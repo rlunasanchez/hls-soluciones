@@ -17,11 +17,12 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", authMiddleware, async (req, res) => {
-  const { equipo, modelo, marca, serie, contador_pag, nivel_tintas, insumo1, insumo2, averia } = req.body;
+  console.log("POST Data:", req.body);
+  const { equipo, modelo, marca, serie, contador_pag, nivel_tintas, insumo1, insumo2, insumo3, insumo4, insumo5, insumo6, insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia } = req.body;
   try {
     await pool.query(
-      "INSERT INTO equipos (equipo, modelo, marca, serie, contador_pag, nivel_tintas, insumo1, insumo2, averia) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [equipo, modelo, marca, serie, contador_pag || 0, nivel_tintas, insumo1, insumo2, averia]
+      "INSERT INTO equipos (equipo, modelo, marca, serie, contador_pag, nivel_tintas, insumo1, insumo2, insumo3, insumo4, insumo5, insumo6, insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [equipo, modelo, marca, serie, contador_pag || 0, nivel_tintas, insumo1, insumo2, insumo3, insumo4, insumo5, insumo6, insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia]
     );
     res.status(201).json({ msg: "Equipo creado" });
   } catch (err) {
@@ -32,11 +33,11 @@ router.post("/", authMiddleware, async (req, res) => {
 
 router.put("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
-  const { equipo, modelo, marca, serie, contador_pag, nivel_tintas, insumo1, insumo2, averia } = req.body;
+  const { equipo, modelo, marca, serie, contador_pag, nivel_tintas, insumo1, insumo2, insumo3, insumo4, insumo5, insumo6, insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia } = req.body;
   try {
     await pool.query(
-      "UPDATE equipos SET equipo = ?, modelo = ?, marca = ?, serie = ?, contador_pag = ?, nivel_tintas = ?, insumo1 = ?, insumo2 = ?, averia = ? WHERE id = ?",
-      [equipo, modelo, marca, serie, contador_pag || 0, nivel_tintas, insumo1, insumo2, averia, id]
+      "UPDATE equipos SET equipo = ?, modelo = ?, marca = ?, serie = ?, contador_pag = ?, nivel_tintas = ?, insumo1 = ?, insumo2 = ?, insumo3 = ?, insumo4 = ?, insumo5 = ?, insumo6 = ?, insumo7 = ?, insumo8 = ?, insumo9 = ?, insumo10 = ?, insumo11 = ?, insumo12 = ?, averia = ? WHERE id = ?",
+      [equipo, modelo, marca, serie, contador_pag || 0, nivel_tintas, insumo1, insumo2, insumo3, insumo4, insumo5, insumo6, insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia, id]
     );
     res.json({ msg: "Equipo actualizado" });
   } catch (err) {

@@ -16,11 +16,10 @@
 - [x] Estructura base backend (Express)
 - [x] Sistema de login con JWT
 - [x] Gestión de usuarios (CRUD)
-- [x] Página Equipos
+- [x] Módulo Equipos (crear, editar, eliminar)
 - [x] Styling con CSS variables
 
 ### Pendiente
-- [ ] Módulo Equipos (crear, editar, eliminar)
 - [ ] Módulo Informes Técnicos
 - [ ] Módulo Retiro Bodega
 - [ ] Exportación PDF
@@ -83,14 +82,26 @@ HLS Soluciones informaticas/
 |-------|------|-------------|
 | id | INT AUTO_INCREMENT | ID único |
 | serie | VARCHAR(100) | Número de serie |
-| equipo | VARCHAR(200) | Nombre del equipo |
+| equipo | VARCHAR(100) | Nombre del equipo |
 | marca | VARCHAR(100) | Marca |
 | modelo | VARCHAR(100) | Modelo |
-| estado | ENUM('disponible','asignado','retirado') | Estado |
-| tecnico_asignado | VARCHAR(50) | Técnico asignado |
-| fecha_asignacion | DATE | Fecha de asignación |
-| cliente | VARCHAR(200) | Cliente |
-| observacion | TEXT | Observaciones |
+| contador_pag | INT | Contador de páginas |
+| nivel_tintas | VARCHAR(50) | Nivel de tintas |
+| insumo1 | VARCHAR(100) | Insumo 1 |
+| insumo2 | VARCHAR(100) | Insumo 2 |
+| insumo3 | VARCHAR(100) | Insumo 3 |
+| insumo4 | VARCHAR(100) | Insumo 4 |
+| insumo5 | VARCHAR(100) | Insumo 5 |
+| insumo6 | VARCHAR(100) | Insumo 6 |
+| insumo7 | VARCHAR(100) | Insumo 7 |
+| insumo8 | VARCHAR(100) | Insumo 8 |
+| insumo9 | VARCHAR(100) | Insumo 9 |
+| insumo10 | VARCHAR(100) | Insumo 10 |
+| insumo11 | VARCHAR(100) | Insumo 11 |
+| insumo12 | VARCHAR(100) | Insumo 12 |
+| averia | VARCHAR(255) | Avería/Falla/Incidencia |
+| activo | BOOLEAN | Estado activo |
+| fecha_creacion | TIMESTAMP | Fecha de creación |
 
 ---
 
