@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { 
   Users, Plus, Save, Trash2, 
   ToggleLeft, ToggleRight, LogOut, ArrowLeft,
-  Key, Lock, Edit, Package
+  Key, Lock, Edit, Package, Home as HomeIcon, UserCog, X
 } from "lucide-react";
 import api from "../services/api";
 
@@ -195,64 +195,99 @@ function GestionUsuarios() {
   if (mostrarFormulario) {
     return (
       <div className="container">
-        <div className="form-container">
-          <div className="form-header">
-            <h2><Plus size={24} /> {usuarioEditando ? "Editar Usuario" : "Crear Usuario"}</h2>
-          </div>
-          <form onSubmit={crearUsuario} className="form-grid">
-            <div className="form-group">
-              <label>Usuario</label>
-              <input
-                placeholder="Nombre de usuario"
-                value={nuevoUsuario.usuario}
-                onChange={(e) => setNuevoUsuario({...nuevoUsuario, usuario: e.target.value})}
-                required
-              />
-            </div>
-            {!usuarioEditando && (
-              <div className="form-group">
-                <label>Contraseña</label>
-                <input
-                  type="password"
-                  placeholder="Contraseña"
-                  value={nuevoUsuario.password}
-                  onChange={(e) => setNuevoUsuario({...nuevoUsuario, password: e.target.value})}
-                  required
-                />
-              </div>
-            )}
-            <div className="form-group">
-              <label>Correo</label>
-              <input
-                type="email"
-                placeholder="correo@ejemplo.com"
-                value={nuevoUsuario.email}
-                onChange={(e) => setNuevoUsuario({...nuevoUsuario, email: e.target.value})}
-              />
-            </div>
-            <div className="form-group">
-              <label>Rol</label>
-              <select
-                value={nuevoUsuario.rol}
-                onChange={(e) => setNuevoUsuario({...nuevoUsuario, rol: e.target.value})}
+        <div style={{ maxWidth: '600px', margin: '0 auto', padding: '24px' }}>
+          <div style={{ background: 'white', borderRadius: '16px', boxShadow: 'var(--shadow-lg)', overflow: 'hidden' }}>
+            <div style={{ background: 'var(--gradient)', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h2 style={{ color: 'white', margin: 0, display: 'flex', alignItems: 'center', gap: '12px', fontSize: '22px' }}>
+                <Plus size={28} />
+                {usuarioEditando ? "Editar Usuario" : "Crear Usuario"}
+              </h2>
+              <button 
+                type="button" 
+                onClick={() => {
+                  setMostrarFormulario(false);
+                  setUsuarioEditando(null);
+                  setNuevoUsuario({ usuario: "", password: "", rol: "tecnico", email: "" });
+                }}
+                style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '8px', padding: '10px', cursor: 'pointer', color: 'white' }}
               >
-                <option value="tecnico">Técnico</option>
-                <option value="admin">Administrador</option>
-              </select>
-            </div>
-            <div className="form-actions" style={{ display: 'flex', justifyContent: 'space-between', width: '100%', gap: '20px', marginTop: '8px' }}>
-              <button type="button" className="cancel-btn" onClick={() => {
-                setMostrarFormulario(false);
-                setUsuarioEditando(null);
-                setNuevoUsuario({ usuario: "", password: "", rol: "tecnico", email: "" });
-              }}>
-                <ArrowLeft size={20} /> Cancelar
-              </button>
-              <button type="submit" className="main-btn">
-                <Save size={20} /> {usuarioEditando ? "Actualizar" : "Crear Usuario"}
+                <X size={24} />
               </button>
             </div>
-          </form>
+            <form onSubmit={crearUsuario} style={{ padding: '24px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
+              <div style={{ gridColumn: 'span 2', padding: '20px', background: 'var(--primary-light)', borderRadius: '12px' }}>
+                <h3 style={{ color: 'var(--primary)', marginBottom: '16px', fontSize: '16px' }}>Datos del Usuario</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                  <div className="form-group">
+                    <label>Usuario</label>
+                    <input
+                      placeholder="Nombre de usuario"
+                      value={nuevoUsuario.usuario}
+                      onChange={(e) => setNuevoUsuario({...nuevoUsuario, usuario: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Correo</label>
+                    <input
+                      type="email"
+                      placeholder="correo@ejemplo.com"
+                      value={nuevoUsuario.email}
+                      onChange={(e) => setNuevoUsuario({...nuevoUsuario, email: e.target.value})}
+                    />
+                  </div>
+                </div>
+                {!usuarioEditando && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginTop: '16px' }}>
+                    <div className="form-group">
+                      <label>Contraseña</label>
+                      <input
+                        type="password"
+                        placeholder="Contraseña"
+                        value={nuevoUsuario.password}
+                        onChange={(e) => setNuevoUsuario({...nuevoUsuario, password: e.target.value})}
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Rol</label>
+                      <select
+                        value={nuevoUsuario.rol}
+                        onChange={(e) => setNuevoUsuario({...nuevoUsuario, rol: e.target.value})}
+                      >
+                        <option value="tecnico">Técnico</option>
+                        <option value="admin">Administrador</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+                {usuarioEditando && (
+                  <div className="form-group" style={{ marginTop: '16px' }}>
+                    <label>Rol</label>
+                    <select
+                      value={nuevoUsuario.rol}
+                      onChange={(e) => setNuevoUsuario({...nuevoUsuario, rol: e.target.value})}
+                    >
+                      <option value="tecnico">Técnico</option>
+                      <option value="admin">Administrador</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+              <div style={{ gridColumn: 'span 2', display: 'flex', gap: '16px', justifyContent: 'flex-end', marginTop: '8px' }}>
+                <button type="button" className="cancel-btn" onClick={() => {
+                  setMostrarFormulario(false);
+                  setUsuarioEditando(null);
+                  setNuevoUsuario({ usuario: "", password: "", rol: "tecnico", email: "" });
+                }}>
+                  <X size={20} /> Cancelar
+                </button>
+                <button type="submit" className="main-btn">
+                  <Save size={20} /> {usuarioEditando ? "Actualizar" : "Crear Usuario"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     );
@@ -260,24 +295,24 @@ function GestionUsuarios() {
 
   return (
     <div className="container">
-      <div className="header">
+      <div className="header" style={{ background: 'var(--gradient)', padding: '20px 32px' }}>
         <div className="header-left">
-          <h1><Users size={28} /> {rol === 'admin' ? 'Gestión de Usuarios' : 'Mi Cuenta'}</h1>
+          <h1 style={{ color: 'white' }}><Users size={28} /> {rol === 'admin' ? 'Gestión de Usuarios' : 'Mi Cuenta'}</h1>
         </div>
-        <div className="user-info">
-          <button onClick={() => setMostrarCambioPassword(true)} className="logout-btn" style={{ background: 'var(--primary-light)', color: 'var(--primary)' }}>
-            <Key size={18} />
-            Cambiar Password
+        <div className="user-info" style={{ gap: '10px' }}>
+          <button onClick={() => navigate("/home")} className="logout-btn" style={{ background: 'var(--primary)', color: 'white' }}>
+            <HomeIcon size={18} />
+            Inicio
           </button>
-          <button onClick={() => navigate("/equipos")} className="logout-btn" style={{ background: 'var(--success-light)', color: 'var(--success)' }}>
+          <button onClick={() => navigate("/equipos")} className="logout-btn" style={{ background: 'var(--success)', color: 'white' }}>
             <Package size={18} />
             Equipos
           </button>
-          <button onClick={() => navigate("/")} className="logout-btn">
-            <ArrowLeft size={18} />
-            Volver
+          <button onClick={() => navigate("/clientes")} className="logout-btn" style={{ background: 'var(--warning)', color: 'white' }}>
+            <Users size={18} />
+            Clientes
           </button>
-          <button onClick={cerrarSesion} className="logout-btn">
+          <button onClick={cerrarSesion} className="logout-btn" style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }}>
             <LogOut size={18} />
             Cerrar Sesión
           </button>
@@ -285,10 +320,14 @@ function GestionUsuarios() {
       </div>
 
       {rol === 'admin' && (
-        <div className="actions-bar" style={{ marginBottom: '16px' }}>
+        <div className="actions-bar" style={{ marginBottom: '16px', display: 'flex', gap: '10px' }}>
           <button onClick={() => setMostrarFormulario(true)} className="main-btn">
             <Plus size={20} />
             Nuevo Usuario
+          </button>
+          <button onClick={() => setMostrarCambioPassword(true)} className="secondary-btn">
+            <Key size={20} />
+            Cambiar Password
           </button>
         </div>
       )}

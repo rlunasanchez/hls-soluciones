@@ -17,7 +17,11 @@
 - [x] Sistema de login con JWT
 - [x] Gestión de usuarios (CRUD)
 - [x] Módulo Equipos (crear, editar, eliminar)
-- [x] Styling con CSS variables
+- [x] Módulo Clientes (crear, editar, eliminar)
+- [x] Styling moderno con CSS variables
+- [x] Diseño unificado con gradiente corporativo
+- [x] Formularios modernizados (Equipos, Clientes, Usuarios, Login)
+- [x] Navegación protegida con refresh forzado
 
 ### Pendiente
 - [ ] Módulo Informes Técnicos
@@ -34,22 +38,24 @@ HLS Soluciones informaticas/
 ├── backend/
 │   ├── config/db.js          # Conexión MySQL
 │   ├── routes/
-│   │   ├── auth.js          # Autenticación
-│   │   └── equipos.js      # Equipos
-│   ├── server.js            # Servidor principal
-│   ├── crear_equipos.js     # Script creación tabla
+│   │   ├── auth.js            # Autenticación
+│   │   ├── equipos.js        # Equipos
+│   │   └── clientes.js       # Clientes
+│   ├── server.js             # Servidor principal
+│   ├── crear_equipos.js       # Script creación tabla
+│   ├── crear_clientes.js    # Script creación tabla
 │   ├── crear_db.sql         # Schema BD
-│   ├── update_pass.js      # Script actualizar password
 │   └── package.json
 │
 ├── frontend/
 │   ├── src/
 │   │   ├── pages/
-│   │   │   ├── Login.jsx
-│   │   │   ├── GestionUsuarios.jsx
-│   │   │   └── Equipos.jsx
+│   │   │   ├── Login.jsx        # Login modernizado
+│   │   │   ├── Home.jsx           # Menú principal modernizado
+│   │   │   ├── GestionUsuarios.jsx # Gestión Usuarios
+│   │   │   ├── Equipos.jsx        # Mantenedor Equipos
+│   │   │   └── Clientes.jsx       # Mantenedor Clientes
 │   │   ├── components/
-│   │   │   └── CustomSelect.jsx
 │   │   ├── services/
 │   │   │   └── api.js
 │   │   ├── App.jsx
@@ -87,19 +93,29 @@ HLS Soluciones informaticas/
 | modelo | VARCHAR(100) | Modelo |
 | contador_pag | INT | Contador de páginas |
 | nivel_tintas | VARCHAR(50) | Nivel de tintas |
-| insumo1 | VARCHAR(100) | Insumo 1 |
-| insumo2 | VARCHAR(100) | Insumo 2 |
-| insumo3 | VARCHAR(100) | Insumo 3 |
-| insumo4 | VARCHAR(100) | Insumo 4 |
-| insumo5 | VARCHAR(100) | Insumo 5 |
-| insumo6 | VARCHAR(100) | Insumo 6 |
-| insumo7 | VARCHAR(100) | Insumo 7 |
-| insumo8 | VARCHAR(100) | Insumo 8 |
-| insumo9 | VARCHAR(100) | Insumo 9 |
-| insumo10 | VARCHAR(100) | Insumo 10 |
-| insumo11 | VARCHAR(100) | Insumo 11 |
-| insumo12 | VARCHAR(100) | Insumo 12 |
+| insumo1-12 | VARCHAR(100) | Insumos |
 | averia | VARCHAR(255) | Avería/Falla/Incidencia |
+| activo | BOOLEAN | Estado activo |
+| fecha_creacion | TIMESTAMP | Fecha de creación |
+
+### Tabla: clientes
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| id | INT AUTO_INCREMENT | ID único |
+| razon_social | VARCHAR(255) | Razón social |
+| giro | VARCHAR(100) | Giro |
+| rut | VARCHAR(20) | RUT |
+| direccion | VARCHAR(255) | Dirección |
+| ciudad | VARCHAR(100) | Ciudad |
+| comuna | VARCHAR(100) | Comuna |
+| telefono | VARCHAR(20) | Teléfono |
+| contacto_nombre | VARCHAR(100) | Nombre contacto |
+| contacto_email | VARCHAR(100) | Email contacto |
+| contacto_fono | VARCHAR(20) | Teléfono contacto |
+| contacto_cargo | VARCHAR(100) | Cargo contacto |
+| contacto_direccion | VARCHAR(255) | Dirección contacto |
+| direcciones | TEXT | Sucursales (formato: tipo|dir|fono|ciudad|comuna;;) |
 | activo | BOOLEAN | Estado activo |
 | fecha_creacion | TIMESTAMP | Fecha de creación |
 
@@ -123,57 +139,87 @@ HLS Soluciones informaticas/
 - `PUT /api/equipos/:id` - Actualizar equipo
 - `DELETE /api/equipos/:id` - Eliminar equipo
 
----
-
-## Colores Corporativos
-
-| Color | Hex | Uso |
-|-------|-----|-----|
-| Primary | #2563EB | Botones principales |
-| Primary Hover | #1D4ED8 | Hover botones |
-| Primary Light | #DBEAFE | Fondos claros |
-| Secondary | #64748B | Botones secundarios |
-| Success | #10B981 | Éxito |
-| Success Light | #D1FAE5 | Fondos éxito |
-| Danger | #EF4444 | Danger |
-| Danger Light | #FEE2E2 | Fondos danger |
-| Warning | #F59E0B | Warning |
-| Warning Light | #FEF3C7 | Fondos warning |
-| Text | #1E293B | Texto principal |
-| Text Muted | #64748B | Texto secundario |
-| Border | #E2E8F0 | Bordes |
+### Clientes
+- `GET /api/clientes` - Listar clientes
+- `POST /api/clientes` - Crear cliente
+- `PUT /api/clientes/:id` - Actualizar cliente
+- `DELETE /api/clientes/:id` - Eliminar cliente
 
 ---
 
-## Referencia: Sistema Soporte Ultra
+## Colores Corporativos (CSS Variables)
 
-Proyecto de referencia en: `C:\wamp64\www\sistema-soporte-ultra`
-
-### Características a implementar del proyecto referencia:
-
-1. **Módulo Equipos** - similar a Ordenes.jsx
-2. **Filtros por** cliente, técnico, estado, equipo, marca, modelo
-3. **Exportar PDF** - generar PDF de equipos
-4. **Exportar Excel** - generar Excel de equipos
-5. **Selector de fecha** - para filtrar por rango de fechas
+| Variable | Hex | Uso |
+|----------|-----|-----|
+| --primary | #0C4A8C | Azul corporativo |
+| --primary-hover | #0a3d75 | Hover primario |
+| --primary-light | #e6f0fa | Fondo azul claro |
+| --success | #00B5E2 | Cyan success |
+| --success-light | #e0f7fc | Fondo cyan |
+| --warning | #FF9800 | Naranja warning |
+| --warning-light | #fff3e0 | Fondo naranja |
+| --danger | #E53935 | Rojo danger |
+| --danger-light | #ffebee | Fondo rojo |
+| --text | #1a1a2e | Texto principal |
+| --text-muted | #64748B | Texto secundario |
+| --bg | #f0f2f5 | Fondo página |
+| --panel | #ffffff | Fondo tarjetas |
+| --border | #e2e8f0 | Bordes |
+| --gradient | linear-gradient(135deg, #0C4A8C 0%, #009EE3 100%) | Gradiente |
 
 ---
 
-## Para Continuar Mañana
+## UI Mejorada (14/04/2026)
 
-### 1. Implementar módulo Equipos
-- Crear tabla equipos si no existe
-- API endpoints para CRUD
-- Frontend: lista de equipos con filtros
-- Formulario para crear/editar equipo
+### Navigation Buttons
+- **Inicio:** var(--primary) azul
+- **Equipos:** var(--success) cyan
+- **Clientes:** var(--warning) naranja
+- **Usuarios:** #0D9488 verde azulado
+- **Cerrar Sesión:** rgba(255,255,255,0.2) translúcido
 
-### 2.Mejorar UI
-- Agregar más spacing entre elementos
-- Revisar diseño responsive
+### Formularios Modernizados
+Todos los formularios ahora tienen:
+- Header con gradiente corporativo
+- Secciones con fondos de colores (primary-light, success-light, warning-light)
+- Grid layout responsive
+- Estilo uniforme de inputs
+- Botón X para cerrar
+- Diseño limpio y moderno
 
-### 3.参考sistema-soporte-ultra
-- Copiar patrones de Ordenes.jsx
-- Implementar filtros avanzados
+### Login
+- Fondo con gradiente
+- Tarjeta blanca con sombras
+- Inputs con iconos
+- Diseño responsivo
+
+### Equipos/Insumos
+- Sistema de hasta 12 insumos visibles
+- Botón "+ Agregar" para mostrar más
+- Se cargan los existentes al editar
+
+### Clientes/Sucursales
+- Sistema de hasta 5 sucursales
+- Botón "+ Agregar" para mostrar más
+- Select para tipo (Matriz, Sucursal, Bodega, Oficina, Otro)
+- Se cargan las existentes al editar
+
+---
+
+## Technical Notes (14/04/2026)
+
+### Login/Logout Implementation
+Para evitar problemas con la navegación del navegador (flechas atrás/adelante):
+- Login usa `window.location.replace('/home')` después de guardar token
+- Logout usa `window.location.replace('/login')` después de borrar token
+- Esto previene que el usuario pueda voltar con la flecha del navegador
+
+### Pagination
+- Equipos: 5 por página
+- Clientes: configurable
+
+### Referencias
+- Proyecto参考: `C:\wamp64\www\sistema-soporte-ultra`
 
 ---
 
@@ -189,16 +235,42 @@ npm run dev      # Iniciar con watch
 ### Frontend
 ```bash
 cd frontend
-npm run dev      # Iniciar开发 servidor
-npm run build    # Build producción
+npm run dev     # Iniciar servidor dev
+npm run build   # Build producción
 ```
+
+---
+
+## Pendiente para Mañana
+
+1. **Módulo Informes Técnicos** - Crear nuevo módulo
+2. **Módulo Retiro Bodega** - Crear nuevo módulo
+3. **Exportación PDF** - Implementar con librería html2pdf o similar
+4. **Exportación Excel** - Implementar con librería xlsx
 
 ---
 
 ## Notas de Sesión
 
-### Fecha: 13/04/2026
+### Fecha: 14/04/2026
 
-- Se creó estructura base del proyecto
-- Botón "Nuevo Usuario" ajustado con margin-bottom
-- Proyecto funcionando
+- Modernización completa del UI:
+  - Todos losheaders con gradiente corporativo
+  - Formularios现代化izadoscon secciones de colores
+  - Botones de navegación con colores distintivos
+  - Diseñounificado en todaslasvistas
+  
+- Problema de navegaciónresuelto:
+  - Pantalla blanca al login/Logout
+  - Solución: usar `window.location.replace()` en lugar de navigate()
+  - Esto fuerzaunarecargaypreviene problemas de timing
+
+- Módulo Equipos mejorado:
+  - Hasta 12 insumos
+  - Botón"+ Agregar" paramostrar más
+  - Al editarses carganlosexistentes
+
+- Módulo Clientes mejorado:
+  - Hasta 5 sucursales
+  - Tipocon select (Matriz,Sucursal,Bodega,Oficina,Otro)
+  - Al editarses carganlosexistentes

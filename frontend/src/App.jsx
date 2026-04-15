@@ -1,8 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Login from "./pages/Login";
+import Home from "./pages/Home";
 import GestionUsuarios from "./pages/GestionUsuarios";
 import Equipos from "./pages/Equipos";
+import Clientes from "./pages/Clientes";
 import "./index.css";
 
 function App() {
@@ -20,6 +22,7 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     setAuthenticated(false);
+    window.location.replace("/login");
   };
 
   return (
@@ -39,7 +42,19 @@ function App() {
             authenticated ? <Equipos onLogout={handleLogout} /> : <Navigate to="/login" />
           } 
         />
-        <Route path="*" element={<Navigate to={authenticated ? "/usuarios" : "/login"} />} />
+        <Route 
+          path="/clientes" 
+          element={
+            authenticated ? <Clientes onLogout={handleLogout} /> : <Navigate to="/login" />
+          } 
+        />
+        <Route 
+          path="/home" 
+          element={
+            authenticated ? <Home onLogout={handleLogout} /> : <Navigate to="/login" />
+          } 
+        />
+        <Route path="*" element={<Navigate to={authenticated ? "/home" : "/login"} />} />
       </Routes>
     </BrowserRouter>
   );

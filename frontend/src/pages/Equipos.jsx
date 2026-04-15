@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Package, Plus, Save, Trash2, Edit, ArrowLeft, LogOut, Monitor, Printer, Scissors, Droplets, Search, ChevronDown, ChevronUp } from "lucide-react";
+import { Package, Plus, Save, Trash2, Edit, ArrowLeft, LogOut, Monitor, Printer, Scissors, Droplets, Search, ChevronDown, ChevronUp, Home as HomeIcon, Users, UserCog, X } from "lucide-react";
 import api from "../services/api";
 
 function Equipos() {
@@ -36,9 +36,12 @@ function Equipos() {
     averia: ""
   });
 
-  const [nuevoInsumo, setNuevoInsumo] = useState("");
-  const [mostrarExtras, setMostrarExtras] = useState(false);
-  const [mostrarExtrasEditar, setMostrarExtrasEditar] = useState(false);
+  const [insumos, setInsumos] = useState([
+    { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
+    { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
+    { nombre: "" }, { nombre: "" }, { nombre: "" }
+  ]);
+  const [insumosVisibles, setInsumosVisibles] = useState(2);
 
   const token = localStorage.getItem("token");
   let usuarioActual = "Usuario";
@@ -87,38 +90,49 @@ function Equipos() {
     setBusquedaMarca("");
   };
 
-  const getInsumosVisibles = () => {
-    const arr = [];
-    for (let i = 1; i <= 12; i++) {
-      const key = `insumo${i}`;
-      const val = nuevoEquipo[key];
-      if (val) arr.push({ key, value: val });
-    }
-    return arr;
+  const actualizarInsumo = (idx, valor) => {
+    const nuevos = [...insumos];
+    nuevos[idx].nombre = valor;
+    setInsumos(nuevos);
   };
 
-  const agregarInsumoExtra = () => {
-    if (!nuevoInsumo.trim()) return;
-    const current = getInsumosVisibles();
-    if (current.length >= 12) {
-      alert("Máximo 12 insumos");
-      return;
+  const guardarEquipo = async (e) => {
+    e.preventDefault();
+    const ins = insumos.filter(i => i.nombre.trim() !== "").map(i => i.nombre);
+    const payload = {
+      ...nuevoEquipo,
+      insumo1: ins[0] || "",
+      insumo2: ins[1] || "",
+      insumo3: ins[2] || "",
+      insumo4: ins[3] || "",
+      insumo5: ins[4] || "",
+      insumo6: ins[5] || "",
+      insumo7: ins[6] || "",
+      insumo8: ins[7] || "",
+      insumo9: ins[8] || "",
+      insumo10: ins[9] || "",
+      insumo11: ins[10] || "",
+      insumo12: ins[11] || ""
+    };
+    try {
+      if (equipoEditando) {
+        await api.put(`/api/equipos/${equipoEditando.id}`, payload);
+      } else {
+        await api.post("/api/equipos", payload);
+      }
+      setNuevoEquipo({ equipo: "", modelo: "", marca: "", serie: "", contador_pag: 0, nivel_tintas: "", insumo1: "", insumo2: "", insumo3: "", insumo4: "", insumo5: "", insumo6: "", insumo7: "", insumo8: "", insumo9: "", insumo10: "", insumo11: "", insumo12: "", averia: "" });
+      setInsumos([
+        { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
+        { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
+        { nombre: "" }, { nombre: "" }, { nombre: "" }
+      ]);
+      setInsumosVisibles(2);
+      setMostrarFormulario(false);
+      setEquipoEditando(null);
+      fetchEquipos();
+    } catch (err) {
+      alert("Error al guardar");
     }
-    const nextKey = `insumo${current.length + 1}`;
-    console.log("Agregando:", nextKey, nuevoInsumo.trim());
-    setNuevoEquipo(prev => ({ ...prev, [nextKey]: nuevoInsumo.trim() }));
-    setNuevoInsumo("");
-  };
-
-  const eliminarInsumoExtra = (key) => {
-    const num = parseInt(key.replace('insumo', ''));
-    const updated = { ...nuevoEquipo };
-    for (let i = num; i < 12; i++) {
-      updated[`insumo${i}`] = nuevoEquipo[`insumo${i + 1}`] || "";
-    }
-    updated[`insumo12`] = "";
-    setNuevoEquipo(updated);
-    setNuevoInsumo("");
   };
 
   const cerrarSesion = () => {
@@ -126,48 +140,17 @@ function Equipos() {
     navigate("/login");
   };
 
-  const guardarEquipo = async (e) => {
-    e.preventDefault();
-    try {
-      const equipoData = {
-        equipo: nuevoEquipo.equipo,
-        modelo: nuevoEquipo.modelo,
-        marca: nuevoEquipo.marca,
-        serie: nuevoEquipo.serie,
-        contador_pag: nuevoEquipo.contador_pag,
-        nivel_tintas: nuevoEquipo.nivel_tintas,
-        insumo1: nuevoEquipo.insumo1,
-        insumo2: nuevoEquipo.insumo2,
-        insumo3: nuevoEquipo.insumo3,
-        insumo4: nuevoEquipo.insumo4,
-        insumo5: nuevoEquipo.insumo5,
-        insumo6: nuevoEquipo.insumo6,
-        insumo7: nuevoEquipo.insumo7,
-        insumo8: nuevoEquipo.insumo8,
-        insumo9: nuevoEquipo.insumo9,
-        insumo10: nuevoEquipo.insumo10,
-        insumo11: nuevoEquipo.insumo11,
-        insumo12: nuevoEquipo.insumo12,
-        averia: nuevoEquipo.averia
-      };
-      if (equipoEditando) {
-        await api.put(`/api/equipos/${equipoEditando.id}`, equipoData);
-        alert("Equipo actualizado");
-      } else {
-        await api.post("/api/equipos", equipoData);
-        alert("Equipo creado");
-      }
-      setNuevoEquipo({ equipo: "", modelo: "", marca: "", serie: "", contador_pag: 0, nivel_tintas: "", insumo1: "", insumo2: "", insumo3: "", insumo4: "", insumo5: "", insumo6: "", insumo7: "", insumo8: "", insumo9: "", insumo10: "", insumo11: "", insumo12: "", averia: "" });
-      setEquipoEditando(null);
-      setMostrarFormulario(false);
-      fetchEquipos();
-    } catch (err) {
-      alert(err.response?.data?.msg || "Error al guardar");
-    }
-  };
-
   const editarEquipo = (eq) => {
     setEquipoEditando(eq);
+    const arr = [
+      { nombre: eq.insumo1 || "" }, { nombre: eq.insumo2 || "" }, { nombre: eq.insumo3 || "" },
+      { nombre: eq.insumo4 || "" }, { nombre: eq.insumo5 || "" }, { nombre: eq.insumo6 || "" },
+      { nombre: eq.insumo7 || "" }, { nombre: eq.insumo8 || "" }, { nombre: eq.insumo9 || "" },
+      { nombre: eq.insumo10 || "" }, { nombre: eq.insumo11 || "" }, { nombre: eq.insumo12 || "" }
+    ];
+    while (arr.length < 12) arr.push({ nombre: "" });
+    setInsumos(arr);
+    setInsumosVisibles(arr.filter(i => i.nombre).length || 2);
     setNuevoEquipo({
       equipo: eq.equipo,
       modelo: eq.modelo,
@@ -210,136 +193,149 @@ function Equipos() {
     return <Package size={24} />;
   };
 
-  if (mostrarFormulario) {
+if (mostrarFormulario) {
     return (
       <div className="container">
-        <div className="form-container">
-          <div className="form-header">
-            <h2><Package size={24} /> {equipoEditando ? "Editar Equipo" : "Nuevo Equipo"}</h2>
-          </div>
-          <form onSubmit={guardarEquipo} className="form-grid">
-            <div className="form-group">
-              <label>Equipo</label>
-              <input
-                placeholder="Nombre del equipo"
-                value={nuevoEquipo.equipo}
-                onChange={(e) => setNuevoEquipo({...nuevoEquipo, equipo: e.target.value})}
-                required
-              />
+        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '24px' }}>
+          <div style={{ background: 'white', borderRadius: '16px', boxShadow: 'var(--shadow-lg)', overflow: 'hidden' }}>
+            <div style={{ background: 'var(--gradient)', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h2 style={{ color: 'white', margin: 0, display: 'flex', alignItems: 'center', gap: '12px', fontSize: '22px' }}>
+                <Package size={28} />
+                {equipoEditando ? "Editar Equipo" : "Nuevo Equipo"}
+              </h2>
+              <button 
+                type="button" 
+                onClick={() => {
+                  setMostrarFormulario(false);
+                  setEquipoEditando(null);
+                  setNuevoEquipo({ equipo: "", modelo: "", marca: "", serie: "", contador_pag: 0, nivel_tintas: "", insumo1: "", insumo2: "", insumo3: "", insumo4: "", insumo5: "", insumo6: "", insumo7: "", insumo8: "", insumo9: "", insumo10: "", insumo11: "", insumo12: "", averia: "" });
+                  setMostrarExtras(false);
+                  setMostrarExtrasEditar(false);
+                }}
+                style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '8px', padding: '10px', cursor: 'pointer', color: 'white' }}
+              >
+                <X size={24} />
+              </button>
             </div>
-            <div className="form-group">
-              <label>Modelo</label>
-              <input
-                placeholder="Modelo"
-                value={nuevoEquipo.modelo}
-                onChange={(e) => setNuevoEquipo({...nuevoEquipo, modelo: e.target.value})}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Marca</label>
-              <input
-                placeholder="Marca"
-                value={nuevoEquipo.marca}
-                onChange={(e) => setNuevoEquipo({...nuevoEquipo, marca: e.target.value})}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Serie</label>
-              <input
-                placeholder="Número de serie"
-                value={nuevoEquipo.serie}
-                onChange={(e) => setNuevoEquipo({...nuevoEquipo, serie: e.target.value})}
-              />
-            </div>
-            <div className="form-group">
-              <label>Contador Páginas</label>
-              <input
-                type="number"
-                placeholder="Contador de páginas"
-                value={nuevoEquipo.contador_pag}
-                onChange={(e) => setNuevoEquipo({...nuevoEquipo, contador_pag: e.target.value})}
-              />
-            </div>
-            <div className="form-group">
-              <label>Nivel Tintas</label>
-              <input
-                placeholder="Nivel de tintas"
-                value={nuevoEquipo.nivel_tintas}
-                onChange={(e) => setNuevoEquipo({...nuevoEquipo, nivel_tintas: e.target.value})}
-              />
-            </div>
-            <div className="form-group">
-              <label>Insumo 1</label>
-              <input
-                placeholder="Insumo 1"
-                value={nuevoEquipo.insumo1}
-                onChange={(e) => setNuevoEquipo({...nuevoEquipo, insumo1: e.target.value})}
-              />
-            </div>
-            <div className="form-group">
-              <label>Insumo 2</label>
-              <input
-                placeholder="Insumo 2"
-                value={nuevoEquipo.insumo2}
-                onChange={(e) => setNuevoEquipo({...nuevoEquipo, insumo2: e.target.value})}
-              />
-            </div>
-            <div className="form-group full-width">
-              <label>+ Insumos</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                <button 
-                  type="button" 
-                  className="secondary-btn" 
-                  onClick={() => equipoEditando ? setMostrarExtrasEditar(!mostrarExtrasEditar) : setMostrarExtras(!mostrarExtras)}
-                >
-                  {equipoEditando ? (mostrarExtrasEditar ? 'Ocultar' : 'Mostrar') : (mostrarExtras ? 'Ocultar' : 'Mostrar')} más insumos
-                </button>
-                <span style={{ fontSize: '14px', color: '#64748B' }}>
-                  ({getInsumosVisibles().length} insumos)
-                </span>
+            <form onSubmit={guardarEquipo} style={{ padding: '24px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
+              <div style={{ gridColumn: 'span 2', padding: '20px', background: 'var(--primary-light)', borderRadius: '12px' }}>
+                <h3 style={{ color: 'var(--primary)', marginBottom: '16px', fontSize: '16px' }}>Información del Equipo</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                  <div className="form-group">
+                    <label>Equipo</label>
+                    <input
+                      placeholder="Nombre del equipo"
+                      value={nuevoEquipo.equipo}
+                      onChange={(e) => setNuevoEquipo({...nuevoEquipo, equipo: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Marca</label>
+                    <input
+                      placeholder="Marca"
+                      value={nuevoEquipo.marca}
+                      onChange={(e) => setNuevoEquipo({...nuevoEquipo, marca: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Modelo</label>
+                    <input
+                      placeholder="Modelo"
+                      value={nuevoEquipo.modelo}
+                      onChange={(e) => setNuevoEquipo({...nuevoEquipo, modelo: e.target.value})}
+                      required
+                    />
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginTop: '16px' }}>
+                  <div className="form-group">
+                    <label>Serie</label>
+                    <input
+                      placeholder="Número de serie"
+                      value={nuevoEquipo.serie}
+                      onChange={(e) => setNuevoEquipo({...nuevoEquipo, serie: e.target.value})}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Contador Páginas</label>
+                    <input
+                      type="number"
+                      placeholder="Contador"
+                      value={nuevoEquipo.contador_pag}
+                      onChange={(e) => setNuevoEquipo({...nuevoEquipo, contador_pag: e.target.value})}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Nivel Tintas</label>
+                    <input
+                      placeholder="Nivel de tintas"
+                      value={nuevoEquipo.nivel_tintas}
+                      onChange={(e) => setNuevoEquipo({...nuevoEquipo, nivel_tintas: e.target.value})}
+                    />
+                  </div>
+                </div>
               </div>
-              {(equipoEditando ? mostrarExtrasEditar : mostrarExtras) && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
-                  {[3,4,5,6,7,8,9,10,11,12].map(num => (
-                    <div key={num} style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                      <span style={{ fontWeight: 'bold', fontSize: '14px', minWidth: '55px' }}>Insumo {num}:</span>
+              <div style={{ gridColumn: 'span 2', padding: '20px', background: 'var(--success-light)', borderRadius: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                  <h3 style={{ color: 'var(--success)', margin: 0, fontSize: '16px' }}>Insumos</h3>
+                  {insumosVisibles < 12 && (
+                    <button 
+                      type="button" 
+                      className="secondary-btn"
+                      style={{ padding: '8px 16px' }}
+                      onClick={() => setInsumosVisibles(insumosVisibles + 1)}
+                    >
+                      + Agregar
+                    </button>
+                  )}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                  {insumos.slice(0, insumosVisibles).map((ins, idx) => (
+                    <div key={idx} className="form-group">
+                      <label>Insumo {idx + 1}</label>
                       <input
-                        placeholder={`Insumo ${num}`}
-                        value={nuevoEquipo[`insumo${num}`] || ""}
-                        onChange={(e) => setNuevoEquipo({ ...nuevoEquipo, [`insumo${num}`]: e.target.value })}
-                        style={{ flex: 1 }}
+                        placeholder={`Insumo ${idx + 1}`}
+                        value={ins.nombre}
+                        onChange={(e) => actualizarInsumo(idx, e.target.value)}
                       />
                     </div>
                   ))}
                 </div>
-              )}
-            </div>
-            <div className="form-group full-width">
-              <label>Avería/Falla/Incidencia</label>
-              <textarea
-                placeholder="Descripción de falla"
-                value={nuevoEquipo.averia}
-                onChange={(e) => setNuevoEquipo({...nuevoEquipo, averia: e.target.value})}
-                rows={2}
-              />
-            </div>
-            <div className="form-actions" style={{ display: 'flex', justifyContent: 'space-between', width: '100%', gap: '20px', marginTop: '8px' }}>
-              <button type="button" className="cancel-btn" onClick={() => {
-                setMostrarFormulario(false);
-                setEquipoEditando(null);
-                setNuevoEquipo({ equipo: "", modelo: "", marca: "", serie: "", contador_pag: 0, nivel_tintas: "", insumo1: "", insumo2: "", insumo3: "", insumo4: "", insumo5: "", insumo6: "", insumo7: "", insumo8: "", insumo9: "", insumo10: "", insumo11: "", insumo12: "", averia: "" });
-                setMostrarExtras(false);
-                setMostrarExtrasEditar(false);
-              }}>
-                <ArrowLeft size={20} /> Cancelar
-              </button>
-              <button type="submit" className="main-btn">
-                <Save size={20} /> Guardar
-              </button>
-            </div>
-          </form>
+              </div>
+              <div style={{ gridColumn: 'span 2', padding: '20px', background: '#F1F5F9', borderRadius: '12px' }}>
+                <h3 style={{ color: 'var(--text)', marginBottom: '16px', fontSize: '16px' }}>Avería/Falla/Incidencia</h3>
+                <div className="form-group">
+                  <textarea
+                    placeholder="Descripción de falla o incidencia..."
+                    value={nuevoEquipo.averia}
+                    onChange={(e) => setNuevoEquipo({...nuevoEquipo, averia: e.target.value})}
+                    rows={3}
+                    style={{ minHeight: '100px' }}
+                  />
+                </div>
+              </div>
+              <div style={{ gridColumn: 'span 2', display: 'flex', gap: '16px', justifyContent: 'flex-end', marginTop: '8px' }}>
+                <button type="button" className="cancel-btn" onClick={() => {
+                  setMostrarFormulario(false);
+                  setEquipoEditando(null);
+                  setNuevoEquipo({ equipo: "", modelo: "", marca: "", serie: "", contador_pag: 0, nivel_tintas: "", insumo1: "", insumo2: "", insumo3: "", insumo4: "", insumo5: "", insumo6: "", insumo7: "", insumo8: "", insumo9: "", insumo10: "", insumo11: "", insumo12: "", averia: "" });
+                  setInsumos([
+                    { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
+                    { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
+                    { nombre: "" }, { nombre: "" }, { nombre: "" }
+                  ]);
+                  setInsumosVisibles(2);
+                }}>
+                  <X size={20} /> Cancelar
+                </button>
+                <button type="submit" className="main-btn">
+                  <Save size={20} /> Guardar
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     );
@@ -347,17 +343,24 @@ function Equipos() {
 
   return (
     <div className="container">
-      <div className="header">
+      <div className="header" style={{ background: 'var(--gradient)', padding: '20px 32px' }}>
         <div className="header-left">
-          <h1><Package size={28} /> Mantenedor de Equipos</h1>
+          <h1 style={{ color: 'white' }}><Package size={28} /> Mantenedor de Equipos</h1>
         </div>
-        <div className="user-info">
-          <div className="user-badge">{usuarioActual}</div>
-          <button onClick={() => navigate("/usuarios")} className="logout-btn">
-            <ArrowLeft size={18} />
+        <div className="user-info" style={{ gap: '10px' }}>
+          <button onClick={() => navigate("/home")} className="logout-btn" style={{ background: 'var(--primary)', color: 'white' }}>
+            <HomeIcon size={18} />
+            Inicio
+          </button>
+          <button onClick={() => navigate("/clientes")} className="logout-btn" style={{ background: 'var(--warning)', color: 'white' }}>
+            <Users size={18} />
+            Clientes
+          </button>
+          <button onClick={() => navigate("/usuarios")} className="logout-btn" style={{ background: '#0D9488', color: 'white' }}>
+            <UserCog size={18} />
             Usuarios
           </button>
-          <button onClick={cerrarSesion} className="logout-btn">
+          <button onClick={cerrarSesion} className="logout-btn" style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }}>
             <LogOut size={18} />
             Cerrar Sesión
           </button>

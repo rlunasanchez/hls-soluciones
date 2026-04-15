@@ -6,6 +6,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import authRoutes from "./routes/auth.js";
 import equiposRoutes from "./routes/equipos.js";
+import clientesRoutes from "./routes/clientes.js";
 
 dotenv.config();
 
@@ -38,6 +39,7 @@ app.use(express.static(frontendPath));
 app.use("/api/auth/login", loginLimiter);
 app.use("/api/auth", authRoutes);
 app.use("/api/equipos", equiposRoutes);
+app.use("/api/clientes", clientesRoutes);
 
 app.get("*", (req, res) => {
   res.sendFile(path.join(frontendPath, "index.html"));
