@@ -15,13 +15,28 @@ function App() {
     setAuthenticated(!!token);
   }, []);
 
+  useEffect(() => {
+    const handlePopState = () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        window.location.replace("/login");
+      } else {
+        setAuthenticated(true);
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
   const handleLogin = () => {
     setAuthenticated(true);
+    window.history.replaceState(null, "", "/home");
   };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     setAuthenticated(false);
+    window.history.replaceState(null, "", "/login");
     window.location.replace("/login");
   };
 
