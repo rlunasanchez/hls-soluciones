@@ -28,31 +28,15 @@ router.post("/", authMiddleware, async (req, res) => {
     contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion,
     direcciones
   } = req.body;
-  const conn = await pool.getConnection();
+  const escape = (v) => (v === '' || v === undefined || v === null) ? 'NULL' : "'" + String(v).replace(/'/g, "''") + "'";
+  const sql = `INSERT INTO clientes (razon_social, giro, rut, direccion, ciudad, comuna, telefono, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion) VALUES (${escape(razon_social)}, ${escape(giro)}, ${escape(rut)}, ${escape(direccion)}, ${escape(ciudad)}, ${escape(comuna)}, ${escape(telefono)}, ${escape(contacto_nombre)}, ${escape(contacto_email)}, ${escape(contacto_fono)}, ${escape(contacto_cargo)}, ${escape(contacto_direccion)})`;
+  console.log("Insert cliente:", sql);
   try {
-    await conn.beginTransaction();
-    const [result] = await conn.query(
-      `INSERT INTO clientes (razon_social, giro, rut, direccion, ciudad, comuna, telefono, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [razon_social, giro, rut, direccion, ciudad, comuna, telefono, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion]
-    );
-    const clienteId = result.insertId;
-    if (direcciones && direcciones.length > 0) {
-      for (const dir of direcciones) {
-        await conn.query(
-          `INSERT INTO clientes_direcciones (cliente_id, tipo_direccion, direccion, fono, ciudad, comuna) VALUES (?, ?, ?, ?, ?, ?)`,
-          [clienteId, dir.tipo_direccion, dir.direccion, dir.fono, dir.ciudad, dir.comuna]
-        );
-      }
-    }
-    await conn.commit();
+    await pool.query(sql);
     res.status(201).json({ msg: "Cliente creado" });
   } catch (err) {
-    await conn.rollback();
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
-  } finally {
-    conn.release();
   }
 });
 
@@ -63,30 +47,29 @@ router.put("/:id", authMiddleware, async (req, res) => {
     contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion,
     direcciones
   } = req.body;
-  const conn = await pool.getConnection();
+  const escape = (v) => (v === '' || v === undefined || v === null) ? 'NULL' : "'" + String(v).replace(/'/g, "''") + "'";
+  const sql = `UPDATE clientes SET razon_social=${escape(razon_social)}, giro=${escape(giro)}, rut=${escape(rut)}, direccion=${escape(direccion)}, ciudad=${escape(ciudad)}, comuna=${escape(comuna)}, telefono=${escape(telefono)}, contacto_nombre=${escape(contacto_nombre)}, contacto_email=${escape(contacto_email)}, contacto_fono=${escape(contacto_fono)}, contacto_cargo=${escape(contacto_cargo)}, contacto_direccion=${escape(contacto_direccion)} WHERE id=${id}`;
+  console.log("Update cliente:", sql);
+  const connection = await pool.getConnection();
   try {
-    await conn.beginTransaction();
-    await conn.query(
-      `UPDATE clientes SET razon_social=?, giro=?, rut=?, direccion=?, ciudad=?, comuna=?, telefono=?, contacto_nombre=?, contacto_email=?, contacto_fono=?, contacto_cargo=?, contacto_direccion=? WHERE id=?`,
-      [razon_social, giro, rut, direccion, ciudad, comuna, telefono, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion, id]
-    );
-    await conn.query("DELETE FROM clientes_direcciones WHERE cliente_id=?", [id]);
+    await connection.query(sql);
+    await connection.query("DELETE FROM clientes_direcciones WHERE cliente_id = ?", [id]);
     if (direcciones && direcciones.length > 0) {
-      for (const dir of direcciones) {
-        await conn.query(
-          `INSERT INTO clientes_direcciones (cliente_id, tipo_direccion, direccion, fono, ciudad, comuna) VALUES (?, ?, ?, ?, ?, ?)`,
-          [id, dir.tipo_direccion, dir.direccion, dir.fono, dir.ciudad, dir.comuna]
-        );
+      for (const d of direcciones) {
+        if (d.direccion && d.direccion.trim()) {
+          await connection.query(
+            "INSERT INTO clientes_direcciones (cliente_id, tipo_direccion, direccion, fono, ciudad, comuna) VALUES (?, ?, ?, ?, ?, ?)",
+            [id, d.tipo_direccion || null, d.direccion, d.fono || null, d.ciudad || null, d.comuna || null]
+          );
+        }
       }
     }
-    await conn.commit();
     res.json({ msg: "Cliente actualizado" });
   } catch (err) {
-    await conn.rollback();
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
   } finally {
-    conn.release();
+    connection.release();
   }
 });
 

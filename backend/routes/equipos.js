@@ -19,11 +19,11 @@ router.get("/", async (req, res) => {
 router.post("/", authMiddleware, async (req, res) => {
   console.log("POST Data:", req.body);
   const { equipo, modelo, marca, serie, contador_pag, nivel_tintas, insumo1, insumo2, insumo3, insumo4, insumo5, insumo6, insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia } = req.body;
+  const escape = (v) => (v === '' || v === undefined || v === null) ? 'NULL' : "'" + String(v).replace(/'/g, "''") + "'";
+  const sql = `INSERT INTO equipos (equipo, modelo, marca, serie, contador_pag, nivel_tintas, insumo1, insumo2, insumo3, insumo4, insumo5, insumo6, insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia) VALUES (${escape(equipo)}, ${escape(modelo)}, ${escape(marca)}, ${escape(serie)}, ${escape(contador_pag)}, ${escape(nivel_tintas)}, ${escape(insumo1)}, ${escape(insumo2)}, ${escape(insumo3)}, ${escape(insumo4)}, ${escape(insumo5)}, ${escape(insumo6)}, ${escape(insumo7)}, ${escape(insumo8)}, ${escape(insumo9)}, ${escape(insumo10)}, ${escape(insumo11)}, ${escape(insumo12)}, ${escape(averia)})`;
+  console.log("Insert SQL:", sql);
   try {
-    await pool.query(
-      "INSERT INTO equipos (equipo, modelo, marca, serie, contador_pag, nivel_tintas, insumo1, insumo2, insumo3, insumo4, insumo5, insumo6, insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [equipo, modelo, marca, serie, contador_pag || 0, nivel_tintas, insumo1, insumo2, insumo3, insumo4, insumo5, insumo6, insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia]
-    );
+    await pool.query(sql);
     res.status(201).json({ msg: "Equipo creado" });
   } catch (err) {
     console.error(err);
