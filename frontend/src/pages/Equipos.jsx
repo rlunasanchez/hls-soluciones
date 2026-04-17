@@ -291,15 +291,32 @@ if (mostrarFormulario) {
                     </button>
                   )}
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
                   {insumos.slice(0, insumosVisibles).map((ins, idx) => (
-                    <div key={idx} className="form-group">
-                      <label>Insumo {idx + 1}</label>
-                      <input
-                        placeholder={`Insumo ${idx + 1}`}
-                        value={ins.nombre}
-                        onChange={(e) => actualizarInsumo(idx, e.target.value)}
-                      />
+                    <div key={idx} className="form-group" style={{ display: 'flex', alignItems: 'end', gap: '8px' }}>
+                      <div style={{ flex: 1 }}>
+                        <label>Insumo {idx + 1}</label>
+                        <input
+                          placeholder={`Insumo ${idx + 1}`}
+                          value={ins.nombre}
+                          onChange={(e) => actualizarInsumo(idx, e.target.value)}
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        className="delete-btn"
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '38px', marginBottom: '2px' }}
+                        onClick={() => {
+                          const nuevas = insumos.filter((_, i) => i !== idx);
+                          while (nuevas.length < 12) {
+                            nuevas.push({ nombre: "" });
+                          }
+                          setInsumos(nuevas);
+                          setInsumosVisibles(Math.max(2, insumosVisibles - 1));
+                        }}
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </div>
                   ))}
                 </div>

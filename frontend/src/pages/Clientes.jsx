@@ -118,6 +118,13 @@ function Clientes() {
   };
 
   const editarCliente = (c) => {
+    setSucursales([
+      { tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" },
+      { tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" },
+      { tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" },
+      { tipo_direccion: "", direccion: "", fono: "", ciudad: "", coma: "" },
+      { tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" }
+    ]);
     setClienteEditando(c);
     let dirs = [];
     if (c.direcciones) {
@@ -125,11 +132,13 @@ function Clientes() {
         const parts = d.split("|");
         return { tipo_direccion: parts[0], direccion: parts[1], fono: parts[2], ciudad: parts[3], comuna: parts[4] };
       }).filter(d => d.tipo_direccion);
+      if (dirs.length > 0) {
+        while (dirs.length < 5) {
+          dirs.push({ tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" });
+        }
+        setSucursales(dirs);
+      }
     }
-    while (dirs.length < 5) {
-      dirs.push({ tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" });
-    }
-    setSucursales(dirs);
     setSucursalesVisibles(dirs.filter(s => s.direccion).length || 1);
     setNuevoCliente({
       razon_social: c.razon_social,
@@ -321,7 +330,7 @@ function Clientes() {
                   )}
                 </div>
                 {sucursales.slice(0, sucursalesVisibles).map((suc, idx) => (
-                  <div key={idx} style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px', marginBottom: '12px', padding: '12px', background: 'white', borderRadius: '8px' }}>
+                  <div key={idx} style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px', marginBottom: '12px', padding: '12px', background: 'white', borderRadius: '8px', alignItems: 'end' }}>
                     <div className="form-group" style={{ margin: 0 }}>
                       <label>Tipo</label>
                       <select
@@ -368,6 +377,21 @@ function Clientes() {
                         onChange={(e) => actualizarSucursal(idx, 'comuna', e.target.value)}
                       />
                     </div>
+                    <button
+                      type="button"
+                      className="delete-btn"
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '38px' }}
+                      onClick={() => {
+                        const nuevas = sucursales.filter((_, i) => i !== idx);
+                        while (nuevas.length < 5) {
+                          nuevas.push({ tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" });
+                        }
+                        setSucursales(nuevas);
+                        setSucursalesVisibles(Math.max(1, sucursalesVisibles - 1));
+                      }}
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   </div>
                 ))}
               </div>

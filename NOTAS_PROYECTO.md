@@ -252,25 +252,147 @@ npm run build   # Build producción
 
 ## Notas de Sesión
 
+### Fecha: 16/04/2026
+
+- Fix editar clientes sin sucursales:
+  - Al editar clientes sin direcciones guardadas, los campos aparecían vacíos
+  - Solución: inicializar estado sucursales antes de cargar datos existentes
+  - Agregada lógica para manejar clientes sin direcciones
+
+- Botón eliminar paraSucursales/Endereços:
+  - Agregado botón Trash2 con clase delete-btn en Sucursales (Clientes)
+  - Agregado botón Trash2 en Insumos (Equipos)
+  - Mantener mismos estilos que el proyecto
+
+---
+
+## Recordatorio de Estilos (IMPORTANTE)
+
+Al agregar nuevos botones o elementos, USAR siempreexactamente estos estilos:
+
+### Botón delete-btn (para eliminar rows)
+```css
+.delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--danger-light);
+  color: var(--danger);
+  border: none;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+  background: var(--danger);
+  color: white;
+  transform: translateY(-1px);
+}
+```
+
+### Botón secondary-btn (para acciones secundarias)
+```css
+.secondary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.secondary-btn:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+```
+
+### Botón main-btn (para acciones principales)
+```css
+.main-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--gradient);
+  color: white;
+  border: none;
+  padding: 14px 20px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(12, 74, 140, 0.3);
+}
+
+.main-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(12, 74, 140, 0.4);
+}
+```
+
+### Reglas generales
+- SIEMPRE usar `display: flex`, `align-items: center`, `justify-content: center`
+- SIEMPRE usar `gap: 8px` para iconos
+- SIEMPRE usar `border-radius: var(--radius-sm)`
+- SIEMPRE usar `transition: all 0.2s ease`
+- NUNCA agregar estilos inline básicos (display, padding, etc.) - usar clases CSS
+
+### Colores por tipo de elemento
+- primary (azul): botones principales, navegación
+- success (cyan): secciones de insumos
+- warning (naranja): secciones de clientes
+- danger (rojo): botones de eliminar
+- colors:
+  - var(--primary): #0C4A8C
+  - var(--primary-light): #e6f0fa
+  - var(--success): #00B5E2
+  - var(--success-light): #e0f7fc
+  - var(--danger): #E53935
+  - var(--danger-light): #ffebee
+
+### Input fields
+- Todos los inputs deben usar clase `.form-group`
+- Labels dentro del grupo
+- Bordes con `--border`
+- Focus con `--primary`
+
+---
+
+## Notas de Sesión (Anterior)
+
 ### Fecha: 14/04/2026
 
 - Modernización completa del UI:
   - Todos losheaders con gradiente corporativo
-  - Formularios现代化izadoscon secciones de colores
+  - Formularios modernizados con secciones de colores
   - Botones de navegación con colores distintivos
-  - Diseñounificado en todaslasvistas
-  
-- Problema de navegaciónresuelto:
-  - Pantalla blanca al login/Logout
+  - Diseño unificado en todas las vistas
+
+- Problema de navegación resuelto:
+  - Pantalla blanca al login/logout
   - Solución: usar `window.location.replace()` en lugar de navigate()
-  - Esto fuerzaunarecargaypreviene problemas de timing
+  - Esto fuerza una recarga y previene problemas de timing
 
 - Módulo Equipos mejorado:
   - Hasta 12 insumos
-  - Botón"+ Agregar" paramostrar más
-  - Al editarses carganlosexistentes
+  - Botón "+ Agregar" para mostrar más
+  - Al editar se cargan los existentes
 
 - Módulo Clientes mejorado:
   - Hasta 5 sucursales
-  - Tipocon select (Matriz,Sucursal,Bodega,Oficina,Otro)
-  - Al editarses carganlosexistentes
+  - Tipo con select (Matriz, Sucursal, Bodega, Oficina, Otro)
+  - Al editar se cargan las existentes
