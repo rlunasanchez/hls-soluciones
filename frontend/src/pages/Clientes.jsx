@@ -9,6 +9,7 @@ function Clientes() {
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [clienteEditando, setClienteEditando] = useState(null);
   const [busqueda, setBusqueda] = useState("");
+  const [filtroRut, setFiltroRut] = useState("");
   const [filtrosExpandidos, setFiltrosExpandidos] = useState(true);
   const [paginaActual, setPaginaActual] = useState(1);
   const clientesPorPagina = 5;
@@ -61,12 +62,11 @@ function Clientes() {
 
   const clientesFiltrados = clientes.filter(c => {
     const texto = busqueda.toLowerCase();
-    return (
-      !texto ||
+    const matchBusqueda = !texto ||
       c.razon_social?.toLowerCase().includes(texto) ||
-      c.rut?.toLowerCase().includes(texto) ||
-      c.contacto_nombre?.toLowerCase().includes(texto)
-    );
+      c.contacto_nombre?.toLowerCase().includes(texto);
+    const matchRut = !filtroRut || c.rut?.toLowerCase().includes(filtroRut.toLowerCase());
+    return matchBusqueda && matchRut;
   });
 
   const totalPaginas = Math.ceil(clientesFiltrados.length / clientesPorPagina);
@@ -79,7 +79,7 @@ function Clientes() {
 
   useEffect(() => {
     setPaginaActual(1);
-  }, [busqueda]);
+  }, [busqueda, filtroRut]);
 
   const cerrarSesion = () => {
     localStorage.removeItem("token");
@@ -430,12 +430,21 @@ function Clientes() {
         {filtrosExpandidos && (
           <div className="filters-content">
             <div className="filter-group">
-              <label>Buscar</label>
+              <label>Razón Social</label>
               <input
                 type="text"
-                placeholder="Razón social, RUT o contacto..."
+                placeholder="Filtrar por razón social..."
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
+              />
+            </div>
+            <div className="filter-group">
+              <label>RUT</label>
+              <input
+                type="text"
+                placeholder="Filtrar por RUT..."
+                value={filtroRut}
+                onChange={(e) => setFiltroRut(e.target.value)}
               />
             </div>
           </div>
