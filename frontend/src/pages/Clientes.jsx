@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Users, Plus, Save, Trash2, Edit, ArrowLeft, LogOut, Search, ChevronDown, ChevronUp, Home as HomeIcon, Package, UserCog, X } from "lucide-react";
+import { Users, Plus, Save, Trash2, Edit, ArrowLeft, LogOut, Search, ChevronDown, ChevronUp, Home as HomeIcon, Package, UserCog, FileText, FileSpreadsheet, ClipboardList, X } from "lucide-react";
 import api from "../services/api";
 
 function Clientes() {
@@ -431,6 +431,18 @@ function Clientes() {
           <button onClick={() => navigate("/equipos")} className="logout-btn" style={{ background: 'var(--success)', color: 'white' }}>
             <Package size={18} />
             Equipos
+          </button>
+          <button onClick={() => navigate("/informes")} className="logout-btn" style={{ background: '#EA580C', color: 'white' }}>
+            <FileText size={18} />
+            Informes
+          </button>
+          <button onClick={() => navigate("/cotizaciones")} className="logout-btn" style={{ background: '#DB2777', color: 'white' }}>
+            <FileSpreadsheet size={18} />
+            Cotizaciones
+          </button>
+          <button onClick={() => navigate("/orden-trabajo")} className="logout-btn" style={{ background: '#6366F1', color: 'white' }}>
+            <ClipboardList size={18} />
+            Orden Trabajo
           </button>
           <button onClick={() => navigate("/usuarios")} className="logout-btn" style={{ background: '#0D9488', color: 'white' }}>
             <UserCog size={18} />

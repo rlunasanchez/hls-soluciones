@@ -18,6 +18,10 @@
   --success-light: #e0f7fc;
   --warning: #FF9800;
   --warning-light: #fff3e0;
+  --info: #7C3AED;
+  --info-light: #EDE9FE;
+  --secondary: #059669;
+  --secondary-light: #D1FAE5;
   --border: #e2e8f0;
   --gradient: linear-gradient(135deg, #0C4A8C 0%, #009EE3 100%);
 }

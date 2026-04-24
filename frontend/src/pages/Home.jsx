@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Package, Users, UserCog, Home as HomeIcon, LogOut, ChevronRight } from "lucide-react";
+import { Package, Users, UserCog, FileText, FileSpreadsheet, ClipboardList, Home as HomeIcon, LogOut, ChevronRight } from "lucide-react";
 
 function Home() {
   const navigate = useNavigate();
@@ -13,6 +13,9 @@ function Home() {
     { title: "Equipos", icon: Package, path: "/equipos", desc: "Mantenedor de equipos técnicos" },
     { title: "Clientes", icon: Users, path: "/clientes", desc: "Mantenedor de clientes" },
     { title: "Usuarios", icon: UserCog, path: "/usuarios", desc: "Gestión de usuarios del sistema" },
+    { title: "Informes Técnicos", icon: FileText, path: "/informes", desc: "Mantenedor de informes técnicos" },
+    { title: "Cotizaciones", icon: FileSpreadsheet, path: "/cotizaciones", desc: "Mantenedor de cotizaciones" },
+    { title: "Orden de Trabajo", icon: ClipboardList, path: "/orden-trabajo", desc: "Crear y gestionar órdenes de trabajo" },
   ];
 
   return (
@@ -69,11 +72,11 @@ function Home() {
               width: '80px',
               height: '80px',
               borderRadius: '50%',
-              background: idx === 0 ? 'var(--primary-light)' : idx === 1 ? 'var(--success-light)' : 'var(--warning-light)',
+              background: idx === 0 ? 'var(--primary-light)' : idx === 1 ? 'var(--success-light)' : idx === 2 ? 'var(--warning-light)' : idx === 3 ? '#FFEDD5' : idx === 4 ? '#FCE7F3' : '#E0E7FF',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: idx === 0 ? 'var(--primary)' : idx === 1 ? 'var(--success)' : 'var(--warning)'
+              color: idx === 0 ? 'var(--primary)' : idx === 1 ? 'var(--success)' : idx === 2 ? 'var(--warning)' : idx === 3 ? '#EA580C' : idx === 4 ? '#DB2777' : '#6366F1'
             }}>
               <item.icon size={40} />
             </div>

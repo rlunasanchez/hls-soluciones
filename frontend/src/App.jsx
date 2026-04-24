@@ -5,6 +5,9 @@ import Home from "./pages/Home";
 import GestionUsuarios from "./pages/GestionUsuarios";
 import Equipos from "./pages/Equipos";
 import Clientes from "./pages/Clientes";
+import Informes from "./pages/Informes";
+import Cotizaciones from "./pages/Cotizaciones";
+import OrdenTrabajo from "./pages/OrdenTrabajo";
 import "./index.css";
 
 function App() {
@@ -61,6 +64,24 @@ function App() {
           path="/clientes" 
           element={
             authenticated ? <Clientes onLogout={handleLogout} /> : <Navigate to="/login" />
+          } 
+        />
+        <Route 
+          path="/informes" 
+          element={
+            authenticated ? <Informes onLogout={handleLogout} /> : <Navigate to="/login" />
+          } 
+        />
+        <Route 
+          path="/cotizaciones" 
+          element={
+            authenticated ? <Cotizaciones onLogout={handleLogout} /> : <Navigate to="/login" />
+          } 
+        />
+        <Route 
+          path="/orden-trabajo" 
+          element={
+            authenticated ? <OrdenTrabajo onLogout={handleLogout} /> : <Navigate to="/login" />
           } 
         />
         <Route 

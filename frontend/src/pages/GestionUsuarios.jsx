@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { 
   Users, Plus, Save, Trash2, 
   ToggleLeft, ToggleRight, LogOut, ArrowLeft,
-  Key, Lock, Edit, Package, Home as HomeIcon, UserCog, X
+  Key, Lock, Edit, Package, Home as HomeIcon, UserCog, FileText, FileSpreadsheet, ClipboardList, X
 } from "lucide-react";
 import api from "../services/api";
 
@@ -311,6 +311,18 @@ function GestionUsuarios() {
           <button onClick={() => navigate("/clientes")} className="logout-btn" style={{ background: 'var(--warning)', color: 'white' }}>
             <Users size={18} />
             Clientes
+          </button>
+          <button onClick={() => navigate("/informes")} className="logout-btn" style={{ background: '#EA580C', color: 'white' }}>
+            <FileText size={18} />
+            Informes
+          </button>
+          <button onClick={() => navigate("/cotizaciones")} className="logout-btn" style={{ background: '#DB2777', color: 'white' }}>
+            <FileSpreadsheet size={18} />
+            Cotizaciones
+          </button>
+          <button onClick={() => navigate("/orden-trabajo")} className="logout-btn" style={{ background: '#6366F1', color: 'white' }}>
+            <ClipboardList size={18} />
+            Orden Trabajo
           </button>
           <button onClick={cerrarSesion} className="logout-btn" style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }}>
             <LogOut size={18} />
