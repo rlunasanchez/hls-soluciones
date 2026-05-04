@@ -4,7 +4,7 @@ import {
   ArrowLeft, Home, Package, Users, UserCog, LogOut, 
   FileText, FileSpreadsheet, ClipboardList, Plus, Save, X, Wrench,
   Calendar, Phone, MapPin, User, AlertCircle, CheckSquare,
-  Search, ChevronDown
+  Search, ChevronDown, Trash2
 } from "lucide-react";
 import api from "../services/api";
 
@@ -12,6 +12,17 @@ function OrdenTrabajo() {
   const navigate = useNavigate();
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [errorNumeroOrden, setErrorNumeroOrden] = useState("");
+  
+  // Estados para listar órdenes con paginación
+  const [ordenes, setOrdenes] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({
+    currentPage:1,
+    totalPages:1,
+    totalItems:0,
+    itemsPerPage:10
+  });
+  const [editingId, setEditingId] = useState(null);
   
   // Estados para autocompletar clientes y equipos
   const [clientes, setClientes] = useState([]);
@@ -65,11 +76,84 @@ function OrdenTrabajo() {
     averia: ""
   });
 
-  // Cargar clientes y equipos al montar el componente
+  // Cargar clientes, equipos y órdenes al montar el componente
   useEffect(() => {
     fetchClientes();
     fetchEquipos();
+    fetchOrdenes(1);
   }, []);
+
+  const fetchOrdenes = async (page = 1) => {
+    setLoading(true);
+    try {
+      const res = await api.get(`/api/ordenes?page=${page}&limit=10`);
+      setOrdenes(res.data.ordenes);
+      setPagination(res.data.pagination);
+    } catch (err) {
+      console.error("Error al cargar órdenes:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const editarOrden = async (orden) => {
+    setEditingId(orden.id);
+    setMostrarFormulario(true);
+    
+    // Cargar datos de la orden en el formulario
+    setNuevaOrden({
+      numeroOrden: orden.numero_orden || "",
+      fecha: orden.fecha || "",
+      esGarantia: orden.es_garantia || false,
+      fechaIngreso: orden.fecha_ingreso || "",
+      fechaIngresoCheck: orden.fecha_ingreso_check || false,
+      fechaTermino: orden.fecha_termino || "",
+      fechaTerminoCheck: orden.fecha_termino_check || false,
+      fechaEntrega: orden.fecha_entrega || "",
+      fechaEntregaCheck: orden.fecha_entrega_check || false,
+      fechaCompra: orden.fecha_compra || "",
+      fechaCompraCheck: orden.fecha_compra_check || false,
+      cliente: orden.cliente || "",
+      direccion: orden.direccion || "",
+      comuna: orden.comuna || "",
+      contacto: orden.contacto || "",
+      fonoPrincipal: orden.fono_principal || "",
+      tecnicoAsignado: orden.tecnico_asignado || "",
+      actividad: orden.actividad || "",
+      equipo: orden.equipo || "",
+      modelo: orden.modelo || "",
+      marca: orden.marca || "",
+      serie: orden.serie || "",
+      contadorPagOut: orden.contador_pag_out || "",
+      nivelTinta: orden.nivel_tinta || "",
+      averia: orden.averia || ""
+    });
+
+    // Cargar insumos
+    const insumosData = [];
+    for (let i = 1; i <= 12; i++) {
+      const insumo = orden[`insumo${i}`];
+      if (insumo) insumosData.push({ nombre: insumo });
+    }
+    const nuevosInsumos = [...insumosData];
+    while (nuevosInsumos.length < 12) {
+      nuevosInsumos.push({ nombre: "" });
+    }
+    setInsumos(nuevosInsumos);
+    setInsumosVisibles(Math.max(2, insumosData.length));
+  };
+
+  const eliminarOrden = async (id) => {
+    if (!window.confirm("¿Está seguro de eliminar esta orden de trabajo?")) return;
+    try {
+      await api.delete(`/api/ordenes/${id}`);
+      alert("Orden eliminada exitosamente");
+      fetchOrdenes(pagination.currentPage);
+    } catch (err) {
+      console.error("Error al eliminar orden:", err);
+      alert("Error al eliminar la orden");
+    }
+  };
 
   const fetchClientes = async () => {
     try {
@@ -335,24 +419,16 @@ function OrdenTrabajo() {
             background: 'white',
             borderRadius: '16px',
             boxShadow: 'var(--shadow)',
-            padding: '40px',
-            textAlign: 'center'
+            padding: '40px'
           }}>
-            <ClipboardList size={64} style={{ color: '#8B5CF6', marginBottom: '24px' }} />
-            <h2 style={{ color: 'var(--text)', marginBottom: '16px' }}>
-              Orden de Trabajo
-            </h2>
-            <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>
-              Gestiona las órdenes de trabajo y accede a los informes técnicos y cotizaciones.
-            </p>
-
-            {/* Botones de acción */}
-            <div style={{ 
-              display: 'flex', 
-              gap: '16px', 
-              justifyContent: 'center',
-              marginBottom: '32px'
-            }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <ClipboardList size={28} style={{ color: '#8B5CF6' }} />
+                <h2 style={{ color: 'var(--text)', margin: 0 }}>Órdenes de Trabajo</h2>
+                <span style={{ background: '#8B5CF6', color: 'white', padding: '4px 12px', borderRadius: '20px', fontSize: '0.85rem' }}>
+                  {pagination.totalItems} total
+                </span>
+              </div>
               <button 
                 onClick={() => setMostrarFormulario(true)}
                 style={{
@@ -360,20 +436,179 @@ function OrdenTrabajo() {
                   color: 'white',
                   border: 'none',
                   borderRadius: '12px',
-                  padding: '16px 32px',
-                  fontSize: '1rem',
+                  padding: '12px 24px',
+                  fontSize: '0.95rem',
                   fontWeight: '600',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '8px',
-                  transition: 'all 0.3s ease'
+                  gap: '8px'
                 }}
               >
-                <Plus size={24} />
-                Crear Orden de Trabajo
+                <Plus size={20} />
+                Crear Orden
               </button>
             </div>
+
+            {loading ? (
+              <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+                Cargando órdenes...
+              </div>
+            ) : ordenes.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
+                <ClipboardList size={48} style={{ marginBottom: '16px', opacity: 0.3 }} />
+                <p>No hay órdenes registradas</p>
+              </div>
+            ) : (
+              <>
+                {/* Tabla de órdenes */}
+                <div style={{ overflowX: 'auto', marginBottom: '24px' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ background: 'var(--bg)', borderBottom: '2px solid var(--border)' }}>
+                        <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text)', fontSize: '0.9rem' }}>N° Orden</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text)', fontSize: '0.9rem' }}>Fecha</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text)', fontSize: '0.9rem' }}>Cliente</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text)', fontSize: '0.9rem' }}>Equipo</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text)', fontSize: '0.9rem' }}>Técnico</th>
+                        <th style={{ padding: '12px', textAlign: 'center', color: 'var(--text)', fontSize: '0.9rem' }}>Garantía</th>
+                        <th style={{ padding: '12px', textAlign: 'center', color: 'var(--text)', fontSize: '0.9rem' }}>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ordenes.map((orden) => (
+                        <tr key={orden.id} style={{ borderBottom: '1px solid var(--border)', transition: 'background 0.2s' }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg)'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+                        >
+                          <td style={{ padding: '14px 12px', fontWeight: '600', color: 'var(--primary)' }}>{orden.numero_orden}</td>
+                          <td style={{ padding: '14px 12px', color: 'var(--text)' }}>{orden.fecha ? new Date(orden.fecha).toLocaleDateString() : '-'}</td>
+                          <td style={{ padding: '14px 12px', color: 'var(--text)' }}>{orden.cliente}</td>
+                          <td style={{ padding: '14px 12px', color: 'var(--text)' }}>{orden.equipo} {orden.marca} {orden.modelo}</td>
+                          <td style={{ padding: '14px 12px', color: 'var(--text)' }}>{orden.tecnico_asignado}</td>
+                          <td style={{ padding: '14px 12px', textAlign: 'center' }}>
+                            {orden.es_garantia ? (
+                              <span style={{ background: '#FEF3C7', color: '#92400E', padding: '4px 12px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: '600' }}>Sí</span>
+                            ) : (
+                              <span style={{ background: 'var(--bg)', color: 'var(--text-muted)', padding: '4px 12px', borderRadius: '12px', fontSize: '0.8rem' }}>No</span>
+                            )}
+                          </td>
+                          <td style={{ padding: '14px 12px', textAlign: 'center' }}>
+                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                              <button
+                                onClick={() => editarOrden(orden)}
+                                style={{
+                                  background: 'var(--primary-light)',
+                                  color: 'var(--primary)',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  padding: '6px 12px',
+                                  cursor: 'pointer',
+                                  fontSize: '0.85rem',
+                                  fontWeight: '500',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '4px'
+                                }}
+                              >
+                                Editar
+                              </button>
+                              <button
+                                onClick={() => eliminarOrden(orden.id)}
+                                style={{
+                                  background: 'var(--danger-light)',
+                                  color: 'var(--danger)',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  padding: '6px 12px',
+                                  cursor: 'pointer',
+                                  fontSize: '0.85rem',
+                                  fontWeight: '500',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '4px'
+                                }}
+                              >
+                                Eliminar
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Paginación */}
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+                  <button
+                    onClick={() => fetchOrdenes(pagination.currentPage - 1)}
+                    disabled={pagination.currentPage === 1}
+                    style={{
+                      padding: '8px 16px',
+                      border: '2px solid var(--border)',
+                      borderRadius: '8px',
+                      background: pagination.currentPage === 1 ? 'var(--bg)' : 'white',
+                      cursor: pagination.currentPage === 1 ? 'not-allowed' : 'pointer',
+                      color: pagination.currentPage === 1 ? 'var(--text-muted)' : 'var(--text)',
+                      fontWeight: '500'
+                    }}
+                  >
+                    ← Anterior
+                  </button>
+                  
+                  {[...Array(pagination.totalPages)].map((_, idx) => {
+                    const pageNum = idx + 1;
+                    if (
+                      pageNum === 1 ||
+                      pageNum === pagination.totalPages ||
+                      (pageNum >= pagination.currentPage - 1 && pageNum <= pagination.currentPage + 1)
+                    ) {
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => fetchOrdenes(pageNum)}
+                          style={{
+                            padding: '8px 14px',
+                            border: '2px solid',
+                            borderColor: pageNum === pagination.currentPage ? '#8B5CF6' : 'var(--border)',
+                            borderRadius: '8px',
+                            background: pageNum === pagination.currentPage ? '#8B5CF6' : 'white',
+                            color: pageNum === pagination.currentPage ? 'white' : 'var(--text)',
+                            cursor: 'pointer',
+                            fontWeight: pageNum === pagination.currentPage ? '600' : '400'
+                          }}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    } else if (
+                      pageNum === pagination.currentPage - 2 ||
+                      pageNum === pagination.currentPage + 2
+                    ) {
+                      return <span key={pageNum} style={{ color: 'var(--text-muted)' }}>...</span>;
+                    }
+                    return null;
+                  })}
+
+                  <button
+                    onClick={() => fetchOrdenes(pagination.currentPage + 1)}
+                    disabled={pagination.currentPage === pagination.totalPages}
+                    style={{
+                      padding: '8px 16px',
+                      border: '2px solid var(--border)',
+                      borderRadius: '8px',
+                      background: pagination.currentPage === pagination.totalPages ? 'var(--bg)' : 'white',
+                      cursor: pagination.currentPage === pagination.totalPages ? 'not-allowed' : 'pointer',
+                      color: pagination.currentPage === pagination.totalPages ? 'var(--text-muted)' : 'var(--text)',
+                      fontWeight: '500'
+                    }}
+                  >
+                    Siguiente →
+                  </button>
+                </div>
+              </>
+            )}
 
             {/* Botones de Informe Técnico e Informe Cotización */}
             <div style={{ 
@@ -382,7 +617,7 @@ function OrdenTrabajo() {
               justifyContent: 'center',
               borderTop: '1px solid var(--border)',
               paddingTop: '32px',
-              marginTop: '16px'
+              marginTop: '32px'
             }}>
               <button 
                 onClick={irAInformeTecnico}
@@ -397,8 +632,7 @@ function OrdenTrabajo() {
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '8px',
-                  transition: 'all 0.3s ease'
+                  gap: '8px'
                 }}
               >
                 <FileText size={20} />
@@ -417,8 +651,7 @@ function OrdenTrabajo() {
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '8px',
-                  transition: 'all 0.3s ease'
+                  gap: '8px'
                 }}
               >
                 <FileSpreadsheet size={20} />
@@ -1271,32 +1504,21 @@ function OrdenTrabajo() {
                             }}
                           />
                         </div>
-                        {idx >= 2 && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const nuevas = insumos.filter((_, i) => i !== idx);
-                              while (nuevas.length < 12) {
-                                nuevas.push({ nombre: "" });
-                              }
-                              setInsumos(nuevas);
-                              setInsumosVisibles(Math.max(2, insumosVisibles - 1));
-                            }}
-                            style={{
-                              background: '#EF4444',
-                              color: 'white',
-                              border: 'none',
-                              borderRadius: '6px',
-                              padding: '10px',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center'
-                            }}
-                          >
-                            <X size={16} />
-                          </button>
-                        )}
+                        <button
+                          type="button"
+                          className="delete-btn"
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '38px', marginBottom: '2px' }}
+                          onClick={() => {
+                            const nuevas = insumos.filter((_, i) => i !== idx);
+                            while (nuevas.length < 12) {
+                              nuevas.push({ nombre: "" });
+                            }
+                            setInsumos(nuevas);
+                            setInsumosVisibles(Math.max(2, insumosVisibles - 1));
+                          }}
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </div>
                     ))}
                   </div>

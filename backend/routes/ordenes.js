@@ -6,14 +6,32 @@ import { authMiddleware } from "../middleware/authMiddleware.js";
 dotenv.config();
 const router = express.Router();
 
-// Obtener todas las órdenes de trabajo
+// Obtener órdenes de trabajo con paginación
 router.get("/", authMiddleware, async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = (page - 1) * limit;
+
   try {
     const [ordenes] = await pool.query(`
       SELECT * FROM ordenes_trabajo 
       ORDER BY fecha_creacion DESC
-    `);
-    res.json(ordenes);
+      LIMIT ? OFFSET ?
+    `, [limit, offset]);
+
+    const [totalResult] = await pool.query("SELECT COUNT(*) as total FROM ordenes_trabajo");
+    const total = totalResult[0].total;
+    const totalPages = Math.ceil(total / limit);
+
+    res.json({
+      ordenes,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems: total,
+        itemsPerPage: limit
+      }
+    });
   } catch (err) {
     console.error("Error al obtener órdenes:", err);
     res.status(500).json({ msg: "Error del servidor" });
@@ -77,18 +95,16 @@ router.post("/", authMiddleware, async (req, res) => {
       return res.status(400).json({ msg: "El número de orden ya existe" });
     }
 
-    const sql = `
-      INSERT INTO ordenes_trabajo (
-        numero_orden, fecha, es_garantia,
-        fecha_ingreso, fecha_ingreso_check, fecha_termino, fecha_termino_check,
-        fecha_entrega, fecha_entrega_check, fecha_compra, fecha_compra_check,
-        cliente, direccion, comuna, contacto, fono_principal, tecnico_asignado, actividad,
-        equipo, modelo, marca, serie, contador_pag_out, nivel_tinta,
-        insumo1, insumo2, insumo3, insumo4, insumo5, insumo6,
-        insumo7, insumo8, insumo9, insumo10, insumo11, insumo12,
-        averia, cliente_id, equipo_id
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
+    const sql = `INSERT INTO ordenes_trabajo (
+      numero_orden, fecha, es_garantia,
+      fecha_ingreso, fecha_ingreso_check, fecha_termino, fecha_termino_check,
+      fecha_entrega, fecha_entrega_check, fecha_compra, fecha_compra_check,
+      cliente, direccion, comuna, contacto, fono_principal, tecnico_asignado, actividad,
+      equipo, modelo, marca, serie, contador_pag_out, nivel_tinta,
+      insumo1, insumo2, insumo3, insumo4, insumo5, insumo6,
+      insumo7, insumo8, insumo9, insumo10, insumo11, insumo12,
+      averia, cliente_id, equipo_id
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     const values = [
       numeroOrden, fecha, esGarantia || false,
@@ -134,18 +150,16 @@ router.put("/:id", authMiddleware, async (req, res) => {
       return res.status(400).json({ msg: "El número de orden ya existe" });
     }
 
-    const sql = `
-      UPDATE ordenes_trabajo SET
-        numero_orden = ?, fecha = ?, es_garantia = ?,
-        fecha_ingreso = ?, fecha_ingreso_check = ?, fecha_termino = ?, fecha_termino_check = ?,
-        fecha_entrega = ?, fecha_entrega_check = ?, fecha_compra = ?, fecha_compra_check = ?,
-        cliente = ?, direccion = ?, comuna = ?, contacto = ?, fono_principal = ?, tecnico_asignado = ?, actividad = ?,
-        equipo = ?, modelo = ?, marca = ?, serie = ?, contador_pag_out = ?, nivel_tinta = ?,
-        insumo1 = ?, insumo2 = ?, insumo3 = ?, insumo4 = ?, insumo5 = ?, insumo6 = ?,
-        insumo7 = ?, insumo8 = ?, insumo9 = ?, insumo10 = ?, insumo11 = ?, insumo12 = ?,
-        averia = ?, cliente_id = ?, equipo_id = ?
-      WHERE id = ?
-    `;
+    const sql = `UPDATE ordenes_trabajo SET
+      numero_orden = ?, fecha = ?, es_garantia = ?,
+      fecha_ingreso = ?, fecha_ingreso_check = ?, fecha_termino = ?, fecha_termino_check = ?,
+      fecha_entrega = ?, fecha_entrega_check = ?, fecha_compra = ?, fecha_compra_check = ?,
+      cliente = ?, direccion = ?, comuna = ?, contacto = ?, fono_principal = ?, tecnico_asignado = ?, actividad = ?,
+      equipo = ?, modelo = ?, marca = ?, serie = ?, contador_pag_out = ?, nivel_tinta = ?,
+      insumo1 = ?, insumo2 = ?, insumo3 = ?, insumo4 = ?, insumo5 = ?, insumo6 = ?,
+      insumo7 = ?, insumo8 = ?, insumo9 = ?, insumo10 = ?, insumo11 = ?, insumo12 = ?,
+      averia = ?, cliente_id = ?, equipo_id = ?
+      WHERE id = ?`;
 
     const values = [
       numeroOrden, fecha, esGarantia || false,
