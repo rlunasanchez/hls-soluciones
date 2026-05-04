@@ -31,6 +31,9 @@ function OrdenTrabajo() {
   const [equipoSeleccionado, setEquipoSeleccionado] = useState(null);
   const [busquedaCliente, setBusquedaCliente] = useState("");
   const [busquedaEquipo, setBusquedaEquipo] = useState("");
+  const [busquedaMarca, setBusquedaMarca] = useState("");
+  const [busquedaModelo, setBusquedaModelo] = useState("");
+  const [busquedaSerie, setBusquedaSerie] = useState("");
   const [mostrarDropdownClientes, setMostrarDropdownClientes] = useState(false);
   const [mostrarDropdownEquipos, setMostrarDropdownEquipos] = useState(false);
   
@@ -225,12 +228,19 @@ function OrdenTrabajo() {
     c.rut?.toLowerCase().includes(busquedaCliente.toLowerCase())
   ).slice(0, 10);
 
-  const equiposFiltrados = equipos.filter(e => 
-    e.equipo?.toLowerCase().includes(busquedaEquipo.toLowerCase()) ||
-    e.marca?.toLowerCase().includes(busquedaEquipo.toLowerCase()) ||
-    e.modelo?.toLowerCase().includes(busquedaEquipo.toLowerCase()) ||
-    e.serie?.toLowerCase().includes(busquedaEquipo.toLowerCase())
-  ).slice(0, 10);
+  const equiposFiltrados = equipos.filter(e => {
+    const busqueda = busquedaEquipo.toLowerCase();
+    const marca = busquedaMarca.toLowerCase();
+    const modelo = busquedaModelo.toLowerCase();
+    const serie = busquedaSerie.toLowerCase();
+    
+    return (
+      (!busqueda || e.equipo?.toLowerCase().includes(busqueda)) &&
+      (!marca || e.marca?.toLowerCase().includes(marca)) &&
+      (!modelo || e.modelo?.toLowerCase().includes(modelo)) &&
+      (!serie || e.serie?.toLowerCase().includes(serie))
+    );
+  }).slice(0, 10);
 
   // Verificar número de orden único
   const verificarNumeroOrden = async (numero) => {
@@ -1236,16 +1246,16 @@ function OrdenTrabajo() {
                   Datos del Equipo
                 </h3>
                 
-                {/* Buscador de Equipo */}
+                {/* Buscador de Equipo - 4 campos separados */}
                 <div style={{ marginBottom: '24px' }}>
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
                     <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
                     Buscar y Seleccionar Equipo
                   </label>
-                  <div style={{ position: 'relative' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '12px' }}>
                     <input
                       type="text"
-                      placeholder="Escriba para buscar equipo por tipo, marca, modelo o serie..."
+                      placeholder="Tipo de equipo"
                       value={busquedaEquipo}
                       onChange={(e) => {
                         setBusquedaEquipo(e.target.value);
@@ -1253,7 +1263,6 @@ function OrdenTrabajo() {
                       }}
                       onFocus={() => setMostrarDropdownEquipos(true)}
                       style={{
-                        width: '100%',
                         padding: '12px 16px',
                         border: '2px solid var(--success)',
                         borderRadius: '8px',
@@ -1261,34 +1270,72 @@ function OrdenTrabajo() {
                         background: equipoSeleccionado ? '#DCFCE7' : 'white'
                       }}
                     />
-                    {equipoSeleccionado && (
-                      <span style={{
-                        position: 'absolute',
-                        right: '40px',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        background: 'var(--success)',
-                        color: 'white',
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        fontSize: '0.75rem'
-                      }}>
-                        ✓ Seleccionado
-                      </span>
-                    )}
-                    <ChevronDown 
-                      size={20} 
+                    <input
+                      type="text"
+                      placeholder="Marca"
+                      value={busquedaMarca}
+                      onChange={(e) => {
+                        setBusquedaMarca(e.target.value);
+                        setMostrarDropdownEquipos(true);
+                      }}
+                      onFocus={() => setMostrarDropdownEquipos(true)}
                       style={{
-                        position: 'absolute',
-                        right: '12px',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        color: 'var(--text-muted)'
+                        padding: '12px 16px',
+                        border: '2px solid var(--success)',
+                        borderRadius: '8px',
+                        fontSize: '1rem'
                       }}
                     />
-                    
-                    {/* Dropdown de Equipos */}
-                    {mostrarDropdownEquipos && equiposFiltrados.length > 0 && (
+                    <input
+                      type="text"
+                      placeholder="Modelo"
+                      value={busquedaModelo}
+                      onChange={(e) => {
+                        setBusquedaModelo(e.target.value);
+                        setMostrarDropdownEquipos(true);
+                      }}
+                      onFocus={() => setMostrarDropdownEquipos(true)}
+                      style={{
+                        padding: '12px 16px',
+                        border: '2px solid var(--success)',
+                        borderRadius: '8px',
+                        fontSize: '1rem'
+                      }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Serie"
+                      value={busquedaSerie}
+                      onChange={(e) => {
+                        setBusquedaSerie(e.target.value);
+                        setMostrarDropdownEquipos(true);
+                      }}
+                      onFocus={() => setMostrarDropdownEquipos(true)}
+                      style={{
+                        padding: '12px 16px',
+                        border: '2px solid var(--success)',
+                        borderRadius: '8px',
+                        fontSize: '1rem'
+                      }}
+                    />
+                  </div>
+                  {equipoSeleccionado && (
+                    <div style={{
+                      background: 'var(--success-light)',
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      fontSize: '0.9rem',
+                      color: 'var(--success)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      ✓ Seleccionado: {equipoSeleccionado.equipo} - {equipoSeleccionado.marca} {equipoSeleccionado.modelo}
+                    </div>
+                  )}
+                  
+                  {/* Dropdown de Equipos */}
+                  {mostrarDropdownEquipos && equiposFiltrados.length > 0 && (
                       <div style={{
                         position: 'absolute',
                         top: '100%',
