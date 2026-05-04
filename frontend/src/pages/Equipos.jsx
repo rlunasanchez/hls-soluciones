@@ -9,7 +9,6 @@ function Equipos() {
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [equipoEditando, setEquipoEditando] = useState(null);
   const [busqueda, setBusqueda] = useState("");
-  const [busquedaMarca, setBusquedaMarca] = useState("");
   const [filtrosExpandidos, setFiltrosExpandidos] = useState(true);
   const [paginaActual, setPaginaActual] = useState(1);
   const equiposPorPagina = 5;
@@ -66,11 +65,7 @@ function Equipos() {
 
   const equiposFiltrados = equipos.filter(eq => {
     const textoBusqueda = busqueda.toLowerCase();
-    const textoMarca = busquedaMarca.toLowerCase();
-    return (
-      (!textoBusqueda || eq.modelo?.toLowerCase().includes(textoBusqueda)) &&
-      (!textoMarca || eq.marca?.toLowerCase().includes(textoMarca))
-    );
+    return !textoBusqueda || eq.serie?.toLowerCase().includes(textoBusqueda);
   });
 
   const totalPaginas = Math.ceil(equiposFiltrados.length / equiposPorPagina);
@@ -83,7 +78,7 @@ function Equipos() {
 
   useEffect(() => {
     setPaginaActual(1);
-  }, [busqueda, busquedaMarca]);
+  }, [busqueda]);
 
   const limpiarFiltros = () => {
     setBusqueda("");
@@ -397,40 +392,22 @@ if (mostrarFormulario) {
       </div>
 
       <div className="filters-section">
-        <div className="filters-header" onClick={() => setFiltrosExpandidos(!filtrosExpandidos)}>
-          <h3><Search size={18} /> Filtros de Búsqueda</h3>
-          <div className="filters-toggle">
-            {filtrosExpandidos ? 'Ocultar' : 'Mostrar'}
-            {filtrosExpandidos ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+        <div className="filters-content">
+          <div className="filter-group">
+            <label>Buscar por Serie</label>
+            <input
+              type="text"
+              placeholder="Ingrese número de serie..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+            />
+          </div>
+          <div className="filter-group" style={{ paddingTop: '23px' }}>
+            <button onClick={limpiarFiltros} className="clear-btn">
+              Limpiar
+            </button>
           </div>
         </div>
-        {filtrosExpandidos && (
-          <div className="filters-content">
-            <div className="filter-group">
-              <label>Modelo</label>
-              <input
-                type="text"
-                placeholder="Buscar modelo..."
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
-              />
-            </div>
-            <div className="filter-group">
-              <label>Marca</label>
-              <input
-                type="text"
-                placeholder="Buscar marca..."
-                value={busquedaMarca}
-                onChange={(e) => setBusquedaMarca(e.target.value)}
-              />
-            </div>
-            <div className="filter-group" style={{ paddingTop: '23px' }}>
-              <button onClick={limpiarFiltros} className="clear-btn">
-                Limpiar
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       <div className="table-header">

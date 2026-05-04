@@ -30,9 +30,6 @@ function OrdenTrabajo() {
   const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
   const [equipoSeleccionado, setEquipoSeleccionado] = useState(null);
   const [busquedaCliente, setBusquedaCliente] = useState("");
-  const [busquedaEquipo, setBusquedaEquipo] = useState("");
-  const [busquedaMarca, setBusquedaMarca] = useState("");
-  const [busquedaModelo, setBusquedaModelo] = useState("");
   const [busquedaSerie, setBusquedaSerie] = useState("");
   const [mostrarDropdownClientes, setMostrarDropdownClientes] = useState(false);
   const [mostrarDropdownEquipos, setMostrarDropdownEquipos] = useState(false);
@@ -218,8 +215,8 @@ function OrdenTrabajo() {
     setInsumos(nuevosInsumos);
     setInsumosVisibles(Math.max(2, insumosEquipo.length));
     
-    setBusquedaEquipo(`${equipo.equipo} - ${equipo.marca} ${equipo.modelo}`);
-    setMostrarDropdownEquipos(false);
+     setBusquedaSerie(equipo.serie || "");
+     setMostrarDropdownEquipos(false);
   };
 
   // Filtrar clientes y equipos para la búsqueda
@@ -228,19 +225,10 @@ function OrdenTrabajo() {
     c.rut?.toLowerCase().includes(busquedaCliente.toLowerCase())
   ).slice(0, 10);
 
-  const equiposFiltrados = equipos.filter(e => {
-    const busqueda = busquedaEquipo.toLowerCase();
-    const marca = busquedaMarca.toLowerCase();
-    const modelo = busquedaModelo.toLowerCase();
-    const serie = busquedaSerie.toLowerCase();
-    
-    return (
-      (!busqueda || e.equipo?.toLowerCase().includes(busqueda)) &&
-      (!marca || e.marca?.toLowerCase().includes(marca)) &&
-      (!modelo || e.modelo?.toLowerCase().includes(modelo)) &&
-      (!serie || e.serie?.toLowerCase().includes(serie))
-    );
-  }).slice(0, 10);
+   const equiposFiltrados = equipos.filter(e => {
+     const serie = busquedaSerie.toLowerCase();
+     return !serie || e.serie?.toLowerCase().includes(serie);
+   }).slice(0, 10);
 
   // Verificar número de orden único
   const verificarNumeroOrden = async (numero) => {
@@ -349,7 +337,7 @@ function OrdenTrabajo() {
     setClienteSeleccionado(null);
     setEquipoSeleccionado(null);
     setBusquedaCliente("");
-    setBusquedaEquipo("");
+    setBusquedaSerie("");
     setErrorNumeroOrden("");
   };
 
@@ -1246,142 +1234,96 @@ function OrdenTrabajo() {
                   Datos del Equipo
                 </h3>
                 
-                {/* Buscador de Equipo - 4 campos separados */}
-                <div style={{ marginBottom: '24px' }}>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
-                    <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
-                    Buscar y Seleccionar Equipo
-                  </label>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '12px' }}>
-                    <input
-                      type="text"
-                      placeholder="Tipo de equipo"
-                      value={busquedaEquipo}
-                      onChange={(e) => {
-                        setBusquedaEquipo(e.target.value);
-                        setMostrarDropdownEquipos(true);
-                      }}
-                      onFocus={() => setMostrarDropdownEquipos(true)}
-                      style={{
-                        padding: '12px 16px',
-                        border: '2px solid var(--success)',
-                        borderRadius: '8px',
-                        fontSize: '1rem',
-                        background: equipoSeleccionado ? '#DCFCE7' : 'white'
-                      }}
-                    />
-                    <input
-                      type="text"
-                      placeholder="Marca"
-                      value={busquedaMarca}
-                      onChange={(e) => {
-                        setBusquedaMarca(e.target.value);
-                        setMostrarDropdownEquipos(true);
-                      }}
-                      onFocus={() => setMostrarDropdownEquipos(true)}
-                      style={{
-                        padding: '12px 16px',
-                        border: '2px solid var(--success)',
-                        borderRadius: '8px',
-                        fontSize: '1rem'
-                      }}
-                    />
-                    <input
-                      type="text"
-                      placeholder="Modelo"
-                      value={busquedaModelo}
-                      onChange={(e) => {
-                        setBusquedaModelo(e.target.value);
-                        setMostrarDropdownEquipos(true);
-                      }}
-                      onFocus={() => setMostrarDropdownEquipos(true)}
-                      style={{
-                        padding: '12px 16px',
-                        border: '2px solid var(--success)',
-                        borderRadius: '8px',
-                        fontSize: '1rem'
-                      }}
-                    />
-                    <input
-                      type="text"
-                      placeholder="Serie"
-                      value={busquedaSerie}
-                      onChange={(e) => {
-                        setBusquedaSerie(e.target.value);
-                        setMostrarDropdownEquipos(true);
-                      }}
-                      onFocus={() => setMostrarDropdownEquipos(true)}
-                      style={{
-                        padding: '12px 16px',
-                        border: '2px solid var(--success)',
-                        borderRadius: '8px',
-                        fontSize: '1rem'
-                      }}
-                    />
-                  </div>
-                  {equipoSeleccionado && (
-                    <div style={{
-                      background: 'var(--success-light)',
-                      padding: '8px 16px',
-                      borderRadius: '8px',
-                      fontSize: '0.9rem',
-                      color: 'var(--success)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px'
-                    }}>
-                      ✓ Seleccionado: {equipoSeleccionado.equipo} - {equipoSeleccionado.marca} {equipoSeleccionado.modelo}
-                    </div>
-                  )}
-                  
-                  {/* Dropdown de Equipos */}
-                  {mostrarDropdownEquipos && equiposFiltrados.length > 0 && (
-                      <div style={{
-                        position: 'absolute',
-                        top: '100%',
-                        left: 0,
-                        right: 0,
-                        background: 'white',
-                        border: '2px solid var(--border)',
-                        borderTop: 'none',
-                        borderRadius: '0 0 8px 8px',
-                        maxHeight: '250px',
-                        overflow: 'auto',
-                        zIndex: 1000,
-                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                      }}>
-                        {equiposFiltrados.map((equipo) => (
-                          <div
-                            key={equipo.id}
-                            onClick={() => seleccionarEquipo(equipo)}
-                            style={{
-                              padding: '12px 16px',
-                              cursor: 'pointer',
-                              borderBottom: '1px solid var(--border)',
-                              transition: 'background 0.2s'
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--success-light)'}
-                            onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
-                          >
-                            <div style={{ fontWeight: '600', color: 'var(--text)' }}>
-                              {equipo.equipo} - {equipo.marca} {equipo.modelo}
-                            </div>
-                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                              Serie: {equipo.serie || 'N/A'} | Contador: {equipo.contador_pag || 'N/A'}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                
-                <div style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: 'repeat(4, 1fr)', 
-                  gap: '20px',
-                  marginBottom: '20px'
-                }}>
+                 {/* Buscador de Equipo - Solo por Serie */}
+                 <div style={{ marginBottom: '24px' }}>
+                   <div style={{ position: 'relative' }}>
+                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
+                       <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
+                       Buscar Equipo por Serie
+                     </label>
+                     <input
+                       type="text"
+                       placeholder="Ingrese número de serie..."
+                       value={busquedaSerie}
+                       onChange={(e) => {
+                         setBusquedaSerie(e.target.value);
+                         setMostrarDropdownEquipos(true);
+                       }}
+                       onFocus={() => setMostrarDropdownEquipos(true)}
+                       style={{
+                         width: '100%',
+                         padding: '12px 16px',
+                         border: '2px solid var(--success)',
+                         borderRadius: '8px',
+                         fontSize: '1rem',
+                         background: equipoSeleccionado ? '#DCFCE7' : 'white'
+                       }}
+                     />
+                   
+                     {/* Dropdown de Equipos */}
+                     {mostrarDropdownEquipos && equiposFiltrados.length > 0 && (
+                       <div style={{
+                         position: 'absolute',
+                         top: '100%',
+                         left: 0,
+                         right: 0,
+                         background: 'white',
+                         border: '2px solid var(--border)',
+                         borderTop: 'none',
+                         borderRadius: '0 0 8px 8px',
+                         maxHeight: '250px',
+                         overflow: 'auto',
+                         zIndex: 1000,
+                         boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                       }}>
+                         {equiposFiltrados.map((equipo) => (
+                           <div
+                             key={equipo.id}
+                             onClick={() => seleccionarEquipo(equipo)}
+                             style={{
+                               padding: '12px 16px',
+                               cursor: 'pointer',
+                               borderBottom: '1px solid var(--border)',
+                               transition: 'background 0.2s'
+                             }}
+                             onMouseEnter={(e) => e.currentTarget.style.background = 'var(--success-light)'}
+                             onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+                           >
+                             <div style={{ fontWeight: '600', color: 'var(--text)' }}>
+                               {equipo.equipo} - {equipo.marca} {equipo.modelo}
+                             </div>
+                             <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                               Serie: {equipo.serie || 'N/A'} | Contador: {equipo.contador_pag || 'N/A'}
+                             </div>
+                           </div>
+                         ))}
+                       </div>
+                     )}
+                   </div>
+                   
+                   {equipoSeleccionado && (
+                     <div style={{
+                       background: 'var(--success-light)',
+                       padding: '8px 16px',
+                       borderRadius: '8px',
+                       fontSize: '0.9rem',
+                       color: 'var(--success)',
+                       display: 'flex',
+                       alignItems: 'center',
+                       gap: '8px',
+                       marginTop: '8px'
+                     }}>
+                       ✓ Seleccionado: {equipoSeleccionado.equipo} - {equipoSeleccionado.marca} {equipoSeleccionado.modelo}
+                     </div>
+                   )}
+                 </div>
+                 
+                 <div style={{ 
+                   display: 'grid', 
+                   gridTemplateColumns: 'repeat(4, 1fr)', 
+                   gap: '20px',
+                   marginBottom: '20px'
+                 }}>
                   <div className="form-group">
                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
                       Equipo *
@@ -1460,52 +1402,54 @@ function OrdenTrabajo() {
                       }}
                     />
                   </div>
-                </div>
+                 </div>
 
-                <div style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: 'repeat(4, 1fr)', 
-                  gap: '20px',
-                  marginBottom: '20px'
-                }}>
-                  <div className="form-group">
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
-                      Contador Páginas OUT
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Contador"
-                      value={nuevaOrden.contadorPagOut}
-                      onChange={(e) => setNuevaOrden({...nuevaOrden, contadorPagOut: e.target.value})}
-                      style={{
-                        width: '100%',
-                        padding: '12px 16px',
-                        border: '2px solid var(--border)',
-                        borderRadius: '8px',
-                        fontSize: '1rem'
-                      }}
-                    />
-                  </div>
+                 {/* CAMPOS ADICIONALES COMENTADOS - Descomentar para restaurar
+                 <div style={{ 
+                   display: 'grid', 
+                   gridTemplateColumns: 'repeat(4, 1fr)', 
+                   gap: '20px',
+                   marginBottom: '20px'
+                 }}>
+                   <div className="form-group">
+                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
+                       Contador Páginas OUT
+                     </label>
+                     <input
+                       type="text"
+                       placeholder="Contador"
+                       value={nuevaOrden.contadorPagOut}
+                       onChange={(e) => setNuevaOrden({...nuevaOrden, contadorPagOut: e.target.value})}
+                       style={{
+                         width: '100%',
+                         padding: '12px 16px',
+                         border: '2px solid var(--border)',
+                         borderRadius: '8px',
+                         fontSize: '1rem'
+                       }}
+                     />
+                   </div>
 
-                  <div className="form-group">
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
-                      Nivel Tinta
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Nivel de tinta"
-                      value={nuevaOrden.nivelTinta}
-                      onChange={(e) => setNuevaOrden({...nuevaOrden, nivelTinta: e.target.value})}
-                      style={{
-                        width: '100%',
-                        padding: '12px 16px',
-                        border: '2px solid var(--border)',
-                        borderRadius: '8px',
-                        fontSize: '1rem'
-                      }}
-                    />
-                  </div>
-                </div>
+                   <div className="form-group">
+                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
+                       Nivel Tinta
+                     </label>
+                     <input
+                       type="text"
+                       placeholder="Nivel de tinta"
+                       value={nuevaOrden.nivelTinta}
+                       onChange={(e) => setNuevaOrden({...nuevaOrden, nivelTinta: e.target.value})}
+                       style={{
+                         width: '100%',
+                         padding: '12px 16px',
+                         border: '2px solid var(--border)',
+                         borderRadius: '8px',
+                         fontSize: '1rem'
+                       }}
+                     />
+                   </div>
+                 </div>
+                 */}
 
                 {/* Insumos Dinámicos */}
                 <div style={{ background: 'white', padding: '20px', borderRadius: '8px' }}>
