@@ -24,23 +24,15 @@ function Home() {
         <div className="header-left">
           <h1 style={{ color: 'white' }}><HomeIcon size={28} /> HLS Soluciones</h1>
         </div>
-        <div className="user-info">
+        <div className="nav-buttons">
           <button onClick={cerrarSesion} className="logout-btn" style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }}>
             <LogOut size={18} />
-            Cerrar Sesión
+            <span className="btn-label">Cerrar Sesión</span>
           </button>
         </div>
       </div>
 
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-        gap: '24px', 
-        marginTop: '32px',
-        maxWidth: '1200px',
-        margin: '32px auto',
-        padding: '0 24px'
-      }}>
+      <div className="home-grid">
         {menuItems.map((item, idx) => (
           <div 
             key={item.path}

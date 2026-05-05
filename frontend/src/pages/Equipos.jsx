@@ -212,10 +212,10 @@ if (mostrarFormulario) {
                 <X size={24} />
               </button>
             </div>
-            <form onSubmit={guardarEquipo} style={{ padding: '24px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
-              <div style={{ gridColumn: 'span 2', padding: '20px', background: 'var(--primary-light)', borderRadius: '12px' }}>
+            <form onSubmit={guardarEquipo} style={{ padding: '24px', display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
+              <div style={{ padding: '20px', background: 'var(--primary-light)', borderRadius: '12px' }}>
                 <h3 style={{ color: 'var(--primary)', marginBottom: '16px', fontSize: '16px' }}>Información del Equipo</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                <div className="form-row-3">
                   <div className="form-group">
                     <label>Equipo</label>
                     <input
@@ -244,7 +244,7 @@ if (mostrarFormulario) {
                     />
                   </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginTop: '16px' }}>
+                <div className="form-row-3" style={{ marginTop: '16px' }}>
                   <div className="form-group">
                     <label>Serie</label>
                     <input
@@ -272,7 +272,7 @@ if (mostrarFormulario) {
                   </div>
                 </div>
               </div>
-              <div style={{ gridColumn: 'span 2', padding: '20px', background: 'var(--success-light)', borderRadius: '12px' }}>
+              <div style={{ padding: '20px', background: 'var(--success-light)', borderRadius: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                   <h3 style={{ color: 'var(--success)', margin: 0, fontSize: '16px' }}>Insumos</h3>
                   {insumosVisibles < 12 && (
@@ -286,7 +286,7 @@ if (mostrarFormulario) {
                     </button>
                   )}
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
                   {insumos.slice(0, insumosVisibles).map((ins, idx) => (
                     <div key={idx} className="form-group" style={{ display: 'flex', alignItems: 'end', gap: '8px' }}>
                       <div style={{ flex: 1 }}>
@@ -316,7 +316,7 @@ if (mostrarFormulario) {
                   ))}
                 </div>
               </div>
-              <div style={{ gridColumn: 'span 2', padding: '20px', background: '#F1F5F9', borderRadius: '12px' }}>
+              <div style={{ padding: '20px', background: '#F1F5F9', borderRadius: '12px' }}>
                 <h3 style={{ color: 'var(--text)', marginBottom: '16px', fontSize: '16px' }}>Avería/Falla/Incidencia</h3>
                 <div className="form-group">
                   <textarea
@@ -328,7 +328,7 @@ if (mostrarFormulario) {
                   />
                 </div>
               </div>
-              <div style={{ gridColumn: 'span 2', display: 'flex', gap: '16px', justifyContent: 'flex-end', marginTop: '8px' }}>
+              <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-end', marginTop: '8px', flexWrap: 'wrap' }}>
                 <button type="button" className="cancel-btn" onClick={() => {
                   setMostrarFormulario(false);
                   setEquipoEditando(null);
@@ -359,34 +359,34 @@ if (mostrarFormulario) {
         <div className="header-left">
           <h1 style={{ color: 'white' }}><Package size={28} /> Mantenedor de Equipos</h1>
         </div>
-        <div className="user-info" style={{ gap: '10px' }}>
+        <div className="nav-buttons" style={{ gap: '10px' }}>
           <button onClick={() => navigate("/home")} className="logout-btn" style={{ background: 'var(--primary)', color: 'white' }}>
             <HomeIcon size={18} />
-            Inicio
+            <span className="btn-label">Inicio</span>
           </button>
           <button onClick={() => navigate("/clientes")} className="logout-btn" style={{ background: 'var(--warning)', color: 'white' }}>
             <Users size={18} />
-            Clientes
+            <span className="btn-label">Clientes</span>
           </button>
           <button onClick={() => navigate("/informes")} className="logout-btn" style={{ background: '#EA580C', color: 'white' }}>
             <FileText size={18} />
-            Informes
+            <span className="btn-label">Informes</span>
           </button>
           <button onClick={() => navigate("/cotizaciones")} className="logout-btn" style={{ background: '#DB2777', color: 'white' }}>
             <FileSpreadsheet size={18} />
-            Cotizaciones
+            <span className="btn-label">Cotizaciones</span>
           </button>
           <button onClick={() => navigate("/orden-trabajo")} className="logout-btn" style={{ background: '#6366F1', color: 'white' }}>
             <ClipboardList size={18} />
-            Orden Trabajo
+            <span className="btn-label">Orden Trabajo</span>
           </button>
           <button onClick={() => navigate("/usuarios")} className="logout-btn" style={{ background: '#0D9488', color: 'white' }}>
             <UserCog size={18} />
-            Usuarios
+            <span className="btn-label">Usuarios</span>
           </button>
           <button onClick={cerrarSesion} className="logout-btn" style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }}>
             <LogOut size={18} />
-            Cerrar Sesión
+            <span className="btn-label">Cerrar Sesión</span>
           </button>
         </div>
       </div>
@@ -459,6 +459,44 @@ if (mostrarFormulario) {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Vista de tarjetas para móvil */}
+      <div className="cards-table">
+        {equiposPagina.map((eq) => (
+          <div key={eq.id} className="data-card">
+            <div className="data-card-header">
+              <strong>{eq.equipo}</strong>
+              <span className="badge badge-info">{eq.marca} {eq.modelo}</span>
+            </div>
+            <div className="data-card-row">
+              <span className="data-card-label">Serie</span>
+              <span className="data-card-value">{eq.serie || '-'}</span>
+            </div>
+            <div className="data-card-row">
+              <span className="data-card-label">Contador</span>
+              <span className="data-card-value">{eq.contador_pag || '-'}</span>
+            </div>
+            <div className="data-card-row">
+              <span className="data-card-label">Tintas</span>
+              <span className="data-card-value">{eq.nivel_tintas || '-'}</span>
+            </div>
+            {eq.averia && (
+              <div className="data-card-row">
+                <span className="data-card-label">Avería</span>
+                <span className="data-card-value">{eq.averia}</span>
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+              <button className="table-btn edit-btn" onClick={() => editarEquipo(eq)} style={{ flex: 1, justifyContent: 'center' }}>
+                <Edit size={14} /> Editar
+              </button>
+              <button className="table-btn delete-btn" onClick={() => eliminarEquipo(eq.id)} style={{ flex: 1, justifyContent: 'center' }}>
+                <Trash2 size={14} /> Eliminar
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
 
       {equiposFiltrados.length === 0 && (

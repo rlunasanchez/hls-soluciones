@@ -373,53 +373,49 @@ function OrdenTrabajo() {
             <ClipboardList size={28} /> Orden de Trabajo
           </h1>
         </div>
-        <div className="user-info" style={{ gap: '10px' }}>
+        <div className="nav-buttons" style={{ gap: '10px' }}>
           <button onClick={() => navigate("/home")} className="logout-btn" style={{ background: 'var(--primary)', color: 'white' }}>
             <Home size={18} />
-            Inicio
+            <span className="btn-label">Inicio</span>
           </button>
           <button onClick={() => navigate("/equipos")} className="logout-btn" style={{ background: 'var(--success)', color: 'white' }}>
             <Package size={18} />
-            Equipos
+            <span className="btn-label">Equipos</span>
           </button>
           <button onClick={() => navigate("/clientes")} className="logout-btn" style={{ background: 'var(--warning)', color: 'white' }}>
             <Users size={18} />
-            Clientes
+            <span className="btn-label">Clientes</span>
           </button>
           <button onClick={() => navigate("/informes")} className="logout-btn" style={{ background: '#EA580C', color: 'white' }}>
             <FileText size={18} />
-            Informes
+            <span className="btn-label">Informes</span>
           </button>
           <button onClick={() => navigate("/cotizaciones")} className="logout-btn" style={{ background: '#DB2777', color: 'white' }}>
             <FileSpreadsheet size={18} />
-            Cotizaciones
+            <span className="btn-label">Cotizaciones</span>
           </button>
           <button onClick={() => navigate("/usuarios")} className="logout-btn" style={{ background: '#0D9488', color: 'white' }}>
             <UserCog size={18} />
-            Usuarios
+            <span className="btn-label">Usuarios</span>
           </button>
           <button onClick={cerrarSesion} className="logout-btn" style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }}>
             <LogOut size={18} />
-            Cerrar Sesión
+            <span className="btn-label">Cerrar Sesión</span>
           </button>
         </div>
       </div>
 
       {/* Contenido principal */}
-      <div style={{ 
-        maxWidth: '1200px',
-        margin: '32px auto',
-        padding: '0 24px'
-      }}>
+      <div className="page-content">
         {!mostrarFormulario ? (
           /* Vista de lista de órdenes */
           <div style={{
             background: 'white',
             borderRadius: '16px',
             boxShadow: 'var(--shadow)',
-            padding: '40px'
+            padding: 'clamp(16px, 3vw, 40px)'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <ClipboardList size={28} style={{ color: '#8B5CF6' }} />
                 <h2 style={{ color: 'var(--text)', margin: 0 }}>Órdenes de Trabajo</h2>
@@ -537,6 +533,52 @@ function OrdenTrabajo() {
                   </table>
                 </div>
 
+                {/* Vista de tarjetas para móvil */}
+                <div className="cards-table">
+                  {ordenes.map((orden) => (
+                    <div key={orden.id} className="data-card">
+                      <div className="data-card-header">
+                        <strong style={{ color: 'var(--primary)' }}>{orden.numero_orden}</strong>
+                        {orden.es_garantia ? (
+                          <span style={{ background: '#FEF3C7', color: '#92400E', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600' }}>Garantía</span>
+                        ) : (
+                          <span style={{ background: 'var(--bg)', color: 'var(--text-muted)', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem' }}>No garantía</span>
+                        )}
+                      </div>
+                      <div className="data-card-row">
+                        <span className="data-card-label">Fecha</span>
+                        <span className="data-card-value">{orden.fecha ? new Date(orden.fecha).toLocaleDateString() : '-'}</span>
+                      </div>
+                      <div className="data-card-row">
+                        <span className="data-card-label">Cliente</span>
+                        <span className="data-card-value">{orden.cliente}</span>
+                      </div>
+                      <div className="data-card-row">
+                        <span className="data-card-label">Equipo</span>
+                        <span className="data-card-value">{orden.equipo} {orden.marca} {orden.modelo}</span>
+                      </div>
+                      <div className="data-card-row">
+                        <span className="data-card-label">Técnico</span>
+                        <span className="data-card-value">{orden.tecnico_asignado}</span>
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                        <button
+                          onClick={() => editarOrden(orden)}
+                          style={{ flex: 1, background: 'var(--primary-light)', color: 'var(--primary)', border: 'none', borderRadius: '6px', padding: '8px', cursor: 'pointer', fontWeight: '500', fontSize: '0.85rem' }}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => eliminarOrden(orden.id)}
+                          style={{ flex: 1, background: 'var(--danger-light)', color: 'var(--danger)', border: 'none', borderRadius: '6px', padding: '8px', cursor: 'pointer', fontWeight: '500', fontSize: '0.85rem' }}
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
                 {/* Paginación */}
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
                   <button
@@ -615,7 +657,8 @@ function OrdenTrabajo() {
               justifyContent: 'center',
               borderTop: '1px solid var(--border)',
               paddingTop: '32px',
-              marginTop: '32px'
+              marginTop: '32px',
+              flexWrap: 'wrap'
             }}>
               <button 
                 onClick={irAInformeTecnico}
@@ -663,7 +706,7 @@ function OrdenTrabajo() {
             background: 'white',
             borderRadius: '16px',
             boxShadow: 'var(--shadow)',
-            padding: '40px'
+            padding: 'clamp(16px, 3vw, 40px)'
           }}>
             <div style={{ 
               display: 'flex', 
@@ -671,7 +714,9 @@ function OrdenTrabajo() {
               justifyContent: 'space-between',
               marginBottom: '32px',
               paddingBottom: '24px',
-              borderBottom: '2px solid var(--border)'
+              borderBottom: '2px solid var(--border)',
+              gap: '12px',
+              flexWrap: 'wrap'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <div style={{
@@ -750,7 +795,7 @@ function OrdenTrabajo() {
                 
                 <div style={{ 
                   display: 'grid', 
-                  gridTemplateColumns: 'repeat(3, 1fr)', 
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
                   gap: '20px',
                   marginBottom: '20px'
                 }}>
@@ -839,7 +884,7 @@ function OrdenTrabajo() {
                 {/* Fechas con Checkboxes */}
                 <div style={{ 
                   display: 'grid', 
-                  gridTemplateColumns: 'repeat(4, 1fr)', 
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', 
                   gap: '20px'
                 }}>
                   {/* Fecha Ingreso */}
@@ -1066,7 +1111,7 @@ function OrdenTrabajo() {
                 
                 <div style={{ 
                   display: 'grid', 
-                  gridTemplateColumns: 'repeat(3, 1fr)', 
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
                   gap: '20px',
                   marginBottom: '20px'
                 }}>
@@ -1131,7 +1176,7 @@ function OrdenTrabajo() {
 
                 <div style={{ 
                   display: 'grid', 
-                  gridTemplateColumns: 'repeat(3, 1fr)', 
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
                   gap: '20px'
                 }}>
                   <div className="form-group">
@@ -1318,16 +1363,16 @@ function OrdenTrabajo() {
                    )}
                  </div>
                  
-                 <div style={{ 
-                   display: 'grid', 
-                   gridTemplateColumns: 'repeat(4, 1fr)', 
-                   gap: '20px',
-                   marginBottom: '20px'
-                 }}>
-                  <div className="form-group">
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
-                      Equipo *
-                    </label>
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', 
+                    gap: '20px',
+                    marginBottom: '20px'
+                  }}>
+                   <div className="form-group">
+                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
+                       Equipo *
+                     </label>
                     <input
                       type="text"
                       placeholder="Tipo de equipo"
@@ -1476,7 +1521,7 @@ function OrdenTrabajo() {
                       </button>
                     )}
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
                     {insumos.slice(0, insumosVisibles).map((ins, idx) => (
                       <div key={idx} className="form-group" style={{ display: 'flex', alignItems: 'end', gap: '8px' }}>
                         <div style={{ flex: 1 }}>

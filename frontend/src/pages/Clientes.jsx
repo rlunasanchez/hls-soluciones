@@ -200,10 +200,10 @@ function Clientes() {
                 <X size={24} />
               </button>
             </div>
-            <form onSubmit={guardarCliente} style={{ padding: '24px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
-              <div style={{ gridColumn: 'span 2', padding: '20px', background: 'var(--primary-light)', borderRadius: '12px' }}>
+            <form onSubmit={guardarCliente} style={{ padding: '24px', display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
+              <div style={{ padding: '20px', background: 'var(--primary-light)', borderRadius: '12px' }}>
                 <h3 style={{ color: 'var(--primary)', marginBottom: '16px', fontSize: '16px' }}>Datos de la Empresa</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                <div className="form-row-3">
                   <div className="form-group">
                     <label>Razón Social *</label>
                     <input
@@ -230,7 +230,7 @@ function Clientes() {
                     />
                   </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginTop: '16px' }}>
+                <div className="form-row-3" style={{ marginTop: '16px' }}>
                   <div className="form-group">
                     <label>Dirección</label>
                     <input
@@ -256,7 +256,7 @@ function Clientes() {
                     />
                   </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginTop: '16px' }}>
+                <div className="form-row-3" style={{ marginTop: '16px' }}>
                   <div className="form-group">
                     <label>Fono</label>
                     <input
@@ -267,9 +267,9 @@ function Clientes() {
                   </div>
                 </div>
               </div>
-              <div style={{ gridColumn: 'span 2', padding: '20px', background: 'var(--success-light)', borderRadius: '12px' }}>
+              <div style={{ padding: '20px', background: 'var(--success-light)', borderRadius: '12px' }}>
                 <h3 style={{ color: 'var(--success)', marginBottom: '16px', fontSize: '16px' }}>Datos del Contacto</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                <div className="form-row-3">
                   <div className="form-group">
                     <label>Nombre Contacto</label>
                     <input
@@ -296,7 +296,7 @@ function Clientes() {
                     />
                   </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginTop: '16px' }}>
+                <div className="form-row-3" style={{ marginTop: '16px' }}>
                   <div className="form-group">
                     <label>Cargo</label>
                     <input
@@ -315,7 +315,7 @@ function Clientes() {
                   </div>
                 </div>
               </div>
-              <div style={{ gridColumn: 'span 2', padding: '20px', background: '#F1F5F9', borderRadius: '12px' }}>
+              <div style={{ padding: '20px', background: '#F1F5F9', borderRadius: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                   <h3 style={{ color: 'var(--text)', margin: 0, fontSize: '16px' }}>Sucursales/Direcciones</h3>
                   {sucursalesVisibles < 5 && (
@@ -330,7 +330,7 @@ function Clientes() {
                   )}
                 </div>
                 {sucursales.slice(0, sucursalesVisibles).map((suc, idx) => (
-                  <div key={idx} style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px', marginBottom: '12px', padding: '12px', background: 'white', borderRadius: '8px', alignItems: 'end' }}>
+                  <div key={idx} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '12px', marginBottom: '12px', padding: '12px', background: 'white', borderRadius: '8px', alignItems: 'end' }}>
                     <div className="form-group" style={{ margin: 0 }}>
                       <label>Tipo</label>
                       <select
@@ -345,7 +345,7 @@ function Clientes() {
                         <option value="Otro">Otro</option>
                       </select>
                     </div>
-                    <div className="form-group" style={{ margin: 0, gridColumn: 'span 2' }}>
+                    <div className="form-group" style={{ margin: 0 }}>
                       <label>Dirección</label>
                       <input
                         placeholder="Dirección"
@@ -395,7 +395,7 @@ function Clientes() {
                   </div>
                 ))}
               </div>
-              <div style={{ gridColumn: 'span 2', display: 'flex', gap: '16px', justifyContent: 'flex-end', marginTop: '8px' }}>
+              <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-end', marginTop: '8px', flexWrap: 'wrap' }}>
                 <button type="button" className="cancel-btn" onClick={() => {
                   setMostrarFormulario(false);
                   setClienteEditando(null);
@@ -423,34 +423,34 @@ function Clientes() {
         <div className="header-left">
           <h1 style={{ color: 'white' }}><Users size={28} /> Mantenedor de Clientes</h1>
         </div>
-        <div className="user-info" style={{ gap: '10px' }}>
+        <div className="nav-buttons" style={{ gap: '10px' }}>
           <button onClick={() => navigate("/home")} className="logout-btn" style={{ background: 'var(--primary)', color: 'white' }}>
             <HomeIcon size={18} />
-            Inicio
+            <span className="btn-label">Inicio</span>
           </button>
           <button onClick={() => navigate("/equipos")} className="logout-btn" style={{ background: 'var(--success)', color: 'white' }}>
             <Package size={18} />
-            Equipos
+            <span className="btn-label">Equipos</span>
           </button>
           <button onClick={() => navigate("/informes")} className="logout-btn" style={{ background: '#EA580C', color: 'white' }}>
             <FileText size={18} />
-            Informes
+            <span className="btn-label">Informes</span>
           </button>
           <button onClick={() => navigate("/cotizaciones")} className="logout-btn" style={{ background: '#DB2777', color: 'white' }}>
             <FileSpreadsheet size={18} />
-            Cotizaciones
+            <span className="btn-label">Cotizaciones</span>
           </button>
           <button onClick={() => navigate("/orden-trabajo")} className="logout-btn" style={{ background: '#6366F1', color: 'white' }}>
             <ClipboardList size={18} />
-            Orden Trabajo
+            <span className="btn-label">Orden Trabajo</span>
           </button>
           <button onClick={() => navigate("/usuarios")} className="logout-btn" style={{ background: '#0D9488', color: 'white' }}>
             <UserCog size={18} />
-            Usuarios
+            <span className="btn-label">Usuarios</span>
           </button>
           <button onClick={cerrarSesion} className="logout-btn" style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }}>
             <LogOut size={18} />
-            Cerrar Sesión
+            <span className="btn-label">Cerrar Sesión</span>
           </button>
         </div>
       </div>
@@ -531,6 +531,38 @@ function Clientes() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Vista de tarjetas para móvil */}
+      <div className="cards-table">
+        {clientesPagina.map((c) => (
+          <div key={c.id} className="data-card">
+            <div className="data-card-header">
+              <strong>{c.razon_social}</strong>
+              <span className="badge badge-primary">{c.rut}</span>
+            </div>
+            <div className="data-card-row">
+              <span className="data-card-label">Teléfono</span>
+              <span className="data-card-value">{c.telefono}</span>
+            </div>
+            <div className="data-card-row">
+              <span className="data-card-label">Ciudad</span>
+              <span className="data-card-value">{c.ciudad}</span>
+            </div>
+            <div className="data-card-row">
+              <span className="data-card-label">Contacto</span>
+              <span className="data-card-value">{c.contacto_nombre}</span>
+            </div>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+              <button className="table-btn edit-btn" onClick={() => editarCliente(c)} style={{ flex: 1, justifyContent: 'center' }}>
+                <Edit size={14} /> Editar
+              </button>
+              <button className="table-btn delete-btn" onClick={() => eliminarCliente(c.id)} style={{ flex: 1, justifyContent: 'center' }}>
+                <Trash2 size={14} /> Eliminar
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
 
       {clientesFiltrados.length === 0 && (

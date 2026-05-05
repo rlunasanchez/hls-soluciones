@@ -37,49 +37,45 @@ function Cotizaciones() {
             <FileSpreadsheet size={28} /> Cotizaciones
           </h1>
         </div>
-        <div className="user-info" style={{ gap: '10px' }}>
+        <div className="nav-buttons" style={{ gap: '10px' }}>
           <button onClick={() => navigate("/home")} className="logout-btn" style={{ background: 'var(--primary)', color: 'white' }}>
             <Home size={18} />
-            Inicio
+            <span className="btn-label">Inicio</span>
           </button>
           <button onClick={() => navigate("/equipos")} className="logout-btn" style={{ background: 'var(--success)', color: 'white' }}>
             <Package size={18} />
-            Equipos
+            <span className="btn-label">Equipos</span>
           </button>
           <button onClick={() => navigate("/clientes")} className="logout-btn" style={{ background: 'var(--warning)', color: 'white' }}>
             <Users size={18} />
-            Clientes
+            <span className="btn-label">Clientes</span>
           </button>
           <button onClick={() => navigate("/informes")} className="logout-btn" style={{ background: '#EA580C', color: 'white' }}>
             <FileText size={18} />
-            Informes
+            <span className="btn-label">Informes</span>
           </button>
           <button onClick={() => navigate("/orden-trabajo")} className="logout-btn" style={{ background: '#6366F1', color: 'white' }}>
             <ClipboardList size={18} />
-            Orden Trabajo
+            <span className="btn-label">Orden Trabajo</span>
           </button>
           <button onClick={() => navigate("/usuarios")} className="logout-btn" style={{ background: '#0D9488', color: 'white' }}>
             <UserCog size={18} />
-            Usuarios
+            <span className="btn-label">Usuarios</span>
           </button>
           <button onClick={cerrarSesion} className="logout-btn" style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }}>
             <LogOut size={18} />
-            Cerrar Sesión
+            <span className="btn-label">Cerrar Sesión</span>
           </button>
         </div>
       </div>
 
       {/* Contenido principal */}
-      <div style={{ 
-        maxWidth: '1200px',
-        margin: '32px auto',
-        padding: '0 24px'
-      }}>
+      <div className="page-content">
         <div style={{
           background: 'white',
           borderRadius: '16px',
           boxShadow: 'var(--shadow)',
-          padding: '40px',
+          padding: 'clamp(20px, 4vw, 40px)',
           textAlign: 'center'
         }}>
           <FileSpreadsheet size={64} style={{ color: '#EC4899', marginBottom: '24px' }} />
