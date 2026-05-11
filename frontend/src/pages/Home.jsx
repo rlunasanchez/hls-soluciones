@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Package, Users, UserCog, FileText, FileSpreadsheet, ClipboardList, Home as HomeIcon, LogOut, ChevronRight } from "lucide-react";
+import { Package, Users, UserCog, FileText, FileSpreadsheet, ClipboardList, Home as HomeIcon, LogOut, ChevronRight, ShoppingCart } from "lucide-react";
 
 function Home() {
   const navigate = useNavigate();
@@ -10,12 +10,12 @@ function Home() {
   };
 
   const menuItems = [
-    { title: "Equipos", icon: Package, path: "/equipos", desc: "Mantenedor de equipos técnicos" },
     { title: "Clientes", icon: Users, path: "/clientes", desc: "Mantenedor de clientes" },
-    { title: "Usuarios", icon: UserCog, path: "/usuarios", desc: "Gestión de usuarios del sistema" },
+    { title: "Equipos", icon: Package, path: "/equipos", desc: "Mantenedor de equipos técnicos" },
+    { title: "Orden de Trabajo", icon: ClipboardList, path: "/orden-trabajo", desc: "Crear y gestionar órdenes de trabajo" },
     { title: "Informes Técnicos", icon: FileText, path: "/informes", desc: "Mantenedor de informes técnicos" },
     { title: "Cotizaciones", icon: FileSpreadsheet, path: "/cotizaciones", desc: "Mantenedor de cotizaciones" },
-    { title: "Orden de Trabajo", icon: ClipboardList, path: "/orden-trabajo", desc: "Crear y gestionar órdenes de trabajo" },
+    { title: "Orden de Compra", icon: ShoppingCart, path: "/orden-compra", desc: "Gestión de órdenes de compra" },
   ];
 
   return (
@@ -25,6 +25,10 @@ function Home() {
           <h1 style={{ color: 'white' }}><HomeIcon size={28} /> HLS Soluciones</h1>
         </div>
         <div className="nav-buttons">
+          <button onClick={() => navigate("/usuarios")} className="logout-btn" style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }}>
+            <UserCog size={18} />
+            <span className="btn-label">Usuarios</span>
+          </button>
           <button onClick={cerrarSesion} className="logout-btn" style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }}>
             <LogOut size={18} />
             <span className="btn-label">Cerrar Sesión</span>

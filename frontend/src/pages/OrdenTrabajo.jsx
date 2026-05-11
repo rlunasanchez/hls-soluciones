@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
-  ArrowLeft, Home, Package, Users, UserCog, LogOut, 
+  Home, Package, Users, UserCog, LogOut, 
   FileText, FileSpreadsheet, ClipboardList, Plus, Save, X, Wrench,
   Calendar, Phone, MapPin, User, AlertCircle, CheckSquare,
-  Search, ChevronDown, Trash2
+  Search, ChevronDown, Trash2, ShoppingCart
 } from "lucide-react";
 import api from "../services/api";
 
@@ -31,8 +31,14 @@ function OrdenTrabajo() {
   const [equipoSeleccionado, setEquipoSeleccionado] = useState(null);
   const [busquedaCliente, setBusquedaCliente] = useState("");
   const [busquedaSerie, setBusquedaSerie] = useState("");
+  const [busquedaCodigo, setBusquedaCodigo] = useState("");
   const [mostrarDropdownClientes, setMostrarDropdownClientes] = useState(false);
   const [mostrarDropdownEquipos, setMostrarDropdownEquipos] = useState(false);
+  const [equiposCodigo, setEquiposCodigo] = useState([]);
+  
+  // Refs para detectar clics fuera de los dropdowns
+  const equipoDropdownRef = useRef(null);
+  const clienteDropdownRef = useRef(null);
   
   // Estado para los insumos dinámicos
   const [insumos, setInsumos] = useState([
@@ -81,6 +87,22 @@ function OrdenTrabajo() {
     fetchClientes();
     fetchEquipos();
     fetchOrdenes(1);
+  }, []);
+
+  // Cierra los dropdowns al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (equipoDropdownRef.current && !equipoDropdownRef.current.contains(event.target)) {
+        setMostrarDropdownEquipos(false);
+      }
+      if (clienteDropdownRef.current && !clienteDropdownRef.current.contains(event.target)) {
+        setMostrarDropdownClientes(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   const fetchOrdenes = async (page = 1) => {
@@ -188,7 +210,7 @@ function OrdenTrabajo() {
     setMostrarDropdownClientes(false);
   };
 
-  // Seleccionar equipo y cargar sus datos
+  // Seleccionar equipo por serie - NO carga avería (puede haber duplicados)
   const seleccionarEquipo = (equipo) => {
     setEquipoSeleccionado(equipo);
     setNuevaOrden(prev => ({
@@ -199,6 +221,7 @@ function OrdenTrabajo() {
       serie: equipo.serie || "",
       contadorPagOut: equipo.contador_pag?.toString() || "",
       nivelTinta: equipo.nivel_tintas || ""
+      // NOTA: No carga avería aquí, solo al buscar por código
     }));
     
     // Cargar insumos del equipo
@@ -217,6 +240,58 @@ function OrdenTrabajo() {
     
      setBusquedaSerie(equipo.serie || "");
      setMostrarDropdownEquipos(false);
+  };
+
+  const seleccionarEquipoPorCodigo = async (codigo) => {
+    try {
+      const res = await api.get(`/api/equipos?q=${encodeURIComponent(codigo)}`);
+      const eq = res.data[0];
+      if (!eq) return;
+      setEquipoSeleccionado(eq);
+      setNuevaOrden(prev => ({
+        ...prev,
+        equipo: eq.equipo || "",
+        modelo: eq.modelo || "",
+        marca: eq.marca || "",
+        serie: eq.serie || "",
+        contadorPagOut: eq.contador_pag?.toString() || "",
+        nivelTinta: eq.nivel_tintas || "",
+        averia: eq.averia || ""
+      }));
+      const insumosEquipo = [];
+      for (let i = 1; i <= 12; i++) {
+        const insumo = eq[`insumo${i}`];
+        if (insumo) insumosEquipo.push({ nombre: insumo });
+      }
+      const nuevosInsumos = [...insumosEquipo];
+      while (nuevosInsumos.length < 12) {
+        nuevosInsumos.push({ nombre: "" });
+      }
+      setInsumos(nuevosInsumos);
+      setInsumosVisibles(Math.max(2, insumosEquipo.length));
+      setBusquedaSerie(eq.serie || "");
+      setBusquedaCodigo(codigo);
+
+      // Si el equipo tiene cliente asociado, cargarlo
+      if (eq.cliente_id) {
+        const resC = await api.get(`/api/clientes`);
+        const cliente = resC.data.find(c => c.id === eq.cliente_id);
+        if (cliente) {
+          setClienteSeleccionado(cliente);
+          setBusquedaCliente(cliente.razon_social);
+          setNuevaOrden(prev => ({
+            ...prev,
+            cliente: cliente.razon_social || "",
+            direccion: cliente.direccion || "",
+            comuna: cliente.comuna || "",
+            contacto: cliente.contacto_nombre || "",
+            fonoPrincipal: cliente.telefono || cliente.contacto_fono || ""
+          }));
+        }
+      }
+    } catch (err) {
+      console.error("Error al buscar por código:", err);
+    }
   };
 
   // Filtrar clientes y equipos para la búsqueda
@@ -243,10 +318,6 @@ function OrdenTrabajo() {
     } catch (err) {
       console.error("Error al verificar número de orden:", err);
     }
-  };
-
-  const volverHome = () => {
-    navigate("/home");
   };
 
   const cerrarSesion = () => {
@@ -353,22 +424,7 @@ function OrdenTrabajo() {
     <div className="container" style={{ background: 'var(--bg)', minHeight: '100vh' }}>
       {/* Header */}
       <div className="header" style={{ background: 'var(--gradient)', padding: '20px 32px' }}>
-        <div className="header-left" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <button 
-            onClick={volverHome}
-            style={{ 
-              background: 'rgba(255,255,255,0.2)', 
-              border: 'none', 
-              borderRadius: '8px', 
-              padding: '8px',
-              cursor: 'pointer',
-              color: 'white',
-              display: 'flex',
-              alignItems: 'center'
-            }}
-          >
-            <ArrowLeft size={20} />
-          </button>
+        <div className="header-left">
           <h1 style={{ color: 'white', margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
             <ClipboardList size={28} /> Orden de Trabajo
           </h1>
@@ -378,21 +434,25 @@ function OrdenTrabajo() {
             <Home size={18} />
             <span className="btn-label">Inicio</span>
           </button>
-          <button onClick={() => navigate("/equipos")} className="logout-btn" style={{ background: 'var(--success)', color: 'white' }}>
-            <Package size={18} />
-            <span className="btn-label">Equipos</span>
-          </button>
           <button onClick={() => navigate("/clientes")} className="logout-btn" style={{ background: 'var(--warning)', color: 'white' }}>
             <Users size={18} />
             <span className="btn-label">Clientes</span>
           </button>
+          <button onClick={() => navigate("/equipos")} className="logout-btn" style={{ background: 'var(--success)', color: 'white' }}>
+            <Package size={18} />
+            <span className="btn-label">Equipos</span>
+          </button>
           <button onClick={() => navigate("/informes")} className="logout-btn" style={{ background: '#EA580C', color: 'white' }}>
             <FileText size={18} />
-            <span className="btn-label">Informes</span>
+            <span className="btn-label">Informes Técnicos</span>
           </button>
           <button onClick={() => navigate("/cotizaciones")} className="logout-btn" style={{ background: '#DB2777', color: 'white' }}>
             <FileSpreadsheet size={18} />
             <span className="btn-label">Cotizaciones</span>
+          </button>
+          <button onClick={() => navigate("/orden-compra")} className="logout-btn" style={{ background: '#8B5CF6', color: 'white' }}>
+            <ShoppingCart size={18} />
+            <span className="btn-label">Orden de Compra</span>
           </button>
           <button onClick={() => navigate("/usuarios")} className="logout-btn" style={{ background: '#0D9488', color: 'white' }}>
             <UserCog size={18} />
@@ -1022,7 +1082,7 @@ function OrdenTrabajo() {
                     <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
                     Buscar y Seleccionar Cliente
                   </label>
-                  <div style={{ position: 'relative' }}>
+                  <div ref={clienteDropdownRef} style={{ position: 'relative' }}>
                     <input
                       type="text"
                       placeholder="Escriba para buscar cliente por nombre o RUT..."
@@ -1279,9 +1339,39 @@ function OrdenTrabajo() {
                   Datos del Equipo
                 </h3>
                 
-                 {/* Buscador de Equipo - Solo por Serie */}
+                  {/* Buscador por Código de Equipo */}
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ position: 'relative' }}>
+                      <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
+                        <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
+                        Buscar por código (EQ-XXX)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Ej: EQ-0001"
+                        value={busquedaCodigo}
+                        onChange={(e) => setBusquedaCodigo(e.target.value.toUpperCase())}
+                        onBlur={() => setTimeout(() => {}, 200)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && busquedaCodigo.trim()) {
+                            seleccionarEquipoPorCodigo(busquedaCodigo.trim());
+                          }
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '10px 16px',
+                          border: '2px solid var(--info)',
+                          borderRadius: '8px',
+                          fontSize: '1rem',
+                          background: equipoSeleccionado?.codigo === busquedaCodigo ? '#DCFCE7' : 'white'
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Buscador de Equipo - Solo por Serie */}
                  <div style={{ marginBottom: '24px' }}>
-                   <div style={{ position: 'relative' }}>
+                   <div ref={equipoDropdownRef} style={{ position: 'relative' }}>
                      <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
                        <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
                        Buscar Equipo por Serie

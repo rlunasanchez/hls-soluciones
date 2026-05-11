@@ -6,6 +6,13 @@ import { authMiddleware } from "../middleware/authMiddleware.js";
 dotenv.config();
 const router = express.Router();
 
+async function generarCodigoEquipo() {
+  const [rows] = await pool.query("SELECT codigo FROM equipos WHERE codigo LIKE 'EQ-%' ORDER BY id DESC LIMIT 1");
+  if (rows.length === 0) return "EQ-0001";
+  const num = parseInt(rows[0].codigo.split("-")[1], 10) || 0;
+  return `EQ-${String(num + 1).padStart(4, "0")}`;
+}
+
 // Obtener órdenes de trabajo con paginación
 router.get("/", authMiddleware, async (req, res) => {
   const page = parseInt(req.query.page) || 1;
@@ -95,6 +102,55 @@ router.post("/", authMiddleware, async (req, res) => {
       return res.status(400).json({ msg: "El número de orden ya existe" });
     }
 
+    // Auto-crear cliente si es nuevo
+    let finalClienteId = clienteId || null;
+    if (!finalClienteId && cliente) {
+      const [existeCliente] = await pool.query(
+        "SELECT id FROM clientes WHERE razon_social = ?",
+        [cliente]
+      );
+      if (existeCliente.length > 0) {
+        finalClienteId = existeCliente[0].id;
+      } else {
+        const [result] = await pool.query(
+          `INSERT INTO clientes (razon_social, direccion, comuna, contacto_nombre, telefono)
+          VALUES (?, ?, ?, ?, ?)`,
+          [cliente, direccion || null, comuna || null, contacto || null, fonoPrincipal || null]
+        );
+        finalClienteId = result.insertId;
+        await pool.query(
+          `INSERT INTO clientes_direcciones (cliente_id, tipo_direccion, direccion, comuna, fono)
+          VALUES (?, 'Matriz', ?, ?, ?)`,
+          [finalClienteId, direccion || null, comuna || null, fonoPrincipal || null]
+        );
+      }
+    }
+
+    // Auto-crear equipo si es nuevo (no existe en tabla equipos)
+    let finalEquipoId = equipoId || null;
+    if (!finalEquipoId && equipo && serie) {
+      const [existeEquipo] = await pool.query(
+        "SELECT id FROM equipos WHERE serie = ?",
+        [serie]
+      );
+      if (existeEquipo.length > 0) {
+        finalEquipoId = existeEquipo[0].id;
+      } else {
+        const codigo = await generarCodigoEquipo();
+        const [result] = await pool.query(
+          `INSERT INTO equipos (codigo, cliente_id, equipo, modelo, marca, serie, contador_pag, nivel_tintas,
+            insumo1, insumo2, insumo3, insumo4, insumo5, insumo6,
+            insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [codigo, finalClienteId, equipo, modelo, marca, serie, contadorPagOut || 0, nivelTinta || null,
+            insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null,
+            insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null,
+            insumo9 || null, insumo10 || null, insumo11 || null, insumo12 || null, averia || null]
+        );
+        finalEquipoId = result.insertId;
+      }
+    }
+
     const sql = `INSERT INTO ordenes_trabajo (
       numero_orden, fecha, es_garantia,
       fecha_ingreso, fecha_ingreso_check, fecha_termino, fecha_termino_check,
@@ -114,7 +170,7 @@ router.post("/", authMiddleware, async (req, res) => {
       equipo, modelo, marca, serie || null, contadorPagOut || null, nivelTinta || null,
       insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null, insumo5 || null, insumo6 || null,
       insumo7 || null, insumo8 || null, insumo9 || null, insumo10 || null, insumo11 || null, insumo12 || null,
-      averia || null, clienteId || null, equipoId || null
+      averia || null, finalClienteId, finalEquipoId
     ];
 
     await pool.query(sql, values);
@@ -150,6 +206,55 @@ router.put("/:id", authMiddleware, async (req, res) => {
       return res.status(400).json({ msg: "El número de orden ya existe" });
     }
 
+    // Auto-crear cliente si es nuevo
+    let finalClienteId = clienteId || null;
+    if (!finalClienteId && cliente) {
+      const [existeCliente] = await pool.query(
+        "SELECT id FROM clientes WHERE razon_social = ?",
+        [cliente]
+      );
+      if (existeCliente.length > 0) {
+        finalClienteId = existeCliente[0].id;
+      } else {
+        const [result] = await pool.query(
+          `INSERT INTO clientes (razon_social, direccion, comuna, contacto_nombre, telefono)
+          VALUES (?, ?, ?, ?, ?)`,
+          [cliente, direccion || null, comuna || null, contacto || null, fonoPrincipal || null]
+        );
+        finalClienteId = result.insertId;
+        await pool.query(
+          `INSERT INTO clientes_direcciones (cliente_id, tipo_direccion, direccion, comuna, fono)
+          VALUES (?, 'Matriz', ?, ?, ?)`,
+          [finalClienteId, direccion || null, comuna || null, fonoPrincipal || null]
+        );
+      }
+    }
+
+    // Auto-crear equipo si es nuevo
+    let finalEquipoId = equipoId || null;
+    if (!finalEquipoId && equipo && serie) {
+      const [existeEquipo] = await pool.query(
+        "SELECT id FROM equipos WHERE serie = ?",
+        [serie]
+      );
+      if (existeEquipo.length > 0) {
+        finalEquipoId = existeEquipo[0].id;
+      } else {
+        const codigo = await generarCodigoEquipo();
+        const [result] = await pool.query(
+          `INSERT INTO equipos (codigo, cliente_id, equipo, modelo, marca, serie, contador_pag, nivel_tintas,
+            insumo1, insumo2, insumo3, insumo4, insumo5, insumo6,
+            insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [codigo, finalClienteId, equipo, modelo, marca, serie, contadorPagOut || 0, nivelTinta || null,
+            insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null,
+            insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null,
+            insumo9 || null, insumo10 || null, insumo11 || null, insumo12 || null, averia || null]
+        );
+        finalEquipoId = result.insertId;
+      }
+    }
+
     const sql = `UPDATE ordenes_trabajo SET
       numero_orden = ?, fecha = ?, es_garantia = ?,
       fecha_ingreso = ?, fecha_ingreso_check = ?, fecha_termino = ?, fecha_termino_check = ?,
@@ -169,7 +274,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
       equipo, modelo, marca, serie || null, contadorPagOut || null, nivelTinta || null,
       insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null, insumo5 || null, insumo6 || null,
       insumo7 || null, insumo8 || null, insumo9 || null, insumo10 || null, insumo11 || null, insumo12 || null,
-      averia || null, clienteId || null, equipoId || null, id
+      averia || null, finalClienteId, finalEquipoId, id
     ];
 
     await pool.query(sql, values);

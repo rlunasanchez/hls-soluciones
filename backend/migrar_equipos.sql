@@ -1,0 +1,2 @@
+ALTER TABLE equipos ADD COLUMN codigo VARCHAR(50) UNIQUE AFTER id;
+ALTER TABLE equipos ADD COLUMN cliente_id INT AFTER codigo;

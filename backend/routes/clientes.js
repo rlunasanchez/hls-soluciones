@@ -6,6 +6,24 @@ import { authMiddleware } from "../middleware/authMiddleware.js";
 dotenv.config();
 const router = express.Router();
 
+async function generarCodigo() {
+  const [rows] = await pool.query(
+    "SELECT CAST(SUBSTRING(codigo, 4) AS UNSIGNED) AS num FROM clientes WHERE codigo LIKE 'CL-%' ORDER BY num DESC LIMIT 1"
+  );
+  if (rows.length === 0) return "CL-0001";
+  return `CL-${String(rows[0].num + 1).padStart(4, "0")}`;
+}
+
+router.get("/next-codigo", async (req, res) => {
+  try {
+    const codigo = await generarCodigo();
+    res.json({ codigo });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Error del servidor" });
+  }
+});
+
 router.get("/", async (req, res) => {
   try {
     const [clientes] = await pool.query(`
@@ -29,11 +47,12 @@ router.post("/", authMiddleware, async (req, res) => {
     direcciones
   } = req.body;
   const escape = (v) => (v === '' || v === undefined || v === null) ? 'NULL' : "'" + String(v).replace(/'/g, "''") + "'";
-  const sql = `INSERT INTO clientes (razon_social, giro, rut, direccion, ciudad, comuna, telefono, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion) VALUES (${escape(razon_social)}, ${escape(giro)}, ${escape(rut)}, ${escape(direccion)}, ${escape(ciudad)}, ${escape(comuna)}, ${escape(telefono)}, ${escape(contacto_nombre)}, ${escape(contacto_email)}, ${escape(contacto_fono)}, ${escape(contacto_cargo)}, ${escape(contacto_direccion)})`;
+  const codigo = await generarCodigo();
+  const sql = `INSERT INTO clientes (codigo, razon_social, giro, rut, direccion, ciudad, comuna, telefono, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion) VALUES (${escape(codigo)}, ${escape(razon_social)}, ${escape(giro)}, ${escape(rut)}, ${escape(direccion)}, ${escape(ciudad)}, ${escape(comuna)}, ${escape(telefono)}, ${escape(contacto_nombre)}, ${escape(contacto_email)}, ${escape(contacto_fono)}, ${escape(contacto_cargo)}, ${escape(contacto_direccion)})`;
   console.log("Insert cliente:", sql);
   try {
     await pool.query(sql);
-    res.status(201).json({ msg: "Cliente creado" });
+    res.status(201).json({ msg: "Cliente creado", codigo });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
@@ -48,7 +67,12 @@ router.put("/:id", authMiddleware, async (req, res) => {
     direcciones
   } = req.body;
   const escape = (v) => (v === '' || v === undefined || v === null) ? 'NULL' : "'" + String(v).replace(/'/g, "''") + "'";
-  const sql = `UPDATE clientes SET razon_social=${escape(razon_social)}, giro=${escape(giro)}, rut=${escape(rut)}, direccion=${escape(direccion)}, ciudad=${escape(ciudad)}, comuna=${escape(comuna)}, telefono=${escape(telefono)}, contacto_nombre=${escape(contacto_nombre)}, contacto_email=${escape(contacto_email)}, contacto_fono=${escape(contacto_fono)}, contacto_cargo=${escape(contacto_cargo)}, contacto_direccion=${escape(contacto_direccion)} WHERE id=${id}`;
+  const [existente] = await pool.query("SELECT codigo FROM clientes WHERE id = ?", [id]);
+  let codigo = existente[0]?.codigo;
+  if (!codigo) {
+    codigo = await generarCodigo();
+  }
+  const sql = `UPDATE clientes SET codigo=${escape(codigo)}, razon_social=${escape(razon_social)}, giro=${escape(giro)}, rut=${escape(rut)}, direccion=${escape(direccion)}, ciudad=${escape(ciudad)}, comuna=${escape(comuna)}, telefono=${escape(telefono)}, contacto_nombre=${escape(contacto_nombre)}, contacto_email=${escape(contacto_email)}, contacto_fono=${escape(contacto_fono)}, contacto_cargo=${escape(contacto_cargo)}, contacto_direccion=${escape(contacto_direccion)} WHERE id=${id}`;
   console.log("Update cliente:", sql);
   const connection = await pool.getConnection();
   try {
