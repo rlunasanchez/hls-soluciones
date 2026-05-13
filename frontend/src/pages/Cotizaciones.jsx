@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, FileSpreadsheet, Home, Package, Users, UserCog, LogOut, FileText, ClipboardList } from "lucide-react";
+import { FileSpreadsheet, Package, Users, UserCog, LogOut, FileText, ClipboardList, ShoppingCart, Home } from "lucide-react";
 
 function Cotizaciones() {
   const navigate = useNavigate();
@@ -16,23 +16,8 @@ function Cotizaciones() {
   return (
     <div className="container" style={{ background: 'var(--bg)', minHeight: '100vh' }}>
       {/* Header */}
-      <div className="header" style={{ background: 'var(--gradient)', padding: '20px 32px' }}>
-        <div className="header-left" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <button 
-            onClick={volverHome}
-            style={{ 
-              background: 'rgba(255,255,255,0.2)', 
-              border: 'none', 
-              borderRadius: '8px', 
-              padding: '8px',
-              cursor: 'pointer',
-              color: 'white',
-              display: 'flex',
-              alignItems: 'center'
-            }}
-          >
-            <ArrowLeft size={20} />
-          </button>
+      <div className="header" style={{ background: 'var(--gradient)', padding: '20px 32px', flexDirection: 'column', alignItems: 'flex-start', gap: '16px' }}>
+        <div className="header-left">
           <h1 style={{ color: 'white', margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
             <FileSpreadsheet size={28} /> Cotizaciones
           </h1>
@@ -42,21 +27,25 @@ function Cotizaciones() {
             <Home size={18} />
             <span className="btn-label">Inicio</span>
           </button>
-          <button onClick={() => navigate("/equipos")} className="logout-btn" style={{ background: 'var(--success)', color: 'white' }}>
-            <Package size={18} />
-            <span className="btn-label">Equipos</span>
-          </button>
           <button onClick={() => navigate("/clientes")} className="logout-btn" style={{ background: 'var(--warning)', color: 'white' }}>
             <Users size={18} />
             <span className="btn-label">Clientes</span>
           </button>
-          <button onClick={() => navigate("/informes")} className="logout-btn" style={{ background: '#EA580C', color: 'white' }}>
-            <FileText size={18} />
-            <span className="btn-label">Informes</span>
+          <button onClick={() => navigate("/equipos")} className="logout-btn" style={{ background: 'var(--success)', color: 'white' }}>
+            <Package size={18} />
+            <span className="btn-label">Equipos</span>
           </button>
           <button onClick={() => navigate("/orden-trabajo")} className="logout-btn" style={{ background: '#6366F1', color: 'white' }}>
             <ClipboardList size={18} />
-            <span className="btn-label">Orden Trabajo</span>
+            <span className="btn-label">Orden de Trabajo</span>
+          </button>
+          <button onClick={() => navigate("/informes")} className="logout-btn" style={{ background: '#EA580C', color: 'white' }}>
+            <FileText size={18} />
+            <span className="btn-label">Informes Técnicos</span>
+          </button>
+          <button onClick={() => navigate("/orden-compra")} className="logout-btn" style={{ background: '#8B5CF6', color: 'white' }}>
+            <ShoppingCart size={18} />
+            <span className="btn-label">Orden de Compra</span>
           </button>
           <button onClick={() => navigate("/usuarios")} className="logout-btn" style={{ background: '#0D9488', color: 'white' }}>
             <UserCog size={18} />

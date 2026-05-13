@@ -803,6 +803,25 @@ table tr:last-child td {
   color: white;
 }
 
+.badge-garantia {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #FEF3C7;
+  color: #92400E;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-no-garantia {
+  display: inline-block;
+  padding: 4px 12px;
+  background: var(--bg);
+  color: var(--text-muted);
+  border-radius: 12px;
+  font-size: 0.75rem;
+}
+
 .empty-state {
   text-align: center;
   padding: 60px 20px;

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Package, Plus, Save, Trash2, Edit, ArrowLeft, LogOut, Monitor, Printer, Scissors, Droplets, Search, ChevronDown, ChevronUp, Home as HomeIcon, Users, UserCog, FileText, FileSpreadsheet, ClipboardList, X } from "lucide-react";
+import { Package, Plus, Save, Trash2, Edit, LogOut, Monitor, Printer, Scissors, Droplets, Search, ChevronDown, ChevronUp, Users, UserCog, FileText, FileSpreadsheet, ClipboardList, X, ShoppingCart, Home } from "lucide-react";
 import api from "../services/api";
 
 function Equipos() {
@@ -491,30 +491,34 @@ if (mostrarFormulario) {
 
   return (
     <div className="container">
-      <div className="header" style={{ background: 'var(--gradient)', padding: '20px 32px' }}>
+      <div className="header" style={{ background: 'var(--gradient)', padding: '20px 32px', flexDirection: 'column', alignItems: 'flex-start', gap: '16px' }}>
         <div className="header-left">
           <h1 style={{ color: 'white' }}><Package size={28} /> Mantenedor de Equipos</h1>
         </div>
         <div className="nav-buttons" style={{ gap: '10px' }}>
           <button onClick={() => navigate("/home")} className="logout-btn" style={{ background: 'var(--primary)', color: 'white' }}>
-            <HomeIcon size={18} />
+            <Home size={18} />
             <span className="btn-label">Inicio</span>
           </button>
           <button onClick={() => navigate("/clientes")} className="logout-btn" style={{ background: 'var(--warning)', color: 'white' }}>
             <Users size={18} />
             <span className="btn-label">Clientes</span>
           </button>
+          <button onClick={() => navigate("/orden-trabajo")} className="logout-btn" style={{ background: '#6366F1', color: 'white' }}>
+            <ClipboardList size={18} />
+            <span className="btn-label">Orden de Trabajo</span>
+          </button>
           <button onClick={() => navigate("/informes")} className="logout-btn" style={{ background: '#EA580C', color: 'white' }}>
             <FileText size={18} />
-            <span className="btn-label">Informes</span>
+            <span className="btn-label">Informes Técnicos</span>
           </button>
           <button onClick={() => navigate("/cotizaciones")} className="logout-btn" style={{ background: '#DB2777', color: 'white' }}>
             <FileSpreadsheet size={18} />
             <span className="btn-label">Cotizaciones</span>
           </button>
-          <button onClick={() => navigate("/orden-trabajo")} className="logout-btn" style={{ background: '#6366F1', color: 'white' }}>
-            <ClipboardList size={18} />
-            <span className="btn-label">Orden Trabajo</span>
+          <button onClick={() => navigate("/orden-compra")} className="logout-btn" style={{ background: '#8B5CF6', color: 'white' }}>
+            <ShoppingCart size={18} />
+            <span className="btn-label">Orden de Compra</span>
           </button>
           <button onClick={() => navigate("/usuarios")} className="logout-btn" style={{ background: '#0D9488', color: 'white' }}>
             <UserCog size={18} />

@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
-  Home, Package, Users, UserCog, LogOut, 
+  Package, Users, UserCog, LogOut, 
   FileText, FileSpreadsheet, ClipboardList, Plus, Save, X, Wrench,
   Calendar, Phone, MapPin, User, AlertCircle, CheckSquare,
-  Search, ChevronDown, Trash2, ShoppingCart
+  Search, ChevronDown, Trash2, ShoppingCart, Edit, Home
 } from "lucide-react";
 import api from "../services/api";
 
@@ -34,10 +34,12 @@ function OrdenTrabajo() {
   const [busquedaCodigo, setBusquedaCodigo] = useState("");
   const [mostrarDropdownClientes, setMostrarDropdownClientes] = useState(false);
   const [mostrarDropdownEquipos, setMostrarDropdownEquipos] = useState(false);
+  const [mostrarDropdownCodigo, setMostrarDropdownCodigo] = useState(false);
   const [equiposCodigo, setEquiposCodigo] = useState([]);
   
   // Refs para detectar clics fuera de los dropdowns
   const equipoDropdownRef = useRef(null);
+  const equipoCodigoDropdownRef = useRef(null);
   const clienteDropdownRef = useRef(null);
   
   // Estado para los insumos dinámicos
@@ -94,6 +96,9 @@ function OrdenTrabajo() {
     const handleClickOutside = (event) => {
       if (equipoDropdownRef.current && !equipoDropdownRef.current.contains(event.target)) {
         setMostrarDropdownEquipos(false);
+      }
+      if (equipoCodigoDropdownRef.current && !equipoCodigoDropdownRef.current.contains(event.target)) {
+        setMostrarDropdownCodigo(false);
       }
       if (clienteDropdownRef.current && !clienteDropdownRef.current.contains(event.target)) {
         setMostrarDropdownClientes(false);
@@ -248,6 +253,7 @@ function OrdenTrabajo() {
       const eq = res.data[0];
       if (!eq) return;
       setEquipoSeleccionado(eq);
+      setMostrarDropdownCodigo(false);
       setNuevaOrden(prev => ({
         ...prev,
         equipo: eq.equipo || "",
@@ -303,6 +309,11 @@ function OrdenTrabajo() {
    const equiposFiltrados = equipos.filter(e => {
      const serie = busquedaSerie.toLowerCase();
      return !serie || e.serie?.toLowerCase().includes(serie);
+   }).slice(0, 10);
+
+   const equiposCodigoFiltrados = equipos.filter(e => {
+     const codigo = busquedaCodigo.toLowerCase();
+     return !codigo || e.codigo?.toLowerCase().includes(codigo);
    }).slice(0, 10);
 
   // Verificar número de orden único
@@ -365,6 +376,7 @@ function OrdenTrabajo() {
       alert("Orden guardada exitosamente");
       setMostrarFormulario(false);
       resetFormulario();
+      fetchOrdenes(1);
     } catch (err) {
       console.error("Error al guardar orden:", err);
       alert("Error al guardar la orden");
@@ -423,7 +435,7 @@ function OrdenTrabajo() {
   return (
     <div className="container" style={{ background: 'var(--bg)', minHeight: '100vh' }}>
       {/* Header */}
-      <div className="header" style={{ background: 'var(--gradient)', padding: '20px 32px' }}>
+      <div className="header" style={{ background: 'var(--gradient)', padding: '20px 32px', flexDirection: 'column', alignItems: 'flex-start', gap: '16px' }}>
         <div className="header-left">
           <h1 style={{ color: 'white', margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
             <ClipboardList size={28} /> Orden de Trabajo
@@ -465,125 +477,76 @@ function OrdenTrabajo() {
         </div>
       </div>
 
-      {/* Contenido principal */}
-      <div className="page-content">
-        {!mostrarFormulario ? (
-          /* Vista de lista de órdenes */
-          <div style={{
-            background: 'white',
-            borderRadius: '16px',
-            boxShadow: 'var(--shadow)',
-            padding: 'clamp(16px, 3vw, 40px)'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <ClipboardList size={28} style={{ color: '#8B5CF6' }} />
-                <h2 style={{ color: 'var(--text)', margin: 0 }}>Órdenes de Trabajo</h2>
-                <span style={{ background: '#8B5CF6', color: 'white', padding: '4px 12px', borderRadius: '20px', fontSize: '0.85rem' }}>
-                  {pagination.totalItems} total
-                </span>
-              </div>
-              <button 
-                onClick={() => setMostrarFormulario(true)}
-                style={{
-                  background: '#8B5CF6',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '12px',
-                  padding: '12px 24px',
-                  fontSize: '0.95rem',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}
-              >
+      {!mostrarFormulario ? (
+          <>
+            <div className="table-header">
+              <button onClick={() => setMostrarFormulario(true)} className="main-btn">
                 <Plus size={20} />
-                Crear Orden
+                Nueva Orden
               </button>
             </div>
 
             {loading ? (
-              <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
-                Cargando órdenes...
+              <div className="empty-state">
+                <ClipboardList size={48} />
+                <p>Cargando órdenes...</p>
               </div>
             ) : ordenes.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
-                <ClipboardList size={48} style={{ marginBottom: '16px', opacity: 0.3 }} />
+              <div className="empty-state">
+                <ClipboardList size={48} />
                 <p>No hay órdenes registradas</p>
               </div>
             ) : (
               <>
-                {/* Tabla de órdenes */}
-                <div style={{ overflowX: 'auto', marginBottom: '24px' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <div className="table-wrapper">
+                  <table>
                     <thead>
-                      <tr style={{ background: 'var(--bg)', borderBottom: '2px solid var(--border)' }}>
-                        <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text)', fontSize: '0.9rem' }}>N° Orden</th>
-                        <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text)', fontSize: '0.9rem' }}>Fecha</th>
-                        <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text)', fontSize: '0.9rem' }}>Cliente</th>
-                        <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text)', fontSize: '0.9rem' }}>Equipo</th>
-                        <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text)', fontSize: '0.9rem' }}>Técnico</th>
-                        <th style={{ padding: '12px', textAlign: 'center', color: 'var(--text)', fontSize: '0.9rem' }}>Garantía</th>
-                        <th style={{ padding: '12px', textAlign: 'center', color: 'var(--text)', fontSize: '0.9rem' }}>Acciones</th>
+                      <tr>
+                        <th>N° Orden</th>
+                        <th>Fecha</th>
+                        <th>Cliente</th>
+                        <th>Equipo</th>
+                        <th>Técnico</th>
+                        <th>Garantía</th>
+                        <th>Acciones</th>
                       </tr>
                     </thead>
                     <tbody>
                       {ordenes.map((orden) => (
-                        <tr key={orden.id} style={{ borderBottom: '1px solid var(--border)', transition: 'background 0.2s' }}
-                          onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg)'}
-                          onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
-                        >
-                          <td style={{ padding: '14px 12px', fontWeight: '600', color: 'var(--primary)' }}>{orden.numero_orden}</td>
-                          <td style={{ padding: '14px 12px', color: 'var(--text)' }}>{orden.fecha ? new Date(orden.fecha).toLocaleDateString() : '-'}</td>
-                          <td style={{ padding: '14px 12px', color: 'var(--text)' }}>{orden.cliente}</td>
-                          <td style={{ padding: '14px 12px', color: 'var(--text)' }}>{orden.equipo} {orden.marca} {orden.modelo}</td>
-                          <td style={{ padding: '14px 12px', color: 'var(--text)' }}>{orden.tecnico_asignado}</td>
-                          <td style={{ padding: '14px 12px', textAlign: 'center' }}>
+                        <tr key={orden.id}>
+                          <td data-label="N° Orden"><span style={{ fontWeight: '600', color: 'var(--primary)' }}>{orden.numero_orden}</span></td>
+                          <td data-label="Fecha">{orden.fecha ? new Date(orden.fecha).toLocaleDateString() : '-'}</td>
+                          <td data-label="Cliente">{orden.cliente}</td>
+                          <td data-label="Equipo">{orden.equipo} {orden.marca} {orden.modelo}</td>
+                          <td data-label="Técnico">{orden.tecnico_asignado}</td>
+                          <td data-label="Garantía">
                             {orden.es_garantia ? (
-                              <span style={{ background: '#FEF3C7', color: '#92400E', padding: '4px 12px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: '600' }}>Sí</span>
+                              <span className="badge-garantia">Sí</span>
                             ) : (
-                              <span style={{ background: 'var(--bg)', color: 'var(--text-muted)', padding: '4px 12px', borderRadius: '12px', fontSize: '0.8rem' }}>No</span>
+                              <span className="badge-no-garantia">No</span>
                             )}
                           </td>
-                          <td style={{ padding: '14px 12px', textAlign: 'center' }}>
-                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                              <button
-                                onClick={() => editarOrden(orden)}
-                                style={{
-                                  background: 'var(--primary-light)',
-                                  color: 'var(--primary)',
-                                  border: 'none',
-                                  borderRadius: '6px',
-                                  padding: '6px 12px',
-                                  cursor: 'pointer',
-                                  fontSize: '0.85rem',
-                                  fontWeight: '500',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '4px'
-                                }}
+                          <td data-label="Acciones">
+                            <div className="action-buttons">
+                              <button 
+                                className="table-btn" 
+                                style={{ background: '#EA580C', color: 'white', border: 'none' }}
+                                onClick={() => navigate('/informes', { state: { orden } })}
                               >
-                                Editar
+                                <FileText size={14} /> Informe
                               </button>
-                              <button
-                                onClick={() => eliminarOrden(orden.id)}
-                                style={{
-                                  background: 'var(--danger-light)',
-                                  color: 'var(--danger)',
-                                  border: 'none',
-                                  borderRadius: '6px',
-                                  padding: '6px 12px',
-                                  cursor: 'pointer',
-                                  fontSize: '0.85rem',
-                                  fontWeight: '500',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '4px'
-                                }}
+                              <button 
+                                className="table-btn" 
+                                style={{ background: '#DB2777', color: 'white', border: 'none' }}
+                                onClick={() => navigate('/cotizaciones', { state: { orden } })}
                               >
-                                Eliminar
+                                <FileSpreadsheet size={14} /> Cotización
+                              </button>
+                              <button className="table-btn edit-btn" onClick={() => editarOrden(orden)}>
+                                <Edit size={14} /> Editar
+                              </button>
+                              <button className="table-btn delete-btn" onClick={() => eliminarOrden(orden.id)}>
+                                <Trash2 size={14} /> Eliminar
                               </button>
                             </div>
                           </td>
@@ -593,16 +556,15 @@ function OrdenTrabajo() {
                   </table>
                 </div>
 
-                {/* Vista de tarjetas para móvil */}
                 <div className="cards-table">
                   {ordenes.map((orden) => (
                     <div key={orden.id} className="data-card">
                       <div className="data-card-header">
-                        <strong style={{ color: 'var(--primary)' }}>{orden.numero_orden}</strong>
+                        <strong>{orden.numero_orden}</strong>
                         {orden.es_garantia ? (
-                          <span style={{ background: '#FEF3C7', color: '#92400E', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600' }}>Garantía</span>
+                          <span className="badge-garantia">Garantía</span>
                         ) : (
-                          <span style={{ background: 'var(--bg)', color: 'var(--text-muted)', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem' }}>No garantía</span>
+                          <span className="badge-no-garantia">No garantía</span>
                         )}
                       </div>
                       <div className="data-card-row">
@@ -621,247 +583,111 @@ function OrdenTrabajo() {
                         <span className="data-card-label">Técnico</span>
                         <span className="data-card-value">{orden.tecnico_asignado}</span>
                       </div>
-                      <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                        <button
-                          onClick={() => editarOrden(orden)}
-                          style={{ flex: 1, background: 'var(--primary-light)', color: 'var(--primary)', border: 'none', borderRadius: '6px', padding: '8px', cursor: 'pointer', fontWeight: '500', fontSize: '0.85rem' }}
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
+                        <button 
+                          className="table-btn" 
+                          style={{ flex: 1, justifyContent: 'center', background: '#EA580C', color: 'white', border: 'none' }}
+                          onClick={() => navigate('/informes', { state: { orden } })}
                         >
-                          Editar
+                          <FileText size={14} /> Informe
                         </button>
-                        <button
-                          onClick={() => eliminarOrden(orden.id)}
-                          style={{ flex: 1, background: 'var(--danger-light)', color: 'var(--danger)', border: 'none', borderRadius: '6px', padding: '8px', cursor: 'pointer', fontWeight: '500', fontSize: '0.85rem' }}
+                        <button 
+                          className="table-btn" 
+                          style={{ flex: 1, justifyContent: 'center', background: '#DB2777', color: 'white', border: 'none' }}
+                          onClick={() => navigate('/cotizaciones', { state: { orden } })}
                         >
-                          Eliminar
+                          <FileSpreadsheet size={14} /> Cotización
+                        </button>
+                        <button className="table-btn edit-btn" onClick={() => editarOrden(orden)} style={{ flex: 1, justifyContent: 'center' }}>
+                          <Edit size={14} /> Editar
+                        </button>
+                        <button className="table-btn delete-btn" onClick={() => eliminarOrden(orden.id)} style={{ flex: 1, justifyContent: 'center' }}>
+                          <Trash2 size={14} /> Eliminar
                         </button>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                {/* Paginación */}
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
-                  <button
-                    onClick={() => fetchOrdenes(pagination.currentPage - 1)}
-                    disabled={pagination.currentPage === 1}
-                    style={{
-                      padding: '8px 16px',
-                      border: '2px solid var(--border)',
-                      borderRadius: '8px',
-                      background: pagination.currentPage === 1 ? 'var(--bg)' : 'white',
-                      cursor: pagination.currentPage === 1 ? 'not-allowed' : 'pointer',
-                      color: pagination.currentPage === 1 ? 'var(--text-muted)' : 'var(--text)',
-                      fontWeight: '500'
-                    }}
-                  >
-                    ← Anterior
-                  </button>
-                  
-                  {[...Array(pagination.totalPages)].map((_, idx) => {
-                    const pageNum = idx + 1;
-                    if (
-                      pageNum === 1 ||
-                      pageNum === pagination.totalPages ||
-                      (pageNum >= pagination.currentPage - 1 && pageNum <= pagination.currentPage + 1)
-                    ) {
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => fetchOrdenes(pageNum)}
-                          style={{
-                            padding: '8px 14px',
-                            border: '2px solid',
-                            borderColor: pageNum === pagination.currentPage ? '#8B5CF6' : 'var(--border)',
-                            borderRadius: '8px',
-                            background: pageNum === pagination.currentPage ? '#8B5CF6' : 'white',
-                            color: pageNum === pagination.currentPage ? 'white' : 'var(--text)',
-                            cursor: 'pointer',
-                            fontWeight: pageNum === pagination.currentPage ? '600' : '400'
-                          }}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    } else if (
-                      pageNum === pagination.currentPage - 2 ||
-                      pageNum === pagination.currentPage + 2
-                    ) {
-                      return <span key={pageNum} style={{ color: 'var(--text-muted)' }}>...</span>;
-                    }
-                    return null;
-                  })}
+                <div className="pagination">
+                  <div className="pagination-info">
+                    Mostrando {ordenes.length} de {pagination.totalItems} órdenes
+                  </div>
+                  <div className="pagination-controls">
+                    <button
+                      className="page-btn-nav"
+                      onClick={() => fetchOrdenes(pagination.currentPage - 1)}
+                      disabled={pagination.currentPage === 1}
+                    >
+                      ‹
+                    </button>
+                    <span className="page-numbers-desktop">
+                      {[...Array(pagination.totalPages)].map((_, i) => {
+                        const num = i + 1;
+                        return (
+                          <button
+                            key={num}
+                            onClick={() => fetchOrdenes(num)}
+                            className={pagination.currentPage === num ? 'active' : ''}
+                          >
+                            {num}
+                          </button>
+                        );
+                      })}
+                    </span>
+                    <button
+                      className="page-btn-nav"
+                      onClick={() => fetchOrdenes(pagination.currentPage + 1)}
+                      disabled={pagination.currentPage === pagination.totalPages}
+                    >
+                      ›
+                    </button>
+                  </div>
+                </div>
 
-                  <button
-                    onClick={() => fetchOrdenes(pagination.currentPage + 1)}
-                    disabled={pagination.currentPage === pagination.totalPages}
-                    style={{
-                      padding: '8px 16px',
-                      border: '2px solid var(--border)',
-                      borderRadius: '8px',
-                      background: pagination.currentPage === pagination.totalPages ? 'var(--bg)' : 'white',
-                      cursor: pagination.currentPage === pagination.totalPages ? 'not-allowed' : 'pointer',
-                      color: pagination.currentPage === pagination.totalPages ? 'var(--text-muted)' : 'var(--text)',
-                      fontWeight: '500'
-                    }}
-                  >
-                    Siguiente →
+                <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginTop: '24px', flexWrap: 'wrap' }}>
+                  <button onClick={irAInformeTecnico} className="main-btn" style={{ background: '#EA580C' }}>
+                    <FileText size={18} /> Informe Técnico
+                  </button>
+                  <button onClick={irAInformeCotizacion} className="main-btn" style={{ background: '#DB2777' }}>
+                    <FileSpreadsheet size={18} /> Informe Cotización
                   </button>
                 </div>
               </>
             )}
-
-            {/* Botones de Informe Técnico e Informe Cotización */}
-            <div style={{ 
-              display: 'flex', 
-              gap: '16px', 
-              justifyContent: 'center',
-              borderTop: '1px solid var(--border)',
-              paddingTop: '32px',
-              marginTop: '32px',
-              flexWrap: 'wrap'
-            }}>
-              <button 
-                onClick={irAInformeTecnico}
-                style={{
-                  background: '#EA580C',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '12px',
-                  padding: '14px 28px',
-                  fontSize: '0.95rem',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}
-              >
-                <FileText size={20} />
-                Informe Técnico
-              </button>
-              <button 
-                onClick={irAInformeCotizacion}
-                style={{
-                  background: '#DB2777',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '12px',
-                  padding: '14px 28px',
-                  fontSize: '0.95rem',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}
-              >
-                <FileSpreadsheet size={20} />
-                Informe Cotización
-              </button>
-            </div>
-          </div>
+          </>
         ) : (
           /* Formulario para crear orden */
-          <div style={{
-            background: 'white',
-            borderRadius: '16px',
-            boxShadow: 'var(--shadow)',
-            padding: 'clamp(16px, 3vw, 40px)'
-          }}>
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'space-between',
-              marginBottom: '32px',
-              paddingBottom: '24px',
-              borderBottom: '2px solid var(--border)',
-              gap: '12px',
-              flexWrap: 'wrap'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{
-                  width: '60px',
-                  height: '60px',
-                  borderRadius: '12px',
-                  background: '#8B5CF6',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white'
-                }}>
-                  <Wrench size={32} />
-                </div>
-                <div>
-                  <h2 style={{ margin: 0, color: 'var(--text)' }}>Crear Orden de Trabajo</h2>
-                  <p style={{ margin: '4px 0 0', color: 'var(--text-muted)' }}>Complete los datos para generar una nueva orden</p>
-                </div>
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px' }}>
+            <div style={{ background: 'white', borderRadius: '16px', boxShadow: 'var(--shadow-lg)', overflow: 'hidden' }}>
+              <div style={{ background: 'var(--gradient)', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <h2 style={{ color: 'white', margin: 0, display: 'flex', alignItems: 'center', gap: '12px', fontSize: '22px' }}>
+                  <Wrench size={28} />
+                  {editingId ? "Editar Orden de Trabajo" : "Crear Orden de Trabajo"}
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMostrarFormulario(false);
+                    resetFormulario();
+                    setEditingId(null);
+                  }}
+                  style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '8px', padding: '10px', cursor: 'pointer', color: 'white' }}
+                >
+                  <X size={24} />
+                </button>
               </div>
-              
-              {/* Botón X para cerrar */}
-              <button
-                type="button"
-                onClick={() => {
-                  setMostrarFormulario(false);
-                  resetFormulario();
-                }}
-                className="icon-btn"
-                style={{
-                  background: 'var(--bg)',
-                  border: '2px solid var(--border)',
-                  borderRadius: '8px',
-                  padding: '10px',
-                  cursor: 'pointer',
-                  color: 'var(--text-muted)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'var(--danger)';
-                  e.currentTarget.style.color = 'white';
-                  e.currentTarget.style.borderColor = 'var(--danger)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'var(--bg)';
-                  e.currentTarget.style.color = 'var(--text-muted)';
-                  e.currentTarget.style.borderColor = 'var(--border)';
-                }}
-                title="Cerrar"
-              >
-                <X size={24} />
-              </button>
-            </div>
-
-            <form onSubmit={guardarOrden}>
+            <form onSubmit={guardarOrden} style={{ padding: '24px', display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
               {/* SECCIÓN 1: DATOS DE LA ORDEN */}
-              <div style={{
-                background: 'var(--primary-light)',
-                borderRadius: '12px',
-                padding: '24px',
-                marginBottom: '24px'
-              }}>
-                <h3 style={{ 
-                  color: 'var(--primary)', 
-                  marginBottom: '20px', 
-                  fontSize: '18px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}>
-                  <ClipboardList size={20} />
+              <div style={{ padding: '20px', background: 'var(--primary-light)', borderRadius: '12px' }}>
+                <h3 style={{ color: 'var(--primary)', marginBottom: '16px', fontSize: '16px' }}>
                   Datos de la Orden
                 </h3>
                 
-                <div style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-                  gap: '20px',
-                  marginBottom: '20px'
-                }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '16px' }}>
                   {/* Número de Orden */}
                   <div className="form-group">
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
+                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: 'var(--text)' }}>
                       Número de Orden *
                     </label>
                     <input
@@ -873,13 +699,7 @@ function OrdenTrabajo() {
                         verificarNumeroOrden(e.target.value);
                       }}
                       required
-                      style={{
-                        width: '100%',
-                        padding: '12px 16px',
-                        border: `2px solid ${errorNumeroOrden ? 'var(--danger)' : 'var(--border)'}`,
-                        borderRadius: '8px',
-                        fontSize: '1rem'
-                      }}
+                      style={{ width: '100%', padding: '10px 14px', border: `2px solid ${errorNumeroOrden ? 'var(--danger)' : 'var(--border)'}`, borderRadius: '8px', fontSize: '0.95rem' }}
                     />
                     {errorNumeroOrden && (
                       <span style={{ color: 'var(--danger)', fontSize: '0.85rem', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -890,7 +710,7 @@ function OrdenTrabajo() {
 
                   {/* Fecha */}
                   <div className="form-group">
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
+                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: 'var(--text)' }}>
                       Fecha *
                     </label>
                     <input
@@ -898,43 +718,25 @@ function OrdenTrabajo() {
                       value={nuevaOrden.fecha}
                       onChange={(e) => setNuevaOrden({...nuevaOrden, fecha: e.target.value})}
                       required
-                      style={{
-                        width: '100%',
-                        padding: '12px 16px',
-                        border: '2px solid var(--border)',
-                        borderRadius: '8px',
-                        fontSize: '1rem'
-                      }}
+                      style={{ width: '100%', padding: '10px 14px', border: '2px solid var(--border)', borderRadius: '8px', fontSize: '0.95rem' }}
                     />
                   </div>
 
                   {/* Garantía Checkbox */}
-                  <div className="form-group" style={{ display: 'flex', alignItems: 'center', paddingTop: '32px' }}>
+                  <div className="form-group" style={{ display: 'flex', alignItems: 'center' }}>
                     <label style={{ 
                       display: 'flex', 
                       alignItems: 'center', 
-                      gap: '12px',
+                      gap: '8px',
                       cursor: 'pointer',
                       fontWeight: '600',
                       color: 'var(--text)'
                     }}>
-                      <div style={{
-                        width: '24px',
-                        height: '24px',
-                        border: '2px solid var(--primary)',
-                        borderRadius: '4px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        background: nuevaOrden.esGarantia ? 'var(--primary)' : 'white'
-                      }}>
-                        {nuevaOrden.esGarantia && <CheckSquare size={18} color="white" />}
-                      </div>
                       <input
                         type="checkbox"
                         checked={nuevaOrden.esGarantia}
                         onChange={(e) => setNuevaOrden({...nuevaOrden, esGarantia: e.target.checked})}
-                        style={{ display: 'none' }}
+                        style={{ width: '18px', height: '18px' }}
                       />
                       Es Garantía
                     </label>
@@ -944,7 +746,7 @@ function OrdenTrabajo() {
                 {/* Fechas con Checkboxes */}
                 <div style={{ 
                   display: 'grid', 
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', 
+                  gridTemplateColumns: 'repeat(4, 1fr)', 
                   gap: '20px'
                 }}>
                   {/* Fecha Ingreso */}
@@ -1057,24 +859,9 @@ function OrdenTrabajo() {
                 </div>
               </div>
 
-              {/* SECCIÓN 2: DATOS DEL CLIENTE */}
-              <div style={{
-                background: 'var(--success-light)',
-                borderRadius: '12px',
-                padding: '24px',
-                marginBottom: '24px'
-              }}>
-                <h3 style={{ 
-                  color: 'var(--success)', 
-                  marginBottom: '20px', 
-                  fontSize: '18px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}>
-                  <User size={20} />
-                  Datos del Cliente
-                </h3>
+{/* SECCIÓN 2: DATOS DEL CLIENTE */}
+              <div style={{ padding: '20px', background: 'var(--success-light)', borderRadius: '12px' }}>
+                <h3 style={{ color: 'var(--success)', marginBottom: '16px', fontSize: '16px' }}>Datos del Cliente</h3>
                 
                 {/* Buscador de Cliente */}
                 <div style={{ marginBottom: '24px' }}>
@@ -1089,9 +876,11 @@ function OrdenTrabajo() {
                       value={busquedaCliente}
                       onChange={(e) => {
                         setBusquedaCliente(e.target.value);
-                        setMostrarDropdownClientes(true);
+                        setMostrarDropdownClientes(e.target.value.length >= 2);
                       }}
-                      onFocus={() => setMostrarDropdownClientes(true)}
+                      onFocus={() => {
+                        if (busquedaCliente.length >= 2) setMostrarDropdownClientes(true);
+                      }}
                       style={{
                         width: '100%',
                         padding: '12px 16px',
@@ -1128,7 +917,7 @@ function OrdenTrabajo() {
                     />
                     
                     {/* Dropdown de Clientes */}
-                    {mostrarDropdownClientes && clientesFiltrados.length > 0 && (
+                    {mostrarDropdownClientes && busquedaCliente.length >= 2 && (
                       <div style={{
                         position: 'absolute',
                         top: '100%',
@@ -1143,33 +932,39 @@ function OrdenTrabajo() {
                         zIndex: 1000,
                         boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
                       }}>
-                        {clientesFiltrados.map((cliente) => (
-                          <div
-                            key={cliente.id}
-                            onClick={() => seleccionarCliente(cliente)}
-                            style={{
-                              padding: '12px 16px',
-                              cursor: 'pointer',
-                              borderBottom: '1px solid var(--border)',
-                              transition: 'background 0.2s'
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--primary-light)'}
-                            onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
-                          >
-                            <div style={{ fontWeight: '600', color: 'var(--text)' }}>
-                              {cliente.razon_social}
+                        {clientesFiltrados.length > 0 ? (
+                          clientesFiltrados.map((cliente) => (
+                            <div
+                              key={cliente.id}
+                              onClick={() => seleccionarCliente(cliente)}
+                              style={{
+                                padding: '12px 16px',
+                                cursor: 'pointer',
+                                borderBottom: '1px solid var(--border)',
+                                transition: 'background 0.2s'
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.background = 'var(--primary-light)'}
+                              onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+                            >
+                              <div style={{ fontWeight: '600', color: 'var(--text)' }}>
+                                {cliente.razon_social}
+                              </div>
+                              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                RUT: {cliente.rut || 'N/A'} | {cliente.direccion || ''}, {cliente.comuna || ''}
+                              </div>
                             </div>
-                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                              RUT: {cliente.rut || 'N/A'} | {cliente.direccion || ''}, {cliente.comuna || ''}
-                            </div>
+                          ))
+                        ) : (
+                          <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                            No se encontraron clientes con "{busquedaCliente}"
                           </div>
-                        ))}
+                        )}
                       </div>
                     )}
                   </div>
                 </div>
                 
-                <div style={{ 
+                <div style={{
                   display: 'grid', 
                   gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
                   gap: '20px',
@@ -1321,27 +1116,14 @@ function OrdenTrabajo() {
               </div>
 
               {/* SECCIÓN 3: DATOS DEL EQUIPO */}
-              <div style={{
-                background: '#F1F5F9',
-                borderRadius: '12px',
-                padding: '24px',
-                marginBottom: '24px'
-              }}>
-                <h3 style={{ 
-                  color: 'var(--text)', 
-                  marginBottom: '20px', 
-                  fontSize: '18px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}>
-                  <Wrench size={20} />
+              <div style={{ padding: '20px', background: '#f1f5f9', borderRadius: '12px' }}>
+                <h3 style={{ color: 'var(--text)', marginBottom: '16px', fontSize: '16px' }}>
                   Datos del Equipo
                 </h3>
                 
                   {/* Buscador por Código de Equipo */}
                   <div style={{ marginBottom: '16px' }}>
-                    <div style={{ position: 'relative' }}>
+                    <div ref={equipoCodigoDropdownRef} style={{ position: 'relative' }}>
                       <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
                         <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
                         Buscar por código (EQ-XXX)
@@ -1350,12 +1132,13 @@ function OrdenTrabajo() {
                         type="text"
                         placeholder="Ej: EQ-0001"
                         value={busquedaCodigo}
-                        onChange={(e) => setBusquedaCodigo(e.target.value.toUpperCase())}
-                        onBlur={() => setTimeout(() => {}, 200)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && busquedaCodigo.trim()) {
-                            seleccionarEquipoPorCodigo(busquedaCodigo.trim());
-                          }
+                        onChange={(e) => {
+                          const val = e.target.value.toUpperCase();
+                          setBusquedaCodigo(val);
+                          setMostrarDropdownCodigo(val.length >= 6);
+                        }}
+                        onFocus={() => {
+                          if (busquedaCodigo.length >= 6) setMostrarDropdownCodigo(true);
                         }}
                         style={{
                           width: '100%',
@@ -1366,6 +1149,55 @@ function OrdenTrabajo() {
                           background: equipoSeleccionado?.codigo === busquedaCodigo ? '#DCFCE7' : 'white'
                         }}
                       />
+                      
+                      {/* Dropdown de Equipos por Código */}
+                      {mostrarDropdownCodigo && busquedaCodigo.length >= 6 && (
+                        <div style={{
+                          position: 'absolute',
+                          top: '100%',
+                          left: 0,
+                          right: 0,
+                          background: 'white',
+                          border: '2px solid var(--border)',
+                          borderTop: 'none',
+                          borderRadius: '0 0 8px 8px',
+                          maxHeight: '250px',
+                          overflow: 'auto',
+                          zIndex: 1000,
+                          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                        }}>
+                          {equiposCodigoFiltrados.length > 0 ? (
+                            equiposCodigoFiltrados.map((equipo) => (
+                              <div
+                                key={equipo.id}
+                                onClick={() => {
+                                  seleccionarEquipoPorCodigo(equipo.codigo);
+                                  setMostrarDropdownCodigo(false);
+                                }}
+                                style={{
+                                  padding: '12px 16px',
+                                  cursor: 'pointer',
+                                  borderBottom: '1px solid var(--border)',
+                                  transition: 'background 0.2s'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--primary-light)'}
+                                onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+                              >
+                                <div style={{ fontWeight: '600', color: 'var(--text)' }}>
+                                  {equipo.codigo} - {equipo.equipo} {equipo.marca} {equipo.modelo}
+                                </div>
+                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                  Serie: {equipo.serie || 'N/A'} | Cliente: {equipo.cliente_nombre || 'N/A'}
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                              No se encontraron equipos con código "{busquedaCodigo}"
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -1376,64 +1208,72 @@ function OrdenTrabajo() {
                        <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
                        Buscar Equipo por Serie
                      </label>
-                     <input
-                       type="text"
-                       placeholder="Ingrese número de serie..."
-                       value={busquedaSerie}
-                       onChange={(e) => {
-                         setBusquedaSerie(e.target.value);
-                         setMostrarDropdownEquipos(true);
-                       }}
-                       onFocus={() => setMostrarDropdownEquipos(true)}
-                       style={{
-                         width: '100%',
-                         padding: '12px 16px',
-                         border: '2px solid var(--success)',
-                         borderRadius: '8px',
-                         fontSize: '1rem',
-                         background: equipoSeleccionado ? '#DCFCE7' : 'white'
-                       }}
-                     />
-                   
-                     {/* Dropdown de Equipos */}
-                     {mostrarDropdownEquipos && equiposFiltrados.length > 0 && (
-                       <div style={{
-                         position: 'absolute',
-                         top: '100%',
-                         left: 0,
-                         right: 0,
-                         background: 'white',
-                         border: '2px solid var(--border)',
-                         borderTop: 'none',
-                         borderRadius: '0 0 8px 8px',
-                         maxHeight: '250px',
-                         overflow: 'auto',
-                         zIndex: 1000,
-                         boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                       }}>
-                         {equiposFiltrados.map((equipo) => (
-                           <div
-                             key={equipo.id}
-                             onClick={() => seleccionarEquipo(equipo)}
-                             style={{
-                               padding: '12px 16px',
-                               cursor: 'pointer',
-                               borderBottom: '1px solid var(--border)',
-                               transition: 'background 0.2s'
-                             }}
-                             onMouseEnter={(e) => e.currentTarget.style.background = 'var(--success-light)'}
-                             onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
-                           >
-                             <div style={{ fontWeight: '600', color: 'var(--text)' }}>
-                               {equipo.equipo} - {equipo.marca} {equipo.modelo}
-                             </div>
-                             <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                               Serie: {equipo.serie || 'N/A'} | Contador: {equipo.contador_pag || 'N/A'}
-                             </div>
-                           </div>
-                         ))}
-                       </div>
-                     )}
+                      <input
+                        type="text"
+                        placeholder="Ingrese número de serie..."
+                        value={busquedaSerie}
+                        onChange={(e) => {
+                          setBusquedaSerie(e.target.value);
+                          setMostrarDropdownEquipos(e.target.value.length >= 2);
+                        }}
+                        onFocus={() => {
+                          if (busquedaSerie.length >= 2) setMostrarDropdownEquipos(true);
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '12px 16px',
+                          border: '2px solid var(--success)',
+                          borderRadius: '8px',
+                          fontSize: '1rem',
+                          background: equipoSeleccionado ? '#DCFCE7' : 'white'
+                        }}
+                      />
+                    
+                      {/* Dropdown de Equipos */}
+                      {mostrarDropdownEquipos && busquedaSerie.length >= 2 && (
+                        <div style={{
+                          position: 'absolute',
+                          top: '100%',
+                          left: 0,
+                          right: 0,
+                          background: 'white',
+                          border: '2px solid var(--border)',
+                          borderTop: 'none',
+                          borderRadius: '0 0 8px 8px',
+                          maxHeight: '250px',
+                          overflow: 'auto',
+                          zIndex: 1000,
+                          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                        }}>
+                          {equiposFiltrados.length > 0 ? (
+                            equiposFiltrados.map((equipo) => (
+                              <div
+                                key={equipo.id}
+                                onClick={() => seleccionarEquipo(equipo)}
+                                style={{
+                                  padding: '12px 16px',
+                                  cursor: 'pointer',
+                                  borderBottom: '1px solid var(--border)',
+                                  transition: 'background 0.2s'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--success-light)'}
+                                onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+                              >
+                                <div style={{ fontWeight: '600', color: 'var(--text)' }}>
+                                  {equipo.equipo} {equipo.marca} {equipo.modelo}
+                                </div>
+                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                  Serie: {equipo.serie || 'N/A'} | Código: {equipo.codigo || 'N/A'}
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                              No se encontraron equipos con serie "{busquedaSerie}"
+                            </div>
+                          )}
+                        </div>
+                      )}
                    </div>
                    
                    {equipoSeleccionado && (
@@ -1652,17 +1492,8 @@ function OrdenTrabajo() {
               </div>
 
               {/* SECCIÓN 4: AVERÍA/FALLA/INCIDENCIA */}
-              <div style={{
-                background: '#F1F5F9',
-                borderRadius: '12px',
-                padding: '24px',
-                marginBottom: '24px'
-              }}>
-                <h3 style={{ 
-                  color: 'var(--text)', 
-                  marginBottom: '16px', 
-                  fontSize: '16px'
-                }}>
+              <div style={{ padding: '20px', background: '#f1f5f9', borderRadius: '12px' }}>
+                <h3 style={{ color: 'var(--text)', marginBottom: '16px', fontSize: '16px' }}>
                   Avería/Falla/Incidencia
                 </h3>
                 <div className="form-group">
@@ -1684,60 +1515,26 @@ function OrdenTrabajo() {
               </div>
 
               {/* Botones de acción del formulario */}
-              <div style={{ 
-                display: 'flex', 
-                gap: '16px', 
-                justifyContent: 'flex-end',
-                borderTop: '2px solid var(--border)',
-                paddingTop: '24px'
-              }}>
+              <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-end', marginTop: '8px', flexWrap: 'wrap' }}>
                 <button 
                   type="button"
                   onClick={() => {
                     setMostrarFormulario(false);
                     resetFormulario();
+                    setEditingId(null);
                   }}
-                  style={{
-                    background: 'transparent',
-                    color: 'var(--text-muted)',
-                    border: '2px solid var(--border)',
-                    borderRadius: '8px',
-                    padding: '12px 24px',
-                    fontSize: '0.95rem',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}
+                  className="cancel-btn"
                 >
-                  <X size={20} />
-                  Cancelar
+                  <X size={20} /> Cancelar
                 </button>
-                <button 
-                  type="submit"
-                  style={{
-                    background: 'var(--primary)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    padding: '12px 24px',
-                    fontSize: '0.95rem',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}
-                >
-                  <Save size={20} />
-                  Guardar Orden
+                <button type="submit" className="main-btn">
+                  <Save size={20} /> {editingId ? "Actualizar Orden" : "Guardar Orden"}
                 </button>
               </div>
             </form>
+            </div>
           </div>
         )}
-      </div>
     </div>
   );
 }

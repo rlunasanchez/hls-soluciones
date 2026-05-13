@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Users, Plus, Save, Trash2, Edit, LogOut, Search, ChevronDown, ChevronUp, Home as HomeIcon, Package, UserCog, FileText, FileSpreadsheet, ClipboardList, X } from "lucide-react";
+import { Users, Plus, Save, Trash2, Edit, LogOut, Search, ChevronDown, ChevronUp, Home, Package, UserCog, FileText, FileSpreadsheet, ClipboardList, X, ShoppingCart } from "lucide-react";
 import api from "../services/api";
 
 function Clientes() {
@@ -464,15 +464,18 @@ function Clientes() {
                     />
                   </div>
                 </div>
-                <div className="form-row-3" style={{ marginTop: '16px' }}>
+                <div className="form-row-1" style={{ marginTop: '16px' }}>
                   <div className="form-group">
                     <label>Dirección</label>
                     <input
-                      placeholder="Dirección"
+                      placeholder="Ingrese la dirección completa"
                       value={nuevoCliente.direccion}
                       onChange={(e) => setNuevoCliente({ ...nuevoCliente, direccion: e.target.value })}
+                      style={{ width: '100%' }}
                     />
                   </div>
+                </div>
+                <div className="form-row-3" style={{ marginTop: '16px' }}>
                   <div className="form-group">
                     <label>Ciudad</label>
                     <input
@@ -489,8 +492,6 @@ function Clientes() {
                       onChange={(e) => setNuevoCliente({ ...nuevoCliente, comuna: e.target.value })}
                     />
                   </div>
-                </div>
-                <div className="form-row-3" style={{ marginTop: '16px' }}>
                   <div className="form-group">
                     <label>Fono</label>
                     <input
@@ -564,65 +565,72 @@ function Clientes() {
                   )}
                 </div>
                 {sucursales.slice(0, sucursalesVisibles).map((suc, idx) => (
-                  <div key={idx} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '12px', marginBottom: '12px', padding: '12px', background: 'white', borderRadius: '8px', alignItems: 'end' }}>
-                    <div className="form-group" style={{ margin: 0 }}>
-                      <label>Tipo</label>
-                      <select
-                        value={suc.tipo_direccion}
-                        onChange={(e) => actualizarSucursal(idx, 'tipo_direccion', e.target.value)}
+                  <div key={idx} style={{ marginBottom: '12px', padding: '12px', background: 'white', borderRadius: '8px' }}>
+                    {/* Fila 1: Tipo y Dirección */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', gap: '12px', marginBottom: '12px' }}>
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label>Tipo</label>
+                        <select
+                          value={suc.tipo_direccion}
+                          onChange={(e) => actualizarSucursal(idx, 'tipo_direccion', e.target.value)}
+                        >
+                          <option value="">Seleccionar</option>
+                          <option value="Matriz">Matriz</option>
+                          <option value="Sucursal">Sucursal</option>
+                        </select>
+                      </div>
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label>Dirección</label>
+                        <input
+                          placeholder="Ingrese la dirección completa"
+                          value={suc.direccion}
+                          onChange={(e) => actualizarSucursal(idx, 'direccion', e.target.value)}
+                          style={{ width: '100%' }}
+                        />
+                      </div>
+                    </div>
+                    {/* Fila 2: Fono, Ciudad, Comuna y Eliminar */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr 1fr 1fr 50px', gap: '12px', alignItems: 'end' }}>
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label>Fono</label>
+                        <input
+                          placeholder="Fono"
+                          value={suc.fono}
+                          onChange={(e) => actualizarSucursal(idx, 'fono', e.target.value)}
+                        />
+                      </div>
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label>Ciudad</label>
+                        <input
+                          placeholder="Ciudad"
+                          value={suc.ciudad}
+                          onChange={(e) => actualizarSucursal(idx, 'ciudad', e.target.value)}
+                        />
+                      </div>
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label>Comuna</label>
+                        <input
+                          placeholder="Comuna"
+                          value={suc.comuna}
+                          onChange={(e) => actualizarSucursal(idx, 'comuna', e.target.value)}
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        className="delete-btn"
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '38px' }}
+                        onClick={() => {
+                          const nuevas = sucursales.filter((_, i) => i !== idx);
+                          while (nuevas.length < 5) {
+                            nuevas.push({ tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" });
+                          }
+                          setSucursales(nuevas);
+                          setSucursalesVisibles(Math.max(1, sucursalesVisibles - 1));
+                        }}
                       >
-                        <option value="">Seleccionar</option>
-                        <option value="Matriz">Matriz</option>
-                        <option value="Sucursal">Sucursal</option>
-                      </select>
+                        <Trash2 size={16} />
+                      </button>
                     </div>
-                    <div className="form-group" style={{ margin: 0 }}>
-                      <label>Dirección</label>
-                      <input
-                        placeholder="Dirección"
-                        value={suc.direccion}
-                        onChange={(e) => actualizarSucursal(idx, 'direccion', e.target.value)}
-                      />
-                    </div>
-                    <div className="form-group" style={{ margin: 0 }}>
-                      <label>Fono</label>
-                      <input
-                        placeholder="Fono"
-                        value={suc.fono}
-                        onChange={(e) => actualizarSucursal(idx, 'fono', e.target.value)}
-                      />
-                    </div>
-                    <div className="form-group" style={{ margin: 0 }}>
-                      <label>Ciudad</label>
-                      <input
-                        placeholder="Ciudad"
-                        value={suc.ciudad}
-                        onChange={(e) => actualizarSucursal(idx, 'ciudad', e.target.value)}
-                      />
-                    </div>
-                    <div className="form-group" style={{ margin: 0 }}>
-                      <label>Comuna</label>
-                      <input
-                        placeholder="Comuna"
-                        value={suc.comuna}
-                        onChange={(e) => actualizarSucursal(idx, 'comuna', e.target.value)}
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      className="delete-btn"
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '38px' }}
-                      onClick={() => {
-                        const nuevas = sucursales.filter((_, i) => i !== idx);
-                        while (nuevas.length < 5) {
-                          nuevas.push({ tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" });
-                        }
-                        setSucursales(nuevas);
-                        setSucursalesVisibles(Math.max(1, sucursalesVisibles - 1));
-                      }}
-                    >
-                      <Trash2 size={16} />
-                    </button>
                   </div>
                 ))}
               </div>
@@ -650,30 +658,34 @@ function Clientes() {
 
   return (
     <div className="container">
-      <div className="header" style={{ background: 'var(--gradient)', padding: '20px 32px' }}>
+      <div className="header" style={{ background: 'var(--gradient)', padding: '20px 32px', flexDirection: 'column', alignItems: 'flex-start', gap: '16px' }}>
         <div className="header-left">
           <h1 style={{ color: 'white' }}><Users size={28} /> Mantenedor de Clientes</h1>
         </div>
         <div className="nav-buttons" style={{ gap: '10px' }}>
           <button onClick={() => navigate("/home")} className="logout-btn" style={{ background: 'var(--primary)', color: 'white' }}>
-            <HomeIcon size={18} />
+            <Home size={18} />
             <span className="btn-label">Inicio</span>
           </button>
           <button onClick={() => navigate("/equipos")} className="logout-btn" style={{ background: 'var(--success)', color: 'white' }}>
             <Package size={18} />
             <span className="btn-label">Equipos</span>
           </button>
+          <button onClick={() => navigate("/orden-trabajo")} className="logout-btn" style={{ background: '#6366F1', color: 'white' }}>
+            <ClipboardList size={18} />
+            <span className="btn-label">Orden de Trabajo</span>
+          </button>
           <button onClick={() => navigate("/informes")} className="logout-btn" style={{ background: '#EA580C', color: 'white' }}>
             <FileText size={18} />
-            <span className="btn-label">Informes</span>
+            <span className="btn-label">Informes Técnicos</span>
           </button>
           <button onClick={() => navigate("/cotizaciones")} className="logout-btn" style={{ background: '#DB2777', color: 'white' }}>
             <FileSpreadsheet size={18} />
             <span className="btn-label">Cotizaciones</span>
           </button>
-          <button onClick={() => navigate("/orden-trabajo")} className="logout-btn" style={{ background: '#6366F1', color: 'white' }}>
-            <ClipboardList size={18} />
-            <span className="btn-label">Orden Trabajo</span>
+          <button onClick={() => navigate("/orden-compra")} className="logout-btn" style={{ background: '#8B5CF6', color: 'white' }}>
+            <ShoppingCart size={18} />
+            <span className="btn-label">Orden de Compra</span>
           </button>
           <button onClick={() => navigate("/usuarios")} className="logout-btn" style={{ background: '#0D9488', color: 'white' }}>
             <UserCog size={18} />
