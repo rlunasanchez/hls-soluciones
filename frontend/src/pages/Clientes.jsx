@@ -145,10 +145,8 @@ function Clientes() {
   const clientesFiltrados = clientes.filter(c => {
     const texto = busqueda.toLowerCase();
     const matchBusqueda = !texto ||
-      c.razon_social?.toLowerCase().includes(texto) ||
-      c.codigo?.toLowerCase().includes(texto) ||
-      c.contacto_nombre?.toLowerCase().includes(texto);
-    const matchRut = !filtroRut || c.rut?.toLowerCase().includes(filtroRut.toLowerCase());
+      (c.razon_social || "").toLowerCase().includes(texto);
+    const matchRut = !filtroRut || (c.rut || "").toLowerCase().includes(filtroRut.toLowerCase());
     return matchBusqueda && matchRut;
   });
 
