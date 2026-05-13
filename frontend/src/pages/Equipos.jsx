@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Package, Plus, Save, Trash2, Edit, LogOut, Monitor, Printer, Scissors, Droplets, Search, ChevronDown, ChevronUp, Users, UserCog, FileText, FileSpreadsheet, ClipboardList, X, ShoppingCart, Home } from "lucide-react";
 import api from "../services/api";
@@ -43,6 +43,17 @@ function Equipos() {
   const [busquedaCliente, setBusquedaCliente] = useState("");
   const [mostrarDropdownClientes, setMostrarDropdownClientes] = useState(false);
   const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
+  const clienteDropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (clienteDropdownRef.current && !clienteDropdownRef.current.contains(event.target)) {
+        setMostrarDropdownClientes(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const [insumos, setInsumos] = useState([
     { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
@@ -317,7 +328,7 @@ if (mostrarFormulario) {
                   </div>
                   <div className="form-group" style={{ margin: 0, flex: 1 }}>
                     <label>Cliente Asociado *</label>
-                    <div style={{ position: 'relative' }}>
+                    <div ref={clienteDropdownRef} style={{ position: 'relative' }}>
                       <input
                         placeholder="Buscar cliente..."
                         value={busquedaCliente}
