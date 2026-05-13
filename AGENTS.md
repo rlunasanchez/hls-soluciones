@@ -124,6 +124,34 @@ useEffect(() => {
 - Corregido typo `coma` → `comuna`
 - Añadidos comentarios JSDoc en funciones principales
 
+### 5. Uniformización de Navegación y Mejoras UX (Mayo 2026)
+**Archivos modificados:**
+- `frontend/src/App.jsx`
+- `frontend/src/index.css`
+- `frontend/src/pages/Clientes.jsx`
+- `frontend/src/pages/OrdenTrabajo.jsx`
+- `frontend/src/pages/Cotizaciones.jsx`
+- `frontend/src/pages/Informes.jsx`
+- `frontend/src/pages/Equipos.jsx`
+- `frontend/src/pages/GestionUsuarios.jsx`
+- `frontend/src/pages/OrdenCompra.jsx` (nuevo)
+
+**Cambios:**
+- **App.jsx**: Agregar estado `checkingAuth` para evitar redirect loops al recargar, agregar ruta `/orden-compra`
+- **index.css**: Agregar estilos `.badge-garantia` y `.badge-no-garantia` para badges de garantía
+- **Clientes.jsx**: 
+  - Campo Dirección en fila propia (ancho completo)
+  - Sección Sucursales: campo Dirección en fila dedicada con ancho completo
+  - Header reorganizado con navegación consistente
+- **OrdenTrabajo.jsx**:
+  - Unificar estilos de tabla y paginación con otras páginas
+  - Usar badges para garantía en vez de spans inline
+  - Agregar dropdown de búsqueda por código EQ-XXXX
+  - Recargar lista de órdenes tras guardar (fetchOrdenes(1))
+- **Cotizaciones/Informes**: Remover botón flecha "volver", header consistente
+- **Equipos/GestiónUsuarios**: Agregar botón "Orden de Compra" en navegación
+- **OrdenCompra.jsx**: Nueva página placeholder con navegación consistente
+
 ## Estructura de Datos
 
 ### Cliente
