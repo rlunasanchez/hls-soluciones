@@ -144,8 +144,9 @@ function Clientes() {
 
   const clientesFiltrados = clientes.filter(c => {
     const texto = busqueda.toLowerCase();
-    const matchBusqueda = !texto ||
-      (c.razon_social || "").toLowerCase().includes(texto);
+    const razon = (c.razon_social || "").toLowerCase();
+    // Busca al inicio de la cadena o al inicio de cualquier palabra
+    const matchBusqueda = !texto || razon.startsWith(texto) || razon.includes(' ' + texto);
     const matchRut = !filtroRut || (c.rut || "").toLowerCase().includes(filtroRut.toLowerCase());
     return matchBusqueda && matchRut;
   });
