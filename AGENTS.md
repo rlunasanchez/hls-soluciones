@@ -162,6 +162,16 @@ useEffect(() => {
 - **Modal Equipo** (dentro de Clientes): Equipo, Marca, Nivel de Tintas → solo letras.
 - Corrección de variables no definidas: `sucursalesVisibles`, `setMostrarDirecciones`.
 
+### 7. Mejoras en Dropdowns de Búsqueda (Mayo 2026)
+**Archivos modificados:**
+- `frontend/src/pages/Equipos.jsx`
+- `frontend/src/pages/OrdenTrabajo.jsx`
+
+**Cambios:**
+- **Dropdowns filtran solo con 2+ caracteres**: Evita que al borrar el campo aparezcan todos los registros (clientes, equipos por serie, equipos por código).
+- **Cierre al clickear fuera**: En Equipos, el dropdown de "Cliente Asociado" ahora cierra automáticamente al hacer clic fuera del campo (patrón `useRef` + `mousedown`).
+- Consistencia con el patrón de dropdowns definido en convenciones de código.
+
 ## Estructura de Datos
 
 ### Cliente
