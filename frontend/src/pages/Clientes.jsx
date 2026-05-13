@@ -147,7 +147,7 @@ function Clientes() {
     const razon = (c.razon_social || "").toLowerCase();
     // Busca al inicio de la cadena o al inicio de cualquier palabra
     const matchBusqueda = !texto || razon.startsWith(texto) || razon.includes(' ' + texto);
-    const matchRut = !filtroRut || (c.rut || "").toLowerCase().includes(filtroRut.toLowerCase());
+    const matchRut = !filtroRut || (c.rut || "").toLowerCase().startsWith(filtroRut.toLowerCase());
     return matchBusqueda && matchRut;
   });
 
