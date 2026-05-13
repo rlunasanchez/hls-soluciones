@@ -36,8 +36,9 @@ function Clientes() {
     { tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" },
     { tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" },
     { tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" }
-  ]);
+]);
   const [sucursalesVisibles, setSucursalesVisibles] = useState(1);
+  const [rutError, setRutError] = useState("");
 
   const [todosEquipos, setTodosEquipos] = useState([]);
   const [mostrarModalEquipo, setMostrarModalEquipo] = useState(false);
@@ -74,6 +75,30 @@ function Clientes() {
       usuarioActual = "Usuario";
     }
   }
+
+  /**
+   * Valida formato RUT chileno (empresa o persona natural)
+   * @param {string} rut - RUT en formato 12.345.678-9 o 12.345.678-K
+   * @returns {boolean} true si es válido
+   */
+  const validarRUT = (rut) => {
+    if (!rut) return false;
+    const limpio = rut.replace(/\./g, '').toUpperCase();
+    const match = limpio.match(/^(\d+)-([K0-9])$/);
+    if (!match) return false;
+    const num = parseInt(match[1], 10);
+    if (num < 100000) return false;
+    const dv = match[2];
+    let suma = 0, mul = 2;
+    const digits = String(num).split('').reverse().join('');
+    for (let i = 0; i < digits.length; i++) {
+      suma += parseInt(digits[i], 10) * mul;
+      mul = mul === 7 ? 2 : mul + 1;
+    }
+    const res = 11 - (suma % 11);
+    const esperado = res === 11 ? '0' : res === 10 ? 'K' : String(res);
+    return dv === esperado;
+  };
 
   /**
    * Carga la lista de clientes desde el API
@@ -163,6 +188,10 @@ function Clientes() {
    */
   const guardarCliente = async (e) => {
     e.preventDefault();
+    if (nuevoCliente.rut && !validarRUT(nuevoCliente.rut)) {
+      alert("RUT inválido. Ejemplo: 12.345.678-9");
+      return;
+    }
     const dirs = sucursales.filter(s => s.direccion.trim() !== "");
     try {
       if (clienteEditando) {
@@ -186,6 +215,7 @@ function Clientes() {
         { tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" }
       ]);
       setSucursalesVisibles(1);
+      setRutError("");
       fetchClientes();
     } catch (err) {
       alert(err.response?.data?.msg || "Error al guardar");
@@ -215,6 +245,7 @@ function Clientes() {
       }
     }
     setSucursalesVisibles(dirs.filter(s => s.direccion).length || 1);
+    setRutError("");
     setNuevoCliente({
       codigo: c.codigo || "",
       razon_social: c.razon_social,
@@ -413,7 +444,8 @@ function Clientes() {
                   onClick={() => {
                     setMostrarFormulario(false);
                     setClienteEditando(null);
-                    setMostrarDirecciones(false);
+                    setSucursalesVisibles(1);
+                    setRutError("");
                     setNuevoCliente({
                       codigo: "", razon_social: "", giro: "", rut: "", direccion: "", ciudad: "", comuna: "", telefono: "",
                       contacto_nombre: "", contacto_email: "", contacto_fono: "", contacto_cargo: "", contacto_direccion: "", direcciones: []
@@ -452,15 +484,46 @@ function Clientes() {
                     <input
                       placeholder="Giro"
                       value={nuevoCliente.giro}
-                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, giro: e.target.value })}
+                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, giro: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '') })}
                     />
                   </div>
                   <div className="form-group">
-                    <label>RUT</label>
+                    <label>RUT {rutError && <span style={{ color: 'red', fontSize: '0.75rem' }}> — {rutError}</span>}</label>
                     <input
-                      placeholder="RUT"
+                      placeholder="Ej: 12.345.678-9"
                       value={nuevoCliente.rut}
-                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, rut: e.target.value })}
+                      style={rutError ? { border: '2px solid red', background: '#FEF2F2' } : {}}
+                      onChange={(e) => {
+                        let val = e.target.value.toUpperCase().replace(/[^0-9K-]/g, '');
+                        if (val.length > 12) val = val.slice(0, 12);
+                        const partes = val.split('-');
+                        if (partes.length === 2) {
+                          if (partes[1].length > 1) partes[1] = partes[1][0];
+                          if (partes[0].length > 0) partes[0] = partes[0].replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+                        } else if (partes.length === 1 && partes[0].length > 0) {
+                          partes[0] = partes[0].replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+                        }
+                        val = partes.join('-');
+                        setNuevoCliente({ ...nuevoCliente, rut: val });
+                        if (rutError && val.length >= 9 && validarRUT(val)) {
+                          setRutError("");
+                        }
+                      }}
+                      onBlur={(e) => {
+                        const val = e.target.value;
+                        if (!val) { setRutError(""); return; }
+                        const limpio = val.replace(/\./g, '').toUpperCase();
+                        const tieneGuion = limpio.includes('-');
+                        const match = limpio.match(/^(\d+)-([K0-9])$/);
+                        if (match) {
+                          if (validarRUT(val)) { setRutError(""); }
+                          else { setRutError("RUT inválido"); }
+                          return;
+                        }
+                        if (tieneGuion && !match) { setRutError("RUT inválido"); }
+                        else if (!tieneGuion && limpio.length >= 5) { setRutError("Falta el guion y dígito verificador"); }
+                        else { setRutError(""); }
+                      }}
                     />
                   </div>
                 </div>
@@ -481,7 +544,7 @@ function Clientes() {
                     <input
                       placeholder="Ciudad"
                       value={nuevoCliente.ciudad}
-                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, ciudad: e.target.value })}
+                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, ciudad: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '') })}
                     />
                   </div>
                   <div className="form-group">
@@ -489,7 +552,7 @@ function Clientes() {
                     <input
                       placeholder="Comuna"
                       value={nuevoCliente.comuna}
-                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, comuna: e.target.value })}
+                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, comuna: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '') })}
                     />
                   </div>
                   <div className="form-group">
@@ -497,7 +560,7 @@ function Clientes() {
                     <input
                       placeholder="Fono"
                       value={nuevoCliente.telefono}
-                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, telefono: e.target.value })}
+                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, telefono: e.target.value.replace(/[^0-9+]/g, '') })}
                     />
                   </div>
                 </div>
@@ -510,7 +573,7 @@ function Clientes() {
                     <input
                       placeholder="Nombre"
                       value={nuevoCliente.contacto_nombre}
-                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_nombre: e.target.value })}
+                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_nombre: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '') })}
                     />
                   </div>
                   <div className="form-group">
@@ -527,7 +590,7 @@ function Clientes() {
                     <input
                       placeholder="Fono"
                       value={nuevoCliente.contacto_fono}
-                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_fono: e.target.value })}
+                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_fono: e.target.value.replace(/[^0-9+]/g, '') })}
                     />
                   </div>
                 </div>
@@ -537,7 +600,7 @@ function Clientes() {
                     <input
                       placeholder="Cargo"
                       value={nuevoCliente.contacto_cargo}
-                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_cargo: e.target.value })}
+                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_cargo: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '') })}
                     />
                   </div>
                   <div className="form-group">
@@ -596,7 +659,7 @@ function Clientes() {
                         <input
                           placeholder="Fono"
                           value={suc.fono}
-                          onChange={(e) => actualizarSucursal(idx, 'fono', e.target.value)}
+                          onChange={(e) => actualizarSucursal(idx, 'fono', e.target.value.replace(/[^0-9+]/g, ''))}
                         />
                       </div>
                       <div className="form-group" style={{ margin: 0 }}>
@@ -604,7 +667,7 @@ function Clientes() {
                         <input
                           placeholder="Ciudad"
                           value={suc.ciudad}
-                          onChange={(e) => actualizarSucursal(idx, 'ciudad', e.target.value)}
+                          onChange={(e) => actualizarSucursal(idx, 'ciudad', e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, ''))}
                         />
                       </div>
                       <div className="form-group" style={{ margin: 0 }}>
@@ -612,7 +675,7 @@ function Clientes() {
                         <input
                           placeholder="Comuna"
                           value={suc.comuna}
-                          onChange={(e) => actualizarSucursal(idx, 'comuna', e.target.value)}
+                          onChange={(e) => actualizarSucursal(idx, 'comuna', e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, ''))}
                         />
                       </div>
                       <button
@@ -638,6 +701,8 @@ function Clientes() {
                 <button type="button" className="cancel-btn" onClick={() => {
                   setMostrarFormulario(false);
                   setClienteEditando(null);
+                  setSucursalesVisibles(1);
+                  setRutError("");
                   setNuevoCliente({
                     codigo: "", razon_social: "", giro: "", rut: "", direccion: "", ciudad: "", comuna: "", telefono: "",
                     contacto_nombre: "", contacto_email: "", contacto_fono: "", contacto_cargo: "", contacto_direccion: "", direcciones: []
@@ -722,7 +787,7 @@ function Clientes() {
       </div>
 
       <div className="table-header">
-        <button onClick={() => { setMostrarFormulario(true); setMostrarDirecciones(false); setNuevoCliente({
+        <button onClick={() => { setMostrarFormulario(true); setSucursalesVisibles(1); setRutError(""); setNuevoCliente({
           codigo: "", razon_social: "", giro: "", rut: "", direccion: "", ciudad: "", comuna: "", telefono: "",
           contacto_nombre: "", contacto_email: "", contacto_fono: "", contacto_cargo: "", contacto_direccion: "", direcciones: []
         }); }} className="main-btn">
@@ -1049,12 +1114,12 @@ function Clientes() {
                   <div className="form-group">
                     <label>Equipo *</label>
                     <input placeholder="Nombre del equipo" value={nuevoEquipoModal.equipo}
-                      onChange={e => setNuevoEquipoModal({...nuevoEquipoModal, equipo: e.target.value})} required />
+                      onChange={e => setNuevoEquipoModal({...nuevoEquipoModal, equipo: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')})} required />
                   </div>
                   <div className="form-group">
                     <label>Marca *</label>
                     <input placeholder="Marca" value={nuevoEquipoModal.marca}
-                      onChange={e => setNuevoEquipoModal({...nuevoEquipoModal, marca: e.target.value})} required />
+                      onChange={e => setNuevoEquipoModal({...nuevoEquipoModal, marca: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')})} required />
                   </div>
                   <div className="form-group">
                     <label>Modelo *</label>
@@ -1076,7 +1141,7 @@ function Clientes() {
                   <div className="form-group">
                     <label>Nivel Tintas</label>
                     <input placeholder="Nivel de tintas" value={nuevoEquipoModal.nivel_tintas}
-                      onChange={e => setNuevoEquipoModal({...nuevoEquipoModal, nivel_tintas: e.target.value})} />
+                      onChange={e => setNuevoEquipoModal({...nuevoEquipoModal, nivel_tintas: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')})} />
                   </div>
                 </div>
               </div>

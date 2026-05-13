@@ -150,7 +150,17 @@ useEffect(() => {
   - Recargar lista de órdenes tras guardar (fetchOrdenes(1))
 - **Cotizaciones/Informes**: Remover botón flecha "volver", header consistente
 - **Equipos/GestiónUsuarios**: Agregar botón "Orden de Compra" en navegación
-- **OrdenCompra.jsx**: Nueva página placeholder con navegación consistente
+
+### 6. Validación de Campos en Formularios (Mayo 2026)
+**Archivos modificados:**
+- `frontend/src/pages/Clientes.jsx`
+
+**Cambios:**
+- **RUT chileno**: validación completa con dígito verificador (módulo 11), auto-formato con puntos y guion, límite de 12 caracteres, solo permite números/K/guion. Error en rojo con mensaje contextual ("RUT inválido", "Falta el guion y dígito verificador"). Números menores a 100.000 se rechazan.
+- **Solo letras** (regex `[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]`): Ciudad, Comuna, Giro, Nombre Contacto, Cargo (datos principales y sucursales).
+- **Solo números** (regex `[^0-9+]`): Fono principal, Fono contacto, Fono sucursales.
+- **Modal Equipo** (dentro de Clientes): Equipo, Marca, Nivel de Tintas → solo letras.
+- Corrección de variables no definidas: `sucursalesVisibles`, `setMostrarDirecciones`.
 
 ## Estructura de Datos
 
