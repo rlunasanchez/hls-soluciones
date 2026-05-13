@@ -301,20 +301,20 @@ function OrdenTrabajo() {
   };
 
   // Filtrar clientes y equipos para la búsqueda
-  const clientesFiltrados = clientes.filter(c => 
+  const clientesFiltrados = busquedaCliente.length >= 2 ? clientes.filter(c => 
     c.razon_social?.toLowerCase().includes(busquedaCliente.toLowerCase()) ||
     c.rut?.toLowerCase().includes(busquedaCliente.toLowerCase())
-  ).slice(0, 10);
+  ).slice(0, 10) : [];
 
-   const equiposFiltrados = equipos.filter(e => {
+   const equiposFiltrados = busquedaSerie.length >= 2 ? equipos.filter(e => {
      const serie = busquedaSerie.toLowerCase();
-     return !serie || e.serie?.toLowerCase().includes(serie);
-   }).slice(0, 10);
+     return e.serie?.toLowerCase().includes(serie);
+   }).slice(0, 10) : [];
 
-   const equiposCodigoFiltrados = equipos.filter(e => {
+   const equiposCodigoFiltrados = busquedaCodigo.length >= 2 ? equipos.filter(e => {
      const codigo = busquedaCodigo.toLowerCase();
-     return !codigo || e.codigo?.toLowerCase().includes(codigo);
-   }).slice(0, 10);
+     return e.codigo?.toLowerCase().includes(codigo);
+   }).slice(0, 10) : [];
 
   // Verificar número de orden único
   const verificarNumeroOrden = async (numero) => {
