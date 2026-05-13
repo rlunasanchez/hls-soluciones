@@ -172,6 +172,14 @@ useEffect(() => {
 - **Cierre al clickear fuera**: En Equipos, el dropdown de "Cliente Asociado" ahora cierra automáticamente al hacer clic fuera del campo (patrón `useRef` + `mousedown`).
 - Consistencia con el patrón de dropdowns definido en convenciones de código.
 
+### 8. Mejoras en Filtros de Búsqueda (Mayo 2026)
+**Archivos modificados:**
+- `frontend/src/pages/Clientes.jsx`
+
+**Cambios:**
+- **Filtro Razón Social**: ahora busca solo al inicio de la cadena o al inicio de una palabra (`startsWith()` o después de espacio). Evita falsos positivos como buscar "d" y encontrar "Rodrigo".
+- **Filtro RUT**: ahora busca solo desde el inicio (`startsWith()`). Evita que buscar "00" encuentre cualquier RUT que contenga "00" en medio.
+
 ## Estructura de Datos
 
 ### Cliente
