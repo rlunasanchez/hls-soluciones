@@ -264,9 +264,9 @@ function Equipos() {
     setMostrarDropdownClientes(false);
   };
 
-  const clientesFiltrados = clientes.filter(c =>
+  const clientesFiltrados = busquedaCliente.length >= 2 ? clientes.filter(c =>
     c.razon_social?.toLowerCase().includes(busquedaCliente.toLowerCase())
-  ).slice(0, 8);
+  ).slice(0, 8) : [];
 
   const getIcono = (equipo) => {
     const eq = equipo?.toLowerCase() || "";
@@ -323,9 +323,11 @@ if (mostrarFormulario) {
                         value={busquedaCliente}
                         onChange={(e) => {
                           setBusquedaCliente(e.target.value);
-                          setMostrarDropdownClientes(true);
+                          setMostrarDropdownClientes(e.target.value.length >= 2);
                         }}
-                        onFocus={() => setMostrarDropdownClientes(true)}
+                        onFocus={() => {
+                          if (busquedaCliente.length >= 2) setMostrarDropdownClientes(true);
+                        }}
                         required
                       />
                       {clienteSeleccionado && (
