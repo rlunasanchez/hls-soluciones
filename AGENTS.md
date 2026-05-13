@@ -280,3 +280,22 @@ ALTER TABLE equipos ADD COLUMN cliente_id INT AFTER codigo;
 ```sql
 ALTER TABLE clientes ADD COLUMN codigo VARCHAR(50) UNIQUE AFTER id;
 ```
+
+---
+
+## Próximos Pasos / Pendientes
+
+### Continuar mañana: Módulo Orden de Trabajo
+**Fecha:** 14 de Mayo 2026
+**Estado:** Pendiente
+**Prioridad:** Alta
+
+**Tareas pendientes en OrdenTrabajo.jsx:**
+1. Revisar flujo completo de creación/edición de órdenes
+2. Verificar integración con búsqueda de clientes y equipos
+3. Validar campos del formulario (solo letras/números donde corresponda)
+4. Revisar que los dropdowns de cliente y equipo funcionen correctamente
+5. Probar guardado y recarga de lista tras crear orden
+6. Verificar paginación y filtros
+
+**Nota:** El módulo Orden de Trabajo fue refactorizado recientemente (Sección 5) pero requiere pruebas exhaustivas y ajustes de UX. Revisar también que los datos del equipo se carguen correctamente al buscar por código EQ-XXXX.
