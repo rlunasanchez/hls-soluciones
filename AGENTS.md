@@ -92,7 +92,7 @@ useEffect(() => {
 - Equipos solo creables desde vista de Clientes (no página Equipos)
 - Modal dual: crea (POST) o edita (PUT) equipos
 - Código EQ-XXXX auto-calculado desde array local
-- Búsqueda unificada: busca en datos de cliente Y datos de equipo
+- Filtro por razón social: busca solo en datos de cliente (razón social, código, contacto)
 - Vista expandida al buscar: tabla completa de equipos con toggle
 
 ### 2. Órdenes de Trabajo - Mejoras UX

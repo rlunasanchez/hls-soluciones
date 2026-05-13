@@ -144,18 +144,10 @@ function Clientes() {
 
   const clientesFiltrados = clientes.filter(c => {
     const texto = busqueda.toLowerCase();
-    const equiposCliente = equiposPorCliente[c.id] || [];
-    const matchEquipo = texto ? equiposCliente.some(eq =>
-      eq.codigo?.toLowerCase().includes(texto) ||
-      eq.equipo?.toLowerCase().includes(texto) ||
-      eq.marca?.toLowerCase().includes(texto) ||
-      eq.serie?.toLowerCase().includes(texto)
-    ) : false;
     const matchBusqueda = !texto ||
       c.razon_social?.toLowerCase().includes(texto) ||
       c.codigo?.toLowerCase().includes(texto) ||
-      c.contacto_nombre?.toLowerCase().includes(texto) ||
-      matchEquipo;
+      c.contacto_nombre?.toLowerCase().includes(texto);
     const matchRut = !filtroRut || c.rut?.toLowerCase().includes(filtroRut.toLowerCase());
     return matchBusqueda && matchRut;
   });
