@@ -122,7 +122,10 @@ function Equipos() {
 
   const equiposFiltrados = equipos.filter(eq => {
     const textoBusqueda = busqueda.toLowerCase();
-    return !textoBusqueda || eq.serie?.toLowerCase().includes(textoBusqueda) || eq.codigo?.toLowerCase().includes(textoBusqueda) || eq.equipo?.toLowerCase().includes(textoBusqueda) || eq.marca?.toLowerCase().includes(textoBusqueda) || eq.cliente_nombre?.toLowerCase().includes(textoBusqueda);
+    return !textoBusqueda || 
+      eq.serie?.toLowerCase().includes(textoBusqueda) || 
+      eq.codigo?.toLowerCase().includes(textoBusqueda) ||
+      eq.cliente_nombre?.toLowerCase().includes(textoBusqueda);
   });
 
   const totalPaginas = Math.ceil(equiposFiltrados.length / equiposPorPagina);
@@ -547,10 +550,10 @@ if (mostrarFormulario) {
       <div className="filters-section">
         <div className="filters-content">
           <div className="filter-group">
-            <label>Buscar por Serie o Código</label>
+            <label>Buscar por Serie, Código o Cliente</label>
             <input
               type="text"
-              placeholder="Serie o código del equipo..."
+              placeholder="Serie, código (EQ-XXXX) o nombre del cliente..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
             />

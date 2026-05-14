@@ -23,6 +23,7 @@ function OrdenTrabajo() {
     itemsPerPage:10
   });
   const [editingId, setEditingId] = useState(null);
+  const [filtroNumeroOrden, setFiltroNumeroOrden] = useState("");
   
   // Estados para autocompletar clientes y equipos
   const [clientes, setClientes] = useState([]);
@@ -113,15 +114,20 @@ function OrdenTrabajo() {
   const fetchOrdenes = async (page = 1) => {
     setLoading(true);
     try {
-      const res = await api.get(`/api/ordenes?page=${page}&limit=10`);
+      const res = await api.get(`/api/ordenes?page=${page}&limit=100`);
       setOrdenes(res.data.ordenes);
-      setPagination(res.data.pagination);
+      setPagination(prev => ({ ...prev, currentPage: page, totalItems: res.data.pagination.totalItems }));
     } catch (err) {
       console.error("Error al cargar órdenes:", err);
     } finally {
       setLoading(false);
     }
   };
+
+  const ordenesFiltradas = ordenes.filter(orden => {
+    if (!filtroNumeroOrden) return true;
+    return orden.numero_orden?.toLowerCase().includes(filtroNumeroOrden.toLowerCase());
+  });
 
   const editarOrden = async (orden) => {
     setEditingId(orden.id);
@@ -303,7 +309,8 @@ function OrdenTrabajo() {
   // Filtrar clientes y equipos para la búsqueda
   const clientesFiltrados = busquedaCliente.length >= 2 ? clientes.filter(c => 
     c.razon_social?.toLowerCase().includes(busquedaCliente.toLowerCase()) ||
-    c.rut?.toLowerCase().includes(busquedaCliente.toLowerCase())
+    c.rut?.toLowerCase().includes(busquedaCliente.toLowerCase()) ||
+    c.codigo?.toLowerCase().includes(busquedaCliente.toLowerCase())
   ).slice(0, 10) : [];
 
    const equiposFiltrados = busquedaSerie.length >= 2 ? equipos.filter(e => {
@@ -422,6 +429,7 @@ function OrdenTrabajo() {
     setBusquedaCliente("");
     setBusquedaSerie("");
     setErrorNumeroOrden("");
+    setFiltroNumeroOrden("");
   };
 
   const irAInformeTecnico = () => {
@@ -480,10 +488,25 @@ function OrdenTrabajo() {
       {!mostrarFormulario ? (
           <>
             <div className="table-header">
-              <button onClick={() => setMostrarFormulario(true)} className="main-btn">
-                <Plus size={20} />
-                Nueva Orden
-              </button>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <input
+                  type="text"
+                  placeholder="Buscar por N° de Orden..."
+                  value={filtroNumeroOrden}
+                  onChange={(e) => setFiltroNumeroOrden(e.target.value)}
+                  style={{
+                    padding: '10px 16px',
+                    border: '2px solid var(--border)',
+                    borderRadius: '8px',
+                    fontSize: '0.95rem',
+                    minWidth: '250px'
+                  }}
+                />
+                <button onClick={() => setMostrarFormulario(true)} className="main-btn">
+                  <Plus size={20} />
+                  Nueva Orden
+                </button>
+              </div>
             </div>
 
             {loading ? (
@@ -491,10 +514,10 @@ function OrdenTrabajo() {
                 <ClipboardList size={48} />
                 <p>Cargando órdenes...</p>
               </div>
-            ) : ordenes.length === 0 ? (
+            ) : ordenesFiltradas.length === 0 ? (
               <div className="empty-state">
                 <ClipboardList size={48} />
-                <p>No hay órdenes registradas</p>
+                <p>No hay órdenes que coincidan con "{filtroNumeroOrden}"</p>
               </div>
             ) : (
               <>
@@ -512,7 +535,7 @@ function OrdenTrabajo() {
                       </tr>
                     </thead>
                     <tbody>
-                      {ordenes.map((orden) => (
+                      {ordenesFiltradas.map((orden) => (
                         <tr key={orden.id}>
                           <td data-label="N° Orden"><span style={{ fontWeight: '600', color: 'var(--primary)' }}>{orden.numero_orden}</span></td>
                           <td data-label="Fecha">{orden.fecha ? new Date(orden.fecha).toLocaleDateString() : '-'}</td>
@@ -557,7 +580,7 @@ function OrdenTrabajo() {
                 </div>
 
                 <div className="cards-table">
-                  {ordenes.map((orden) => (
+                  {ordenesFiltradas.map((orden) => (
                     <div key={orden.id} className="data-card">
                       <div className="data-card-header">
                         <strong>{orden.numero_orden}</strong>
@@ -946,8 +969,13 @@ function OrdenTrabajo() {
                               onMouseEnter={(e) => e.currentTarget.style.background = 'var(--primary-light)'}
                               onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
                             >
-                              <div style={{ fontWeight: '600', color: 'var(--text)' }}>
-                                {cliente.razon_social}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' }}>
+                                  {cliente.codigo || 'CL-XXXX'}
+                                </span>
+                                <span style={{ fontWeight: '600', color: 'var(--text)' }}>
+                                  {cliente.razon_social}
+                                </span>
                               </div>
                               <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                                 RUT: {cliente.rut || 'N/A'} | {cliente.direccion || ''}, {cliente.comuna || ''}
@@ -1017,7 +1045,7 @@ function OrdenTrabajo() {
                       type="text"
                       placeholder="Comuna"
                       value={nuevaOrden.comuna}
-                      onChange={(e) => setNuevaOrden({...nuevaOrden, comuna: e.target.value})}
+                      onChange={(e) => setNuevaOrden({...nuevaOrden, comuna: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')})}
                       style={{
                         width: '100%',
                         padding: '12px 16px',
@@ -1042,7 +1070,7 @@ function OrdenTrabajo() {
                       type="text"
                       placeholder="Nombre del contacto"
                       value={nuevaOrden.contacto}
-                      onChange={(e) => setNuevaOrden({...nuevaOrden, contacto: e.target.value})}
+                      onChange={(e) => setNuevaOrden({...nuevaOrden, contacto: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')})}
                       style={{
                         width: '100%',
                         padding: '12px 16px',
@@ -1061,7 +1089,7 @@ function OrdenTrabajo() {
                       type="tel"
                       placeholder="Teléfono de contacto"
                       value={nuevaOrden.fonoPrincipal}
-                      onChange={(e) => setNuevaOrden({...nuevaOrden, fonoPrincipal: e.target.value})}
+                      onChange={(e) => setNuevaOrden({...nuevaOrden, fonoPrincipal: e.target.value.replace(/[^0-9+]/g, '')})}
                       style={{
                         width: '100%',
                         padding: '12px 16px',
@@ -1080,7 +1108,7 @@ function OrdenTrabajo() {
                       type="text"
                       placeholder="Nombre y apellido del técnico"
                       value={nuevaOrden.tecnicoAsignado}
-                      onChange={(e) => setNuevaOrden({...nuevaOrden, tecnicoAsignado: e.target.value})}
+                      onChange={(e) => setNuevaOrden({...nuevaOrden, tecnicoAsignado: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')})}
                       required
                       style={{
                         width: '100%',

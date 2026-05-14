@@ -36,7 +36,7 @@ router.get("/", async (req, res) => {
       const term = `%${q.trim()}%`;
       params = [term, term, term, term];
     }
-    sql += ` ORDER BY e.id DESC`;
+    sql += ` ORDER BY CAST(SUBSTRING(IFNULL(e.codigo, 'EQ-0001'), 4) AS UNSIGNED) DESC`;
     const [equipos] = await pool.query(sql, params);
     res.json(equipos);
   } catch (err) {

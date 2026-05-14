@@ -396,3 +396,40 @@ Al agregar nuevos botones o elementos, USAR siempreexactamente estos estilos:
   - Hasta 5 sucursales
   - Tipo con select (Matriz, Sucursal, Bodega, Oficina, Otro)
   - Al editar se cargan las existentes
+
+---
+
+## Notas de Sesión (14/05/2026)
+
+### Cambios Realizados
+
+#### 1. Validaciones en Orden de Trabajo (Datos del Cliente)
+- **Comuna**: Solo letras (sin números) - `replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')`
+- **Fono Principal**: Solo números (sin letras) - `replace(/[^0-9+]/g, '')`
+- **Técnico Asignado**: Solo letras (sin números)
+- **Contacto**: Solo letras
+
+#### 2. Orden correlativo DESC en listados
+- **backend/routes/clientes.js**: ORDER BY código DESC (CL-0003 → CL-0002 → CL-0001)
+- **backend/routes/equipos.js**: ORDER BY código DESC (EQ-0003 → EQ-0002 → EQ-0001)
+- El más nuevo aparece primero
+
+#### 3. Dropdown de clientes en Orden de Trabajo
+- Muestra código `CL-XXXX` con badge azul
+- Búsqueda incluye código del cliente
+
+#### 4. Filtro RUT en Mantenedor de Clientes
+- Auto-formatea con puntos y guion: `12.345.678-9`
+- Mayúsculas, solo números/K/guion, límite 12 caracteres
+- Placeholder actualizado: "Filtrar por RUT (ej: 12.345.678-9)..."
+
+#### 5. Buscador de Equipos
+- Label: "Buscar por Serie, Código o Cliente"
+- Placeholder: "Serie, código (EQ-XXXX) o nombre del cliente..."
+- Busca por: Serie, Código (EQ-XXXX), Nombre del cliente
+
+#### 6. Filtro por número de orden en Orden de Trabajo
+- Input para buscar por N° de orden en la lista
+- Filtro case-insensitive
+- Mensaje "No hay órdenes que coincidan con..." cuando no hay resultados
+- Se limpia al cerrar/el formulario

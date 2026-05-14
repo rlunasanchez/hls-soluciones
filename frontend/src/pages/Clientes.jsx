@@ -769,9 +769,21 @@ function Clientes() {
             <label>RUT</label>
             <input
               type="text"
-              placeholder="Filtrar por RUT..."
+              placeholder="Filtrar por RUT (ej: 12.345.678-9)..."
               value={filtroRut}
-              onChange={(e) => setFiltroRut(e.target.value)}
+              onChange={(e) => {
+                let val = e.target.value.toUpperCase().replace(/[^0-9K-]/g, '');
+                if (val.length > 12) val = val.slice(0, 12);
+                const partes = val.split('-');
+                if (partes.length === 2) {
+                  if (partes[1].length > 1) partes[1] = partes[1][0];
+                  if (partes[0].length > 0) partes[0] = partes[0].replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+                } else if (partes.length === 1 && partes[0].length > 0) {
+                  partes[0] = partes[0].replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+                }
+                val = partes.join('-');
+                setFiltroRut(val);
+              }}
             />
           </div>
         </div>
