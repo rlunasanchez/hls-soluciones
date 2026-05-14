@@ -431,14 +431,7 @@ function OrdenTrabajo() {
     setErrorNumeroOrden("");
     setFiltroNumeroOrden("");
   };
-
-  const irAInformeTecnico = () => {
-    navigate("/informes");
-  };
-
-  const irAInformeCotizacion = () => {
-    navigate("/cotizaciones");
-  };
+  // Funciones de navegación eliminadas (accesos desde el menú)
 
   return (
     <div className="container" style={{ background: 'var(--bg)', minHeight: '100vh' }}>
@@ -666,15 +659,6 @@ function OrdenTrabajo() {
                       ›
                     </button>
                   </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginTop: '24px', flexWrap: 'wrap' }}>
-                  <button onClick={irAInformeTecnico} className="main-btn" style={{ background: '#EA580C' }}>
-                    <FileText size={18} /> Informe Técnico
-                  </button>
-                  <button onClick={irAInformeCotizacion} className="main-btn" style={{ background: '#DB2777' }}>
-                    <FileSpreadsheet size={18} /> Informe Cotización
-                  </button>
                 </div>
               </>
             )}
