@@ -702,7 +702,7 @@ function Clientes() {
                   <X size={20} /> Cancelar
                 </button>
                 <button type="submit" className="main-btn">
-                  <Save size={20} /> Guardar
+                  <Save size={20} /> {clienteEditando ? "Guardar Cambios" : "Guardar Cliente"}
                 </button>
               </div>
             </form>

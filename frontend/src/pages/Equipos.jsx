@@ -495,7 +495,7 @@ if (mostrarFormulario) {
                   <X size={20} /> Cancelar
                 </button>
                 <button type="submit" className="main-btn">
-                  <Save size={20} /> Guardar
+                  <Save size={20} /> {equipoEditando ? "Guardar Cambios" : "Guardar Equipo"}
                 </button>
               </div>
             </form>
