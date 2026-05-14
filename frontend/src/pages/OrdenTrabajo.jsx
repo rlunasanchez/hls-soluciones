@@ -1556,7 +1556,7 @@ function OrdenTrabajo() {
                   <X size={20} /> Cancelar
                 </button>
                 <button type="submit" className="main-btn">
-                  <Save size={20} /> {editingId ? "Actualizar Orden" : "Guardar Orden"}
+                  <Save size={20} /> {editingId ? "Guardar Cambios" : "Guardar Orden"}
                 </button>
               </div>
             </form>
