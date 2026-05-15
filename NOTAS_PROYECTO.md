@@ -433,3 +433,47 @@ Al agregar nuevos botones o elementos, USAR siempreexactamente estos estilos:
 - Filtro case-insensitive
 - Mensaje "No hay órdenes que coincidan con..." cuando no hay resultados
 - Se limpia al cerrar/el formulario
+
+---
+
+## Notas de Sesión (04/05/2026)
+
+### Diseño Responsive Completo
+Implementación de diseño responsive para todas las vistas:
+
+**Breakpoints implementados:**
+- Pantallas grandes (1600px+): Grid de 3 columnas en Home
+- Notebook/Desktop (1280px): Labels de navegación ocultos, solo iconos
+- Tablet landscape (1024px): Grid de 2 columnas en Home
+- Tablet portrait/Celular grande (768px): Vista de cards, formularios 1 columna
+- Celular (480px): Padding reducido, fuentes más pequeñas
+
+**CSS (index.css):**
+- 8 media queries para 5 breakpoints
+- Clases nuevas: `nav-buttons`, `btn-label`, `cards-table`, `data-card`, `form-row-2` a `form-row-6`, `home-grid`, `page-content`
+
+**Modificaciones en componentes:**
+- **Home.jsx**: Grid de tarjetas responsive
+- **Clientes.jsx**: Grid de sucursales con auto-fit, vista cards en móvil
+- **Equipos.jsx**: Insumos responsive, vista cards
+- **OrdenTrabajo.jsx**: Grids responsive, vista cards
+- **GestionUsuarios.jsx**: Formulario responsive, vista cards
+
+### Correcciones JSX
+- **OrdenTrabajo.jsx**: Etiqueta `</div>` extra corregida
+- **Equipos.jsx**: Estructura de comentarios y etiquetas corregidas
+
+### Simplificación Buscador de Equipos
+- **OrdenTrabajo.jsx**: Ahora busca solo por serie, eliminados campos equipo/marca/modelo
+- **Equipos.jsx**: Buscador simplificado a solo serie, siempre visible
+
+### Formulario Nuevo Equipo
+- Restaurado formulario completo con todos los campos (equipo, marca, modelo, serie, contador, tintas, 12 insumos, avería)
+
+### Campos Comentados en Orden de Trabajo
+- Contador Páginas OUT y Nivel Tinta comentados con nota para restaurar
+- Mantenidos visibles: Equipo, Marca, Modelo, Serie e Insumos
+
+### Estructura Buscador OrdenTrabajo
+- Buscador por serie en sección "Datos del Equipo"
+- Al seleccionar equipo se llenan: equipo, marca, modelo, serie, contador, nivel tinta, insumos
