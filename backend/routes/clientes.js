@@ -51,7 +51,20 @@ router.post("/", authMiddleware, async (req, res) => {
   const sql = `INSERT INTO clientes (codigo, razon_social, giro, rut, direccion, ciudad, comuna, telefono, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion) VALUES (${escape(codigo)}, ${escape(razon_social)}, ${escape(giro)}, ${escape(rut)}, ${escape(direccion)}, ${escape(ciudad)}, ${escape(comuna)}, ${escape(telefono)}, ${escape(contacto_nombre)}, ${escape(contacto_email)}, ${escape(contacto_fono)}, ${escape(contacto_cargo)}, ${escape(contacto_direccion)})`;
   console.log("Insert cliente:", sql);
   try {
-    await pool.query(sql);
+    const [result] = await pool.query(sql);
+    const clienteId = result.insertId;
+
+    if (direcciones && direcciones.length > 0) {
+      for (const d of direcciones) {
+        if (d.direccion && d.direccion.trim()) {
+          await pool.query(
+            "INSERT INTO clientes_direcciones (cliente_id, tipo_direccion, direccion, fono, ciudad, comuna) VALUES (?, ?, ?, ?, ?, ?)",
+            [clienteId, d.tipo_direccion || null, d.direccion, d.fono || null, d.ciudad || null, d.comuna || null]
+          );
+        }
+      }
+    }
+
     res.status(201).json({ msg: "Cliente creado", codigo });
   } catch (err) {
     console.error(err);

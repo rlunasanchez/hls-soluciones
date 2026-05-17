@@ -283,6 +283,79 @@ ALTER TABLE clientes ADD COLUMN codigo VARCHAR(50) UNIQUE AFTER id;
 
 ---
 
+## 🌩️ Deploy en la Nube (Vercel + Render + Neon)
+
+### URLs de Producción
+| Servicio | URL |
+|----------|-----|
+| **Frontend** | `https://hls-soluciones.vercel.app` |
+| **Backend** | `https://hls-soluciones.onrender.com` |
+| **Base de datos** | Neon (PostgreSQL) |
+
+### Ramas de Git
+| Rama | Base de datos | Uso |
+|------|--------------|-----|
+| `main` | MySQL (local) | Desarrollo local |
+| `deploy/cloud` | PostgreSQL (Neon) | Deploy en la nube |
+
+### Flujo de Trabajo: Local → Producción
+
+Cuando trabajes en **local** (rama `main` con MySQL) y quieras subir los cambios a producción:
+
+```bash
+# 1. Primero commit en local (main)
+git add .
+git commit -m "Descripción del cambio"
+
+# 2. Pusheás main (opcional, para respaldo)
+git push origin main
+
+# 3. Te pasás a deploy/cloud
+git checkout deploy/cloud
+
+# 4. Traés los cambios de main
+git merge main
+
+# 5. Resolvés conflictos si los hay:
+#    - backend/config/db.js → aceptar versión de deploy/cloud (usa pg, no mysql2)
+#    - backend/routes/*.js → aceptar versión de deploy/cloud ($1 en vez de ?, etc.)
+#    - backend/package.json → aceptar versión de deploy/cloud (pg, no mysql2)
+# Para resolver rápido:
+git checkout --theirs backend/config/db.js      # mantener PostgreSQL
+git checkout --theirs backend/package.json       # mantener pg
+git checkout --theirs backend/routes/auth.js     # mantener PostgreSQL
+git checkout --theirs backend/routes/equipos.js
+git checkout --theirs backend/routes/clientes.js
+git checkout --theirs backend/routes/ordenes.js
+git add .
+git commit -m "Merge main → deploy/cloud"
+
+# 6. Pusheás deploy/cloud → Render y Vercel se actualizan solos
+git push origin deploy/cloud
+
+# 7. Volvés a main para seguir trabajando
+git checkout main
+```
+
+> ⚠️ **Importante**: Los archivos que **siempre difieren** entre ramas son los de la base de datos (db.js, rutas, package.json). Cuando hagas merge, aceptá siempre la versión de `deploy/cloud` para esos archivos.
+
+### Variables de Entorno Cloud
+
+**Render (Backend):**
+| Variable | Valor |
+|----------|-------|
+| `DATABASE_URL` | Connection string de Neon (PostgreSQL) |
+| `JWT_SECRET` | Clave secreta JWT |
+| `NODE_ENV` | `production` |
+| `FRONTEND_URL` | `https://hls-soluciones.vercel.app` |
+
+**Vercel (Frontend):**
+| Variable | Valor |
+|----------|-------|
+| `VITE_API_URL` | `https://hls-soluciones.onrender.com` |
+
+---
+
 ## Próximos Pasos / Pendientes
 
 ### Continuar mañana: Módulo Orden de Trabajo
