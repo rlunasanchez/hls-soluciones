@@ -1257,15 +1257,16 @@ table tr:last-child td {
   }
 
   .equipos-asociados tr {
-    margin-bottom: 12px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: white;
-    padding: 12px;
+    margin-bottom: 16px;
+    border: none;
+    border-radius: 12px;
+    background: var(--primary-light);
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   }
 
   .equipos-asociados td {
-    padding: 8px 12px;
+    padding: 6px 0;
     border: none;
     text-align: left;
   }
@@ -1275,7 +1276,33 @@ table tr:last-child td {
     font-weight: 600;
     color: var(--primary);
     display: block;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .equipos-asociados td[data-label="Código"] {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--primary);
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(12, 74, 140, 0.2);
+    margin-bottom: 8px;
+  }
+
+  .equipos-asociados td[data-label="Código"]::before {
+    display: none;
+  }
+
+  .equipos-asociados td[data-label="Acción"] {
+    padding-top: 12px;
+    display: flex;
+    gap: 8px;
+  }
+
+  .equipos-asociados td[data-label="Acción"]::before {
+    display: none;
   }
   
   .form-actions-bar {
