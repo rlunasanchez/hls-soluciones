@@ -339,6 +339,34 @@ git checkout main
 
 > ⚠️ **Importante**: Los archivos que **siempre difieren** entre ramas son los de la base de datos (db.js, rutas, package.json). Cuando hagas merge, aceptá siempre la versión de `deploy/cloud` para esos archivos.
 
+## Cambios Recientes (Mayo 2026)
+
+### 9. Fix Sucursales/Direcciones al Editar Cliente
+**Archivos modificados:**
+- `backend/routes/clientes.js`
+- `frontend/src/pages/Clientes.jsx`
+
+**Problema:** Al crear un cliente con sucursales, los datos no se guardaban en `clientes_direcciones`. Al editar el cliente, las sucursales aparecían vacías.
+
+**Causas raíz:**
+1. **POST `/api/clientes`** no insertaba en `clientes_direcciones` (solo el PUT lo hacía)
+2. **`CONCAT` con `NULL`** en MySQL: si `tipo_direccion` era `NULL`, `CONCAT(NULL, '|', ...)` devolvía `NULL`, y `GROUP_CONCAT` lo ignoraba
+3. **Filtro en frontend** usaba `d.tipo_direccion` para filtrar, pero si estaba vacío se descartaba la sucursal
+
+**Soluciones:**
+1. **POST**: Agregada inserción en `clientes_direcciones` después de crear el cliente, usando `result.insertId`
+2. **GET**: Envolver campos con `IFNULL(campo, '')` dentro del `CONCAT` para evitar NULLs
+3. **PUT/POST**: Cambiar `d.tipo_direccion || null` por `d.tipo_direccion || ''` (string vacío en vez de NULL)
+4. **Frontend**: Cambiar `filter(d => d.tipo_direccion)` por `filter(d => d.direccion)` en `editarCliente()`
+
+**Archivos involucrados (rama main - MySQL):**
+- `backend/routes/clientes.js` - Fix en GET (IFNULL), POST y PUT (string vacío)
+- `frontend/src/pages/Clientes.jsx` - Fix en filter de editarCliente
+
+**Archivos involucrados (rama deploy/cloud - PostgreSQL):**
+- `backend/routes/clientes.js` - Fix en GET (COALESCE), POST y PUT (string vacío)
+- `frontend/src/pages/Clientes.jsx` - Mismo fix que en main
+
 ### Variables de Entorno Cloud
 
 **Render (Backend):**
