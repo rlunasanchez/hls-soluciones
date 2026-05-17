@@ -59,7 +59,7 @@ router.post("/", authMiddleware, async (req, res) => {
         if (d.direccion && d.direccion.trim()) {
           await pool.query(
             "INSERT INTO clientes_direcciones (cliente_id, tipo_direccion, direccion, fono, ciudad, comuna) VALUES (?, ?, ?, ?, ?, ?)",
-            [clienteId, d.tipo_direccion || null, d.direccion, d.fono || null, d.ciudad || null, d.comuna || null]
+            [clienteId, d.tipo_direccion || '', d.direccion, d.fono || '', d.ciudad || '', d.comuna || '']
           );
         }
       }
@@ -96,7 +96,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
         if (d.direccion && d.direccion.trim()) {
           await connection.query(
             "INSERT INTO clientes_direcciones (cliente_id, tipo_direccion, direccion, fono, ciudad, comuna) VALUES (?, ?, ?, ?, ?, ?)",
-            [id, d.tipo_direccion || null, d.direccion, d.fono || null, d.ciudad || null, d.comuna || null]
+            [id, d.tipo_direccion || '', d.direccion, d.fono || '', d.ciudad || '', d.comuna || '']
           );
         }
       }
