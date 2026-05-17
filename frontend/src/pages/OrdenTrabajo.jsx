@@ -785,13 +785,9 @@ function OrdenTrabajo() {
                 </div>
 
                 {/* Fechas con Checkboxes */}
-                <div style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: 'repeat(4, 1fr)', 
-                  gap: '20px'
-                }}>
+                <div className="date-check-grid">
                   {/* Fecha Ingreso */}
-                  <div style={{ background: 'white', padding: '16px', borderRadius: '8px' }}>
+                  <div className="date-check-card">
                     <div className="form-group" style={{ marginBottom: '12px' }}>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer' }}>
                         <input
@@ -818,7 +814,7 @@ function OrdenTrabajo() {
                   </div>
 
                   {/* Fecha Término */}
-                  <div style={{ background: 'white', padding: '16px', borderRadius: '8px' }}>
+                  <div className="date-check-card">
                     <div className="form-group" style={{ marginBottom: '12px' }}>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer' }}>
                         <input
@@ -845,7 +841,7 @@ function OrdenTrabajo() {
                   </div>
 
                   {/* Fecha Entrega */}
-                  <div style={{ background: 'white', padding: '16px', borderRadius: '8px' }}>
+                  <div className="date-check-card">
                     <div className="form-group" style={{ marginBottom: '12px' }}>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer' }}>
                         <input
@@ -872,7 +868,7 @@ function OrdenTrabajo() {
                   </div>
 
                   {/* Fecha Compra */}
-                  <div style={{ background: 'white', padding: '16px', borderRadius: '8px' }}>
+                  <div className="date-check-card">
                     <div className="form-group" style={{ marginBottom: '12px' }}>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer' }}>
                         <input
