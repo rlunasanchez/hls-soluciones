@@ -9,6 +9,25 @@ dotenv.config();
 
 const router = express.Router();
 
+router.post("/setup-admin", async (req, res) => {
+  const { key } = req.body;
+  if (key !== "hls-setup-2026") {
+    return res.status(403).json({ msg: "Key inválida" });
+  }
+  try {
+    const passwordHash = await bcrypt.hash("admin123", 10);
+    const [result] = await pool.query(`
+      INSERT INTO usuarios (usuario, password, rol, email, activo)
+      VALUES ('admin', ?, 'admin', 'admin@hls.cl', true)
+      ON DUPLICATE KEY UPDATE password = ?, rol = 'admin', activo = true
+    `, [passwordHash, passwordHash]);
+    res.json({ msg: "Admin creado/actualizado correctamente" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Error del servidor" });
+  }
+});
+
 router.post("/login", async (req, res) => {
   const { usuario, password } = req.body;
 
