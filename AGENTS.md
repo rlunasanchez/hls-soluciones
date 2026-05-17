@@ -555,3 +555,54 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.0 | 17 Mayo 2026 | Sistema base con Clientes, Equipos, Órdenes |
 | 1.1 | 17-18 Mayo 2026 | Responsive móvil, fix Vercel, optimización |
 | 1.2 | 18 Mayo 2026 | Documentación completa |
+
+---
+
+## Fix Críticos (17 Mayo 2026)
+
+### 22. Fix CORS - Agregar Vercel a origins permitidos
+
+**Archivo modificado:** `backend/server.js`
+
+**Problema:** Error CORS al intentar login desde Vercel (hls-soluciones.vercel.app) hacia Render.
+
+**Causa:** CORS solo permitía `localhost`, no el dominio de Vercel.
+
+**Solución:** Agregar `https://hls-soluciones.vercel.app` al array de allowedOrigins.
+
+### 23. Fix PostgreSQL - Convertir backend completo
+
+**Problema:** Error 500 al hacer login en la nube.
+
+**Causa:** Los archivos del backend se sobrescribieron con sintaxis MySQL al hacer merge, pero la base de datos cloud es PostgreSQL (Neon).
+
+**Archivos modificados:**
+- `backend/config/db.js` - Cambiar de mysql2 a pg
+- `backend/package.json` - Cambiar dependencia mysql2 a pg
+- `backend/routes/auth.js` - Cambiar `?` a `$1`, `[rows]` a `result.rows`, `ON DUPLICATE KEY` a `ON CONFLICT`, `ER_DUP_ENTRY` a `23505`
+- `backend/routes/equipos.js` - Sintaxis PostgreSQL completa
+- `backend/routes/clientes.js` - Sintaxis PostgreSQL (COALESCE, STRING_AGG, RETURNING)
+- `backend/routes/ordenes.js` - Sintaxis PostgreSQL completa
+
+**Cambios en queries:**
+- `pool.query("SELECT ...")` → `result = await pool.query(...)` + `result.rows`
+- `?` → `$1, $2, ...`
+- `IFNULL()` → `COALESCE()`
+- `GROUP_CONCAT()` → `STRING_AGG()`
+- `INSERT ...` → `INSERT ... RETURNING id`
+- `ON DUPLICATE KEY` → `ON CONFLICT`
+- `ER_DUP_ENTRY` → `23505`
+
+### 24. Endpoint para crear admin
+
+**Archivo modificado:** `backend/routes/auth.js`
+
+**Agregado:** Endpoint `/api/auth/setup-admin` para crear el usuario admin en la base de datos cloud.
+
+**Uso:**
+```
+POST https://hls-soluciones.onrender.com/api/auth/setup-admin
+Body: { "key": "hls-setup-2026" }
+```
+
+**Credenciales creadas:** usuario: `admin`, contraseña: `admin123`
