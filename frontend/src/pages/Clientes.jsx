@@ -884,7 +884,7 @@ function Clientes() {
                     )}
                   </div>
                   {expandido && equiposCliente.length > 0 && (
-                    <div style={{ overflowX: 'auto' }}>
+                    <div className="equipos-asociados" style={{ overflowX: 'auto' }}>
                       <table style={{ width: '100%', fontSize: '0.9rem' }}>
                         <thead>
                           <tr style={{ background: 'var(--success-light)' }}>
@@ -899,14 +899,14 @@ function Clientes() {
                         <tbody>
                           {equiposCliente.map((eq) => (
                             <tr key={eq.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                              <td style={{ padding: '10px 12px' }}>
+                              <td data-label="Código" style={{ padding: '10px 12px' }}>
                                 <span style={{ fontWeight: 600, color: 'var(--primary)' }}>{eq.codigo}</span>
                               </td>
-                              <td style={{ padding: '10px 12px' }}>{eq.equipo}</td>
-                              <td style={{ padding: '10px 12px' }}>{eq.marca}</td>
-                              <td style={{ padding: '10px 12px' }}>{eq.modelo}</td>
-                              <td style={{ padding: '10px 12px' }}>{eq.serie || '-'}</td>
-                              <td style={{ padding: '10px 12px', textAlign: 'center' }}>
+                              <td data-label="Equipo" style={{ padding: '10px 12px' }}>{eq.equipo}</td>
+                              <td data-label="Marca" style={{ padding: '10px 12px' }}>{eq.marca}</td>
+                              <td data-label="Modelo" style={{ padding: '10px 12px' }}>{eq.modelo}</td>
+                              <td data-label="Serie" style={{ padding: '10px 12px' }}>{eq.serie || '-'}</td>
+                              <td data-label="Acción" style={{ padding: '10px 12px', textAlign: 'center' }}>
                                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                                   <button onClick={() => abrirModalEditarEquipo(eq)} 
                                     style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', padding: '4px' }}

@@ -1509,4 +1509,47 @@ table tr:last-child td {
   .form-actions-bar button {
     width: 100%;
   }
+
+  .equipos-asociados table,
+  .equipos-asociados thead,
+  .equipos-asociados tbody,
+  .equipos-asociados th,
+  .equipos-asociados td,
+  .equipos-asociados tr {
+    display: block;
+  }
+
+  .equipos-asociados thead tr {
+    display: none;
+  }
+
+  .equipos-asociados tr {
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: white;
+    padding: 12px;
+  }
+
+  .equipos-asociados td {
+    padding: 8px 12px;
+    border: none;
+    text-align: left;
+  }
+
+  .equipos-asociados td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--primary);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .equipos-asociados td:first-child {
+    padding-top: 12px;
+  }
+
+  .equipos-asociados td:last-child {
+    padding-bottom: 12px;
+  }
 }
