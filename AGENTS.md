@@ -367,6 +367,18 @@ git checkout main
 - `backend/routes/clientes.js` - Fix en GET (COALESCE), POST y PUT (string vacío)
 - `frontend/src/pages/Clientes.jsx` - Mismo fix que en main
 
+### 10. Fix Error 500 al Crear Equipo en la Nube (PostgreSQL)
+**Archivo modificado:**
+- `backend/routes/equipos.js` (solo rama `deploy/cloud`)
+
+**Problema:** Al guardar un equipo desde la vista de clientes, daba error 500. El INSERT tenía 22 placeholders (`$22`) pero solo 21 columnas.
+
+**Causa:** Error de tipeo al migrar de MySQL a PostgreSQL. En MySQL los placeholders son `?` y no hay conteo explícito, pero en PostgreSQL usamos `$1, $2...` y me equivoqué al numerar.
+
+**Solución:** Cambiar `$22` por `$21` en el VALUES del INSERT.
+
+**Nota:** Este error solo afectaba a la rama `deploy/cloud` (PostgreSQL). La rama `main` con MySQL funciona correctamente.
+
 ### Variables de Entorno Cloud
 
 **Render (Backend):**
