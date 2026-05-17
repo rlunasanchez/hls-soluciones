@@ -27,7 +27,8 @@ router.get("/next-codigo", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const [clientes] = await pool.query(`
-      SELECT c.*, GROUP_CONCAT(CONCAT(cd.tipo_direccion, '|', cd.direccion, '|', cd.fono, '|', cd.ciudad, '|', cd.comuna) SEPARATOR ';;') as direcciones
+      SELECT c.*,
+        IFNULL(GROUP_CONCAT(CONCAT(IFNULL(cd.tipo_direccion, ''), '|', IFNULL(cd.direccion, ''), '|', IFNULL(cd.fono, ''), '|', IFNULL(cd.ciudad, ''), '|', IFNULL(cd.comuna, '')) SEPARATOR ';;'), '') as direcciones
       FROM clientes c
       LEFT JOIN clientes_direcciones cd ON c.id = cd.cliente_id
       GROUP BY c.id
