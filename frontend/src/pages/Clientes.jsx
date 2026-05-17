@@ -622,9 +622,8 @@ function Clientes() {
                   )}
                 </div>
                 {sucursales.slice(0, sucursalesVisibles).map((suc, idx) => (
-                  <div key={idx} style={{ marginBottom: '12px', padding: '12px', background: 'white', borderRadius: '8px' }}>
-                    {/* Fila 1: Tipo y Dirección */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', gap: '12px', marginBottom: '12px' }}>
+                  <div key={idx} className="sucursal-card" style={{ marginBottom: '12px', padding: '12px', background: 'white', borderRadius: '8px' }}>
+                    <div className="form-row-1" style={{ marginBottom: '8px' }}>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label>Tipo</label>
                         <select
@@ -636,18 +635,18 @@ function Clientes() {
                           <option value="Sucursal">Sucursal</option>
                         </select>
                       </div>
+                    </div>
+                    <div className="form-row-1" style={{ marginBottom: '8px' }}>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label>Dirección</label>
                         <input
                           placeholder="Ingrese la dirección completa"
                           value={suc.direccion}
                           onChange={(e) => actualizarSucursal(idx, 'direccion', e.target.value)}
-                          style={{ width: '100%' }}
                         />
                       </div>
                     </div>
-                    {/* Fila 2: Fono, Ciudad, Comuna y Eliminar */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 36px', gap: '12px', alignItems: 'end' }}>
+                    <div className="form-row-1" style={{ marginBottom: '8px' }}>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label>Fono</label>
                         <input
@@ -656,6 +655,8 @@ function Clientes() {
                           onChange={(e) => actualizarSucursal(idx, 'fono', e.target.value.replace(/[^0-9+]/g, ''))}
                         />
                       </div>
+                    </div>
+                    <div className="form-row-1" style={{ marginBottom: '8px' }}>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label>Ciudad</label>
                         <input
@@ -664,6 +665,8 @@ function Clientes() {
                           onChange={(e) => actualizarSucursal(idx, 'ciudad', e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, ''))}
                         />
                       </div>
+                    </div>
+                    <div className="form-row-1" style={{ marginBottom: '8px' }}>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label>Comuna</label>
                         <input
@@ -672,10 +675,12 @@ function Clientes() {
                           onChange={(e) => actualizarSucursal(idx, 'comuna', e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, ''))}
                         />
                       </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
                       <button
                         type="button"
                         className="delete-btn"
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '38px', minWidth: '36px', padding: '0' }}
+                        style={{ padding: '8px 12px' }}
                         onClick={() => {
                           const nuevas = sucursales.filter((_, i) => i !== idx);
                           while (nuevas.length < 5) {
@@ -685,7 +690,7 @@ function Clientes() {
                           setSucursalesVisibles(Math.max(1, sucursalesVisibles - 1));
                         }}
                       >
-                        <Trash2 size={14} />
+                        <Trash2 size={16} /> Eliminar
                       </button>
                     </div>
                   </div>

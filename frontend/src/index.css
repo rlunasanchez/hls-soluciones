@@ -1220,7 +1220,13 @@ table tr:last-child td {
     grid-template-columns: 1fr;
   }
   
-  .form-row-2 {
+.form-row-1 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.form-row-2 {
     grid-template-columns: 1fr;
   }
   
@@ -1458,5 +1464,49 @@ table tr:last-child td {
     width: 100%;
     justify-content: center;
     padding: 8px;
+  }
+}
+
+/* =========================
+   RESPONSIVE: Mobile (< 480px)
+  ========================= */
+@media (max-width: 480px) {
+  .form-row-1,
+  .form-row-2,
+  .form-row-3,
+  .form-row-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .sucursal-card {
+    padding: 16px !important;
+  }
+
+  .sucursal-card .form-group {
+    margin-bottom: 12px !important;
+  }
+
+  .sucursal-card .form-group label {
+    font-size: 14px;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .sucursal-card .form-group input,
+  .sucursal-card .form-group select {
+    width: 100%;
+    min-height: 44px;
+    font-size: 16px;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  .form-actions-bar {
+    flex-direction: column;
+  }
+
+  .form-actions-bar button {
+    width: 100%;
   }
 }
