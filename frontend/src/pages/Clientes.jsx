@@ -227,7 +227,7 @@ function Clientes() {
       dirs = c.direcciones.split(";;").map(d => {
         const parts = d.split("|");
         return { tipo_direccion: parts[0], direccion: parts[1], fono: parts[2], ciudad: parts[3], comuna: parts[4] };
-      }).filter(d => d.tipo_direccion);
+      }).filter(d => d.direccion);
       if (dirs.length > 0) {
         while (dirs.length < 5) {
           dirs.push({ tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" });
