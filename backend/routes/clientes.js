@@ -7,11 +7,11 @@ dotenv.config();
 const router = express.Router();
 
 async function generarCodigo() {
-  const [rows] = await pool.query(
-    "SELECT CAST(SUBSTRING(codigo, 4) AS UNSIGNED) AS num FROM clientes WHERE codigo LIKE 'CL-%' ORDER BY num DESC LIMIT 1"
+  const result = await pool.query(
+    "SELECT CAST(SUBSTRING(codigo, 4) AS INTEGER) AS num FROM clientes WHERE codigo LIKE 'CL-%' ORDER BY num DESC LIMIT 1"
   );
-  if (rows.length === 0) return "CL-0001";
-  return `CL-${String(rows[0].num + 1).padStart(4, "0")}`;
+  if (result.rows.length === 0) return "CL-0001";
+  return `CL-${String(result.rows[0].num + 1).padStart(4, "0")}`;
 }
 
 router.get("/next-codigo", async (req, res) => {
@@ -26,14 +26,18 @@ router.get("/next-codigo", async (req, res) => {
 
 router.get("/", async (req, res) => {
   try {
-    const [clientes] = await pool.query(`
-      SELECT c.*, GROUP_CONCAT(CONCAT(cd.tipo_direccion, '|', cd.direccion, '|', cd.fono, '|', cd.ciudad, '|', cd.comuna) SEPARATOR ';;') as direcciones
+    const result = await pool.query(`
+      SELECT c.*,
+        COALESCE(
+          STRING_AGG(CONCAT_WS('|', cd.tipo_direccion, cd.direccion, cd.fono, cd.ciudad, cd.comuna), ';;' ORDER BY cd.id),
+          ''
+        ) as direcciones
       FROM clientes c
       LEFT JOIN clientes_direcciones cd ON c.id = cd.cliente_id
       GROUP BY c.id
-      ORDER BY CAST(SUBSTRING(IFNULL(c.codigo, 'CL-0001'), 4) AS UNSIGNED) DESC
+      ORDER BY CAST(SUBSTRING(COALESCE(c.codigo, 'CL-0001'), 4) AS INTEGER) DESC
     `);
-    res.json(clientes);
+    res.json(result.rows);
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
@@ -46,12 +50,16 @@ router.post("/", authMiddleware, async (req, res) => {
     contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion,
     direcciones
   } = req.body;
-  const escape = (v) => (v === '' || v === undefined || v === null) ? 'NULL' : "'" + String(v).replace(/'/g, "''") + "'";
   const codigo = await generarCodigo();
-  const sql = `INSERT INTO clientes (codigo, razon_social, giro, rut, direccion, ciudad, comuna, telefono, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion) VALUES (${escape(codigo)}, ${escape(razon_social)}, ${escape(giro)}, ${escape(rut)}, ${escape(direccion)}, ${escape(ciudad)}, ${escape(comuna)}, ${escape(telefono)}, ${escape(contacto_nombre)}, ${escape(contacto_email)}, ${escape(contacto_fono)}, ${escape(contacto_cargo)}, ${escape(contacto_direccion)})`;
-  console.log("Insert cliente:", sql);
   try {
-    await pool.query(sql);
+    await pool.query(
+      `INSERT INTO clientes (codigo, razon_social, giro, rut, direccion, ciudad, comuna, telefono,
+        contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+      [codigo, razon_social, giro || null, rut || null, direccion || null, ciudad || null, comuna || null,
+        telefono || null, contacto_nombre || null, contacto_email || null, contacto_fono || null,
+        contacto_cargo || null, contacto_direccion || null]
+    );
     res.status(201).json({ msg: "Cliente creado", codigo });
   } catch (err) {
     console.error(err);
@@ -66,41 +74,52 @@ router.put("/:id", authMiddleware, async (req, res) => {
     contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion,
     direcciones
   } = req.body;
-  const escape = (v) => (v === '' || v === undefined || v === null) ? 'NULL' : "'" + String(v).replace(/'/g, "''") + "'";
-  const [existente] = await pool.query("SELECT codigo FROM clientes WHERE id = ?", [id]);
-  let codigo = existente[0]?.codigo;
-  if (!codigo) {
-    codigo = await generarCodigo();
-  }
-  const sql = `UPDATE clientes SET codigo=${escape(codigo)}, razon_social=${escape(razon_social)}, giro=${escape(giro)}, rut=${escape(rut)}, direccion=${escape(direccion)}, ciudad=${escape(ciudad)}, comuna=${escape(comuna)}, telefono=${escape(telefono)}, contacto_nombre=${escape(contacto_nombre)}, contacto_email=${escape(contacto_email)}, contacto_fono=${escape(contacto_fono)}, contacto_cargo=${escape(contacto_cargo)}, contacto_direccion=${escape(contacto_direccion)} WHERE id=${id}`;
-  console.log("Update cliente:", sql);
-  const connection = await pool.getConnection();
   try {
-    await connection.query(sql);
-    await connection.query("DELETE FROM clientes_direcciones WHERE cliente_id = ?", [id]);
+    const existente = await pool.query("SELECT codigo FROM clientes WHERE id = $1", [id]);
+    let codigo = existente.rows[0]?.codigo;
+    if (!codigo) {
+      codigo = await generarCodigo();
+    }
+
+    await pool.query("BEGIN");
+
+    await pool.query(
+      `UPDATE clientes SET codigo = $1, razon_social = $2, giro = $3, rut = $4, direccion = $5,
+        ciudad = $6, comuna = $7, telefono = $8,
+        contacto_nombre = $9, contacto_email = $10, contacto_fono = $11,
+        contacto_cargo = $12, contacto_direccion = $13
+      WHERE id = $14`,
+      [codigo, razon_social, giro || null, rut || null, direccion || null, ciudad || null, comuna || null,
+        telefono || null, contacto_nombre || null, contacto_email || null, contacto_fono || null,
+        contacto_cargo || null, contacto_direccion || null, id]
+    );
+
+    await pool.query("DELETE FROM clientes_direcciones WHERE cliente_id = $1", [id]);
+
     if (direcciones && direcciones.length > 0) {
       for (const d of direcciones) {
         if (d.direccion && d.direccion.trim()) {
-          await connection.query(
-            "INSERT INTO clientes_direcciones (cliente_id, tipo_direccion, direccion, fono, ciudad, comuna) VALUES (?, ?, ?, ?, ?, ?)",
+          await pool.query(
+            "INSERT INTO clientes_direcciones (cliente_id, tipo_direccion, direccion, fono, ciudad, comuna) VALUES ($1, $2, $3, $4, $5, $6)",
             [id, d.tipo_direccion || null, d.direccion, d.fono || null, d.ciudad || null, d.comuna || null]
           );
         }
       }
     }
+
+    await pool.query("COMMIT");
     res.json({ msg: "Cliente actualizado" });
   } catch (err) {
+    await pool.query("ROLLBACK");
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
-  } finally {
-    connection.release();
   }
 });
 
 router.delete("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
   try {
-    await pool.query("DELETE FROM clientes WHERE id=?", [id]);
+    await pool.query("DELETE FROM clientes WHERE id = $1", [id]);
     res.json({ msg: "Cliente eliminado" });
   } catch (err) {
     console.error(err);

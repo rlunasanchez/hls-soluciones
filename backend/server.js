@@ -28,8 +28,15 @@ const loginLimiter = rateLimit({
 });
 
 app.use(limiter);
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:3000',
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'],
+  origin: allowedOrigins,
   credentials: true
 }));
 app.use(express.json());
@@ -47,6 +54,7 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(frontendPath, "index.html"));
 });
 
-app.listen(5001, () => {
-  console.log("Servidor ejecutándose en puerto 5001");
+const PORT = process.env.PORT || 5001;
+app.listen(PORT, () => {
+  console.log(`Servidor ejecutándose en puerto ${PORT}`);
 });

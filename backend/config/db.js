@@ -1,18 +1,13 @@
-import mysql from "mysql2/promise";
+import pg from "pg";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST || "localhost",
-  port: process.env.DB_PORT || 3306,
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_NAME || "soporte_tecnico_db",
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-  decimalNumbers: true,
+const { Pool } = pg;
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
 });
 
 export default pool;
