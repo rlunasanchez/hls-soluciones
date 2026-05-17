@@ -594,12 +594,15 @@ function Clientes() {
                       onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_cargo: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '') })}
                     />
                   </div>
+                </div>
+                <div className="form-row-1" style={{ marginTop: '16px' }}>
                   <div className="form-group">
                     <label>Dirección Contacto</label>
                     <input
-                      placeholder="Dirección"
+                      placeholder="Ingrese la dirección completa"
                       value={nuevoCliente.contacto_direccion}
                       onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_direccion: e.target.value })}
+                      style={{ width: '100%' }}
                     />
                   </div>
                 </div>
@@ -644,7 +647,7 @@ function Clientes() {
                       </div>
                     </div>
                     {/* Fila 2: Fono, Ciudad, Comuna y Eliminar */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr 1fr 1fr 50px', gap: '12px', alignItems: 'end' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 36px', gap: '12px', alignItems: 'end' }}>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label>Fono</label>
                         <input
@@ -672,7 +675,7 @@ function Clientes() {
                       <button
                         type="button"
                         className="delete-btn"
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '38px' }}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '38px', minWidth: '36px', padding: '0' }}
                         onClick={() => {
                           const nuevas = sucursales.filter((_, i) => i !== idx);
                           while (nuevas.length < 5) {
@@ -682,7 +685,7 @@ function Clientes() {
                           setSucursalesVisibles(Math.max(1, sucursalesVisibles - 1));
                         }}
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   </div>
