@@ -45,14 +45,20 @@ router.get("/", authMiddleware, async (req, res) => {
   }
 });
 
-// Verificar si un número de orden ya existe
+// Verificar si un número de orden ya existe (opcionalmente excluir un ID)
 router.get("/verificar/:numeroOrden", async (req, res) => {
   const { numeroOrden } = req.params;
+  const { excluir } = req.query;
   try {
-    const [result] = await pool.query(
-      "SELECT id FROM ordenes_trabajo WHERE numero_orden = ?",
-      [numeroOrden]
-    );
+    let query, params;
+    if (excluir) {
+      query = "SELECT id FROM ordenes_trabajo WHERE numero_orden = ? AND id != ?";
+      params = [numeroOrden, excluir];
+    } else {
+      query = "SELECT id FROM ordenes_trabajo WHERE numero_orden = ?";
+      params = [numeroOrden];
+    }
+    const [result] = await pool.query(query, params);
     res.json({ existe: result.length > 0 });
   } catch (err) {
     console.error("Error al verificar número de orden:", err);

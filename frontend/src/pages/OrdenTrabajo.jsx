@@ -162,6 +162,31 @@ function OrdenTrabajo() {
       averia: orden.averia || ""
     });
 
+    // Buscar equipo asociado en la lista cargada
+    const eq = equipos.find(e => 
+      (orden.equipo_id && e.id === orden.equipo_id) || 
+      (orden.serie && e.serie === orden.serie)
+    );
+    if (eq) {
+      setEquipoSeleccionado(eq);
+      setBusquedaCodigo(eq.codigo || "");
+      setBusquedaSerie(eq.serie || "");
+    } else if (orden.serie) {
+      setBusquedaSerie(orden.serie);
+    }
+
+    // Buscar cliente asociado en la lista cargada
+    const cl = clientes.find(c => 
+      (orden.cliente_id && c.id === orden.cliente_id) || 
+      (orden.cliente && c.razon_social === orden.cliente)
+    );
+    if (cl) {
+      setClienteSeleccionado(cl);
+      setBusquedaCliente(cl.razon_social || orden.cliente || "");
+    } else {
+      setBusquedaCliente(orden.cliente || "");
+    }
+
     // Cargar insumos
     const insumosData = [];
     for (let i = 1; i <= 12; i++) {
@@ -327,7 +352,10 @@ function OrdenTrabajo() {
   const verificarNumeroOrden = async (numero) => {
     if (!numero) return;
     try {
-      const res = await api.get(`/api/ordenes/verificar/${numero}`);
+      const res = await api.get(editingId
+        ? `/api/ordenes/verificar/${numero}?excluir=${editingId}`
+        : `/api/ordenes/verificar/${numero}`
+      );
       if (res.data.existe) {
         setErrorNumeroOrden("Este número de orden ya existe");
       } else {
@@ -379,8 +407,12 @@ function OrdenTrabajo() {
     };
     
     try {
-      await api.post("/api/ordenes", payload);
-      alert("Orden guardada exitosamente");
+      if (editingId) {
+        await api.put(`/api/ordenes/${editingId}`, payload);
+      } else {
+        await api.post("/api/ordenes", payload);
+      }
+      alert(editingId ? "Orden actualizada exitosamente" : "Orden guardada exitosamente");
       setMostrarFormulario(false);
       resetFormulario();
       fetchOrdenes(1);
@@ -428,6 +460,8 @@ function OrdenTrabajo() {
     setEquipoSeleccionado(null);
     setBusquedaCliente("");
     setBusquedaSerie("");
+    setBusquedaCodigo("");
+    setEditingId(null);
     setErrorNumeroOrden("");
     setFiltroNumeroOrden("");
   };
