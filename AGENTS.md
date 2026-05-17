@@ -514,3 +514,44 @@ Pasos exactos:
 5. Esperar ~1 minuto a que se actualice
 
 Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán en `hls-soluciones.vercel.app`.
+
+---
+
+## Optimizaciones de Código (18 Mayo 2026)
+
+### 21. Mejoras en Queries y Generación de Códigos
+
+**Problema:** El código de generación de códigos usaba `ORDER BY + LIMIT 1` lo cual es menos eficiente.
+
+**Solución:** Cambiar a usar `MAX()` para obtener el máximo directamente.
+
+**Archivos modificados:**
+- `backend/routes/clientes.js`
+- `backend/routes/equipos.js`
+- `backend/routes/ordenes.js`
+
+**Cambios específicos:**
+
+1. **generarCodigo()** en clientes.js y equipos.js:
+   - Antes: `SELECT ... ORDER BY num DESC LIMIT 1`
+   - Después: `SELECT MAX(CAST(SUBSTRING(codigo, 4) AS UNSIGNED)) AS num ...`
+   - Resultado: Más eficiente, evita ordenar la tabla completa
+
+2. **generarCodigoEquipo()** en ordenes.js:
+   - Mismo cambio de ORDER BY a MAX()
+
+3. **Búsqueda de equipos** en equipos.js:
+   - Eliminado `LOWER()` innecesario en primer campo de búsqueda
+   - Solo aplica LOWER a campos de texto (serie, equipo, marca)
+
+**Nota:** Los console.log de debug también fueron eliminados de clientes.js.
+
+---
+
+## Historial de Versiones
+
+| Versión | Fecha | Cambios |
+|---------|-------|---------|
+| 1.0 | 17 Mayo 2026 | Sistema base con Clientes, Equipos, Órdenes |
+| 1.1 | 17-18 Mayo 2026 | Responsive móvil, fix Vercel, optimización |
+| 1.2 | 18 Mayo 2026 | Documentación completa |
