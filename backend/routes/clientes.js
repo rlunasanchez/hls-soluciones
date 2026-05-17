@@ -8,9 +8,9 @@ const router = express.Router();
 
 async function generarCodigo() {
   const [rows] = await pool.query(
-    "SELECT CAST(SUBSTRING(codigo, 4) AS UNSIGNED) AS num FROM clientes WHERE codigo LIKE 'CL-%' ORDER BY num DESC LIMIT 1"
+    "SELECT MAX(CAST(SUBSTRING(codigo, 4) AS UNSIGNED)) AS num FROM clientes WHERE codigo LIKE 'CL-%'"
   );
-  if (rows.length === 0) return "CL-0001";
+  if (!rows[0].num) return "CL-0001";
   return `CL-${String(rows[0].num + 1).padStart(4, "0")}`;
 }
 

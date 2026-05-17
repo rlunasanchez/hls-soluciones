@@ -7,10 +7,9 @@ dotenv.config();
 const router = express.Router();
 
 async function generarCodigoEquipo() {
-  const [rows] = await pool.query("SELECT codigo FROM equipos WHERE codigo LIKE 'EQ-%' ORDER BY id DESC LIMIT 1");
-  if (rows.length === 0) return "EQ-0001";
-  const num = parseInt(rows[0].codigo.split("-")[1], 10) || 0;
-  return `EQ-${String(num + 1).padStart(4, "0")}`;
+  const [rows] = await pool.query("SELECT MAX(CAST(SUBSTRING(codigo, 4) AS UNSIGNED)) AS num FROM equipos WHERE codigo LIKE 'EQ-%'");
+  if (!rows[0].num) return "EQ-0001";
+  return `EQ-${String(rows[0].num + 1).padStart(4, "0")}`;
 }
 
 // Obtener órdenes de trabajo con paginación

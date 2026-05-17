@@ -8,9 +8,9 @@ const router = express.Router();
 
 async function generarCodigo() {
   const [rows] = await pool.query(
-    "SELECT CAST(SUBSTRING(codigo, 4) AS UNSIGNED) AS num FROM equipos WHERE codigo LIKE 'EQ-%' ORDER BY num DESC LIMIT 1"
+    "SELECT MAX(CAST(SUBSTRING(codigo, 4) AS UNSIGNED)) AS num FROM equipos WHERE codigo LIKE 'EQ-%'"
   );
-  if (rows.length === 0) return "EQ-0001";
+  if (!rows[0].num) return "EQ-0001";
   return `EQ-${String(rows[0].num + 1).padStart(4, "0")}`;
 }
 
@@ -32,8 +32,8 @@ router.get("/", async (req, res) => {
       LEFT JOIN clientes c ON e.cliente_id = c.id`;
     let params = [];
     if (q && q.trim()) {
-      sql += ` WHERE LOWER(e.codigo) LIKE LOWER(?) OR LOWER(e.serie) LIKE LOWER(?) OR LOWER(e.equipo) LIKE LOWER(?) OR LOWER(e.marca) LIKE LOWER(?)`;
-      const term = `%${q.trim()}%`;
+      const term = `%${q.trim().toLowerCase()}%`;
+      sql += ` WHERE e.codigo LIKE ? OR LOWER(e.serie) LIKE ? OR LOWER(e.equipo) LIKE ? OR LOWER(e.marca) LIKE ?`;
       params = [term, term, term, term];
     }
     sql += ` ORDER BY CAST(SUBSTRING(IFNULL(e.codigo, 'EQ-0001'), 4) AS UNSIGNED) DESC`;
