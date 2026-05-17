@@ -77,7 +77,7 @@ function Home() {
               <item.icon size={40} />
             </div>
             <div>
-              <h2 style={{ margin: 0, fontSize: '1.5rem', color: 'var(--text)' }}>{item.title}</h2>
+              <h2 style={{ margin: 0, fontSize: '1.5rem', color: 'red' }}>{item.title}</h2>
               <p style={{ margin: '8px 0 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>{item.desc}</p>
             </div>
             <ChevronRight size={24} style={{ color: 'var(--text-muted)', marginTop: '8px' }} />
