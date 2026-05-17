@@ -50,7 +50,6 @@ router.post("/", authMiddleware, async (req, res) => {
   const escape = (v) => (v === '' || v === undefined || v === null) ? 'NULL' : "'" + String(v).replace(/'/g, "''") + "'";
   const codigo = await generarCodigo();
   const sql = `INSERT INTO clientes (codigo, razon_social, giro, rut, direccion, ciudad, comuna, telefono, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion) VALUES (${escape(codigo)}, ${escape(razon_social)}, ${escape(giro)}, ${escape(rut)}, ${escape(direccion)}, ${escape(ciudad)}, ${escape(comuna)}, ${escape(telefono)}, ${escape(contacto_nombre)}, ${escape(contacto_email)}, ${escape(contacto_fono)}, ${escape(contacto_cargo)}, ${escape(contacto_direccion)})`;
-  console.log("Insert cliente:", sql);
   try {
     const [result] = await pool.query(sql);
     const clienteId = result.insertId;
@@ -87,7 +86,6 @@ router.put("/:id", authMiddleware, async (req, res) => {
     codigo = await generarCodigo();
   }
   const sql = `UPDATE clientes SET codigo=${escape(codigo)}, razon_social=${escape(razon_social)}, giro=${escape(giro)}, rut=${escape(rut)}, direccion=${escape(direccion)}, ciudad=${escape(ciudad)}, comuna=${escape(comuna)}, telefono=${escape(telefono)}, contacto_nombre=${escape(contacto_nombre)}, contacto_email=${escape(contacto_email)}, contacto_fono=${escape(contacto_fono)}, contacto_cargo=${escape(contacto_cargo)}, contacto_direccion=${escape(contacto_direccion)} WHERE id=${id}`;
-  console.log("Update cliente:", sql);
   const connection = await pool.getConnection();
   try {
     await connection.query(sql);
