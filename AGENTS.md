@@ -394,21 +394,126 @@ git checkout main
 |----------|-------|
 | `VITE_API_URL` | `https://hls-soluciones.onrender.com` |
 
+### 11. Fix Render: Rate Limiter bloqueando CORS y errores SQL
+**Fecha:** 17 de Mayo 2026
+**Archivos modificados:**
+- `backend/server.js` (rama `deploy/cloud`)
+
+**Problema:** El rate limiter estaba bloqueando las peticiones CORS preflight (OPTIONS) antes de que se agregaran los headers de CORS. Error: `No 'Access-Control-Allow-Origin' header is present`.
+
+**Soluciones:**
+1. Mover CORS **antes** del rate limiter en el middleware stack
+2. Agregar `skip: (req) => req.method === 'OPTIONS'` al rate limiter
+3. Eliminar declaración duplicada de `limiter` (quedó un `limiter` viejo arriba del código)
+4. Aumentar límite de `max: 100` a `max: 1000` para uso normal
+
+**Nota:** El rate limiter estaba bloqueando TODO el tráfico porque estaba declarado dos veces y el primero (más restrictivo) seguía activo.
+
+### 12. Fix Vercel: Configuración correcta para SPA
+**Fecha:** 17 de Mayo 2026
+**Archivos modificados:**
+- `frontend/vercel.json` (rama `deploy/cloud`)
+- Configuración Vercel Dashboard
+
+**Problema:** El deploy en Vercel daba 404 o cargaba en blanco.
+
+**Configuración correcta:**
+- **Root Directory:** `frontend`
+- **Build Command:** `npm install && npm run build`
+- **Output Directory:** `dist`
+- **Environment Variable:** `VITE_API_URL=https://hls-soluciones.onrender.com`
+
+**Solución SPA Routing:**
+El `vercel.json` usa:
+```json
+{
+  "rewrites": [
+    { "source": "/((?!assets/).*)", "destination": "/index.html" }
+  ]
+}
+```
+Así los assets (JS, CSS) se sirven directamente y las rutas de React Router van a `index.html`.
+
+### 13. Restauración archivos PostgreSQL en deploy/cloud
+**Fecha:** 17 de Mayo 2026
+**Archivos modificados:**
+- `backend/routes/ordenes.js`
+- `backend/routes/clientes.js`
+
+**Problema:** En un merge anterior, los archivos de `deploy/cloud` quedaron con sintaxis de MySQL (`LIMIT ? OFFSET ?`, `GROUP_CONCAT`, `UNSIGNED`, `IFNULL`, placeholders `?`) en vez de PostgreSQL (`LIMIT $1 OFFSET $2`, `STRING_AGG`, `INTEGER`, `COALESCE`, placeholders `$1`).
+
+**Solución:** Restaurar los archivos desde el commit original de migración a PostgreSQL (`d43dd7a`) y re-aplicar los fixes posteriores (PUT en ordenes, verificar con excluir).
+
+### 14. Fix editar Orden de Trabajo - Completo
+**Fecha:** 17 de Mayo 2026
+**Archivos modificados:**
+- `frontend/src/pages/OrdenTrabajo.jsx` (ambas ramas)
+- `backend/routes/ordenes.js` (ambas ramas)
+
+**Problema:** Al editar una orden de trabajo, no cargaba el código EQ-XXX ni la serie del equipo.
+
+**Causas y soluciones:**
+1. **`editarOrden()` no seteaba `equipoSeleccionado`, `busquedaCodigo`, `busquedaSerie`**
+   - Solución: Buscar equipo en array `equipos` por `equipo_id` o `serie`, y setear los estados correspondientes. Lo mismo para cliente.
+
+2. **`guardarOrden()` siempre hacía POST** (crear nuevo) en vez de PUT (actualizar)
+   - Solución: Condicional `if (editingId) { api.put(...) } else { api.post(...) }`
+
+3. **`verificarNumeroOrden()` daba error "ya existe" al editar la misma orden**
+   - Solución: Agregar parámetro `?excluir={editingId}` al endpoint de verificación, y modificar backend para excluir ese ID de la query.
+
+### 15. Deploy en la nube funcionando (Vercel + Render + Neon)
+**Fecha:** 17 de Mayo 2026
+**Estado:** ✅ Funcionando
+
+**URLs de producción:**
+| Servicio | URL |
+|----------|-----|
+| **Frontend (Vercel)** | `https://hls-soluciones.vercel.app` |
+| **Backend (Render)** | `https://hls-soluciones.onrender.com` |
+| **Base de datos (Neon)** | PostgreSQL |
+
+**Configuración Vercel:**
+- **Framework Preset:** Vite
+- **Root Directory:** `frontend`
+- **Build Command:** `npm run build`
+- **Output Directory:** `dist`
+- **Environment Variable:** `VITE_API_URL=https://hls-soluciones.onrender.com`
+
+**Configuración Render:**
+- **Runtime:** Node
+- **Root Directory:** `backend`
+- **Build Command:** `npm install`
+- **Start Command:** `node server.js`
+- **Branch:** `deploy/cloud`
+
+**Variables de entorno Render:**
+| Variable | Valor |
+|----------|-------|
+| `DATABASE_URL` | `postgresql://neondb_owner:...` |
+| `JWT_SECRET` | `mi_secreto_seguro_123` |
+| `NODE_ENV` | `production` |
+| `FRONTEND_URL` | `https://hls-soluciones.vercel.app` |
+
 ---
 
 ## Próximos Pasos / Pendientes
 
-### Continuar mañana: Módulo Orden de Trabajo
-**Fecha:** 14 de Mayo 2026
+### Continuar mañana: Pruebas exhaustivas del sistema
+**Fecha:** 18 de Mayo 2026
 **Estado:** Pendiente
 **Prioridad:** Alta
 
-**Tareas pendientes en OrdenTrabajo.jsx:**
-1. Revisar flujo completo de creación/edición de órdenes
-2. Verificar integración con búsqueda de clientes y equipos
-3. Validar campos del formulario (solo letras/números donde corresponda)
-4. Revisar que los dropdowns de cliente y equipo funcionen correctamente
-5. Probar guardado y recarga de lista tras crear orden
-6. Verificar paginación y filtros
+**Tareas pendientes:**
+1. **Módulo Clientes:** Verificar flujo completo de creación/edición con sucursales
+2. **Módulo Equipos:** Verificar creación desde vista de clientes y códigos auto-generados
+3. **Módulo Orden de Trabajo:**
+   - Probar edición completa (EQ-XXX, serie, datos del equipo)
+   - Verificar que PUT actualice correctamente sin crear nueva orden
+   - Validar que verificación de número de orden funcione al editar
+   - Probar dropdowns de búsqueda por código y serie
+4. **Módulo Informes/Cotizaciones:** Verificar integración con órdenes
+5. **UX/UI:** Revisar que todos los módulos tengan navegación consistente
+6. **Deploy:** Verificar que cambios en `main` se puedan mergear a `deploy/cloud` sin problemas
 
-**Nota:** El módulo Orden de Trabajo fue refactorizado recientemente (Sección 5) pero requiere pruebas exhaustivas y ajustes de UX. Revisar también que los datos del equipo se carguen correctamente al buscar por código EQ-XXXX.
+**Nota:** El deploy en la nube ya está funcionando. Prioridad: estabilizar el flujo de edición de órdenes y probar todas las funcionalidades end-to-end.
