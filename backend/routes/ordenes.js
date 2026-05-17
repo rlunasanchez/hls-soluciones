@@ -7,9 +7,9 @@ dotenv.config();
 const router = express.Router();
 
 async function generarCodigoEquipo() {
-  const result = await pool.query("SELECT MAX(CAST(SUBSTRING(codigo, 4) AS UNSIGNED)) AS num FROM equipos WHERE codigo LIKE 'EQ-%'");
-  if (!result.rows[0].num) return "EQ-0001";
-  return `EQ-${String(result.rows[0].num + 1).padStart(4, "0")}`;
+  const result = await pool.query("SELECT MAX(id) as max_id FROM equipos");
+  const maxId = result.rows[0].max_id || 0;
+  return `EQ-${String(maxId + 1).padStart(4, "0")}`;
 }
 
 router.get("/", authMiddleware, async (req, res) => {

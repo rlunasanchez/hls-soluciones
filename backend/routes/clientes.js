@@ -7,12 +7,9 @@ dotenv.config();
 const router = express.Router();
 
 async function generarCodigo() {
-  const result = await pool.query(
-    "SELECT MAX(CAST(SUBSTRING(codigo, 4) AS UNSIGNED)) AS num FROM clientes WHERE codigo LIKE 'CL-%'"
-  );
-  const rows = result.rows;
-  if (!rows[0].num) return "CL-0001";
-  return `CL-${String(rows[0].num + 1).padStart(4, "0")}`;
+  const result = await pool.query("SELECT MAX(id) as max_id FROM clientes");
+  const maxId = result.rows[0].max_id || 0;
+  return `CL-${String(maxId + 1).padStart(4, "0")}`;
 }
 
 router.get("/next-codigo", async (req, res) => {
@@ -37,7 +34,7 @@ router.get("/", async (req, res) => {
       FROM clientes c
       LEFT JOIN clientes_direcciones cd ON c.id = cd.cliente_id
       GROUP BY c.id
-      ORDER BY CAST(SUBSTRING(COALESCE(c.codigo, 'CL-0001'), 4) AS UNSIGNED) DESC
+      ORDER BY c.id DESC
     `);
     res.json(result.rows);
   } catch (err) {
