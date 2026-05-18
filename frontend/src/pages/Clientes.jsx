@@ -993,94 +993,94 @@ function Clientes() {
           zIndex: 1000, padding: '20px'
         }} onClick={() => setMostrarModalEquipo(false)}>
           <div style={{
-            background: 'white', borderRadius: '16px', maxWidth: '800px', width: '100%',
+            background: 'white', borderRadius: '16px', maxWidth: '700px', width: '100%',
             maxHeight: '90vh', overflow: 'auto', boxShadow: 'var(--shadow-lg)'
           }} onClick={e => e.stopPropagation()}>
-            <div style={{ background: 'var(--gradient)', padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <h2 style={{ color: 'white', margin: 0, display: 'flex', alignItems: 'center', gap: '10px', fontSize: '18px' }}>
-                <Package size={24} />
+            <div style={{ background: 'var(--gradient)', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h2 style={{ color: 'white', margin: 0, display: 'flex', alignItems: 'center', gap: '10px', fontSize: '17px' }}>
+                <Package size={20} />
                 {equipoEditandoModal ? "Editar Equipo" : "Agregar Equipo"}
               </h2>
-              <button type="button" onClick={() => {
-                  setMostrarModalEquipo(false);
-                  setEquipoEditandoModal(null);
-                }}
-                style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '8px', padding: '8px', cursor: 'pointer', color: 'white' }}>
-                <X size={20} />
+              <button type="button" onClick={() => { setMostrarModalEquipo(false); setEquipoEditandoModal(null); }}
+                style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '8px', padding: '7px', cursor: 'pointer', color: 'white', display: 'flex' }}>
+                <X size={18} />
               </button>
             </div>
-            <form onSubmit={guardarEquipoModal} style={{ padding: '20px', display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
-              <div style={{ padding: '16px', background: 'var(--primary-light)', borderRadius: '12px' }}>
-                <h3 style={{ color: 'var(--primary)', marginBottom: '12px', fontSize: '15px' }}>Información del Equipo</h3>
-                <div style={{ marginBottom: '12px', padding: '12px', background: 'white', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div className="form-group" style={{ margin: 0, flex: '0 0 auto' }}>
-                    <label>Código</label>
+            <form onSubmit={guardarEquipoModal} style={{ padding: '16px', display: 'grid', gap: '12px' }}>
+              <div style={{ padding: '12px', background: 'var(--primary-light)', borderRadius: '10px' }}>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--primary)', marginBottom: '10px' }}>Información del Equipo</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <label style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.3px' }}>Código</label>
                     <input value={codigoEquipoModal} disabled
-                      style={{ background: '#e8f0fe', color: '#1a73e8', fontWeight: '700', fontSize: '1rem', width: '140px' }} />
+                      style={{ padding: '5px 8px', fontSize: '.82rem', border: '1.5px solid var(--border)', borderRadius: '6px', background: '#e8f0fe', color: '#1a73e8', fontWeight: 700 }} />
                   </div>
-                  <div className="form-group" style={{ margin: 0, flex: 1 }}>
-                    <label>Cliente Asociado</label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <label style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.3px' }}>Cliente Asociado</label>
                     <input value={clientes.find(c => c.id === modalEquipoClienteId)?.razon_social || ''} disabled
-                      style={{ background: '#f3f4f6', fontWeight: '500' }} />
+                      style={{ padding: '5px 8px', fontSize: '.78rem', border: '1.5px solid var(--border)', borderRadius: '6px', background: '#f3f4f6', fontWeight: 500 }} />
                   </div>
                 </div>
-                <div className="form-row-3">
-                  <div className="form-group">
-                    <label>Equipo *</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <label style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.3px' }}>Equipo *</label>
                     <input placeholder="Nombre del equipo" value={nuevoEquipoModal.equipo}
-                      onChange={e => setNuevoEquipoModal({...nuevoEquipoModal, equipo: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')})} required />
+                      onChange={e => setNuevoEquipoModal({...nuevoEquipoModal, equipo: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')})} required
+                      style={{ padding: '5px 8px', fontSize: '.78rem', border: '1.5px solid var(--border)', borderRadius: '6px' }} />
                   </div>
-                  <div className="form-group">
-                    <label>Marca *</label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <label style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.3px' }}>Marca *</label>
                     <input placeholder="Marca" value={nuevoEquipoModal.marca}
-                      onChange={e => setNuevoEquipoModal({...nuevoEquipoModal, marca: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')})} required />
-                  </div>
-                  <div className="form-group">
-                    <label>Modelo *</label>
-                    <input placeholder="Modelo" value={nuevoEquipoModal.modelo}
-                      onChange={e => setNuevoEquipoModal({...nuevoEquipoModal, modelo: e.target.value})} required />
+                      onChange={e => setNuevoEquipoModal({...nuevoEquipoModal, marca: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')})} required
+                      style={{ padding: '5px 8px', fontSize: '.78rem', border: '1.5px solid var(--border)', borderRadius: '6px' }} />
                   </div>
                 </div>
-                <div className="form-row-3" style={{ marginTop: '12px' }}>
-                  <div className="form-group">
-                    <label>Serie</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginTop: '8px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <label style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.3px' }}>Modelo *</label>
+                    <input placeholder="Modelo" value={nuevoEquipoModal.modelo}
+                      onChange={e => setNuevoEquipoModal({...nuevoEquipoModal, modelo: e.target.value})} required
+                      style={{ padding: '5px 8px', fontSize: '.78rem', border: '1.5px solid var(--border)', borderRadius: '6px' }} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <label style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.3px' }}>Serie</label>
                     <input placeholder="Número de serie" value={nuevoEquipoModal.serie}
-                      onChange={e => setNuevoEquipoModal({...nuevoEquipoModal, serie: e.target.value})} />
+                      onChange={e => setNuevoEquipoModal({...nuevoEquipoModal, serie: e.target.value})}
+                      style={{ padding: '5px 8px', fontSize: '.78rem', border: '1.5px solid var(--border)', borderRadius: '6px' }} />
                   </div>
-                  <div className="form-group">
-                    <label>Contador Páginas</label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <label style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.3px' }}>Contador Pág</label>
                     <input type="number" placeholder="Contador" value={nuevoEquipoModal.contador_pag}
-                      onChange={e => setNuevoEquipoModal({...nuevoEquipoModal, contador_pag: e.target.value})} />
+                      onChange={e => setNuevoEquipoModal({...nuevoEquipoModal, contador_pag: e.target.value})}
+                      style={{ padding: '5px 8px', fontSize: '.78rem', border: '1.5px solid var(--border)', borderRadius: '6px' }} />
                   </div>
-                  <div className="form-group">
-                    <label>Nivel Tintas</label>
-                    <input placeholder="Nivel de tintas" value={nuevoEquipoModal.nivel_tintas}
-                      onChange={e => setNuevoEquipoModal({...nuevoEquipoModal, nivel_tintas: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')})} />
-                  </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '8px' }}>
+                  <label style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.3px' }}>Nivel Tintas</label>
+                  <input placeholder="Nivel de tintas" value={nuevoEquipoModal.nivel_tintas}
+                    onChange={e => setNuevoEquipoModal({...nuevoEquipoModal, nivel_tintas: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')})}
+                    style={{ padding: '5px 8px', fontSize: '.78rem', border: '1.5px solid var(--border)', borderRadius: '6px' }} />
                 </div>
               </div>
-              <div style={{ padding: '16px', background: 'var(--success-light)', borderRadius: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                  <h3 style={{ color: 'var(--success)', margin: 0, fontSize: '15px' }}>Insumos</h3>
+              <div style={{ padding: '12px', background: 'var(--success-light)', borderRadius: '10px' }}>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--success)', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span>Insumos</span>
                   {insumosVisiblesModal < 12 && (
-                    <button type="button" className="secondary-btn" style={{ padding: '6px 12px', fontSize: '13px' }}
-                      onClick={() => setInsumosVisiblesModal(insumosVisiblesModal + 1)}>+ Agregar</button>
+                    <button type="button" onClick={() => setInsumosVisiblesModal(insumosVisiblesModal + 1)}
+                      style={{ padding: '4px 10px', fontSize: '.72rem', background: 'var(--success)', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 600 }}>+ Agregar</button>
                   )}
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: '8px' }}>
                   {insumosModal.slice(0, insumosVisiblesModal).map((ins, idx) => (
-                    <div key={idx} className="form-group" style={{ display: 'flex', alignItems: 'end', gap: '6px', margin: 0 }}>
-                      <div style={{ flex: 1 }}>
-                        <label>Insumo {idx + 1}</label>
+                    <div key={idx} style={{ display: 'flex', alignItems: 'end', gap: '6px' }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <label style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.3px' }}>Insumo {idx + 1}</label>
                         <input placeholder={`Insumo ${idx + 1}`} value={ins.nombre}
-                          onChange={e => {
-                            const nuevos = [...insumosModal];
-                            nuevos[idx].nombre = e.target.value;
-                            setInsumosModal(nuevos);
-                          }} />
+                          onChange={e => { const nuevos = [...insumosModal]; nuevos[idx].nombre = e.target.value; setInsumosModal(nuevos); }}
+                          style={{ padding: '5px 8px', fontSize: '.78rem', border: '1.5px solid var(--border)', borderRadius: '6px', width: '100%', boxSizing: 'border-box' }} />
                       </div>
-                      <button type="button" className="delete-btn"
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '38px', marginBottom: '2px' }}
+                      <button type="button"
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px', width: '32px', padding: 0, background: 'var(--danger)', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', flexShrink: 0 }}
                         onClick={() => {
                           const nuevas = insumosModal.filter((_, i) => i !== idx);
                           while (nuevas.length < 12) nuevas.push({ nombre: "" });
@@ -1093,24 +1093,20 @@ function Clientes() {
                   ))}
                 </div>
               </div>
-              <div style={{ padding: '16px', background: '#F1F5F9', borderRadius: '12px' }}>
-                <h3 style={{ color: 'var(--text)', marginBottom: '12px', fontSize: '15px' }}>Avería/Falla/Incidencia</h3>
-                <div className="form-group" style={{ margin: 0 }}>
-                  <textarea placeholder="Descripción de falla o incidencia..."
-                    value={nuevoEquipoModal.averia}
-                    onChange={e => setNuevoEquipoModal({...nuevoEquipoModal, averia: e.target.value})}
-                    rows={3} style={{ minHeight: '80px' }} />
-                </div>
+              <div style={{ padding: '12px', background: '#F1F5F9', borderRadius: '10px' }}>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text)', marginBottom: '8px' }}>Avería/Falla/Incidencia</div>
+                <textarea placeholder="Descripción de falla o incidencia..." value={nuevoEquipoModal.averia}
+                  onChange={e => setNuevoEquipoModal({...nuevoEquipoModal, averia: e.target.value})}
+                  rows={3} style={{ padding: '5px 8px', fontSize: '.78rem', border: '1.5px solid var(--border)', borderRadius: '6px', minHeight: '60px', width: '100%', boxSizing: 'border-box', fontFamily: 'inherit' }} />
               </div>
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-                <button type="button" className="cancel-btn" onClick={() => {
-                  setMostrarModalEquipo(false);
-                  setEquipoEditandoModal(null);
-                }}>
-                  <X size={18} /> Cancelar
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                <button type="button" onClick={() => { setMostrarModalEquipo(false); setEquipoEditandoModal(null); }}
+                  style={{ padding: '7px 16px', fontSize: '.8rem', background: 'var(--danger)', color: 'white', border: 'none', borderRadius: '7px', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <X size={16} /> Cancelar
                 </button>
-                <button type="submit" className="main-btn">
-                  <Save size={18} /> {equipoEditandoModal ? "Guardar Cambios" : "Guardar Equipo"}
+                <button type="submit"
+                  style={{ padding: '7px 16px', fontSize: '.8rem', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '7px', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Save size={16} /> {equipoEditandoModal ? "Guardar Cambios" : "Guardar Equipo"}
                 </button>
               </div>
             </form>
