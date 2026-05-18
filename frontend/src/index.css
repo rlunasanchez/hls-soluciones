@@ -1220,7 +1220,13 @@ table tr:last-child td {
     grid-template-columns: 1fr;
   }
   
-  .form-row-2 {
+.form-row-1 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.form-row-2 {
     grid-template-columns: 1fr;
   }
   
@@ -1235,6 +1241,68 @@ table tr:last-child td {
   
   .form-row-6 {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .equipos-asociados table,
+  .equipos-asociados thead,
+  .equipos-asociados tbody,
+  .equipos-asociados th,
+  .equipos-asociados td,
+  .equipos-asociados tr {
+    display: block;
+  }
+
+  .equipos-asociados thead tr {
+    display: none;
+  }
+
+  .equipos-asociados tr {
+    margin-bottom: 16px;
+    border: none;
+    border-radius: 12px;
+    background: var(--primary-light);
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  .equipos-asociados td {
+    padding: 6px 0;
+    border: none;
+    text-align: left;
+  }
+
+  .equipos-asociados td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--primary);
+    display: block;
+    margin-bottom: 2px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .equipos-asociados td[data-label="Código"] {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--primary);
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(12, 74, 140, 0.2);
+    margin-bottom: 8px;
+  }
+
+  .equipos-asociados td[data-label="Código"]::before {
+    display: none;
+  }
+
+  .equipos-asociados td[data-label="Acción"] {
+    padding-top: 12px;
+    display: flex;
+    gap: 8px;
+  }
+
+  .equipos-asociados td[data-label="Acción"]::before {
+    display: none;
   }
   
   .form-actions-bar {
@@ -1458,5 +1526,92 @@ table tr:last-child td {
     width: 100%;
     justify-content: center;
     padding: 8px;
+  }
+}
+
+/* =========================
+   RESPONSIVE: Mobile (< 480px)
+  ========================= */
+@media (max-width: 480px) {
+  .form-row-1,
+  .form-row-2,
+  .form-row-3,
+  .form-row-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .sucursal-card {
+    padding: 16px !important;
+  }
+
+  .sucursal-card .form-group {
+    margin-bottom: 12px !important;
+  }
+
+  .sucursal-card .form-group label {
+    font-size: 14px;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .sucursal-card .form-group input,
+  .sucursal-card .form-group select {
+    width: 100%;
+    min-height: 44px;
+    font-size: 16px;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  .form-actions-bar {
+    flex-direction: column;
+  }
+
+  .form-actions-bar button {
+    width: 100%;
+  }
+
+  .equipos-asociados table,
+  .equipos-asociados thead,
+  .equipos-asociados tbody,
+  .equipos-asociados th,
+  .equipos-asociados td,
+  .equipos-asociados tr {
+    display: block;
+  }
+
+  .equipos-asociados thead tr {
+    display: none;
+  }
+
+  .equipos-asociados tr {
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: white;
+    padding: 12px;
+  }
+
+  .equipos-asociados td {
+    padding: 8px 12px;
+    border: none;
+    text-align: left;
+  }
+
+  .equipos-asociados td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--primary);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .equipos-asociados td:first-child {
+    padding-top: 12px;
+  }
+
+  .equipos-asociados td:last-child {
+    padding-bottom: 12px;
   }
 }

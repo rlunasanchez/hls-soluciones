@@ -516,4 +516,162 @@ Así los assets (JS, CSS) se sirven directamente y las rutas de React Router van
 5. **UX/UI:** Revisar que todos los módulos tengan navegación consistente
 6. **Deploy:** Verificar que cambios en `main` se puedan mergear a `deploy/cloud` sin problemas
 
-**Nota:** El deploy en la nube ya está funcionando. Prioridad: estabilizar el flujo de edición de órdenes y probar todas las funcionalidades end-to-end.
+**Nota:** El deploy en la nube ya está funcionando. Prioridad: estabilizar el flujo de edición de órdenes y probar todas las funcionalidades end-to-end. El módulo Orden de Trabajo fue refactorizado recientemente pero requiere pruebas exhaustivas y ajustes de UX.
+
+---
+
+## Cambios Recientes (17-18 Mayo 2026) - Responsive Móvil
+
+### 16. Fix Problema de Deploy en Vercel
+
+**Problema:** Los cambios subidos a `deploy/cloud` no se reflejaban en la producción de Vercel. Los cambios locales funcionaban pero en la web no aparecían.
+
+**Causa raíz:** Los deployments se creaban como "Preview" en vez de "Production". Vercel hacía el build pero no lo asignaba como producción.
+
+**Solución:**
+1. Cada vez que se hace push a `deploy/cloud`, ir a https://vercel.com/rodrigolunaanalista-9059s-projects/hls-soluciones/deployments
+2. Buscar el deployment más reciente (commit más nuevo)
+3. Hacer click en el deployment
+4. Hacer click en el botón **"Promote to Production"**
+
+**URLs:**
+- Deployments: https://vercel.com/rodrigolunaanalista-9059s-projects/hls-soluciones/deployments
+- Proyecto: https://vercel.com/rodrigolunaanalista-9059s-projects/hls-soluciones
+
+### 17. Responsive Formulario de Clientes (Sucursales/Direcciones)
+
+**Archivos modificados:**
+- `frontend/src/pages/Clientes.jsx`
+- `frontend/src/index.css`
+
+**Cambios:**
+- Cada campo de sucursal ahora es una fila independiente
+- En móvil, los campos se muestran stacked
+- Inputs con tamaño mínimo de 44px para mejor touch en móvil
+- Labels más grandes (14px, bold)
+
+**CSS agregado:**
+- `.form-row-1`: para una columna
+- Media query para `.sucursal-card`
+
+### 18. Responsive Orden de Trabajo (Fechas con Checkboxes)
+
+**Archivos modificados:**
+- `frontend/src/pages/OrdenTrabajo.jsx`
+
+**Cambios:**
+- Las 4 fechas (Ingreso, Término, Entrega, Compra) ahora usan `date-check-grid` y `date-check-card`
+- En móvil: 1 columna | En tablet: 2 columnas | En desktop: 4 columnas
+
+### 19. Responsive Equipos Asociados en Clientes
+
+**Archivos modificados:**
+- `frontend/src/pages/Clientes.jsx`
+- `frontend/src/index.css`
+
+**Cambios:**
+- Vista de equipos como tarjetas verticales en móvil
+- Fondo azul claro (`var(--primary-light)`)
+- Clase `.equipos-asociados`
+
+### 20. Responsive Equipos.jsx
+
+**Estado:** Ya funcional con `.form-row-3` existente
+
+---
+
+## Flujo de Trabajo para Cambios Responsive
+
+1. **Hacer cambios en local (rama `main`)**
+2. **Commit y push a `deploy/cloud`:**
+   ```bash
+   git add .
+   git commit -m "Descripción del cambio"
+   git checkout deploy/cloud
+   git merge main
+   git push origin deploy/cloud
+   git checkout main
+   ```
+3. **Ir a Vercel → Deployments → Promote to Production**
+4. **Probar en móvil**
+
+---
+
+## Nota Importante: Always Promote to Production
+
+⚠️ **IMPORTANTE:** Cada vez que se hace push a `deploy/cloud`, los cambios aparecerán en la lista de deployments pero **NO** se mostrarán en la URL de producción hasta que se haga **Promote to Production**.
+
+Pasos exactos:
+1. Ir a https://vercel.com/rodrigolunaanalista-9059s-projects/hls-soluciones/deployments
+2. El deployment más reciente dice "Preview" (no Production)
+3. Click en el deployment → Buscar botón "Promote to Production"
+4. Click en el botón
+5. Esperar ~1 minuto a que se actualice
+
+Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán en `hls-soluciones.vercel.app`.
+
+---
+
+## Optimizaciones de Código (18 Mayo 2026)
+
+### 21. Mejoras en Queries y Generación de Códigos
+
+**Problema:** `ORDER BY + LIMIT 1` poco eficiente.
+
+**Solución:** Cambiar a `MAX()`.
+
+**Archivos modificados:**
+- `backend/routes/clientes.js`
+- `backend/routes/equipos.js`
+- `backend/routes/ordenes.js`
+
+**Cambios:**
+- `SELECT ... ORDER BY num DESC LIMIT 1` → `SELECT MAX(CAST(SUBSTRING(codigo, 4) AS UNSIGNED)) AS num ...`
+- Eliminado `LOWER()` innecesario en búsqueda de equipos
+- Eliminados console.log de debug
+
+---
+
+## Historial de Versiones
+
+| Versión | Fecha | Cambios |
+|---------|-------|---------|
+| 1.0 | 17 Mayo 2026 | Sistema base con Clientes, Equipos, Órdenes |
+| 1.1 | 17-18 Mayo 2026 | Responsive móvil, fix Vercel, optimización |
+| 1.2 | 18 Mayo 2026 | Documentación completa |
+
+---
+
+## Fix Críticos (17 Mayo 2026)
+
+### 22. Fix CORS - Agregar Vercel a origins permitidos
+
+**Archivo:** `backend/server.js`
+
+**Solución:** Agregar `https://hls-soluciones.vercel.app` al array de allowedOrigins.
+
+### 23. Fix PostgreSQL - Convertir backend completo
+
+**Archivos modificados:**
+- `backend/config/db.js` - mysql2 → pg
+- `backend/package.json` - dependencia mysql2 → pg
+- `backend/routes/auth.js` - sintaxis PostgreSQL
+- `backend/routes/equipos.js` - sintaxis PostgreSQL
+- `backend/routes/clientes.js` - sintaxis PostgreSQL
+- `backend/routes/ordenes.js` - sintaxis PostgreSQL
+
+**Cambios clave:**
+- `?` → `$1, $2, ...`
+- `IFNULL()` → `COALESCE()`
+- `GROUP_CONCAT()` → `STRING_AGG()`
+- `INSERT ...` → `INSERT ... RETURNING id`
+- `ON DUPLICATE KEY` → `ON CONFLICT`
+- `ER_DUP_ENTRY` → `23505`
+
+### 24. Endpoint para crear admin
+
+**Archivo:** `backend/routes/auth.js`
+
+**Endpoint:** `POST /api/auth/setup-admin` con key `hls-setup-2026`
+
+**Credenciales:** usuario: `admin`, contraseña: `admin123`
