@@ -308,6 +308,7 @@ const efCss = `.ef-wrap { background: white; border-radius: 16px; box-shadow: va
 .ef-f { display: flex; flex-direction: column; gap: 2px; }
 .ef-f label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .3px; }
 .ef-f input, .ef-f textarea { padding: 5px 8px; font-size: .78rem; border: 1.5px solid var(--border); border-radius: 6px; background: white; transition: border-color .15s; }
+.ef-f textarea { resize: vertical; min-height: 60px; }
 .ef-f input:focus, .ef-f textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37,99,235,.1); }
 .ef-code input { background: #e8f0fe !important; color: #1a73e8; font-weight: 700; font-size: .85rem !important; }
 .ef-code label { color: #1a73e8 !important; }
