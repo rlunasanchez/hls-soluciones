@@ -7,7 +7,6 @@ import {
   Search, ChevronDown, Trash2, ShoppingCart, Edit, Home
 } from "lucide-react";
 import api from "../services/api";
-import styles from './OrdenTrabajo/OrdenTrabajo.module.css';
 
 function OrdenTrabajo() {
   const navigate = useNavigate();
@@ -704,20 +703,61 @@ function OrdenTrabajo() {
           </>
         ) : (
           /* Formulario para crear orden */
-          <><div style={{ maxWidth: '900px', margin: '0 auto', padding: '12px' }}>
-            <div className={styles.wrap}>
-              <div className={styles.head}>
+          <><style>{`
+.of-wrap{background:white;border-radius:12px;box-shadow:var(--shadow-lg);overflow:hidden}
+.of-head{background:var(--gradient);padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.of-head h2{color:white;margin:0;display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600}
+.of-head-close{background:rgba(255,255,255,0.2);border:none;border-radius:6px;padding:6px;cursor:pointer;color:white;display:flex}
+.of-form{padding:10px;display:grid;grid-template-columns:1fr;gap:8px}
+.of-sec{padding:8px;border-radius:8px}
+.of-sec.primary{background:var(--primary-light)}
+.of-sec.success{background:var(--success-light)}
+.of-sec.muted{background:#f1f5f9}
+.of-st{font-size:11px;font-weight:600;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.of-st.primary{color:var(--primary)}
+.of-st.success{color:var(--success)}
+.of-st.muted{color:var(--text)}
+.of-r3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px}
+.of-r2{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:6px}
+.of-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.of-f{display:flex;flex-direction:column;gap:1px}
+.of-f label{font-size:9px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px}
+.of-f input,.of-f select,.of-f textarea{padding:6px 10px;font-size:.82rem;border:1.5px solid var(--border);border-radius:6px;background:white;transition:border-color .15s;width:100%;box-sizing:border-box}.of-f textarea{resize:vertical;min-height:60px}
+.of-f input:focus,.of-f select:focus,.of-f textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px rgba(37,99,235,.1)}
+.of-dates{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.of-date{display:flex;align-items:center;gap:4px}
+.of-chk{display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:600;color:var(--text);text-transform:none;letter-spacing:normal;cursor:pointer}
+.of-chk input{width:auto;margin:0}
+.of-date-f{flex:1;min-width:0;margin-left:4px}
+.of-date-f input{width:100%}
+.of-date input[type="date"]{padding:6px 10px;font-size:.82rem;border:1.5px solid var(--border);border-radius:6px}
+.of-ins{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.of-ins-item{display:flex;align-items:end;gap:4px}
+.of-ins-item>div{flex:1;min-width:0}
+.of-ins-item label{font-size:9px;font-weight:600;color:var(--text-muted);text-transform:uppercase}
+.of-ins-item input{padding:6px 10px;font-size:.82rem;border:1.5px solid var(--border);border-radius:6px;width:100%;box-sizing:border-box}
+.of-ins-del{height:26px;width:26px;padding:0;display:flex;align-items:center;justify-content:center;background:#fee2e2;color:#dc2626;border:none;border-radius:4px;cursor:pointer;flex-shrink:0}
+.of-btn-a{padding:4px 10px;font-size:.7rem;background:var(--success);color:white;border:none;border-radius:5px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:3px}
+.of-sub{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:2px}
+.of-btn-p{padding:6px 14px;font-size:.78rem;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px}
+.of-btn-c{padding:6px 14px;font-size:.78rem;background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px;transition:all .2s}
+.of-btn-c:hover{background:#e2e8f0}
+@media(max-width:768px){.of-r3,.of-r2,.of-grid,.of-dates,.of-ins{grid-template-columns:1fr}.of-form{padding:8px;gap:6px}.of-f input,.of-f select,.of-f textarea{padding:10px 12px;font-size:.9rem;min-height:44px}.of-sub{flex-direction:column}.of-sub button{width:100%;justify-content:center}}
+`}</style>
+          <div style={{ maxWidth: '900px', margin: '0 auto', padding: '12px' }}>
+            <div className="of-wrap">
+              <div className="of-head">
                 <h2><Wrench size={20} /> {editingId ? "Editar Orden" : "Nueva Orden"}</h2>
-                <button type="button" className={styles.headClose} onClick={() => { setMostrarFormulario(false); resetFormulario(); setEditingId(null); }}><X size={18} /></button>
+                <button type="button" className="of-head-close" onClick={() => { setMostrarFormulario(false); resetFormulario(); setEditingId(null); }}><X size={18} /></button>
               </div>
-            <form onSubmit={guardarOrden} className={styles.form}>
+            <form onSubmit={guardarOrden} className="of-form">
               {/* SECCIÓN 1: DATOS DE LA ORDEN */}
-              <div className={`${styles.sec} ${styles.primary}`}>
-                <div className={`${styles.st} ${styles.primary}`}>Datos de la Orden</div>
+              <div className="of-sec primary">
+                <div className="of-st primary">Datos de la Orden</div>
                 
-                <div className={styles.grid}>
+                <div className="of-grid">
                   {/* Número de Orden */}
-                  <div className={styles.f}>
+                  <div className="of-f">
                     <label>
                       Número de Orden *
                     </label>
@@ -740,7 +780,7 @@ function OrdenTrabajo() {
                   </div>
 
                   {/* Fecha */}
-                  <div className={styles.f}>
+                  <div className="of-f">
                     <label>
                       Fecha *
                     </label>
@@ -753,8 +793,8 @@ function OrdenTrabajo() {
                   </div>
 
                   {/* Garantía Checkbox */}
-                  <div className={styles.f} style={{justifyContent:'center'}}>
-                    <label className={styles.chk}>
+                  <div className="of-f" style={{justifyContent:'center'}}>
+                    <label className="of-chk">
                       <input
                         type="checkbox"
                         checked={nuevaOrden.esGarantia}
@@ -766,33 +806,33 @@ function OrdenTrabajo() {
                 </div>
 
                 {/* Fechas con Checkboxes */}
-                <div className={styles.dates}>
-                  <div className={styles.date}>
+                <div className="of-dates">
+                  <div className="of-date">
                     <input type="checkbox" checked={nuevaOrden.fechaIngresoCheck} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaIngresoCheck: e.target.checked})} />
                     <span style={{fontSize:'.75rem',fontWeight:600}}>Ingreso</span>
-                    {nuevaOrden.fechaIngresoCheck && <div className={styles.dateF}><input type="date" value={nuevaOrden.fechaIngreso} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaIngreso: e.target.value})} /></div>}
+                    {nuevaOrden.fechaIngresoCheck && <div className="of-date-f"><input type="date" value={nuevaOrden.fechaIngreso} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaIngreso: e.target.value})} /></div>}
                   </div>
-                  <div className={styles.date}>
+                  <div className="of-date">
                     <input type="checkbox" checked={nuevaOrden.fechaTerminoCheck} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaTerminoCheck: e.target.checked})} />
                     <span style={{fontSize:'.75rem',fontWeight:600}}>Término</span>
-                    {nuevaOrden.fechaTerminoCheck && <div className={styles.dateF}><input type="date" value={nuevaOrden.fechaTermino} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaTermino: e.target.value})} /></div>}
+                    {nuevaOrden.fechaTerminoCheck && <div className="of-date-f"><input type="date" value={nuevaOrden.fechaTermino} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaTermino: e.target.value})} /></div>}
                   </div>
-                  <div className={styles.date}>
+                  <div className="of-date">
                     <input type="checkbox" checked={nuevaOrden.fechaEntregaCheck} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaEntregaCheck: e.target.checked})} />
                     <span style={{fontSize:'.75rem',fontWeight:600}}>Entrega</span>
-                    {nuevaOrden.fechaEntregaCheck && <div className={styles.dateF}><input type="date" value={nuevaOrden.fechaEntrega} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaEntrega: e.target.value})} /></div>}
+                    {nuevaOrden.fechaEntregaCheck && <div className="of-date-f"><input type="date" value={nuevaOrden.fechaEntrega} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaEntrega: e.target.value})} /></div>}
                   </div>
-                  <div className={styles.date}>
+                  <div className="of-date">
                     <input type="checkbox" checked={nuevaOrden.fechaCompraCheck} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaCompraCheck: e.target.checked})} />
                     <span style={{fontSize:'.75rem',fontWeight:600}}>Compra</span>
-                    {nuevaOrden.fechaCompraCheck && <div className={styles.dateF}><input type="date" value={nuevaOrden.fechaCompra} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaCompra: e.target.value})} /></div>}
+                    {nuevaOrden.fechaCompraCheck && <div className="of-date-f"><input type="date" value={nuevaOrden.fechaCompra} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaCompra: e.target.value})} /></div>}
                   </div>
                 </div>
               </div>
 
 {/* SECCIÓN 2: DATOS DEL CLIENTE */}
-              <div className={`${styles.sec} ${styles.success}`}>
-                <div className={`${styles.st} ${styles.success}`}>Datos del Cliente</div>
+              <div className="of-sec success">
+                <div className="of-st success">Datos del Cliente</div>
                 
                 {/* Buscador de Cliente */}
                 <div style={{ marginBottom: '12px' }}>
@@ -906,7 +946,7 @@ function OrdenTrabajo() {
                   gap: '20px',
                   marginBottom: '20px'
                 }}>
-                  <div className={styles.f}>
+                  <div className="of-f">
                     <label>
                       Cliente *
                     </label>
@@ -926,7 +966,7 @@ function OrdenTrabajo() {
                     />
                   </div>
 
-                  <div className={styles.f}>
+                  <div className="of-f">
                     <label>
                       Dirección
                     </label>
@@ -945,7 +985,7 @@ function OrdenTrabajo() {
                     />
                   </div>
 
-                  <div className={styles.f}>
+                  <div className="of-f">
                     <label>
                       Comuna
                     </label>
@@ -970,7 +1010,7 @@ function OrdenTrabajo() {
                   gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
                   gap: '20px'
                 }}>
-                  <div className={styles.f}>
+                  <div className="of-f">
                     <label>
                       Contacto
                     </label>
@@ -989,7 +1029,7 @@ function OrdenTrabajo() {
                     />
                   </div>
 
-                  <div className={styles.f}>
+                  <div className="of-f">
                     <label>
                       Fono Principal
                     </label>
@@ -1008,7 +1048,7 @@ function OrdenTrabajo() {
                     />
                   </div>
 
-                  <div className={styles.f}>
+                  <div className="of-f">
                     <label>
                       Técnico Asignado *
                     </label>
@@ -1032,8 +1072,8 @@ function OrdenTrabajo() {
               </div>
 
               {/* SECCIÓN 3: DATOS DEL EQUIPO */}
-              <div className={`${styles.sec} ${styles.muted}`}>
-                <div className={`${styles.st} ${styles.muted}`}>Datos del Equipo</div>
+              <div className="of-sec muted">
+                <div className="of-st muted">Datos del Equipo</div>
                 
                 <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px',marginBottom:'8px'}}>
                   {/* Buscador por Código de Equipo */}
@@ -1215,7 +1255,7 @@ function OrdenTrabajo() {
                      gap: '20px',
                      marginBottom: '20px'
                    }}>
-                   <div className={styles.f}>
+                   <div className="of-f">
                     <label>
                        Equipo *
                      </label>
@@ -1235,7 +1275,7 @@ function OrdenTrabajo() {
                     />
                   </div>
 
-                  <div className={styles.f}>
+                  <div className="of-f">
                     <label>
                       Marca *
                     </label>
@@ -1255,7 +1295,7 @@ function OrdenTrabajo() {
                     />
                   </div>
 
-                  <div className={styles.f}>
+                  <div className="of-f">
                     <label>
                       Modelo *
                     </label>
@@ -1275,7 +1315,7 @@ function OrdenTrabajo() {
                     />
                   </div>
 
-                  <div className={styles.f}>
+                  <div className="of-f">
                     <label>
                       Serie
                     </label>
@@ -1302,7 +1342,7 @@ function OrdenTrabajo() {
                    gap: '20px',
                    marginBottom: '20px'
                  }}>
-                   <div className={styles.f}>
+                   <div className="of-f">
                     <label>
                        Contador Páginas OUT
                      </label>
@@ -1321,7 +1361,7 @@ function OrdenTrabajo() {
                      />
                    </div>
 
-                   <div className={styles.f}>
+                   <div className="of-f">
                     <label>
                        Nivel Tinta
                      </label>
@@ -1343,23 +1383,23 @@ function OrdenTrabajo() {
                  */}
 
                 {/* Insumos Dinámicos */}
-                <div className={styles.sec} style={{background:'white'}}>
+                <div className="of-sec" style={{background:'white'}}>
                   <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'6px'}}>
-                    <span className={`${styles.st} ${styles.muted}`}>Insumos</span>
+                    <span className="of-st muted">Insumos</span>
                     {insumosVisibles < 12 && (
-                      <button type="button" className={styles.btnA} onClick={() => setInsumosVisibles(insumosVisibles + 1)}>
+                      <button type="button" className="of-btn-a" onClick={() => setInsumosVisibles(insumosVisibles + 1)}>
                         <Plus size={14} /> Agregar
                       </button>
                     )}
                   </div>
-                  <div className={styles.ins}>
+                  <div className="of-ins">
                     {insumos.slice(0, insumosVisibles).map((ins, idx) => (
-                      <div key={idx} className={styles.insItem}>
+                      <div key={idx} className="of-ins-item">
                         <div>
                           <label>Insumo {idx + 1}</label>
                           <input type="text" placeholder={`Insumo ${idx + 1}`} value={ins.nombre} onChange={(e) => actualizarInsumo(idx, e.target.value)} />
                         </div>
-                        <button type="button" className={styles.insDel} onClick={() => {
+                        <button type="button" className="of-ins-del" onClick={() => {
                           const nuevas = insumos.filter((_, i) => i !== idx);
                           while (nuevas.length < 12) nuevas.push({ nombre: "" });
                           setInsumos(nuevas);
@@ -1372,9 +1412,9 @@ function OrdenTrabajo() {
               </div>
 
               {/* SECCIÓN 4: AVERÍA/FALLA/INCIDENCIA */}
-              <div className={`${styles.sec} ${styles.muted}`}>
-                <div className={`${styles.st} ${styles.muted}`}>Avería/Falla/Incidencia</div>
-                <div className={styles.f}>
+              <div className="of-sec muted">
+                <div className="of-st muted">Avería/Falla/Incidencia</div>
+                <div className="of-f">
                   <textarea
                     placeholder="Describa la avería, falla o incidencia del equipo..."
                     value={nuevaOrden.averia}
@@ -1385,11 +1425,11 @@ function OrdenTrabajo() {
               </div>
 
               {/* Botones de acción del formulario */}
-              <div className={styles.sub}>
-                <button type="button" className={styles.btnC} onClick={() => { setMostrarFormulario(false); resetFormulario(); setEditingId(null); }}>
+              <div className="of-sub">
+                <button type="button" className="of-btn-c" onClick={() => { setMostrarFormulario(false); resetFormulario(); setEditingId(null); }}>
                   <X size={16} /> Cancelar
                 </button>
-                <button type="submit" className={styles.btnP}>
+                <button type="submit" className="of-btn-p">
                   <Save size={16} /> {editingId ? "Guardar Cambios" : "Guardar Orden"}
                 </button>
               </div>
