@@ -426,53 +426,52 @@ function Clientes() {
     return (
       <div className="container">
         <style>{`
-.cf-wrap{max-width:900px;margin:0 auto;padding:16px}
-.cf-card{background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.08);overflow:hidden}
-.cf-head{background:linear-gradient(135deg,#0C4A8C,#1a6bc4);padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
-.cf-head h2{color:#fff;margin:0;display:flex;align-items:center;gap:12px;font-size:18px}
-.cf-head button{background:rgba(255,255,255,.2);border:none;border-radius:8px;padding:10px;cursor:pointer;color:#fff;transition:background .2s;line-height:0}
+.cf-wrap{max-width:900px;margin:0 auto;padding:12px}
+.cf-card{background:#fff;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.07);overflow:hidden}
+.cf-head{background:linear-gradient(135deg,#0C4A8C,#1a6bc4);padding:12px 18px;display:flex;align-items:center;justify-content:space-between}
+.cf-head h2{color:#fff;margin:0;display:flex;align-items:center;gap:10px;font-size:16px}
+.cf-head button{background:rgba(255,255,255,.2);border:none;border-radius:8px;padding:8px;cursor:pointer;color:#fff;transition:background .2s;line-height:0}
 .cf-head button:hover{background:rgba(255,255,255,.3)}
-.cf{padding:16px;display:flex;flex-direction:column;gap:12px}
-.cf-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
-.cf-sec{padding:14px;border-radius:12px}
+.cf{padding:12px;display:flex;flex-direction:column;gap:10px}
+.cf-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
+.cf-sec{padding:10px;border-radius:10px}
 .cf-sec-empresa{background:#f0f7ff}
 .cf-sec-contacto{background:#f0fdf4}
 .cf-sec-suc{background:#f8fafc}
-.cf-sec h3{margin-bottom:12px;font-size:14px;font-weight:700}
+.cf-sec h3{margin-bottom:8px;font-size:13px;font-weight:700}
 .cf-sec-empresa h3{color:#0C4A8C}
 .cf-sec-contacto h3{color:#16a34a}
-.cf-sec-suc h3{color:#334155;margin:0;font-size:14px}
-.cf-r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-.cf-r2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.cf-r1{display:grid;grid-template-columns:1fr;gap:10px}
-.cf-field{display:flex;flex-direction:column;gap:4px}
-.cf-field label{font-size:.82rem;font-weight:600;color:#475569}
-.cf-field input,.cf-field select{padding:7px 10px;font-size:.82rem;border:1px solid #d1d5db;border-radius:6px;transition:all .2s;background:#fff;width:100%;box-sizing:border-box;font-family:inherit;color:#1e293b}
-.cf-field input:focus,.cf-field select:focus{border-color:#0C4A8C;outline:none;box-shadow:0 0 0 3px rgba(12,74,140,.12)}
+.cf-sec-suc h3{color:#334155;margin:0;font-size:13px}
+.cf-r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.cf-r2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.cf-r1{display:grid;grid-template-columns:1fr;gap:6px}
+.cf-field{display:flex;flex-direction:column;gap:3px}
+.cf-field label{font-size:.78rem;font-weight:600;color:#475569;line-height:1.2}
+.cf-field input,.cf-field select{padding:6px 9px;font-size:.8rem;border:1px solid #d1d5db;border-radius:5px;transition:all .2s;background:#fff;width:100%;box-sizing:border-box;font-family:inherit;color:#1e293b}
+.cf-field input:focus,.cf-field select:focus{border-color:#0C4A8C;outline:none;box-shadow:0 0 0 2px rgba(12,74,140,.15)}
 .cf-field input::placeholder{color:#94a3b8}
-.cf-codigo{max-width:200px}
-.cf-codigo input{background:#eef2ff;color:#0C4A8C;font-weight:700;font-size:.95rem;border-color:#c7d2fe}
-.cf-sub{display:flex;gap:16px;justify-content:flex-end;margin-top:8px;flex-wrap:wrap}
-.cf-btn-p{padding:8px 16px;font-size:.85rem;background:#0C4A8C;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;transition:all .2s}
+.cf-codigo input{background:#eef2ff;color:#0C4A8C;font-weight:700;font-size:.9rem;border-color:#c7d2fe;width:100%;box-sizing:border-box}
+.cf-sub{display:flex;gap:12px;justify-content:flex-end;margin-top:6px;flex-wrap:wrap}
+.cf-btn-p{padding:6px 14px;font-size:.82rem;background:#0C4A8C;color:#fff;border:none;border-radius:7px;cursor:pointer;font-weight:600;transition:all .2s}
 .cf-btn-p:hover{background:#0a3d75}
-.cf-btn-c{padding:8px 16px;font-size:.85rem;background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;font-weight:600;transition:all .2s}
+.cf-btn-c{padding:6px 14px;font-size:.82rem;background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;border-radius:7px;cursor:pointer;font-weight:600;transition:all .2s}
 .cf-btn-c:hover{background:#e2e8f0}
-.cf-btn-a{padding:6px 12px;font-size:.8rem;background:#0C4A8C;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:500;transition:all .2s}
+.cf-btn-a{padding:5px 10px;font-size:.78rem;background:#0C4A8C;color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:500;transition:all .2s}
 .cf-btn-a:hover{background:#0a3d75}
-.cf-btn-d{padding:6px 10px;font-size:.8rem;background:#fee2e2;color:#dc2626;border:none;border-radius:6px;cursor:pointer;font-weight:500;transition:all .2s}
+.cf-btn-d{padding:5px 8px;font-size:.78rem;background:#fee2e2;color:#dc2626;border:none;border-radius:5px;cursor:pointer;font-weight:500;transition:all .2s}
 .cf-btn-d:hover{background:#fecaca}
-.cf-sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.cf-sc{margin-bottom:8px;padding:10px;background:#fff;border-radius:8px;border:1px solid #e2e8f0}
+.cf-sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cf-sc{margin-bottom:6px;padding:8px;background:#fff;border-radius:6px;border:1px solid #e2e8f0}
 .cf-sc:last-child{margin-bottom:0}
-.cf-sc-del{text-align:right;margin-top:4px}
-.cf-mt{margin-top:8px}
-.cf-mb{margin-bottom:6px}
+.cf-sc-del{text-align:right;margin-top:2px}
+.cf-mt{margin-top:6px}
+.cf-mb{margin-bottom:4px}
 .cf-m0{margin:0!important}
 `}</style>
         <div className="cf-wrap">
           <div className="cf-card">
             <div className="cf-head">
-              <h2><Users size={28} />{clienteEditando ? "Editar Cliente" : "Nuevo Cliente"}</h2>
+              <h2><Users size={24} />{clienteEditando ? "Editar Cliente" : "Nuevo Cliente"}</h2>
               <button onClick={() => {
                 setMostrarFormulario(false); setClienteEditando(null);
                 setSucursalesVisibles(1); setRutError("");
@@ -480,19 +479,19 @@ function Clientes() {
                   codigo:"",razon_social:"",giro:"",rut:"",direccion:"",ciudad:"",comuna:"",telefono:"",
                   contacto_nombre:"",contacto_email:"",contacto_fono:"",contacto_cargo:"",contacto_direccion:"",direcciones:[]
                 });
-              }}><X size={24} /></button>
+              }}><X size={20} /></button>
             </div>
             <form onSubmit={guardarCliente} className="cf">
               <div className="cf-grid">
               <div className="cf-sec cf-sec-empresa">
                 <h3>Datos de la Empresa</h3>
-                <div className="cf-codigo cf-mb">
+                <div className="cf-codigo" style={{marginBottom:6}}>
                   <div className="cf-field">
                     <label>Código</label>
                     <input value={clienteEditando?(clienteEditando.codigo||calcularSiguienteCodigoCliente()):calcularSiguienteCodigoCliente()} disabled />
                   </div>
                 </div>
-                <div className="cf-r3">
+                <div style={{display:'grid',gridTemplateColumns:'2fr 1fr',gap:6}}>
                   <div className="cf-field">
                     <label>Razón Social *</label>
                     <input placeholder="Razón social" value={nuevoCliente.razon_social} onChange={e=>setNuevoCliente({...nuevoCliente,razon_social:e.target.value})} required />
@@ -501,8 +500,10 @@ function Clientes() {
                     <label>Giro</label>
                     <input placeholder="Giro" value={nuevoCliente.giro} onChange={e=>setNuevoCliente({...nuevoCliente,giro:e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'')})} />
                   </div>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'200px',gap:6,marginTop:6}}>
                   <div className="cf-field">
-                    <label>RUT {rutError&&<span style={{color:'#dc2626',fontSize:'.75rem'}}> — {rutError}</span>}</label>
+                    <label>RUT {rutError&&<span style={{color:'#dc2626',fontSize:'.72rem'}}> — {rutError}</span>}</label>
                     <input placeholder="Ej: 12.345.678-9" value={nuevoCliente.rut} style={rutError?{border:'2px solid #dc2626',background:'#fef2f2'}:{}}
                       onChange={e=>{let val=e.target.value.toUpperCase().replace(/[^0-9K-]/g,'');if(val.length>12)val=val.slice(0,12);const partes=val.split('-');if(partes.length===2){if(partes[1].length>1)partes[1]=partes[1][0];if(partes[0].length>0)partes[0]=partes[0].replace(/(\d)(?=(\d{3})+(?!\d))/g,'$1.')}else if(partes.length===1&&partes[0].length>0){partes[0]=partes[0].replace(/(\d)(?=(\d{3})+(?!\d))/g,'$1.')}val=partes.join('-');setNuevoCliente({...nuevoCliente,rut:val});if(rutError&&val.length>=9&&validarRUT(val))setRutError('')}}
                       onBlur={e=>{const val=e.target.value;if(!val){setRutError('');return}const limpio=val.replace(/\./g,'').toUpperCase();const tieneGuion=limpio.includes('-');const match=limpio.match(/^(\d+)-([K0-9])$/);if(match){if(validarRUT(val))setRutError('');else setRutError('RUT inválido');return}if(tieneGuion&&!match)setRutError('RUT inválido');else if(!tieneGuion&&limpio.length>=5)setRutError('Falta el guion y dígito verificador');else setRutError('')}}
@@ -538,7 +539,7 @@ function Clientes() {
               </div>
               <div className="cf-sec cf-sec-contacto">
                 <h3>Datos del Contacto</h3>
-                <div className="cf-r3">
+                <div style={{display:'grid',gridTemplateColumns:'1.5fr 1fr 1fr',gap:6}}>
                   <div className="cf-field">
                     <label>Nombre Contacto</label>
                     <input placeholder="Nombre" value={nuevoCliente.contacto_nombre} onChange={e=>setNuevoCliente({...nuevoCliente,contacto_nombre:e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'')})} />
@@ -552,7 +553,7 @@ function Clientes() {
                     <input placeholder="Fono" value={nuevoCliente.contacto_fono} onChange={e=>setNuevoCliente({...nuevoCliente,contacto_fono:e.target.value.replace(/[^0-9+]/g,'')})} />
                   </div>
                 </div>
-                <div className="cf-r3 cf-mt">
+                <div className="cf-r1 cf-mt">
                   <div className="cf-field">
                     <label>Cargo</label>
                     <input placeholder="Cargo" value={nuevoCliente.contacto_cargo} onChange={e=>setNuevoCliente({...nuevoCliente,contacto_cargo:e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'')})} />
@@ -604,14 +605,14 @@ function Clientes() {
                       </div>
                     </div>
                     <div className="cf-sc-del">
-                      <button type="button" className="cf-btn-d" onClick={()=>{const nuevas=sucursales.filter((_,i)=>i!==idx);while(nuevas.length<5)nuevas.push({tipo_direccion:"",direccion:"",fono:"",ciudad:"",comuna:""});setSucursales(nuevas);setSucursalesVisibles(Math.max(1,sucursalesVisibles-1))}}><Trash2 size={16} /> Eliminar</button>
+                      <button type="button" className="cf-btn-d" onClick={()=>{const nuevas=sucursales.filter((_,i)=>i!==idx);while(nuevas.length<5)nuevas.push({tipo_direccion:"",direccion:"",fono:"",ciudad:"",comuna:""});setSucursales(nuevas);setSucursalesVisibles(Math.max(1,sucursalesVisibles-1))}}><Trash2 size={14} /> Eliminar</button>
                     </div>
                   </div>
                 ))}
               </div>
               <div className="cf-sub">
-                <button type="button" className="cf-btn-c" onClick={()=>{setMostrarFormulario(false);setClienteEditando(null);setSucursalesVisibles(1);setRutError("");setNuevoCliente({codigo:"",razon_social:"",giro:"",rut:"",direccion:"",ciudad:"",comuna:"",telefono:"",email:"",contacto_nombre:"",contacto_email:"",contacto_fono:"",contacto_cargo:"",contacto_direccion:"",direcciones:[]})}}><X size={20} /> Cancelar</button>
-                <button type="submit" className="cf-btn-p"><Save size={20} /> {clienteEditando?"Guardar Cambios":"Guardar Cliente"}</button>
+                <button type="button" className="cf-btn-c" onClick={()=>{setMostrarFormulario(false);setClienteEditando(null);setSucursalesVisibles(1);setRutError("");setNuevoCliente({codigo:"",razon_social:"",giro:"",rut:"",direccion:"",ciudad:"",comuna:"",telefono:"",email:"",contacto_nombre:"",contacto_email:"",contacto_fono:"",contacto_cargo:"",contacto_direccion:"",direcciones:[]})}}><X size={18} /> Cancelar</button>
+                <button type="submit" className="cf-btn-p"><Save size={18} /> {clienteEditando?"Guardar Cambios":"Guardar Cliente"}</button>
               </div>
             </form>
           </div>
