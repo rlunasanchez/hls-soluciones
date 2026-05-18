@@ -562,7 +562,7 @@ function Clientes() {
                     <label>Email</label>
                     <input
                       type="email"
-                      placeholder="correo@ejemplo.cl"
+                      placeholder="Email"
                       value={nuevoCliente.email}
                       onChange={(e) => setNuevoCliente({ ...nuevoCliente, email: e.target.value })}
                     />
