@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Users, Plus, Save, Trash2, Edit, LogOut, Search, ChevronDown, ChevronUp, Home, Package, UserCog, FileText, FileSpreadsheet, ClipboardList, X, ShoppingCart } from "lucide-react";
 import api from "../services/api";
+import './Clientes.css';
 
 function Clientes() {
   const navigate = useNavigate();
@@ -425,51 +426,7 @@ function Clientes() {
   if (mostrarFormulario) {
     return (
       <div className="container">
-        <style>{`
-.cf-wrap{max-width:900px;margin:0 auto;padding:12px}
-.cf-card{background:#fff;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.07);overflow:hidden}
-.cf-head{background:linear-gradient(135deg,#0C4A8C,#1a6bc4);padding:12px 18px;display:flex;align-items:center;justify-content:space-between}
-.cf-head h2{color:#fff;margin:0;display:flex;align-items:center;gap:10px;font-size:16px}
-.cf-head button{background:rgba(255,255,255,.2);border:none;border-radius:8px;padding:8px;cursor:pointer;color:#fff;transition:background .2s;line-height:0}
-.cf-head button:hover{background:rgba(255,255,255,.3)}
-.cf{padding:12px;display:flex;flex-direction:column;gap:10px}
-.cf-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
-.cf-sec{padding:10px;border-radius:10px}
-.cf-sec-empresa{background:#f0f7ff}
-.cf-sec-contacto{background:#f0fdf4}
-.cf-sec-suc{background:#f8fafc}
-.cf-sec h3{margin-bottom:8px;font-size:13px;font-weight:700}
-.cf-sec-empresa h3{color:#0C4A8C}
-.cf-sec-contacto h3{color:#16a34a}
-.cf-sec-suc h3{color:#334155;margin:0;font-size:13px}
-.cf-r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
-.cf-r2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.cf-r1{display:grid;grid-template-columns:1fr;gap:6px}
-.cf-field{display:flex;flex-direction:column;gap:3px}
-.cf-field label{font-size:.78rem;font-weight:600;color:#475569;line-height:1.2}
-.cf-field input,.cf-field select{padding:6px 9px;font-size:.8rem;border:1px solid #d1d5db;border-radius:5px;transition:all .2s;background:#fff;width:100%;box-sizing:border-box;font-family:inherit;color:#1e293b}
-.cf-field input:focus,.cf-field select:focus{border-color:#0C4A8C;outline:none;box-shadow:0 0 0 2px rgba(12,74,140,.15)}
-.cf-field input::placeholder{color:#94a3b8}
-.cf-codigo input{background:#eef2ff;color:#0C4A8C;font-weight:700;font-size:.9rem;border-color:#c7d2fe;width:100%;box-sizing:border-box}
-@media(max-width:767px){.cf-wrap{padding:8px}.cf-card{border-radius:10px}.cf-head{padding:10px 14px}.cf-head h2{font-size:14px}.cf-head h2 svg{width:20px!important;height:20px!important}.cf-head button{padding:6px}.cf{padding:10px}.cf-grid{grid-template-columns:1fr!important}.cf-sec{padding:10px}.cf-sec h3{font-size:12px}.cf-r3,.cf-r2{grid-template-columns:1fr!important}.cf-field label{font-size:.75rem}.cf-field input,.cf-field select{padding:8px 10px;font-size:.85rem}.cf-sub{gap:8px}.cf-btn-p,.cf-btn-c{padding:10px 16px;font-size:.9rem;flex:1}.cf-sc .cf-r1 input{max-width:none}.cf-sh{flex-direction:column;gap:6px;align-items:stretch}.cf-sh button{width:100%;text-align:center}}
-.cf-sub{display:flex;gap:12px;justify-content:flex-end;margin-top:6px;flex-wrap:wrap}
-.cf-btn-p{padding:6px 14px;font-size:.82rem;background:#0C4A8C;color:#fff;border:none;border-radius:7px;cursor:pointer;font-weight:600;transition:all .2s}
-.cf-btn-p:hover{background:#0a3d75}
-.cf-btn-c{padding:6px 14px;font-size:.82rem;background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;border-radius:7px;cursor:pointer;font-weight:600;transition:all .2s}
-.cf-btn-c:hover{background:#e2e8f0}
-.cf-btn-a{padding:5px 10px;font-size:.78rem;background:#0C4A8C;color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:500;transition:all .2s}
-.cf-btn-a:hover{background:#0a3d75}
-.cf-btn-d{padding:5px 8px;font-size:.78rem;background:#fee2e2;color:#dc2626;border:none;border-radius:5px;cursor:pointer;font-weight:500;transition:all .2s}
-.cf-btn-d:hover{background:#fecaca}
-.cf-sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.cf-sc{margin-bottom:6px;padding:8px;background:#fff;border-radius:6px;border:1px solid #e2e8f0}
-.cf-sc:last-child{margin-bottom:0}
-.cf-sc .cf-r1 input{max-width:400px}
-.cf-sc-del{text-align:right;margin-top:8px}
-.cf-mt{margin-top:6px}
-.cf-mb{margin-bottom:4px}
-.cf-m0{margin:0!important}
-`}</style>
+        
         <div className="cf-wrap">
           <div className="cf-card">
             <div className="cf-head">

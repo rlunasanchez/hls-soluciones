@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Package, Plus, Save, Trash2, Edit, LogOut, Monitor, Printer, Scissors, Droplets, Search, ChevronDown, ChevronUp, Users, UserCog, FileText, FileSpreadsheet, ClipboardList, X, ShoppingCart, Home } from "lucide-react";
 import api from "../services/api";
+import './Equipos.css';
 
 function Equipos() {
   const navigate = useNavigate();
@@ -290,60 +291,10 @@ function Equipos() {
     return <Package size={24} />;
   };
 
-const efCss = `.ef-wrap { background: white; border-radius: 16px; box-shadow: var(--shadow-lg); overflow: hidden; }
-.ef-head { background: var(--gradient); padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; }
-.ef-head h2 { color: white; margin: 0; display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 600; }
-.ef-head-close { background: rgba(255,255,255,0.2); border: none; border-radius: 8px; padding: 8px; cursor: pointer; color: white; display: flex; }
-.ef-form { padding: 18px; display: grid; gap: 14px; }
-.ef-s { padding: 12px; border-radius: 10px; }
-.ef-s.primary { background: var(--primary-light); }
-.ef-s.success { background: var(--success-light); }
-.ef-s.muted { background: #F1F5F9; }
-.ef-st { font-size: 13px; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
-.ef-st.primary { color: var(--primary); }
-.ef-st.success { color: var(--success); }
-.ef-st.muted { color: var(--text); }
-.ef-r2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.ef-r3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-.ef-f { display: flex; flex-direction: column; gap: 2px; }
-.ef-f label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .3px; }
-.ef-f input, .ef-f textarea { padding: 5px 8px; font-size: .78rem; border: 1.5px solid var(--border); border-radius: 6px; background: white; transition: border-color .15s; width: 100%; box-sizing: border-box; }
-.ef-f textarea { resize: vertical; min-height: 60px; }
-.ef-f input:focus, .ef-f textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37,99,235,.1); }
-.ef-code input { background: #e8f0fe !important; color: #1a73e8; font-weight: 700; font-size: .85rem !important; }
-.ef-code label { color: #1a73e8 !important; }
-.ef-sc { position: relative; }
-.ef-sc input { padding-right: 32px; }
-.ef-sc-ok { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--success); font-size: .75rem; pointer-events: none; }
-.ef-sc-dd { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; max-height: 180px; overflow: auto; z-index: 1000; }
-.ef-sc-item { padding: 8px 12px; cursor: pointer; border-bottom: 1px solid var(--border); }
-.ef-sc-item:hover { background: var(--primary-light); }
-.ef-sc-item strong { font-size: .8rem; color: var(--text); }
-.ef-sc-item small { font-size: .7rem; color: var(--text-muted); }
-.ef-ins { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
-.ef-ins-item { display: flex; align-items: end; gap: 6px; }
-.ef-ins-item > div { flex: 1; min-width: 0; }
-.ef-ins-item label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .3px; display: block; margin-bottom: 3px; }
-.ef-ins-item input { padding: 5px 8px; font-size: .78rem; border: 1.5px solid var(--border); border-radius: 6px; background: white; }
-.ef-ins-del { display: flex; align-items: center; justify-content: center; height: 32px; width: 32px; padding: 0; background: #fee2e2; color: #dc2626; border: none; border-radius: 5px; cursor: pointer; flex-shrink: 0; transition: all .2s; }
-.ef-ins-del:hover { background: #fecaca; }
-.ef-btn-a { padding: 5px 12px; font-size: .75rem; background: var(--success); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 4px; }
-.ef-btn-p { padding: 8px 18px; font-size: .82rem; background: var(--primary); color: white; border: none; border-radius: 7px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 6px; }
-.ef-btn-c { padding: 8px 18px; font-size: .82rem; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 7px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 6px; transition: all .2s; }
-.ef-btn-c:hover { background: #e2e8f0; }
-.ef-sub { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; margin-top: 2px; }
-@media (max-width: 768px) {
-  .ef-r2, .ef-r3 { grid-template-columns: 1fr; }
-  .ef-ins { grid-template-columns: 1fr; gap: 12px; }
-  .ef-ins-item { align-items: center; gap: 8px; }
-  .ef-form { padding: 12px; gap: 10px; }
-  .ef-f input, .ef-f textarea, .ef-ins-item input { padding: 10px 12px; font-size: .9rem; min-height: 44px; }
-  .ef-sub { flex-direction: column; }
-  .ef-sub button { width: 100%; justify-content: center; }
-}`;
+
 if (mostrarFormulario) {
     return (
-      <><style>{efCss}</style><div className="container">
+      <><div className="container">
         <div style={{ maxWidth: '740px', margin: '0 auto', padding: '20px' }}>
           <div className="ef-wrap">
             <div className="ef-head">
@@ -476,7 +427,7 @@ if (mostrarFormulario) {
   }
 
   return (
-    <><style>{efCss}</style>
+    <>
     <div className="container">
       <div className="header" style={{ background: 'var(--gradient)', padding: '20px 32px', flexDirection: 'column', alignItems: 'flex-start', gap: '16px' }}>
         <div className="header-left">
