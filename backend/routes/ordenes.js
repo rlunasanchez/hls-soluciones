@@ -6,6 +6,13 @@ import { authMiddleware } from "../middleware/authMiddleware.js";
 dotenv.config();
 const router = express.Router();
 
+const toDateMySQL = (val) => {
+  if (!val) return null;
+  const d = new Date(val);
+  if (isNaN(d.getTime())) return null;
+  return d.toISOString().split('T')[0];
+};
+
 async function generarCodigoEquipo() {
   const [rows] = await pool.query("SELECT codigo FROM equipos WHERE codigo LIKE 'EQ-%' ORDER BY id DESC LIMIT 1");
   if (rows.length === 0) return "EQ-0001";
@@ -169,9 +176,9 @@ router.post("/", authMiddleware, async (req, res) => {
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     const values = [
-      numeroOrden, fecha, esGarantia || false,
-      fechaIngreso || null, fechaIngresoCheck || false, fechaTermino || null, fechaTerminoCheck || false,
-      fechaEntrega || null, fechaEntregaCheck || false, fechaCompra || null, fechaCompraCheck || false,
+      numeroOrden, toDateMySQL(fecha), esGarantia || false,
+      toDateMySQL(fechaIngreso), fechaIngresoCheck || false, toDateMySQL(fechaTermino), fechaTerminoCheck || false,
+      toDateMySQL(fechaEntrega), fechaEntregaCheck || false, toDateMySQL(fechaCompra), fechaCompraCheck || false,
       cliente, direccion || null, comuna || null, contacto || null, fonoPrincipal || null, tecnicoAsignado, actividad || null,
       equipo, modelo, marca, serie || null, contadorPagOut || null, nivelTinta || null,
       insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null, insumo5 || null, insumo6 || null,
@@ -273,9 +280,9 @@ router.put("/:id", authMiddleware, async (req, res) => {
       WHERE id = ?`;
 
     const values = [
-      numeroOrden, fecha, esGarantia || false,
-      fechaIngreso || null, fechaIngresoCheck || false, fechaTermino || null, fechaTerminoCheck || false,
-      fechaEntrega || null, fechaEntregaCheck || false, fechaCompra || null, fechaCompraCheck || false,
+      numeroOrden, toDateMySQL(fecha), esGarantia || false,
+      toDateMySQL(fechaIngreso), fechaIngresoCheck || false, toDateMySQL(fechaTermino), fechaTerminoCheck || false,
+      toDateMySQL(fechaEntrega), fechaEntregaCheck || false, toDateMySQL(fechaCompra), fechaCompraCheck || false,
       cliente, direccion || null, comuna || null, contacto || null, fonoPrincipal || null, tecnicoAsignado, actividad || null,
       equipo, modelo, marca, serie || null, contadorPagOut || null, nivelTinta || null,
       insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null, insumo5 || null, insumo6 || null,
