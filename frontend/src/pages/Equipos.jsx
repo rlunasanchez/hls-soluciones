@@ -290,73 +290,94 @@ function Equipos() {
     return <Package size={24} />;
   };
 
+<style>{`
+.ef-wrap { background: white; border-radius: 16px; box-shadow: var(--shadow-lg); overflow: hidden; }
+.ef-head { background: var(--gradient); padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; }
+.ef-head h2 { color: white; margin: 0; display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 600; }
+.ef-head-close { background: rgba(255,255,255,0.2); border: none; border-radius: 8px; padding: 8px; cursor: pointer; color: white; display: flex; }
+.ef-form { padding: 18px; display: grid; gap: 14px; }
+.ef-s { padding: 12px; border-radius: 10px; }
+.ef-s.primary { background: var(--primary-light); }
+.ef-s.success { background: var(--success-light); }
+.ef-s.muted { background: #F1F5F9; }
+.ef-st { font-size: 13px; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+.ef-st.primary { color: var(--primary); }
+.ef-st.success { color: var(--success); }
+.ef-st.muted { color: var(--text); }
+.ef-r2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ef-r3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.ef-f { display: flex; flex-direction: column; gap: 2px; }
+.ef-f label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .3px; }
+.ef-f input, .ef-f textarea { padding: 5px 8px; font-size: .78rem; border: 1.5px solid var(--border); border-radius: 6px; background: white; transition: border-color .15s; }
+.ef-f input:focus, .ef-f textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37,99,235,.1); }
+.ef-code input { background: #e8f0fe !important; color: #1a73e8; font-weight: 700; font-size: .85rem !important; }
+.ef-code label { color: #1a73e8 !important; }
+.ef-sc { position: relative; }
+.ef-sc input { padding-right: 32px; }
+.ef-sc-ok { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--success); font-size: .75rem; pointer-events: none; }
+.ef-sc-dd { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; max-height: 180px; overflow: auto; z-index: 1000; }
+.ef-sc-item { padding: 8px 12px; cursor: pointer; border-bottom: 1px solid var(--border); }
+.ef-sc-item:hover { background: var(--primary-light); }
+.ef-sc-item strong { font-size: .8rem; color: var(--text); }
+.ef-sc-item small { font-size: .7rem; color: var(--text-muted); }
+.ef-ins { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
+.ef-ins-item { display: flex; align-items: end; gap: 6px; }
+.ef-ins-item > div { flex: 1; min-width: 0; }
+.ef-ins-item label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .3px; }
+.ef-ins-item input { padding: 5px 8px; font-size: .78rem; border: 1.5px solid var(--border); border-radius: 6px; background: white; }
+.ef-ins-del { display: flex; align-items: center; justify-content: center; height: 32px; width: 32px; padding: 0; background: var(--danger); color: white; border: none; border-radius: 5px; cursor: pointer; flex-shrink: 0; }
+.ef-btn-a { padding: 5px 12px; font-size: .75rem; background: var(--success); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+.ef-btn-p { padding: 8px 18px; font-size: .82rem; background: var(--primary); color: white; border: none; border-radius: 7px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+.ef-btn-c { padding: 8px 18px; font-size: .82rem; background: var(--danger); color: white; border: none; border-radius: 7px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+.ef-sub { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; margin-top: 2px; }
+@media (max-width: 768px) {
+  .ef-r2, .ef-r3 { grid-template-columns: 1fr; }
+  .ef-ins { grid-template-columns: 1fr; }
+  .ef-form { padding: 12px; gap: 10px; }
+  .ef-f input, .ef-f textarea, .ef-ins-item input { padding: 10px 12px; font-size: .9rem; min-height: 44px; }
+  .ef-sub { flex-direction: column; }
+  .ef-sub button { width: 100%; justify-content: center; }
+}
+`}</style>
 if (mostrarFormulario) {
     return (
       <div className="container">
-        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '24px' }}>
-          <div style={{ background: 'white', borderRadius: '16px', boxShadow: 'var(--shadow-lg)', overflow: 'hidden' }}>
-            <div style={{ background: 'var(--gradient)', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <h2 style={{ color: 'white', margin: 0, display: 'flex', alignItems: 'center', gap: '12px', fontSize: '22px' }}>
-                <Package size={28} />
-                {equipoEditando ? "Editar Equipo" : "Nuevo Equipo"}
-              </h2>
-              <button 
-                type="button" 
-                onClick={() => {
-                  setMostrarFormulario(false);
-                  setEquipoEditando(null);
-                  setClienteSeleccionado(null);
-                  setBusquedaCliente("");
-                  setNuevoEquipo({ equipo: "", modelo: "", marca: "", serie: "", contador_pag: 0, nivel_tintas: "", codigo: "", cliente_id: "", insumo1: "", insumo2: "", insumo3: "", insumo4: "", insumo5: "", insumo6: "", insumo7: "", insumo8: "", insumo9: "", insumo10: "", insumo11: "", insumo12: "", averia: "" });
-                  setMostrarExtras(false);
-                  setMostrarExtrasEditar(false);
-                  navigate('/equipos', { replace: true });
-                }}
-                style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '8px', padding: '10px', cursor: 'pointer', color: 'white' }}
-              >
-                <X size={24} />
-              </button>
+        <div style={{ maxWidth: '740px', margin: '0 auto', padding: '20px' }}>
+          <div className="ef-wrap">
+            <div className="ef-head">
+              <h2><Package size={22} />{equipoEditando ? "Editar Equipo" : "Nuevo Equipo"}</h2>
+              <button type="button" className="ef-head-close" onClick={() => {
+                setMostrarFormulario(false);
+                setEquipoEditando(null);
+                setClienteSeleccionado(null);
+                setBusquedaCliente("");
+                setNuevoEquipo({ equipo: "", modelo: "", marca: "", serie: "", contador_pag: 0, nivel_tintas: "", codigo: "", cliente_id: "", insumo1: "", insumo2: "", insumo3: "", insumo4: "", insumo5: "", insumo6: "", insumo7: "", insumo8: "", insumo9: "", insumo10: "", insumo11: "", insumo12: "", averia: "" });
+                setMostrarExtras(false);
+                setMostrarExtrasEditar(false);
+                navigate('/equipos', { replace: true });
+              }}><X size={20} /></button>
             </div>
-            <form onSubmit={guardarEquipo} style={{ padding: '24px', display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
-              <div style={{ padding: '20px', background: 'var(--primary-light)', borderRadius: '12px' }}>
-                <h3 style={{ color: 'var(--primary)', marginBottom: '16px', fontSize: '16px' }}>Información del Equipo</h3>
-                <div style={{ marginBottom: '16px', padding: '16px', background: 'white', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div className="form-group" style={{ margin: 0, flex: '0 0 auto' }}>
+            <form onSubmit={guardarEquipo} className="ef-form">
+              <div className="ef-s primary">
+                <div className="ef-st primary">Información del Equipo</div>
+                <div className="ef-r2" style={{ marginBottom: '8px' }}>
+                  <div className="ef-f ef-code">
                     <label>Código</label>
-                    <input
-                      value={equipoEditando ? (equipoEditando.codigo || codigoActual) : codigoActual}
-                      disabled
-                      style={{ background: '#e8f0fe', color: '#1a73e8', fontWeight: '700', fontSize: '1.1rem', width: '160px' }}
-                    />
+                    <input value={equipoEditando ? (equipoEditando.codigo || codigoActual) : codigoActual} disabled />
                   </div>
-                  <div className="form-group" style={{ margin: 0, flex: 1 }}>
+                  <div className="ef-f">
                     <label>Cliente Asociado *</label>
-                    <div ref={clienteDropdownRef} style={{ position: 'relative' }}>
-                      <input
-                        placeholder="Buscar cliente..."
-                        value={busquedaCliente}
-                        onChange={(e) => {
-                          setBusquedaCliente(e.target.value);
-                          setMostrarDropdownClientes(e.target.value.length >= 2);
-                        }}
-                        onFocus={() => {
-                          if (busquedaCliente.length >= 2) setMostrarDropdownClientes(true);
-                        }}
-                        required
-                      />
-                      {clienteSeleccionado && (
-                        <span style={{ position: 'absolute', right: '40px', top: '50%', transform: 'translateY(-50%)', color: 'var(--success)', fontSize: '0.75rem' }}>✓</span>
-                      )}
+                    <div ref={clienteDropdownRef} className="ef-sc">
+                      <input placeholder="Buscar cliente..." value={busquedaCliente}
+                        onChange={(e) => { setBusquedaCliente(e.target.value); setMostrarDropdownClientes(e.target.value.length >= 2); }}
+                        onFocus={() => { if (busquedaCliente.length >= 2) setMostrarDropdownClientes(true); }} required />
+                      {clienteSeleccionado && <span className="ef-sc-ok">✓</span>}
                       {mostrarDropdownClientes && clientesFiltrados.length > 0 && (
-                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '2px solid var(--border)', borderTop: 'none', borderRadius: '0 0 8px 8px', maxHeight: '200px', overflow: 'auto', zIndex: 1000 }}>
+                        <div className="ef-sc-dd">
                           {clientesFiltrados.map((c) => (
-                            <div key={c.id} onClick={() => seleccionarCliente(c)}
-                              style={{ padding: '10px 14px', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}
-                              onMouseEnter={(e) => e.currentTarget.style.background = 'var(--primary-light)'}
-                              onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
-                            >
-                              <div style={{ fontWeight: '600', color: 'var(--text)' }}>{c.razon_social}</div>
-                              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>RUT: {c.rut || 'N/A'}</div>
+                            <div key={c.id} className="ef-sc-item" onClick={() => seleccionarCliente(c)}>
+                              <div><strong>{c.razon_social}</strong></div>
+                              <small>RUT: {c.rut || 'N/A'}</small>
                             </div>
                           ))}
                         </div>
@@ -364,139 +385,86 @@ if (mostrarFormulario) {
                     </div>
                   </div>
                 </div>
-                <div className="form-row-3">
-                  <div className="form-group">
-                    <label>Equipo</label>
-                    <input
-                      placeholder="Nombre del equipo"
-                      value={nuevoEquipo.equipo}
-                      onChange={(e) => setNuevoEquipo({...nuevoEquipo, equipo: e.target.value})}
-                      required
-                    />
+                <div className="ef-r2">
+                  <div className="ef-f">
+                    <label>Equipo *</label>
+                    <input placeholder="Nombre del equipo" value={nuevoEquipo.equipo}
+                      onChange={e => setNuevoEquipo({...nuevoEquipo, equipo: e.target.value})} required />
                   </div>
-                  <div className="form-group">
-                    <label>Marca</label>
-                    <input
-                      placeholder="Marca"
-                      value={nuevoEquipo.marca}
-                      onChange={(e) => setNuevoEquipo({...nuevoEquipo, marca: e.target.value})}
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Modelo</label>
-                    <input
-                      placeholder="Modelo"
-                      value={nuevoEquipo.modelo}
-                      onChange={(e) => setNuevoEquipo({...nuevoEquipo, modelo: e.target.value})}
-                      required
-                    />
+                  <div className="ef-f">
+                    <label>Marca *</label>
+                    <input placeholder="Marca" value={nuevoEquipo.marca}
+                      onChange={e => setNuevoEquipo({...nuevoEquipo, marca: e.target.value})} required />
                   </div>
                 </div>
-                <div className="form-row-3" style={{ marginTop: '16px' }}>
-                  <div className="form-group">
+                <div className="ef-r3" style={{ marginTop: '8px' }}>
+                  <div className="ef-f">
+                    <label>Modelo *</label>
+                    <input placeholder="Modelo" value={nuevoEquipo.modelo}
+                      onChange={e => setNuevoEquipo({...nuevoEquipo, modelo: e.target.value})} required />
+                  </div>
+                  <div className="ef-f">
                     <label>Serie</label>
-                    <input
-                      placeholder="Número de serie"
-                      value={nuevoEquipo.serie}
-                      onChange={(e) => setNuevoEquipo({...nuevoEquipo, serie: e.target.value})}
-                    />
+                    <input placeholder="Número de serie" value={nuevoEquipo.serie}
+                      onChange={e => setNuevoEquipo({...nuevoEquipo, serie: e.target.value})} />
                   </div>
-                  <div className="form-group">
+                  <div className="ef-f">
                     <label>Contador Páginas</label>
-                    <input
-                      type="number"
-                      placeholder="Contador"
-                      value={nuevoEquipo.contador_pag}
-                      onChange={(e) => setNuevoEquipo({...nuevoEquipo, contador_pag: e.target.value})}
-                    />
+                    <input type="number" placeholder="Contador" value={nuevoEquipo.contador_pag}
+                      onChange={e => setNuevoEquipo({...nuevoEquipo, contador_pag: e.target.value})} />
                   </div>
-                  <div className="form-group">
-                    <label>Nivel Tintas</label>
-                    <input
-                      placeholder="Nivel de tintas"
-                      value={nuevoEquipo.nivel_tintas}
-                      onChange={(e) => setNuevoEquipo({...nuevoEquipo, nivel_tintas: e.target.value})}
-                    />
-                  </div>
+                </div>
+                <div className="ef-f" style={{ marginTop: '8px' }}>
+                  <label>Nivel Tintas</label>
+                  <input placeholder="Nivel de tintas" value={nuevoEquipo.nivel_tintas}
+                    onChange={e => setNuevoEquipo({...nuevoEquipo, nivel_tintas: e.target.value})} />
                 </div>
               </div>
-              <div style={{ padding: '20px', background: 'var(--success-light)', borderRadius: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                  <h3 style={{ color: 'var(--success)', margin: 0, fontSize: '16px' }}>Insumos</h3>
+              <div className="ef-s success">
+                <div className="ef-st success">
+                  <span>Insumos</span>
                   {insumosVisibles < 12 && (
-                    <button 
-                      type="button" 
-                      className="secondary-btn"
-                      style={{ padding: '8px 16px' }}
-                      onClick={() => setInsumosVisibles(insumosVisibles + 1)}
-                    >
-                      + Agregar
-                    </button>
+                    <button type="button" className="ef-btn-a" onClick={() => setInsumosVisibles(insumosVisibles + 1)}>+ Agregar</button>
                   )}
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
+                <div className="ef-ins">
                   {insumos.slice(0, insumosVisibles).map((ins, idx) => (
-                    <div key={idx} className="form-group" style={{ display: 'flex', alignItems: 'end', gap: '8px' }}>
-                      <div style={{ flex: 1 }}>
+                    <div key={idx} className="ef-ins-item">
+                      <div>
                         <label>Insumo {idx + 1}</label>
-                        <input
-                          placeholder={`Insumo ${idx + 1}`}
-                          value={ins.nombre}
-                          onChange={(e) => actualizarInsumo(idx, e.target.value)}
-                        />
+                        <input placeholder={`Insumo ${idx + 1}`} value={ins.nombre}
+                          onChange={e => actualizarInsumo(idx, e.target.value)} />
                       </div>
-                      <button
-                        type="button"
-                        className="delete-btn"
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '38px', marginBottom: '2px' }}
+                      <button type="button" className="ef-ins-del"
                         onClick={() => {
                           const nuevas = insumos.filter((_, i) => i !== idx);
-                          while (nuevas.length < 12) {
-                            nuevas.push({ nombre: "" });
-                          }
+                          while (nuevas.length < 12) nuevas.push({ nombre: "" });
                           setInsumos(nuevas);
                           setInsumosVisibles(Math.max(2, insumosVisibles - 1));
-                        }}
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                        }}><Trash2 size={14} /></button>
                     </div>
                   ))}
                 </div>
               </div>
-              <div style={{ padding: '20px', background: '#F1F5F9', borderRadius: '12px' }}>
-                <h3 style={{ color: 'var(--text)', marginBottom: '16px', fontSize: '16px' }}>Avería/Falla/Incidencia</h3>
-                <div className="form-group">
-                  <textarea
-                    placeholder="Descripción de falla o incidencia..."
-                    value={nuevoEquipo.averia}
-                    onChange={(e) => setNuevoEquipo({...nuevoEquipo, averia: e.target.value})}
-                    rows={3}
-                    style={{ minHeight: '100px' }}
-                  />
+              <div className="ef-s muted">
+                <div className="ef-st muted">Avería/Falla/Incidencia</div>
+                <div className="ef-f">
+                  <textarea placeholder="Descripción de falla o incidencia..." value={nuevoEquipo.averia}
+                    onChange={e => setNuevoEquipo({...nuevoEquipo, averia: e.target.value})} rows={3} style={{ minHeight: '70px' }} />
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-end', marginTop: '8px', flexWrap: 'wrap' }}>
-                <button type="button" className="cancel-btn" onClick={() => {
+              <div className="ef-sub">
+                <button type="button" className="ef-btn-c" onClick={() => {
                   setMostrarFormulario(false);
                   setEquipoEditando(null);
                   setClienteSeleccionado(null);
                   setBusquedaCliente("");
                   setNuevoEquipo({ equipo: "", modelo: "", marca: "", serie: "", contador_pag: 0, nivel_tintas: "", codigo: "", cliente_id: "", insumo1: "", insumo2: "", insumo3: "", insumo4: "", insumo5: "", insumo6: "", insumo7: "", insumo8: "", insumo9: "", insumo10: "", insumo11: "", insumo12: "", averia: "" });
-                  setInsumos([
-                    { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
-                    { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
-                    { nombre: "" }, { nombre: "" }, { nombre: "" }
-                  ]);
+                  setInsumos([{ nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }]);
                   setInsumosVisibles(2);
                   navigate('/equipos', { replace: true });
-                }}>
-                  <X size={20} /> Cancelar
-                </button>
-                <button type="submit" className="main-btn">
-                  <Save size={20} /> {equipoEditando ? "Guardar Cambios" : "Guardar Equipo"}
-                </button>
+                }}><X size={18} /> Cancelar</button>
+                <button type="submit" className="ef-btn-p"><Save size={18} /> {equipoEditando ? "Guardar Cambios" : "Guardar Equipo"}</button>
               </div>
             </form>
           </div>
