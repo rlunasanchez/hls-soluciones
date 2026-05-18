@@ -451,7 +451,7 @@ function Clientes() {
 .cf-field input:focus,.cf-field select:focus{border-color:#0C4A8C;outline:none;box-shadow:0 0 0 2px rgba(12,74,140,.15)}
 .cf-field input::placeholder{color:#94a3b8}
 .cf-codigo input{background:#eef2ff;color:#0C4A8C;font-weight:700;font-size:.9rem;border-color:#c7d2fe;width:100%;box-sizing:border-box}
-@media(max-width:767px){.cf-wrap{padding:8px}.cf-card{border-radius:10px}.cf-head{padding:10px 14px}.cf-head h2{font-size:14px}.cf-head h2 svg{width:20px!important;height:20px!important}.cf-head button{padding:6px}.cf{padding:10px}.cf-grid{grid-template-columns:1fr!important}.cf-sec{padding:10px}.cf-sec h3{font-size:12px}.cf-r3,.cf-r2{grid-template-columns:1fr!important}.cf-field label{font-size:.75rem}.cf-field input,.cf-field select{padding:8px 10px;font-size:.85rem}.cf-sub{gap:8px}.cf-btn-p,.cf-btn-c{padding:10px 16px;font-size:.9rem;flex:1}.cf-sc .cf-r2 input,.cf-sc .cf-r2 select,.cf-sc .cf-r1 input{max-width:none}.cf-sh{flex-direction:column;gap:6px;align-items:stretch}.cf-sh button{width:100%;text-align:center}}
+@media(max-width:767px){.cf-wrap{padding:8px}.cf-card{border-radius:10px}.cf-head{padding:10px 14px}.cf-head h2{font-size:14px}.cf-head h2 svg{width:20px!important;height:20px!important}.cf-head button{padding:6px}.cf{padding:10px}.cf-grid{grid-template-columns:1fr!important}.cf-sec{padding:10px}.cf-sec h3{font-size:12px}.cf-r3,.cf-r2{grid-template-columns:1fr!important}.cf-field label{font-size:.75rem}.cf-field input,.cf-field select{padding:8px 10px;font-size:.85rem}.cf-sub{gap:8px}.cf-btn-p,.cf-btn-c{padding:10px 16px;font-size:.9rem;flex:1}.cf-sc .cf-r2 input,.cf-sc .cf-r2 select,.cf-sc .cf-r3 input,.cf-sc .cf-r1 input{max-width:none}.cf-sh{flex-direction:column;gap:6px;align-items:stretch}.cf-sh button{width:100%;text-align:center}}
 .cf-sub{display:flex;gap:12px;justify-content:flex-end;margin-top:6px;flex-wrap:wrap}
 .cf-btn-p{padding:6px 14px;font-size:.82rem;background:#0C4A8C;color:#fff;border:none;border-radius:7px;cursor:pointer;font-weight:600;transition:all .2s}
 .cf-btn-p:hover{background:#0a3d75}
@@ -464,7 +464,7 @@ function Clientes() {
 .cf-sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .cf-sc{margin-bottom:6px;padding:8px;background:#fff;border-radius:6px;border:1px solid #e2e8f0}
 .cf-sc:last-child{margin-bottom:0}
-.cf-sc .cf-r2 input,.cf-sc .cf-r2 select{max-width:260px}
+.cf-sc .cf-r2 input,.cf-sc .cf-r2 select,.cf-sc .cf-r3 input{max-width:260px}
 .cf-sc .cf-r1 input{max-width:400px}
 .cf-sc-del{text-align:right;margin-top:2px}
 .cf-mt{margin-top:6px}
@@ -579,7 +579,7 @@ function Clientes() {
                 </div>
                 {sucursales.slice(0,sucursalesVisibles).map((suc,idx)=>(
                   <div key={idx} className="cf-sc">
-                    <div className="cf-r2 cf-mb">
+                    <div className="cf-r1 cf-mb">
                       <div className="cf-field cf-m0">
                         <label>Tipo</label>
                         <select value={suc.tipo_direccion} onChange={e=>actualizarSucursal(idx,'tipo_direccion',e.target.value)}>
@@ -588,10 +588,6 @@ function Clientes() {
                           <option value="Sucursal">Sucursal</option>
                         </select>
                       </div>
-                      <div className="cf-field cf-m0">
-                        <label>Fono</label>
-                        <input placeholder="Fono" value={suc.fono} onChange={e=>actualizarSucursal(idx,'fono',e.target.value.replace(/[^0-9+]/g,''))} />
-                      </div>
                     </div>
                     <div className="cf-r1 cf-mb">
                       <div className="cf-field cf-m0">
@@ -599,10 +595,14 @@ function Clientes() {
                         <input placeholder="Ingrese la dirección completa" value={suc.direccion} onChange={e=>actualizarSucursal(idx,'direccion',e.target.value)} />
                       </div>
                     </div>
-                    <div className="cf-r2 cf-mb">
+                    <div className="cf-r3 cf-mb">
                       <div className="cf-field cf-m0">
                         <label>Ciudad</label>
                         <input placeholder="Ciudad" value={suc.ciudad} onChange={e=>actualizarSucursal(idx,'ciudad',e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,''))} />
+                      </div>
+                      <div className="cf-field cf-m0">
+                        <label>Fono</label>
+                        <input placeholder="Fono" value={suc.fono} onChange={e=>actualizarSucursal(idx,'fono',e.target.value.replace(/[^0-9+]/g,''))} />
                       </div>
                       <div className="cf-field cf-m0">
                         <label>Comuna</label>
