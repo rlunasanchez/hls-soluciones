@@ -143,118 +143,104 @@ function GestionUsuarios() {
     }
   };
 
-  if (mostrarCambioPassword) {
+const ufCss = `.uf-wrap{background:white;border-radius:16px;box-shadow:var(--shadow-lg);overflow:hidden}
+.uf-head{background:var(--gradient);padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.uf-head h2{color:white;margin:0;display:flex;align-items:center;gap:10px;font-size:17px;font-weight:600}
+.uf-head-close{background:rgba(255,255,255,0.2);border:none;border-radius:8px;padding:7px;cursor:pointer;color:white;display:flex}
+.uf-form{padding:16px;display:grid;gap:12px}
+.uf-s{padding:12px;border-radius:10px;background:var(--primary-light)}
+.uf-st{font-size:13px;font-weight:600;color:var(--primary);margin-bottom:10px}
+.uf-r2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.uf-f{display:flex;flex-direction:column;gap:2px}
+.uf-f label{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px}
+.uf-f input,.uf-f select{padding:5px 8px;font-size:.78rem;border:1.5px solid var(--border);border-radius:6px;background:white;transition:border-color .15s}
+.uf-f input:focus,.uf-f select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px rgba(37,99,235,.1)}
+.uf-sub{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:2px}
+.uf-btn-p{padding:7px 16px;font-size:.8rem;background:var(--primary);color:white;border:none;border-radius:7px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px}
+.uf-btn-c{padding:7px 16px;font-size:.8rem;background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;border-radius:7px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px;transition:all .2s}
+.uf-btn-c:hover{background:#e2e8f0}
+@media(max-width:768px){.uf-r2{grid-template-columns:1fr}.uf-form{padding:12px;gap:10px}.uf-f input,.uf-f select{padding:10px 12px;font-size:.9rem;min-height:44px}.uf-sub{flex-direction:column}.uf-sub button{width:100%;justify-content:center}}`;
+if (mostrarCambioPassword) {
     return (
+      <><style>{ufCss}</style>
       <div className="container">
-        <div className="form-container">
-          <div className="form-header">
-            <h2><Lock size={24} /> Cambiar Mi Contraseña</h2>
+        <div style={{ maxWidth: '500px', margin: '0 auto', padding: '20px' }}>
+          <div className="uf-wrap">
+            <div className="uf-head">
+              <h2><Lock size={20} /> Cambiar Mi Contraseña</h2>
+              <button type="button" className="uf-head-close" onClick={() => setMostrarCambioPassword(false)}><X size={18} /></button>
+            </div>
+            <form onSubmit={cambiarMiPassword} className="uf-form">
+              <div className="uf-s">
+                <div className="uf-st">Cambio de Contraseña</div>
+                <div className="uf-r2">
+                  <div className="uf-f">
+                    <label>Actual</label>
+                    <input type="password" value={cambioPassword.passwordActual}
+                      onChange={e => setCambioPassword({...cambioPassword, passwordActual: e.target.value})} required />
+                  </div>
+                  <div className="uf-f">
+                    <label>Nueva</label>
+                    <input type="password" value={cambioPassword.nuevaPassword}
+                      onChange={e => setCambioPassword({...cambioPassword, nuevaPassword: e.target.value})} required />
+                  </div>
+                </div>
+                <div className="uf-f" style={{ marginTop: '8px' }}>
+                  <label>Confirmar Nueva</label>
+                  <input type="password" value={cambioPassword.confirmarPassword}
+                    onChange={e => setCambioPassword({...cambioPassword, confirmarPassword: e.target.value})} required />
+                </div>
+              </div>
+              <div className="uf-sub">
+                <button type="button" className="uf-btn-c" onClick={() => setMostrarCambioPassword(false)}><ArrowLeft size={16} /> Cancelar</button>
+                <button type="submit" className="uf-btn-p"><Save size={16} /> Guardar</button>
+              </div>
+            </form>
           </div>
-          <form onSubmit={cambiarMiPassword} className="form-grid">
-            <div className="form-group full-width">
-              <label>Contraseña Actual</label>
-              <input
-                type="password"
-                value={cambioPassword.passwordActual}
-                onChange={(e) => setCambioPassword({...cambioPassword, passwordActual: e.target.value})}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Nueva Contraseña</label>
-              <input
-                type="password"
-                value={cambioPassword.nuevaPassword}
-                onChange={(e) => setCambioPassword({...cambioPassword, nuevaPassword: e.target.value})}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Confirmar Contraseña</label>
-              <input
-                type="password"
-                value={cambioPassword.confirmarPassword}
-                onChange={(e) => setCambioPassword({...cambioPassword, confirmarPassword: e.target.value})}
-                required
-              />
-            </div>
-            <div className="form-actions" style={{ display: 'flex', justifyContent: 'space-between', width: '100%', gap: '20px', marginTop: '8px' }}>
-              <button type="button" className="cancel-btn" onClick={() => setMostrarCambioPassword(false)}>
-                <ArrowLeft size={20} /> Cancelar
-              </button>
-              <button type="submit" className="main-btn">
-                <Save size={20} /> Guardar
-              </button>
-            </div>
-          </form>
         </div>
-      </div>
+      </div></>
     );
   }
 
   if (mostrarFormulario) {
     return (
+      <><style>{ufCss}</style>
       <div className="container">
-        <div style={{ maxWidth: '600px', margin: '0 auto', padding: '24px' }}>
-          <div style={{ background: 'white', borderRadius: '16px', boxShadow: 'var(--shadow-lg)', overflow: 'hidden' }}>
-            <div style={{ background: 'var(--gradient)', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <h2 style={{ color: 'white', margin: 0, display: 'flex', alignItems: 'center', gap: '12px', fontSize: '22px' }}>
-                <Plus size={28} />
-                {usuarioEditando ? "Editar Usuario" : "Crear Usuario"}
-              </h2>
-              <button 
-                type="button" 
-                onClick={() => {
-                  setMostrarFormulario(false);
-                  setUsuarioEditando(null);
-                  setNuevoUsuario({ usuario: "", password: "", rol: "tecnico", email: "" });
-                }}
-                style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '8px', padding: '10px', cursor: 'pointer', color: 'white' }}
-              >
-                <X size={24} />
-              </button>
+        <div style={{ maxWidth: '520px', margin: '0 auto', padding: '20px' }}>
+          <div className="uf-wrap">
+            <div className="uf-head">
+              <h2><Plus size={20} /> {usuarioEditando ? "Editar Usuario" : "Crear Usuario"}</h2>
+              <button type="button" className="uf-head-close" onClick={() => {
+                setMostrarFormulario(false);
+                setUsuarioEditando(null);
+                setNuevoUsuario({ usuario: "", password: "", rol: "tecnico", email: "" });
+              }}><X size={18} /></button>
             </div>
-            <form onSubmit={crearUsuario} style={{ padding: '24px', display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
-              <div style={{ padding: '20px', background: 'var(--primary-light)', borderRadius: '12px' }}>
-                <h3 style={{ color: 'var(--primary)', marginBottom: '16px', fontSize: '16px' }}>Datos del Usuario</h3>
-                <div className="form-row-2">
-                  <div className="form-group">
+            <form onSubmit={crearUsuario} className="uf-form">
+              <div className="uf-s">
+                <div className="uf-st">Datos del Usuario</div>
+                <div className="uf-r2">
+                  <div className="uf-f">
                     <label>Usuario</label>
-                    <input
-                      placeholder="Nombre de usuario"
-                      value={nuevoUsuario.usuario}
-                      onChange={(e) => setNuevoUsuario({...nuevoUsuario, usuario: e.target.value})}
-                      required
-                    />
+                    <input placeholder="Nombre de usuario" value={nuevoUsuario.usuario}
+                      onChange={e => setNuevoUsuario({...nuevoUsuario, usuario: e.target.value})} required />
                   </div>
-                  <div className="form-group">
+                  <div className="uf-f">
                     <label>Correo</label>
-                    <input
-                      type="email"
-                      placeholder="correo@ejemplo.com"
-                      value={nuevoUsuario.email}
-                      onChange={(e) => setNuevoUsuario({...nuevoUsuario, email: e.target.value})}
-                    />
+                    <input type="email" placeholder="correo@ejemplo.com" value={nuevoUsuario.email}
+                      onChange={e => setNuevoUsuario({...nuevoUsuario, email: e.target.value})} />
                   </div>
                 </div>
                 {!usuarioEditando && (
-                  <div className="form-row-2" style={{ marginTop: '16px' }}>
-                    <div className="form-group">
+                  <div className="uf-r2" style={{ marginTop: '8px' }}>
+                    <div className="uf-f">
                       <label>Contraseña</label>
-                      <input
-                        type="password"
-                        placeholder="Contraseña"
-                        value={nuevoUsuario.password}
-                        onChange={(e) => setNuevoUsuario({...nuevoUsuario, password: e.target.value})}
-                        required
-                      />
+                      <input type="password" placeholder="Contraseña" value={nuevoUsuario.password}
+                        onChange={e => setNuevoUsuario({...nuevoUsuario, password: e.target.value})} required />
                     </div>
-                    <div className="form-group">
+                    <div className="uf-f">
                       <label>Rol</label>
-                      <select
-                        value={nuevoUsuario.rol}
-                        onChange={(e) => setNuevoUsuario({...nuevoUsuario, rol: e.target.value})}
-                      >
+                      <select value={nuevoUsuario.rol} onChange={e => setNuevoUsuario({...nuevoUsuario, rol: e.target.value})}>
                         <option value="tecnico">Técnico</option>
                         <option value="admin">Administrador</option>
                       </select>
@@ -262,34 +248,27 @@ function GestionUsuarios() {
                   </div>
                 )}
                 {usuarioEditando && (
-                  <div className="form-group" style={{ marginTop: '16px' }}>
+                  <div className="uf-f" style={{ marginTop: '8px' }}>
                     <label>Rol</label>
-                    <select
-                      value={nuevoUsuario.rol}
-                      onChange={(e) => setNuevoUsuario({...nuevoUsuario, rol: e.target.value})}
-                    >
+                    <select value={nuevoUsuario.rol} onChange={e => setNuevoUsuario({...nuevoUsuario, rol: e.target.value})}>
                       <option value="tecnico">Técnico</option>
                       <option value="admin">Administrador</option>
                     </select>
                   </div>
                 )}
               </div>
-              <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-end', marginTop: '8px', flexWrap: 'wrap' }}>
-                <button type="button" className="cancel-btn" onClick={() => {
+              <div className="uf-sub">
+                <button type="button" className="uf-btn-c" onClick={() => {
                   setMostrarFormulario(false);
                   setUsuarioEditando(null);
                   setNuevoUsuario({ usuario: "", password: "", rol: "tecnico", email: "" });
-                }}>
-                  <X size={20} /> Cancelar
-                </button>
-                <button type="submit" className="main-btn">
-                  <Save size={20} /> {usuarioEditando ? "Actualizar" : "Crear Usuario"}
-                </button>
+                }}><X size={16} /> Cancelar</button>
+                <button type="submit" className="uf-btn-p"><Save size={16} /> {usuarioEditando ? "Actualizar" : "Crear Usuario"}</button>
               </div>
             </form>
           </div>
         </div>
-      </div>
+      </div></>
     );
   }
 
