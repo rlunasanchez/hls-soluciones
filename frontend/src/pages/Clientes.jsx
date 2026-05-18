@@ -559,7 +559,7 @@ function Clientes() {
                 </div>
                 <div className="form-row-1" style={{ marginTop: '16px' }}>
                   <div className="form-group">
-                    <label>Correo</label>
+                    <label>Email</label>
                     <input
                       type="email"
                       placeholder="correo@ejemplo.cl"
