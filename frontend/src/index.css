@@ -104,22 +104,21 @@ html, body {
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 3px;
 }
 
 .form-group label {
-  font-size: 1rem;
+  font-size: .75rem;
   font-weight: 600;
   color: var(--text);
 }
 
 .form-group input {
-  padding: 12px 14px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  font-size: 1rem;
-  transition: all 0.2s ease;
-  text-align: center;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border);
+  font-size: .82rem;
+  transition: border-color .15s ease;
 }
 
 .form-group.input-with-icon {
@@ -127,15 +126,14 @@ html, body {
 }
 
 .form-group.input-with-icon input {
-  padding-left: 44px;
-  padding-right: 14px;
-  text-align: left;
+  padding-left: 34px;
+  padding-right: 10px;
 }
 
 .form-group.input-with-icon .input-icon {
   position: absolute;
-  left: 14px;
-  top: 42px;
+  left: 10px;
+  top: 28px;
   color: var(--text-muted);
   pointer-events: none;
   opacity: 0.7;
@@ -143,8 +141,8 @@ html, body {
 
 .toggle-password {
   position: absolute;
-  right: 14px;
-  top: 42px;
+  right: 10px;
+  top: 28px;
   background: none;
   border: none;
   cursor: pointer;
@@ -161,7 +159,7 @@ html, body {
 .form-group input:focus {
   border-color: var(--primary);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  box-shadow: 0 0 0 2px rgba(37,99,235,.1);
 }
 
 .error-message {
@@ -177,15 +175,15 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   background: var(--gradient);
   color: white;
   border: none;
-  padding: 14px 20px;
-  border-radius: var(--radius-sm);
+  padding: 8px 16px;
+  border-radius: 7px;
   cursor: pointer;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: .82rem;
   transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(12, 74, 140, 0.3);
 }
@@ -205,15 +203,15 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 5px;
   background: var(--primary);
   color: white;
   border: none;
-  padding: 10px 16px;
-  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: .78rem;
   transition: all 0.2s ease;
 }
 
@@ -553,18 +551,18 @@ html, body {
 .form-group input,
 .form-group select {
   width: 100%;
-  padding: 12px 14px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  font-size: 1rem;
-  transition: all 0.2s ease;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border);
+  font-size: .82rem;
+  transition: border-color .15s ease;
 }
 
 .form-group input:focus,
 .form-group select:focus {
   border-color: var(--primary);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  box-shadow: 0 0 0 2px rgba(37,99,235,.1);
 }
 
 .form-actions {
@@ -574,15 +572,15 @@ html, body {
 .cancel-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   background: var(--panel);
   color: var(--text);
   border: 1px solid var(--border);
-  padding: 12px 20px;
-  border-radius: var(--radius-sm);
+  padding: 6px 14px;
+  border-radius: 7px;
   cursor: pointer;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: .8rem;
   transition: all 0.2s ease;
 }
 
@@ -648,15 +646,15 @@ tbody tr:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 5px;
   background: var(--danger-light);
   color: var(--danger);
   border: none;
-  padding: 10px 16px;
-  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: .78rem;
   transition: all 0.2s ease;
 }
 
@@ -843,10 +841,10 @@ table tr:last-child td {
 
 .form-group textarea {
   width: 100%;
-  padding: 12px 14px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  font-size: 1rem;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border);
+  font-size: .82rem;
   font-family: inherit;
   resize: vertical;
 }
@@ -854,7 +852,7 @@ table tr:last-child td {
 .form-group textarea:focus {
   border-color: var(--primary);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  box-shadow: 0 0 0 2px rgba(37,99,235,.1);
 }
 
 /* =========================
