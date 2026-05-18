@@ -290,8 +290,7 @@ function Equipos() {
     return <Package size={24} />;
   };
 
-<style>{`
-.ef-wrap { background: white; border-radius: 16px; box-shadow: var(--shadow-lg); overflow: hidden; }
+const efCss = `.ef-wrap { background: white; border-radius: 16px; box-shadow: var(--shadow-lg); overflow: hidden; }
 .ef-head { background: var(--gradient); padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; }
 .ef-head h2 { color: white; margin: 0; display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 600; }
 .ef-head-close { background: rgba(255,255,255,0.2); border: none; border-radius: 8px; padding: 8px; cursor: pointer; color: white; display: flex; }
@@ -337,11 +336,10 @@ function Equipos() {
   .ef-f input, .ef-f textarea, .ef-ins-item input { padding: 10px 12px; font-size: .9rem; min-height: 44px; }
   .ef-sub { flex-direction: column; }
   .ef-sub button { width: 100%; justify-content: center; }
-}
-`}</style>
+}`;
 if (mostrarFormulario) {
     return (
-      <div className="container">
+      <><style>{efCss}</style><div className="container">
         <div style={{ maxWidth: '740px', margin: '0 auto', padding: '20px' }}>
           <div className="ef-wrap">
             <div className="ef-head">
@@ -469,11 +467,12 @@ if (mostrarFormulario) {
             </form>
           </div>
         </div>
-      </div>
+      </div></>
     );
   }
 
   return (
+    <><style>{efCss}</style>
     <div className="container">
       <div className="header" style={{ background: 'var(--gradient)', padding: '20px 32px', flexDirection: 'column', alignItems: 'flex-start', gap: '16px' }}>
         <div className="header-left">
@@ -713,7 +712,7 @@ if (mostrarFormulario) {
           </div>
         </div>
       )}
-    </div>
+    </div></>
   );
 }
 
