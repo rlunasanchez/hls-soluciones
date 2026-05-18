@@ -307,7 +307,7 @@ const efCss = `.ef-wrap { background: white; border-radius: 16px; box-shadow: va
 .ef-r3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 .ef-f { display: flex; flex-direction: column; gap: 2px; }
 .ef-f label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .3px; }
-.ef-f input, .ef-f textarea { padding: 5px 8px; font-size: .78rem; border: 1.5px solid var(--border); border-radius: 6px; background: white; transition: border-color .15s; }
+.ef-f input, .ef-f textarea { padding: 5px 8px; font-size: .78rem; border: 1.5px solid var(--border); border-radius: 6px; background: white; transition: border-color .15s; width: 100%; box-sizing: border-box; }
 .ef-f textarea { resize: vertical; min-height: 60px; }
 .ef-f input:focus, .ef-f textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37,99,235,.1); }
 .ef-code input { background: #e8f0fe !important; color: #1a73e8; font-weight: 700; font-size: .85rem !important; }
@@ -334,7 +334,8 @@ const efCss = `.ef-wrap { background: white; border-radius: 16px; box-shadow: va
 .ef-sub { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; margin-top: 2px; }
 @media (max-width: 768px) {
   .ef-r2, .ef-r3 { grid-template-columns: 1fr; }
-  .ef-ins { grid-template-columns: 1fr; }
+  .ef-ins { grid-template-columns: 1fr; gap: 12px; }
+  .ef-ins-item { align-items: center; gap: 8px; }
   .ef-form { padding: 12px; gap: 10px; }
   .ef-f input, .ef-f textarea, .ef-ins-item input { padding: 10px 12px; font-size: .9rem; min-height: 44px; }
   .ef-sub { flex-direction: column; }
