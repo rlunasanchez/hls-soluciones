@@ -273,10 +273,10 @@ html, body {
 ========================= */
 .header {
   background: var(--panel);
-  padding: 16px 24px;
+  padding: 14px 20px;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -291,7 +291,7 @@ html, body {
 }
 
 .header h1 {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: var(--primary);
   margin: 0;
@@ -309,14 +309,14 @@ html, body {
 .logout-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   background: var(--danger-light);
   color: var(--danger);
   border: none;
-  padding: 8px 14px;
-  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  border-radius: 6px;
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: .75rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -862,7 +862,7 @@ table tr:last-child td {
  ========================= */
 .nav-buttons {
   display: flex;
-  gap: 10px;
+  gap: 6px !important;
   flex-wrap: wrap;
   justify-content: flex-end;
 }
