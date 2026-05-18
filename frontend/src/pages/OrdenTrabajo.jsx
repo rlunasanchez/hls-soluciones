@@ -704,40 +704,43 @@ function OrdenTrabajo() {
         ) : (
           /* Formulario para crear orden */
           <><style>{`
-.of-wrap{background:white;border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden}
-.of-head{background:var(--gradient);padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
-.of-head h2{color:white;margin:0;display:flex;align-items:center;gap:10px;font-size:17px;font-weight:600}
-.of-head-close{background:rgba(255,255,255,0.2);border:none;border-radius:8px;padding:7px;cursor:pointer;color:white;display:flex}
-.of-form{padding:16px;display:grid;grid-template-columns:1fr;gap:12px}
-.of-sec{padding:12px;border-radius:10px}
+.of-wrap{background:white;border-radius:12px;box-shadow:var(--shadow-lg);overflow:hidden}
+.of-head{background:var(--gradient);padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.of-head h2{color:white;margin:0;display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600}
+.of-head-close{background:rgba(255,255,255,0.2);border:none;border-radius:6px;padding:6px;cursor:pointer;color:white;display:flex}
+.of-form{padding:10px;display:grid;grid-template-columns:1fr;gap:8px}
+.of-sec{padding:8px;border-radius:8px}
 .of-sec.primary{background:var(--primary-light)}
 .of-sec.success{background:var(--success-light)}
 .of-sec.muted{background:#f1f5f9}
-.of-st{font-size:13px;font-weight:600;margin-bottom:10px}
+.of-st{font-size:11px;font-weight:600;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
 .of-st.primary{color:var(--primary)}
 .of-st.success{color:var(--success)}
 .of-st.muted{color:var(--text)}
-.of-r3{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-bottom:10px}
-.of-r2{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-bottom:10px}
-.of-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
-.of-f{display:flex;flex-direction:column;gap:2px}
-.of-f label{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px}
-.of-f input,.of-f select,.of-f textarea{padding:5px 8px;font-size:.78rem;border:1.5px solid var(--border);border-radius:6px;background:white;transition:border-color .15s}
+.of-r3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px}
+.of-r2{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:6px}
+.of-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.of-f{display:flex;flex-direction:column;gap:1px}
+.of-f label{font-size:9px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px}
+.of-f input,.of-f select,.of-f textarea{padding:4px 6px;font-size:.75rem;border:1px solid var(--border);border-radius:5px;background:white;transition:border-color .15s;width:100%;box-sizing:border-box}
 .of-f input:focus,.of-f select:focus,.of-f textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px rgba(37,99,235,.1)}
-.of-sub{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:2px}
-.of-dd{position:absolute;top:100%;left:0;right:0;background:white;border:2px solid var(--border);border-top:none;border-radius:0 0 8px 8px;max-height:200px;overflow:auto;z-index:1000;box-shadow:0 4px 6px rgba(0,0,0,0.1)}
-.of-dd-item{padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border)}
-.of-dd-item:hover{background:var(--primary-light)}
-.of-sc{position:relative}
-.of-sc-ok{position:absolute;right:40px;top:50%;transform:translateY(-50%);background:var(--success);color:white;padding:2px 8px;border-radius:4px;font-size:.75rem}
-.of-chk{display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:600;color:var(--text);font-size:.78rem}
-.of-chk input{width:16px;height:16px}
-.of-btn-p{padding:7px 16px;font-size:.8rem;background:var(--primary);color:white;border:none;border-radius:7px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px}
-.of-btn-c{padding:7px 16px;font-size:.8rem;background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;border-radius:7px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px;transition:all .2s}
+.of-dates{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.of-date{display:flex;align-items:center;gap:4px}
+.of-date input[type="date"]{padding:3px 6px;font-size:.75rem;border:1px solid var(--border);border-radius:5px}
+.of-ins{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.of-ins-item{display:flex;align-items:end;gap:4px}
+.of-ins-item>div{flex:1;min-width:0}
+.of-ins-item label{font-size:9px;font-weight:600;color:var(--text-muted);text-transform:uppercase}
+.of-ins-item input{padding:4px 6px;font-size:.75rem;border:1px solid var(--border);border-radius:5px;width:100%;box-sizing:border-box}
+.of-ins-del{height:26px;width:26px;padding:0;display:flex;align-items:center;justify-content:center;background:#fee2e2;color:#dc2626;border:none;border-radius:4px;cursor:pointer;flex-shrink:0}
+.of-btn-a{padding:4px 10px;font-size:.7rem;background:var(--success);color:white;border:none;border-radius:5px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:3px}
+.of-sub{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:2px}
+.of-btn-p{padding:6px 14px;font-size:.78rem;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px}
+.of-btn-c{padding:6px 14px;font-size:.78rem;background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px;transition:all .2s}
 .of-btn-c:hover{background:#e2e8f0}
-@media(max-width:768px){.of-r3,.of-r2,.of-grid{grid-template-columns:1fr}.of-form{padding:12px;gap:10px}.of-f input,.of-f select,.of-f textarea{padding:10px 12px;font-size:.9rem;min-height:44px}.of-sub{flex-direction:column}.of-sub button{width:100%;justify-content:center}}
+@media(max-width:768px){.of-r3,.of-r2,.of-grid,.of-dates,.of-ins{grid-template-columns:1fr}.of-form{padding:8px;gap:6px}.of-f input,.of-f select,.of-f textarea{padding:8px 10px;font-size:.85rem;min-height:40px}.of-sub{flex-direction:column}.of-sub button{width:100%;justify-content:center}}
 `}</style>
-          <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '16px' }}>
+          <div style={{ maxWidth: '740px', margin: '0 auto', padding: '16px' }}>
             <div className="of-wrap">
               <div className="of-head">
                 <h2><Wrench size={20} /> {editingId ? "Editar Orden" : "Nueva Orden"}</h2>
@@ -748,10 +751,10 @@ function OrdenTrabajo() {
               <div className="of-sec primary">
                 <div className="of-st primary">Datos de la Orden</div>
                 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+                <div className="of-grid">
                   {/* Número de Orden */}
-                  <div className="form-group">
-                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: 'var(--text)' }}>
+                  <div className="of-f">
+                    <label>
                       Número de Orden *
                     </label>
                     <input
@@ -763,7 +766,7 @@ function OrdenTrabajo() {
                         verificarNumeroOrden(e.target.value);
                       }}
                       required
-                      style={{ width: '100%', padding: '10px 14px', border: `2px solid ${errorNumeroOrden ? 'var(--danger)' : 'var(--border)'}`, borderRadius: '8px', fontSize: '0.95rem' }}
+                      
                     />
                     {errorNumeroOrden && (
                       <span style={{ color: 'var(--danger)', fontSize: '0.85rem', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -773,8 +776,8 @@ function OrdenTrabajo() {
                   </div>
 
                   {/* Fecha */}
-                  <div className="form-group">
-                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: 'var(--text)' }}>
+                  <div className="of-f">
+                    <label>
                       Fecha *
                     </label>
                     <input
@@ -787,20 +790,13 @@ function OrdenTrabajo() {
                   </div>
 
                   {/* Garantía Checkbox */}
-                  <div className="form-group" style={{ display: 'flex', alignItems: 'center' }}>
-                    <label style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: '8px',
-                      cursor: 'pointer',
-                      fontWeight: '600',
-                      color: 'var(--text)'
-                    }}>
+                  <div className="of-f">
+                    <label>
                       <input
                         type="checkbox"
                         checked={nuevaOrden.esGarantia}
                         onChange={(e) => setNuevaOrden({...nuevaOrden, esGarantia: e.target.checked})}
-                        style={{ width: '18px', height: '18px' }}
+                        
                       />
                       Es Garantía
                     </label>
@@ -808,113 +804,26 @@ function OrdenTrabajo() {
                 </div>
 
                 {/* Fechas con Checkboxes */}
-                <div className="date-check-grid">
-                  {/* Fecha Ingreso */}
-                  <div className="date-check-card">
-                    <div className="form-group" style={{ marginBottom: '12px' }}>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer' }}>
-                        <input
-                          type="checkbox"
-                          checked={nuevaOrden.fechaIngresoCheck}
-                          onChange={(e) => setNuevaOrden({...nuevaOrden, fechaIngresoCheck: e.target.checked})}
-                        />
-                        Fecha Ingreso
-                      </label>
-                    </div>
-                    {nuevaOrden.fechaIngresoCheck && (
-                      <input
-                        type="date"
-                        value={nuevaOrden.fechaIngreso}
-                        onChange={(e) => setNuevaOrden({...nuevaOrden, fechaIngreso: e.target.value})}
-                        style={{
-                          width: '100%',
-                          padding: '10px',
-                          border: '2px solid var(--border)',
-                          borderRadius: '6px'
-                        }}
-                      />
-                    )}
+                <div className="of-dates">
+                  <div className="of-date">
+                    <input type="checkbox" checked={nuevaOrden.fechaIngresoCheck} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaIngresoCheck: e.target.checked})} />
+                    <span style={{fontSize:'.75rem',fontWeight:600}}>Ingreso</span>
+                    {nuevaOrden.fechaIngresoCheck && <input type="date" value={nuevaOrden.fechaIngreso} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaIngreso: e.target.value})} />}
                   </div>
-
-                  {/* Fecha Término */}
-                  <div className="date-check-card">
-                    <div className="form-group" style={{ marginBottom: '12px' }}>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer' }}>
-                        <input
-                          type="checkbox"
-                          checked={nuevaOrden.fechaTerminoCheck}
-                          onChange={(e) => setNuevaOrden({...nuevaOrden, fechaTerminoCheck: e.target.checked})}
-                        />
-                        Fecha Término
-                      </label>
-                    </div>
-                    {nuevaOrden.fechaTerminoCheck && (
-                      <input
-                        type="date"
-                        value={nuevaOrden.fechaTermino}
-                        onChange={(e) => setNuevaOrden({...nuevaOrden, fechaTermino: e.target.value})}
-                        style={{
-                          width: '100%',
-                          padding: '10px',
-                          border: '2px solid var(--border)',
-                          borderRadius: '6px'
-                        }}
-                      />
-                    )}
+                  <div className="of-date">
+                    <input type="checkbox" checked={nuevaOrden.fechaTerminoCheck} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaTerminoCheck: e.target.checked})} />
+                    <span style={{fontSize:'.75rem',fontWeight:600}}>Término</span>
+                    {nuevaOrden.fechaTerminoCheck && <input type="date" value={nuevaOrden.fechaTermino} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaTermino: e.target.value})} />}
                   </div>
-
-                  {/* Fecha Entrega */}
-                  <div className="date-check-card">
-                    <div className="form-group" style={{ marginBottom: '12px' }}>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer' }}>
-                        <input
-                          type="checkbox"
-                          checked={nuevaOrden.fechaEntregaCheck}
-                          onChange={(e) => setNuevaOrden({...nuevaOrden, fechaEntregaCheck: e.target.checked})}
-                        />
-                        Fecha Entrega
-                      </label>
-                    </div>
-                    {nuevaOrden.fechaEntregaCheck && (
-                      <input
-                        type="date"
-                        value={nuevaOrden.fechaEntrega}
-                        onChange={(e) => setNuevaOrden({...nuevaOrden, fechaEntrega: e.target.value})}
-                        style={{
-                          width: '100%',
-                          padding: '10px',
-                          border: '2px solid var(--border)',
-                          borderRadius: '6px'
-                        }}
-                      />
-                    )}
+                  <div className="of-date">
+                    <input type="checkbox" checked={nuevaOrden.fechaEntregaCheck} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaEntregaCheck: e.target.checked})} />
+                    <span style={{fontSize:'.75rem',fontWeight:600}}>Entrega</span>
+                    {nuevaOrden.fechaEntregaCheck && <input type="date" value={nuevaOrden.fechaEntrega} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaEntrega: e.target.value})} />}
                   </div>
-
-                  {/* Fecha Compra */}
-                  <div className="date-check-card">
-                    <div className="form-group" style={{ marginBottom: '12px' }}>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer' }}>
-                        <input
-                          type="checkbox"
-                          checked={nuevaOrden.fechaCompraCheck}
-                          onChange={(e) => setNuevaOrden({...nuevaOrden, fechaCompraCheck: e.target.checked})}
-                        />
-                        Fecha Compra
-                      </label>
-                    </div>
-                    {nuevaOrden.fechaCompraCheck && (
-                      <input
-                        type="date"
-                        value={nuevaOrden.fechaCompra}
-                        onChange={(e) => setNuevaOrden({...nuevaOrden, fechaCompra: e.target.value})}
-                        style={{
-                          width: '100%',
-                          padding: '10px',
-                          border: '2px solid var(--border)',
-                          borderRadius: '6px'
-                        }}
-                      />
-                    )}
+                  <div className="of-date">
+                    <input type="checkbox" checked={nuevaOrden.fechaCompraCheck} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaCompraCheck: e.target.checked})} />
+                    <span style={{fontSize:'.75rem',fontWeight:600}}>Compra</span>
+                    {nuevaOrden.fechaCompraCheck && <input type="date" value={nuevaOrden.fechaCompra} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaCompra: e.target.value})} />}
                   </div>
                 </div>
               </div>
@@ -1035,8 +944,8 @@ function OrdenTrabajo() {
                   gap: '20px',
                   marginBottom: '20px'
                 }}>
-                  <div className="form-group">
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
+                  <div className="of-f">
+                    <label>
                       Cliente *
                     </label>
                     <input
@@ -1055,8 +964,8 @@ function OrdenTrabajo() {
                     />
                   </div>
 
-                  <div className="form-group">
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
+                  <div className="of-f">
+                    <label>
                       Dirección
                     </label>
                     <input
@@ -1074,8 +983,8 @@ function OrdenTrabajo() {
                     />
                   </div>
 
-                  <div className="form-group">
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
+                  <div className="of-f">
+                    <label>
                       Comuna
                     </label>
                     <input
@@ -1099,8 +1008,8 @@ function OrdenTrabajo() {
                   gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
                   gap: '20px'
                 }}>
-                  <div className="form-group">
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
+                  <div className="of-f">
+                    <label>
                       Contacto
                     </label>
                     <input
@@ -1118,8 +1027,8 @@ function OrdenTrabajo() {
                     />
                   </div>
 
-                  <div className="form-group">
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
+                  <div className="of-f">
+                    <label>
                       Fono Principal
                     </label>
                     <input
@@ -1137,8 +1046,8 @@ function OrdenTrabajo() {
                     />
                   </div>
 
-                  <div className="form-group">
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
+                  <div className="of-f">
+                    <label>
                       Técnico Asignado *
                     </label>
                     <input
@@ -1342,8 +1251,8 @@ function OrdenTrabajo() {
                     gap: '20px',
                     marginBottom: '20px'
                   }}>
-                   <div className="form-group">
-                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
+                   <div className="of-f">
+                    <label>
                        Equipo *
                      </label>
                     <input
@@ -1362,8 +1271,8 @@ function OrdenTrabajo() {
                     />
                   </div>
 
-                  <div className="form-group">
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
+                  <div className="of-f">
+                    <label>
                       Marca *
                     </label>
                     <input
@@ -1382,8 +1291,8 @@ function OrdenTrabajo() {
                     />
                   </div>
 
-                  <div className="form-group">
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
+                  <div className="of-f">
+                    <label>
                       Modelo *
                     </label>
                     <input
@@ -1402,8 +1311,8 @@ function OrdenTrabajo() {
                     />
                   </div>
 
-                  <div className="form-group">
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
+                  <div className="of-f">
+                    <label>
                       Serie
                     </label>
                     <input
@@ -1429,8 +1338,8 @@ function OrdenTrabajo() {
                    gap: '20px',
                    marginBottom: '20px'
                  }}>
-                   <div className="form-group">
-                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
+                   <div className="of-f">
+                    <label>
                        Contador Páginas OUT
                      </label>
                      <input
@@ -1448,8 +1357,8 @@ function OrdenTrabajo() {
                      />
                    </div>
 
-                   <div className="form-group">
-                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
+                   <div className="of-f">
+                    <label>
                        Nivel Tinta
                      </label>
                      <input
@@ -1470,64 +1379,28 @@ function OrdenTrabajo() {
                  */}
 
                 {/* Insumos Dinámicos */}
-                <div style={{ background: 'white', padding: '20px', borderRadius: '8px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                    <h4 style={{ margin: 0, color: 'var(--text)', fontSize: '16px' }}>Insumos</h4>
+                <div className="of-sec" style={{background:'white'}}>
+                  <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'6px'}}>
+                    <span className="of-st muted">Insumos</span>
                     {insumosVisibles < 12 && (
-                      <button 
-                        type="button"
-                        onClick={() => setInsumosVisibles(insumosVisibles + 1)}
-                        style={{
-                          background: 'var(--success)',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '6px',
-                          padding: '8px 16px',
-                          fontSize: '0.9rem',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px'
-                        }}
-                      >
-                        <Plus size={16} /> Agregar
+                      <button type="button" className="of-btn-a" onClick={() => setInsumosVisibles(insumosVisibles + 1)}>
+                        <Plus size={14} /> Agregar
                       </button>
                     )}
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
+                  <div className="of-ins">
                     {insumos.slice(0, insumosVisibles).map((ins, idx) => (
-                      <div key={idx} className="form-group" style={{ display: 'flex', alignItems: 'end', gap: '8px' }}>
-                        <div style={{ flex: 1 }}>
-                          <label style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Insumo {idx + 1}</label>
-                          <input
-                            type="text"
-                            placeholder={`Insumo ${idx + 1}`}
-                            value={ins.nombre}
-                            onChange={(e) => actualizarInsumo(idx, e.target.value)}
-                            style={{
-                              width: '100%',
-                              padding: '10px 12px',
-                              border: '2px solid var(--border)',
-                              borderRadius: '6px',
-                              fontSize: '0.95rem'
-                            }}
-                          />
+                      <div key={idx} className="of-ins-item">
+                        <div>
+                          <label>Insumo {idx + 1}</label>
+                          <input type="text" placeholder={`Insumo ${idx + 1}`} value={ins.nombre} onChange={(e) => actualizarInsumo(idx, e.target.value)} />
                         </div>
-                        <button
-                          type="button"
-                          className="delete-btn"
-                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '38px', marginBottom: '2px' }}
-                          onClick={() => {
-                            const nuevas = insumos.filter((_, i) => i !== idx);
-                            while (nuevas.length < 12) {
-                              nuevas.push({ nombre: "" });
-                            }
-                            setInsumos(nuevas);
-                            setInsumosVisibles(Math.max(2, insumosVisibles - 1));
-                          }}
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                        <button type="button" className="of-ins-del" onClick={() => {
+                          const nuevas = insumos.filter((_, i) => i !== idx);
+                          while (nuevas.length < 12) nuevas.push({ nombre: "" });
+                          setInsumos(nuevas);
+                          setInsumosVisibles(Math.max(2, insumosVisibles - 1));
+                        }}><Trash2 size={14} /></button>
                       </div>
                     ))}
                   </div>
