@@ -449,7 +449,7 @@ function Clientes() {
                 <X size={24} />
               </button>
             </div>
-            <form onSubmit={guardarCliente} style={{ padding: '24px', display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
+            <form onSubmit={guardarCliente} className="cliente-form" style={{ padding: '24px', display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
               <div style={{ padding: '20px', background: 'var(--primary-light)', borderRadius: '12px' }}>
                 <h3 style={{ color: 'var(--primary)', marginBottom: '16px', fontSize: '16px' }}>Datos de la Empresa</h3>
                 <div style={{ marginBottom: '16px' }}>

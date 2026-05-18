@@ -1226,6 +1226,25 @@ table tr:last-child td {
   gap: 12px;
 }
 
+@media (min-width: 768px) {
+  .cliente-form {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .cliente-form > div:nth-child(1) {
+    grid-column: 1;
+  }
+  .cliente-form > div:nth-child(2) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .cliente-form > div:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+  .cliente-form > div {
+    padding: 16px !important;
+  }
+}
+
 .form-row-2 {
     grid-template-columns: 1fr;
   }
