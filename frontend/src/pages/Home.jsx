@@ -1,12 +1,16 @@
 import { useNavigate } from "react-router-dom";
 import { Package, Users, UserCog, FileText, FileSpreadsheet, ClipboardList, Home as HomeIcon, LogOut, ChevronRight, ShoppingCart } from "lucide-react";
 
-function Home() {
+function Home({ onLogout }) {
   const navigate = useNavigate();
   
   const cerrarSesion = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
+    if (onLogout) {
+      onLogout();
+    } else {
+      localStorage.removeItem("token");
+      window.location.replace("/login");
+    }
   };
 
   const menuItems = [
