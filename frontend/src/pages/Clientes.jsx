@@ -582,7 +582,7 @@ function Clientes() {
 
   return (
     <div className="container">
-      <div className="header" style={{ background: 'var(--gradient)', padding: '20px 32px', flexDirection: 'column', alignItems: 'flex-start', gap: '16px' }}>
+      <div className="header" style={{ background: 'var(--gradient)', padding: '20px 32px', flexDirection: 'row', alignItems: 'center', gap: '16px' }}>
         <div className="header-left">
           <h1 style={{ color: 'white' }}><Users size={28} /> Mantenedor de Clientes</h1>
         </div>

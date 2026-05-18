@@ -16,7 +16,7 @@ function Cotizaciones() {
   return (
     <div className="container" style={{ background: 'var(--bg)', minHeight: '100vh' }}>
       {/* Header */}
-      <div className="header" style={{ background: 'var(--gradient)', padding: '20px 32px', flexDirection: 'column', alignItems: 'flex-start', gap: '16px' }}>
+      <div className="header" style={{ background: 'var(--gradient)', padding: '20px 32px', flexDirection: 'row', alignItems: 'center', gap: '16px' }}>
         <div className="header-left">
           <h1 style={{ color: 'white', margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
             <FileSpreadsheet size={28} /> Cotizaciones

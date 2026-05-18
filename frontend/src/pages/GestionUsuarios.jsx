@@ -274,7 +274,7 @@ if (mostrarCambioPassword) {
 
   return (
     <div className="container">
-      <div className="header" style={{ background: 'var(--gradient)', padding: '20px 32px', flexDirection: 'column', alignItems: 'flex-start', gap: '16px' }}>
+      <div className="header" style={{ background: 'var(--gradient)', padding: '20px 32px', flexDirection: 'row', alignItems: 'center', gap: '16px' }}>
         <div className="header-left">
           <h1 style={{ color: 'white' }}><Users size={28} /> {rol === 'admin' ? 'Gestión de Usuarios' : 'Mi Cuenta'}</h1>
         </div>
