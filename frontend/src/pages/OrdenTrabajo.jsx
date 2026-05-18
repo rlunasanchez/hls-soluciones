@@ -73,7 +73,6 @@ function OrdenTrabajo() {
     contacto: "",
     fonoPrincipal: "",
     tecnicoAsignado: "",
-    actividad: "",
     // Datos del Equipo
     equipo: "",
     modelo: "",
@@ -159,7 +158,6 @@ function OrdenTrabajo() {
       contacto: orden.contacto || "",
       fonoPrincipal: orden.fono_principal || "",
       tecnicoAsignado: orden.tecnico_asignado || "",
-      actividad: orden.actividad || "",
       equipo: orden.equipo || "",
       modelo: orden.modelo || "",
       marca: orden.marca || "",
@@ -448,7 +446,6 @@ function OrdenTrabajo() {
       contacto: "",
       fonoPrincipal: "",
       tecnicoAsignado: "",
-      actividad: "",
       equipo: "",
       modelo: "",
       marca: "",
@@ -1142,26 +1139,6 @@ function OrdenTrabajo() {
                   </div>
                 </div>
 
-                {/* Actividad/Observaciones */}
-                <div className="form-group" style={{ marginTop: '20px' }}>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
-                    Actividad / Observaciones
-                  </label>
-                  <textarea
-                    placeholder="Ingrese observaciones o actividad a realizar..."
-                    value={nuevaOrden.actividad}
-                    onChange={(e) => setNuevaOrden({...nuevaOrden, actividad: e.target.value})}
-                    rows={3}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      border: '2px solid var(--border)',
-                      borderRadius: '8px',
-                      fontSize: '1rem',
-                      resize: 'vertical'
-                    }}
-                  />
-                </div>
               </div>
 
               {/* SECCIÓN 3: DATOS DEL EQUIPO */}
