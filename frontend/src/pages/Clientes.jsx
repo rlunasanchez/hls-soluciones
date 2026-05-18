@@ -463,6 +463,7 @@ function Clientes() {
 .cf-sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .cf-sc{margin-bottom:6px;padding:8px;background:#fff;border-radius:6px;border:1px solid #e2e8f0}
 .cf-sc:last-child{margin-bottom:0}
+.cf-sc .cf-r2 input,.cf-sc .cf-r2 select{max-width:260px}
 .cf-sc-del{text-align:right;margin-top:2px}
 .cf-mt{margin-top:6px}
 .cf-mb{margin-bottom:4px}
