@@ -722,25 +722,25 @@ function OrdenTrabajo() {
 .of-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
 .of-f{display:flex;flex-direction:column;gap:1px}
 .of-f label{font-size:9px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px}
-.of-f input,.of-f select,.of-f textarea{padding:4px 6px;font-size:.75rem;border:1px solid var(--border);border-radius:5px;background:white;transition:border-color .15s;width:100%;box-sizing:border-box}
+.of-f input,.of-f select,.of-f textarea{padding:6px 10px;font-size:.82rem;border:1.5px solid var(--border);border-radius:6px;background:white;transition:border-color .15s;width:100%;box-sizing:border-box}
 .of-f input:focus,.of-f select:focus,.of-f textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px rgba(37,99,235,.1)}
 .of-dates{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
 .of-date{display:flex;align-items:center;gap:4px}
-.of-date input[type="date"]{padding:3px 6px;font-size:.75rem;border:1px solid var(--border);border-radius:5px}
+.of-date input[type="date"]{padding:6px 10px;font-size:.82rem;border:1.5px solid var(--border);border-radius:6px}
 .of-ins{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .of-ins-item{display:flex;align-items:end;gap:4px}
 .of-ins-item>div{flex:1;min-width:0}
 .of-ins-item label{font-size:9px;font-weight:600;color:var(--text-muted);text-transform:uppercase}
-.of-ins-item input{padding:4px 6px;font-size:.75rem;border:1px solid var(--border);border-radius:5px;width:100%;box-sizing:border-box}
+.of-ins-item input{padding:6px 10px;font-size:.82rem;border:1.5px solid var(--border);border-radius:6px;width:100%;box-sizing:border-box}
 .of-ins-del{height:26px;width:26px;padding:0;display:flex;align-items:center;justify-content:center;background:#fee2e2;color:#dc2626;border:none;border-radius:4px;cursor:pointer;flex-shrink:0}
 .of-btn-a{padding:4px 10px;font-size:.7rem;background:var(--success);color:white;border:none;border-radius:5px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:3px}
 .of-sub{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:2px}
 .of-btn-p{padding:6px 14px;font-size:.78rem;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px}
 .of-btn-c{padding:6px 14px;font-size:.78rem;background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px;transition:all .2s}
 .of-btn-c:hover{background:#e2e8f0}
-@media(max-width:768px){.of-r3,.of-r2,.of-grid,.of-dates,.of-ins{grid-template-columns:1fr}.of-form{padding:8px;gap:6px}.of-f input,.of-f select,.of-f textarea{padding:8px 10px;font-size:.85rem;min-height:40px}.of-sub{flex-direction:column}.of-sub button{width:100%;justify-content:center}}
+@media(max-width:768px){.of-r3,.of-r2,.of-grid,.of-dates,.of-ins{grid-template-columns:1fr}.of-form{padding:8px;gap:6px}.of-f input,.of-f select,.of-f textarea{padding:10px 12px;font-size:.9rem;min-height:44px}.of-sub{flex-direction:column}.of-sub button{width:100%;justify-content:center}}
 `}</style>
-          <div style={{ maxWidth: '740px', margin: '0 auto', padding: '16px' }}>
+          <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '16px' }}>
             <div className="of-wrap">
               <div className="of-head">
                 <h2><Wrench size={20} /> {editingId ? "Editar Orden" : "Nueva Orden"}</h2>
