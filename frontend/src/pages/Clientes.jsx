@@ -451,6 +451,7 @@ function Clientes() {
 .cf-field input:focus,.cf-field select:focus{border-color:#0C4A8C;outline:none;box-shadow:0 0 0 2px rgba(12,74,140,.15)}
 .cf-field input::placeholder{color:#94a3b8}
 .cf-codigo input{background:#eef2ff;color:#0C4A8C;font-weight:700;font-size:.9rem;border-color:#c7d2fe;width:100%;box-sizing:border-box}
+@media(max-width:767px){.cf-wrap{padding:8px}.cf-card{border-radius:10px}.cf-head{padding:10px 14px}.cf-head h2{font-size:14px}.cf-head h2 svg{width:20px!important;height:20px!important}.cf-head button{padding:6px}.cf{padding:10px}.cf-grid{grid-template-columns:1fr!important}.cf-sec{padding:10px}.cf-sec h3{font-size:12px}.cf-r3,.cf-r2{grid-template-columns:1fr!important}.cf-field label{font-size:.75rem}.cf-field input,.cf-field select{padding:8px 10px;font-size:.85rem}.cf-sub{gap:8px}.cf-btn-p,.cf-btn-c{padding:10px 16px;font-size:.9rem;flex:1}.cf-sc .cf-r2 input,.cf-sc .cf-r2 select{max-width:none}.cf-sh{flex-direction:column;gap:6px;align-items:stretch}.cf-sh button{width:100%;text-align:center}}
 .cf-sub{display:flex;gap:12px;justify-content:flex-end;margin-top:6px;flex-wrap:wrap}
 .cf-btn-p{padding:6px 14px;font-size:.82rem;background:#0C4A8C;color:#fff;border:none;border-radius:7px;cursor:pointer;font-weight:600;transition:all .2s}
 .cf-btn-p:hover{background:#0a3d75}
