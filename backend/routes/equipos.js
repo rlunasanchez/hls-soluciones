@@ -31,7 +31,7 @@ router.get("/", async (req, res) => {
     let params = [];
     if (q && q.trim()) {
       const term = `%${q.trim().toLowerCase()}%`;
-      sql += ` WHERE e.codigo LIKE $1 OR LOWER(e.serie) LIKE $1 OR LOWER(e.equipo) LIKE $1 OR LOWER(e.marca) LIKE $1`;
+      sql += ` WHERE LOWER(e.codigo) LIKE $1 OR LOWER(e.serie) LIKE $1 OR LOWER(e.equipo) LIKE $1 OR LOWER(e.marca) LIKE $1`;
       params = [term];
     }
     sql += ` ORDER BY e.id DESC`;
