@@ -492,7 +492,7 @@ function Clientes() {
                     <input value={clienteEditando?(clienteEditando.codigo||calcularSiguienteCodigoCliente()):calcularSiguienteCodigoCliente()} disabled />
                   </div>
                 </div>
-                <div style={{display:'grid',gridTemplateColumns:'2fr 1fr',gap:6}}>
+                <div style={{display:'grid',gridTemplateColumns:'1.2fr 1fr',gap:6}}>
                   <div className="cf-field">
                     <label>Razón Social *</label>
                     <input placeholder="Razón social" value={nuevoCliente.razon_social} onChange={e=>setNuevoCliente({...nuevoCliente,razon_social:e.target.value})} required />
@@ -540,11 +540,13 @@ function Clientes() {
               </div>
               <div className="cf-sec cf-sec-contacto">
                 <h3>Datos del Contacto</h3>
-                <div style={{display:'grid',gridTemplateColumns:'1.5fr 1fr 1fr',gap:6}}>
+                <div className="cf-r1 cf-mt">
                   <div className="cf-field">
                     <label>Nombre Contacto</label>
                     <input placeholder="Nombre" value={nuevoCliente.contacto_nombre} onChange={e=>setNuevoCliente({...nuevoCliente,contacto_nombre:e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'')})} />
                   </div>
+                </div>
+                <div className="cf-r2 cf-mt">
                   <div className="cf-field">
                     <label>Email</label>
                     <input type="email" placeholder="Email" value={nuevoCliente.contacto_email} onChange={e=>setNuevoCliente({...nuevoCliente,contacto_email:e.target.value})} />
