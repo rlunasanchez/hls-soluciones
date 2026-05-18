@@ -425,10 +425,11 @@ function Clientes() {
   if (mostrarFormulario) {
     return (
       <div className="container">
-        <div style={{ maxWidth: '900px', margin: '0 auto', padding: '24px' }}>
+        <style>{`.form-compact input,.form-compact select{padding:8px 10px!important;font-size:.85rem!important}.form-compact label{font-size:.85rem!important}.form-compact .secondary-btn{padding:6px 12px!important;font-size:.8rem!important}.form-compact .delete-btn{padding:6px 10px!important;font-size:.8rem!important}.form-compact .main-btn{padding:8px 16px!important;font-size:.85rem!important}.form-compact .cancel-btn{padding:8px 16px!important;font-size:.85rem!important}`}</style>
+        <div style={{ maxWidth: '900px', margin: '0 auto', padding: '16px' }}>
           <div style={{ background: 'white', borderRadius: '16px', boxShadow: 'var(--shadow-lg)', overflow: 'hidden' }}>
-            <div style={{ background: 'var(--gradient)', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <h2 style={{ color: 'white', margin: 0, display: 'flex', alignItems: 'center', gap: '12px', fontSize: '22px' }}>
+            <div style={{ background: 'var(--gradient)', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h2 style={{ color: 'white', margin: 0, display: 'flex', alignItems: 'center', gap: '12px', fontSize: '18px' }}>
                 <Users size={28} />
                 {clienteEditando ? "Editar Cliente" : "Nuevo Cliente"}
               </h2>
@@ -449,10 +450,11 @@ function Clientes() {
                 <X size={24} />
               </button>
             </div>
-            <form onSubmit={guardarCliente} className="cliente-form" style={{ padding: '24px', display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
-              <div style={{ padding: '20px', background: 'var(--primary-light)', borderRadius: '12px' }}>
-                <h3 style={{ color: 'var(--primary)', marginBottom: '16px', fontSize: '16px' }}>Datos de la Empresa</h3>
-                <div style={{ marginBottom: '16px' }}>
+             <form onSubmit={guardarCliente} className="form-compact" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', alignItems: 'start' }}>
+              <div style={{ padding: '14px', background: 'var(--primary-light)', borderRadius: '12px' }}>
+                <h3 style={{ color: 'var(--primary)', marginBottom: '12px', fontSize: '14px' }}>Datos de la Empresa</h3>
+                <div style={{ marginBottom: '8px' }}>
                   <div className="form-group" style={{ maxWidth: '200px' }}>
                     <label>Código</label>
                     <input
@@ -520,7 +522,7 @@ function Clientes() {
                     />
                   </div>
                 </div>
-                <div className="form-row-1" style={{ marginTop: '16px' }}>
+                <div className="form-row-1" style={{ marginTop: '8px' }}>
                   <div className="form-group">
                     <label>Dirección</label>
                     <input
@@ -531,7 +533,7 @@ function Clientes() {
                     />
                   </div>
                 </div>
-                <div className="form-row-3" style={{ marginTop: '16px' }}>
+                <div className="form-row-3" style={{ marginTop: '8px' }}>
                   <div className="form-group">
                     <label>Ciudad</label>
                     <input
@@ -557,7 +559,7 @@ function Clientes() {
                     />
                   </div>
                 </div>
-                <div className="form-row-1" style={{ marginTop: '16px' }}>
+                <div className="form-row-1" style={{ marginTop: '8px' }}>
                   <div className="form-group">
                     <label>Email</label>
                     <input
@@ -569,8 +571,8 @@ function Clientes() {
                   </div>
                 </div>
               </div>
-              <div style={{ padding: '20px', background: 'var(--success-light)', borderRadius: '12px' }}>
-                <h3 style={{ color: 'var(--success)', marginBottom: '16px', fontSize: '16px' }}>Datos del Contacto</h3>
+              <div style={{ padding: '14px', background: 'var(--success-light)', borderRadius: '12px' }}>
+                <h3 style={{ color: 'var(--success)', marginBottom: '12px', fontSize: '14px' }}>Datos del Contacto</h3>
                 <div className="form-row-3">
                   <div className="form-group">
                     <label>Nombre Contacto</label>
@@ -598,7 +600,7 @@ function Clientes() {
                     />
                   </div>
                 </div>
-                <div className="form-row-3" style={{ marginTop: '16px' }}>
+                <div className="form-row-3" style={{ marginTop: '8px' }}>
                   <div className="form-group">
                     <label>Cargo</label>
                     <input
@@ -608,7 +610,7 @@ function Clientes() {
                     />
                   </div>
                 </div>
-                <div className="form-row-1" style={{ marginTop: '16px' }}>
+                <div className="form-row-1" style={{ marginTop: '8px' }}>
                   <div className="form-group">
                     <label>Dirección Contacto</label>
                     <input
@@ -620,9 +622,10 @@ function Clientes() {
                   </div>
                 </div>
               </div>
-              <div style={{ padding: '20px', background: '#F1F5F9', borderRadius: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                  <h3 style={{ color: 'var(--text)', margin: 0, fontSize: '16px' }}>Sucursales/Direcciones</h3>
+              </div>
+              <div style={{ padding: '14px', background: '#F1F5F9', borderRadius: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                  <h3 style={{ color: 'var(--text)', margin: 0, fontSize: '14px' }}>Sucursales/Direcciones</h3>
                   {sucursalesVisibles < 5 && (
                     <button 
                       type="button" 
@@ -635,8 +638,8 @@ function Clientes() {
                   )}
                 </div>
                 {sucursales.slice(0, sucursalesVisibles).map((suc, idx) => (
-                  <div key={idx} className="sucursal-card" style={{ marginBottom: '12px', padding: '12px', background: 'white', borderRadius: '8px' }}>
-                    <div className="form-row-1" style={{ marginBottom: '8px' }}>
+                  <div key={idx} className="sucursal-card" style={{ marginBottom: '8px', padding: '10px', background: 'white', borderRadius: '8px' }}>
+                    <div className="form-row-1" style={{ marginBottom: '6px' }}>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label>Tipo</label>
                         <select
@@ -649,7 +652,7 @@ function Clientes() {
                         </select>
                       </div>
                     </div>
-                    <div className="form-row-1" style={{ marginBottom: '8px' }}>
+                    <div className="form-row-1" style={{ marginBottom: '6px' }}>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label>Dirección</label>
                         <input
@@ -659,7 +662,7 @@ function Clientes() {
                         />
                       </div>
                     </div>
-                    <div className="form-row-1" style={{ marginBottom: '8px' }}>
+                    <div className="form-row-1" style={{ marginBottom: '6px' }}>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label>Fono</label>
                         <input
@@ -669,7 +672,7 @@ function Clientes() {
                         />
                       </div>
                     </div>
-                    <div className="form-row-1" style={{ marginBottom: '8px' }}>
+                    <div className="form-row-1" style={{ marginBottom: '6px' }}>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label>Ciudad</label>
                         <input
@@ -679,7 +682,7 @@ function Clientes() {
                         />
                       </div>
                     </div>
-                    <div className="form-row-1" style={{ marginBottom: '8px' }}>
+                    <div className="form-row-1" style={{ marginBottom: '6px' }}>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label>Comuna</label>
                         <input
