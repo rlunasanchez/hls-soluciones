@@ -425,306 +425,196 @@ function Clientes() {
   if (mostrarFormulario) {
     return (
       <div className="container">
-        <div style={{ maxWidth: '900px', margin: '0 auto', padding: '24px' }}>
-          <div style={{ background: 'white', borderRadius: '16px', boxShadow: 'var(--shadow-lg)', overflow: 'hidden' }}>
-            <div style={{ background: 'var(--gradient)', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <h2 style={{ color: 'white', margin: 0, display: 'flex', alignItems: 'center', gap: '12px', fontSize: '22px' }}>
-                <Users size={28} />
-                {clienteEditando ? "Editar Cliente" : "Nuevo Cliente"}
-              </h2>
-              <button 
-                type="button" 
-                  onClick={() => {
-                    setMostrarFormulario(false);
-                    setClienteEditando(null);
-                    setSucursalesVisibles(1);
-                    setRutError("");
-                    setNuevoCliente({
-                      codigo: "", razon_social: "", giro: "", rut: "", direccion: "", ciudad: "", comuna: "", telefono: "",
-                      contacto_nombre: "", contacto_email: "", contacto_fono: "", contacto_cargo: "", contacto_direccion: "", direcciones: []
-                    });
-                }}
-                style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '8px', padding: '10px', cursor: 'pointer', color: 'white' }}
-              >
-                <X size={24} />
-              </button>
+        <style>{`
+.cf-wrap{max-width:900px;margin:0 auto;padding:12px}
+.cf-card{background:#fff;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.07);overflow:hidden}
+.cf-head{background:linear-gradient(135deg,#0C4A8C,#1a6bc4);padding:12px 18px;display:flex;align-items:center;justify-content:space-between}
+.cf-head h2{color:#fff;margin:0;display:flex;align-items:center;gap:10px;font-size:16px}
+.cf-head button{background:rgba(255,255,255,.2);border:none;border-radius:8px;padding:8px;cursor:pointer;color:#fff;transition:background .2s;line-height:0}
+.cf-head button:hover{background:rgba(255,255,255,.3)}
+.cf{padding:12px;display:flex;flex-direction:column;gap:10px}
+.cf-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
+.cf-sec{padding:10px;border-radius:10px}
+.cf-sec-empresa{background:#f0f7ff}
+.cf-sec-contacto{background:#f0fdf4}
+.cf-sec-suc{background:#f8fafc}
+.cf-sec h3{margin-bottom:8px;font-size:13px;font-weight:700}
+.cf-sec-empresa h3{color:#0C4A8C}
+.cf-sec-contacto h3{color:#16a34a}
+.cf-sec-suc h3{color:#334155;margin:0;font-size:13px}
+.cf-r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.cf-r2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.cf-r1{display:grid;grid-template-columns:1fr;gap:6px}
+.cf-field{display:flex;flex-direction:column;gap:3px}
+.cf-field label{font-size:.78rem;font-weight:600;color:#475569;line-height:1.2}
+.cf-field input,.cf-field select{padding:6px 9px;font-size:.8rem;border:1px solid #d1d5db;border-radius:5px;transition:all .2s;background:#fff;width:100%;box-sizing:border-box;font-family:inherit;color:#1e293b}
+.cf-field input:focus,.cf-field select:focus{border-color:#0C4A8C;outline:none;box-shadow:0 0 0 2px rgba(12,74,140,.15)}
+.cf-field input::placeholder{color:#94a3b8}
+.cf-codigo input{background:#eef2ff;color:#0C4A8C;font-weight:700;font-size:.9rem;border-color:#c7d2fe;width:100%;box-sizing:border-box}
+@media(max-width:767px){.cf-wrap{padding:8px}.cf-card{border-radius:10px}.cf-head{padding:10px 14px}.cf-head h2{font-size:14px}.cf-head h2 svg{width:20px!important;height:20px!important}.cf-head button{padding:6px}.cf{padding:10px}.cf-grid{grid-template-columns:1fr!important}.cf-sec{padding:10px}.cf-sec h3{font-size:12px}.cf-r3,.cf-r2{grid-template-columns:1fr!important}.cf-field label{font-size:.75rem}.cf-field input,.cf-field select{padding:8px 10px;font-size:.85rem}.cf-sub{gap:8px}.cf-btn-p,.cf-btn-c{padding:10px 16px;font-size:.9rem;flex:1}.cf-sc .cf-r1 input{max-width:none}.cf-sh{flex-direction:column;gap:6px;align-items:stretch}.cf-sh button{width:100%;text-align:center}}
+.cf-sub{display:flex;gap:12px;justify-content:flex-end;margin-top:6px;flex-wrap:wrap}
+.cf-btn-p{padding:6px 14px;font-size:.82rem;background:#0C4A8C;color:#fff;border:none;border-radius:7px;cursor:pointer;font-weight:600;transition:all .2s}
+.cf-btn-p:hover{background:#0a3d75}
+.cf-btn-c{padding:6px 14px;font-size:.82rem;background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;border-radius:7px;cursor:pointer;font-weight:600;transition:all .2s}
+.cf-btn-c:hover{background:#e2e8f0}
+.cf-btn-a{padding:5px 10px;font-size:.78rem;background:#0C4A8C;color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:500;transition:all .2s}
+.cf-btn-a:hover{background:#0a3d75}
+.cf-btn-d{padding:5px 8px;font-size:.78rem;background:#fee2e2;color:#dc2626;border:none;border-radius:5px;cursor:pointer;font-weight:500;transition:all .2s}
+.cf-btn-d:hover{background:#fecaca}
+.cf-sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cf-sc{margin-bottom:6px;padding:8px;background:#fff;border-radius:6px;border:1px solid #e2e8f0}
+.cf-sc:last-child{margin-bottom:0}
+.cf-sc .cf-r1 input{max-width:400px}
+.cf-sc-del{text-align:right;margin-top:8px}
+.cf-mt{margin-top:6px}
+.cf-mb{margin-bottom:4px}
+.cf-m0{margin:0!important}
+`}</style>
+        <div className="cf-wrap">
+          <div className="cf-card">
+            <div className="cf-head">
+              <h2><Users size={24} />{clienteEditando ? "Editar Cliente" : "Nuevo Cliente"}</h2>
+              <button onClick={() => {
+                setMostrarFormulario(false); setClienteEditando(null);
+                setSucursalesVisibles(1); setRutError("");
+                setNuevoCliente({
+                  codigo:"",razon_social:"",giro:"",rut:"",direccion:"",ciudad:"",comuna:"",telefono:"",
+                  contacto_nombre:"",contacto_email:"",contacto_fono:"",contacto_cargo:"",contacto_direccion:"",direcciones:[]
+                });
+              }}><X size={20} /></button>
             </div>
-            <form onSubmit={guardarCliente} style={{ padding: '24px', display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
-              <div style={{ padding: '20px', background: 'var(--primary-light)', borderRadius: '12px' }}>
-                <h3 style={{ color: 'var(--primary)', marginBottom: '16px', fontSize: '16px' }}>Datos de la Empresa</h3>
-                <div style={{ marginBottom: '16px' }}>
-                  <div className="form-group" style={{ maxWidth: '200px' }}>
+            <form onSubmit={guardarCliente} className="cf">
+              <div className="cf-grid">
+              <div className="cf-sec cf-sec-empresa">
+                <h3>Datos de la Empresa</h3>
+                <div className="cf-codigo" style={{marginBottom:6}}>
+                  <div className="cf-field">
                     <label>Código</label>
-                    <input
-                      value={clienteEditando ? (clienteEditando.codigo || calcularSiguienteCodigoCliente()) : calcularSiguienteCodigoCliente()}
-                      disabled
-                      style={{ background: '#e8f0fe', color: '#1a73e8', fontWeight: '700', fontSize: '1.1rem' }}
-                    />
+                    <input value={clienteEditando?(clienteEditando.codigo||calcularSiguienteCodigoCliente()):calcularSiguienteCodigoCliente()} disabled />
                   </div>
                 </div>
-                <div className="form-row-3">
-                  <div className="form-group">
+                <div style={{display:'grid',gridTemplateColumns:'1.2fr 1fr',gap:6}}>
+                  <div className="cf-field">
                     <label>Razón Social *</label>
-                    <input
-                      placeholder="Razón social"
-                      value={nuevoCliente.razon_social}
-                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, razon_social: e.target.value })}
-                      required
-                    />
+                    <input placeholder="Razón social" value={nuevoCliente.razon_social} onChange={e=>setNuevoCliente({...nuevoCliente,razon_social:e.target.value})} required />
                   </div>
-                  <div className="form-group">
+                  <div className="cf-field">
                     <label>Giro</label>
-                    <input
-                      placeholder="Giro"
-                      value={nuevoCliente.giro}
-                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, giro: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '') })}
-                    />
+                    <input placeholder="Giro" value={nuevoCliente.giro} onChange={e=>setNuevoCliente({...nuevoCliente,giro:e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'')})} />
                   </div>
-                  <div className="form-group">
-                    <label>RUT {rutError && <span style={{ color: 'red', fontSize: '0.75rem' }}> — {rutError}</span>}</label>
-                    <input
-                      placeholder="Ej: 12.345.678-9"
-                      value={nuevoCliente.rut}
-                      style={rutError ? { border: '2px solid red', background: '#FEF2F2' } : {}}
-                      onChange={(e) => {
-                        let val = e.target.value.toUpperCase().replace(/[^0-9K-]/g, '');
-                        if (val.length > 12) val = val.slice(0, 12);
-                        const partes = val.split('-');
-                        if (partes.length === 2) {
-                          if (partes[1].length > 1) partes[1] = partes[1][0];
-                          if (partes[0].length > 0) partes[0] = partes[0].replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
-                        } else if (partes.length === 1 && partes[0].length > 0) {
-                          partes[0] = partes[0].replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
-                        }
-                        val = partes.join('-');
-                        setNuevoCliente({ ...nuevoCliente, rut: val });
-                        if (rutError && val.length >= 9 && validarRUT(val)) {
-                          setRutError("");
-                        }
-                      }}
-                      onBlur={(e) => {
-                        const val = e.target.value;
-                        if (!val) { setRutError(""); return; }
-                        const limpio = val.replace(/\./g, '').toUpperCase();
-                        const tieneGuion = limpio.includes('-');
-                        const match = limpio.match(/^(\d+)-([K0-9])$/);
-                        if (match) {
-                          if (validarRUT(val)) { setRutError(""); }
-                          else { setRutError("RUT inválido"); }
-                          return;
-                        }
-                        if (tieneGuion && !match) { setRutError("RUT inválido"); }
-                        else if (!tieneGuion && limpio.length >= 5) { setRutError("Falta el guion y dígito verificador"); }
-                        else { setRutError(""); }
-                      }}
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'200px',gap:6,marginTop:6}}>
+                  <div className="cf-field">
+                    <label>RUT {rutError&&<span style={{color:'#dc2626',fontSize:'.72rem'}}> — {rutError}</span>}</label>
+                    <input placeholder="Ej: 12.345.678-9" value={nuevoCliente.rut} style={rutError?{border:'2px solid #dc2626',background:'#fef2f2'}:{}}
+                      onChange={e=>{let val=e.target.value.toUpperCase().replace(/[^0-9K-]/g,'');if(val.length>12)val=val.slice(0,12);const partes=val.split('-');if(partes.length===2){if(partes[1].length>1)partes[1]=partes[1][0];if(partes[0].length>0)partes[0]=partes[0].replace(/(\d)(?=(\d{3})+(?!\d))/g,'$1.')}else if(partes.length===1&&partes[0].length>0){partes[0]=partes[0].replace(/(\d)(?=(\d{3})+(?!\d))/g,'$1.')}val=partes.join('-');setNuevoCliente({...nuevoCliente,rut:val});if(rutError&&val.length>=9&&validarRUT(val))setRutError('')}}
+                      onBlur={e=>{const val=e.target.value;if(!val){setRutError('');return}const limpio=val.replace(/\./g,'').toUpperCase();const tieneGuion=limpio.includes('-');const match=limpio.match(/^(\d+)-([K0-9])$/);if(match){if(validarRUT(val))setRutError('');else setRutError('RUT inválido');return}if(tieneGuion&&!match)setRutError('RUT inválido');else if(!tieneGuion&&limpio.length>=5)setRutError('Falta el guion y dígito verificador');else setRutError('')}}
                     />
                   </div>
                 </div>
-                <div className="form-row-1" style={{ marginTop: '16px' }}>
-                  <div className="form-group">
+                <div className="cf-r1 cf-mt">
+                  <div className="cf-field">
                     <label>Dirección</label>
-                    <input
-                      placeholder="Ingrese la dirección completa"
-                      value={nuevoCliente.direccion}
-                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, direccion: e.target.value })}
-                      style={{ width: '100%' }}
-                    />
+                    <input placeholder="Ingrese la dirección completa" value={nuevoCliente.direccion} onChange={e=>setNuevoCliente({...nuevoCliente,direccion:e.target.value})} />
                   </div>
                 </div>
-                <div className="form-row-3" style={{ marginTop: '16px' }}>
-                  <div className="form-group">
+                <div className="cf-r3 cf-mt">
+                  <div className="cf-field">
                     <label>Ciudad</label>
-                    <input
-                      placeholder="Ciudad"
-                      value={nuevoCliente.ciudad}
-                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, ciudad: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '') })}
-                    />
+                    <input placeholder="Ciudad" value={nuevoCliente.ciudad} onChange={e=>setNuevoCliente({...nuevoCliente,ciudad:e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'')})} />
                   </div>
-                  <div className="form-group">
+                  <div className="cf-field">
                     <label>Comuna</label>
-                    <input
-                      placeholder="Comuna"
-                      value={nuevoCliente.comuna}
-                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, comuna: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '') })}
-                    />
+                    <input placeholder="Comuna" value={nuevoCliente.comuna} onChange={e=>setNuevoCliente({...nuevoCliente,comuna:e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'')})} />
                   </div>
-                  <div className="form-group">
+                  <div className="cf-field">
                     <label>Fono</label>
-                    <input
-                      placeholder="Fono"
-                      value={nuevoCliente.telefono}
-                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, telefono: e.target.value.replace(/[^0-9+]/g, '') })}
-                    />
+                    <input placeholder="Fono" value={nuevoCliente.telefono} onChange={e=>setNuevoCliente({...nuevoCliente,telefono:e.target.value.replace(/[^0-9+]/g,'')})} />
                   </div>
                 </div>
-                <div className="form-row-1" style={{ marginTop: '16px' }}>
-                  <div className="form-group">
+                <div className="cf-r1 cf-mt">
+                  <div className="cf-field">
                     <label>Email</label>
-                    <input
-                      type="email"
-                      placeholder="Email"
-                      value={nuevoCliente.email}
-                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, email: e.target.value })}
-                    />
+                    <input type="email" placeholder="Email" value={nuevoCliente.email} onChange={e=>setNuevoCliente({...nuevoCliente,email:e.target.value})} />
                   </div>
                 </div>
               </div>
-              <div style={{ padding: '20px', background: 'var(--success-light)', borderRadius: '12px' }}>
-                <h3 style={{ color: 'var(--success)', marginBottom: '16px', fontSize: '16px' }}>Datos del Contacto</h3>
-                <div className="form-row-3">
-                  <div className="form-group">
+              <div className="cf-sec cf-sec-contacto">
+                <h3>Datos del Contacto</h3>
+                <div className="cf-r1 cf-mt">
+                  <div className="cf-field">
                     <label>Nombre Contacto</label>
-                    <input
-                      placeholder="Nombre"
-                      value={nuevoCliente.contacto_nombre}
-                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_nombre: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '') })}
-                    />
+                    <input placeholder="Nombre" value={nuevoCliente.contacto_nombre} onChange={e=>setNuevoCliente({...nuevoCliente,contacto_nombre:e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'')})} />
                   </div>
-                  <div className="form-group">
+                </div>
+                <div className="cf-r2 cf-mt">
+                  <div className="cf-field">
                     <label>Email</label>
-                    <input
-                      type="email"
-                      placeholder="Email"
-                      value={nuevoCliente.contacto_email}
-                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_email: e.target.value })}
-                    />
+                    <input type="email" placeholder="Email" value={nuevoCliente.contacto_email} onChange={e=>setNuevoCliente({...nuevoCliente,contacto_email:e.target.value})} />
                   </div>
-                  <div className="form-group">
+                  <div className="cf-field">
                     <label>Fono</label>
-                    <input
-                      placeholder="Fono"
-                      value={nuevoCliente.contacto_fono}
-                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_fono: e.target.value.replace(/[^0-9+]/g, '') })}
-                    />
+                    <input placeholder="Fono" value={nuevoCliente.contacto_fono} onChange={e=>setNuevoCliente({...nuevoCliente,contacto_fono:e.target.value.replace(/[^0-9+]/g,'')})} />
                   </div>
                 </div>
-                <div className="form-row-3" style={{ marginTop: '16px' }}>
-                  <div className="form-group">
+                <div className="cf-r1 cf-mt">
+                  <div className="cf-field">
                     <label>Cargo</label>
-                    <input
-                      placeholder="Cargo"
-                      value={nuevoCliente.contacto_cargo}
-                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_cargo: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '') })}
-                    />
+                    <input placeholder="Cargo" value={nuevoCliente.contacto_cargo} onChange={e=>setNuevoCliente({...nuevoCliente,contacto_cargo:e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'')})} />
                   </div>
                 </div>
-                <div className="form-row-1" style={{ marginTop: '16px' }}>
-                  <div className="form-group">
+                <div className="cf-r1 cf-mt">
+                  <div className="cf-field">
                     <label>Dirección Contacto</label>
-                    <input
-                      placeholder="Ingrese la dirección completa"
-                      value={nuevoCliente.contacto_direccion}
-                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_direccion: e.target.value })}
-                      style={{ width: '100%' }}
-                    />
+                    <input placeholder="Ingrese la dirección completa" value={nuevoCliente.contacto_direccion} onChange={e=>setNuevoCliente({...nuevoCliente,contacto_direccion:e.target.value})} />
                   </div>
                 </div>
               </div>
-              <div style={{ padding: '20px', background: '#F1F5F9', borderRadius: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                  <h3 style={{ color: 'var(--text)', margin: 0, fontSize: '16px' }}>Sucursales/Direcciones</h3>
-                  {sucursalesVisibles < 5 && (
-                    <button 
-                      type="button" 
-                      className="secondary-btn"
-                      style={{ padding: '8px 16px' }}
-                      onClick={() => setSucursalesVisibles(sucursalesVisibles + 1)}
-                    >
-                      + Agregar
-                    </button>
-                  )}
+              </div>
+              <div className="cf-sec cf-sec-suc">
+                <div className="cf-sh">
+                  <h3>Sucursales/Direcciones</h3>
+                  {sucursalesVisibles<5&&<button type="button" className="cf-btn-a" onClick={()=>setSucursalesVisibles(sucursalesVisibles+1)}>+ Agregar</button>}
                 </div>
-                {sucursales.slice(0, sucursalesVisibles).map((suc, idx) => (
-                  <div key={idx} className="sucursal-card" style={{ marginBottom: '12px', padding: '12px', background: 'white', borderRadius: '8px' }}>
-                    <div className="form-row-1" style={{ marginBottom: '8px' }}>
-                      <div className="form-group" style={{ margin: 0 }}>
+                {sucursales.slice(0,sucursalesVisibles).map((suc,idx)=>(
+                  <div key={idx} className="cf-sc">
+                    <div className="cf-r2 cf-mb">
+                      <div className="cf-field cf-m0">
                         <label>Tipo</label>
-                        <select
-                          value={suc.tipo_direccion}
-                          onChange={(e) => actualizarSucursal(idx, 'tipo_direccion', e.target.value)}
-                        >
+                        <select value={suc.tipo_direccion} onChange={e=>actualizarSucursal(idx,'tipo_direccion',e.target.value)}>
                           <option value="">Seleccionar</option>
                           <option value="Matriz">Matriz</option>
                           <option value="Sucursal">Sucursal</option>
                         </select>
                       </div>
-                    </div>
-                    <div className="form-row-1" style={{ marginBottom: '8px' }}>
-                      <div className="form-group" style={{ margin: 0 }}>
+                      <div className="cf-field cf-m0">
                         <label>Dirección</label>
-                        <input
-                          placeholder="Ingrese la dirección completa"
-                          value={suc.direccion}
-                          onChange={(e) => actualizarSucursal(idx, 'direccion', e.target.value)}
-                        />
+                        <input placeholder="Ingrese la dirección completa" value={suc.direccion} onChange={e=>actualizarSucursal(idx,'direccion',e.target.value)} />
                       </div>
                     </div>
-                    <div className="form-row-1" style={{ marginBottom: '8px' }}>
-                      <div className="form-group" style={{ margin: 0 }}>
-                        <label>Fono</label>
-                        <input
-                          placeholder="Fono"
-                          value={suc.fono}
-                          onChange={(e) => actualizarSucursal(idx, 'fono', e.target.value.replace(/[^0-9+]/g, ''))}
-                        />
-                      </div>
-                    </div>
-                    <div className="form-row-1" style={{ marginBottom: '8px' }}>
-                      <div className="form-group" style={{ margin: 0 }}>
+                    <div className="cf-r3 cf-mb">
+                      <div className="cf-field cf-m0">
                         <label>Ciudad</label>
-                        <input
-                          placeholder="Ciudad"
-                          value={suc.ciudad}
-                          onChange={(e) => actualizarSucursal(idx, 'ciudad', e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, ''))}
-                        />
+                        <input placeholder="Ciudad" value={suc.ciudad} onChange={e=>actualizarSucursal(idx,'ciudad',e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,''))} />
                       </div>
-                    </div>
-                    <div className="form-row-1" style={{ marginBottom: '8px' }}>
-                      <div className="form-group" style={{ margin: 0 }}>
+                      <div className="cf-field cf-m0">
+                        <label>Fono</label>
+                        <input placeholder="Fono" value={suc.fono} onChange={e=>actualizarSucursal(idx,'fono',e.target.value.replace(/[^0-9+]/g,''))} />
+                      </div>
+                      <div className="cf-field cf-m0">
                         <label>Comuna</label>
-                        <input
-                          placeholder="Comuna"
-                          value={suc.comuna}
-                          onChange={(e) => actualizarSucursal(idx, 'comuna', e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, ''))}
-                        />
+                        <input placeholder="Comuna" value={suc.comuna} onChange={e=>actualizarSucursal(idx,'comuna',e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,''))} />
                       </div>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <button
-                        type="button"
-                        className="delete-btn"
-                        style={{ padding: '8px 12px' }}
-                        onClick={() => {
-                          const nuevas = sucursales.filter((_, i) => i !== idx);
-                          while (nuevas.length < 5) {
-                            nuevas.push({ tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" });
-                          }
-                          setSucursales(nuevas);
-                          setSucursalesVisibles(Math.max(1, sucursalesVisibles - 1));
-                        }}
-                      >
-                        <Trash2 size={16} /> Eliminar
-                      </button>
+                    <div className="cf-sc-del">
+                      <button type="button" className="cf-btn-d" onClick={()=>{const nuevas=sucursales.filter((_,i)=>i!==idx);while(nuevas.length<5)nuevas.push({tipo_direccion:"",direccion:"",fono:"",ciudad:"",comuna:""});setSucursales(nuevas);setSucursalesVisibles(Math.max(1,sucursalesVisibles-1))}}><Trash2 size={14} /> Eliminar</button>
                     </div>
                   </div>
                 ))}
               </div>
-              <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-end', marginTop: '8px', flexWrap: 'wrap' }}>
-                <button type="button" className="cancel-btn" onClick={() => {
-                  setMostrarFormulario(false);
-                  setClienteEditando(null);
-                  setSucursalesVisibles(1);
-                  setRutError("");
-                  setNuevoCliente({
-                    codigo: "", razon_social: "", giro: "", rut: "", direccion: "", ciudad: "", comuna: "", telefono: "", email: "",
-                    contacto_nombre: "", contacto_email: "", contacto_fono: "", contacto_cargo: "", contacto_direccion: "", direcciones: []
-                  });
-                }}>
-                  <X size={20} /> Cancelar
-                </button>
-                <button type="submit" className="main-btn">
-                  <Save size={20} /> {clienteEditando ? "Guardar Cambios" : "Guardar Cliente"}
-                </button>
+              <div className="cf-sub">
+                <button type="button" className="cf-btn-c" onClick={()=>{setMostrarFormulario(false);setClienteEditando(null);setSucursalesVisibles(1);setRutError("");setNuevoCliente({codigo:"",razon_social:"",giro:"",rut:"",direccion:"",ciudad:"",comuna:"",telefono:"",email:"",contacto_nombre:"",contacto_email:"",contacto_fono:"",contacto_cargo:"",contacto_direccion:"",direcciones:[]})}}><X size={18} /> Cancelar</button>
+                <button type="submit" className="cf-btn-p"><Save size={18} /> {clienteEditando?"Guardar Cambios":"Guardar Cliente"}</button>
               </div>
             </form>
           </div>
