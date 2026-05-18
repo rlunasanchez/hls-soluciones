@@ -324,10 +324,12 @@ const efCss = `.ef-wrap { background: white; border-radius: 16px; box-shadow: va
 .ef-ins-item > div { flex: 1; min-width: 0; }
 .ef-ins-item label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .3px; }
 .ef-ins-item input { padding: 5px 8px; font-size: .78rem; border: 1.5px solid var(--border); border-radius: 6px; background: white; }
-.ef-ins-del { display: flex; align-items: center; justify-content: center; height: 32px; width: 32px; padding: 0; background: var(--danger); color: white; border: none; border-radius: 5px; cursor: pointer; flex-shrink: 0; }
+.ef-ins-del { display: flex; align-items: center; justify-content: center; height: 32px; width: 32px; padding: 0; background: #fee2e2; color: #dc2626; border: none; border-radius: 5px; cursor: pointer; flex-shrink: 0; transition: all .2s; }
+.ef-ins-del:hover { background: #fecaca; }
 .ef-btn-a { padding: 5px 12px; font-size: .75rem; background: var(--success); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 4px; }
 .ef-btn-p { padding: 8px 18px; font-size: .82rem; background: var(--primary); color: white; border: none; border-radius: 7px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 6px; }
-.ef-btn-c { padding: 8px 18px; font-size: .82rem; background: var(--danger); color: white; border: none; border-radius: 7px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+.ef-btn-c { padding: 8px 18px; font-size: .82rem; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 7px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 6px; transition: all .2s; }
+.ef-btn-c:hover { background: #e2e8f0; }
 .ef-sub { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; margin-top: 2px; }
 @media (max-width: 768px) {
   .ef-r2, .ef-r3 { grid-template-columns: 1fr; }
