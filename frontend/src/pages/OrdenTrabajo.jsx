@@ -719,7 +719,7 @@ function OrdenTrabajo() {
 .of-st.muted{color:var(--text)}
 .of-r3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px}
 .of-r2{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:6px}
-.of-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.of-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .of-f{display:flex;flex-direction:column;gap:1px}
 .of-f label{font-size:9px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px}
 .of-f input,.of-f select,.of-f textarea{padding:6px 10px;font-size:.82rem;border:1.5px solid var(--border);border-radius:6px;background:white;transition:border-color .15s;width:100%;box-sizing:border-box}
