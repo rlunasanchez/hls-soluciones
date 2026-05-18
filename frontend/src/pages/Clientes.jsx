@@ -22,6 +22,7 @@ function Clientes() {
     ciudad: "",
     comuna: "",
     telefono: "",
+    email: "",
     contacto_nombre: "",
     contacto_email: "",
     contacto_fono: "",
@@ -193,7 +194,7 @@ function Clientes() {
         alert("Cliente creado");
       }
       setNuevoCliente({
-        codigo: "", razon_social: "", giro: "", rut: "", direccion: "", ciudad: "", comuna: "", telefono: "",
+        codigo: "", razon_social: "", giro: "", rut: "", direccion: "", ciudad: "", comuna: "", telefono: "", email: "",
         contacto_nombre: "", contacto_email: "", contacto_fono: "", contacto_cargo: "", contacto_direccion: "", direcciones: []
       });
       setClienteEditando(null);
@@ -246,6 +247,7 @@ function Clientes() {
       ciudad: c.ciudad || "",
       comuna: c.comuna || "",
       telefono: c.telefono || "",
+      email: c.email || "",
       contacto_nombre: c.contacto_nombre || "",
       contacto_email: c.contacto_email || "",
       contacto_fono: c.contacto_fono || "",
@@ -555,6 +557,17 @@ function Clientes() {
                     />
                   </div>
                 </div>
+                <div className="form-row-1" style={{ marginTop: '16px' }}>
+                  <div className="form-group">
+                    <label>Correo</label>
+                    <input
+                      type="email"
+                      placeholder="correo@ejemplo.cl"
+                      value={nuevoCliente.email}
+                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, email: e.target.value })}
+                    />
+                  </div>
+                </div>
               </div>
               <div style={{ padding: '20px', background: 'var(--success-light)', borderRadius: '12px' }}>
                 <h3 style={{ color: 'var(--success)', marginBottom: '16px', fontSize: '16px' }}>Datos del Contacto</h3>
@@ -703,7 +716,7 @@ function Clientes() {
                   setSucursalesVisibles(1);
                   setRutError("");
                   setNuevoCliente({
-                    codigo: "", razon_social: "", giro: "", rut: "", direccion: "", ciudad: "", comuna: "", telefono: "",
+                    codigo: "", razon_social: "", giro: "", rut: "", direccion: "", ciudad: "", comuna: "", telefono: "", email: "",
                     contacto_nombre: "", contacto_email: "", contacto_fono: "", contacto_cargo: "", contacto_direccion: "", direcciones: []
                   });
                 }}>
