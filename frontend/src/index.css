@@ -1229,6 +1229,8 @@ table tr:last-child td {
 @media (min-width: 768px) {
   .cliente-form {
     grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+    padding: 16px !important;
   }
   .cliente-form > div:nth-child(1) {
     grid-column: 1;
@@ -1241,7 +1243,32 @@ table tr:last-child td {
     grid-column: 1 / -1;
   }
   .cliente-form > div {
-    padding: 16px !important;
+    padding: 12px !important;
+  }
+  .cliente-form h3 {
+    margin-bottom: 10px !important;
+    font-size: 14px !important;
+  }
+  .cliente-form .form-group {
+    gap: 4px !important;
+  }
+  .cliente-form .form-group label {
+    font-size: 0.85rem !important;
+  }
+  .cliente-form .form-group input,
+  .cliente-form .form-group select {
+    padding: 8px 10px !important;
+    font-size: 0.85rem !important;
+  }
+  .cliente-form .form-row-3,
+  .cliente-form .form-row-1 {
+    gap: 8px !important;
+  }
+  .cliente-form [style*="marginBottom"] {
+    margin-bottom: 4px !important;
+  }
+  .cliente-form [style*="marginTop"] {
+    margin-top: 8px !important;
   }
 }
 
