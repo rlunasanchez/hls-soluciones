@@ -9,34 +9,14 @@ dotenv.config();
 
 const router = express.Router();
 
-router.post("/setup-admin", async (req, res) => {
-  const { key } = req.body;
-  if (key !== "hls-setup-2026") {
-    return res.status(403).json({ msg: "Key inválida" });
-  }
-  try {
-    const passwordHash = await bcrypt.hash("admin123", 10);
-    await pool.query(`
-      INSERT INTO usuarios (usuario, password, rol, email, activo)
-      VALUES ('admin', $1, 'admin', 'admin@hls.cl', true)
-      ON CONFLICT (usuario) DO UPDATE SET password = $1, rol = 'admin', activo = true
-    `, [passwordHash]);
-    res.json({ msg: "Admin creado/actualizado correctamente" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Error del servidor" });
-  }
-});
-
 router.post("/login", async (req, res) => {
   const { usuario, password } = req.body;
 
   try {
-    const result = await pool.query(
-      "SELECT * FROM usuarios WHERE usuario = $1 AND activo = true",
+    const [users] = await pool.query(
+      "SELECT * FROM usuarios WHERE usuario = ? AND activo = true",
       [usuario]
     );
-    const users = result.rows;
 
     if (users.length === 0) {
       return res.status(401).json({ msg: "Usuario no encontrado o inactivo" });
@@ -69,13 +49,13 @@ router.post("/registrar", authMiddleware, async (req, res) => {
     const passwordEncriptada = await bcrypt.hash(password, 10);
 
     await pool.query(
-      "INSERT INTO usuarios (usuario, password, rol, email, activo) VALUES ($1, $2, $3, $4, true)",
+      "INSERT INTO usuarios (usuario, password, rol, email, activo) VALUES (?, ?, ?, ?, true)",
       [usuario, passwordEncriptada, rol || "tecnico", email || null]
     );
 
     res.status(201).json({ msg: "Usuario creado correctamente" });
   } catch (err) {
-    if (err.code === "23505") {
+    if (err.code === "ER_DUP_ENTRY") {
       return res.status(400).json({ msg: "El usuario ya existe" });
     }
     console.error(err);
@@ -87,11 +67,10 @@ router.put("/cambiar-password", authMiddleware, async (req, res) => {
   const { usuario, passwordActual, nuevaPassword } = req.body;
 
   try {
-    const result = await pool.query(
-      "SELECT * FROM usuarios WHERE usuario = $1",
+    const [users] = await pool.query(
+      "SELECT * FROM usuarios WHERE usuario = ?",
       [usuario]
     );
-    const users = result.rows;
 
     if (users.length === 0) {
       return res.status(404).json({ msg: "Usuario no encontrado" });
@@ -107,7 +86,7 @@ router.put("/cambiar-password", authMiddleware, async (req, res) => {
     const nuevaPasswordEncriptada = await bcrypt.hash(nuevaPassword, 10);
 
     await pool.query(
-      "UPDATE usuarios SET password = $1 WHERE usuario = $2",
+      "UPDATE usuarios SET password = ? WHERE usuario = ?",
       [nuevaPasswordEncriptada, usuario]
     );
 
@@ -120,10 +99,10 @@ router.put("/cambiar-password", authMiddleware, async (req, res) => {
 
 router.get("/usuarios", authMiddleware, async (req, res) => {
   try {
-    const result = await pool.query(
+    const [usuarios] = await pool.query(
       "SELECT id, usuario, email, rol, activo, fecha_creacion FROM usuarios ORDER BY id DESC"
     );
-    res.json(result.rows);
+    res.json(usuarios);
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
@@ -138,7 +117,7 @@ router.put("/resetear-password/:id", authMiddleware, async (req, res) => {
     const nuevaPasswordEncriptada = await bcrypt.hash(nuevaPassword, 10);
 
     await pool.query(
-      "UPDATE usuarios SET password = $1 WHERE id = $2",
+      "UPDATE usuarios SET password = ? WHERE id = ?",
       [nuevaPasswordEncriptada, id]
     );
 
@@ -155,8 +134,8 @@ router.put("/activar-usuario/:id", authMiddleware, async (req, res) => {
 
   try {
     await pool.query(
-      "UPDATE usuarios SET activo = $1 WHERE id = $2",
-      [activo, id]
+      "UPDATE usuarios SET activo = ? WHERE id = ?",
+      [activo ? true : false, id]
     );
 
     res.json({ msg: activo ? "Usuario activado" : "Usuario desactivado" });
@@ -170,7 +149,7 @@ router.delete("/eliminar-usuario/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
 
   try {
-    await pool.query("DELETE FROM usuarios WHERE id = $1", [id]);
+    await pool.query("DELETE FROM usuarios WHERE id = ?", [id]);
     res.json({ msg: "Usuario eliminado" });
   } catch (err) {
     console.error(err);
@@ -184,12 +163,12 @@ router.put("/actualizar-usuario/:id", authMiddleware, async (req, res) => {
 
   try {
     await pool.query(
-      "UPDATE usuarios SET usuario = $1, rol = $2, email = $3 WHERE id = $4",
+      "UPDATE usuarios SET usuario = ?, rol = ?, email = ? WHERE id = ?",
       [usuario, rol, email || null, id]
     );
     res.json({ msg: "Usuario actualizado correctamente" });
   } catch (err) {
-    if (err.code === "23505") {
+    if (err.code === "ER_DUP_ENTRY") {
       return res.status(400).json({ msg: "El usuario ya existe" });
     }
     console.error(err);

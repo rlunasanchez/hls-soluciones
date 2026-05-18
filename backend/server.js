@@ -28,15 +28,8 @@ const loginLimiter = rateLimit({
 });
 
 app.use(limiter);
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:5174', 
-  'http://localhost:3000',
-  'https://hls-soluciones.vercel.app'
-];
-
 app.use(cors({
-  origin: allowedOrigins,
+  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'],
   credentials: true
 }));
 app.use(express.json());
