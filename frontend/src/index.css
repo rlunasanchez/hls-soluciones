@@ -1220,6 +1220,24 @@ table tr:last-child td {
     grid-template-columns: 1fr;
   }
   
+  .form-row-2 {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-row-4 {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .date-check-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  
+  .form-row-6 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 .form-row-1 {
   display: grid;
   grid-template-columns: 1fr;
@@ -1237,23 +1255,6 @@ table tr:last-child td {
     grid-template-columns: repeat(3, 1fr);
   }
 }
-
-.form-row-2 {
-    grid-template-columns: 1fr;
-  }
-  
-  .form-row-4 {
-    grid-template-columns: 1fr 1fr;
-  }
-  
-  .date-check-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-  
-  .form-row-6 {
-    grid-template-columns: repeat(2, 1fr);
-  }
 
   .equipos-asociados table,
   .equipos-asociados thead,
