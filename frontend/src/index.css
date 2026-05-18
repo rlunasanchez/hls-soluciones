@@ -1226,6 +1226,12 @@ table tr:last-child td {
   gap: 12px;
 }
 
+.form-row-sucursal {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
 .form-row-2 {
     grid-template-columns: 1fr;
   }
