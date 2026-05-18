@@ -703,31 +703,50 @@ function OrdenTrabajo() {
           </>
         ) : (
           /* Formulario para crear orden */
-          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px' }}>
-            <div style={{ background: 'white', borderRadius: '16px', boxShadow: 'var(--shadow-lg)', overflow: 'hidden' }}>
-              <div style={{ background: 'var(--gradient)', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <h2 style={{ color: 'white', margin: 0, display: 'flex', alignItems: 'center', gap: '12px', fontSize: '22px' }}>
-                  <Wrench size={28} />
-                  {editingId ? "Editar Orden de Trabajo" : "Crear Orden de Trabajo"}
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMostrarFormulario(false);
-                    resetFormulario();
-                    setEditingId(null);
-                  }}
-                  style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '8px', padding: '10px', cursor: 'pointer', color: 'white' }}
-                >
-                  <X size={24} />
-                </button>
+          <><style>{`
+.of-wrap{background:white;border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden}
+.of-head{background:var(--gradient);padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.of-head h2{color:white;margin:0;display:flex;align-items:center;gap:10px;font-size:17px;font-weight:600}
+.of-head-close{background:rgba(255,255,255,0.2);border:none;border-radius:8px;padding:7px;cursor:pointer;color:white;display:flex}
+.of-form{padding:16px;display:grid;grid-template-columns:1fr;gap:12px}
+.of-sec{padding:12px;border-radius:10px}
+.of-sec.primary{background:var(--primary-light)}
+.of-sec.success{background:var(--success-light)}
+.of-sec.muted{background:#f1f5f9}
+.of-st{font-size:13px;font-weight:600;margin-bottom:10px}
+.of-st.primary{color:var(--primary)}
+.of-st.success{color:var(--success)}
+.of-st.muted{color:var(--text)}
+.of-r3{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-bottom:10px}
+.of-r2{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-bottom:10px}
+.of-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+.of-f{display:flex;flex-direction:column;gap:2px}
+.of-f label{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px}
+.of-f input,.of-f select,.of-f textarea{padding:5px 8px;font-size:.78rem;border:1.5px solid var(--border);border-radius:6px;background:white;transition:border-color .15s}
+.of-f input:focus,.of-f select:focus,.of-f textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px rgba(37,99,235,.1)}
+.of-sub{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:2px}
+.of-dd{position:absolute;top:100%;left:0;right:0;background:white;border:2px solid var(--border);border-top:none;border-radius:0 0 8px 8px;max-height:200px;overflow:auto;z-index:1000;box-shadow:0 4px 6px rgba(0,0,0,0.1)}
+.of-dd-item{padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border)}
+.of-dd-item:hover{background:var(--primary-light)}
+.of-sc{position:relative}
+.of-sc-ok{position:absolute;right:40px;top:50%;transform:translateY(-50%);background:var(--success);color:white;padding:2px 8px;border-radius:4px;font-size:.75rem}
+.of-chk{display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:600;color:var(--text);font-size:.78rem}
+.of-chk input{width:16px;height:16px}
+.of-btn-p{padding:7px 16px;font-size:.8rem;background:var(--primary);color:white;border:none;border-radius:7px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px}
+.of-btn-c{padding:7px 16px;font-size:.8rem;background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;border-radius:7px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px;transition:all .2s}
+.of-btn-c:hover{background:#e2e8f0}
+@media(max-width:768px){.of-r3,.of-r2,.of-grid{grid-template-columns:1fr}.of-form{padding:12px;gap:10px}.of-f input,.of-f select,.of-f textarea{padding:10px 12px;font-size:.9rem;min-height:44px}.of-sub{flex-direction:column}.of-sub button{width:100%;justify-content:center}}
+`}</style>
+          <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '16px' }}>
+            <div className="of-wrap">
+              <div className="of-head">
+                <h2><Wrench size={20} /> {editingId ? "Editar Orden" : "Nueva Orden"}</h2>
+                <button type="button" className="of-head-close" onClick={() => { setMostrarFormulario(false); resetFormulario(); setEditingId(null); }}><X size={18} /></button>
               </div>
-            <form onSubmit={guardarOrden} style={{ padding: '24px', display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
+            <form onSubmit={guardarOrden} className="of-form">
               {/* SECCIÓN 1: DATOS DE LA ORDEN */}
-              <div style={{ padding: '20px', background: 'var(--primary-light)', borderRadius: '12px' }}>
-                <h3 style={{ color: 'var(--primary)', marginBottom: '16px', fontSize: '16px' }}>
-                  Datos de la Orden
-                </h3>
+              <div className="of-sec primary">
+                <div className="of-st primary">Datos de la Orden</div>
                 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '16px' }}>
                   {/* Número de Orden */}
@@ -901,8 +920,8 @@ function OrdenTrabajo() {
               </div>
 
 {/* SECCIÓN 2: DATOS DEL CLIENTE */}
-              <div style={{ padding: '20px', background: 'var(--success-light)', borderRadius: '12px' }}>
-                <h3 style={{ color: 'var(--success)', marginBottom: '16px', fontSize: '16px' }}>Datos del Cliente</h3>
+              <div className="of-sec success">
+                <div className="of-st success">Datos del Cliente</div>
                 
                 {/* Buscador de Cliente */}
                 <div style={{ marginBottom: '24px' }}>
@@ -1142,10 +1161,8 @@ function OrdenTrabajo() {
               </div>
 
               {/* SECCIÓN 3: DATOS DEL EQUIPO */}
-              <div style={{ padding: '20px', background: '#f1f5f9', borderRadius: '12px' }}>
-                <h3 style={{ color: 'var(--text)', marginBottom: '16px', fontSize: '16px' }}>
-                  Datos del Equipo
-                </h3>
+              <div className="of-sec muted">
+                <div className="of-st muted">Datos del Equipo</div>
                 
                   {/* Buscador por Código de Equipo */}
                   <div style={{ marginBottom: '16px' }}>
@@ -1518,48 +1535,30 @@ function OrdenTrabajo() {
               </div>
 
               {/* SECCIÓN 4: AVERÍA/FALLA/INCIDENCIA */}
-              <div style={{ padding: '20px', background: '#f1f5f9', borderRadius: '12px' }}>
-                <h3 style={{ color: 'var(--text)', marginBottom: '16px', fontSize: '16px' }}>
-                  Avería/Falla/Incidencia
-                </h3>
-                <div className="form-group">
+              <div className="of-sec muted">
+                <div className="of-st muted">Avería/Falla/Incidencia</div>
+                <div className="of-f">
                   <textarea
                     placeholder="Describa la avería, falla o incidencia del equipo..."
                     value={nuevaOrden.averia}
                     onChange={(e) => setNuevaOrden({...nuevaOrden, averia: e.target.value})}
-                    rows={4}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      border: '2px solid var(--border)',
-                      borderRadius: '8px',
-                      fontSize: '1rem',
-                      resize: 'vertical'
-                    }}
+                    rows={3}
                   />
                 </div>
               </div>
 
               {/* Botones de acción del formulario */}
-              <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-end', marginTop: '8px', flexWrap: 'wrap' }}>
-                <button 
-                  type="button"
-                  onClick={() => {
-                    setMostrarFormulario(false);
-                    resetFormulario();
-                    setEditingId(null);
-                  }}
-                  className="cancel-btn"
-                >
-                  <X size={20} /> Cancelar
+              <div className="of-sub">
+                <button type="button" className="of-btn-c" onClick={() => { setMostrarFormulario(false); resetFormulario(); setEditingId(null); }}>
+                  <X size={16} /> Cancelar
                 </button>
-                <button type="submit" className="main-btn">
-                  <Save size={20} /> {editingId ? "Guardar Cambios" : "Guardar Orden"}
+                <button type="submit" className="of-btn-p">
+                  <Save size={16} /> {editingId ? "Guardar Cambios" : "Guardar Orden"}
                 </button>
               </div>
             </form>
             </div>
-          </div>
+          </div></>
         )}
     </div>
   );
