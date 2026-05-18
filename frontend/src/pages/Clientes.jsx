@@ -639,17 +639,27 @@ function Clientes() {
                 </div>
                 {sucursales.slice(0, sucursalesVisibles).map((suc, idx) => (
                   <div key={idx} className="sucursal-card" style={{ marginBottom: '8px', padding: '10px', background: 'white', borderRadius: '8px' }}>
-                    <div className="form-row-1" style={{ marginBottom: '6px' }}>
+                    <div className="form-row-2" style={{ marginBottom: '6px' }}>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label>Tipo</label>
                         <select
                           value={suc.tipo_direccion}
                           onChange={(e) => actualizarSucursal(idx, 'tipo_direccion', e.target.value)}
+                          style={{ padding: '8px 10px', fontSize: '0.85rem' }}
                         >
                           <option value="">Seleccionar</option>
                           <option value="Matriz">Matriz</option>
                           <option value="Sucursal">Sucursal</option>
                         </select>
+                      </div>
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label>Fono</label>
+                        <input
+                          placeholder="Fono"
+                          value={suc.fono}
+                          onChange={(e) => actualizarSucursal(idx, 'fono', e.target.value.replace(/[^0-9+]/g, ''))}
+                          style={{ padding: '8px 10px', fontSize: '0.85rem' }}
+                        />
                       </div>
                     </div>
                     <div className="form-row-1" style={{ marginBottom: '6px' }}>
@@ -659,44 +669,35 @@ function Clientes() {
                           placeholder="Ingrese la dirección completa"
                           value={suc.direccion}
                           onChange={(e) => actualizarSucursal(idx, 'direccion', e.target.value)}
+                          style={{ padding: '8px 10px', fontSize: '0.85rem' }}
                         />
                       </div>
                     </div>
-                    <div className="form-row-1" style={{ marginBottom: '6px' }}>
-                      <div className="form-group" style={{ margin: 0 }}>
-                        <label>Fono</label>
-                        <input
-                          placeholder="Fono"
-                          value={suc.fono}
-                          onChange={(e) => actualizarSucursal(idx, 'fono', e.target.value.replace(/[^0-9+]/g, ''))}
-                        />
-                      </div>
-                    </div>
-                    <div className="form-row-1" style={{ marginBottom: '6px' }}>
+                    <div className="form-row-2" style={{ marginBottom: '6px' }}>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label>Ciudad</label>
                         <input
                           placeholder="Ciudad"
                           value={suc.ciudad}
                           onChange={(e) => actualizarSucursal(idx, 'ciudad', e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, ''))}
+                          style={{ padding: '8px 10px', fontSize: '0.85rem' }}
                         />
                       </div>
-                    </div>
-                    <div className="form-row-1" style={{ marginBottom: '6px' }}>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label>Comuna</label>
                         <input
                           placeholder="Comuna"
                           value={suc.comuna}
                           onChange={(e) => actualizarSucursal(idx, 'comuna', e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, ''))}
+                          style={{ padding: '8px 10px', fontSize: '0.85rem' }}
                         />
                       </div>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
+                    <div style={{ textAlign: 'right', marginTop: '4px' }}>
                       <button
                         type="button"
                         className="delete-btn"
-                        style={{ padding: '8px 12px' }}
+                        style={{ padding: '6px 10px', fontSize: '0.8rem' }}
                         onClick={() => {
                           const nuevas = sucursales.filter((_, i) => i !== idx);
                           while (nuevas.length < 5) {
