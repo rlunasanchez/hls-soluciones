@@ -621,9 +621,9 @@ function Clientes() {
                     </button>
                   )}
                 </div>
-                  {sucursales.slice(0, sucursalesVisibles).map((suc, idx) => (
+                {sucursales.slice(0, sucursalesVisibles).map((suc, idx) => (
                   <div key={idx} className="sucursal-card" style={{ marginBottom: '12px', padding: '12px', background: 'white', borderRadius: '8px' }}>
-                    <div className="form-row-sucursal">
+                    <div className="form-row-1" style={{ marginBottom: '8px' }}>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label>Tipo</label>
                         <select
@@ -635,6 +635,8 @@ function Clientes() {
                           <option value="Sucursal">Sucursal</option>
                         </select>
                       </div>
+                    </div>
+                    <div className="form-row-1" style={{ marginBottom: '8px' }}>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label>Dirección</label>
                         <input
@@ -643,6 +645,8 @@ function Clientes() {
                           onChange={(e) => actualizarSucursal(idx, 'direccion', e.target.value)}
                         />
                       </div>
+                    </div>
+                    <div className="form-row-1" style={{ marginBottom: '8px' }}>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label>Fono</label>
                         <input
@@ -651,6 +655,8 @@ function Clientes() {
                           onChange={(e) => actualizarSucursal(idx, 'fono', e.target.value.replace(/[^0-9+]/g, ''))}
                         />
                       </div>
+                    </div>
+                    <div className="form-row-1" style={{ marginBottom: '8px' }}>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label>Ciudad</label>
                         <input
@@ -659,6 +665,8 @@ function Clientes() {
                           onChange={(e) => actualizarSucursal(idx, 'ciudad', e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, ''))}
                         />
                       </div>
+                    </div>
+                    <div className="form-row-1" style={{ marginBottom: '8px' }}>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label>Comuna</label>
                         <input
