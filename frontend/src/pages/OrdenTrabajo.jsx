@@ -526,9 +526,9 @@ function OrdenTrabajo() {
                   value={filtroNumeroOrden}
                   onChange={(e) => setFiltroNumeroOrden(e.target.value)}
                   style={{
-                    padding: '10px 16px',
+                    padding: '6px 10px',
                     border: '2px solid var(--border)',
-                    borderRadius: '8px',
+                    borderRadius: '6px',
                     fontSize: '0.95rem',
                     minWidth: '250px'
                   }}
@@ -722,10 +722,14 @@ function OrdenTrabajo() {
 .of-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .of-f{display:flex;flex-direction:column;gap:1px}
 .of-f label{font-size:9px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px}
-.of-f input,.of-f select,.of-f textarea{padding:6px 10px;font-size:.82rem;border:1.5px solid var(--border);border-radius:6px;background:white;transition:border-color .15s;width:100%;box-sizing:border-box}
+.of-f input,.of-f select,.of-f textarea{padding:6px 10px;font-size:.82rem;border:1.5px solid var(--border);border-radius:6px;background:white;transition:border-color .15s;width:100%;box-sizing:border-box}.of-f textarea{resize:vertical;min-height:60px}
 .of-f input:focus,.of-f select:focus,.of-f textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px rgba(37,99,235,.1)}
-.of-dates{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.of-dates{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
 .of-date{display:flex;align-items:center;gap:4px}
+.of-chk{display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:600;color:var(--text);text-transform:none;letter-spacing:normal;cursor:pointer}
+.of-chk input{width:auto;margin:0}
+.of-date-f{flex:1;min-width:0;margin-left:4px}
+.of-date-f input{width:100%}
 .of-date input[type="date"]{padding:6px 10px;font-size:.82rem;border:1.5px solid var(--border);border-radius:6px}
 .of-ins{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .of-ins-item{display:flex;align-items:end;gap:4px}
@@ -740,7 +744,7 @@ function OrdenTrabajo() {
 .of-btn-c:hover{background:#e2e8f0}
 @media(max-width:768px){.of-r3,.of-r2,.of-grid,.of-dates,.of-ins{grid-template-columns:1fr}.of-form{padding:8px;gap:6px}.of-f input,.of-f select,.of-f textarea{padding:10px 12px;font-size:.9rem;min-height:44px}.of-sub{flex-direction:column}.of-sub button{width:100%;justify-content:center}}
 `}</style>
-          <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '16px' }}>
+          <div style={{ maxWidth: '900px', margin: '0 auto', padding: '12px' }}>
             <div className="of-wrap">
               <div className="of-head">
                 <h2><Wrench size={20} /> {editingId ? "Editar Orden" : "Nueva Orden"}</h2>
@@ -789,7 +793,7 @@ function OrdenTrabajo() {
                   </div>
 
                   {/* Garantía Checkbox */}
-                  <div className="of-f" style={{justifyContent:'center',paddingTop:'16px'}}>
+                  <div className="of-f" style={{justifyContent:'center'}}>
                     <label className="of-chk">
                       <input
                         type="checkbox"
@@ -806,22 +810,22 @@ function OrdenTrabajo() {
                   <div className="of-date">
                     <input type="checkbox" checked={nuevaOrden.fechaIngresoCheck} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaIngresoCheck: e.target.checked})} />
                     <span style={{fontSize:'.75rem',fontWeight:600}}>Ingreso</span>
-                    {nuevaOrden.fechaIngresoCheck && <input type="date" value={nuevaOrden.fechaIngreso} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaIngreso: e.target.value})} />}
+                    {nuevaOrden.fechaIngresoCheck && <div className="of-date-f"><input type="date" value={nuevaOrden.fechaIngreso} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaIngreso: e.target.value})} /></div>}
                   </div>
                   <div className="of-date">
                     <input type="checkbox" checked={nuevaOrden.fechaTerminoCheck} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaTerminoCheck: e.target.checked})} />
                     <span style={{fontSize:'.75rem',fontWeight:600}}>Término</span>
-                    {nuevaOrden.fechaTerminoCheck && <input type="date" value={nuevaOrden.fechaTermino} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaTermino: e.target.value})} />}
+                    {nuevaOrden.fechaTerminoCheck && <div className="of-date-f"><input type="date" value={nuevaOrden.fechaTermino} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaTermino: e.target.value})} /></div>}
                   </div>
                   <div className="of-date">
                     <input type="checkbox" checked={nuevaOrden.fechaEntregaCheck} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaEntregaCheck: e.target.checked})} />
                     <span style={{fontSize:'.75rem',fontWeight:600}}>Entrega</span>
-                    {nuevaOrden.fechaEntregaCheck && <input type="date" value={nuevaOrden.fechaEntrega} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaEntrega: e.target.value})} />}
+                    {nuevaOrden.fechaEntregaCheck && <div className="of-date-f"><input type="date" value={nuevaOrden.fechaEntrega} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaEntrega: e.target.value})} /></div>}
                   </div>
                   <div className="of-date">
                     <input type="checkbox" checked={nuevaOrden.fechaCompraCheck} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaCompraCheck: e.target.checked})} />
                     <span style={{fontSize:'.75rem',fontWeight:600}}>Compra</span>
-                    {nuevaOrden.fechaCompraCheck && <input type="date" value={nuevaOrden.fechaCompra} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaCompra: e.target.value})} />}
+                    {nuevaOrden.fechaCompraCheck && <div className="of-date-f"><input type="date" value={nuevaOrden.fechaCompra} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaCompra: e.target.value})} /></div>}
                   </div>
                 </div>
               </div>
@@ -831,8 +835,8 @@ function OrdenTrabajo() {
                 <div className="of-st success">Datos del Cliente</div>
                 
                 {/* Buscador de Cliente */}
-                <div style={{ marginBottom: '24px' }}>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)' }}>
                     <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
                     Buscar y Seleccionar Cliente
                   </label>
@@ -850,10 +854,10 @@ function OrdenTrabajo() {
                       }}
                       style={{
                         width: '100%',
-                        padding: '12px 16px',
+                        padding: '6px 10px',
                         border: '2px solid var(--primary)',
-                        borderRadius: '8px',
-                        fontSize: '1rem',
+                        borderRadius: '6px',
+                        fontSize: '.82rem',
                         background: clienteSeleccionado ? '#E0F2FE' : 'white'
                       }}
                     />
@@ -905,7 +909,7 @@ function OrdenTrabajo() {
                               key={cliente.id}
                               onClick={() => seleccionarCliente(cliente)}
                               style={{
-                                padding: '12px 16px',
+                                padding: '6px 10px',
                                 cursor: 'pointer',
                                 borderBottom: '1px solid var(--border)',
                                 transition: 'background 0.2s'
@@ -954,10 +958,10 @@ function OrdenTrabajo() {
                       required
                       style={{
                         width: '100%',
-                        padding: '12px 16px',
+                        padding: '6px 10px',
                         border: '2px solid var(--border)',
-                        borderRadius: '8px',
-                        fontSize: '1rem'
+                        borderRadius: '6px',
+                        fontSize: '.82rem'
                       }}
                     />
                   </div>
@@ -973,10 +977,10 @@ function OrdenTrabajo() {
                       onChange={(e) => setNuevaOrden({...nuevaOrden, direccion: e.target.value})}
                       style={{
                         width: '100%',
-                        padding: '12px 16px',
+                        padding: '6px 10px',
                         border: '2px solid var(--border)',
-                        borderRadius: '8px',
-                        fontSize: '1rem'
+                        borderRadius: '6px',
+                        fontSize: '.82rem'
                       }}
                     />
                   </div>
@@ -992,10 +996,10 @@ function OrdenTrabajo() {
                       onChange={(e) => setNuevaOrden({...nuevaOrden, comuna: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')})}
                       style={{
                         width: '100%',
-                        padding: '12px 16px',
+                        padding: '6px 10px',
                         border: '2px solid var(--border)',
-                        borderRadius: '8px',
-                        fontSize: '1rem'
+                        borderRadius: '6px',
+                        fontSize: '.82rem'
                       }}
                     />
                   </div>
@@ -1017,10 +1021,10 @@ function OrdenTrabajo() {
                       onChange={(e) => setNuevaOrden({...nuevaOrden, contacto: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')})}
                       style={{
                         width: '100%',
-                        padding: '12px 16px',
+                        padding: '6px 10px',
                         border: '2px solid var(--border)',
-                        borderRadius: '8px',
-                        fontSize: '1rem'
+                        borderRadius: '6px',
+                        fontSize: '.82rem'
                       }}
                     />
                   </div>
@@ -1036,10 +1040,10 @@ function OrdenTrabajo() {
                       onChange={(e) => setNuevaOrden({...nuevaOrden, fonoPrincipal: e.target.value.replace(/[^0-9+]/g, '')})}
                       style={{
                         width: '100%',
-                        padding: '12px 16px',
+                        padding: '6px 10px',
                         border: '2px solid var(--border)',
-                        borderRadius: '8px',
-                        fontSize: '1rem'
+                        borderRadius: '6px',
+                        fontSize: '.82rem'
                       }}
                     />
                   </div>
@@ -1056,10 +1060,10 @@ function OrdenTrabajo() {
                       required
                       style={{
                         width: '100%',
-                        padding: '12px 16px',
+                        padding: '6px 10px',
                         border: '2px solid var(--border)',
-                        borderRadius: '8px',
-                        fontSize: '1rem'
+                        borderRadius: '6px',
+                        fontSize: '.82rem'
                       }}
                     />
                   </div>
@@ -1071,10 +1075,11 @@ function OrdenTrabajo() {
               <div className="of-sec muted">
                 <div className="of-st muted">Datos del Equipo</div>
                 
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px',marginBottom:'8px'}}>
                   {/* Buscador por Código de Equipo */}
-                  <div style={{ marginBottom: '16px' }}>
+                  <div>
                     <div ref={equipoCodigoDropdownRef} style={{ position: 'relative' }}>
-                      <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
+                      <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)' }}>
                         <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
                         Buscar por código (EQ-XXX)
                       </label>
@@ -1092,10 +1097,10 @@ function OrdenTrabajo() {
                         }}
                         style={{
                           width: '100%',
-                          padding: '10px 16px',
+                          padding: '6px 10px',
                           border: '2px solid var(--info)',
-                          borderRadius: '8px',
-                          fontSize: '1rem',
+                          borderRadius: '6px',
+                          fontSize: '.82rem',
                           background: equipoSeleccionado?.codigo === busquedaCodigo ? '#DCFCE7' : 'white'
                         }}
                       />
@@ -1125,7 +1130,7 @@ function OrdenTrabajo() {
                                   setMostrarDropdownCodigo(false);
                                 }}
                                 style={{
-                                  padding: '12px 16px',
+                                  padding: '6px 10px',
                                   cursor: 'pointer',
                                   borderBottom: '1px solid var(--border)',
                                   transition: 'background 0.2s'
@@ -1152,9 +1157,9 @@ function OrdenTrabajo() {
                   </div>
 
                   {/* Buscador de Equipo - Solo por Serie */}
-                 <div style={{ marginBottom: '24px' }}>
+                 <div>
                    <div ref={equipoDropdownRef} style={{ position: 'relative' }}>
-                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: 'var(--text)' }}>
+                     <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)' }}>
                        <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
                        Buscar Equipo por Serie
                      </label>
@@ -1171,10 +1176,10 @@ function OrdenTrabajo() {
                         }}
                         style={{
                           width: '100%',
-                          padding: '12px 16px',
+                          padding: '6px 10px',
                           border: '2px solid var(--success)',
-                          borderRadius: '8px',
-                          fontSize: '1rem',
+                          borderRadius: '6px',
+                          fontSize: '.82rem',
                           background: equipoSeleccionado ? '#DCFCE7' : 'white'
                         }}
                       />
@@ -1201,7 +1206,7 @@ function OrdenTrabajo() {
                                 key={equipo.id}
                                 onClick={() => seleccionarEquipo(equipo)}
                                 style={{
-                                  padding: '12px 16px',
+                                  padding: '6px 10px',
                                   cursor: 'pointer',
                                   borderBottom: '1px solid var(--border)',
                                   transition: 'background 0.2s'
@@ -1230,7 +1235,7 @@ function OrdenTrabajo() {
                      <div style={{
                        background: 'var(--success-light)',
                        padding: '8px 16px',
-                       borderRadius: '8px',
+                       borderRadius: '6px',
                        fontSize: '0.9rem',
                        color: 'var(--success)',
                        display: 'flex',
@@ -1241,14 +1246,15 @@ function OrdenTrabajo() {
                        ✓ Seleccionado: {equipoSeleccionado.equipo} - {equipoSeleccionado.marca} {equipoSeleccionado.modelo}
                      </div>
                    )}
-                 </div>
-                 
-                  <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', 
-                    gap: '20px',
-                    marginBottom: '20px'
-                  }}>
+                  </div>
+                </div>
+                  
+                   <div style={{ 
+                     display: 'grid', 
+                     gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', 
+                     gap: '20px',
+                     marginBottom: '20px'
+                   }}>
                    <div className="of-f">
                     <label>
                        Equipo *
@@ -1261,10 +1267,10 @@ function OrdenTrabajo() {
                       required
                       style={{
                         width: '100%',
-                        padding: '12px 16px',
+                        padding: '6px 10px',
                         border: '2px solid var(--border)',
-                        borderRadius: '8px',
-                        fontSize: '1rem'
+                        borderRadius: '6px',
+                        fontSize: '.82rem'
                       }}
                     />
                   </div>
@@ -1281,10 +1287,10 @@ function OrdenTrabajo() {
                       required
                       style={{
                         width: '100%',
-                        padding: '12px 16px',
+                        padding: '6px 10px',
                         border: '2px solid var(--border)',
-                        borderRadius: '8px',
-                        fontSize: '1rem'
+                        borderRadius: '6px',
+                        fontSize: '.82rem'
                       }}
                     />
                   </div>
@@ -1301,10 +1307,10 @@ function OrdenTrabajo() {
                       required
                       style={{
                         width: '100%',
-                        padding: '12px 16px',
+                        padding: '6px 10px',
                         border: '2px solid var(--border)',
-                        borderRadius: '8px',
-                        fontSize: '1rem'
+                        borderRadius: '6px',
+                        fontSize: '.82rem'
                       }}
                     />
                   </div>
@@ -1320,10 +1326,10 @@ function OrdenTrabajo() {
                       onChange={(e) => setNuevaOrden({...nuevaOrden, serie: e.target.value})}
                       style={{
                         width: '100%',
-                        padding: '12px 16px',
+                        padding: '6px 10px',
                         border: '2px solid var(--border)',
-                        borderRadius: '8px',
-                        fontSize: '1rem'
+                        borderRadius: '6px',
+                        fontSize: '.82rem'
                       }}
                     />
                   </div>
@@ -1347,10 +1353,10 @@ function OrdenTrabajo() {
                        onChange={(e) => setNuevaOrden({...nuevaOrden, contadorPagOut: e.target.value})}
                        style={{
                          width: '100%',
-                         padding: '12px 16px',
+                         padding: '6px 10px',
                          border: '2px solid var(--border)',
-                         borderRadius: '8px',
-                         fontSize: '1rem'
+                         borderRadius: '6px',
+                         fontSize: '.82rem'
                        }}
                      />
                    </div>
@@ -1366,10 +1372,10 @@ function OrdenTrabajo() {
                        onChange={(e) => setNuevaOrden({...nuevaOrden, nivelTinta: e.target.value})}
                        style={{
                          width: '100%',
-                         padding: '12px 16px',
+                         padding: '6px 10px',
                          border: '2px solid var(--border)',
-                         borderRadius: '8px',
-                         fontSize: '1rem'
+                         borderRadius: '6px',
+                         fontSize: '.82rem'
                        }}
                      />
                    </div>
