@@ -477,3 +477,29 @@ Implementación de diseño responsive para todas las vistas:
 ### Estructura Buscador OrdenTrabajo
 - Buscador por serie en sección "Datos del Equipo"
 - Al seleccionar equipo se llenan: equipo, marca, modelo, serie, contador, nivel tinta, insumos
+
+---
+
+## Notas de Sesión (18/05/2026)
+
+### Fix: Fechas vacías al editar Orden de Trabajo
+
+**Problema:** Al editar una orden, los campos de fecha (`fecha`, `fechaIngreso`, etc.) aparecían vacíos.
+
+**Causa:** mysql2 devuelve columnas DATE como objetos Date de JavaScript. `<input type="date">` solo acepta string en formato `YYYY-MM-DD`, por lo que el input se mostraba vacío.
+
+**Solución:**
+- **Frontend** (`OrdenTrabajo.jsx`): función `fmtDate()` que convierte cualquier formato de fecha (Date object, string ISO, string MySQL) a `YYYY-MM-DD`
+- **Backend** (`routes/ordenes.js`): función `toDateMySQL()` que convierte fechas ISO del frontend a `YYYY-MM-DD` para MySQL (solo en rama `main`)
+
+**Archivos modificados:**
+- `frontend/src/pages/OrdenTrabajo.jsx` (ambas ramas)
+- `backend/routes/ordenes.js` (solo `main`)
+
+### Rama `main` vs `deploy/cloud`
+
+Se formalizó la separación de ramas:
+- `main` → MySQL local
+- `deploy/cloud` → PostgreSQL cloud (Vercel + Render)
+
+**Flujo:** cambios frontend se copian a ambas ramas. Cambios backend se hacen por separado según la BD.

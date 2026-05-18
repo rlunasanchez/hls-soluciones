@@ -675,3 +675,29 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 **Endpoint:** `POST /api/auth/setup-admin` con key `hls-setup-2026`
 
 **Credenciales:** usuario: `admin`, contraseña: `admin123`
+
+---
+
+## Rama `main` vs `deploy/cloud`
+
+| Aspecto | `main` (Local) | `deploy/cloud` (Web) |
+|---------|---------------|---------------------|
+| Base de datos | MySQL (mysql2) | PostgreSQL (pg) |
+| Backend config | `backend/config/db.js` con mysql2 | `backend/config/db.js` con pg |
+| Backend routes | Sintaxis MySQL | Sintaxis PostgreSQL |
+| Package.json | Dependencia `mysql2` | Dependencia `pg` |
+| Frontend | Igual en ambas | Igual en ambas |
+
+**Reglas:**
+- Trabajar en `main`, hacer merge a `deploy/cloud` **sin sobrescribir backend** (PostgreSQL)
+- Si se toca frontend, se puede copiar el archivo directamente a ambas ramas
+- `main` usa MySQL local; `deploy/cloud` usa PostgreSQL en Neon/Render
+
+## Historial de Versiones
+
+| Versión | Fecha | Cambios |
+|---------|-------|---------|
+| 1.0 | 17 Mayo 2026 | Sistema base con Clientes, Equipos, Órdenes |
+| 1.1 | 17-18 Mayo 2026 | Responsive móvil, fix Vercel, optimización |
+| 1.2 | 18 Mayo 2026 | Documentación completa |
+| 1.3 | 18 Mayo 2026 | Separación ramas main (MySQL) vs deploy/cloud (PostgreSQL), fix fechas editar orden |
