@@ -129,6 +129,13 @@ function OrdenTrabajo() {
     return orden.numero_orden?.toLowerCase().includes(filtroNumeroOrden.toLowerCase());
   });
 
+  const fmtDate = (d) => {
+    if (!d) return "";
+    const dt = typeof d === "string" ? new Date(d) : d;
+    if (isNaN(dt.getTime())) return "";
+    return dt.toISOString().split("T")[0];
+  };
+
   const editarOrden = async (orden) => {
     setEditingId(orden.id);
     setMostrarFormulario(true);
@@ -136,15 +143,15 @@ function OrdenTrabajo() {
     // Cargar datos de la orden en el formulario
     setNuevaOrden({
       numeroOrden: orden.numero_orden || "",
-      fecha: orden.fecha || "",
+      fecha: fmtDate(orden.fecha),
       esGarantia: orden.es_garantia || false,
-      fechaIngreso: orden.fecha_ingreso || "",
+      fechaIngreso: fmtDate(orden.fecha_ingreso),
       fechaIngresoCheck: orden.fecha_ingreso_check || false,
-      fechaTermino: orden.fecha_termino || "",
+      fechaTermino: fmtDate(orden.fecha_termino),
       fechaTerminoCheck: orden.fecha_termino_check || false,
-      fechaEntrega: orden.fecha_entrega || "",
+      fechaEntrega: fmtDate(orden.fecha_entrega),
       fechaEntregaCheck: orden.fecha_entrega_check || false,
-      fechaCompra: orden.fecha_compra || "",
+      fechaCompra: fmtDate(orden.fecha_compra),
       fechaCompraCheck: orden.fecha_compra_check || false,
       cliente: orden.cliente || "",
       direccion: orden.direccion || "",
