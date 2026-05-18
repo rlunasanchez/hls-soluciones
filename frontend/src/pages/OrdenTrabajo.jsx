@@ -785,18 +785,16 @@ function OrdenTrabajo() {
                       value={nuevaOrden.fecha}
                       onChange={(e) => setNuevaOrden({...nuevaOrden, fecha: e.target.value})}
                       required
-                      style={{ width: '100%', padding: '10px 14px', border: '2px solid var(--border)', borderRadius: '8px', fontSize: '0.95rem' }}
                     />
                   </div>
 
                   {/* Garantía Checkbox */}
-                  <div className="of-f">
-                    <label>
+                  <div className="of-f" style={{justifyContent:'center',paddingTop:'16px'}}>
+                    <label className="of-chk">
                       <input
                         type="checkbox"
                         checked={nuevaOrden.esGarantia}
                         onChange={(e) => setNuevaOrden({...nuevaOrden, esGarantia: e.target.checked})}
-                        
                       />
                       Es Garantía
                     </label>
