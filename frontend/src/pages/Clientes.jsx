@@ -688,8 +688,11 @@ function Clientes() {
                       </p>
                     </div>
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <button className="table-btn" style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none' }} onClick={() => abrirModalEquipo(c.id)}>
-                        <Package size={14} /> Agregar Equipo
+                      <button className="table-btn" style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none' }} onClick={() => navigate("/orden-trabajo", { state: { cliente: c } })}>
+                        <ClipboardList size={14} /> Agregar OT
+                      </button>
+                      <button className="table-btn" style={{ background: '#DB2777', color: 'white', border: 'none' }} onClick={() => navigate("/cotizaciones", { state: { cliente: c } })}>
+                        <FileSpreadsheet size={14} /> Cotización
                       </button>
                       <button className="table-btn edit-btn" style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }} onClick={() => editarCliente(c)}>
                         <Edit size={14} /> Editar
@@ -790,8 +793,8 @@ function Clientes() {
                     <div style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)', background: 'var(--bg)', borderRadius: '8px' }}>
                       <Package size={32} style={{ opacity: 0.5 }} />
                       <p style={{ margin: '8px 0 0' }}>Este cliente no tiene equipos asociados</p>
-                      <button className="main-btn" style={{ marginTop: '12px', padding: '8px 16px', fontSize: '0.9rem' }} onClick={() => abrirModalEquipo(c.id)}>
-                        <Package size={16} /> Agregar primer equipo
+                      <button className="main-btn" style={{ marginTop: '12px', padding: '8px 16px', fontSize: '0.9rem' }} onClick={() => navigate("/orden-trabajo", { state: { cliente: c } })}>
+                        <ClipboardList size={16} /> Crear primera OT
                       </button>
                     </div>
                   )}
@@ -847,8 +850,11 @@ function Clientes() {
                     </td>
                     <td data-label="Acciones">
                       <div className="action-buttons">
-                        <button className="table-btn" style={{ background: 'var(--success-light)', color: 'var(--success)' }} onClick={() => abrirModalEquipo(c.id)}>
-                          <Package size={14} /> Agregar
+                        <button className="table-btn" style={{ background: '#6366F1', color: 'white' }} onClick={() => navigate("/orden-trabajo", { state: { cliente: c } })}>
+                          <ClipboardList size={14} /> OT
+                        </button>
+                        <button className="table-btn" style={{ background: '#DB2777', color: 'white' }} onClick={() => navigate("/cotizaciones", { state: { cliente: c } })}>
+                          <FileSpreadsheet size={14} /> Cotización
                         </button>
                         <button className="table-btn edit-btn" onClick={() => editarCliente(c)}>
                           <Edit size={14} /> Editar
@@ -903,8 +909,11 @@ function Clientes() {
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-                  <button className="table-btn" onClick={() => abrirModalEquipo(c.id)} style={{ flex: 1, justifyContent: 'center', background: 'var(--success-light)', color: 'var(--success)', border: 'none', borderRadius: 6, cursor: 'pointer' }}>
-                    <Package size={14} /> Agregar
+                  <button className="table-btn" onClick={() => navigate("/orden-trabajo", { state: { cliente: c } })} style={{ flex: 1, justifyContent: 'center', background: '#6366F1', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer' }}>
+                    <ClipboardList size={14} /> OT
+                  </button>
+                  <button className="table-btn" onClick={() => navigate("/cotizaciones", { state: { cliente: c } })} style={{ flex: 1, justifyContent: 'center', background: '#DB2777', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer' }}>
+                    <FileSpreadsheet size={14} /> Cotización
                   </button>
                   <button className="table-btn edit-btn" onClick={() => editarCliente(c)} style={{ flex: 1, justifyContent: 'center' }}>
                     <Edit size={14} /> Editar

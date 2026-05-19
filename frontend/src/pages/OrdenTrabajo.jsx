@@ -92,6 +92,110 @@ function OrdenTrabajo() {
     fetchOrdenes(1);
   }, []);
 
+  // Recibir cliente u orden desde Clientes
+  useEffect(() => {
+    const init = async () => {
+      const navState = window.history.state?.usr;
+      
+      // Limpiar siempre al inicio
+      setMostrarFormulario(false);
+      setEditingId(null);
+      
+      // Solo procesar si hay datos de cliente u orden
+      if (!navState || (!navState?.cliente && !navState?.orden)) return;
+      
+      const ordenFromNav = navState?.orden;
+      const clienteFromNav = navState?.cliente;
+      
+      if (ordenFromNav) {
+        // Editar orden existente - llamar a editarOrden
+        editarOrden(ordenFromNav);
+      }
+      
+      if (clienteFromNav) {
+        const fechaActual = new Date().toISOString().split("T")[0];
+        const numeroOt = await calcularSiguienteNumeroOrden();
+        setEditingId(null);
+        setClienteSeleccionado(clienteFromNav);
+        setEquipoSeleccionado(null);
+        setBusquedaCliente(clienteFromNav.razon_social || "");
+        setBusquedaSerie("");
+        setBusquedaCodigo("");
+        setInsumos([
+          { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
+          { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
+          { nombre: "" }, { nombre: "" }
+        ]);
+        setInsumosVisibles(2);
+        setErrorNumeroOrden("");
+        setNuevaOrden({
+          numeroOrden: numeroOt,
+          fecha: fechaActual,
+          esGarantia: false,
+          fechaIngreso: "",
+          fechaIngresoCheck: false,
+          fechaTermino: "",
+          fechaTerminoCheck: false,
+          fechaEntrega: "",
+          fechaEntregaCheck: false,
+        fechaCompra: "",
+        fechaCompraCheck: false,
+        cliente: clienteFromNav.razon_social || "",
+        direccion: clienteFromNav.direccion || "",
+        comuna: clienteFromNav.comuna || "",
+        contacto: clienteFromNav.contacto_nombre || "",
+        fonoPrincipal: clienteFromNav.telefono || clienteFromNav.contacto_fono || "",
+        tecnicoAsignado: "",
+        equipo: "",
+        modelo: "",
+        marca: "",
+        serie: "",
+        contadorPagOut: "",
+        nivelTinta: "",
+        averia: ""
+      });
+      setMostrarFormulario(true);
+    }
+    };
+    init();
+  }, []);
+
+  // Función para calcular siguiente número de OT correlativo
+  const calcularSiguienteNumeroOrden = async () => {
+    try {
+      const res = await api.get("/api/ordenes/siguiente-numero");
+      return res.data.numeroOrden;
+    } catch (err) {
+      const year = new Date().getFullYear();
+      return `OT-${year}-0001`;
+    }
+  };
+
+  // Función para abrir formulario de nueva orden con valores automáticos
+  const abrirNuevaOrden = async () => {
+    const fechaActual = new Date().toISOString().split("T")[0];
+    const numeroOt = await calcularSiguienteNumeroOrden();
+    setNuevaOrden(prev => ({
+      ...prev,
+      numeroOrden: numeroOt,
+      fecha: fechaActual
+    }));
+    setEditingId(null);
+    setClienteSeleccionado(null);
+    setEquipoSeleccionado(null);
+    setBusquedaCliente("");
+    setBusquedaSerie("");
+    setBusquedaCodigo("");
+    setInsumos([
+      { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
+      { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
+      { nombre: "" }, { nombre: "" }
+    ]);
+    setInsumosVisibles(2);
+    setErrorNumeroOrden("");
+    setMostrarFormulario(true);
+  };
+
   // Cierra los dropdowns al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -534,7 +638,7 @@ function OrdenTrabajo() {
                     minWidth: '250px'
                   }}
                 />
-                <button onClick={() => setMostrarFormulario(true)} className="main-btn">
+                <button onClick={abrirNuevaOrden} className="main-btn">
                   <Plus size={20} />
                   Nueva Orden
                 </button>
@@ -709,7 +813,15 @@ function OrdenTrabajo() {
             <div className="of-wrap">
               <div className="of-head">
                 <h2><Wrench size={20} /> {editingId ? "Editar Orden" : "Nueva Orden"}</h2>
-                <button type="button" className="of-head-close" onClick={() => { setMostrarFormulario(false); resetFormulario(); setEditingId(null); }}><X size={18} /></button>
+                <button type="button" className="of-head-close" onClick={() => { 
+      const navState = window.history.state?.usr;
+      const vinoDeCliente = navState?.cliente || navState?.orden;
+      setMostrarFormulario(false); 
+      resetFormulario(); 
+      setEditingId(null); 
+      window.history.replaceState({}, document.title); 
+      if (vinoDeCliente) navigate("/clientes");
+    }}><X size={18} /></button>
               </div>
             <form onSubmit={guardarOrden} className="of-form">
               {/* SECCIÓN 1: DATOS DE LA ORDEN */}
@@ -1387,7 +1499,15 @@ function OrdenTrabajo() {
 
               {/* Botones de acción del formulario */}
               <div className="of-sub">
-                <button type="button" className="of-btn-c" onClick={() => { setMostrarFormulario(false); resetFormulario(); setEditingId(null); }}>
+                <button type="button" className="of-btn-c" onClick={() => { 
+      const navState = window.history.state?.usr;
+      const vinoDeCliente = navState?.cliente || navState?.orden;
+      setMostrarFormulario(false); 
+      resetFormulario(); 
+      setEditingId(null); 
+      window.history.replaceState({}, document.title); 
+      if (vinoDeCliente) navigate("/clientes");
+    }}>
                   <X size={16} /> Cancelar
                 </button>
                 <button type="submit" className="of-btn-p">
