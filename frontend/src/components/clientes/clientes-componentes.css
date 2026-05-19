@@ -81,7 +81,7 @@
 
 .btn-nuevo-cliente {
   background: var(--primary);
-  color: white;
+  color: white !important;
   border: none;
   padding: 8px 14px;
   border-radius: 6px;
@@ -91,12 +91,13 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  transition: background 0.2s;
+  transition: all 0.2s;
   white-space: nowrap;
 }
 
 .btn-nuevo-cliente:hover {
-  background: var(--primary-dark);
+  background: #1d4ed8;
+  color: white !important;
 }
 
 .filtro-grupo label {
