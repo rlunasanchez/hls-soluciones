@@ -7,9 +7,10 @@ dotenv.config();
 const router = express.Router();
 
 async function generarCodigo() {
-  const result = await pool.query("SELECT MAX(CAST(SUBSTRING(codigo, 4) AS INTEGER)) AS num FROM equipos WHERE codigo LIKE 'EQ-%'");
-  const maxNum = result.rows[0]?.num || 0;
-  return `EQ-${String(maxNum + 1).padStart(4, "0")}`;
+  const [rows] = await pool.query("SELECT codigo FROM equipos WHERE codigo LIKE 'EQ-%' ORDER BY id DESC LIMIT 1");
+  if (rows.length === 0) return "EQ-0001";
+  const num = parseInt(rows[0].codigo.split("-")[1], 10) || 0;
+  return `EQ-${String(num + 1).padStart(4, "0")}`;
 }
 
 router.get("/next-codigo", async (req, res) => {
@@ -31,12 +32,12 @@ router.get("/", async (req, res) => {
     let params = [];
     if (q && q.trim()) {
       const term = `%${q.trim()}%`;
-      sql += ` WHERE e.codigo ILIKE $1 OR e.serie ILIKE $1 OR e.equipo ILIKE $1 OR e.marca ILIKE $1`;
-      params = [term];
+      sql += ` WHERE LOWER(e.codigo) LIKE LOWER(?) OR LOWER(e.serie) LIKE LOWER(?) OR LOWER(e.equipo) LIKE LOWER(?) OR LOWER(e.marca) LIKE LOWER(?)`;
+      params = [term, term, term, term];
     }
     sql += ` ORDER BY e.id DESC`;
-    const result = await pool.query(sql, params);
-    res.json(result.rows);
+    const [rows] = await pool.query(sql, params);
+    res.json(rows);
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });

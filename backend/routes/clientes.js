@@ -7,12 +7,10 @@ dotenv.config();
 const router = express.Router();
 
 async function generarCodigo() {
-  const result = await pool.query(
-    "SELECT MAX(CAST(SUBSTRING(codigo, 4) AS INTEGER)) AS num FROM clientes WHERE codigo LIKE 'CL-%'"
-  );
-  const maxNum = result.rows[0]?.num || 0;
-  if (maxNum === 0) return "CL-0001";
-  return `CL-${String(maxNum + 1).padStart(4, "0")}`;
+  const [rows] = await pool.query("SELECT codigo FROM clientes WHERE codigo LIKE 'CL-%' ORDER BY id DESC LIMIT 1");
+  if (rows.length === 0) return "CL-0001";
+  const num = parseInt(rows[0].codigo.split("-")[1], 10) || 0;
+  return `CL-${String(num + 1).padStart(4, "0")}`;
 }
 
 router.get("/next-codigo", async (req, res) => {
@@ -27,18 +25,18 @@ router.get("/next-codigo", async (req, res) => {
 
 router.get("/", async (req, res) => {
   try {
-    const result = await pool.query(`
+    const [rows] = await pool.query(`
       SELECT c.*,
-        COALESCE(STRING_AGG(
-          CONCAT(COALESCE(cd.tipo_direccion, ''), '|', COALESCE(cd.direccion, ''), '|', COALESCE(cd.fono, ''), '|', COALESCE(cd.ciudad, ''), '|', COALESCE(cd.comuna, '')),
-          ';;'
+        COALESCE(GROUP_CONCAT(
+          CONCAT(COALESCE(cd.tipo_direccion, ''), '|', COALESCE(cd.direccion, ''), '|', COALESCE(cd.fono, ''), '|', COALESCE(cd.ciudad, ''), '|', COALESCE(cd.comuna, ''))
+          SEPARATOR ';;'
         ), '') as direcciones
       FROM clientes c
       LEFT JOIN clientes_direcciones cd ON c.id = cd.cliente_id
       GROUP BY c.id
       ORDER BY c.id DESC
     `);
-    res.json(result.rows);
+    res.json(rows);
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
