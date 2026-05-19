@@ -35,7 +35,7 @@ function ClienteLista({ clientes, ordenesPorCliente, onEditar, onEliminar }) {
                   <div className="action-buttons">
                     <button
                       className="table-btn"
-                      style={{ background: '#EA580C', color: 'white' }}
+                      style={{ background: '#6366f1', color: 'white' }}
                       onClick={() =>
                         navigate("/orden-trabajo", { state: { cliente: c } })
                       }
@@ -97,7 +97,7 @@ function ClienteLista({ clientes, ordenesPorCliente, onEditar, onEliminar }) {
             <div className="action-buttons">
               <button
                 className="table-btn"
-                style={{ flex: 1, background: '#EA580C', color: 'white' }}
+                style={{ flex: 1, background: '#6366f1', color: 'white' }}
                 onClick={() =>
                   navigate("/orden-trabajo", { state: { cliente: c } })
                 }
