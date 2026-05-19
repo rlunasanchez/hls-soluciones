@@ -471,7 +471,7 @@ if (mostrarFormulario) {
 
       <div className="filters-section">
         <div className="filters-content">
-          <div className="filter-group">
+          <div className="filtro-grupo-equipos">
             <label>Buscar por Serie, Código o Cliente</label>
             <input
               type="text"
@@ -480,11 +480,9 @@ if (mostrarFormulario) {
               onChange={(e) => setBusqueda(e.target.value)}
             />
           </div>
-          <div className="filter-group" style={{ paddingTop: '23px' }}>
-            <button onClick={limpiarFiltros} className="clear-btn">
-              Limpiar
-            </button>
-          </div>
+          <button onClick={limpiarFiltros} className="clear-btn">
+            Limpiar
+          </button>
         </div>
       </div>
 
