@@ -32,9 +32,10 @@ function ClienteLista({ clientes, ordenesPorCliente, onEditar, onEliminar }) {
                 <td>{c.ciudad}</td>
                 <td>{c.contacto_nombre}</td>
                 <td>
-                  <div className="acciones">
+                  <div className="action-buttons">
                     <button
-                      className="btn-ot"
+                      className="table-btn"
+                      style={{ background: '#EA580C', color: 'white' }}
                       onClick={() =>
                         navigate("/orden-trabajo", { state: { cliente: c } })
                       }
@@ -42,7 +43,8 @@ function ClienteLista({ clientes, ordenesPorCliente, onEditar, onEliminar }) {
                       <ClipboardList size={14} /> OT
                     </button>
                     <button
-                      className="btn-cotizacion"
+                      className="table-btn"
+                      style={{ background: '#DB2777', color: 'white' }}
                       onClick={() =>
                         navigate("/cotizaciones", { state: { cliente: c } })
                       }
@@ -50,13 +52,13 @@ function ClienteLista({ clientes, ordenesPorCliente, onEditar, onEliminar }) {
                       <FileSpreadsheet size={14} /> Cotización
                     </button>
                     <button
-                      className="btn-editar"
+                      className="table-btn edit-btn"
                       onClick={() => onEditar(c)}
                     >
                       <Edit size={14} /> Editar
                     </button>
                     <button
-                      className="btn-eliminar"
+                      className="table-btn delete-btn"
                       onClick={() => onEliminar(c.id)}
                     >
                       <Trash2 size={14} /> Eliminar
@@ -92,9 +94,10 @@ function ClienteLista({ clientes, ordenesPorCliente, onEditar, onEliminar }) {
               <span className="label">Contacto</span>
               <span className="value">{c.contacto_nombre}</span>
             </div>
-            <div className="data-card-acciones">
+            <div className="action-buttons">
               <button
-                className="btn-ot"
+                className="table-btn"
+                style={{ flex: 1, background: '#EA580C', color: 'white' }}
                 onClick={() =>
                   navigate("/orden-trabajo", { state: { cliente: c } })
                 }
@@ -102,18 +105,20 @@ function ClienteLista({ clientes, ordenesPorCliente, onEditar, onEliminar }) {
                 <ClipboardList size={14} /> OT
               </button>
               <button
-                className="btn-cotizacion"
+                className="table-btn"
+                style={{ flex: 1, background: '#DB2777', color: 'white' }}
                 onClick={() =>
                   navigate("/cotizaciones", { state: { cliente: c } })
                 }
               >
                 <FileSpreadsheet size={14} /> Cotización
               </button>
-              <button className="btn-editar" onClick={() => onEditar(c)}>
+              <button className="table-btn edit-btn" style={{ flex: 1 }} onClick={() => onEditar(c)}>
                 <Edit size={14} /> Editar
               </button>
               <button
-                className="btn-eliminar"
+                className="table-btn delete-btn"
+                style={{ flex: 1 }}
                 onClick={() => onEliminar(c.id)}
               >
                 <Trash2 size={14} /> Eliminar
