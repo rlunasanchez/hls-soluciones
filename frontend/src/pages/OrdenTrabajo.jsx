@@ -95,51 +95,49 @@ function OrdenTrabajo() {
   // Recibir cliente u orden desde Clientes
   useEffect(() => {
     const init = async () => {
-      // Limpiar al inicio
+      const navState = window.history.state?.usr;
+      
+      // Limpiar siempre al inicio
       setMostrarFormulario(false);
       setEditingId(null);
       
-      // Verificar si viene datos de navegación (solo en navegación real, no al recargar)
-      const navState = window.history.state?.usr;
-      const isNavigation = window.performance.getEntriesByType("navigation")[0]?.type === "navigate";
-      
-      if (!isNavigation) return; // Si es refresh, salir
+      // Solo procesar si hay datos de cliente u orden
+      if (!navState || (!navState?.cliente && !navState?.orden)) return;
       
       const ordenFromNav = navState?.orden;
       const clienteFromNav = navState?.cliente;
       
       if (ordenFromNav) {
-        // Editar orden existente
-        // Llamar a editarOrden con los datos
-        // Por ahora solo mostrar el formulario vacío
+        // Editar orden existente - llamar a editarOrden
+        editarOrden(ordenFromNav);
       }
       
       if (clienteFromNav) {
         const fechaActual = new Date().toISOString().split("T")[0];
         const numeroOt = await calcularSiguienteNumeroOrden();
-      setEditingId(null);
-      setClienteSeleccionado(clienteFromNav);
-      setEquipoSeleccionado(null);
-      setBusquedaCliente(clienteFromNav.razon_social || "");
-      setBusquedaSerie("");
-      setBusquedaCodigo("");
-      setInsumos([
-        { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
-        { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
-        { nombre: "" }, { nombre: "" }
-      ]);
-      setInsumosVisibles(2);
-      setErrorNumeroOrden("");
-      setNuevaOrden({
-        numeroOrden: numeroOt,
-        fecha: fechaActual,
-        esGarantia: false,
-        fechaIngreso: "",
-        fechaIngresoCheck: false,
-        fechaTermino: "",
-        fechaTerminoCheck: false,
-        fechaEntrega: "",
-        fechaEntregaCheck: false,
+        setEditingId(null);
+        setClienteSeleccionado(clienteFromNav);
+        setEquipoSeleccionado(null);
+        setBusquedaCliente(clienteFromNav.razon_social || "");
+        setBusquedaSerie("");
+        setBusquedaCodigo("");
+        setInsumos([
+          { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
+          { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
+          { nombre: "" }, { nombre: "" }
+        ]);
+        setInsumosVisibles(2);
+        setErrorNumeroOrden("");
+        setNuevaOrden({
+          numeroOrden: numeroOt,
+          fecha: fechaActual,
+          esGarantia: false,
+          fechaIngreso: "",
+          fechaIngresoCheck: false,
+          fechaTermino: "",
+          fechaTerminoCheck: false,
+          fechaEntrega: "",
+          fechaEntregaCheck: false,
         fechaCompra: "",
         fechaCompraCheck: false,
         cliente: clienteFromNav.razon_social || "",
@@ -815,7 +813,15 @@ function OrdenTrabajo() {
             <div className="of-wrap">
               <div className="of-head">
                 <h2><Wrench size={20} /> {editingId ? "Editar Orden" : "Nueva Orden"}</h2>
-                <button type="button" className="of-head-close" onClick={() => { setMostrarFormulario(false); resetFormulario(); setEditingId(null); }}><X size={18} /></button>
+                <button type="button" className="of-head-close" onClick={() => { 
+      const navState = window.history.state?.usr;
+      const vinoDeCliente = navState?.cliente || navState?.orden;
+      setMostrarFormulario(false); 
+      resetFormulario(); 
+      setEditingId(null); 
+      window.history.replaceState({}, document.title); 
+      if (vinoDeCliente) navigate("/clientes");
+    }}><X size={18} /></button>
               </div>
             <form onSubmit={guardarOrden} className="of-form">
               {/* SECCIÓN 1: DATOS DE LA ORDEN */}
@@ -1493,7 +1499,15 @@ function OrdenTrabajo() {
 
               {/* Botones de acción del formulario */}
               <div className="of-sub">
-                <button type="button" className="of-btn-c" onClick={() => { setMostrarFormulario(false); resetFormulario(); setEditingId(null); }}>
+                <button type="button" className="of-btn-c" onClick={() => { 
+      const navState = window.history.state?.usr;
+      const vinoDeCliente = navState?.cliente || navState?.orden;
+      setMostrarFormulario(false); 
+      resetFormulario(); 
+      setEditingId(null); 
+      window.history.replaceState({}, document.title); 
+      if (vinoDeCliente) navigate("/clientes");
+    }}>
                   <X size={16} /> Cancelar
                 </button>
                 <button type="submit" className="of-btn-p">
