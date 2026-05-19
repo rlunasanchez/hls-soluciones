@@ -69,8 +69,14 @@
 }
 
 .filtro-grupo {
-  flex: 1;
-  min-width: 160px;
+  flex: 0 0 auto;
+  width: 200px;
+}
+
+@media (max-width: 768px) {
+  .filtro-grupo {
+    width: 100%;
+  }
 }
 
 .btn-nuevo-cliente {
