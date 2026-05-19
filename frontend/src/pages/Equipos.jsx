@@ -480,7 +480,7 @@ if (mostrarFormulario) {
               onChange={(e) => setBusqueda(e.target.value)}
             />
           </div>
-          <button onClick={limpiarFiltros} className="clear-btn">
+          <button onClick={limpiarFiltros} className="btn-nuevo-cliente">
             Limpiar
           </button>
         </div>

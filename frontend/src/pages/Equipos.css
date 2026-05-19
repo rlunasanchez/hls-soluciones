@@ -57,5 +57,5 @@
 .filtro-grupo-equipos label { display: block; margin-bottom: 4px; font-weight: 600; font-size: 0.8rem; color: var(--text-muted); }
 .filtro-grupo-equipos input { width: 100%; padding: 6px 10px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.85rem; }
 .filtro-grupo-equipos input:focus { border-color: var(--primary); outline: none; }
-.clear-btn { padding: 8px 14px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500; }
-.clear-btn:hover { background: #1d4ed8; }
+.btn-nuevo-cliente { padding: 8px 14px; background: var(--primary); color: white !important; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500; display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+.btn-nuevo-cliente:hover { background: #1d4ed8; color: white !important; }
