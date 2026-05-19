@@ -1,11 +1,12 @@
 import { useNavigate } from "react-router-dom";
-import { Home, UserCog, FileText, FileSpreadsheet, ClipboardList, ShoppingCart, LogOut, Users } from "lucide-react";
+import { Home, UserCog, FileText, FileSpreadsheet, ClipboardList, ShoppingCart, Package, LogOut, Users } from "lucide-react";
 
 function HeaderCliente({ usuarioActual, onLogout }) {
   const navigate = useNavigate();
 
   const navItems = [
     { label: "Inicio", path: "/home", icon: Home, bg: "var(--primary)" },
+    { label: "Equipos", path: "/equipos", icon: Package, bg: "var(--success)" },
     { label: "Orden de Trabajo", path: "/orden-trabajo", icon: ClipboardList, bg: "#6366F1" },
     { label: "Informes Técnicos", path: "/informes", icon: FileText, bg: "#EA580C" },
     { label: "Cotizaciones", path: "/cotizaciones", icon: FileSpreadsheet, bg: "#DB2777" },
