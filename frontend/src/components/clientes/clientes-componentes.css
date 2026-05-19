@@ -1,0 +1,479 @@
+/* =========================
+   COMPONENTES - CLIENTES
+   ========================= */
+
+/* HeaderCliente */
+.header-cliente {
+  background: var(--gradient);
+  padding: 20px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header-cliente .header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-cliente h1 {
+  color: white;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.5rem;
+}
+
+.usuario-badge {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+}
+
+.header-cliente .nav-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.nav-btn {
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.2s;
+}
+
+.nav-btn:hover {
+  opacity: 0.9;
+}
+
+.nav-btn-logout {
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* FiltrosCliente */
+.filtros-cliente {
+  background: var(--panel);
+  padding: 20px;
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  box-shadow: var(--shadow);
+}
+
+.filtro-grupo {
+  flex: 1;
+  min-width: 250px;
+}
+
+.filtro-grupo label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filtro-grupo input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+}
+
+.filtro-grupo input:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+
+/* ClienteLista - Tabla */
+.table-wrapper {
+  background: var(--panel);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.table-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-wrapper th {
+  padding: 14px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--border);
+}
+
+.table-wrapper td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.codigo-badge {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+/* Botones de acción */
+.acciones {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.btn-ot,
+.btn-cotizacion,
+.btn-editar,
+.btn-eliminar {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: opacity 0.2s;
+}
+
+.btn-ot {
+  background: #6366f1;
+  color: white;
+}
+
+.btn-cotizacion {
+  background: #db2777;
+  color: white;
+}
+
+.btn-editar {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.btn-eliminar {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+/* ClienteLista - Tarjetas móvil */
+.cards-table {
+  display: none;
+  gap: 12px;
+}
+
+.data-card {
+  background: var(--panel);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+
+.data-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.data-card-header strong {
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.badge-rut {
+  background: var(--primary-light);
+  color: var(--primary);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.data-card-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+
+.data-card-row .label {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.data-card-row .value {
+  font-weight: 500;
+}
+
+.data-card-acciones {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.data-card-acciones button {
+  flex: 1;
+  justify-content: center;
+}
+
+/* ClienteExpandido */
+.cliente-expandido {
+  background: var(--panel);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.cliente-exp-header {
+  background: var(--gradient);
+  padding: 20px 24px;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.cliente-exp-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cliente-exp-header p {
+  margin: 8px 0 0;
+  opacity: 0.9;
+  font-size: 0.9rem;
+}
+
+.cliente-acciones {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-nueva-ot-header,
+.btn-editar-header,
+.btn-eliminar-header {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  color: white;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-nueva-ot-header {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-editar-header {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-eliminar-header {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.cliente-datos {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.dato-item label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dato-item p {
+  margin: 4px 0 0;
+  font-weight: 500;
+}
+
+.dato-item .contacto-email {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* OTs Asociadas */
+.cliente-ots,
+.ots-asociadas {
+  padding: 20px 24px;
+}
+
+.ots-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.ots-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-nueva-ot {
+  background: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ots-tabla-wrapper {
+  overflow-x: auto;
+}
+
+.ots-tabla-wrapper table {
+  width: 100%;
+  font-size: 0.9rem;
+  border-collapse: collapse;
+}
+
+.ots-tabla-wrapper thead tr {
+  background: #eef2ff;
+}
+
+.ots-tabla-wrapper th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #6366f1;
+}
+
+.ots-tabla-wrapper td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.ot-numero {
+  font-weight: 600;
+  color: #6366f1;
+}
+
+.ots-vacio {
+  text-align: center;
+  padding: 24px;
+  color: var(--text-muted);
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.ots-vacio svg {
+  opacity: 0.5;
+}
+
+.ots-vacio p {
+  margin: 8px 0 0;
+}
+
+.btn-crear-primera {
+  margin-top: 12px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header-cliente {
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  .header-cliente h1 {
+    font-size: 1.2rem;
+  }
+
+  .nav-buttons {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .table-wrapper {
+    display: none;
+  }
+
+  .cards-table {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cliente-exp-header {
+    flex-direction: column;
+  }
+
+  .cliente-datos {
+    grid-template-columns: 1fr;
+  }
+
+  .filtros-cliente {
+    flex-direction: column;
+  }
+
+  .filtro-grupo {
+    min-width: 100%;
+  }
+}
