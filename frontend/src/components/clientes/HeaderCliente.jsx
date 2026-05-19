@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Home, UserCog, FileText, FileSpreadsheet, ClipboardList, LogOut, Users } from "lucide-react";
+import { Home, UserCog, FileText, FileSpreadsheet, ClipboardList, ShoppingCart, LogOut, Users } from "lucide-react";
 
 function HeaderCliente({ usuarioActual, onLogout }) {
   const navigate = useNavigate();

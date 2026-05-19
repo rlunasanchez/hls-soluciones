@@ -231,15 +231,6 @@ function Clientes() {
     setSucursales(nuevas);
   };
 
-  const navItems = [
-    { label: "Inicio", icon: Home, path: "/home", color: "var(--primary)" },
-    { label: "Orden de Trabajo", icon: ClipboardList, path: "/orden-trabajo", color: "#6366F1" },
-    { label: "Informes Técnicos", icon: FileText, path: "/informes", color: "#EA580C" },
-    { label: "Cotizaciones", icon: FileSpreadsheet, path: "/cotizaciones", color: "#DB2777" },
-    { label: "Orden de Compra", icon: ShoppingCart, path: "/orden-compra", color: "#8B5CF6" },
-    { label: "Usuarios", icon: UserCog, path: "/usuarios", color: "#0D9488" },
-  ];
-
   /* ════════════════════════════════════════════
      RENDER  –  FORMULARIO
      ════════════════════════════════════════════ */
@@ -493,7 +484,7 @@ function Clientes() {
      ════════════════════════════════════════════ */
   return (
     <div className="container">
-      <HeaderCliente usuario={usuarioActual} navItems={navItems} onLogout={() => { localStorage.removeItem("token"); navigate("/login"); }} />
+      <HeaderCliente usuarioActual={usuarioActual} onLogout={() => { localStorage.removeItem("token"); navigate("/login"); }} />
 
       <FiltrosCliente
         busqueda={busqueda}
