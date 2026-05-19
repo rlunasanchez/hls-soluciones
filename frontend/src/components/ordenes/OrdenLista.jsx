@@ -17,10 +17,6 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, onNue
             onChange={(e) => onFiltroChange(e.target.value)}
             className="filtro-orden-input"
           />
-          <button onClick={onNueva} className="main-btn">
-            <ClipboardList size={20} />
-            Nueva Orden
-          </button>
         </div>
       </div>
 
