@@ -1,0 +1,85 @@
+/* =========================
+   COMPONENTES - ORDENES DE TRABAJO
+   ========================= */
+
+/* HeaderOrdenTrabajo */
+.header-orden {
+  background: var(--gradient);
+  padding: 20px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header-orden .header-left h1 {
+  color: white;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.5rem;
+}
+
+/* Tabla header actions */
+.table-header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filtro-orden-input {
+  padding: 6px 10px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  min-width: 250px;
+}
+
+.filtro-orden-input:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+
+/* Botones específicos de ordenes */
+.btn-informe {
+  background: #EA580C;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: opacity 0.2s;
+}
+
+.btn-informe:hover {
+  opacity: 0.9;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header-orden {
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  .header-orden .header-left h1 {
+    font-size: 1.2rem;
+  }
+
+  .table-header-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .filtro-orden-input {
+    min-width: 100%;
+  }
+}
