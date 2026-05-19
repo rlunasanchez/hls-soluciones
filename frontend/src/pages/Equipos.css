@@ -49,3 +49,12 @@
   .ef-sub { flex-direction: column; }
   .ef-sub button { width: 100%; justify-content: center; }
 }
+
+/* Filtros */
+.filters-content { display: flex; gap: 10px; align-items: flex-end; padding: 12px; background: var(--panel); border-radius: var(--radius); margin-bottom: 16px; }
+.filter-group { flex: 0 0 auto; width: 220px; }
+.filter-group label { display: block; margin-bottom: 4px; font-weight: 600; font-size: 0.8rem; color: var(--text-muted); }
+.filter-group input { width: 100%; padding: 6px 10px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.85rem; }
+.filter-group input:focus { border-color: var(--primary); outline: none; }
+.clear-btn { padding: 6px 12px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; font-size: 0.8rem; color: var(--text); }
+.clear-btn:hover { background: #e2e8f0; }
