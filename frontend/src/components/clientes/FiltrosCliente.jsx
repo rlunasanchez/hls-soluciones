@@ -19,7 +19,7 @@ function FiltrosCliente({ busqueda, onBusquedaChange, filtroRut, onFiltroRutChan
     <div className="filtros-cliente">
       <div className="filtro-grupo">
         <label>
-          <Search size={14} /> Razón Social
+          <Search size={12} /> Razón Social
         </label>
         <input
           type="text"
