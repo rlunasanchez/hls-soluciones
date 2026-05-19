@@ -27,8 +27,15 @@ const loginLimiter = rateLimit({
   message: { msg: "Demasiados intentos de login, intenta en 15 minutos" }
 });
 
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174', 
+  'http://localhost:3000',
+  'https://hls-soluciones.vercel.app'
+];
+
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'],
+  origin: allowedOrigins,
   credentials: true
 }));
 app.use(express.json());
