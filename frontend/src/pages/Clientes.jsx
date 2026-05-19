@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Users, Plus, Save, Trash2, Edit, X, Home, UserCog,
-  FileText, FileSpreadsheet, ClipboardList, ShoppingCart
+  FileText, FileSpreadsheet, ClipboardList, ShoppingCart, Package, LogOut
 } from "lucide-react";
 import api from "../services/api";
 import "./Clientes.css";

@@ -2,7 +2,7 @@
    COMPONENTES - CLIENTES
    ========================= */
 
-/* HeaderCliente */
+/* HeaderCliente - mismo estilo que Equipos */
 .header-cliente {
   background: var(--gradient);
   padding: 20px 32px;
@@ -11,6 +11,8 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
 }
 
 .header-cliente .header-left {
@@ -25,7 +27,6 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 1.5rem;
 }
 
 .usuario-badge {
@@ -39,29 +40,19 @@
 .header-cliente .nav-buttons {
   display: flex;
   gap: 10px;
-  flex-wrap: wrap;
 }
 
-.nav-btn {
-  padding: 8px 16px;
-  border-radius: var(--radius-sm);
+.header-cliente .logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
   border: none;
-  cursor: pointer;
+  border-radius: 8px;
   color: white;
   font-size: 0.85rem;
   font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: opacity 0.2s;
-}
-
-.nav-btn:hover {
-  opacity: 0.9;
-}
-
-.nav-btn-logout {
-  background: rgba(255, 255, 255, 0.2) !important;
+  cursor: pointer;
 }
 
 /* FiltrosCliente */

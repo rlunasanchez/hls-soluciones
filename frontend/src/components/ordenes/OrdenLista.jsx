@@ -67,17 +67,17 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, onNue
                       )}
                     </td>
                     <td data-label="Acciones">
-                      <div className="acciones">
-                        <button className="btn-informe" onClick={() => onInforme(orden)}>
+                      <div className="action-buttons">
+                        <button className="table-btn" style={{ background: '#EA580C', color: 'white' }} onClick={() => onInforme(orden)}>
                           <FileText size={14} /> Informe
                         </button>
-                        <button className="btn-cotizacion" onClick={() => onCotizacion(orden)}>
+                        <button className="table-btn" style={{ background: '#DB2777', color: 'white' }} onClick={() => onCotizacion(orden)}>
                           <FileSpreadsheet size={14} /> Cotización
                         </button>
-                        <button className="btn-editar" onClick={() => onEditar(orden)}>
+                        <button className="table-btn edit-btn" onClick={() => onEditar(orden)}>
                           <Edit size={14} /> Editar
                         </button>
-                        <button className="btn-eliminar" onClick={() => onEliminar(orden.id)}>
+                        <button className="table-btn delete-btn" onClick={() => onEliminar(orden.id)}>
                           <Trash2 size={14} /> Eliminar
                         </button>
                       </div>
@@ -119,17 +119,17 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, onNue
                   <span className="label">Técnico</span>
                   <span className="value">{orden.tecnico_asignado}</span>
                 </div>
-                <div className="data-card-acciones">
-                  <button className="btn-informe" onClick={() => onInforme(orden)}>
+                <div className="action-buttons" style={{ justifyContent: 'center' }}>
+                  <button className="table-btn" style={{ flex: 1, background: '#EA580C', color: 'white' }} onClick={() => onInforme(orden)}>
                     <FileText size={14} /> Informe
                   </button>
-                  <button className="btn-cotizacion" onClick={() => onCotizacion(orden)}>
+                  <button className="table-btn" style={{ flex: 1, background: '#DB2777', color: 'white' }} onClick={() => onCotizacion(orden)}>
                     <FileSpreadsheet size={14} /> Cotización
                   </button>
-                  <button className="btn-editar" onClick={() => onEditar(orden)}>
+                  <button className="table-btn edit-btn" style={{ flex: 1 }} onClick={() => onEditar(orden)}>
                     <Edit size={14} /> Editar
                   </button>
-                  <button className="btn-eliminar" onClick={() => onEliminar(orden.id)}>
+                  <button className="table-btn delete-btn" style={{ flex: 1 }} onClick={() => onEliminar(orden.id)}>
                     <Trash2 size={14} /> Eliminar
                   </button>
                 </div>

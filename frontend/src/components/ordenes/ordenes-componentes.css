@@ -2,7 +2,7 @@
    COMPONENTES - ORDENES DE TRABAJO
    ========================= */
 
-/* HeaderOrdenTrabajo */
+/* HeaderOrdenTrabajo - mismo estilo que Equipos */
 .header-orden {
   background: var(--gradient);
   padding: 20px 32px;
@@ -11,6 +11,14 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.header-orden .header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .header-orden .header-left h1 {
@@ -19,7 +27,24 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 1.5rem;
+}
+
+.header-orden .nav-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.header-orden .logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
 }
 
 /* Tabla header actions */
@@ -43,35 +68,11 @@
   outline: none;
 }
 
-/* Botones específicos de ordenes */
-.btn-informe {
-  background: #EA580C;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  transition: opacity 0.2s;
-}
-
-.btn-informe:hover {
-  opacity: 0.9;
-}
-
 /* Responsive */
 @media (max-width: 768px) {
   .header-orden {
     flex-direction: column;
     padding: 16px;
-  }
-
-  .header-orden .header-left h1 {
-    font-size: 1.2rem;
   }
 
   .table-header-actions {
