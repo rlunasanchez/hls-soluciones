@@ -92,6 +92,112 @@ function OrdenTrabajo() {
     fetchOrdenes(1);
   }, []);
 
+  // Recibir cliente u orden desde Clientes
+  useEffect(() => {
+    const init = async () => {
+      // Limpiar al inicio
+      setMostrarFormulario(false);
+      setEditingId(null);
+      
+      // Verificar si viene datos de navegación (solo en navegación real, no al recargar)
+      const navState = window.history.state?.usr;
+      const isNavigation = window.performance.getEntriesByType("navigation")[0]?.type === "navigate";
+      
+      if (!isNavigation) return; // Si es refresh, salir
+      
+      const ordenFromNav = navState?.orden;
+      const clienteFromNav = navState?.cliente;
+      
+      if (ordenFromNav) {
+        // Editar orden existente
+        // Llamar a editarOrden con los datos
+        // Por ahora solo mostrar el formulario vacío
+      }
+      
+      if (clienteFromNav) {
+        const fechaActual = new Date().toISOString().split("T")[0];
+        const numeroOt = await calcularSiguienteNumeroOrden();
+      setEditingId(null);
+      setClienteSeleccionado(clienteFromNav);
+      setEquipoSeleccionado(null);
+      setBusquedaCliente(clienteFromNav.razon_social || "");
+      setBusquedaSerie("");
+      setBusquedaCodigo("");
+      setInsumos([
+        { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
+        { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
+        { nombre: "" }, { nombre: "" }
+      ]);
+      setInsumosVisibles(2);
+      setErrorNumeroOrden("");
+      setNuevaOrden({
+        numeroOrden: numeroOt,
+        fecha: fechaActual,
+        esGarantia: false,
+        fechaIngreso: "",
+        fechaIngresoCheck: false,
+        fechaTermino: "",
+        fechaTerminoCheck: false,
+        fechaEntrega: "",
+        fechaEntregaCheck: false,
+        fechaCompra: "",
+        fechaCompraCheck: false,
+        cliente: clienteFromNav.razon_social || "",
+        direccion: clienteFromNav.direccion || "",
+        comuna: clienteFromNav.comuna || "",
+        contacto: clienteFromNav.contacto_nombre || "",
+        fonoPrincipal: clienteFromNav.telefono || clienteFromNav.contacto_fono || "",
+        tecnicoAsignado: "",
+        equipo: "",
+        modelo: "",
+        marca: "",
+        serie: "",
+        contadorPagOut: "",
+        nivelTinta: "",
+        averia: ""
+      });
+      setMostrarFormulario(true);
+    }
+    };
+    init();
+  }, []);
+
+  // Función para calcular siguiente número de OT correlativo
+  const calcularSiguienteNumeroOrden = async () => {
+    try {
+      const res = await api.get("/api/ordenes/siguiente-numero");
+      return res.data.numeroOrden;
+    } catch (err) {
+      const year = new Date().getFullYear();
+      return `OT-${year}-0001`;
+    }
+  };
+
+  // Función para abrir formulario de nueva orden con valores automáticos
+  const abrirNuevaOrden = async () => {
+    const fechaActual = new Date().toISOString().split("T")[0];
+    const numeroOt = await calcularSiguienteNumeroOrden();
+    setNuevaOrden(prev => ({
+      ...prev,
+      numeroOrden: numeroOt,
+      fecha: fechaActual
+    }));
+    setEditingId(null);
+    setClienteSeleccionado(null);
+    setEquipoSeleccionado(null);
+    setBusquedaCliente("");
+    setBusquedaSerie("");
+    setBusquedaCodigo("");
+    setInsumos([
+      { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
+      { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
+      { nombre: "" }, { nombre: "" }
+    ]);
+    setInsumosVisibles(2);
+    setErrorNumeroOrden("");
+    setMostrarFormulario(true);
+  };
+
   // Cierra los dropdowns al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -534,7 +640,7 @@ function OrdenTrabajo() {
                     minWidth: '250px'
                   }}
                 />
-                <button onClick={() => setMostrarFormulario(true)} className="main-btn">
+                <button onClick={abrirNuevaOrden} className="main-btn">
                   <Plus size={20} />
                   Nueva Orden
                 </button>

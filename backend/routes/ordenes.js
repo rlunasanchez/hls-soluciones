@@ -52,6 +52,28 @@ router.get("/", authMiddleware, async (req, res) => {
   }
 });
 
+router.get("/siguiente-numero", async (req, res) => {
+  const year = new Date().getFullYear();
+  try {
+    const [rows] = await pool.query(
+      "SELECT numero_orden FROM ordenes_trabajo WHERE numero_orden LIKE ? ORDER BY numero_orden DESC LIMIT 1",
+      [`OT-${year}-%`]
+    );
+    let siguiente = 1;
+    if (rows.length > 0) {
+      const ultimo = rows[0].numero_orden;
+      const partes = ultimo.split("-");
+      if (partes.length === 3) {
+        siguiente = parseInt(partes[2], 10) + 1;
+      }
+    }
+    res.json({ numeroOrden: `OT-${year}-${String(siguiente).padStart(4, "0")}` });
+  } catch (err) {
+    console.error("Error al obtener siguiente número:", err);
+    res.status(500).json({ msg: "Error del servidor" });
+  }
+});
+
 // Verificar si un número de orden ya existe (opcionalmente excluir un ID)
 router.get("/verificar/:numeroOrden", async (req, res) => {
   const { numeroOrden } = req.params;
@@ -154,7 +176,7 @@ router.post("/", authMiddleware, async (req, res) => {
           `INSERT INTO equipos (codigo, cliente_id, equipo, modelo, marca, serie, contador_pag, nivel_tintas,
             insumo1, insumo2, insumo3, insumo4, insumo5, insumo6,
             insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [codigo, finalClienteId, equipo, modelo, marca, serie, contadorPagOut || 0, nivelTinta || null,
             insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null,
             insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null,
@@ -258,7 +280,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
           `INSERT INTO equipos (codigo, cliente_id, equipo, modelo, marca, serie, contador_pag, nivel_tintas,
             insumo1, insumo2, insumo3, insumo4, insumo5, insumo6,
             insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [codigo, finalClienteId, equipo, modelo, marca, serie, contadorPagOut || 0, nivelTinta || null,
             insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null,
             insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null,

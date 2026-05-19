@@ -27,12 +27,12 @@ const loginLimiter = rateLimit({
   message: { msg: "Demasiados intentos de login, intenta en 15 minutos" }
 });
 
-app.use(limiter);
 app.use(cors({
   origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'],
   credentials: true
 }));
 app.use(express.json());
+app.use(limiter);
 
 const frontendPath = path.join(__dirname, "../frontend/dist");
 app.use(express.static(frontendPath));
