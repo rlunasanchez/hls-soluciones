@@ -36,7 +36,7 @@ router.get("/", async (req, res) => {
       FROM clientes c
       LEFT JOIN clientes_direcciones cd ON c.id = cd.cliente_id
       GROUP BY c.id
-      ORDER BY CAST(SUBSTRING(COALESCE(c.codigo, 'CL-0001'), 4) AS INTEGER) DESC
+      ORDER BY c.id DESC
     `);
     res.json(result.rows);
   } catch (err) {
