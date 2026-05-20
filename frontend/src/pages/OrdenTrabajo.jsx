@@ -562,9 +562,16 @@ function OrdenTrabajo() {
         await api.post("/api/ordenes", payload);
       }
       alert(editingId ? "Orden actualizada exitosamente" : "Orden guardada exitosamente");
+      const navState = window.history.state?.usr;
+      const vinoDeCliente = navState?.cliente || navState?.orden;
       setMostrarFormulario(false);
       resetFormulario();
-      fetchOrdenes(1);
+      window.history.replaceState({}, document.title);
+      if (vinoDeCliente) {
+        navigate("/clientes");
+      } else {
+        fetchOrdenes(1);
+      }
     } catch (err) {
       console.error("Error al guardar orden:", err);
       alert("Error al guardar la orden");
