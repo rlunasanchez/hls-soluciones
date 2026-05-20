@@ -141,11 +141,11 @@ function GestionUsuarios() {
 
       {rol === 'admin' && (
         <div className="actions-bar" style={{ marginBottom: '16px', display: 'flex', gap: '10px' }}>
-          <button onClick={() => setMostrarFormulario(true)} className="main-btn">
-            <Plus size={20} /> Nuevo Usuario
+          <button onClick={() => setMostrarFormulario(true)} className="btn-nuevo-cliente">
+            <Plus size={16} /> Nuevo Usuario
           </button>
-          <button onClick={() => setMostrarCambioPassword(true)} className="secondary-btn">
-            <Key size={20} /> Cambiar Password
+          <button onClick={() => setMostrarCambioPassword(true)} className="btn-nuevo-cliente">
+            <Key size={16} /> Cambiar Password
           </button>
         </div>
       )}
