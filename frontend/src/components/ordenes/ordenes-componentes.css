@@ -68,6 +68,21 @@
   outline: none;
 }
 
+.filtro-garantia-select {
+  padding: 6px 10px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  min-width: 140px;
+  background: white;
+  cursor: pointer;
+}
+
+.filtro-garantia-select:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .header-orden {

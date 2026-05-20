@@ -31,6 +31,7 @@ function OrdenTrabajo() {
   });
   const [editingId, setEditingId] = useState(null);
   const [filtroNumeroOrden, setFiltroNumeroOrden] = useState("");
+  const [filtroGarantia, setFiltroGarantia] = useState("todos");
   
   // Estados para autocompletar clientes y equipos
   const [clientes, setClientes] = useState([]);
@@ -619,6 +620,7 @@ function OrdenTrabajo() {
     setEditingId(null);
     setErrorNumeroOrden("");
     setFiltroNumeroOrden("");
+    setFiltroGarantia("todos");
   };
   // Funciones de navegación eliminadas (accesos desde el menú)
 
@@ -642,6 +644,8 @@ function OrdenTrabajo() {
             loading={loading}
             filtroNumeroOrden={filtroNumeroOrden}
             onFiltroChange={setFiltroNumeroOrden}
+            filtroGarantia={filtroGarantia}
+            onFiltroGarantiaChange={setFiltroGarantia}
             onNueva={abrirNuevaOrden}
             pagination={pagination}
             onPageChange={fetchOrdenes}
