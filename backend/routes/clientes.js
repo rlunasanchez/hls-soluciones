@@ -45,16 +45,16 @@ router.get("/", async (req, res) => {
 
 router.post("/", authMiddleware, async (req, res) => {
   const {
-    razon_social, giro, rut, direccion, ciudad, comuna, telefono, email,
+    razon_social, giro, rut, direccion, ciudad, comuna, telefono,
     contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion,
     direcciones
   } = req.body;
   const codigo = await generarCodigo();
   try {
     const [result] = await pool.query(
-      `INSERT INTO clientes (codigo, razon_social, giro, rut, direccion, ciudad, comuna, telefono, email, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [codigo, razon_social, giro, rut, direccion, ciudad, comuna, telefono, email, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion]
+      `INSERT INTO clientes (codigo, razon_social, giro, rut, direccion, ciudad, comuna, telefono, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [codigo, razon_social, giro, rut, direccion, ciudad, comuna, telefono, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion]
     );
     const clienteId = result.insertId;
 
@@ -79,7 +79,7 @@ router.post("/", authMiddleware, async (req, res) => {
 router.put("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
   const {
-    razon_social, giro, rut, direccion, ciudad, comuna, telefono, email,
+    razon_social, giro, rut, direccion, ciudad, comuna, telefono,
     contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion,
     direcciones
   } = req.body;
@@ -92,8 +92,8 @@ router.put("/:id", authMiddleware, async (req, res) => {
     try {
       await connection.beginTransaction();
       await connection.query(
-        `UPDATE clientes SET codigo=?, razon_social=?, giro=?, rut=?, direccion=?, ciudad=?, comuna=?, telefono=?, email=?, contacto_nombre=?, contacto_email=?, contacto_fono=?, contacto_cargo=?, contacto_direccion=? WHERE id=?`,
-        [codigo, razon_social, giro, rut, direccion, ciudad, comuna, telefono, email, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion, id]
+        `UPDATE clientes SET codigo=?, razon_social=?, giro=?, rut=?, direccion=?, ciudad=?, comuna=?, telefono=?, contacto_nombre=?, contacto_email=?, contacto_fono=?, contacto_cargo=?, contacto_direccion=? WHERE id=?`,
+        [codigo, razon_social, giro, rut, direccion, ciudad, comuna, telefono, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion, id]
       );
       await connection.query("DELETE FROM clientes_direcciones WHERE cliente_id = ?", [id]);
       if (direcciones && direcciones.length > 0) {
