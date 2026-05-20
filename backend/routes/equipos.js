@@ -54,7 +54,7 @@ router.post("/", authMiddleware, async (req, res) => {
       `INSERT INTO equipos (codigo, cliente_id, equipo, modelo, marca, serie, contador_pag, nivel_tintas,
         insumo1, insumo2, insumo3, insumo4, insumo5, insumo6,
         insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)`,
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)`,
       [codigo, cliente_id || null, equipo, modelo, marca, serie || null, contador_pag || 0, nivel_tintas || null,
         insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null,
         insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null,
