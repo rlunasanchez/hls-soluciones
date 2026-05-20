@@ -1,3 +1,5 @@
+import { RotateCcw } from "lucide-react";
+
 function FiltrosEquipo({ busqueda, onBusquedaChange, onLimpiar }) {
   return (
     <div className="filters-section">
@@ -12,7 +14,7 @@ function FiltrosEquipo({ busqueda, onBusquedaChange, onLimpiar }) {
           />
         </div>
         <button onClick={onLimpiar} className="btn-nuevo-cliente">
-          Limpiar
+          <RotateCcw size={16} /> Limpiar
         </button>
       </div>
     </div>
