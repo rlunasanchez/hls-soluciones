@@ -165,6 +165,22 @@ router.put("/:id", authMiddleware, async (req, res) => {
     await connection.query(`UPDATE ordenes_trabajo SET numero_orden = ?, fecha = ?, es_garantia = ?, fecha_ingreso = ?, fecha_ingreso_check = ?, fecha_termino = ?, fecha_termino_check = ?, fecha_entrega = ?, fecha_entrega_check = ?, fecha_compra = ?, fecha_compra_check = ?, cliente = ?, direccion = ?, comuna = ?, contacto = ?, fono_principal = ?, tecnico_asignado = ?, equipo = ?, modelo = ?, marca = ?, serie = ?, contador_pag_out = ?, nivel_tinta = ?, insumo1 = ?, insumo2 = ?, insumo3 = ?, insumo4 = ?, insumo5 = ?, insumo6 = ?, insumo7 = ?, insumo8 = ?, insumo9 = ?, insumo10 = ?, insumo11 = ?, insumo12 = ?, averia = ?, cliente_id = ?, equipo_id = ? WHERE id = ?`,
       [numeroOrden, toDateMySQL(fecha), esGarantia || false, toDateMySQL(fechaIngreso), fechaIngresoCheck || false, toDateMySQL(fechaTermino), fechaTerminoCheck || false, toDateMySQL(fechaEntrega), fechaEntregaCheck || false, toDateMySQL(fechaCompra), fechaCompraCheck || false, cliente, direccion || null, comuna || null, contacto || null, fonoPrincipal || null, tecnicoAsignado, equipo, modelo, marca, serie || null, contadorPagOut || null, nivelTinta || null, insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null, insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null, insumo9 || null, insumo10 || null, insumo11 || null, insumo12 || null, averia || null, finalClienteId, finalEquipoId, id]);
 
+    // Al editar desde OT, actualizar también el registro maestro del equipo
+    if (finalEquipoId) {
+      await connection.query(
+        `UPDATE equipos SET equipo = ?, modelo = ?, marca = ?, serie = ?,
+          contador_pag = ?, nivel_tintas = ?,
+          insumo1 = ?, insumo2 = ?, insumo3 = ?, insumo4 = ?, insumo5 = ?, insumo6 = ?,
+          insumo7 = ?, insumo8 = ?, insumo9 = ?, insumo10 = ?, insumo11 = ?, insumo12 = ?,
+          averia = ? WHERE id = ?`,
+        [equipo, modelo, marca, serie || null, contadorPagOut || 0, nivelTinta || null,
+          insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null,
+          insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null,
+          insumo9 || null, insumo10 || null, insumo11 || null, insumo12 || null, averia || null,
+          finalEquipoId]
+      );
+    }
+
     await connection.commit();
     res.json({ msg: "Orden actualizada" });
   } catch (err) {
