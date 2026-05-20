@@ -491,8 +491,13 @@ function Clientes() {
         onBusquedaChange={setBusqueda}
         filtroRut={filtroRut}
         onFiltroRutChange={setFiltroRut}
-        onNuevo={() => { setMostrarFormulario(true); setSucursalesVisibles(1); setRutError(""); setNuevoCliente({ codigo: "", razon_social: "", giro: "", rut: "", direccion: "", ciudad: "", comuna: "", telefono: "", email: "", contacto_nombre: "", contacto_email: "", contacto_fono: "", contacto_cargo: "", contacto_direccion: "", direcciones: [] }); }}
       />
+
+      <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 16 }}>
+        <button className="btn-nuevo-cliente" onClick={() => { setMostrarFormulario(true); setSucursalesVisibles(1); setRutError(""); setNuevoCliente({ codigo: "", razon_social: "", giro: "", rut: "", direccion: "", ciudad: "", comuna: "", telefono: "", email: "", contacto_nombre: "", contacto_email: "", contacto_fono: "", contacto_cargo: "", contacto_direccion: "", direcciones: [] }); }}>
+          <Plus size={16} /> Nuevo Cliente
+        </button>
+      </div>
 
       {/* Vista expandida con OTs (búsqueda activa) */}
       {(busqueda || filtroRut) && clientesPagina.length > 0 && (

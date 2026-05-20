@@ -1,16 +1,19 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
+import {
   Home, Users, Package, FileText, FileSpreadsheet, ShoppingCart, UserCog, LogOut,
-  ClipboardList, Plus, Save, X, Wrench,
-  Calendar, Phone, MapPin, User, AlertCircle, CheckSquare,
-  Search, ChevronDown, Trash2, Edit
+  ClipboardList, Save, X, Wrench
 } from "lucide-react";
 import api from "../services/api";
 import './OrdenTrabajo.css';
 import "../components/ordenes/ordenes-componentes.css";
 import HeaderOrdenTrabajo from "../components/ordenes/HeaderOrdenTrabajo";
 import OrdenLista from "../components/ordenes/OrdenLista";
+import OrdenFormDatos from "../components/ordenes/OrdenFormDatos";
+import OrdenFormCliente from "../components/ordenes/OrdenFormCliente";
+import OrdenFormEquipo from "../components/ordenes/OrdenFormEquipo";
+import OrdenFormInsumos from "../components/ordenes/OrdenFormInsumos";
+import OrdenFormAveria from "../components/ordenes/OrdenFormAveria";
 
 function OrdenTrabajo() {
   const navigate = useNavigate();
@@ -484,12 +487,6 @@ function OrdenTrabajo() {
     navigate("/login");
   };
 
-  const actualizarInsumo = (idx, valor) => {
-    const nuevos = [...insumos];
-    nuevos[idx].nombre = valor;
-    setInsumos(nuevos);
-  };
-
   const guardarOrden = async (e) => {
     e.preventDefault();
     
@@ -625,678 +622,57 @@ function OrdenTrabajo() {
     }}><X size={18} /></button>
               </div>
             <form onSubmit={guardarOrden} className="of-form">
-              {/* SECCIÓN 1: DATOS DE LA ORDEN */}
-              <div className="of-sec primary">
-                <div className="of-st primary">Datos de la Orden</div>
-                
-                <div className="of-grid">
-                  {/* Número de Orden */}
-                  <div className="of-f">
-                    <label>
-                      Número de Orden *
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Ej: OT-2024-001"
-                      value={nuevaOrden.numeroOrden}
-                      onChange={(e) => {
-                        setNuevaOrden({...nuevaOrden, numeroOrden: e.target.value});
-                        verificarNumeroOrden(e.target.value);
-                      }}
-                      required
-                      
-                    />
-                    {errorNumeroOrden && (
-                      <span style={{ color: 'var(--danger)', fontSize: '0.85rem', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <AlertCircle size={14} /> {errorNumeroOrden}
-                      </span>
-                    )}
-                  </div>
+              <OrdenFormDatos
+                nuevaOrden={nuevaOrden}
+                setNuevaOrden={setNuevaOrden}
+                errorNumeroOrden={errorNumeroOrden}
+                verificarNumeroOrden={verificarNumeroOrden}
+              />
 
-                  {/* Fecha */}
-                  <div className="of-f">
-                    <label>
-                      Fecha *
-                    </label>
-                    <input
-                      type="date"
-                      value={nuevaOrden.fecha}
-                      onChange={(e) => setNuevaOrden({...nuevaOrden, fecha: e.target.value})}
-                      required
-                    />
-                  </div>
+              <OrdenFormCliente
+                busquedaCliente={busquedaCliente}
+                setBusquedaCliente={setBusquedaCliente}
+                mostrarDropdownClientes={mostrarDropdownClientes}
+                setMostrarDropdownClientes={setMostrarDropdownClientes}
+                clienteSeleccionado={clienteSeleccionado}
+                clientesFiltrados={clientesFiltrados}
+                clienteDropdownRef={clienteDropdownRef}
+                seleccionarCliente={seleccionarCliente}
+                nuevaOrden={nuevaOrden}
+                setNuevaOrden={setNuevaOrden}
+              />
 
-                  {/* Garantía Checkbox */}
-                  <div className="of-f" style={{justifyContent:'center'}}>
-                    <label className="of-chk">
-                      <input
-                        type="checkbox"
-                        checked={nuevaOrden.esGarantia}
-                        onChange={(e) => setNuevaOrden({...nuevaOrden, esGarantia: e.target.checked})}
-                      />
-                      Es Garantía
-                    </label>
-                  </div>
-                </div>
+              <OrdenFormEquipo
+                busquedaCodigo={busquedaCodigo}
+                setBusquedaCodigo={setBusquedaCodigo}
+                mostrarDropdownCodigo={mostrarDropdownCodigo}
+                setMostrarDropdownCodigo={setMostrarDropdownCodigo}
+                equiposCodigoFiltrados={equiposCodigoFiltrados}
+                equipoCodigoDropdownRef={equipoCodigoDropdownRef}
+                seleccionarEquipoPorCodigo={seleccionarEquipoPorCodigo}
+                busquedaSerie={busquedaSerie}
+                setBusquedaSerie={setBusquedaSerie}
+                mostrarDropdownEquipos={mostrarDropdownEquipos}
+                setMostrarDropdownEquipos={setMostrarDropdownEquipos}
+                equiposFiltrados={equiposFiltrados}
+                equipoDropdownRef={equipoDropdownRef}
+                seleccionarEquipo={seleccionarEquipo}
+                equipoSeleccionado={equipoSeleccionado}
+                nuevaOrden={nuevaOrden}
+                setNuevaOrden={setNuevaOrden}
+              >
+                <OrdenFormInsumos
+                  insumos={insumos}
+                  insumosVisibles={insumosVisibles}
+                  setInsumosVisibles={setInsumosVisibles}
+                  setInsumos={setInsumos}
+                />
+              </OrdenFormEquipo>
 
-                {/* Fechas con Checkboxes */}
-                <div className="of-dates">
-                  <div className="of-date">
-                    <input type="checkbox" checked={nuevaOrden.fechaIngresoCheck} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaIngresoCheck: e.target.checked})} />
-                    <span style={{fontSize:'.75rem',fontWeight:600}}>Ingreso</span>
-                    {nuevaOrden.fechaIngresoCheck && <div className="of-date-f"><input type="date" value={nuevaOrden.fechaIngreso} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaIngreso: e.target.value})} /></div>}
-                  </div>
-                  <div className="of-date">
-                    <input type="checkbox" checked={nuevaOrden.fechaTerminoCheck} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaTerminoCheck: e.target.checked})} />
-                    <span style={{fontSize:'.75rem',fontWeight:600}}>Término</span>
-                    {nuevaOrden.fechaTerminoCheck && <div className="of-date-f"><input type="date" value={nuevaOrden.fechaTermino} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaTermino: e.target.value})} /></div>}
-                  </div>
-                  <div className="of-date">
-                    <input type="checkbox" checked={nuevaOrden.fechaEntregaCheck} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaEntregaCheck: e.target.checked})} />
-                    <span style={{fontSize:'.75rem',fontWeight:600}}>Entrega</span>
-                    {nuevaOrden.fechaEntregaCheck && <div className="of-date-f"><input type="date" value={nuevaOrden.fechaEntrega} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaEntrega: e.target.value})} /></div>}
-                  </div>
-                  <div className="of-date">
-                    <input type="checkbox" checked={nuevaOrden.fechaCompraCheck} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaCompraCheck: e.target.checked})} />
-                    <span style={{fontSize:'.75rem',fontWeight:600}}>Compra</span>
-                    {nuevaOrden.fechaCompraCheck && <div className="of-date-f"><input type="date" value={nuevaOrden.fechaCompra} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaCompra: e.target.value})} /></div>}
-                  </div>
-                </div>
-              </div>
-
-{/* SECCIÓN 2: DATOS DEL CLIENTE */}
-              <div className="of-sec success">
-                <div className="of-st success">Datos del Cliente</div>
-                
-                {/* Buscador de Cliente */}
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)' }}>
-                    <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
-                    Buscar y Seleccionar Cliente
-                  </label>
-                  <div ref={clienteDropdownRef} style={{ position: 'relative' }}>
-                    <input
-                      type="text"
-                      placeholder="Escriba para buscar cliente por nombre o RUT..."
-                      value={busquedaCliente}
-                      onChange={(e) => {
-                        setBusquedaCliente(e.target.value);
-                        setMostrarDropdownClientes(e.target.value.length >= 2);
-                      }}
-                      onFocus={() => {
-                        if (busquedaCliente.length >= 2) setMostrarDropdownClientes(true);
-                      }}
-                      style={{
-                        width: '100%',
-                        padding: '6px 10px',
-                        border: '2px solid var(--primary)',
-                        borderRadius: '6px',
-                        fontSize: '.82rem',
-                        background: clienteSeleccionado ? '#E0F2FE' : 'white'
-                      }}
-                    />
-                    {clienteSeleccionado && (
-                      <span style={{
-                        position: 'absolute',
-                        right: '40px',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        background: 'var(--success)',
-                        color: 'white',
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        fontSize: '0.75rem'
-                      }}>
-                        ✓ Seleccionado
-                      </span>
-                    )}
-                    <ChevronDown 
-                      size={20} 
-                      style={{
-                        position: 'absolute',
-                        right: '12px',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        color: 'var(--text-muted)'
-                      }}
-                    />
-                    
-                    {/* Dropdown de Clientes */}
-                    {mostrarDropdownClientes && busquedaCliente.length >= 2 && (
-                      <div style={{
-                        position: 'absolute',
-                        top: '100%',
-                        left: 0,
-                        right: 0,
-                        background: 'white',
-                        border: '2px solid var(--border)',
-                        borderTop: 'none',
-                        borderRadius: '0 0 8px 8px',
-                        maxHeight: '250px',
-                        overflow: 'auto',
-                        zIndex: 1000,
-                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                      }}>
-                        {clientesFiltrados.length > 0 ? (
-                          clientesFiltrados.map((cliente) => (
-                            <div
-                              key={cliente.id}
-                              onClick={() => seleccionarCliente(cliente)}
-                              style={{
-                                padding: '6px 10px',
-                                cursor: 'pointer',
-                                borderBottom: '1px solid var(--border)',
-                                transition: 'background 0.2s'
-                              }}
-                              onMouseEnter={(e) => e.currentTarget.style.background = 'var(--primary-light)'}
-                              onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
-                            >
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' }}>
-                                  {cliente.codigo || 'CL-XXXX'}
-                                </span>
-                                <span style={{ fontWeight: '600', color: 'var(--text)' }}>
-                                  {cliente.razon_social}
-                                </span>
-                              </div>
-                              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                                RUT: {cliente.rut || 'N/A'} | {cliente.direccion || ''}, {cliente.comuna || ''}
-                              </div>
-                            </div>
-                          ))
-                        ) : (
-                          <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                            No se encontraron clientes con "{busquedaCliente}"
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                
-                <div style={{
-                  display: 'grid', 
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-                  gap: '20px',
-                  marginBottom: '20px'
-                }}>
-                  <div className="of-f">
-                    <label>
-                      Cliente *
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Nombre del cliente"
-                      value={nuevaOrden.cliente}
-                      onChange={(e) => setNuevaOrden({...nuevaOrden, cliente: e.target.value})}
-                      required
-                      style={{
-                        width: '100%',
-                        padding: '6px 10px',
-                        border: '2px solid var(--border)',
-                        borderRadius: '6px',
-                        fontSize: '.82rem'
-                      }}
-                    />
-                  </div>
-
-                  <div className="of-f">
-                    <label>
-                      Dirección
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Dirección del cliente"
-                      value={nuevaOrden.direccion}
-                      onChange={(e) => setNuevaOrden({...nuevaOrden, direccion: e.target.value})}
-                      style={{
-                        width: '100%',
-                        padding: '6px 10px',
-                        border: '2px solid var(--border)',
-                        borderRadius: '6px',
-                        fontSize: '.82rem'
-                      }}
-                    />
-                  </div>
-
-                  <div className="of-f">
-                    <label>
-                      Comuna
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Comuna"
-                      value={nuevaOrden.comuna}
-                      onChange={(e) => setNuevaOrden({...nuevaOrden, comuna: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')})}
-                      style={{
-                        width: '100%',
-                        padding: '6px 10px',
-                        border: '2px solid var(--border)',
-                        borderRadius: '6px',
-                        fontSize: '.82rem'
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-                  gap: '20px'
-                }}>
-                  <div className="of-f">
-                    <label>
-                      Contacto
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Nombre del contacto"
-                      value={nuevaOrden.contacto}
-                      onChange={(e) => setNuevaOrden({...nuevaOrden, contacto: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')})}
-                      style={{
-                        width: '100%',
-                        padding: '6px 10px',
-                        border: '2px solid var(--border)',
-                        borderRadius: '6px',
-                        fontSize: '.82rem'
-                      }}
-                    />
-                  </div>
-
-                  <div className="of-f">
-                    <label>
-                      Fono Principal
-                    </label>
-                    <input
-                      type="tel"
-                      placeholder="Teléfono de contacto"
-                      value={nuevaOrden.fonoPrincipal}
-                      onChange={(e) => setNuevaOrden({...nuevaOrden, fonoPrincipal: e.target.value.replace(/[^0-9+]/g, '')})}
-                      style={{
-                        width: '100%',
-                        padding: '6px 10px',
-                        border: '2px solid var(--border)',
-                        borderRadius: '6px',
-                        fontSize: '.82rem'
-                      }}
-                    />
-                  </div>
-
-                  <div className="of-f">
-                    <label>
-                      Técnico Asignado *
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Nombre y apellido del técnico"
-                      value={nuevaOrden.tecnicoAsignado}
-                      onChange={(e) => setNuevaOrden({...nuevaOrden, tecnicoAsignado: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')})}
-                      required
-                      style={{
-                        width: '100%',
-                        padding: '6px 10px',
-                        border: '2px solid var(--border)',
-                        borderRadius: '6px',
-                        fontSize: '.82rem'
-                      }}
-                    />
-                  </div>
-                </div>
-
-              </div>
-
-              {/* SECCIÓN 3: DATOS DEL EQUIPO */}
-              <div className="of-sec muted">
-                <div className="of-st muted">Datos del Equipo</div>
-                
-                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px',marginBottom:'8px'}}>
-                  {/* Buscador por Código de Equipo */}
-                  <div>
-                    <div ref={equipoCodigoDropdownRef} style={{ position: 'relative' }}>
-                      <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)' }}>
-                        <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
-                        Buscar por código (EQ-XXX)
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Ej: EQ-0001"
-                        value={busquedaCodigo}
-                        onChange={(e) => {
-                          const val = e.target.value.toUpperCase();
-                          setBusquedaCodigo(val);
-                          setMostrarDropdownCodigo(val.length >= 6);
-                        }}
-                        onFocus={() => {
-                          if (busquedaCodigo.length >= 6) setMostrarDropdownCodigo(true);
-                        }}
-                        style={{
-                          width: '100%',
-                          padding: '6px 10px',
-                          border: '2px solid var(--info)',
-                          borderRadius: '6px',
-                          fontSize: '.82rem',
-                          background: equipoSeleccionado?.codigo === busquedaCodigo ? '#DCFCE7' : 'white'
-                        }}
-                      />
-                      
-                      {/* Dropdown de Equipos por Código */}
-                      {mostrarDropdownCodigo && busquedaCodigo.length >= 6 && (
-                        <div style={{
-                          position: 'absolute',
-                          top: '100%',
-                          left: 0,
-                          right: 0,
-                          background: 'white',
-                          border: '2px solid var(--border)',
-                          borderTop: 'none',
-                          borderRadius: '0 0 8px 8px',
-                          maxHeight: '250px',
-                          overflow: 'auto',
-                          zIndex: 1000,
-                          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                        }}>
-                          {equiposCodigoFiltrados.length > 0 ? (
-                            equiposCodigoFiltrados.map((equipo) => (
-                              <div
-                                key={equipo.id}
-                                onClick={() => {
-                                  seleccionarEquipoPorCodigo(equipo.codigo);
-                                  setMostrarDropdownCodigo(false);
-                                }}
-                                style={{
-                                  padding: '6px 10px',
-                                  cursor: 'pointer',
-                                  borderBottom: '1px solid var(--border)',
-                                  transition: 'background 0.2s'
-                                }}
-                                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--primary-light)'}
-                                onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
-                              >
-                                <div style={{ fontWeight: '600', color: 'var(--text)' }}>
-                                  {equipo.codigo} - {equipo.equipo} {equipo.marca} {equipo.modelo}
-                                </div>
-                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                                  Serie: {equipo.serie || 'N/A'} | Cliente: {equipo.cliente_nombre || 'N/A'}
-                                </div>
-                              </div>
-                            ))
-                          ) : (
-                            <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                              No se encontraron equipos con código "{busquedaCodigo}"
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Buscador de Equipo - Solo por Serie */}
-                 <div>
-                   <div ref={equipoDropdownRef} style={{ position: 'relative' }}>
-                     <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)' }}>
-                       <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
-                       Buscar Equipo por Serie
-                     </label>
-                      <input
-                        type="text"
-                        placeholder="Ingrese número de serie..."
-                        value={busquedaSerie}
-                        onChange={(e) => {
-                          setBusquedaSerie(e.target.value);
-                          setMostrarDropdownEquipos(e.target.value.length >= 2);
-                        }}
-                        onFocus={() => {
-                          if (busquedaSerie.length >= 2) setMostrarDropdownEquipos(true);
-                        }}
-                        style={{
-                          width: '100%',
-                          padding: '6px 10px',
-                          border: '2px solid var(--success)',
-                          borderRadius: '6px',
-                          fontSize: '.82rem',
-                          background: equipoSeleccionado ? '#DCFCE7' : 'white'
-                        }}
-                      />
-                    
-                      {/* Dropdown de Equipos */}
-                      {mostrarDropdownEquipos && busquedaSerie.length >= 2 && (
-                        <div style={{
-                          position: 'absolute',
-                          top: '100%',
-                          left: 0,
-                          right: 0,
-                          background: 'white',
-                          border: '2px solid var(--border)',
-                          borderTop: 'none',
-                          borderRadius: '0 0 8px 8px',
-                          maxHeight: '250px',
-                          overflow: 'auto',
-                          zIndex: 1000,
-                          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                        }}>
-                          {equiposFiltrados.length > 0 ? (
-                            equiposFiltrados.map((equipo) => (
-                              <div
-                                key={equipo.id}
-                                onClick={() => seleccionarEquipo(equipo)}
-                                style={{
-                                  padding: '6px 10px',
-                                  cursor: 'pointer',
-                                  borderBottom: '1px solid var(--border)',
-                                  transition: 'background 0.2s'
-                                }}
-                                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--success-light)'}
-                                onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
-                              >
-                                <div style={{ fontWeight: '600', color: 'var(--text)' }}>
-                                  {equipo.equipo} {equipo.marca} {equipo.modelo}
-                                </div>
-                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                                  Serie: {equipo.serie || 'N/A'} | Código: {equipo.codigo || 'N/A'}
-                                </div>
-                              </div>
-                            ))
-                          ) : (
-                            <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                              No se encontraron equipos con serie "{busquedaSerie}"
-                            </div>
-                          )}
-                        </div>
-                      )}
-                   </div>
-                   
-                   {equipoSeleccionado && (
-                     <div style={{
-                       background: 'var(--success-light)',
-                       padding: '8px 16px',
-                       borderRadius: '6px',
-                       fontSize: '0.9rem',
-                       color: 'var(--success)',
-                       display: 'flex',
-                       alignItems: 'center',
-                       gap: '8px',
-                       marginTop: '8px'
-                     }}>
-                       ✓ Seleccionado: {equipoSeleccionado.equipo} - {equipoSeleccionado.marca} {equipoSeleccionado.modelo}
-                     </div>
-                   )}
-                  </div>
-                </div>
-                  
-                   <div style={{ 
-                     display: 'grid', 
-                     gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', 
-                     gap: '20px',
-                     marginBottom: '20px'
-                   }}>
-                   <div className="of-f">
-                    <label>
-                       Equipo *
-                     </label>
-                    <input
-                      type="text"
-                      placeholder="Tipo de equipo"
-                      value={nuevaOrden.equipo}
-                      onChange={(e) => setNuevaOrden({...nuevaOrden, equipo: e.target.value})}
-                      required
-                      style={{
-                        width: '100%',
-                        padding: '6px 10px',
-                        border: '2px solid var(--border)',
-                        borderRadius: '6px',
-                        fontSize: '.82rem'
-                      }}
-                    />
-                  </div>
-
-                  <div className="of-f">
-                    <label>
-                      Marca *
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Marca del equipo"
-                      value={nuevaOrden.marca}
-                      onChange={(e) => setNuevaOrden({...nuevaOrden, marca: e.target.value})}
-                      required
-                      style={{
-                        width: '100%',
-                        padding: '6px 10px',
-                        border: '2px solid var(--border)',
-                        borderRadius: '6px',
-                        fontSize: '.82rem'
-                      }}
-                    />
-                  </div>
-
-                  <div className="of-f">
-                    <label>
-                      Modelo *
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Modelo del equipo"
-                      value={nuevaOrden.modelo}
-                      onChange={(e) => setNuevaOrden({...nuevaOrden, modelo: e.target.value})}
-                      required
-                      style={{
-                        width: '100%',
-                        padding: '6px 10px',
-                        border: '2px solid var(--border)',
-                        borderRadius: '6px',
-                        fontSize: '.82rem'
-                      }}
-                    />
-                  </div>
-
-                  <div className="of-f">
-                    <label>
-                      Serie
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Número de serie"
-                      value={nuevaOrden.serie}
-                      onChange={(e) => setNuevaOrden({...nuevaOrden, serie: e.target.value})}
-                      style={{
-                        width: '100%',
-                        padding: '6px 10px',
-                        border: '2px solid var(--border)',
-                        borderRadius: '6px',
-                        fontSize: '.82rem'
-                      }}
-                    />
-                  </div>
-                 </div>
-
-                 {/* CAMPOS ADICIONALES COMENTADOS - Descomentar para restaurar
-                 <div style={{ 
-                   display: 'grid', 
-                   gridTemplateColumns: 'repeat(4, 1fr)', 
-                   gap: '20px',
-                   marginBottom: '20px'
-                 }}>
-                   <div className="of-f">
-                    <label>
-                       Contador Páginas OUT
-                     </label>
-                     <input
-                       type="text"
-                       placeholder="Contador"
-                       value={nuevaOrden.contadorPagOut}
-                       onChange={(e) => setNuevaOrden({...nuevaOrden, contadorPagOut: e.target.value})}
-                       style={{
-                         width: '100%',
-                         padding: '6px 10px',
-                         border: '2px solid var(--border)',
-                         borderRadius: '6px',
-                         fontSize: '.82rem'
-                       }}
-                     />
-                   </div>
-
-                   <div className="of-f">
-                    <label>
-                       Nivel Tinta
-                     </label>
-                     <input
-                       type="text"
-                       placeholder="Nivel de tinta"
-                       value={nuevaOrden.nivelTinta}
-                       onChange={(e) => setNuevaOrden({...nuevaOrden, nivelTinta: e.target.value})}
-                       style={{
-                         width: '100%',
-                         padding: '6px 10px',
-                         border: '2px solid var(--border)',
-                         borderRadius: '6px',
-                         fontSize: '.82rem'
-                       }}
-                     />
-                   </div>
-                 </div>
-                 */}
-
-                {/* Insumos Dinámicos */}
-                <div className="of-sec" style={{background:'white'}}>
-                  <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'6px'}}>
-                    <span className="of-st muted">Insumos</span>
-                    {insumosVisibles < 12 && (
-                      <button type="button" className="of-btn-a" onClick={() => setInsumosVisibles(insumosVisibles + 1)}>
-                        <Plus size={14} /> Agregar
-                      </button>
-                    )}
-                  </div>
-                  <div className="of-ins">
-                    {insumos.slice(0, insumosVisibles).map((ins, idx) => (
-                      <div key={idx} className="of-ins-item">
-                        <div>
-                          <label>Insumo {idx + 1}</label>
-                          <input type="text" placeholder={`Insumo ${idx + 1}`} value={ins.nombre} onChange={(e) => actualizarInsumo(idx, e.target.value)} />
-                        </div>
-                        <button type="button" className="of-ins-del" onClick={() => {
-                          const nuevas = insumos.filter((_, i) => i !== idx);
-                          while (nuevas.length < 12) nuevas.push({ nombre: "" });
-                          setInsumos(nuevas);
-                          setInsumosVisibles(Math.max(2, insumosVisibles - 1));
-                        }}><Trash2 size={14} /></button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* SECCIÓN 4: AVERÍA/FALLA/INCIDENCIA */}
-              <div className="of-sec muted">
-                <div className="of-st muted">Avería/Falla/Incidencia</div>
-                <div className="of-f">
-                  <textarea
-                    placeholder="Describa la avería, falla o incidencia del equipo..."
-                    value={nuevaOrden.averia}
-                    onChange={(e) => setNuevaOrden({...nuevaOrden, averia: e.target.value})}
-                    rows={3}
-                  />
-                </div>
-              </div>
+              <OrdenFormAveria
+                nuevaOrden={nuevaOrden}
+                setNuevaOrden={setNuevaOrden}
+              />
 
               {/* Botones de acción del formulario */}
               <div className="of-sub">

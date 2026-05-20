@@ -1,6 +1,6 @@
-import { Search, Plus } from "lucide-react";
+import { Search } from "lucide-react";
 
-function FiltrosCliente({ busqueda, onBusquedaChange, filtroRut, onFiltroRutChange, onNuevo }) {
+function FiltrosCliente({ busqueda, onBusquedaChange, filtroRut, onFiltroRutChange }) {
   const formatearRut = (val) => {
     let v = val.toUpperCase().replace(/[^0-9K-]/g, "");
     if (v.length > 12) v = v.slice(0, 12);
@@ -37,11 +37,6 @@ function FiltrosCliente({ busqueda, onBusquedaChange, filtroRut, onFiltroRutChan
           onChange={(e) => onFiltroRutChange(formatearRut(e.target.value))}
         />
       </div>
-      {onNuevo && (
-        <button className="btn-nuevo-cliente" onClick={onNuevo}>
-          <Plus size={16} /> Nuevo Cliente
-        </button>
-      )}
     </div>
   );
 }
