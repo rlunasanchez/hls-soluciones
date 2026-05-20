@@ -1,9 +1,13 @@
 import { ClipboardList, FileText, FileSpreadsheet, Edit, Trash2 } from "lucide-react";
 
-function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, onNueva, pagination, onPageChange, onEditar, onEliminar, onInforme, onCotizacion }) {
+function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtroGarantia, onFiltroGarantiaChange, onNueva, pagination, onPageChange, onEditar, onEliminar, onInforme, onCotizacion }) {
   const ordenesFiltradas = ordenes.filter((orden) => {
-    if (!filtroNumeroOrden) return true;
-    return orden.numero_orden?.toLowerCase().includes(filtroNumeroOrden.toLowerCase());
+    if (filtroNumeroOrden && !orden.numero_orden?.toLowerCase().includes(filtroNumeroOrden.toLowerCase())) return false;
+    if (filtroGarantia !== "todos") {
+      if (filtroGarantia === "si" && !orden.es_garantia) return false;
+      if (filtroGarantia === "no" && orden.es_garantia) return false;
+    }
+    return true;
   });
 
   return (
@@ -17,6 +21,15 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, onNue
             onChange={(e) => onFiltroChange(e.target.value)}
             className="filtro-orden-input"
           />
+          <select
+            value={filtroGarantia}
+            onChange={(e) => onFiltroGarantiaChange(e.target.value)}
+            className="filtro-garantia-select"
+          >
+            <option value="todos">Todas</option>
+            <option value="si">Garantía</option>
+            <option value="no">No garantía</option>
+          </select>
         </div>
       </div>
 

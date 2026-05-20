@@ -31,6 +31,7 @@ function OrdenTrabajo() {
   });
   const [editingId, setEditingId] = useState(null);
   const [filtroNumeroOrden, setFiltroNumeroOrden] = useState("");
+  const [filtroGarantia, setFiltroGarantia] = useState("todos");
   
   // Estados para autocompletar clientes y equipos
   const [clientes, setClientes] = useState([]);
@@ -562,9 +563,16 @@ function OrdenTrabajo() {
         await api.post("/api/ordenes", payload);
       }
       alert(editingId ? "Orden actualizada exitosamente" : "Orden guardada exitosamente");
+      const navState = window.history.state?.usr;
+      const vinoDeCliente = navState?.cliente || navState?.orden;
       setMostrarFormulario(false);
       resetFormulario();
-      fetchOrdenes(1);
+      window.history.replaceState({}, document.title);
+      if (vinoDeCliente) {
+        navigate("/clientes");
+      } else {
+        fetchOrdenes(1);
+      }
     } catch (err) {
       console.error("Error al guardar orden:", err);
       alert("Error al guardar la orden");
@@ -612,6 +620,7 @@ function OrdenTrabajo() {
     setEditingId(null);
     setErrorNumeroOrden("");
     setFiltroNumeroOrden("");
+    setFiltroGarantia("todos");
   };
   // Funciones de navegación eliminadas (accesos desde el menú)
 
@@ -635,6 +644,8 @@ function OrdenTrabajo() {
             loading={loading}
             filtroNumeroOrden={filtroNumeroOrden}
             onFiltroChange={setFiltroNumeroOrden}
+            filtroGarantia={filtroGarantia}
+            onFiltroGarantiaChange={setFiltroGarantia}
             onNueva={abrirNuevaOrden}
             pagination={pagination}
             onPageChange={fetchOrdenes}
