@@ -1,13 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
-  Package, Users, UserCog, LogOut, 
-  FileText, FileSpreadsheet, ClipboardList, Plus, Save, X, Wrench,
+  Home, Users, Package, FileText, FileSpreadsheet, ShoppingCart, UserCog, LogOut,
+  ClipboardList, Plus, Save, X, Wrench,
   Calendar, Phone, MapPin, User, AlertCircle, CheckSquare,
-  Search, ChevronDown, Trash2, ShoppingCart, Edit, Home
+  Search, ChevronDown, Trash2, Edit
 } from "lucide-react";
 import api from "../services/api";
 import './OrdenTrabajo.css';
+import "../components/ordenes/ordenes-componentes.css";
+import HeaderOrdenTrabajo from "../components/ordenes/HeaderOrdenTrabajo";
+import OrdenLista from "../components/ordenes/OrdenLista";
 
 function OrdenTrabajo() {
   const navigate = useNavigate();
@@ -91,6 +94,110 @@ function OrdenTrabajo() {
     fetchEquipos();
     fetchOrdenes(1);
   }, []);
+
+  // Recibir cliente u orden desde Clientes
+  useEffect(() => {
+    const init = async () => {
+      const navState = window.history.state?.usr;
+      
+      // Limpiar siempre al inicio
+      setMostrarFormulario(false);
+      setEditingId(null);
+      
+      // Solo procesar si hay datos de cliente u orden
+      if (!navState || (!navState?.cliente && !navState?.orden)) return;
+      
+      const ordenFromNav = navState?.orden;
+      const clienteFromNav = navState?.cliente;
+      
+      if (ordenFromNav) {
+        // Editar orden existente - llamar a editarOrden
+        editarOrden(ordenFromNav);
+      }
+      
+      if (clienteFromNav) {
+        const fechaActual = new Date().toISOString().split("T")[0];
+        const numeroOt = await calcularSiguienteNumeroOrden();
+        setEditingId(null);
+        setClienteSeleccionado(clienteFromNav);
+        setEquipoSeleccionado(null);
+        setBusquedaCliente(clienteFromNav.razon_social || "");
+        setBusquedaSerie("");
+        setBusquedaCodigo("");
+        setInsumos([
+          { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
+          { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
+          { nombre: "" }, { nombre: "" }
+        ]);
+        setInsumosVisibles(2);
+        setErrorNumeroOrden("");
+        setNuevaOrden({
+          numeroOrden: numeroOt,
+          fecha: fechaActual,
+          esGarantia: false,
+          fechaIngreso: "",
+          fechaIngresoCheck: false,
+          fechaTermino: "",
+          fechaTerminoCheck: false,
+          fechaEntrega: "",
+          fechaEntregaCheck: false,
+        fechaCompra: "",
+        fechaCompraCheck: false,
+        cliente: clienteFromNav.razon_social || "",
+        direccion: clienteFromNav.direccion || "",
+        comuna: clienteFromNav.comuna || "",
+        contacto: clienteFromNav.contacto_nombre || "",
+        fonoPrincipal: clienteFromNav.telefono || clienteFromNav.contacto_fono || "",
+        tecnicoAsignado: "",
+        equipo: "",
+        modelo: "",
+        marca: "",
+        serie: "",
+        contadorPagOut: "",
+        nivelTinta: "",
+        averia: ""
+      });
+      setMostrarFormulario(true);
+    }
+    };
+    init();
+  }, []);
+
+  // Función para calcular siguiente número de OT correlativo
+  const calcularSiguienteNumeroOrden = async () => {
+    try {
+      const res = await api.get("/api/ordenes/siguiente-numero");
+      return res.data.numeroOrden;
+    } catch (err) {
+      const year = new Date().getFullYear();
+      return `OT-${year}-0001`;
+    }
+  };
+
+  // Función para abrir formulario de nueva orden con valores automáticos
+  const abrirNuevaOrden = async () => {
+    const fechaActual = new Date().toISOString().split("T")[0];
+    const numeroOt = await calcularSiguienteNumeroOrden();
+    setNuevaOrden(prev => ({
+      ...prev,
+      numeroOrden: numeroOt,
+      fecha: fechaActual
+    }));
+    setEditingId(null);
+    setClienteSeleccionado(null);
+    setEquipoSeleccionado(null);
+    setBusquedaCliente("");
+    setBusquedaSerie("");
+    setBusquedaCodigo("");
+    setInsumos([
+      { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
+      { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
+      { nombre: "" }, { nombre: "" }
+    ]);
+    setInsumosVisibles(2);
+    setErrorNumeroOrden("");
+    setMostrarFormulario(true);
+  };
 
   // Cierra los dropdowns al hacer clic fuera
   useEffect(() => {
@@ -472,236 +579,34 @@ function OrdenTrabajo() {
   };
   // Funciones de navegación eliminadas (accesos desde el menú)
 
+  const navItems = [
+    { label: "Inicio", icon: Home, onClick: () => navigate("/home"), color: "var(--primary)" },
+    { label: "Clientes", icon: Users, onClick: () => navigate("/clientes"), color: "var(--warning)" },
+    { label: "Equipos", icon: Package, onClick: () => navigate("/equipos"), color: "var(--success)" },
+    { label: "Informes Técnicos", icon: FileText, onClick: () => navigate("/informes"), color: "#EA580C" },
+    { label: "Cotizaciones", icon: FileSpreadsheet, onClick: () => navigate("/cotizaciones"), color: "#DB2777" },
+    { label: "Orden de Compra", icon: ShoppingCart, onClick: () => navigate("/orden-compra"), color: "#8B5CF6" },
+    { label: "Usuarios", icon: UserCog, onClick: () => navigate("/usuarios"), color: "#0D9488" },
+  ];
+
   return (
     <div className="container" style={{ background: 'var(--bg)', minHeight: '100vh' }}>
-      {/* Header */}
-      <div className="header" style={{ background: 'var(--gradient)', padding: '20px 32px', flexDirection: 'row', alignItems: 'center', gap: '16px' }}>
-        <div className="header-left">
-          <h1 style={{ color: 'white', margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <ClipboardList size={28} /> Orden de Trabajo
-          </h1>
-        </div>
-        <div className="nav-buttons" style={{ gap: '10px' }}>
-          <button onClick={() => navigate("/home")} className="logout-btn" style={{ background: 'var(--primary)', color: 'white' }}>
-            <Home size={18} />
-            <span className="btn-label">Inicio</span>
-          </button>
-          <button onClick={() => navigate("/clientes")} className="logout-btn" style={{ background: 'var(--warning)', color: 'white' }}>
-            <Users size={18} />
-            <span className="btn-label">Clientes</span>
-          </button>
-          <button onClick={() => navigate("/equipos")} className="logout-btn" style={{ background: 'var(--success)', color: 'white' }}>
-            <Package size={18} />
-            <span className="btn-label">Equipos</span>
-          </button>
-          <button onClick={() => navigate("/informes")} className="logout-btn" style={{ background: '#EA580C', color: 'white' }}>
-            <FileText size={18} />
-            <span className="btn-label">Informes Técnicos</span>
-          </button>
-          <button onClick={() => navigate("/cotizaciones")} className="logout-btn" style={{ background: '#DB2777', color: 'white' }}>
-            <FileSpreadsheet size={18} />
-            <span className="btn-label">Cotizaciones</span>
-          </button>
-          <button onClick={() => navigate("/orden-compra")} className="logout-btn" style={{ background: '#8B5CF6', color: 'white' }}>
-            <ShoppingCart size={18} />
-            <span className="btn-label">Orden de Compra</span>
-          </button>
-          <button onClick={() => navigate("/usuarios")} className="logout-btn" style={{ background: '#0D9488', color: 'white' }}>
-            <UserCog size={18} />
-            <span className="btn-label">Usuarios</span>
-          </button>
-          <button onClick={cerrarSesion} className="logout-btn" style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }}>
-            <LogOut size={18} />
-            <span className="btn-label">Cerrar Sesión</span>
-          </button>
-        </div>
-      </div>
+      <HeaderOrdenTrabajo navItems={navItems} onLogout={cerrarSesion} />
 
       {!mostrarFormulario ? (
-          <>
-            <div className="table-header">
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-                <input
-                  type="text"
-                  placeholder="Buscar por N° de Orden..."
-                  value={filtroNumeroOrden}
-                  onChange={(e) => setFiltroNumeroOrden(e.target.value)}
-                  style={{
-                    padding: '6px 10px',
-                    border: '2px solid var(--border)',
-                    borderRadius: '6px',
-                    fontSize: '0.95rem',
-                    minWidth: '250px'
-                  }}
-                />
-                <button onClick={() => setMostrarFormulario(true)} className="main-btn">
-                  <Plus size={20} />
-                  Nueva Orden
-                </button>
-              </div>
-            </div>
-
-            {loading ? (
-              <div className="empty-state">
-                <ClipboardList size={48} />
-                <p>Cargando órdenes...</p>
-              </div>
-            ) : ordenesFiltradas.length === 0 ? (
-              <div className="empty-state">
-                <ClipboardList size={48} />
-                <p>No hay órdenes que coincidan con "{filtroNumeroOrden}"</p>
-              </div>
-            ) : (
-              <>
-                <div className="table-wrapper">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>N° Orden</th>
-                        <th>Fecha</th>
-                        <th>Cliente</th>
-                        <th>Equipo</th>
-                        <th>Técnico</th>
-                        <th>Garantía</th>
-                        <th>Acciones</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {ordenesFiltradas.map((orden) => (
-                        <tr key={orden.id}>
-                          <td data-label="N° Orden"><span style={{ fontWeight: '600', color: 'var(--primary)' }}>{orden.numero_orden}</span></td>
-                          <td data-label="Fecha">{orden.fecha ? new Date(orden.fecha).toLocaleDateString() : '-'}</td>
-                          <td data-label="Cliente">{orden.cliente}</td>
-                          <td data-label="Equipo">{orden.equipo} {orden.marca} {orden.modelo}</td>
-                          <td data-label="Técnico">{orden.tecnico_asignado}</td>
-                          <td data-label="Garantía">
-                            {orden.es_garantia ? (
-                              <span className="badge-garantia">Sí</span>
-                            ) : (
-                              <span className="badge-no-garantia">No</span>
-                            )}
-                          </td>
-                          <td data-label="Acciones">
-                            <div className="action-buttons">
-                              <button 
-                                className="table-btn" 
-                                style={{ background: '#EA580C', color: 'white', border: 'none' }}
-                                onClick={() => navigate('/informes', { state: { orden } })}
-                              >
-                                <FileText size={14} /> Informe
-                              </button>
-                              <button 
-                                className="table-btn" 
-                                style={{ background: '#DB2777', color: 'white', border: 'none' }}
-                                onClick={() => navigate('/cotizaciones', { state: { orden } })}
-                              >
-                                <FileSpreadsheet size={14} /> Cotización
-                              </button>
-                              <button className="table-btn edit-btn" onClick={() => editarOrden(orden)}>
-                                <Edit size={14} /> Editar
-                              </button>
-                              <button className="table-btn delete-btn" onClick={() => eliminarOrden(orden.id)}>
-                                <Trash2 size={14} /> Eliminar
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                <div className="cards-table">
-                  {ordenesFiltradas.map((orden) => (
-                    <div key={orden.id} className="data-card">
-                      <div className="data-card-header">
-                        <strong>{orden.numero_orden}</strong>
-                        {orden.es_garantia ? (
-                          <span className="badge-garantia">Garantía</span>
-                        ) : (
-                          <span className="badge-no-garantia">No garantía</span>
-                        )}
-                      </div>
-                      <div className="data-card-row">
-                        <span className="data-card-label">Fecha</span>
-                        <span className="data-card-value">{orden.fecha ? new Date(orden.fecha).toLocaleDateString() : '-'}</span>
-                      </div>
-                      <div className="data-card-row">
-                        <span className="data-card-label">Cliente</span>
-                        <span className="data-card-value">{orden.cliente}</span>
-                      </div>
-                      <div className="data-card-row">
-                        <span className="data-card-label">Equipo</span>
-                        <span className="data-card-value">{orden.equipo} {orden.marca} {orden.modelo}</span>
-                      </div>
-                      <div className="data-card-row">
-                        <span className="data-card-label">Técnico</span>
-                        <span className="data-card-value">{orden.tecnico_asignado}</span>
-                      </div>
-                      <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
-                        <button 
-                          className="table-btn" 
-                          style={{ flex: 1, justifyContent: 'center', background: '#EA580C', color: 'white', border: 'none' }}
-                          onClick={() => navigate('/informes', { state: { orden } })}
-                        >
-                          <FileText size={14} /> Informe
-                        </button>
-                        <button 
-                          className="table-btn" 
-                          style={{ flex: 1, justifyContent: 'center', background: '#DB2777', color: 'white', border: 'none' }}
-                          onClick={() => navigate('/cotizaciones', { state: { orden } })}
-                        >
-                          <FileSpreadsheet size={14} /> Cotización
-                        </button>
-                        <button className="table-btn edit-btn" onClick={() => editarOrden(orden)} style={{ flex: 1, justifyContent: 'center' }}>
-                          <Edit size={14} /> Editar
-                        </button>
-                        <button className="table-btn delete-btn" onClick={() => eliminarOrden(orden.id)} style={{ flex: 1, justifyContent: 'center' }}>
-                          <Trash2 size={14} /> Eliminar
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="pagination">
-                  <div className="pagination-info">
-                    Mostrando {ordenes.length} de {pagination.totalItems} órdenes
-                  </div>
-                  <div className="pagination-controls">
-                    <button
-                      className="page-btn-nav"
-                      onClick={() => fetchOrdenes(pagination.currentPage - 1)}
-                      disabled={pagination.currentPage === 1}
-                    >
-                      ‹
-                    </button>
-                    <span className="page-numbers-desktop">
-                      {[...Array(pagination.totalPages)].map((_, i) => {
-                        const num = i + 1;
-                        return (
-                          <button
-                            key={num}
-                            onClick={() => fetchOrdenes(num)}
-                            className={pagination.currentPage === num ? 'active' : ''}
-                          >
-                            {num}
-                          </button>
-                        );
-                      })}
-                    </span>
-                    <button
-                      className="page-btn-nav"
-                      onClick={() => fetchOrdenes(pagination.currentPage + 1)}
-                      disabled={pagination.currentPage === pagination.totalPages}
-                    >
-                      ›
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-          </>
+          <OrdenLista
+            ordenes={ordenes}
+            loading={loading}
+            filtroNumeroOrden={filtroNumeroOrden}
+            onFiltroChange={setFiltroNumeroOrden}
+            onNueva={abrirNuevaOrden}
+            pagination={pagination}
+            onPageChange={fetchOrdenes}
+            onEditar={editarOrden}
+            onEliminar={eliminarOrden}
+            onInforme={(orden) => navigate('/informes', { state: { orden } })}
+            onCotizacion={(orden) => navigate('/cotizaciones', { state: { orden } })}
+          />
         ) : (
           /* Formulario para crear orden */
           <>
@@ -709,7 +614,15 @@ function OrdenTrabajo() {
             <div className="of-wrap">
               <div className="of-head">
                 <h2><Wrench size={20} /> {editingId ? "Editar Orden" : "Nueva Orden"}</h2>
-                <button type="button" className="of-head-close" onClick={() => { setMostrarFormulario(false); resetFormulario(); setEditingId(null); }}><X size={18} /></button>
+                <button type="button" className="of-head-close" onClick={() => { 
+      const navState = window.history.state?.usr;
+      const vinoDeCliente = navState?.cliente || navState?.orden;
+      setMostrarFormulario(false); 
+      resetFormulario(); 
+      setEditingId(null); 
+      window.history.replaceState({}, document.title); 
+      if (vinoDeCliente) navigate("/clientes");
+    }}><X size={18} /></button>
               </div>
             <form onSubmit={guardarOrden} className="of-form">
               {/* SECCIÓN 1: DATOS DE LA ORDEN */}
@@ -1387,7 +1300,15 @@ function OrdenTrabajo() {
 
               {/* Botones de acción del formulario */}
               <div className="of-sub">
-                <button type="button" className="of-btn-c" onClick={() => { setMostrarFormulario(false); resetFormulario(); setEditingId(null); }}>
+                <button type="button" className="of-btn-c" onClick={() => { 
+      const navState = window.history.state?.usr;
+      const vinoDeCliente = navState?.cliente || navState?.orden;
+      setMostrarFormulario(false); 
+      resetFormulario(); 
+      setEditingId(null); 
+      window.history.replaceState({}, document.title); 
+      if (vinoDeCliente) navigate("/clientes");
+    }}>
                   <X size={16} /> Cancelar
                 </button>
                 <button type="submit" className="of-btn-p">

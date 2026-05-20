@@ -11,8 +11,7 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME || "soporte_tecnico_db",
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0,
-  decimalNumbers: true,
+  queueLimit: 0
 });
 
 export default pool;

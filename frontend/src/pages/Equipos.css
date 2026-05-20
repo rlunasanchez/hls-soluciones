@@ -49,3 +49,13 @@
   .ef-sub { flex-direction: column; }
   .ef-sub button { width: 100%; justify-content: center; }
 }
+
+/* Filtros - igual a Clientes */
+.filters-section { background: var(--panel); border-radius: var(--radius); margin-bottom: 16px; box-shadow: var(--shadow); overflow: hidden; }
+.filters-content { display: flex; gap: 10px; align-items: flex-end; padding: 10px 12px; flex-wrap: wrap; }
+.filtro-grupo-equipos { flex: 0 0 auto; width: 200px; }
+.filtro-grupo-equipos label { display: block; margin-bottom: 4px; font-weight: 600; font-size: 0.8rem; color: var(--text-muted); }
+.filtro-grupo-equipos input { width: 100%; padding: 6px 10px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.85rem; }
+.filtro-grupo-equipos input:focus { border-color: var(--primary); outline: none; }
+.btn-nuevo-cliente { padding: 8px 14px; background: var(--primary); color: white !important; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500; display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+.btn-nuevo-cliente:hover { background: #1d4ed8; color: white !important; }
