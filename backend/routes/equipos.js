@@ -25,19 +25,48 @@ router.get("/next-codigo", async (req, res) => {
 
 router.get("/", async (req, res) => {
   try {
-    const { q } = req.query;
+    const { q, cliente_id } = req.query;
     let sql = `SELECT e.*, c.razon_social as cliente_nombre, c.rut as cliente_rut, c.codigo as cliente_codigo
       FROM equipos e
       LEFT JOIN clientes c ON e.cliente_id = c.id`;
     let params = [];
+    const conditions = [];
+    let paramIndex = 0;
     if (q && q.trim()) {
+      paramIndex++;
       const term = `%${q.trim()}%`;
-      sql += ` WHERE LOWER(e.codigo) LIKE LOWER($1) OR LOWER(e.serie) LIKE LOWER($2) OR LOWER(e.equipo) LIKE LOWER($3) OR LOWER(e.marca) LIKE LOWER($4)`;
-      params = [term, term, term, term];
+      conditions.push(`(LOWER(e.codigo) LIKE LOWER($${paramIndex}) OR LOWER(e.serie) LIKE LOWER($${paramIndex}) OR LOWER(e.equipo) LIKE LOWER($${paramIndex}) OR LOWER(e.marca) LIKE LOWER($${paramIndex}))`);
+      params.push(term, term, term, term);
+      paramIndex += 3;
+    }
+    if (cliente_id) {
+      paramIndex++;
+      conditions.push(`e.cliente_id = $${paramIndex}`);
+      params.push(cliente_id);
+    }
+    if (conditions.length > 0) {
+      sql += ` WHERE ${conditions.join(" AND ")}`;
     }
     sql += ` ORDER BY e.id DESC`;
     const result = await pool.query(sql, params);
     res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Error del servidor" });
+  }
+});
+
+router.get("/:id", async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT e.*, c.razon_social as cliente_nombre, c.rut as cliente_rut, c.codigo as cliente_codigo
+      FROM equipos e
+      LEFT JOIN clientes c ON e.cliente_id = c.id
+      WHERE e.id = $1`,
+      [req.params.id]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ msg: "Equipo no encontrado" });
+    res.json(result.rows[0]);
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
@@ -78,18 +107,39 @@ router.put("/:id", authMiddleware, async (req, res) => {
     if (!codigo) {
       codigo = await generarCodigo();
     }
-    await pool.query(
-      `UPDATE equipos SET codigo = $1, equipo = $2, modelo = $3, marca = $4, serie = $5, contador_pag = $6,
-        nivel_tintas = $7, cliente_id = $8,
-        insumo1 = $9, insumo2 = $10, insumo3 = $11, insumo4 = $12, insumo5 = $13, insumo6 = $14,
-        insumo7 = $15, insumo8 = $16, insumo9 = $17, insumo10 = $18, insumo11 = $19, insumo12 = $20,
-        averia = $21 WHERE id = $22`,
-      [codigo, equipo, modelo, marca, serie, contador_pag || 0, nivel_tintas, cliente_id || null,
-        insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null,
-        insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null,
-        insumo9 || null, insumo10 || null, insumo11 || null, insumo12 || null, averia || null, id]
-    );
-    res.json({ msg: "Equipo actualizado", codigo });
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query(
+        `UPDATE equipos SET codigo = $1, equipo = $2, modelo = $3, marca = $4, serie = $5, contador_pag = $6,
+          nivel_tintas = $7, cliente_id = $8,
+          insumo1 = $9, insumo2 = $10, insumo3 = $11, insumo4 = $12, insumo5 = $13, insumo6 = $14,
+          insumo7 = $15, insumo8 = $16, insumo9 = $17, insumo10 = $18, insumo11 = $19, insumo12 = $20,
+          averia = $21 WHERE id = $22`,
+        [codigo, equipo, modelo, marca, serie, contador_pag || 0, nivel_tintas, cliente_id || null,
+          insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null,
+          insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null,
+          insumo9 || null, insumo10 || null, insumo11 || null, insumo12 || null, averia || null, id]
+      );
+      await client.query(
+        `UPDATE ordenes_trabajo SET equipo = $1, modelo = $2, marca = $3, serie = $4,
+          contador_pag_out = $5, nivel_tinta = $6,
+          insumo1 = $7, insumo2 = $8, insumo3 = $9, insumo4 = $10, insumo5 = $11, insumo6 = $12,
+          insumo7 = $13, insumo8 = $14, insumo9 = $15, insumo10 = $16, insumo11 = $17, insumo12 = $18,
+          averia = $19 WHERE equipo_id = $20`,
+        [equipo, modelo, marca, serie, contador_pag || 0, nivel_tintas || null,
+          insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null,
+          insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null,
+          insumo9 || null, insumo10 || null, insumo11 || null, insumo12 || null, averia || null, id]
+      );
+      await client.query("COMMIT");
+      res.json({ msg: "Equipo actualizado", codigo });
+    } catch (err2) {
+      await client.query("ROLLBACK");
+      throw err2;
+    } finally {
+      client.release();
+    }
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });

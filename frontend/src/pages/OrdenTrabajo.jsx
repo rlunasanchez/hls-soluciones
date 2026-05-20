@@ -278,18 +278,57 @@ function OrdenTrabajo() {
       averia: orden.averia || ""
     });
 
-    // Buscar equipo asociado en la lista cargada
-    const eq = equipos.find(e => 
-      (orden.equipo_id && e.id === orden.equipo_id) || 
-      (orden.serie && e.serie === orden.serie)
-    );
-    if (eq) {
-      setEquipoSeleccionado(eq);
-      setBusquedaCodigo(eq.codigo || "");
-      setBusquedaSerie(eq.serie || "");
-    } else if (orden.serie) {
-      setBusquedaSerie(orden.serie);
-    }
+    // Buscar equipo asociado - primero intentar con datos frescos del API
+    const cargarEquipoFresco = async () => {
+      try {
+        if (orden.equipo_id) {
+          const res = await api.get(`/api/equipos/${orden.equipo_id}`);
+          const eq = res.data;
+          setEquipoSeleccionado(eq);
+          setBusquedaCodigo(eq.codigo || "");
+          setBusquedaSerie(eq.serie || "");
+          setNuevaOrden(prev => ({
+            ...prev,
+            equipo: eq.equipo || prev.equipo,
+            modelo: eq.modelo || prev.modelo,
+            marca: eq.marca || prev.marca,
+            serie: eq.serie || prev.serie,
+            contadorPagOut: eq.contador_pag?.toString() || prev.contadorPagOut,
+            nivelTinta: eq.nivel_tintas || prev.nivelTinta,
+            averia: eq.averia || prev.averia
+          }));
+          const insumosEquipo = [];
+          for (let i = 1; i <= 12; i++) {
+            const insumo = eq[`insumo${i}`];
+            if (insumo) insumosEquipo.push({ nombre: insumo });
+          }
+          if (insumosEquipo.length > 0) {
+            const nuevosInsumos = [...insumosEquipo];
+            while (nuevosInsumos.length < 12) {
+              nuevosInsumos.push({ nombre: "" });
+            }
+            setInsumos(nuevosInsumos);
+            setInsumosVisibles(Math.max(2, insumosEquipo.length));
+          }
+          return;
+        }
+      } catch (err) {
+        console.error("Error al cargar equipo fresco:", err);
+      }
+      // Fallback: buscar en la lista local
+      const eq = equipos.find(e => 
+        (orden.equipo_id && e.id === orden.equipo_id) || 
+        (orden.serie && e.serie === orden.serie)
+      );
+      if (eq) {
+        setEquipoSeleccionado(eq);
+        setBusquedaCodigo(eq.codigo || "");
+        setBusquedaSerie(eq.serie || "");
+      } else if (orden.serie) {
+        setBusquedaSerie(orden.serie);
+      }
+    };
+    cargarEquipoFresco();
 
     // Buscar cliente asociado en la lista cargada
     const cl = clientes.find(c => 
