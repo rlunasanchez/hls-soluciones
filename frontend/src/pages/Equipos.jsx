@@ -8,6 +8,7 @@ import FiltrosEquipo from "../components/equipos/FiltrosEquipo";
 import EquipoFormulario from "../components/equipos/EquipoFormulario";
 import EquipoTabla from "../components/equipos/EquipoTabla";
 import EquipoCard from "../components/equipos/EquipoCard";
+import Pagination from "../components/Pagination";
 
 function Equipos() {
   const navigate = useNavigate();
@@ -168,22 +169,7 @@ function Equipos() {
         </div>
       )}
 
-      {totalPaginas > 0 && (
-        <div className="pagination">
-          <div className="pagination-info">
-            Mostrando {indiceInicio + 1}-{Math.min(indiceInicio + equiposPorPagina, equiposFiltrados.length)} de {equiposFiltrados.length} equipos
-          </div>
-          <div className="pagination-controls">
-            <button className="page-btn-nav" onClick={() => setPaginaActual(paginaActual - 1)} disabled={paginaActual === 1}>‹</button>
-            <span className="page-numbers-desktop">
-              {[...Array(totalPaginas)].map((_, i) => (
-                <button key={i + 1} onClick={() => setPaginaActual(i + 1)} className={paginaActual === i + 1 ? "active" : ""}>{i + 1}</button>
-              ))}
-            </span>
-            <button className="page-btn-nav" onClick={() => setPaginaActual(paginaActual + 1)} disabled={paginaActual === totalPaginas}>›</button>
-          </div>
-        </div>
-      )}
+      <Pagination currentPage={paginaActual} totalPages={totalPaginas} onPageChange={setPaginaActual} />
     </div>
   );
 }
