@@ -507,11 +507,9 @@ function Clientes() {
               key={c.id}
               cliente={c}
               ordenes={ordenesPorCliente[c.id] || []}
-              onNuevaOT={() => navigate("/orden-trabajo", { state: { cliente: c } })}
-              onCotizacion={() => navigate("/cotizaciones", { state: { cliente: c } })}
+              onEliminar={eliminarCliente}
               onEditar={() => editarCliente(c)}
               onEliminarOT={eliminarOrdenCliente}
-              onEditarOT={(ot) => navigate("/orden-trabajo", { state: { orden: ot } })}
             />
           ))}
         </div>
