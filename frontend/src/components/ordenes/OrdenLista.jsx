@@ -41,7 +41,7 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
       ) : ordenesFiltradas.length === 0 ? (
         <div className="empty-state">
           <ClipboardList size={48} />
-          <p>No hay órdenes que coincidan con "{filtroNumeroOrden}"</p>
+          <p>{ordenes.length === 0 ? "No hay órdenes de trabajo" : `No hay órdenes que coincidan con la búsqueda`}</p>
         </div>
       ) : (
         <>
