@@ -54,7 +54,7 @@ router.post("/", authMiddleware, async (req, res) => {
       `INSERT INTO equipos (codigo, cliente_id, equipo, modelo, marca, serie, contador_pag, nivel_tintas,
         insumo1, insumo2, insumo3, insumo4, insumo5, insumo6,
         insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)`,
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [codigo, cliente_id || null, equipo, modelo, marca, serie || null, contador_pag || 0, nivel_tintas || null,
         insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null,
         insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null,
@@ -73,17 +73,17 @@ router.put("/:id", authMiddleware, async (req, res) => {
     insumo1, insumo2, insumo3, insumo4, insumo5, insumo6,
     insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia } = req.body;
   try {
-    const result = await pool.query("SELECT codigo FROM equipos WHERE id = $1", [id]);
-    let codigo = result.rows[0]?.codigo;
+    const [rows] = await pool.query("SELECT codigo FROM equipos WHERE id = ?", [id]);
+    let codigo = rows[0]?.codigo;
     if (!codigo) {
       codigo = await generarCodigo();
     }
     await pool.query(
-      `UPDATE equipos SET codigo = $1, equipo = $2, modelo = $3, marca = $4, serie = $5, contador_pag = $6,
-        nivel_tintas = $7, cliente_id = $8,
-        insumo1 = $9, insumo2 = $10, insumo3 = $11, insumo4 = $12, insumo5 = $13, insumo6 = $14,
-        insumo7 = $15, insumo8 = $16, insumo9 = $17, insumo10 = $18, insumo11 = $19, insumo12 = $20,
-        averia = $21 WHERE id = $22`,
+      `UPDATE equipos SET codigo = ?, equipo = ?, modelo = ?, marca = ?, serie = ?, contador_pag = ?,
+        nivel_tintas = ?, cliente_id = ?,
+        insumo1 = ?, insumo2 = ?, insumo3 = ?, insumo4 = ?, insumo5 = ?, insumo6 = ?,
+        insumo7 = ?, insumo8 = ?, insumo9 = ?, insumo10 = ?, insumo11 = ?, insumo12 = ?,
+        averia = ? WHERE id = ?`,
       [codigo, equipo, modelo, marca, serie, contador_pag || 0, nivel_tintas, cliente_id || null,
         insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null,
         insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null,
@@ -99,7 +99,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
 router.delete("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
   try {
-    await pool.query("DELETE FROM equipos WHERE id = $1", [id]);
+    await pool.query("DELETE FROM equipos WHERE id = ?", [id]);
     res.json({ msg: "Equipo eliminado" });
   } catch (err) {
     console.error(err);
