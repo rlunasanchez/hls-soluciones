@@ -227,7 +227,7 @@ function OrdenTrabajo() {
     try {
       const res = await api.get(`/api/ordenes?page=${page}&limit=100`);
       setOrdenes(res.data.ordenes);
-      setPagination(prev => ({ ...prev, currentPage: page, totalItems: res.data.pagination.totalItems }));
+      setPagination({ ...res.data.pagination, currentPage: page });
     } catch (err) {
       console.error("Error al cargar órdenes:", err);
     } finally {

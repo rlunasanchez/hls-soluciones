@@ -1,4 +1,5 @@
 import { ClipboardList, FileText, FileSpreadsheet, Edit, Trash2 } from "lucide-react";
+import Pagination from "../Pagination";
 
 function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtroGarantia, onFiltroGarantiaChange, onNueva, pagination, onPageChange, onEditar, onEliminar, onInforme, onCotizacion }) {
   const ordenesFiltradas = ordenes.filter((orden) => {
@@ -150,41 +151,7 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
             ))}
           </div>
 
-          <div className="pagination">
-            <div className="pagination-info">
-              Mostrando {ordenes.length} de {pagination.totalItems} órdenes
-            </div>
-            <div className="pagination-controls">
-              <button
-                className="page-btn-nav"
-                onClick={() => onPageChange(pagination.currentPage - 1)}
-                disabled={pagination.currentPage === 1}
-              >
-                ‹
-              </button>
-              <span className="page-numbers-desktop">
-                {[...Array(pagination.totalPages)].map((_, i) => {
-                  const num = i + 1;
-                  return (
-                    <button
-                      key={num}
-                      onClick={() => onPageChange(num)}
-                      className={pagination.currentPage === num ? "active" : ""}
-                    >
-                      {num}
-                    </button>
-                  );
-                })}
-              </span>
-              <button
-                className="page-btn-nav"
-                onClick={() => onPageChange(pagination.currentPage + 1)}
-                disabled={pagination.currentPage === pagination.totalPages}
-              >
-                ›
-              </button>
-            </div>
-          </div>
+          <Pagination currentPage={pagination.currentPage} totalPages={pagination.totalPages} onPageChange={onPageChange} />
         </>
       )}
     </>

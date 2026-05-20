@@ -532,6 +532,13 @@ html, body {
 .page-numbers-desktop {
   display: flex;
   gap: 4px;
+  align-items: center;
+}
+
+.page-ellipsis {
+  padding: 0 4px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
 }
 
 /* =========================

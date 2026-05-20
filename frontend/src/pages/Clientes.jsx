@@ -8,6 +8,7 @@ import api from "../services/api";
 import "./Clientes.css";
 import "../components/clientes/clientes-componentes.css";
 import HeaderCliente from "../components/clientes/HeaderCliente";
+import Pagination from "../components/Pagination";
 import FiltrosCliente from "../components/clientes/FiltrosCliente";
 import ClienteLista from "../components/clientes/ClienteLista";
 import ClienteExpandido from "../components/clientes/ClienteExpandido";
@@ -533,22 +534,7 @@ function Clientes() {
         </div>
       )}
 
-      {totalPaginas > 0 && (
-        <div className="pagination">
-          <div className="pagination-info">
-            Mostrando {indiceInicio + 1}-{Math.min(indiceInicio + clientesPorPagina, clientesFiltrados.length)} de {clientesFiltrados.length} clientes
-          </div>
-          <div className="pagination-controls">
-            <button className="page-btn-nav" onClick={() => setPaginaActual(paginaActual - 1)} disabled={paginaActual === 1}>‹</button>
-            <span className="page-numbers-desktop">
-              {[...Array(totalPaginas)].map((_, i) => (
-                <button key={i + 1} onClick={() => setPaginaActual(i + 1)} className={paginaActual === i + 1 ? "active" : ""}>{i + 1}</button>
-              ))}
-            </span>
-            <button className="page-btn-nav" onClick={() => setPaginaActual(paginaActual + 1)} disabled={paginaActual === totalPaginas}>›</button>
-          </div>
-        </div>
-      )}
+      <Pagination currentPage={paginaActual} totalPages={totalPaginas} onPageChange={setPaginaActual} />
     </div>
   );
 }
