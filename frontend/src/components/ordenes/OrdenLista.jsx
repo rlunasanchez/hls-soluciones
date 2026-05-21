@@ -34,7 +34,7 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
       ) : ordenes.length === 0 ? (
         <div className="empty-state">
           <ClipboardList size={48} />
-          <p>No hay órdenes de trabajo</p>
+          <p>No hay órdenes de trabajo que coincidan con la búsqueda</p>
         </div>
       ) : (
         <>

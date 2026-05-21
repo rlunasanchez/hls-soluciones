@@ -1,137 +1,159 @@
-﻿-- ============================================================
+﻿﻿-- ============================================================
 -- Script generado desde MySQL local para Neon (PostgreSQL)
--- Sin BEGIN/COMMIT para depuraciÃ³n
 -- Fecha: 2026-05-21
 -- ============================================================
 
--- PRIMERO ejecutar ROLLBACK si hay transacciÃ³n trabada:
--- ROLLBACK;
 
--- SEGUNDO agregar unique constraints si no existen:
--- ALTER TABLE clientes ADD UNIQUE (codigo);
--- ALTER TABLE equipos ADD UNIQUE (codigo);
--- ALTER TABLE ordenes_trabajo ADD UNIQUE (numero_orden);
-
--- ========== CLIENTES (31) ==========
+-- Clientes (31)
 INSERT INTO clientes (codigo, razon_social, giro, rut, direccion, ciudad, comuna, telefono, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion, activo) VALUES
-  ('CL-0001', 'Microsystem', 'Servivicios informaticos', '14.900.665-6', 'Alameda 1', 'Santiago ', 'Santiago ', '962746015', 'Diego Luna', 'diego@gmail.com', '96494960', 'Supervisor', 'Teatinos 550', TRUE)
-  ('CL-0002', 'TechSolutions Chile SpA', 'Servicios informÃ¡ticos', '76.123.456-7', 'Av. Apoquindo 4500, Of 301', 'Santiago', 'Las Condes', '+562 2123 4500', 'Carlos MuÃ±oz', 'carlos@techsolutions.cl', '+569 8765 4321', NULL, NULL, TRUE)
-  ('CL-0003', 'Distribuidora del Sur Ltda', 'DistribuciÃ³n mayorista', '77.234.567-8', 'Av. Los Carrera 1200', 'ConcepciÃ³n', 'San Pedro de la Paz', '+564 1234 5678', 'MarÃ­a Soto', 'maria@delsur.cl', '+569 7654 3210', NULL, NULL, TRUE)
-  ('CL-0004', 'Minera Los Andes SA', 'MinerÃ­a', '78.345.678-9', 'Av. Grecia 550', 'Antofagasta', 'Antofagasta', '+565 2345 6789', 'Pedro RamÃ­rez', 'pedro@mineraandes.cl', '+569 6543 2109', NULL, NULL, TRUE)
-  ('CL-0005', 'Constructora Norte Grande EIRL', 'ConstrucciÃ³n', '79.456.789-0', 'Av. Arturo Prat 890', 'Iquique', 'Iquique', '+565 3456 7890', 'Ana Torres', 'ana@constructoranorte.cl', '+569 5432 1098', NULL, NULL, TRUE)
-  ('CL-0006', 'Farmacias del Centro SA', 'FarmacÃ©utico', '80.567.890-1', 'HuÃ©rfanos 1050', 'Santiago', 'Santiago Centro', '+562 3456 7890', 'Luis Vega', 'luis@farmaciascentro.cl', '+569 4321 0987', NULL, NULL, TRUE)
-  ('CL-0007', 'Agroindustria Verde SpA', 'Agroindustrial', '81.678.901-2', 'Av. Libertador 320', 'Rancagua', 'Rancagua', '+567 4567 8901', 'Carmen Flores', 'carmen@agroverde.cl', '+569 3210 9876', NULL, NULL, TRUE)
-  ('CL-0008', 'Transportes RÃ¡pidos Ltda', 'Transporte', '82.789.012-3', 'Av. EspaÃ±a 1500', 'ValparaÃ­so', 'ViÃ±a del Mar', '+563 4567 8901', 'JosÃ© MartÃ­nez', 'jose@transportes.cl', '+569 2109 8765', NULL, NULL, TRUE)
-  ('CL-0009', 'ClÃ­nica del Sur SA', 'Salud', '83.890.123-4', 'Av. Alemania 800', 'Temuco', 'Temuco', '+564 5678 9012', 'Dra. Patricia RÃ­os', 'patricia@clinicasur.cl', '+569 1098 7654', NULL, NULL, TRUE)
-  ('CL-0010', 'Hotel Plaza Mayor SA', 'HotelerÃ­a', '84.901.234-5', 'Av. Providencia 2345', 'Santiago', 'Providencia', '+562 4567 8901', 'AndrÃ©s LÃ³pez', 'andres@hotelplaza.cl', '+569 0987 6543', NULL, NULL, TRUE)
-  ('CL-0011', 'Imprenta GrÃ¡fica RÃ¡pida EIRL', 'Imprenta', '85.012.345-6', 'Av. IrarrÃ¡zaval 3456', 'Santiago', 'Ã‘uÃ±oa', '+562 5678 9012', 'Valeria DÃ­az', 'valeria@graficarapida.cl', '+569 9876 5432', NULL, NULL, TRUE)
-  ('CL-0012', 'Laboratorios QuÃ­micos del PacÃ­fico SA', 'QuÃ­mico', '86.123.456-7', 'Av. Argentina 678', 'ValparaÃ­so', 'ValparaÃ­so', '+563 5678 9012', 'Dr. Ricardo Mora', 'ricardo@labpacifico.cl', '+569 8765 4321', NULL, NULL, TRUE)
-  ('CL-0013', 'Comercial Muebles Finos SpA', 'MueblerÃ­a', '87.234.567-8', 'Av. La Florida 7890', 'Santiago', 'La Florida', '+562 6789 0123', 'Daniela Pino', 'daniela@mueblesfinos.cl', '+569 7654 3210', NULL, NULL, TRUE)
-  ('CL-0014', 'Pesquera del Sur Ltda', 'Pesquero', '88.345.678-9', 'Av. Diego Portales 450', 'Puerto Montt', 'Puerto Montt', '+566 5678 9012', 'Francisco Vera', 'francisco@pesquerasur.cl', '+569 6543 2109', NULL, NULL, TRUE)
-  ('CL-0015', 'Inmobiliaria Nuevo Hogar SA', 'Inmobiliaria', '89.456.789-0', 'Av. Vitacura 5600', 'Santiago', 'Las Condes', '+562 7890 1234', 'Gabriela Silva', 'gabriela@nuevohogar.cl', '+569 5432 1098', NULL, NULL, TRUE)
-  ('CL-0016', 'Taller MecÃ¡nico RÃ¡pido EIRL', 'MecÃ¡nica', '90.567.890-1', 'Av. Pajaritos 3200', 'Santiago', 'MaipÃº', '+562 8901 2345', 'Roberto Castro', 'roberto@tallermecanico.cl', '+569 4321 0987', NULL, NULL, TRUE)
-  ('CL-0017', 'Estudio JurÃ­dico MuÃ±oz & CÃ­a', 'Servicios legales', '91.678.901-2', 'Agustinas 1200, Piso 8', 'Santiago', 'Santiago Centro', '+562 9012 3456', 'Marcela MuÃ±oz', 'marcela@estudiojuridico.cl', '+569 3210 9876', NULL, NULL, TRUE)
-  ('CL-0018', 'PanaderÃ­a La Espiga de Oro SA', 'PanaderÃ­a', '92.789.012-3', 'Av. Gran Avenida 5600', 'Santiago', 'San Miguel', '+562 0123 4567', 'Jorge AlarcÃ³n', 'jorge@espigadeoro.cl', '+569 2109 8765', NULL, NULL, TRUE)
-  ('CL-0019', 'Colegio San AndrÃ©s Ltda', 'EducaciÃ³n', '93.890.123-4', 'Av. PrÃ­ncipe de Gales 4567', 'Santiago', 'La Reina', '+562 1234 5678', 'Prof. Marta Lagos', 'marta@colsandres.cl', '+569 1098 7654', NULL, NULL, TRUE)
-  ('CL-0020', 'Automotriz del Valle SA', 'Automotriz', '94.901.234-5', 'Av. Bernardo O''Higgins 2500', 'Rancagua', 'Rancagua', '+567 6789 0123', 'CristiÃ¡n Rojas', 'cristian@automotrizvalle.cl', '+569 0987 6543', NULL, NULL, TRUE)
-  ('CL-0021', 'Empresa ElÃ©ctrica del Norte SA', 'GeneraciÃ³n elÃ©ctrica', '95.012.345-6', 'Av. Granaderos 120', 'Calama', 'Calama', '+565 7890 1234', 'Hugo Pizarro', 'hugo@electricanorte.cl', '+569 9876 5432', NULL, NULL, TRUE)
-  ('CL-0022', 'Centro MÃ©dico Salud Total SpA', 'Salud', '96.123.456-7', 'Av. Manuel Montt 1800', 'Santiago', 'Providencia', '+562 2345 6789', 'Dr. Sergio ValdÃ©s', 'sergio@saludtotal.cl', '+569 8765 4321', NULL, NULL, TRUE)
-  ('CL-0023', 'ViÃ±a del Mar Turismo Ltda', 'Turismo', '97.234.567-8', 'Av. San MartÃ­n 500', 'ViÃ±a del Mar', 'ViÃ±a del Mar', '+563 7890 1234', 'Claudia Olivares', 'claudia@vinaturismo.cl', '+569 7654 3210', NULL, NULL, TRUE)
-  ('CL-0024', 'FerreterÃ­a El Constructor SA', 'FerreterÃ­a', '98.345.678-9', 'Av. Libertador 5000', 'Santiago', 'EstaciÃ³n Central', '+562 3456 7890', 'Patricio Soto', 'patricio@ferreteria.cl', '+569 6543 2109', NULL, NULL, TRUE)
-  ('CL-0025', 'TecnologÃ­a MÃ©dica del Sur SA', 'TecnologÃ­a mÃ©dica', '99.456.789-0', 'Av. PaicavÃ­ 2300', 'ConcepciÃ³n', 'ConcepciÃ³n', '+564 7890 1234', 'Ing. Karen DÃ­az', 'karen@tecmedsur.cl', '+569 5432 1098', NULL, NULL, TRUE)
-  ('CL-0026', 'Distribuidora de Alimentos Miramar Ltda', 'Alimentos', '60.567.890-1', 'Av. ColÃ³n 3400', 'ValparaÃ­so', 'ValparaÃ­so', '+563 8901 2345', 'Fernando Lara', 'fernando@alimentosmiramar.cl', '+569 4321 0987', NULL, NULL, TRUE)
-  ('CL-0027', 'Seguros del Sur SA', 'Seguros', '61.678.901-2', 'Av. Isidora Goyenechea 3000', 'Santiago', 'Las Condes', '+562 4567 8901', 'Andrea Bascur', 'andrea@segurossur.cl', '+569 3210 9876', NULL, NULL, TRUE)
-  ('CL-0028', 'Restaurante El Buen Sabor SpA', 'Restaurante', '62.789.012-3', 'Av. PÃ­o Nono 450', 'Santiago', 'Bellavista', '+562 5678 9012', 'CÃ©sar Tapia', 'cesar@buensabor.cl', '+569 2109 8765', NULL, NULL, TRUE)
-  ('CL-0029', 'Gimnasio Fitness Total EIRL', 'Gimnasio', '63.890.123-4', 'Av. IrarrÃ¡zaval 4500', 'Santiago', 'Ã‘uÃ±oa', '+562 6789 0123', 'Tamara Rivas', 'tamara@fitnesstotal.cl', '+569 1098 7654', NULL, NULL, TRUE)
-  ('CL-0030', 'ConsultorÃ­a EstratÃ©gica SpA', 'ConsultorÃ­a', '64.901.234-5', 'Av. El Bosque Sur 850', 'Santiago', 'El Golf', '+562 7890 1234', 'Mauricio Palma', 'mauricio@consultora.cl', '+569 0987 6543', NULL, NULL, TRUE)
+  ('CL-0001', 'Microsystem', 'Servivicios informaticos', '14.900.665-6', 'Alameda 1', 'Santiago ', 'Santiago ', '962746015', 'Diego Luna', 'diego@gmail.com', '96494960', 'Supervisor', 'Teatinos 550', TRUE),
+  ('CL-0002', 'TechSolutions Chile SpA', 'Servicios informÃ¡ticos', '76.123.456-7', 'Av. Apoquindo 4500, Of 301', 'Santiago', 'Las Condes', '+562 2123 4500', 'Carlos MuÃ±oz', 'carlos@techsolutions.cl', '+569 8765 4321', NULL, NULL, TRUE),
+  ('CL-0003', 'Distribuidora del Sur Ltda', 'DistribuciÃ³n mayorista', '77.234.567-8', 'Av. Los Carrera 1200', 'ConcepciÃ³n', 'San Pedro de la Paz', '+564 1234 5678', 'MarÃ­a Soto', 'maria@delsur.cl', '+569 7654 3210', NULL, NULL, TRUE),
+  ('CL-0004', 'Minera Los Andes SA', 'MinerÃ­a', '78.345.678-9', 'Av. Grecia 550', 'Antofagasta', 'Antofagasta', '+565 2345 6789', 'Pedro RamÃ­rez', 'pedro@mineraandes.cl', '+569 6543 2109', NULL, NULL, TRUE),
+  ('CL-0005', 'Constructora Norte Grande EIRL', 'ConstrucciÃ³n', '79.456.789-0', 'Av. Arturo Prat 890', 'Iquique', 'Iquique', '+565 3456 7890', 'Ana Torres', 'ana@constructoranorte.cl', '+569 5432 1098', NULL, NULL, TRUE),
+  ('CL-0006', 'Farmacias del Centro SA', 'FarmacÃ©utico', '80.567.890-1', 'HuÃ©rfanos 1050', 'Santiago', 'Santiago Centro', '+562 3456 7890', 'Luis Vega', 'luis@farmaciascentro.cl', '+569 4321 0987', NULL, NULL, TRUE),
+  ('CL-0007', 'Agroindustria Verde SpA', 'Agroindustrial', '81.678.901-2', 'Av. Libertador 320', 'Rancagua', 'Rancagua', '+567 4567 8901', 'Carmen Flores', 'carmen@agroverde.cl', '+569 3210 9876', NULL, NULL, TRUE),
+  ('CL-0008', 'Transportes RÃ¡pidos Ltda', 'Transporte', '82.789.012-3', 'Av. EspaÃ±a 1500', 'ValparaÃ­so', 'ViÃ±a del Mar', '+563 4567 8901', 'JosÃ© MartÃ­nez', 'jose@transportes.cl', '+569 2109 8765', NULL, NULL, TRUE),
+  ('CL-0009', 'ClÃ­nica del Sur SA', 'Salud', '83.890.123-4', 'Av. Alemania 800', 'Temuco', 'Temuco', '+564 5678 9012', 'Dra. Patricia RÃ­os', 'patricia@clinicasur.cl', '+569 1098 7654', NULL, NULL, TRUE),
+  ('CL-0010', 'Hotel Plaza Mayor SA', 'HotelerÃ­a', '84.901.234-5', 'Av. Providencia 2345', 'Santiago', 'Providencia', '+562 4567 8901', 'AndrÃ©s LÃ³pez', 'andres@hotelplaza.cl', '+569 0987 6543', NULL, NULL, TRUE),
+  ('CL-0011', 'Imprenta GrÃ¡fica RÃ¡pida EIRL', 'Imprenta', '85.012.345-6', 'Av. IrarrÃ¡zaval 3456', 'Santiago', 'Ã‘uÃ±oa', '+562 5678 9012', 'Valeria DÃ­az', 'valeria@graficarapida.cl', '+569 9876 5432', NULL, NULL, TRUE),
+  ('CL-0012', 'Laboratorios QuÃ­micos del PacÃ­fico SA', 'QuÃ­mico', '86.123.456-7', 'Av. Argentina 678', 'ValparaÃ­so', 'ValparaÃ­so', '+563 5678 9012', 'Dr. Ricardo Mora', 'ricardo@labpacifico.cl', '+569 8765 4321', NULL, NULL, TRUE),
+  ('CL-0013', 'Comercial Muebles Finos SpA', 'MueblerÃ­a', '87.234.567-8', 'Av. La Florida 7890', 'Santiago', 'La Florida', '+562 6789 0123', 'Daniela Pino', 'daniela@mueblesfinos.cl', '+569 7654 3210', NULL, NULL, TRUE),
+  ('CL-0014', 'Pesquera del Sur Ltda', 'Pesquero', '88.345.678-9', 'Av. Diego Portales 450', 'Puerto Montt', 'Puerto Montt', '+566 5678 9012', 'Francisco Vera', 'francisco@pesquerasur.cl', '+569 6543 2109', NULL, NULL, TRUE),
+  ('CL-0015', 'Inmobiliaria Nuevo Hogar SA', 'Inmobiliaria', '89.456.789-0', 'Av. Vitacura 5600', 'Santiago', 'Las Condes', '+562 7890 1234', 'Gabriela Silva', 'gabriela@nuevohogar.cl', '+569 5432 1098', NULL, NULL, TRUE),
+  ('CL-0016', 'Taller MecÃ¡nico RÃ¡pido EIRL', 'MecÃ¡nica', '90.567.890-1', 'Av. Pajaritos 3200', 'Santiago', 'MaipÃº', '+562 8901 2345', 'Roberto Castro', 'roberto@tallermecanico.cl', '+569 4321 0987', NULL, NULL, TRUE),
+  ('CL-0017', 'Estudio JurÃ­dico MuÃ±oz & CÃ­a', 'Servicios legales', '91.678.901-2', 'Agustinas 1200, Piso 8', 'Santiago', 'Santiago Centro', '+562 9012 3456', 'Marcela MuÃ±oz', 'marcela@estudiojuridico.cl', '+569 3210 9876', NULL, NULL, TRUE),
+  ('CL-0018', 'PanaderÃ­a La Espiga de Oro SA', 'PanaderÃ­a', '92.789.012-3', 'Av. Gran Avenida 5600', 'Santiago', 'San Miguel', '+562 0123 4567', 'Jorge AlarcÃ³n', 'jorge@espigadeoro.cl', '+569 2109 8765', NULL, NULL, TRUE),
+  ('CL-0019', 'Colegio San AndrÃ©s Ltda', 'EducaciÃ³n', '93.890.123-4', 'Av. PrÃ­ncipe de Gales 4567', 'Santiago', 'La Reina', '+562 1234 5678', 'Prof. Marta Lagos', 'marta@colsandres.cl', '+569 1098 7654', NULL, NULL, TRUE),
+  ('CL-0020', 'Automotriz del Valle SA', 'Automotriz', '94.901.234-5', 'Av. Bernardo O''Higgins 2500', 'Rancagua', 'Rancagua', '+567 6789 0123', 'CristiÃ¡n Rojas', 'cristian@automotrizvalle.cl', '+569 0987 6543', NULL, NULL, TRUE),
+  ('CL-0021', 'Empresa ElÃ©ctrica del Norte SA', 'GeneraciÃ³n elÃ©ctrica', '95.012.345-6', 'Av. Granaderos 120', 'Calama', 'Calama', '+565 7890 1234', 'Hugo Pizarro', 'hugo@electricanorte.cl', '+569 9876 5432', NULL, NULL, TRUE),
+  ('CL-0022', 'Centro MÃ©dico Salud Total SpA', 'Salud', '96.123.456-7', 'Av. Manuel Montt 1800', 'Santiago', 'Providencia', '+562 2345 6789', 'Dr. Sergio ValdÃ©s', 'sergio@saludtotal.cl', '+569 8765 4321', NULL, NULL, TRUE),
+  ('CL-0023', 'ViÃ±a del Mar Turismo Ltda', 'Turismo', '97.234.567-8', 'Av. San MartÃ­n 500', 'ViÃ±a del Mar', 'ViÃ±a del Mar', '+563 7890 1234', 'Claudia Olivares', 'claudia@vinaturismo.cl', '+569 7654 3210', NULL, NULL, TRUE),
+  ('CL-0024', 'FerreterÃ­a El Constructor SA', 'FerreterÃ­a', '98.345.678-9', 'Av. Libertador 5000', 'Santiago', 'EstaciÃ³n Central', '+562 3456 7890', 'Patricio Soto', 'patricio@ferreteria.cl', '+569 6543 2109', NULL, NULL, TRUE),
+  ('CL-0025', 'TecnologÃ­a MÃ©dica del Sur SA', 'TecnologÃ­a mÃ©dica', '99.456.789-0', 'Av. PaicavÃ­ 2300', 'ConcepciÃ³n', 'ConcepciÃ³n', '+564 7890 1234', 'Ing. Karen DÃ­az', 'karen@tecmedsur.cl', '+569 5432 1098', NULL, NULL, TRUE),
+  ('CL-0026', 'Distribuidora de Alimentos Miramar Ltda', 'Alimentos', '60.567.890-1', 'Av. ColÃ³n 3400', 'ValparaÃ­so', 'ValparaÃ­so', '+563 8901 2345', 'Fernando Lara', 'fernando@alimentosmiramar.cl', '+569 4321 0987', NULL, NULL, TRUE),
+  ('CL-0027', 'Seguros del Sur SA', 'Seguros', '61.678.901-2', 'Av. Isidora Goyenechea 3000', 'Santiago', 'Las Condes', '+562 4567 8901', 'Andrea Bascur', 'andrea@segurossur.cl', '+569 3210 9876', NULL, NULL, TRUE),
+  ('CL-0028', 'Restaurante El Buen Sabor SpA', 'Restaurante', '62.789.012-3', 'Av. PÃ­o Nono 450', 'Santiago', 'Bellavista', '+562 5678 9012', 'CÃ©sar Tapia', 'cesar@buensabor.cl', '+569 2109 8765', NULL, NULL, TRUE),
+  ('CL-0029', 'Gimnasio Fitness Total EIRL', 'Gimnasio', '63.890.123-4', 'Av. IrarrÃ¡zaval 4500', 'Santiago', 'Ã‘uÃ±oa', '+562 6789 0123', 'Tamara Rivas', 'tamara@fitnesstotal.cl', '+569 1098 7654', NULL, NULL, TRUE),
+  ('CL-0030', 'ConsultorÃ­a EstratÃ©gica SpA', 'ConsultorÃ­a', '64.901.234-5', 'Av. El Bosque Sur 850', 'Santiago', 'El Golf', '+562 7890 1234', 'Mauricio Palma', 'mauricio@consultora.cl', '+569 0987 6543', NULL, NULL, TRUE),
   ('CL-0031', 'Reciclajes Industriales Chile SA', 'Reciclaje', '65.012.345-6', 'Av. AmÃ©rico Vespucio 5600', 'Santiago', 'Quilicura', '+562 8901 2345', 'Nelson Fuentes', 'nelson@reciclaje.cl', '+569 9876 5432', NULL, NULL, TRUE)
 ON CONFLICT (codigo) DO NOTHING;
 
--- ========== DIRECCIONES ==========
+-- Direcciones/Sucursales
 INSERT INTO clientes_direcciones (cliente_id, tipo_direccion, direccion, fono, ciudad, comuna) VALUES
   ((SELECT id FROM clientes WHERE codigo='CL-0001'), 'Matriz', 'Alameda 1', '962746015', 'Santiago', 'Santiago')
 ON CONFLICT DO NOTHING;
 
--- ========== EQUIPOS (61) ==========
+-- Equipos (61)
 INSERT INTO equipos (codigo, cliente_id, equipo, modelo, marca, serie, contador_pag, nivel_tintas, averia, activo) VALUES
-  ('EQ-0001', (SELECT id FROM clientes WHERE codigo='CL-0001'), 'Notebook', '445 g9', 'Hp', '123456789', '0', NULL, 'No enciende', TRUE)
-  ('EQ-0002', (SELECT id FROM clientes WHERE codigo='CL-0001'), 'Impresora', 'pr2-plus', 'Olivetti', '987654321', '0', NULL, 'Bateria daÃ±ada', TRUE)
-  ('EQ-0003', (SELECT id FROM clientes WHERE codigo='CL-0001'), 'NotebooK', 't14', 'Lenovo', '123123123', '0', NULL, 'Derrame de liquido', TRUE)
-  ('EQ-0004', (SELECT id FROM clientes WHERE codigo='CL-0002'), 'Impresora LÃ¡ser', 'LBP-2900B', 'Canon', 'CAN-4', '21647', 'Medio', NULL, TRUE)
-  ('EQ-0005', (SELECT id FROM clientes WHERE codigo='CL-0003'), 'Impresora LÃ¡ser', 'M404dn', 'HP', 'HP-5', '9487', 'CrÃ­tico', NULL, TRUE)
-  ('EQ-0006', (SELECT id FROM clientes WHERE codigo='CL-0004'), 'Impresora LÃ¡ser', 'P2650dw', 'Brother', 'BRO-6', '24570', 'Alto', NULL, TRUE)
-  ('EQ-0007', (SELECT id FROM clientes WHERE codigo='CL-0005'), 'Impresora LÃ¡ser', 'MB-2720', 'OKI', 'OKI-7', '7487', 'Medio', NULL, TRUE)
-  ('EQ-0008', (SELECT id FROM clientes WHERE codigo='CL-0006'), 'Impresora LÃ¡ser', 'M203dw', 'HP', 'HP-8', '44578', 'Alto', NULL, TRUE)
-  ('EQ-0009', (SELECT id FROM clientes WHERE codigo='CL-0007'), 'Impresora LÃ¡ser', 'MFP M227fdw', 'HP', 'HP-9', '28572', 'Alto', NULL, TRUE)
-  ('EQ-0010', (SELECT id FROM clientes WHERE codigo='CL-0008'), 'Impresora LÃ¡ser', 'MC-363', 'OKI', 'OKI-10', '29140', 'Alto', NULL, TRUE)
-  ('EQ-0011', (SELECT id FROM clientes WHERE codigo='CL-0009'), 'Impresora LÃ¡ser', 'LBP-6650dn', 'Canon', 'CAN-11', '42450', 'Bajo', NULL, TRUE)
-  ('EQ-0012', (SELECT id FROM clientes WHERE codigo='CL-0010'), 'Impresora LÃ¡ser', 'HL-L2370DW', 'Brother', 'BRO-12', '25531', 'CrÃ­tico', NULL, TRUE)
-  ('EQ-0013', (SELECT id FROM clientes WHERE codigo='CL-0011'), 'Impresora Multifuncional', 'MFC-L2710DW', 'Brother', 'BRO-13', '38697', 'CrÃ­tico', NULL, TRUE)
-  ('EQ-0014', (SELECT id FROM clientes WHERE codigo='CL-0012'), 'Impresora Multifuncional', 'LaserJet Pro MFP M428fdw', 'HP', 'HP-14', '38306', 'Alto', NULL, TRUE)
-  ('EQ-0015', (SELECT id FROM clientes WHERE codigo='CL-0013'), 'Impresora Multifuncional', 'ImageClass MF-744Cdw', 'Canon', 'CAN-15', '24691', 'Bajo', NULL, TRUE)
-  ('EQ-0016', (SELECT id FROM clientes WHERE codigo='CL-0014'), 'Impresora Multifuncional', 'MC-853dn', 'OKI', 'OKI-16', '39095', 'Medio', NULL, TRUE)
-  ('EQ-0017', (SELECT id FROM clientes WHERE codigo='CL-0015'), 'Impresora Multifuncional', 'MFC-J6545DW', 'Brother', 'BRO-17', '2272', 'CrÃ­tico', NULL, TRUE)
-  ('EQ-0018', (SELECT id FROM clientes WHERE codigo='CL-0016'), 'Impresora Multifuncional', 'Smart Tank 515', 'HP', 'HP-18', '33978', 'Bajo', NULL, TRUE)
-  ('EQ-0019', (SELECT id FROM clientes WHERE codigo='CL-0017'), 'Impresora Multifuncional', 'G3110', 'Canon', 'CAN-19', '29630', 'Medio', NULL, TRUE)
-  ('EQ-0020', (SELECT id FROM clientes WHERE codigo='CL-0018'), 'Impresora Matricial', 'DOT-Matrix 590', 'Epson', 'EPS-20', '19423', 'Bajo', NULL, TRUE)
-  ('EQ-0021', (SELECT id FROM clientes WHERE codigo='CL-0019'), 'Impresora Matricial', 'FX-2190II', 'Epson', 'EPS-21', '42942', 'Alto', NULL, TRUE)
-  ('EQ-0022', (SELECT id FROM clientes WHERE codigo='CL-0020'), 'Impresora TÃ©rmica', 'TSP-143', 'Star', 'STA-22', '36360', 'Bajo', NULL, TRUE)
-  ('EQ-0023', (SELECT id FROM clientes WHERE codigo='CL-0021'), 'Impresora TÃ©rmica', 'TM-T20X', 'Epson', 'EPS-23', '5419', 'Alto', NULL, TRUE)
-  ('EQ-0024', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Notebook', 'ThinkPad X1 Carbon', 'Lenovo', 'LEN-24', '36211', 'Bajo', NULL, TRUE)
-  ('EQ-0025', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Notebook', 'Latitude 3540', 'Dell', 'DEL-25', '47458', 'CrÃ­tico', NULL, TRUE)
-  ('EQ-0026', (SELECT id FROM clientes WHERE codigo='CL-0023'), 'Notebook', 'Pavilion 14', 'HP', 'HP-26', '4100', 'CrÃ­tico', NULL, TRUE)
-  ('EQ-0027', (SELECT id FROM clientes WHERE codigo='CL-0023'), 'Escritorio', 'OptiPlex 7080', 'Dell', 'DEL-27', '5521', 'Bajo', NULL, TRUE)
-  ('EQ-0028', (SELECT id FROM clientes WHERE codigo='CL-0024'), 'Escritorio', 'ThinkCentre M720q', 'Lenovo', 'LEN-28', '9268', 'Medio', NULL, TRUE)
-  ('EQ-0029', (SELECT id FROM clientes WHERE codigo='CL-0024'), 'Monitor', '27GL850-B', 'LG', 'LG-29', '18928', 'Alto', NULL, TRUE)
-  ('EQ-0030', (SELECT id FROM clientes WHERE codigo='CL-0025'), 'Monitor', 'P2721Q', 'Dell', 'DEL-30', '28010', 'Medio', NULL, TRUE)
-  ('EQ-0031', (SELECT id FROM clientes WHERE codigo='CL-0025'), 'Servidor', 'PowerEdge T340', 'Dell', 'DEL-31', '27499', 'Medio', NULL, TRUE)
-  ('EQ-0032', (SELECT id FROM clientes WHERE codigo='CL-0026'), 'Servidor', 'ThinkSystem SR250', 'Lenovo', 'LEN-32', '49169', 'Alto', NULL, TRUE)
-  ('EQ-0033', (SELECT id FROM clientes WHERE codigo='CL-0026'), 'Switch', 'SG-250-10', 'Cisco', 'CIS-33', '41186', 'Medio', NULL, TRUE)
-  ('EQ-0034', (SELECT id FROM clientes WHERE codigo='CL-0027'), 'Router', 'RV340', 'Cisco', 'CIS-34', '20835', 'Bajo', NULL, TRUE)
-  ('EQ-0035', (SELECT id FROM clientes WHERE codigo='CL-0027'), 'Firewall', 'FortiGate 60F', 'Fortinet', 'FOR-35', '30354', 'Medio', NULL, TRUE)
-  ('EQ-0036', (SELECT id FROM clientes WHERE codigo='CL-0028'), 'UPS', 'BX1500M', 'APC', 'APC-36', '39255', 'Alto', NULL, TRUE)
-  ('EQ-0037', (SELECT id FROM clientes WHERE codigo='CL-0028'), 'EscÃ¡ner', 'iS1000', 'Fujitsu', 'FUJ-37', '3688', 'Bajo', NULL, TRUE)
-  ('EQ-0038', (SELECT id FROM clientes WHERE codigo='CL-0029'), 'Fotocopiadora', 'eStudio 3029AC', 'Toshiba', 'TOS-38', '23516', 'CrÃ­tico', NULL, TRUE)
-  ('EQ-0039', (SELECT id FROM clientes WHERE codigo='CL-0029'), 'Fotocopiadora', 'D-COP 2500MF', 'Develop', 'DEV-39', '27775', 'Alto', NULL, TRUE)
-  ('EQ-0040', (SELECT id FROM clientes WHERE codigo='CL-0030'), 'Tablet', 'Tab S9 FE', 'Samsung', 'SAM-40', '19706', 'Alto', NULL, TRUE)
-  ('EQ-0041', (SELECT id FROM clientes WHERE codigo='CL-0030'), 'Proyector', 'EB-U50', 'Epson', 'EPS-41', '34919', 'CrÃ­tico', NULL, TRUE)
-  ('EQ-0042', (SELECT id FROM clientes WHERE codigo='CL-0031'), 'Impresora Plotter', 'DesignJet T830', 'HP', 'HP-42', '25057', 'CrÃ­tico', NULL, TRUE)
-  ('EQ-0043', (SELECT id FROM clientes WHERE codigo='CL-0031'), 'Impresora LÃ¡ser Color', 'CLP-775ND', 'Samsung', 'SAM-43', '28419', 'Alto', NULL, TRUE)
-  ('EQ-0044', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Impresora LÃ¡ser', 'LBP-2900B', 'Canon', 'CAN-2000-27', '5412', 'Bajo', NULL, TRUE)
-  ('EQ-0045', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Impresora Multifuncional', 'M404dn', 'HP', 'HP-2001-27', '13518', 'Alto', NULL, TRUE)
-  ('EQ-0046', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Notebook', 'P2650dw', 'Brother', 'BRO-2002-27', '45201', 'Bajo', NULL, TRUE)
-  ('EQ-0047', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Escritorio', 'MB-2720', 'OKI', 'OKI-2003-27', '5108', 'CrÃ­tico', NULL, TRUE)
-  ('EQ-0048', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Monitor', 'M203dw', 'Epson', 'EPS-2004-27', '4513', 'CrÃ­tico', NULL, TRUE)
-  ('EQ-0049', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Servidor', 'MFP M227fdw', 'Dell', 'DEL-2005-27', '18267', 'Alto', NULL, TRUE)
-  ('EQ-0050', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Switch', 'MC-363', 'Lenovo', 'LEN-2006-27', '37671', 'Alto', NULL, TRUE)
-  ('EQ-0051', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Router', 'HL-L2370DW', 'Samsung', 'SAM-2007-27', '34354', 'Medio', NULL, TRUE)
-  ('EQ-0052', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'UPS', 'MFC-L2710DW', 'LG', 'LG-2008-27', '42576', 'Bajo', NULL, TRUE)
-  ('EQ-0053', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'EscÃ¡ner', 'Smart Tank 515', 'Toshiba', 'TOS-2009-27', '14521', 'CrÃ­tico', NULL, TRUE)
-  ('EQ-0054', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Impresora LÃ¡ser', 'LBP-2900B', 'Canon', 'CAN-2010-27', '11548', 'Medio', NULL, TRUE)
-  ('EQ-0055', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Impresora Multifuncional', 'M404dn', 'HP', 'HP-2011-27', '27533', 'CrÃ­tico', NULL, TRUE)
-  ('EQ-0056', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Notebook', 'P2650dw', 'Brother', 'BRO-2012-27', '8970', 'Medio', NULL, TRUE)
-  ('EQ-0057', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Escritorio', 'MB-2720', 'OKI', 'OKI-2013-27', '14068', 'CrÃ­tico', NULL, TRUE)
-  ('EQ-0058', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Monitor', 'M203dw', 'Epson', 'EPS-2014-27', '10682', 'Bajo', NULL, TRUE)
-  ('EQ-0059', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Servidor', 'MFP M227fdw', 'Dell', 'DEL-2015-27', '7344', 'CrÃ­tico', NULL, TRUE)
-  ('EQ-0060', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Switch', 'MC-363', 'Lenovo', 'LEN-2016-27', '22285', 'CrÃ­tico', NULL, TRUE)
+  ('EQ-0001', (SELECT id FROM clientes WHERE codigo='CL-0001'), 'Notebook', '445 g9', 'Hp', '123456789', '0', NULL, 'No enciende', TRUE),
+  ('EQ-0002', (SELECT id FROM clientes WHERE codigo='CL-0001'), 'Impresora', 'pr2-plus', 'Olivetti', '987654321', '0', NULL, 'Bateria daÃ±ada', TRUE),
+  ('EQ-0003', (SELECT id FROM clientes WHERE codigo='CL-0001'), 'NotebooK', 't14', 'Lenovo', '123123123', '0', NULL, 'Derrame de liquido', TRUE),
+  ('EQ-0004', (SELECT id FROM clientes WHERE codigo='CL-0002'), 'Impresora LÃ¡ser', 'LBP-2900B', 'Canon', 'CAN-4', '21647', 'Medio', NULL, TRUE),
+  ('EQ-0005', (SELECT id FROM clientes WHERE codigo='CL-0003'), 'Impresora LÃ¡ser', 'M404dn', 'HP', 'HP-5', '9487', 'CrÃ­tico', NULL, TRUE),
+  ('EQ-0006', (SELECT id FROM clientes WHERE codigo='CL-0004'), 'Impresora LÃ¡ser', 'P2650dw', 'Brother', 'BRO-6', '24570', 'Alto', NULL, TRUE),
+  ('EQ-0007', (SELECT id FROM clientes WHERE codigo='CL-0005'), 'Impresora LÃ¡ser', 'MB-2720', 'OKI', 'OKI-7', '7487', 'Medio', NULL, TRUE),
+  ('EQ-0008', (SELECT id FROM clientes WHERE codigo='CL-0006'), 'Impresora LÃ¡ser', 'M203dw', 'HP', 'HP-8', '44578', 'Alto', NULL, TRUE),
+  ('EQ-0009', (SELECT id FROM clientes WHERE codigo='CL-0007'), 'Impresora LÃ¡ser', 'MFP M227fdw', 'HP', 'HP-9', '28572', 'Alto', NULL, TRUE),
+  ('EQ-0010', (SELECT id FROM clientes WHERE codigo='CL-0008'), 'Impresora LÃ¡ser', 'MC-363', 'OKI', 'OKI-10', '29140', 'Alto', NULL, TRUE),
+  ('EQ-0011', (SELECT id FROM clientes WHERE codigo='CL-0009'), 'Impresora LÃ¡ser', 'LBP-6650dn', 'Canon', 'CAN-11', '42450', 'Bajo', NULL, TRUE),
+  ('EQ-0012', (SELECT id FROM clientes WHERE codigo='CL-0010'), 'Impresora LÃ¡ser', 'HL-L2370DW', 'Brother', 'BRO-12', '25531', 'CrÃ­tico', NULL, TRUE),
+  ('EQ-0013', (SELECT id FROM clientes WHERE codigo='CL-0011'), 'Impresora Multifuncional', 'MFC-L2710DW', 'Brother', 'BRO-13', '38697', 'CrÃ­tico', NULL, TRUE),
+  ('EQ-0014', (SELECT id FROM clientes WHERE codigo='CL-0012'), 'Impresora Multifuncional', 'LaserJet Pro MFP M428fdw', 'HP', 'HP-14', '38306', 'Alto', NULL, TRUE),
+  ('EQ-0015', (SELECT id FROM clientes WHERE codigo='CL-0013'), 'Impresora Multifuncional', 'ImageClass MF-744Cdw', 'Canon', 'CAN-15', '24691', 'Bajo', NULL, TRUE),
+  ('EQ-0016', (SELECT id FROM clientes WHERE codigo='CL-0014'), 'Impresora Multifuncional', 'MC-853dn', 'OKI', 'OKI-16', '39095', 'Medio', NULL, TRUE),
+  ('EQ-0017', (SELECT id FROM clientes WHERE codigo='CL-0015'), 'Impresora Multifuncional', 'MFC-J6545DW', 'Brother', 'BRO-17', '2272', 'CrÃ­tico', NULL, TRUE),
+  ('EQ-0018', (SELECT id FROM clientes WHERE codigo='CL-0016'), 'Impresora Multifuncional', 'Smart Tank 515', 'HP', 'HP-18', '33978', 'Bajo', NULL, TRUE),
+  ('EQ-0019', (SELECT id FROM clientes WHERE codigo='CL-0017'), 'Impresora Multifuncional', 'G3110', 'Canon', 'CAN-19', '29630', 'Medio', NULL, TRUE),
+  ('EQ-0020', (SELECT id FROM clientes WHERE codigo='CL-0018'), 'Impresora Matricial', 'DOT-Matrix 590', 'Epson', 'EPS-20', '19423', 'Bajo', NULL, TRUE),
+  ('EQ-0021', (SELECT id FROM clientes WHERE codigo='CL-0019'), 'Impresora Matricial', 'FX-2190II', 'Epson', 'EPS-21', '42942', 'Alto', NULL, TRUE),
+  ('EQ-0022', (SELECT id FROM clientes WHERE codigo='CL-0020'), 'Impresora TÃ©rmica', 'TSP-143', 'Star', 'STA-22', '36360', 'Bajo', NULL, TRUE),
+  ('EQ-0023', (SELECT id FROM clientes WHERE codigo='CL-0021'), 'Impresora TÃ©rmica', 'TM-T20X', 'Epson', 'EPS-23', '5419', 'Alto', NULL, TRUE),
+  ('EQ-0024', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Notebook', 'ThinkPad X1 Carbon', 'Lenovo', 'LEN-24', '36211', 'Bajo', NULL, TRUE),
+  ('EQ-0025', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Notebook', 'Latitude 3540', 'Dell', 'DEL-25', '47458', 'CrÃ­tico', NULL, TRUE),
+  ('EQ-0026', (SELECT id FROM clientes WHERE codigo='CL-0023'), 'Notebook', 'Pavilion 14', 'HP', 'HP-26', '4100', 'CrÃ­tico', NULL, TRUE),
+  ('EQ-0027', (SELECT id FROM clientes WHERE codigo='CL-0023'), 'Escritorio', 'OptiPlex 7080', 'Dell', 'DEL-27', '5521', 'Bajo', NULL, TRUE),
+  ('EQ-0028', (SELECT id FROM clientes WHERE codigo='CL-0024'), 'Escritorio', 'ThinkCentre M720q', 'Lenovo', 'LEN-28', '9268', 'Medio', NULL, TRUE),
+  ('EQ-0029', (SELECT id FROM clientes WHERE codigo='CL-0024'), 'Monitor', '27GL850-B', 'LG', 'LG-29', '18928', 'Alto', NULL, TRUE),
+  ('EQ-0030', (SELECT id FROM clientes WHERE codigo='CL-0025'), 'Monitor', 'P2721Q', 'Dell', 'DEL-30', '28010', 'Medio', NULL, TRUE),
+  ('EQ-0031', (SELECT id FROM clientes WHERE codigo='CL-0025'), 'Servidor', 'PowerEdge T340', 'Dell', 'DEL-31', '27499', 'Medio', NULL, TRUE),
+  ('EQ-0032', (SELECT id FROM clientes WHERE codigo='CL-0026'), 'Servidor', 'ThinkSystem SR250', 'Lenovo', 'LEN-32', '49169', 'Alto', NULL, TRUE),
+  ('EQ-0033', (SELECT id FROM clientes WHERE codigo='CL-0026'), 'Switch', 'SG-250-10', 'Cisco', 'CIS-33', '41186', 'Medio', NULL, TRUE),
+  ('EQ-0034', (SELECT id FROM clientes WHERE codigo='CL-0027'), 'Router', 'RV340', 'Cisco', 'CIS-34', '20835', 'Bajo', NULL, TRUE),
+  ('EQ-0035', (SELECT id FROM clientes WHERE codigo='CL-0027'), 'Firewall', 'FortiGate 60F', 'Fortinet', 'FOR-35', '30354', 'Medio', NULL, TRUE),
+  ('EQ-0036', (SELECT id FROM clientes WHERE codigo='CL-0028'), 'UPS', 'BX1500M', 'APC', 'APC-36', '39255', 'Alto', NULL, TRUE),
+  ('EQ-0037', (SELECT id FROM clientes WHERE codigo='CL-0028'), 'EscÃ¡ner', 'iS1000', 'Fujitsu', 'FUJ-37', '3688', 'Bajo', NULL, TRUE),
+  ('EQ-0038', (SELECT id FROM clientes WHERE codigo='CL-0029'), 'Fotocopiadora', 'eStudio 3029AC', 'Toshiba', 'TOS-38', '23516', 'CrÃ­tico', NULL, TRUE),
+  ('EQ-0039', (SELECT id FROM clientes WHERE codigo='CL-0029'), 'Fotocopiadora', 'D-COP 2500MF', 'Develop', 'DEV-39', '27775', 'Alto', NULL, TRUE),
+  ('EQ-0040', (SELECT id FROM clientes WHERE codigo='CL-0030'), 'Tablet', 'Tab S9 FE', 'Samsung', 'SAM-40', '19706', 'Alto', NULL, TRUE),
+  ('EQ-0041', (SELECT id FROM clientes WHERE codigo='CL-0030'), 'Proyector', 'EB-U50', 'Epson', 'EPS-41', '34919', 'CrÃ­tico', NULL, TRUE),
+  ('EQ-0042', (SELECT id FROM clientes WHERE codigo='CL-0031'), 'Impresora Plotter', 'DesignJet T830', 'HP', 'HP-42', '25057', 'CrÃ­tico', NULL, TRUE),
+  ('EQ-0043', (SELECT id FROM clientes WHERE codigo='CL-0031'), 'Impresora LÃ¡ser Color', 'CLP-775ND', 'Samsung', 'SAM-43', '28419', 'Alto', NULL, TRUE),
+  ('EQ-0044', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Impresora LÃ¡ser', 'LBP-2900B', 'Canon', 'CAN-2000-27', '5412', 'Bajo', NULL, TRUE),
+  ('EQ-0045', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Impresora Multifuncional', 'M404dn', 'HP', 'HP-2001-27', '13518', 'Alto', NULL, TRUE),
+  ('EQ-0046', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Notebook', 'P2650dw', 'Brother', 'BRO-2002-27', '45201', 'Bajo', NULL, TRUE),
+  ('EQ-0047', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Escritorio', 'MB-2720', 'OKI', 'OKI-2003-27', '5108', 'CrÃ­tico', NULL, TRUE),
+  ('EQ-0048', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Monitor', 'M203dw', 'Epson', 'EPS-2004-27', '4513', 'CrÃ­tico', NULL, TRUE),
+  ('EQ-0049', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Servidor', 'MFP M227fdw', 'Dell', 'DEL-2005-27', '18267', 'Alto', NULL, TRUE),
+  ('EQ-0050', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Switch', 'MC-363', 'Lenovo', 'LEN-2006-27', '37671', 'Alto', NULL, TRUE),
+  ('EQ-0051', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Router', 'HL-L2370DW', 'Samsung', 'SAM-2007-27', '34354', 'Medio', NULL, TRUE),
+  ('EQ-0052', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'UPS', 'MFC-L2710DW', 'LG', 'LG-2008-27', '42576', 'Bajo', NULL, TRUE),
+  ('EQ-0053', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'EscÃ¡ner', 'Smart Tank 515', 'Toshiba', 'TOS-2009-27', '14521', 'CrÃ­tico', NULL, TRUE),
+  ('EQ-0054', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Impresora LÃ¡ser', 'LBP-2900B', 'Canon', 'CAN-2010-27', '11548', 'Medio', NULL, TRUE),
+  ('EQ-0055', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Impresora Multifuncional', 'M404dn', 'HP', 'HP-2011-27', '27533', 'CrÃ­tico', NULL, TRUE),
+  ('EQ-0056', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Notebook', 'P2650dw', 'Brother', 'BRO-2012-27', '8970', 'Medio', NULL, TRUE),
+  ('EQ-0057', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Escritorio', 'MB-2720', 'OKI', 'OKI-2013-27', '14068', 'CrÃ­tico', NULL, TRUE),
+  ('EQ-0058', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Monitor', 'M203dw', 'Epson', 'EPS-2014-27', '10682', 'Bajo', NULL, TRUE),
+  ('EQ-0059', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Servidor', 'MFP M227fdw', 'Dell', 'DEL-2015-27', '7344', 'CrÃ­tico', NULL, TRUE),
+  ('EQ-0060', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Switch', 'MC-363', 'Lenovo', 'LEN-2016-27', '22285', 'CrÃ­tico', NULL, TRUE),
   ('EQ-0061', (SELECT id FROM clientes WHERE codigo='CL-0022'), 'Router', 'HL-L2370DW', 'Samsung', 'SAM-2017-27', '1347', 'Alto', NULL, TRUE)
 ON CONFLICT (codigo) DO NOTHING;
 
--- ========== INSUMOS ==========
+-- Insumos de equipos
 UPDATE equipos SET insumo1='Cargador' WHERE codigo='EQ-0001';
 UPDATE equipos SET insumo1='Cinta ' WHERE codigo='EQ-0002';
 UPDATE equipos SET insumo1='Cargador' WHERE codigo='EQ-0003';
 
--- ========== ORDENES DE TRABAJO (63) ==========
+-- Ordenes de Trabajo (63)
 INSERT INTO ordenes_trabajo (
-  "numero_orden", "fecha", "es_garantia", "fecha_ingreso", "fecha_ingreso_check",
-  "fecha_termino", "fecha_termino_check", "fecha_entrega", "fecha_entrega_check",
-  "fecha_compra", "fecha_compra_check", "cliente", "direccion", "comuna",
-  "contacto", "fono_principal", "tecnico_asignado", "equipo", "modelo",
-  "marca", "serie", "contador_pag_out", "nivel_tinta", "averia",
-  "cliente_id", "equipo_id", "insumo1", "insumo2", "insumo3", "insumo4",
-  "insumo5", "insumo6", "insumo7", "insumo8", "insumo9", "insumo10",
-  "insumo11", "insumo12"
+  "numero_orden",
+  "fecha",
+  "es_garantia",
+  "fecha_ingreso",
+  "fecha_ingreso_check",
+  "fecha_termino",
+  "fecha_termino_check",
+  "fecha_entrega",
+  "fecha_entrega_check",
+  "fecha_compra",
+  "fecha_compra_check",
+  "cliente",
+  "direccion",
+  "comuna",
+  "contacto",
+  "fono_principal",
+  "tecnico_asignado",
+  "equipo",
+  "modelo",
+  "marca",
+  "serie",
+  "contador_pag_out",
+  "nivel_tinta",
+  "averia",
+  "cliente_id",
+  "equipo_id",
+  "insumo1",
+  "insumo2",
+  "insumo3",
+  "insumo4",
+  "insumo5",
+  "insumo6",
+  "insumo7",
+  "insumo8",
+  "insumo9",
+  "insumo10",
+  "insumo11",
+  "insumo12"
 ) VALUES
   ('OT-2026-0001', '2026-05-20', '0', NULL, FALSE, NULL, FALSE, NULL, FALSE, NULL, FALSE, 'Microsystem', 'Alameda 1', 'Santiago ', 'Diego Luna', '962746015', 'Javier encina', 'Notebook', '445 g9', 'Hp', '123456789', '0', NULL, 'No enciende', (SELECT id FROM clientes WHERE codigo='CL-0001'), (SELECT id FROM equipos WHERE codigo='EQ-0001'), 'Cargador', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
   ('OT-2026-0002', '2026-05-20', '0', NULL, FALSE, NULL, FALSE, NULL, FALSE, NULL, FALSE, 'Microsystem', 'Alameda 1', 'Santiago ', 'Diego Luna', '962746015', 'Diego pincheira', 'Impresora', 'pr2-plus', 'Olivetti', '987654321', NULL, NULL, 'Bateria daÃ±ada', (SELECT id FROM clientes WHERE codigo='CL-0001'), (SELECT id FROM equipos WHERE codigo='EQ-0002'), 'Cinta ', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
@@ -198,6 +220,5 @@ INSERT INTO ordenes_trabajo (
   ('OT-2026-0063', '2026-04-29', '0', '2026-04-29', TRUE, NULL, TRUE, NULL, FALSE, NULL, FALSE, 'CL-0022 - Centro MÃ©dico Salud Total SpA', '-', '-', '-', '-', 'Carolina Vega', 'EscÃ¡ner', 'Smart Tank 515', 'Toshiba', 'TOS-2019-27', '31218', 'Bajo', 'Atasco de papel', (SELECT id FROM clientes WHERE codigo='CL-0022'), (SELECT id FROM equipos WHERE codigo='EQ-0061'), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)
 ON CONFLICT (numero_orden) DO NOTHING;
 
--- ========== HECHO ==========
-SELECT 'Seed completado: 31 clientes, 61 equipos, 63 OT' AS resultado;
 
+-- Total: 31 clientes, 61 equipos, 63 OT
