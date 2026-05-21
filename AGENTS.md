@@ -701,3 +701,39 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.1 | 17-18 Mayo 2026 | Responsive móvil, fix Vercel, optimización |
 | 1.2 | 18 Mayo 2026 | Documentación completa |
 | 1.3 | 18 Mayo 2026 | Separación ramas main (MySQL) vs deploy/cloud (PostgreSQL), fix fechas editar orden |
+| 1.4 | 20 Mayo 2026 | Fix FK cliente_id en seed script, toggle hide/show secciones, paginación 10 items |
+
+## Cambios Recientes (20 Mayo 2026)
+
+### 24. Fix FK cliente_id en Seed Script
+**Archivo modificado:** `scripts/seed-test-data.js`
+
+**Problema:** El seed script usaba `distribucion[i]` (índice 1-based) como `cliente_id` al insertar equipos y OT, pero los IDs reales de la DB no comienzan en 1 si hay registros pre-existentes. Esto causaba que los equipos y OT quedaran con `cliente_id` incorrectos (huérfanos o apuntando al cliente equivocado), y el mantenedor mostraba 0 órdenes de trabajo asociadas.
+
+**Soluciones:**
+1. **Seed**: Ahora inserta clientes, luego consulta sus IDs reales por código (`SELECT id FROM clientes WHERE codigo IN (...)`), y usa ese mapeo para equipos y OT
+2. **Equipo_id en OT**: También se consulta el ID real del equipo por código
+3. Se cambió a `INSERT IGNORE` para ser re-ejecutable sin duplicados
+4. Se agregaron 20 clientes adicionales (total 50 en el seed)
+
+### 25. Toggle Hide/Show en ClienteExpandido
+**Archivos modificados:**
+- `frontend/src/components/clientes/ClienteExpandido.jsx`
+- `frontend/src/components/clientes/clientes-componentes.css`
+
+**Cambios:**
+- Cada sección (Equipos Asociados, Órdenes de Trabajo) tiene un botón toggle (chevron up/down) que oculta/muestra el contenido
+- Estados independientes: `mostrarEquipos` y `mostrarOTs`
+- Botón con hover que cambia a color primary
+
+### 26. Paginación en Equipos Asociados y Órdenes de Trabajo
+**Archivos modificados:**
+- `frontend/src/components/clientes/ClienteExpandido.jsx`
+- `frontend/src/components/clientes/clientes-componentes.css`
+
+**Cambios:**
+- 10 items por página con slice en frontend
+- Componente `Paginacion` reutilizable con ventana de 7 números y ellipsis
+- Estados `pagEquipos` y `pagOTs` independientes
+- Se resetea a página 1 al cambiar la cantidad de datos (useEffect)
+- Estilos `.paginacion-cliente` con botones compactos de 32px
