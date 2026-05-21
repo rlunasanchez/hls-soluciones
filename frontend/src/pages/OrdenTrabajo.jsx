@@ -235,8 +235,10 @@ function OrdenTrabajo() {
   };
 
   const ordenesFiltradas = ordenes.filter(orden => {
-    if (!filtroNumeroOrden) return true;
-    return orden.numero_orden?.toLowerCase().includes(filtroNumeroOrden.toLowerCase());
+    if (filtroNumeroOrden && !orden.numero_orden?.toLowerCase().includes(filtroNumeroOrden.toLowerCase())) return false;
+    if (filtroGarantia === "si" && !orden.es_garantia) return false;
+    if (filtroGarantia === "no" && orden.es_garantia) return false;
+    return true;
   });
 
   const totalPaginas = Math.ceil(ordenesFiltradas.length / ITEMS_POR_PAG);
