@@ -23,12 +23,8 @@ function OrdenTrabajo() {
   // Estados para listar órdenes con paginación
   const [ordenes, setOrdenes] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [pagination, setPagination] = useState({
-    currentPage:1,
-    totalPages:1,
-    totalItems:0,
-    itemsPerPage:10
-  });
+  const [paginaActual, setPaginaActual] = useState(1);
+  const ITEMS_POR_PAG = 4;
   const [editingId, setEditingId] = useState(null);
   const [filtroNumeroOrden, setFiltroNumeroOrden] = useState("");
   const [filtroGarantia, setFiltroGarantia] = useState("todos");
@@ -96,7 +92,7 @@ function OrdenTrabajo() {
   useEffect(() => {
     fetchClientes();
     fetchEquipos();
-    fetchOrdenes(1);
+    fetchOrdenes();
   }, []);
 
   // Recibir cliente u orden desde Clientes
@@ -203,6 +199,9 @@ function OrdenTrabajo() {
     setMostrarFormulario(true);
   };
 
+  // Resetear paginación al filtrar
+  useEffect(() => { setPaginaActual(1); }, [filtroNumeroOrden, filtroGarantia]);
+
   // Cierra los dropdowns al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -222,12 +221,12 @@ function OrdenTrabajo() {
     };
   }, []);
 
-  const fetchOrdenes = async (page = 1) => {
+  const fetchOrdenes = async () => {
     setLoading(true);
     try {
-      const res = await api.get(`/api/ordenes?page=${page}&limit=100`);
+      const res = await api.get("/api/ordenes?page=1&limit=10000");
       setOrdenes(res.data.ordenes);
-      setPagination({ ...res.data.pagination, currentPage: page });
+      setPaginaActual(1);
     } catch (err) {
       console.error("Error al cargar órdenes:", err);
     } finally {
@@ -239,6 +238,9 @@ function OrdenTrabajo() {
     if (!filtroNumeroOrden) return true;
     return orden.numero_orden?.toLowerCase().includes(filtroNumeroOrden.toLowerCase());
   });
+
+  const totalPaginas = Math.ceil(ordenesFiltradas.length / ITEMS_POR_PAG);
+  const ordenesPag = ordenesFiltradas.slice((paginaActual - 1) * ITEMS_POR_PAG, paginaActual * ITEMS_POR_PAG);
 
   const fmtDate = (d) => {
     if (!d) return "";
@@ -362,7 +364,7 @@ function OrdenTrabajo() {
     try {
       await api.delete(`/api/ordenes/${id}`);
       alert("Orden eliminada exitosamente");
-      fetchOrdenes(pagination.currentPage);
+      fetchOrdenes();
     } catch (err) {
       console.error("Error al eliminar orden:", err);
       alert("Error al eliminar la orden");
@@ -571,7 +573,7 @@ function OrdenTrabajo() {
       if (vinoDeCliente) {
         navigate("/clientes");
       } else {
-        fetchOrdenes(1);
+    fetchOrdenes();
       }
     } catch (err) {
       console.error("Error al guardar orden:", err);
@@ -640,15 +642,16 @@ function OrdenTrabajo() {
 
       {!mostrarFormulario ? (
           <OrdenLista
-            ordenes={ordenes}
+            ordenes={ordenesPag}
             loading={loading}
             filtroNumeroOrden={filtroNumeroOrden}
             onFiltroChange={setFiltroNumeroOrden}
             filtroGarantia={filtroGarantia}
             onFiltroGarantiaChange={setFiltroGarantia}
             onNueva={abrirNuevaOrden}
-            pagination={pagination}
-            onPageChange={fetchOrdenes}
+            paginaActual={paginaActual}
+            totalPaginas={totalPaginas}
+            onPageChange={setPaginaActual}
             onEditar={editarOrden}
             onEliminar={eliminarOrden}
             onInforme={(orden) => navigate('/informes', { state: { orden } })}

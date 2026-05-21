@@ -1,15 +1,7 @@
 import { ClipboardList, FileText, FileSpreadsheet, Edit, Trash2 } from "lucide-react";
 import Pagination from "../Pagination";
 
-function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtroGarantia, onFiltroGarantiaChange, onNueva, pagination, onPageChange, onEditar, onEliminar, onInforme, onCotizacion }) {
-  const ordenesFiltradas = ordenes.filter((orden) => {
-    if (filtroNumeroOrden && !orden.numero_orden?.toLowerCase().includes(filtroNumeroOrden.toLowerCase())) return false;
-    if (filtroGarantia !== "todos") {
-      if (filtroGarantia === "si" && !orden.es_garantia) return false;
-      if (filtroGarantia === "no" && orden.es_garantia) return false;
-    }
-    return true;
-  });
+function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtroGarantia, onFiltroGarantiaChange, onNueva, paginaActual, totalPaginas, onPageChange, onEditar, onEliminar, onInforme, onCotizacion }) {
 
   return (
     <>
@@ -39,10 +31,10 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
           <ClipboardList size={48} />
           <p>Cargando órdenes...</p>
         </div>
-      ) : ordenesFiltradas.length === 0 ? (
+      ) : ordenes.length === 0 ? (
         <div className="empty-state">
           <ClipboardList size={48} />
-          <p>{ordenes.length === 0 ? "No hay órdenes de trabajo" : `No hay órdenes que coincidan con la búsqueda`}</p>
+          <p>No hay órdenes de trabajo</p>
         </div>
       ) : (
         <>
@@ -60,7 +52,7 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                 </tr>
               </thead>
               <tbody>
-                {ordenesFiltradas.map((orden) => (
+                {ordenes.map((orden) => (
                   <tr key={orden.id}>
                     <td data-label="N° Orden">
                       <span className="codigo-badge">{orden.numero_orden}</span>
@@ -103,7 +95,7 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
           </div>
 
           <div className="cards-table">
-            {ordenesFiltradas.map((orden) => (
+            {ordenes.map((orden) => (
               <div key={orden.id} className="data-card">
                 <div className="data-card-header">
                   <strong>{orden.numero_orden}</strong>
@@ -151,7 +143,7 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
             ))}
           </div>
 
-          <Pagination currentPage={pagination.currentPage} totalPages={pagination.totalPages} onPageChange={onPageChange} />
+          <Pagination currentPage={paginaActual} totalPages={totalPaginas} onPageChange={onPageChange} />
         </>
       )}
     </>
