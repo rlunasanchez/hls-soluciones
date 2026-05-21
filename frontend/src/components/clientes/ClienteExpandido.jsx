@@ -45,7 +45,7 @@ function ClienteExpandido({ cliente, ordenes, onEditar, onEliminar, onEliminarOT
   const [mostrarOTs, setMostrarOTs] = useState(true);
   const [pagEquipos, setPagEquipos] = useState(1);
   const [pagOTs, setPagOTs] = useState(1);
-  const ITEMS_POR_PAG = 10;
+  const ITEMS_POR_PAG = 4;
 
   useEffect(() => {
     if (cliente?.id) {
