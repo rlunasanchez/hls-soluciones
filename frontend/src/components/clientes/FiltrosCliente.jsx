@@ -1,4 +1,4 @@
-import { Search, X } from "lucide-react";
+import { Search, RotateCcw } from "lucide-react";
 
 function FiltrosCliente({ busqueda, onBusquedaChange, filtroRut, onFiltroRutChange, onLimpiar }) {
   const hayFiltro = busqueda || filtroRut;
@@ -39,8 +39,8 @@ function FiltrosCliente({ busqueda, onBusquedaChange, filtroRut, onFiltroRutChan
         />
       </div>
       {hayFiltro && (
-        <button className="filtro-limpiar" onClick={onLimpiar} title="Limpiar filtros">
-          <X size={14} /> Limpiar
+        <button className="btn-nuevo-cliente" onClick={onLimpiar} title="Limpiar filtros">
+          <RotateCcw size={14} /> Limpiar
         </button>
       )}
     </div>

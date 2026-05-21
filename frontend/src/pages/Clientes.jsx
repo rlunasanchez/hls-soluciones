@@ -531,7 +531,7 @@ function Clientes() {
       {clientesFiltrados.length === 0 && (
         <div className="empty-state">
           <Users size={48} />
-          <p>{clientes.length === 0 ? "No hay clientes" : "No hay clientes que coincidan con la búsqueda"}</p>
+          <p>No hay clientes que coincidan con la búsqueda</p>
         </div>
       )}
 
