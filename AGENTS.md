@@ -701,7 +701,7 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.1 | 17-18 Mayo 2026 | Responsive móvil, fix Vercel, optimización |
 | 1.2 | 18 Mayo 2026 | Documentación completa |
 | 1.3 | 18 Mayo 2026 | Separación ramas main (MySQL) vs deploy/cloud (PostgreSQL), fix fechas editar orden |
-| 1.4 | 20 Mayo 2026 | Fix FK cliente_id en seed script, toggle hide/show secciones, paginación 10 items |
+| 1.4 | 20 Mayo 2026 | Fix FK cliente_id en seed script, toggle hide/show secciones, paginación 10 items, botón Limpiar filtros, paginación 4 items |
 
 ## Cambios Recientes (20 Mayo 2026)
 
@@ -737,3 +737,15 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 - Estados `pagEquipos` y `pagOTs` independientes
 - Se resetea a página 1 al cambiar la cantidad de datos (useEffect)
 - Estilos `.paginacion-cliente` con botones compactos de 32px
+
+### 27. Paginación 4 items y botón Limpiar en filtros
+**Archivos modificados:**
+- `frontend/src/components/clientes/ClienteExpandido.jsx`
+- `frontend/src/components/clientes/FiltrosCliente.jsx`
+- `frontend/src/components/clientes/clientes-componentes.css`
+- `frontend/src/pages/Clientes.jsx`
+
+**Cambios:**
+- Items por página reducido de 10 a 4 (ITEMS_POR_PAG = 4)
+- Botón "Limpiar" en FiltrosCliente con estilo cf-btn-c (fondo #f1f5f9), visible solo cuando hay filtro activo
+- Limpia ambos campos (Razón Social y RUT) al hacer clic

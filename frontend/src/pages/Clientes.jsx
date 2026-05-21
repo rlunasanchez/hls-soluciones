@@ -492,6 +492,7 @@ function Clientes() {
         onBusquedaChange={setBusqueda}
         filtroRut={filtroRut}
         onFiltroRutChange={setFiltroRut}
+        onLimpiar={() => { setBusqueda(""); setFiltroRut(""); }}
       />
 
       <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 16 }}>
