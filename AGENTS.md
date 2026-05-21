@@ -701,7 +701,7 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.1 | 17-18 Mayo 2026 | Responsive móvil, fix Vercel, optimización |
 | 1.2 | 18 Mayo 2026 | Documentación completa |
 | 1.3 | 18 Mayo 2026 | Separación ramas main (MySQL) vs deploy/cloud (PostgreSQL), fix fechas editar orden |
-| 1.4 | 20 Mayo 2026 | Fix FK cliente_id en seed script, toggle hide/show secciones, paginación 10 items, botón Limpiar filtros, paginación 4 items |
+| 1.4 | 20 Mayo 2026 | Fix FK cliente_id en seed script, toggle hide/show secciones, paginación 10 items, botón Limpiar filtros, paginación 4 items, paginación OT |
 
 ## Cambios Recientes (20 Mayo 2026)
 
@@ -749,3 +749,14 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 - Items por página reducido de 10 a 4 (ITEMS_POR_PAG = 4)
 - Botón "Limpiar" en FiltrosCliente con estilo cf-btn-c (fondo #f1f5f9), visible solo cuando hay filtro activo
 - Limpia ambos campos (Razón Social y RUT) al hacer clic
+
+### 28. Paginación en Orden de Trabajo
+**Archivos modificados:**
+- `frontend/src/pages/OrdenTrabajo.jsx`
+- `frontend/src/components/ordenes/OrdenLista.jsx`
+
+**Cambios:**
+- Fetch de todas las órdenes sin límite (`limit=10000`) y paginación frontend con `slice()`
+- 4 items por página (`ITEMS_POR_PAG = 4`)
+- Reseteo a página 1 al cambiar filtros (useEffect)
+- Filtros ahora actúan sobre el dataset completo, no solo la página actual
