@@ -51,7 +51,8 @@ function Login() {
     input: { padding: '7px 34px 7px 34px', fontSize: '.82rem', border: '1.5px solid var(--border)', borderRadius: '7px', width: '100%', boxSizing: 'border-box', outline: 'none', background: 'white' },
     eyeBtn: { position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: '4px' },
     error: { color: 'var(--danger)', background: 'var(--danger-light)', padding: '10px', borderRadius: '7px', margin: 0, fontSize: '.78rem' },
-    btn: { padding: '9px 0', fontSize: '.85rem', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, marginTop: '2px', transition: 'all .2s' }
+    btn: { padding: '9px 0', fontSize: '.85rem', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, marginTop: '2px', transition: 'all .2s' },
+    footer: { textAlign: 'center', padding: '14px', borderTop: '1px solid var(--border)', color: 'var(--text-muted)', fontSize: '.75rem' }
   };
 
   return (
@@ -90,6 +91,7 @@ function Login() {
             {cargando ? 'Ingresando...' : 'Ingresar al Sistema'}
           </button>
         </form>
+        <div style={s.footer}>&copy; HLS Soluciones Inform&aacute;ticas</div>
       </div>
     </div>
   );
