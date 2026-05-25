@@ -1,5 +1,15 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-05-25
+
+### Limpieza Login
+- Se quitó el ícono (logo) del header del login
+- Se quitó el año del footer, dejando solo "© HLS Soluciones Informáticas"
+
+**Archivo modificado:** `frontend/src/pages/Login.jsx`
+
+---
+
 ## Fecha: 2026-05-04
 
 ### 🎨 Diseño Responsive (NUEVO)
