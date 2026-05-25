@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { Lock, User, Eye, EyeOff } from 'lucide-react';
 import api from '../services/api';
 
 function Login() {
@@ -41,8 +41,6 @@ function Login() {
     page: { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--gradient)', padding: '16px' },
     card: { background: 'white', borderRadius: '14px', boxShadow: 'var(--shadow-lg)', width: '100%', maxWidth: '380px', overflow: 'hidden' },
     head: { background: 'var(--gradient)', padding: '24px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' },
-    iconWrap: { width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-    icon: { color: 'white' },
     h2: { color: 'white', margin: 0, fontSize: '18px', fontWeight: 600 },
     p: { color: 'rgba(255,255,255,0.8)', margin: 0, fontSize: '.78rem' },
     form: { padding: '22px', display: 'flex', flexDirection: 'column', gap: '14px' },
@@ -53,15 +51,13 @@ function Login() {
     input: { padding: '7px 34px 7px 34px', fontSize: '.82rem', border: '1.5px solid var(--border)', borderRadius: '7px', width: '100%', boxSizing: 'border-box', outline: 'none', background: 'white' },
     eyeBtn: { position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: '4px' },
     error: { color: 'var(--danger)', background: 'var(--danger-light)', padding: '10px', borderRadius: '7px', margin: 0, fontSize: '.78rem' },
-    btn: { padding: '9px 0', fontSize: '.85rem', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, marginTop: '2px', transition: 'all .2s' },
-    footer: { textAlign: 'center', padding: '14px', borderTop: '1px solid var(--border)', color: 'var(--text-muted)', fontSize: '.75rem' }
+    btn: { padding: '9px 0', fontSize: '.85rem', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, marginTop: '2px', transition: 'all .2s' }
   };
 
   return (
     <div style={s.page}>
       <div style={s.card}>
         <div style={s.head}>
-          <div style={s.iconWrap}><Shield size={24} style={s.icon} /></div>
           <h2 style={s.h2}>HLS Soluciones</h2>
           <p style={s.p}>Ingrese sus credenciales para acceder</p>
         </div>
@@ -94,7 +90,6 @@ function Login() {
             {cargando ? 'Ingresando...' : 'Ingresar al Sistema'}
           </button>
         </form>
-        <div style={s.footer}>&copy; {new Date().getFullYear()} HLS Soluciones Inform&aacute;ticas</div>
       </div>
     </div>
   );
