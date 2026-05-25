@@ -7,9 +7,9 @@ dotenv.config();
 const router = express.Router();
 
 async function generarCodigo() {
-  const [rows] = await pool.query("SELECT codigo FROM equipos WHERE codigo LIKE 'EQ-%' ORDER BY id DESC LIMIT 1");
-  if (rows.length === 0) return "EQ-0001";
-  const num = parseInt(rows[0].codigo.split("-")[1], 10) || 0;
+  const result = await pool.query("SELECT codigo FROM equipos WHERE codigo LIKE 'EQ-%' ORDER BY id DESC LIMIT 1");
+  if (result.rows.length === 0) return "EQ-0001";
+  const num = parseInt(result.rows[0].codigo.split("-")[1], 10) || 0;
   return `EQ-${String(num + 1).padStart(4, "0")}`;
 }
 
@@ -31,21 +31,25 @@ router.get("/", async (req, res) => {
       LEFT JOIN clientes c ON e.cliente_id = c.id`;
     let params = [];
     const conditions = [];
+    let paramIndex = 0;
     if (q && q.trim()) {
+      paramIndex++;
       const term = `%${q.trim()}%`;
-      conditions.push(`(LOWER(e.codigo) LIKE LOWER(?) OR LOWER(e.serie) LIKE LOWER(?) OR LOWER(e.equipo) LIKE LOWER(?) OR LOWER(e.marca) LIKE LOWER(?))`);
+      conditions.push(`(LOWER(e.codigo) LIKE LOWER($${paramIndex}) OR LOWER(e.serie) LIKE LOWER($${paramIndex}) OR LOWER(e.equipo) LIKE LOWER($${paramIndex}) OR LOWER(e.marca) LIKE LOWER($${paramIndex}))`);
       params.push(term, term, term, term);
+      paramIndex += 3;
     }
     if (cliente_id) {
-      conditions.push(`e.cliente_id = ?`);
+      paramIndex++;
+      conditions.push(`e.cliente_id = $${paramIndex}`);
       params.push(cliente_id);
     }
     if (conditions.length > 0) {
       sql += ` WHERE ${conditions.join(" AND ")}`;
     }
     sql += ` ORDER BY e.id DESC`;
-    const [rows] = await pool.query(sql, params);
-    res.json(rows);
+    const result = await pool.query(sql, params);
+    res.json(result.rows);
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
@@ -54,15 +58,15 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
-    const [rows] = await pool.query(
+    const result = await pool.query(
       `SELECT e.*, c.razon_social as cliente_nombre, c.rut as cliente_rut, c.codigo as cliente_codigo
       FROM equipos e
       LEFT JOIN clientes c ON e.cliente_id = c.id
-      WHERE e.id = ?`,
+      WHERE e.id = $1`,
       [req.params.id]
     );
-    if (rows.length === 0) return res.status(404).json({ msg: "Equipo no encontrado" });
-    res.json(rows[0]);
+    if (result.rows.length === 0) return res.status(404).json({ msg: "Equipo no encontrado" });
+    res.json(result.rows[0]);
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
@@ -79,7 +83,7 @@ router.post("/", authMiddleware, async (req, res) => {
       `INSERT INTO equipos (codigo, cliente_id, equipo, modelo, marca, serie, contador_pag, nivel_tintas,
         insumo1, insumo2, insumo3, insumo4, insumo5, insumo6,
         insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)`,
       [codigo, cliente_id || null, equipo, modelo, marca, serie || null, contador_pag || 0, nivel_tintas || null,
         insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null,
         insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null,
@@ -98,43 +102,43 @@ router.put("/:id", authMiddleware, async (req, res) => {
     insumo1, insumo2, insumo3, insumo4, insumo5, insumo6,
     insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia } = req.body;
   try {
-    const [rows] = await pool.query("SELECT codigo FROM equipos WHERE id = ?", [id]);
-    let codigo = rows[0]?.codigo;
+    const result = await pool.query("SELECT codigo FROM equipos WHERE id = $1", [id]);
+    let codigo = result.rows[0]?.codigo;
     if (!codigo) {
       codigo = await generarCodigo();
     }
-    const connection = await pool.getConnection();
+    const client = await pool.connect();
     try {
-      await connection.beginTransaction();
-      await connection.query(
-        `UPDATE equipos SET codigo = ?, equipo = ?, modelo = ?, marca = ?, serie = ?, contador_pag = ?,
-          nivel_tintas = ?, cliente_id = ?,
-          insumo1 = ?, insumo2 = ?, insumo3 = ?, insumo4 = ?, insumo5 = ?, insumo6 = ?,
-          insumo7 = ?, insumo8 = ?, insumo9 = ?, insumo10 = ?, insumo11 = ?, insumo12 = ?,
-          averia = ? WHERE id = ?`,
+      await client.query("BEGIN");
+      await client.query(
+        `UPDATE equipos SET codigo = $1, equipo = $2, modelo = $3, marca = $4, serie = $5, contador_pag = $6,
+          nivel_tintas = $7, cliente_id = $8,
+          insumo1 = $9, insumo2 = $10, insumo3 = $11, insumo4 = $12, insumo5 = $13, insumo6 = $14,
+          insumo7 = $15, insumo8 = $16, insumo9 = $17, insumo10 = $18, insumo11 = $19, insumo12 = $20,
+          averia = $21 WHERE id = $22`,
         [codigo, equipo, modelo, marca, serie, contador_pag || 0, nivel_tintas, cliente_id || null,
           insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null,
           insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null,
           insumo9 || null, insumo10 || null, insumo11 || null, insumo12 || null, averia || null, id]
       );
-      await connection.query(
-        `UPDATE ordenes_trabajo SET equipo = ?, modelo = ?, marca = ?, serie = ?,
-          contador_pag_out = ?, nivel_tinta = ?,
-          insumo1 = ?, insumo2 = ?, insumo3 = ?, insumo4 = ?, insumo5 = ?, insumo6 = ?,
-          insumo7 = ?, insumo8 = ?, insumo9 = ?, insumo10 = ?, insumo11 = ?, insumo12 = ?,
-          averia = ? WHERE equipo_id = ?`,
+      await client.query(
+        `UPDATE ordenes_trabajo SET equipo = $1, modelo = $2, marca = $3, serie = $4,
+          contador_pag_out = $5, nivel_tinta = $6,
+          insumo1 = $7, insumo2 = $8, insumo3 = $9, insumo4 = $10, insumo5 = $11, insumo6 = $12,
+          insumo7 = $13, insumo8 = $14, insumo9 = $15, insumo10 = $16, insumo11 = $17, insumo12 = $18,
+          averia = $19 WHERE equipo_id = $20`,
         [equipo, modelo, marca, serie, contador_pag || 0, nivel_tintas || null,
           insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null,
           insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null,
           insumo9 || null, insumo10 || null, insumo11 || null, insumo12 || null, averia || null, id]
       );
-      await connection.commit();
+      await client.query("COMMIT");
       res.json({ msg: "Equipo actualizado", codigo });
     } catch (err2) {
-      await connection.rollback();
+      await client.query("ROLLBACK");
       throw err2;
     } finally {
-      connection.release();
+      client.release();
     }
   } catch (err) {
     console.error(err);
@@ -145,7 +149,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
 router.delete("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
   try {
-    await pool.query("DELETE FROM equipos WHERE id = ?", [id]);
+    await pool.query("DELETE FROM equipos WHERE id = $1", [id]);
     res.json({ msg: "Equipo eliminado" });
   } catch (err) {
     console.error(err);
