@@ -27,6 +27,20 @@
 - línea 45: `parseInt(partes[2], 10) + 1` → `Math.max(parseInt(partes[2], 10) + 1, 2800)`
 - línea 47: `padStart(4, "0")` → `padStart(5, "0")`
 
+### Botón Nuevo cliente solo en nueva orden (no en editar)
+- El botón "Nuevo" para crear cliente ahora solo se muestra cuando se está creando una nueva OT
+- Se oculta al editar una orden existente
+
+**Archivos modificados:**
+- `frontend/src/pages/OrdenTrabajo.jsx` — se pasa prop `esEdicion={!!editingId}`
+- `frontend/src/components/ordenes/OrdenFormCliente.jsx` — se oculta el botón con `{!esEdicion && ( ... )}`
+
+### Campo Nivel de Tinta en Datos del Equipo
+- Agregado campo "Nivel de Tinta" en el formulario de OT, sección Datos del Equipo
+- Funciona tanto en crear como en editar (carga desde `orden.nivel_tinta`)
+
+**Archivo modificado:** `frontend/src/components/ordenes/OrdenFormEquipo.jsx`
+
 ### Cómo revertir
 Para volver al comportamiento anterior:
 1. **backend/routes/ordenes.js**:
