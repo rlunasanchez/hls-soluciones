@@ -695,6 +695,7 @@ function OrdenTrabajo() {
                 seleccionarCliente={seleccionarCliente}
                 nuevaOrden={nuevaOrden}
                 setNuevaOrden={setNuevaOrden}
+                clientes={clientes}
               />
 
               <OrdenFormEquipo
