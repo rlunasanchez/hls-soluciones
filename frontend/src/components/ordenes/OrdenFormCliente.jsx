@@ -11,7 +11,8 @@ function OrdenFormCliente({
   clienteDropdownRef,
   seleccionarCliente,
   nuevaOrden, setNuevaOrden,
-  clientes = []
+  clientes = [],
+  esEdicion = false
 }) {
   const [mostrarModalCliente, setMostrarModalCliente] = useState(false);
   const [creandoCliente, setCreandoCliente] = useState(false);
@@ -204,29 +205,31 @@ function OrdenFormCliente({
               </div>
             )}
           </div>
-          <button
-            type="button"
-            onClick={() => { resetModal(); setMostrarModalCliente(true); }}
-            title="Crear nuevo cliente"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              background: 'var(--primary)',
-              color: 'white',
-              border: 'none',
-              padding: '6px 12px',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontWeight: 500,
-              fontSize: '0.8rem',
-              whiteSpace: 'nowrap',
-              flexShrink: 0,
-              height: '32px'
-            }}
-          >
-            <Plus size={14} /> Nuevo
-          </button>
+          {!esEdicion && (
+            <button
+              type="button"
+              onClick={() => { resetModal(); setMostrarModalCliente(true); }}
+              title="Crear nuevo cliente"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                background: 'var(--primary)',
+                color: 'white',
+                border: 'none',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: 500,
+                fontSize: '0.8rem',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                height: '32px'
+              }}
+            >
+              <Plus size={14} /> Nuevo
+            </button>
+          )}
         </div>
       </div>
 

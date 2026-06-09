@@ -696,6 +696,7 @@ function OrdenTrabajo() {
                 nuevaOrden={nuevaOrden}
                 setNuevaOrden={setNuevaOrden}
                 clientes={clientes}
+                esEdicion={!!editingId}
               />
 
               <OrdenFormEquipo

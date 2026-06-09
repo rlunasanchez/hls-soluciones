@@ -265,6 +265,23 @@ function OrdenFormEquipo({
             }}
           />
         </div>
+
+        <div className="of-f">
+          <label>Nivel de Tinta</label>
+          <input
+            type="text"
+            placeholder="Ej: 80%, lleno, etc."
+            value={nuevaOrden.nivelTinta}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, nivelTinta: e.target.value})}
+            style={{
+              width: '100%',
+              padding: '6px 10px',
+              border: '2px solid var(--border)',
+              borderRadius: '6px',
+              fontSize: '.82rem'
+            }}
+          />
+        </div>
       </div>
       {children}
     </div>
