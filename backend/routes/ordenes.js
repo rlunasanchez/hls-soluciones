@@ -39,12 +39,12 @@ router.get("/siguiente-numero", async (req, res) => {
   const year = new Date().getFullYear();
   try {
     const [rows] = await pool.query("SELECT numero_orden FROM ordenes_trabajo WHERE numero_orden LIKE ? ORDER BY numero_orden DESC LIMIT 1", [`OT-${year}-%`]);
-    let siguiente = 1;
+    let siguiente = 2800;
     if (rows.length > 0) {
       const partes = rows[0].numero_orden.split("-");
-      if (partes.length === 3) siguiente = parseInt(partes[2], 10) + 1;
+      if (partes.length === 3) siguiente = Math.max(parseInt(partes[2], 10) + 1, 2800);
     }
-    res.json({ numeroOrden: `OT-${year}-${String(siguiente).padStart(4, "0")}` });
+    res.json({ numeroOrden: `OT-${year}-${String(siguiente).padStart(5, "0")}` });
   } catch (err) {
     res.status(500).json({ msg: "Error del servidor" });
   }

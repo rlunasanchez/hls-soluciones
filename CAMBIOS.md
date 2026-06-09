@@ -1,5 +1,44 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-06-09
+
+### Botón Nueva Orden en lista OT
+- Agregado botón "Nueva Orden" (clase `main-btn`) en el header de la lista de órdenes de trabajo
+- Usa la función `onNueva` que ya estaba definida pero no se usaba
+
+**Archivo modificado:** `frontend/src/components/ordenes/OrdenLista.jsx`
+
+### Creación de cliente desde formulario OT
+- Agregado botón "Nuevo" al lado del buscador de clientes en el formulario de OT
+- Abre un modal con el formulario completo de creación de cliente (mismo diseño que Clientes.jsx)
+- Secciones: Datos Empresa (fondo azul), Datos Contacto (fondo verde), Sucursales (fondo gris)
+- Validación de RUT chileno (módulo 11)
+- Auto-selecciona el cliente creado al guardar
+
+**Archivo modificado:** `frontend/src/components/ordenes/OrdenFormCliente.jsx`
+**Prop agregada:** `clientes` (para calcular código correlativo)
+
+### Correlativo OT desde 2800
+- El número de orden ahora arranca desde `OT-{año}-02800` (5 dígitos)
+- Si ya existen órdenes > 02800, continúa desde la siguiente
+
+**Archivo modificado:** `backend/routes/ordenes.js`
+- línea 42: `let siguiente = 1` → `let siguiente = 2800`
+- línea 45: `parseInt(partes[2], 10) + 1` → `Math.max(parseInt(partes[2], 10) + 1, 2800)`
+- línea 47: `padStart(4, "0")` → `padStart(5, "0")`
+
+### Cómo revertir
+Para volver al comportamiento anterior:
+1. **backend/routes/ordenes.js**:
+   - Cambiar `let siguiente = 2800` → `let siguiente = 1`
+   - Cambiar `Math.max(parseInt(partes[2], 10) + 1, 2800)` → `parseInt(partes[2], 10) + 1`
+   - Cambiar `padStart(5, "0")` → `padStart(4, "0")`
+2. **frontend/src/components/ordenes/OrdenFormCliente.jsx**: Eliminar el botón "Nuevo" y el modal (desde `{/* Modal Nuevo Cliente */}` hasta su cierre)
+3. **frontend/src/components/ordenes/OrdenLista.jsx**: Eliminar el botón "Nueva Orden" del `table-header-actions`
+4. **frontend/src/pages/OrdenTrabajo.jsx**: Quitar la prop `clientes={clientes}` de `<OrdenFormCliente>`
+
+---
+
 ## Fecha: 2026-05-25
 
 ### Limpieza Login

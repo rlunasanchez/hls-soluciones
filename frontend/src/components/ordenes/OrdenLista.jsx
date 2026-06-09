@@ -1,4 +1,4 @@
-import { ClipboardList, FileText, FileSpreadsheet, Edit, Trash2 } from "lucide-react";
+import { ClipboardList, FileText, FileSpreadsheet, Edit, Trash2, Plus } from "lucide-react";
 import Pagination from "../Pagination";
 
 function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtroGarantia, onFiltroGarantiaChange, onNueva, paginaActual, totalPaginas, onPageChange, onEditar, onEliminar, onInforme, onCotizacion }) {
@@ -7,6 +7,9 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
     <>
       <div className="table-header">
         <div className="table-header-actions">
+          <button className="main-btn" onClick={onNueva} style={{ marginRight: '8px' }}>
+            <Plus size={16} /> Nueva Orden
+          </button>
           <input
             type="text"
             placeholder="Buscar por N° de Orden..."
