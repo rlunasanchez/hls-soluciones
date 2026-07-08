@@ -42,7 +42,7 @@ function OrdenFormDatos({ nuevaOrden, setNuevaOrden, errorNumeroOrden, verificar
               checked={nuevaOrden.esGarantia}
               onChange={(e) => setNuevaOrden({...nuevaOrden, esGarantia: e.target.checked})}
             />
-            Es Garantía
+            Garantía
           </label>
         </div>
       </div>
