@@ -16,7 +16,7 @@
 .of-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .of-f{display:flex;flex-direction:column;gap:1px}
 .of-f label{font-size:9px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px}
-.of-f input,.of-f select,.of-f textarea{padding:6px 10px;font-size:.82rem;border:1.5px solid var(--border);border-radius:6px;background:white;transition:border-color .15s;width:100%;box-sizing:border-box}.of-f textarea{resize:vertical;min-height:60px}
+.of-f input,.of-f select,.of-f textarea{padding:6px 10px;font-size:.82rem;border:1.5px solid var(--border);border-radius:6px;background:white;transition:border-color .15s;width:100%;box-sizing:border-box;font-family:inherit}.of-f textarea{resize:vertical;min-height:60px}
 .of-f input:focus,.of-f select:focus,.of-f textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px rgba(37,99,235,.1)}
 .of-dates{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
 .of-date{display:flex;align-items:center;gap:4px}
@@ -24,7 +24,7 @@
 .of-chk input{width:auto;margin:0}
 .of-date-f{flex:1;min-width:0;margin-left:4px}
 .of-date-f input{width:100%}
-.of-date input[type="date"]{padding:6px 10px;font-size:.82rem;border:1.5px solid var(--border);border-radius:6px}
+.of-date input[type="date"]{padding:6px 10px;font-size:.82rem;border:1.5px solid var(--border);border-radius:6px;font-family:inherit}
 .of-ins{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .of-ins-item{display:flex;align-items:end;gap:4px}
 .of-ins-item>div{flex:1;min-width:0}
