@@ -10,6 +10,26 @@ function OrdenFormAveria({ nuevaOrden, setNuevaOrden }) {
           rows={3}
         />
       </div>
+
+      <div className="of-st muted">Actividad</div>
+      <div className="of-f">
+        <textarea
+          placeholder="Describa la actividad realizada..."
+          value={nuevaOrden.actividad}
+          onChange={(e) => setNuevaOrden({...nuevaOrden, actividad: e.target.value})}
+          rows={3}
+        />
+      </div>
+
+      <div className="of-st muted">Observaciones</div>
+      <div className="of-f">
+        <textarea
+          placeholder="Observaciones adicionales..."
+          value={nuevaOrden.observaciones}
+          onChange={(e) => setNuevaOrden({...nuevaOrden, observaciones: e.target.value})}
+          rows={3}
+        />
+      </div>
     </div>
   );
 }
