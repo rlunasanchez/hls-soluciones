@@ -702,6 +702,8 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.2 | 18 Mayo 2026 | Documentación completa |
 | 1.3 | 18 Mayo 2026 | Separación ramas main (MySQL) vs deploy/cloud (PostgreSQL), fix fechas editar orden |
 | 1.4 | 20 Mayo 2026 | Fix FK cliente_id en seed script, toggle hide/show secciones, paginación 10 items, botón Limpiar filtros, paginación 4 items, paginación OT |
+| 1.5 | Julio 2026 | Campos actividad y observaciones en órdenes de trabajo |
+| 1.5 | Julio 2026 | Campos actividad y observaciones en órdenes de trabajo |
 
 ## Cambios Recientes (20 Mayo 2026)
 
@@ -760,3 +762,26 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 - 4 items por página (`ITEMS_POR_PAG = 4`)
 - Reseteo a página 1 al cambiar filtros (useEffect)
 - Filtros ahora actúan sobre el dataset completo, no solo la página actual
+
+### 29. Campos Actividad y Observaciones en Orden de Trabajo
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `backend/crear_tablas.sql`
+- `backend/routes/ordenes.js` (ambas ramas)
+- `frontend/src/pages/OrdenTrabajo.jsx`
+- `frontend/src/components/ordenes/OrdenFormAveria.jsx`
+- `scripts/migrar_actividad_observaciones.sql` (nuevo)
+
+**Cambios:**
+- Agregados campos `actividad TEXT` y `observaciones TEXT` a la tabla `ordenes_trabajo`
+- Backend POST y PUT reciben, guardan y devuelven ambos campos
+- Frontend: textarea "Actividad" y "Observaciones" debajo de "Avería/Falla/Incidencia" en formulario nueva/editar orden
+- Migración SQL para DB local (MySQL) y nube (PostgreSQL/Neon)
+
+**Migración SQL:**
+- MySQL: `scripts/migrar_actividad_observaciones.sql`
+- PostgreSQL (Neon):
+```sql
+ALTER TABLE ordenes_trabajo ADD COLUMN IF NOT EXISTS actividad TEXT;
+ALTER TABLE ordenes_trabajo ADD COLUMN IF NOT EXISTS observaciones TEXT;
+```
