@@ -85,7 +85,9 @@ function OrdenTrabajo() {
     contadorPagOut: "",
     nivelTinta: "",
     // Avería/Falla/Incidencia
-    averia: ""
+    averia: "",
+    actividad: "",
+    observaciones: ""
   });
 
   // Cargar clientes, equipos y órdenes al montar el componente
@@ -155,7 +157,9 @@ function OrdenTrabajo() {
         serie: "",
         contadorPagOut: "",
         nivelTinta: "",
-        averia: ""
+        averia: "",
+        actividad: "",
+        observaciones: ""
       });
       setMostrarFormulario(true);
     }
@@ -280,7 +284,9 @@ function OrdenTrabajo() {
       serie: orden.serie || "",
       contadorPagOut: orden.contador_pag_out || "",
       nivelTinta: orden.nivel_tinta || "",
-      averia: orden.averia || ""
+      averia: orden.averia || "",
+      actividad: orden.actividad || "",
+      observaciones: orden.observaciones || ""
     });
 
     // Buscar equipo asociado - primero intentar con datos frescos del API
@@ -608,7 +614,9 @@ function OrdenTrabajo() {
       serie: "",
       contadorPagOut: "",
       nivelTinta: "",
-      averia: ""
+      averia: "",
+      actividad: "",
+      observaciones: ""
     });
     setInsumos([
       { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },

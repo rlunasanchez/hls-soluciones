@@ -77,6 +77,8 @@ CREATE TABLE IF NOT EXISTS ordenes_trabajo (
   
   -- Avería/Falla/Incidencia
   averia TEXT,
+  actividad TEXT,
+  observaciones TEXT,
   
   -- Relaciones (opcionales - si el cliente/equipo existen en sus tablas)
   cliente_id INT,
