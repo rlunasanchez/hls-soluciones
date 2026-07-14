@@ -119,6 +119,11 @@ html, body {
   border: 1.5px solid var(--border);
   font-size: .82rem;
   transition: border-color .15s ease;
+  text-transform: uppercase;
+}
+
+.form-group input[type="email"] {
+  text-transform: none;
 }
 
 .form-group.input-with-icon {
@@ -896,6 +901,7 @@ table tr:last-child td {
   font-size: .82rem;
   font-family: inherit;
   resize: vertical;
+  text-transform: uppercase;
 }
 
 .form-group textarea:focus {
