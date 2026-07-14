@@ -1,7 +1,7 @@
 import { ClipboardList, FileText, FileSpreadsheet, Edit, Trash2, Plus } from "lucide-react";
 import Pagination from "../Pagination";
 
-function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtroGarantia, onFiltroGarantiaChange, onNueva, paginaActual, totalPaginas, onPageChange, onEditar, onEliminar, onInforme, onCotizacion }) {
+function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtroGarantia, onFiltroGarantiaChange, filtroEstado, onFiltroEstadoChange, onNueva, paginaActual, totalPaginas, onPageChange, onEditar, onEliminar, onInforme, onCotizacion }) {
 
   return (
     <>
@@ -25,6 +25,15 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
             <option value="todos">Todas</option>
             <option value="si">Garantía</option>
             <option value="no">No garantía</option>
+          </select>
+          <select
+            value={filtroEstado}
+            onChange={(e) => onFiltroEstadoChange(e.target.value)}
+            className="filtro-garantia-select"
+          >
+            <option value="todos">Todos estados</option>
+            <option value="cerrada">Cerrada</option>
+            <option value="pendiente">Pendiente</option>
           </select>
         </div>
       </div>
