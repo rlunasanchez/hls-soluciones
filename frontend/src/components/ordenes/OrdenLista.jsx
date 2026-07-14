@@ -31,7 +31,7 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
             onChange={(e) => onFiltroEstadoChange(e.target.value)}
             className="filtro-garantia-select"
           >
-            <option value="todos">Todos estados</option>
+            <option value="todos">Todas</option>
             <option value="cerrada">Cerrada</option>
             <option value="pendiente">Pendiente</option>
           </select>
