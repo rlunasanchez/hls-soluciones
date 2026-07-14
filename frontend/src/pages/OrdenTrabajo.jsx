@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Home, Users, Package, FileText, FileSpreadsheet, ShoppingCart, UserCog, LogOut,
-  ClipboardList, Save, X, Wrench
+  Home, Users, Package, FileText, FileSpreadsheet, ShoppingCart, UserCog,
+  Save, X, Wrench
 } from "lucide-react";
 import api from "../services/api";
 import './OrdenTrabajo.css';
@@ -41,7 +41,6 @@ function OrdenTrabajo() {
   const [mostrarDropdownClientes, setMostrarDropdownClientes] = useState(false);
   const [mostrarDropdownEquipos, setMostrarDropdownEquipos] = useState(false);
   const [mostrarDropdownCodigo, setMostrarDropdownCodigo] = useState(false);
-  const [equiposCodigo, setEquiposCodigo] = useState([]);
   
   // Refs para detectar clics fuera de los dropdowns
   const equipoDropdownRef = useRef(null);

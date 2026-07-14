@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Users, Plus, Save, Trash2, Edit, X, Home, UserCog,
-  FileText, FileSpreadsheet, ClipboardList, ShoppingCart, Package, LogOut
+  Users, Plus, Save, Trash2, X
 } from "lucide-react";
 import api from "../services/api";
 import "./Clientes.css";
@@ -195,7 +194,8 @@ function Clientes() {
       dirs = c.direcciones.split(";;").map((d) => {
         const parts = d.split("|");
         return {
-          tipo_direccion: parts[0], direccion: parts[1], fono: parts[2], ciudad: parts[3], comuna: parts[4]
+          tipo_direccion: (parts[0] || "").toUpperCase(), direccion: (parts[1] || "").toUpperCase(),
+          fono: parts[2] || "", ciudad: (parts[3] || "").toUpperCase(), comuna: (parts[4] || "").toUpperCase()
         };
       }).filter((d) => d.direccion);
       if (dirs.length > 0) {
@@ -205,12 +205,13 @@ function Clientes() {
     }
     setSucursalesVisibles(dirs.filter((s) => s.direccion).length || 1);
     setRutError("");
+    const toUpper = (v) => (v || "").toUpperCase();
     setNuevoCliente({
-      codigo: c.codigo || "", razon_social: c.razon_social, giro: c.giro || "", rut: c.rut || "",
-      direccion: c.direccion || "", ciudad: c.ciudad || "", comuna: c.comuna || "",
-      telefono: c.telefono || "", email: c.email || "", contacto_nombre: c.contacto_nombre || "",
+      codigo: c.codigo || "", razon_social: toUpper(c.razon_social), giro: toUpper(c.giro), rut: c.rut || "",
+      direccion: toUpper(c.direccion), ciudad: toUpper(c.ciudad), comuna: toUpper(c.comuna),
+      telefono: c.telefono || "", email: c.email || "", contacto_nombre: toUpper(c.contacto_nombre),
       contacto_email: c.contacto_email || "", contacto_fono: c.contacto_fono || "",
-      contacto_cargo: c.contacto_cargo || "", contacto_direccion: c.contacto_direccion || "",
+      contacto_cargo: toUpper(c.contacto_cargo), contacto_direccion: toUpper(c.contacto_direccion),
       direcciones: dirs
     });
     setMostrarFormulario(true);
