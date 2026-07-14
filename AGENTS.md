@@ -591,7 +591,21 @@ Así los assets (JS, CSS) se sirven directamente y las rutas de React Router van
    git merge main
    git push origin deploy/cloud
    git checkout main
-   ```
+```
+
+### 30. Columna y filtro de Estado en Órdenes de Trabajo
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `frontend/src/components/ordenes/OrdenLista.jsx`
+- `frontend/src/pages/OrdenTrabajo.jsx`
+- `frontend/src/index.css`
+
+**Cambios:**
+- Nueva columna "Estado" en tabla y tarjetas de la lista de OT
+- Lógica: si `fecha_entrega` tiene valor → badge verde "Cerrada", si no → badge amarillo "Pendiente"
+- Nuevo dropdown de filtro "Todos estados" / "Cerrada" / "Pendiente"
+- Reseteo a página 1 al cambiar filtro de estado
+- Estilos `.badge-estado-cerrada` y `.badge-estado-pendiente`
 3. **Ir a Vercel → Deployments → Promote to Production**
 4. **Probar en móvil**
 
@@ -702,8 +716,7 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.2 | 18 Mayo 2026 | Documentación completa |
 | 1.3 | 18 Mayo 2026 | Separación ramas main (MySQL) vs deploy/cloud (PostgreSQL), fix fechas editar orden |
 | 1.4 | 20 Mayo 2026 | Fix FK cliente_id en seed script, toggle hide/show secciones, paginación 10 items, botón Limpiar filtros, paginación 4 items, paginación OT |
-| 1.5 | Julio 2026 | Campos actividad y observaciones en órdenes de trabajo |
-| 1.5 | Julio 2026 | Campos actividad y observaciones en órdenes de trabajo |
+| 1.5 | Julio 2026 | Campos actividad y observaciones en OT, columna y filtro de estado |
 
 ## Cambios Recientes (20 Mayo 2026)
 
