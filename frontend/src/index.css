@@ -849,6 +849,26 @@ table tr:last-child td {
   font-size: 0.75rem;
 }
 
+.badge-estado-cerrada {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #D1FAE5;
+  color: #065F46;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-estado-pendiente {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #FEF3C7;
+  color: #92400E;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
 .empty-state {
   text-align: center;
   padding: 60px 20px;

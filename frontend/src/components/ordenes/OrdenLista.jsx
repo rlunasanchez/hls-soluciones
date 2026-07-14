@@ -1,7 +1,7 @@
 import { ClipboardList, FileText, FileSpreadsheet, Edit, Trash2, Plus } from "lucide-react";
 import Pagination from "../Pagination";
 
-function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtroGarantia, onFiltroGarantiaChange, onNueva, paginaActual, totalPaginas, onPageChange, onEditar, onEliminar, onInforme, onCotizacion }) {
+function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtroGarantia, onFiltroGarantiaChange, filtroEstado, onFiltroEstadoChange, onNueva, paginaActual, totalPaginas, onPageChange, onEditar, onEliminar, onInforme, onCotizacion }) {
 
   return (
     <>
@@ -25,6 +25,15 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
             <option value="todos">Todas</option>
             <option value="si">Garantía</option>
             <option value="no">No garantía</option>
+          </select>
+          <select
+            value={filtroEstado}
+            onChange={(e) => onFiltroEstadoChange(e.target.value)}
+            className="filtro-garantia-select"
+          >
+            <option value="todos">Todos estados</option>
+            <option value="cerrada">Cerrada</option>
+            <option value="pendiente">Pendiente</option>
           </select>
         </div>
       </div>
@@ -51,6 +60,7 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                   <th>Equipo</th>
                   <th>Técnico</th>
                   <th>Garantía</th>
+                  <th>Estado</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
@@ -73,6 +83,13 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                         <span className="badge-garantia">Sí</span>
                       ) : (
                         <span className="badge-no-garantia">No</span>
+                      )}
+                    </td>
+                    <td data-label="Estado">
+                      {orden.fecha_entrega ? (
+                        <span className="badge-estado-cerrada">Cerrada</span>
+                      ) : (
+                        <span className="badge-estado-pendiente">Pendiente</span>
                       )}
                     </td>
                     <td data-label="Acciones">
@@ -127,6 +144,16 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                 <div className="data-card-row">
                   <span className="label">Técnico</span>
                   <span className="value">{orden.tecnico_asignado}</span>
+                </div>
+                <div className="data-card-row">
+                  <span className="label">Estado</span>
+                  <span className="value">
+                    {orden.fecha_entrega ? (
+                      <span className="badge-estado-cerrada">Cerrada</span>
+                    ) : (
+                      <span className="badge-estado-pendiente">Pendiente</span>
+                    )}
+                  </span>
                 </div>
                 <div className="action-buttons" style={{ justifyContent: 'center' }}>
                   <button className="table-btn" style={{ flex: 1, background: '#EA580C', color: 'white' }} onClick={() => onInforme(orden)}>

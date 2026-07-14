@@ -28,6 +28,7 @@ function OrdenTrabajo() {
   const [editingId, setEditingId] = useState(null);
   const [filtroNumeroOrden, setFiltroNumeroOrden] = useState("");
   const [filtroGarantia, setFiltroGarantia] = useState("todos");
+  const [filtroEstado, setFiltroEstado] = useState("todos");
   
   // Estados para autocompletar clientes y equipos
   const [clientes, setClientes] = useState([]);
@@ -204,7 +205,7 @@ function OrdenTrabajo() {
   };
 
   // Resetear paginación al filtrar
-  useEffect(() => { setPaginaActual(1); }, [filtroNumeroOrden, filtroGarantia]);
+  useEffect(() => { setPaginaActual(1); }, [filtroNumeroOrden, filtroGarantia, filtroEstado]);
 
   // Cierra los dropdowns al hacer clic fuera
   useEffect(() => {
@@ -242,6 +243,8 @@ function OrdenTrabajo() {
     if (filtroNumeroOrden && !orden.numero_orden?.toLowerCase().includes(filtroNumeroOrden.toLowerCase())) return false;
     if (filtroGarantia === "si" && !orden.es_garantia) return false;
     if (filtroGarantia === "no" && orden.es_garantia) return false;
+    if (filtroEstado === "cerrada" && !orden.fecha_entrega) return false;
+    if (filtroEstado === "pendiente" && orden.fecha_entrega) return false;
     return true;
   });
 
@@ -633,6 +636,7 @@ function OrdenTrabajo() {
     setErrorNumeroOrden("");
     setFiltroNumeroOrden("");
     setFiltroGarantia("todos");
+    setFiltroEstado("todos");
   };
   // Funciones de navegación eliminadas (accesos desde el menú)
 
@@ -658,6 +662,8 @@ function OrdenTrabajo() {
             onFiltroChange={setFiltroNumeroOrden}
             filtroGarantia={filtroGarantia}
             onFiltroGarantiaChange={setFiltroGarantia}
+            filtroEstado={filtroEstado}
+            onFiltroEstadoChange={setFiltroEstado}
             onNueva={abrirNuevaOrden}
             paginaActual={paginaActual}
             totalPaginas={totalPaginas}
