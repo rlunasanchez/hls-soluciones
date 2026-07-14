@@ -40,22 +40,6 @@ html, body {
   min-height: 100vh;
 }
 
-input, textarea, select {
-  text-transform: uppercase;
-}
-
-input[type="email"] {
-  text-transform: none;
-}
-
-.auth-form input {
-  text-transform: none;
-}
-
-.of-f input, .of-f textarea {
-  text-transform: none;
-}
-
 #root {
   min-height: 100vh;
 }
