@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Home, Users, Package, FileText, FileSpreadsheet, ShoppingCart, UserCog, LogOut,
-  ClipboardList, Save, X, Wrench
+  Home, Users, Package, FileText, FileSpreadsheet, ShoppingCart, UserCog,
+  Save, X, Wrench
 } from "lucide-react";
 import api from "../services/api";
 import './OrdenTrabajo.css';
@@ -41,7 +41,6 @@ function OrdenTrabajo() {
   const [mostrarDropdownClientes, setMostrarDropdownClientes] = useState(false);
   const [mostrarDropdownEquipos, setMostrarDropdownEquipos] = useState(false);
   const [mostrarDropdownCodigo, setMostrarDropdownCodigo] = useState(false);
-  const [equiposCodigo, setEquiposCodigo] = useState([]);
   
   // Refs para detectar clics fuera de los dropdowns
   const equipoDropdownRef = useRef(null);
@@ -124,7 +123,7 @@ function OrdenTrabajo() {
         setEditingId(null);
         setClienteSeleccionado(clienteFromNav);
         setEquipoSeleccionado(null);
-        setBusquedaCliente(clienteFromNav.razon_social || "");
+        setBusquedaCliente((clienteFromNav.razon_social || "").toUpperCase());
         setBusquedaSerie("");
         setBusquedaCodigo("");
         setInsumos([
@@ -146,10 +145,10 @@ function OrdenTrabajo() {
           fechaEntregaCheck: false,
         fechaCompra: "",
         fechaCompraCheck: false,
-        cliente: clienteFromNav.razon_social || "",
-        direccion: clienteFromNav.direccion || "",
-        comuna: clienteFromNav.comuna || "",
-        contacto: clienteFromNav.contacto_nombre || "",
+        cliente: (clienteFromNav.razon_social || "").toUpperCase(),
+        direccion: (clienteFromNav.direccion || "").toUpperCase(),
+        comuna: (clienteFromNav.comuna || "").toUpperCase(),
+        contacto: (clienteFromNav.contacto_nombre || "").toUpperCase(),
         fonoPrincipal: clienteFromNav.telefono || clienteFromNav.contacto_fono || "",
         tecnicoAsignado: "",
         equipo: "",
@@ -263,6 +262,7 @@ function OrdenTrabajo() {
     setMostrarFormulario(true);
     
     // Cargar datos de la orden en el formulario
+    const toUpper = (v) => (v || "").toUpperCase();
     setNuevaOrden({
       numeroOrden: orden.numero_orden || "",
       fecha: fmtDate(orden.fecha),
@@ -275,21 +275,21 @@ function OrdenTrabajo() {
       fechaEntregaCheck: orden.fecha_entrega_check || false,
       fechaCompra: fmtDate(orden.fecha_compra),
       fechaCompraCheck: orden.fecha_compra_check || false,
-      cliente: orden.cliente || "",
-      direccion: orden.direccion || "",
-      comuna: orden.comuna || "",
-      contacto: orden.contacto || "",
+      cliente: toUpper(orden.cliente),
+      direccion: toUpper(orden.direccion),
+      comuna: toUpper(orden.comuna),
+      contacto: toUpper(orden.contacto),
       fonoPrincipal: orden.fono_principal || "",
-      tecnicoAsignado: orden.tecnico_asignado || "",
-      equipo: orden.equipo || "",
-      modelo: orden.modelo || "",
-      marca: orden.marca || "",
-      serie: orden.serie || "",
+      tecnicoAsignado: toUpper(orden.tecnico_asignado),
+      equipo: toUpper(orden.equipo),
+      modelo: toUpper(orden.modelo),
+      marca: toUpper(orden.marca),
+      serie: toUpper(orden.serie),
       contadorPagOut: orden.contador_pag_out || "",
-      nivelTinta: orden.nivel_tinta || "",
-      averia: orden.averia || "",
-      actividad: orden.actividad || "",
-      observaciones: orden.observaciones || ""
+      nivelTinta: toUpper(orden.nivel_tinta),
+      averia: toUpper(orden.averia),
+      actividad: toUpper(orden.actividad),
+      observaciones: toUpper(orden.observaciones)
     });
 
     // Buscar equipo asociado - primero intentar con datos frescos del API
@@ -300,21 +300,22 @@ function OrdenTrabajo() {
           const eq = res.data;
           setEquipoSeleccionado(eq);
           setBusquedaCodigo(eq.codigo || "");
-          setBusquedaSerie(eq.serie || "");
+          setBusquedaSerie((eq.serie || "").toUpperCase());
+          const toUpper = (v) => (v || "").toUpperCase();
           setNuevaOrden(prev => ({
             ...prev,
-            equipo: eq.equipo || prev.equipo,
-            modelo: eq.modelo || prev.modelo,
-            marca: eq.marca || prev.marca,
-            serie: eq.serie || prev.serie,
+            equipo: toUpper(eq.equipo) || prev.equipo,
+            modelo: toUpper(eq.modelo) || prev.modelo,
+            marca: toUpper(eq.marca) || prev.marca,
+            serie: toUpper(eq.serie) || prev.serie,
             contadorPagOut: eq.contador_pag?.toString() || prev.contadorPagOut,
-            nivelTinta: eq.nivel_tintas || prev.nivelTinta,
-            averia: eq.averia || prev.averia
+            nivelTinta: toUpper(eq.nivel_tintas) || prev.nivelTinta,
+            averia: toUpper(eq.averia) || prev.averia
           }));
           const insumosEquipo = [];
           for (let i = 1; i <= 12; i++) {
             const insumo = eq[`insumo${i}`];
-            if (insumo) insumosEquipo.push({ nombre: insumo });
+            if (insumo) insumosEquipo.push({ nombre: insumo.toUpperCase() });
           }
           if (insumosEquipo.length > 0) {
             const nuevosInsumos = [...insumosEquipo];
@@ -337,9 +338,9 @@ function OrdenTrabajo() {
       if (eq) {
         setEquipoSeleccionado(eq);
         setBusquedaCodigo(eq.codigo || "");
-        setBusquedaSerie(eq.serie || "");
+        setBusquedaSerie((eq.serie || "").toUpperCase());
       } else if (orden.serie) {
-        setBusquedaSerie(orden.serie);
+        setBusquedaSerie((orden.serie || "").toUpperCase());
       }
     };
     cargarEquipoFresco();
@@ -351,9 +352,9 @@ function OrdenTrabajo() {
     );
     if (cl) {
       setClienteSeleccionado(cl);
-      setBusquedaCliente(cl.razon_social || orden.cliente || "");
+      setBusquedaCliente((cl.razon_social || orden.cliente || "").toUpperCase());
     } else {
-      setBusquedaCliente(orden.cliente || "");
+      setBusquedaCliente((orden.cliente || "").toUpperCase());
     }
 
     // Cargar insumos
@@ -402,30 +403,32 @@ function OrdenTrabajo() {
 
   // Seleccionar cliente y cargar sus datos
   const seleccionarCliente = (cliente) => {
+    const toUpper = (v) => (v || "").toUpperCase();
     setClienteSeleccionado(cliente);
     setNuevaOrden(prev => ({
       ...prev,
-      cliente: cliente.razon_social || "",
-      direccion: cliente.direccion || "",
-      comuna: cliente.comuna || "",
-      contacto: cliente.contacto_nombre || "",
+      cliente: toUpper(cliente.razon_social),
+      direccion: toUpper(cliente.direccion),
+      comuna: toUpper(cliente.comuna),
+      contacto: toUpper(cliente.contacto_nombre),
       fonoPrincipal: cliente.telefono || cliente.contacto_fono || ""
     }));
-    setBusquedaCliente(cliente.razon_social || "");
+    setBusquedaCliente(toUpper(cliente.razon_social));
     setMostrarDropdownClientes(false);
   };
 
   // Seleccionar equipo por serie - NO carga avería (puede haber duplicados)
   const seleccionarEquipo = (equipo) => {
+    const toUpper = (v) => (v || "").toUpperCase();
     setEquipoSeleccionado(equipo);
     setNuevaOrden(prev => ({
       ...prev,
-      equipo: equipo.equipo || "",
-      modelo: equipo.modelo || "",
-      marca: equipo.marca || "",
-      serie: equipo.serie || "",
+      equipo: toUpper(equipo.equipo),
+      modelo: toUpper(equipo.modelo),
+      marca: toUpper(equipo.marca),
+      serie: toUpper(equipo.serie),
       contadorPagOut: equipo.contador_pag?.toString() || "",
-      nivelTinta: equipo.nivel_tintas || ""
+      nivelTinta: toUpper(equipo.nivel_tintas)
       // NOTA: No carga avería aquí, solo al buscar por código
     }));
     
@@ -433,7 +436,7 @@ function OrdenTrabajo() {
     const insumosEquipo = [];
     for (let i = 1; i <= 12; i++) {
       const insumo = equipo[`insumo${i}`];
-      if (insumo) insumosEquipo.push({ nombre: insumo });
+      if (insumo) insumosEquipo.push({ nombre: insumo.toUpperCase() });
     }
     
     const nuevosInsumos = [...insumosEquipo];
@@ -443,7 +446,7 @@ function OrdenTrabajo() {
     setInsumos(nuevosInsumos);
     setInsumosVisibles(Math.max(2, insumosEquipo.length));
     
-     setBusquedaSerie(equipo.serie || "");
+     setBusquedaSerie((equipo.serie || "").toUpperCase());
      setMostrarDropdownEquipos(false);
   };
 
@@ -452,22 +455,23 @@ function OrdenTrabajo() {
       const res = await api.get(`/api/equipos?q=${encodeURIComponent(codigo)}`);
       const eq = res.data[0];
       if (!eq) return;
+      const toUpper = (v) => (v || "").toUpperCase();
       setEquipoSeleccionado(eq);
       setMostrarDropdownCodigo(false);
       setNuevaOrden(prev => ({
         ...prev,
-        equipo: eq.equipo || "",
-        modelo: eq.modelo || "",
-        marca: eq.marca || "",
-        serie: eq.serie || "",
+        equipo: toUpper(eq.equipo),
+        modelo: toUpper(eq.modelo),
+        marca: toUpper(eq.marca),
+        serie: toUpper(eq.serie),
         contadorPagOut: eq.contador_pag?.toString() || "",
-        nivelTinta: eq.nivel_tintas || "",
-        averia: eq.averia || ""
+        nivelTinta: toUpper(eq.nivel_tintas),
+        averia: toUpper(eq.averia)
       }));
       const insumosEquipo = [];
       for (let i = 1; i <= 12; i++) {
         const insumo = eq[`insumo${i}`];
-        if (insumo) insumosEquipo.push({ nombre: insumo });
+        if (insumo) insumosEquipo.push({ nombre: insumo.toUpperCase() });
       }
       const nuevosInsumos = [...insumosEquipo];
       while (nuevosInsumos.length < 12) {
@@ -475,7 +479,7 @@ function OrdenTrabajo() {
       }
       setInsumos(nuevosInsumos);
       setInsumosVisibles(Math.max(2, insumosEquipo.length));
-      setBusquedaSerie(eq.serie || "");
+      setBusquedaSerie((eq.serie || "").toUpperCase());
       setBusquedaCodigo(codigo);
 
       // Si el equipo tiene cliente asociado, cargarlo
@@ -483,14 +487,15 @@ function OrdenTrabajo() {
         const resC = await api.get(`/api/clientes`);
         const cliente = resC.data.find(c => c.id === eq.cliente_id);
         if (cliente) {
+          const toUpper = (v) => (v || "").toUpperCase();
           setClienteSeleccionado(cliente);
-          setBusquedaCliente(cliente.razon_social);
+          setBusquedaCliente(toUpper(cliente.razon_social));
           setNuevaOrden(prev => ({
             ...prev,
-            cliente: cliente.razon_social || "",
-            direccion: cliente.direccion || "",
-            comuna: cliente.comuna || "",
-            contacto: cliente.contacto_nombre || "",
+            cliente: toUpper(cliente.razon_social),
+            direccion: toUpper(cliente.direccion),
+            comuna: toUpper(cliente.comuna),
+            contacto: toUpper(cliente.contacto_nombre),
             fonoPrincipal: cliente.telefono || cliente.contacto_fono || ""
           }));
         }

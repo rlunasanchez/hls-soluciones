@@ -3,7 +3,7 @@ import { Plus, Trash2 } from "lucide-react";
 function OrdenFormInsumos({ insumos, insumosVisibles, setInsumosVisibles, setInsumos }) {
   const actualizarInsumo = (idx, valor) => {
     const nuevos = [...insumos];
-    nuevos[idx].nombre = valor;
+    nuevos[idx].nombre = valor.toUpperCase();
     setInsumos(nuevos);
   };
 

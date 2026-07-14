@@ -114,7 +114,7 @@ function OrdenFormCliente({
               placeholder="Escriba para buscar cliente por nombre o RUT..."
               value={busquedaCliente}
               onChange={(e) => {
-                setBusquedaCliente(e.target.value);
+                setBusquedaCliente(e.target.value.toUpperCase());
                 setMostrarDropdownClientes(e.target.value.length >= 2);
               }}
               onFocus={() => {
@@ -270,12 +270,12 @@ function OrdenFormCliente({
                       <div className="cf-field">
                         <label>Razón Social *</label>
                         <input placeholder="Razón social" value={nuevoCliente.razon_social}
-                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, razon_social: e.target.value })} required />
+                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, razon_social: e.target.value.toUpperCase() })} required />
                       </div>
                       <div className="cf-field">
                         <label>Giro</label>
                         <input placeholder="Giro" value={nuevoCliente.giro}
-                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, giro: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, "") })} />
+                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, giro: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
                       </div>
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "200px", gap: 6, marginTop: 6 }}>
@@ -314,19 +314,19 @@ function OrdenFormCliente({
                       <div className="cf-field">
                         <label>Dirección</label>
                         <input placeholder="Ingrese la dirección completa" value={nuevoCliente.direccion}
-                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, direccion: e.target.value })} />
+                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, direccion: e.target.value.toUpperCase() })} />
                       </div>
                     </div>
                     <div className="cf-r3 cf-mt">
                       <div className="cf-field">
                         <label>Ciudad</label>
                         <input placeholder="Ciudad" value={nuevoCliente.ciudad}
-                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, ciudad: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, "") })} />
+                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, ciudad: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
                       </div>
                       <div className="cf-field">
                         <label>Comuna</label>
                         <input placeholder="Comuna" value={nuevoCliente.comuna}
-                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, comuna: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, "") })} />
+                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, comuna: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
                       </div>
                       <div className="cf-field">
                         <label>Fono</label>
@@ -349,7 +349,7 @@ function OrdenFormCliente({
                       <div className="cf-field">
                         <label>Nombre Contacto</label>
                         <input placeholder="Nombre" value={nuevoCliente.contacto_nombre}
-                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_nombre: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, "") })} />
+                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_nombre: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
                       </div>
                     </div>
                     <div className="cf-r2 cf-mt">
@@ -368,14 +368,14 @@ function OrdenFormCliente({
                       <div className="cf-field">
                         <label>Cargo</label>
                         <input placeholder="Cargo" value={nuevoCliente.contacto_cargo}
-                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_cargo: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, "") })} />
+                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_cargo: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
                       </div>
                     </div>
                     <div className="cf-r1 cf-mt">
                       <div className="cf-field">
                         <label>Dirección Contacto</label>
                         <input placeholder="Ingrese la dirección completa" value={nuevoCliente.contacto_direccion}
-                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_direccion: e.target.value })} />
+                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_direccion: e.target.value.toUpperCase() })} />
                       </div>
                     </div>
                   </div>
@@ -401,13 +401,13 @@ function OrdenFormCliente({
                         </div>
                         <div className="cf-field cf-m0">
                           <label>Dirección</label>
-                          <input placeholder="Ingrese la dirección completa" value={suc.direccion} onChange={(e) => actualizarSucursal(idx, "direccion", e.target.value)} />
+                          <input placeholder="Ingrese la dirección completa" value={suc.direccion} onChange={(e) => actualizarSucursal(idx, "direccion", e.target.value.toUpperCase())} />
                         </div>
                       </div>
                       <div className="cf-r3 cf-mb">
                         <div className="cf-field cf-m0">
                           <label>Ciudad</label>
-                          <input placeholder="Ciudad" value={suc.ciudad} onChange={(e) => actualizarSucursal(idx, "ciudad", e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, ""))} />
+                          <input placeholder="Ciudad" value={suc.ciudad} onChange={(e) => actualizarSucursal(idx, "ciudad", e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ""))} />
                         </div>
                         <div className="cf-field cf-m0">
                           <label>Fono</label>
@@ -415,7 +415,7 @@ function OrdenFormCliente({
                         </div>
                         <div className="cf-field cf-m0">
                           <label>Comuna</label>
-                          <input placeholder="Comuna" value={suc.comuna} onChange={(e) => actualizarSucursal(idx, "comuna", e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, ""))} />
+                          <input placeholder="Comuna" value={suc.comuna} onChange={(e) => actualizarSucursal(idx, "comuna", e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ""))} />
                         </div>
                       </div>
                       <div className="cf-sc-del">
@@ -454,7 +454,7 @@ function OrdenFormCliente({
             type="text"
             placeholder="Nombre del cliente"
             value={nuevaOrden.cliente}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, cliente: e.target.value})}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, cliente: e.target.value.toUpperCase()})}
             required
             style={{
               width: '100%',
@@ -472,7 +472,7 @@ function OrdenFormCliente({
             type="text"
             placeholder="Dirección del cliente"
             value={nuevaOrden.direccion}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, direccion: e.target.value})}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, direccion: e.target.value.toUpperCase()})}
             style={{
               width: '100%',
               padding: '6px 10px',
@@ -489,7 +489,7 @@ function OrdenFormCliente({
             type="text"
             placeholder="Comuna"
             value={nuevaOrden.comuna}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, comuna: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')})}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, comuna: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
             style={{
               width: '100%',
               padding: '6px 10px',
@@ -512,7 +512,7 @@ function OrdenFormCliente({
             type="text"
             placeholder="Nombre del contacto"
             value={nuevaOrden.contacto}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, contacto: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')})}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, contacto: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
             style={{
               width: '100%',
               padding: '6px 10px',
@@ -546,7 +546,7 @@ function OrdenFormCliente({
             type="text"
             placeholder="Nombre y apellido del técnico"
             value={nuevaOrden.tecnicoAsignado}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, tecnicoAsignado: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')})}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, tecnicoAsignado: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
             required
             style={{
               width: '100%',

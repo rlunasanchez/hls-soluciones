@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Users, Plus, Save, Trash2, Edit, X, Home, UserCog,
-  FileText, FileSpreadsheet, ClipboardList, ShoppingCart, Package, LogOut
+  Users, Plus, Save, Trash2, X
 } from "lucide-react";
 import api from "../services/api";
 import "./Clientes.css";
@@ -195,7 +194,8 @@ function Clientes() {
       dirs = c.direcciones.split(";;").map((d) => {
         const parts = d.split("|");
         return {
-          tipo_direccion: parts[0], direccion: parts[1], fono: parts[2], ciudad: parts[3], comuna: parts[4]
+          tipo_direccion: (parts[0] || "").toUpperCase(), direccion: (parts[1] || "").toUpperCase(),
+          fono: parts[2] || "", ciudad: (parts[3] || "").toUpperCase(), comuna: (parts[4] || "").toUpperCase()
         };
       }).filter((d) => d.direccion);
       if (dirs.length > 0) {
@@ -205,12 +205,13 @@ function Clientes() {
     }
     setSucursalesVisibles(dirs.filter((s) => s.direccion).length || 1);
     setRutError("");
+    const toUpper = (v) => (v || "").toUpperCase();
     setNuevoCliente({
-      codigo: c.codigo || "", razon_social: c.razon_social, giro: c.giro || "", rut: c.rut || "",
-      direccion: c.direccion || "", ciudad: c.ciudad || "", comuna: c.comuna || "",
-      telefono: c.telefono || "", email: c.email || "", contacto_nombre: c.contacto_nombre || "",
+      codigo: c.codigo || "", razon_social: toUpper(c.razon_social), giro: toUpper(c.giro), rut: c.rut || "",
+      direccion: toUpper(c.direccion), ciudad: toUpper(c.ciudad), comuna: toUpper(c.comuna),
+      telefono: c.telefono || "", email: c.email || "", contacto_nombre: toUpper(c.contacto_nombre),
       contacto_email: c.contacto_email || "", contacto_fono: c.contacto_fono || "",
-      contacto_cargo: c.contacto_cargo || "", contacto_direccion: c.contacto_direccion || "",
+      contacto_cargo: toUpper(c.contacto_cargo), contacto_direccion: toUpper(c.contacto_direccion),
       direcciones: dirs
     });
     setMostrarFormulario(true);
@@ -263,7 +264,7 @@ function Clientes() {
                       <input
                         placeholder="Razón social"
                         value={nuevoCliente.razon_social}
-                        onChange={(e) => setNuevoCliente({ ...nuevoCliente, razon_social: e.target.value })}
+                        onChange={(e) => setNuevoCliente({ ...nuevoCliente, razon_social: e.target.value.toUpperCase() })}
                         required
                       />
                     </div>
@@ -272,7 +273,7 @@ function Clientes() {
                       <input
                         placeholder="Giro"
                         value={nuevoCliente.giro}
-                        onChange={(e) => setNuevoCliente({ ...nuevoCliente, giro: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, "") })}
+                        onChange={(e) => setNuevoCliente({ ...nuevoCliente, giro: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })}
                       />
                     </div>
                   </div>
@@ -317,7 +318,7 @@ function Clientes() {
                       <input
                         placeholder="Ingrese la dirección completa"
                         value={nuevoCliente.direccion}
-                        onChange={(e) => setNuevoCliente({ ...nuevoCliente, direccion: e.target.value })}
+                        onChange={(e) => setNuevoCliente({ ...nuevoCliente, direccion: e.target.value.toUpperCase() })}
                       />
                     </div>
                   </div>
@@ -327,7 +328,7 @@ function Clientes() {
                       <input
                         placeholder="Ciudad"
                         value={nuevoCliente.ciudad}
-                        onChange={(e) => setNuevoCliente({ ...nuevoCliente, ciudad: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, "") })}
+                        onChange={(e) => setNuevoCliente({ ...nuevoCliente, ciudad: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })}
                       />
                     </div>
                     <div className="cf-field">
@@ -335,7 +336,7 @@ function Clientes() {
                       <input
                         placeholder="Comuna"
                         value={nuevoCliente.comuna}
-                        onChange={(e) => setNuevoCliente({ ...nuevoCliente, comuna: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, "") })}
+                        onChange={(e) => setNuevoCliente({ ...nuevoCliente, comuna: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })}
                       />
                     </div>
                     <div className="cf-field">
@@ -368,7 +369,7 @@ function Clientes() {
                       <input
                         placeholder="Nombre"
                         value={nuevoCliente.contacto_nombre}
-                        onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_nombre: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, "") })}
+                        onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_nombre: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })}
                       />
                     </div>
                   </div>
@@ -397,7 +398,7 @@ function Clientes() {
                       <input
                         placeholder="Cargo"
                         value={nuevoCliente.contacto_cargo}
-                        onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_cargo: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, "") })}
+                        onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_cargo: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })}
                       />
                     </div>
                   </div>
@@ -407,7 +408,7 @@ function Clientes() {
                       <input
                         placeholder="Ingrese la dirección completa"
                         value={nuevoCliente.contacto_direccion}
-                        onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_direccion: e.target.value })}
+                        onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_direccion: e.target.value.toUpperCase() })}
                       />
                     </div>
                   </div>
@@ -434,13 +435,13 @@ function Clientes() {
                       </div>
                       <div className="cf-field cf-m0">
                         <label>Dirección</label>
-                        <input placeholder="Ingrese la dirección completa" value={suc.direccion} onChange={(e) => actualizarSucursal(idx, "direccion", e.target.value)} />
+                        <input placeholder="Ingrese la dirección completa" value={suc.direccion} onChange={(e) => actualizarSucursal(idx, "direccion", e.target.value.toUpperCase())} />
                       </div>
                     </div>
                     <div className="cf-r3 cf-mb">
                       <div className="cf-field cf-m0">
                         <label>Ciudad</label>
-                        <input placeholder="Ciudad" value={suc.ciudad} onChange={(e) => actualizarSucursal(idx, "ciudad", e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, ""))} />
+                        <input placeholder="Ciudad" value={suc.ciudad} onChange={(e) => actualizarSucursal(idx, "ciudad", e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ""))} />
                       </div>
                       <div className="cf-field cf-m0">
                         <label>Fono</label>
@@ -448,7 +449,7 @@ function Clientes() {
                       </div>
                       <div className="cf-field cf-m0">
                         <label>Comuna</label>
-                        <input placeholder="Comuna" value={suc.comuna} onChange={(e) => actualizarSucursal(idx, "comuna", e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, ""))} />
+                        <input placeholder="Comuna" value={suc.comuna} onChange={(e) => actualizarSucursal(idx, "comuna", e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ""))} />
                       </div>
                     </div>
                     <div className="cf-sc-del">

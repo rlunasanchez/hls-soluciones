@@ -109,7 +109,7 @@ function OrdenFormEquipo({
               placeholder="Ingrese número de serie..."
               value={busquedaSerie}
               onChange={(e) => {
-                setBusquedaSerie(e.target.value);
+                setBusquedaSerie(e.target.value.toUpperCase());
                 setMostrarDropdownEquipos(e.target.value.length >= 2);
               }}
               onFocus={() => {
@@ -201,7 +201,7 @@ function OrdenFormEquipo({
             type="text"
             placeholder="Tipo de equipo"
             value={nuevaOrden.equipo}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, equipo: e.target.value})}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, equipo: e.target.value.toUpperCase()})}
             required
             style={{
               width: '100%',
@@ -219,7 +219,7 @@ function OrdenFormEquipo({
             type="text"
             placeholder="Marca del equipo"
             value={nuevaOrden.marca}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, marca: e.target.value})}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, marca: e.target.value.toUpperCase()})}
             required
             style={{
               width: '100%',
@@ -237,7 +237,7 @@ function OrdenFormEquipo({
             type="text"
             placeholder="Modelo del equipo"
             value={nuevaOrden.modelo}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, modelo: e.target.value})}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, modelo: e.target.value.toUpperCase()})}
             required
             style={{
               width: '100%',
@@ -255,7 +255,7 @@ function OrdenFormEquipo({
             type="text"
             placeholder="Número de serie"
             value={nuevaOrden.serie}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, serie: e.target.value})}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, serie: e.target.value.toUpperCase()})}
             style={{
               width: '100%',
               padding: '6px 10px',
@@ -272,7 +272,7 @@ function OrdenFormEquipo({
             type="text"
             placeholder="Ej: 80%, lleno, etc."
             value={nuevaOrden.nivelTinta}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, nivelTinta: e.target.value})}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, nivelTinta: e.target.value.toUpperCase()})}
             style={{
               width: '100%',
               padding: '6px 10px',
