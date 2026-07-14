@@ -717,6 +717,7 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.3 | 18 Mayo 2026 | Separación ramas main (MySQL) vs deploy/cloud (PostgreSQL), fix fechas editar orden |
 | 1.4 | 20 Mayo 2026 | Fix FK cliente_id en seed script, toggle hide/show secciones, paginación 10 items, botón Limpiar filtros, paginación 4 items, paginación OT |
 | 1.5 | Julio 2026 | Campos actividad y observaciones en OT, columna y filtro de estado |
+| 1.6 | Julio 2026 | Mayúsculas automáticas en formularios (Clientes, Equipos, OT), limpieza de código muerto |
 
 ## Cambios Recientes (20 Mayo 2026)
 
@@ -798,3 +799,33 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 ALTER TABLE ordenes_trabajo ADD COLUMN IF NOT EXISTS actividad TEXT;
 ALTER TABLE ordenes_trabajo ADD COLUMN IF NOT EXISTS observaciones TEXT;
 ```
+
+### 31. Mayúsculas automáticas en formularios y vistas
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `frontend/src/pages/Clientes.jsx`
+- `frontend/src/components/clientes/clientes-componentes.css`
+- `frontend/src/pages/Equipos.jsx`
+- `frontend/src/pages/Equipos.css`
+- `frontend/src/components/equipos/EquipoFormulario.jsx`
+- `frontend/src/pages/OrdenTrabajo.jsx`
+- `frontend/src/pages/OrdenTrabajo.css`
+- `frontend/src/components/ordenes/OrdenFormCliente.jsx`
+- `frontend/src/components/ordenes/OrdenFormEquipo.jsx`
+- `frontend/src/components/ordenes/OrdenFormAveria.jsx`
+- `frontend/src/components/ordenes/OrdenFormInsumos.jsx`
+
+**Cambios:**
+- Todos los campos de texto (inputs, textareas) convierten automáticamente a MAYÚSCULAS al escribir
+- Excepciones: Email (permite mayúsculas y minúsculas), Fono/contador (solo números)
+- Al **editar** un registro existente, los datos se cargan en mayúsculas aunque estén guardados en minúsculas
+- La **vista de tabla/tarjetas** muestra todo en mayúsculas via CSS (`text-transform: uppercase`)
+- Búsquedas de cliente y serie también se muestran en mayúsculas
+- Se eliminó código muerto: imports no usados, estado `equiposCodigo`, variable `usuarioActual` en Equipos
+
+**Módulos afectados:**
+- **Clientes** (Crear/Editar): razón social, giro, dirección, ciudad, comuna, contacto, cargo, dirección contacto, sucursales
+- **Equipos** (Crear/Editar): equipo, marca, modelo, serie, nivel tintas, insumos, avería
+- **Orden de Trabajo** (Crear/Editar): cliente, dirección, comuna, contacto, técnico, equipo, marca, modelo, serie, nivel tinta, insumos, avería, actividad, observaciones
+
+**Para revertir:** Quitar `.toUpperCase()` de los `onChange` y `toUpper()` de las funciones `editar*` y `setNuevaOrden`. Quitar reglas CSS `text-transform: uppercase` de `clientes-componentes.css`, `Equipos.css` y `OrdenTrabajo.css`.
