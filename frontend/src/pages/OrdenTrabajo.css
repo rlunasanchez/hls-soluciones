@@ -37,3 +37,8 @@
 .of-btn-c{padding:6px 14px;font-size:.78rem;background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px;transition:all .2s}
 .of-btn-c:hover{background:#e2e8f0}
 @media(max-width:768px){.of-r3,.of-r2,.of-grid,.of-dates,.of-ins{grid-template-columns:1fr}.of-form{padding:8px;gap:6px}.of-f input,.of-f select,.of-f textarea{padding:10px 12px;font-size:.9rem;min-height:44px}.of-sub{flex-direction:column}.of-sub button{width:100%;justify-content:center}}
+
+/* Vista tabla - mayúsculas */
+.table-wrapper td { text-transform: uppercase; }
+.data-card-row .value, .data-card-value { text-transform: uppercase; }
+.data-card-header strong, .badge-info { text-transform: uppercase; }
