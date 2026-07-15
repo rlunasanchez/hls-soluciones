@@ -829,3 +829,13 @@ ALTER TABLE ordenes_trabajo ADD COLUMN IF NOT EXISTS observaciones TEXT;
 - **Orden de Trabajo** (Crear/Editar): cliente, dirección, comuna, contacto, técnico, equipo, marca, modelo, serie, nivel tinta, insumos, avería, actividad, observaciones
 
 **Para revertir:** Quitar `.toUpperCase()` de los `onChange` y `toUpper()` de las funciones `editar*` y `setNuevaOrden`. Quitar reglas CSS `text-transform: uppercase` de `clientes-componentes.css`, `Equipos.css` y `OrdenTrabajo.css`.
+
+### 32. Teléfono visible en dropdown de búsqueda de cliente (OT)
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `frontend/src/components/ordenes/OrdenFormCliente.jsx`
+
+**Cambios:**
+- El dropdown de búsqueda de cliente en Nueva/Editar Orden ahora muestra el teléfono del cliente (`Tel: +569...`)
+- Formato: `RUT: XX.XXX.XXX-X | Dirección, Comuna | Tel: +569XXXXXXXX`
+- El teléfono ya se cargaba en "Fono Principal" al seleccionar; ahora también es visible antes de seleccionar
