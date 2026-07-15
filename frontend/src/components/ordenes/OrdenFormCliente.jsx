@@ -194,6 +194,7 @@ function OrdenFormCliente({
                       </div>
                       <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                         RUT: {cliente.rut || 'N/A'} | {cliente.direccion || ''}, {cliente.comuna || ''}
+                        {cliente.telefono ? ` | Tel: ${cliente.telefono}` : ''}
                       </div>
                     </div>
                   ))
