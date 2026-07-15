@@ -302,49 +302,49 @@
 
 .cliente-exp-header {
   background: var(--gradient);
-  padding: 12px 16px;
+  padding: 8px 12px;
   color: white;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .cliente-exp-header h3 {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   text-transform: uppercase;
 }
 
 .cliente-exp-header p {
-  margin: 4px 0 0;
+  margin: 2px 0 0;
   opacity: 0.9;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
 }
 
 .cliente-acciones {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   flex-wrap: wrap;
 }
 
 .btn-nueva-ot-header,
 .btn-editar-header,
 .btn-eliminar-header {
-  padding: 4px 10px;
-  border-radius: 5px;
+  padding: 3px 8px;
+  border-radius: 4px;
   border: none;
   cursor: pointer;
   color: white;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
 }
 
 .btn-nueva-ot-header {
@@ -360,54 +360,54 @@
 }
 
 .cliente-datos {
-  padding: 10px 16px;
+  padding: 6px 12px;
   border-bottom: 1px solid var(--border);
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 4px;
 }
 
 .dato-item label {
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .dato-item p {
-  margin: 2px 0 0;
+  margin: 1px 0 0;
   font-weight: 500;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   text-transform: uppercase;
 }
 
 .dato-item .contacto-email {
-  margin: 1px 0 0;
-  font-size: 0.75rem;
+  margin: 0;
+  font-size: 0.7rem;
   color: var(--text-muted);
 }
 
 /* OTs Asociadas */
 .cliente-ots,
 .ots-asociadas {
-  padding: 10px 16px;
+  padding: 6px 12px;
 }
 
 .ots-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
 }
 
 .ots-header h4 {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 .btn-nueva-ot {
@@ -438,17 +438,17 @@
 }
 
 .ots-tabla-wrapper th {
-  padding: 8px 10px;
+  padding: 5px 8px;
   text-align: left;
   font-weight: 600;
   color: #6366f1;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
 }
 
 .ots-tabla-wrapper td {
-  padding: 7px 10px;
+  padding: 4px 8px;
   border-bottom: 1px solid var(--border);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
 }
 
 .ot-numero {
@@ -458,10 +458,10 @@
 
 .ots-vacio {
   text-align: center;
-  padding: 14px;
+  padding: 10px;
   color: var(--text-muted);
   background: #f9fafb;
-  border-radius: 6px;
+  border-radius: 5px;
 }
 
 .ots-vacio svg {
@@ -469,8 +469,8 @@
 }
 
 .ots-vacio p {
-  margin: 4px 0 0;
-  font-size: 0.8rem;
+  margin: 2px 0 0;
+  font-size: 0.75rem;
 }
 
 .ots-header-actions {
@@ -482,8 +482,8 @@
 .btn-toggle-seccion {
   background: none;
   border: 1px solid var(--border);
-  border-radius: 5px;
-  padding: 4px;
+  border-radius: 4px;
+  padding: 3px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -501,23 +501,23 @@
 .paginacion-cliente {
   display: flex;
   justify-content: center;
-  gap: 3px;
+  gap: 2px;
   align-items: center;
-  padding: 6px 0 2px;
+  padding: 4px 0 2px;
 }
 
 .paginacion-cliente button {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 26px;
-  height: 26px;
-  padding: 0 6px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
   border: 1px solid var(--border);
   background: white;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   transition: all 0.15s;
 }
 
@@ -544,17 +544,17 @@
 }
 
 .btn-crear-primera {
-  margin-top: 8px;
-  padding: 6px 12px;
-  font-size: 0.8rem;
+  margin-top: 4px;
+  padding: 4px 10px;
+  font-size: 0.72rem;
   background: var(--primary);
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
 }
 
 /* Responsive */

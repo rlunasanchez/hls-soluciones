@@ -8,7 +8,7 @@ function Paginacion({ pagina, totalPaginas, setPagina }) {
   return (
     <div className="paginacion-cliente">
       <button disabled={pagina <= 1} onClick={() => setPagina(pagina - 1)}>
-        <ChevronLeft size={14} />
+        <ChevronLeft size={12} />
       </button>
       {(() => {
         const maxVisibles = 7;
@@ -30,7 +30,7 @@ function Paginacion({ pagina, totalPaginas, setPagina }) {
         );
       })()}
       <button disabled={pagina >= totalPaginas} onClick={() => setPagina(pagina + 1)}>
-        <ChevronRight size={14} />
+        <ChevronRight size={12} />
       </button>
     </div>
   );
@@ -86,16 +86,16 @@ function ClienteExpandido({ cliente, ordenes, onEditar, onEliminar, onEliminarOT
               navigate("/orden-trabajo", { state: { cliente } })
             }
           >
-            <ClipboardList size={12} /> Agregar OT
+            <ClipboardList size={10} /> Agregar OT
           </button>
           <button className="btn-editar-header" onClick={() => onEditar(cliente)}>
-            <Edit size={12} /> Editar
+            <Edit size={10} /> Editar
           </button>
           <button
             className="btn-eliminar-header"
             onClick={() => onEliminar(cliente.id)}
           >
-            <Trash2 size={12} /> Eliminar
+            <Trash2 size={10} /> Eliminar
           </button>
         </div>
       </div>
@@ -123,11 +123,11 @@ function ClienteExpandido({ cliente, ordenes, onEditar, onEliminar, onEliminarOT
       <div className="cliente-ots">
         <div className="ots-header">
           <h4>
-            <Package size={14} />
+            <Package size={12} />
             Equipos Asociados ({equipos.length})
           </h4>
           <button className="btn-toggle-seccion" onClick={() => setMostrarEquipos(!mostrarEquipos)} title={mostrarEquipos ? "Ocultar equipos" : "Mostrar equipos"}>
-            {mostrarEquipos ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            {mostrarEquipos ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
           </button>
         </div>
         {mostrarEquipos && (loadingEquipos ? (
@@ -162,7 +162,7 @@ function ClienteExpandido({ cliente, ordenes, onEditar, onEliminar, onEliminarOT
           </>
         ) : (
           <div className="ots-vacio">
-            <Package size={24} />
+            <Package size={20} />
             <p>Este cliente no tiene equipos asociados</p>
           </div>
         ))}
@@ -172,7 +172,7 @@ function ClienteExpandido({ cliente, ordenes, onEditar, onEliminar, onEliminarOT
       <div className="cliente-ots">
         <div className="ots-header">
           <h4>
-            <ClipboardList size={14} />
+            <ClipboardList size={12} />
             Órdenes de Trabajo ({ots.length})
           </h4>
           <div className="ots-header-actions">
@@ -182,10 +182,10 @@ function ClienteExpandido({ cliente, ordenes, onEditar, onEliminar, onEliminarOT
                 navigate("/orden-trabajo", { state: { cliente } })
               }
             >
-              <Plus size={12} /> Nueva OT
+              <Plus size={10} /> Nueva OT
             </button>
             <button className="btn-toggle-seccion" onClick={() => setMostrarOTs(!mostrarOTs)} title={mostrarOTs ? "Ocultar órdenes" : "Mostrar órdenes"}>
-              {mostrarOTs ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              {mostrarOTs ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
             </button>
           </div>
         </div>
@@ -225,14 +225,14 @@ function ClienteExpandido({ cliente, ordenes, onEditar, onEliminar, onEliminarOT
                           }
                           title="Editar OT"
                         >
-                          <Edit size={14} />
+                          <Edit size={12} />
                         </button>
                         <button
                           onClick={() => onEliminarOT(ot.id)}
                           title="Eliminar OT"
                           className="btn-eliminar"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={12} />
                         </button>
                       </td>
                     </tr>
@@ -244,7 +244,7 @@ function ClienteExpandido({ cliente, ordenes, onEditar, onEliminar, onEliminarOT
           </>
         ) : (
           <div className="ots-vacio">
-            <ClipboardList size={24} />
+            <ClipboardList size={20} />
             <p>Este cliente no tiene órdenes de trabajo</p>
             <button
               className="btn-crear-primera"
@@ -252,7 +252,7 @@ function ClienteExpandido({ cliente, ordenes, onEditar, onEliminar, onEliminarOT
                 navigate("/orden-trabajo", { state: { cliente } })
               }
             >
-              <ClipboardList size={14} /> Crear primera OT
+              <ClipboardList size={12} /> Crear primera OT
             </button>
           </div>
         ))}
