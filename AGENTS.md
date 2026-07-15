@@ -718,6 +718,7 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.4 | 20 Mayo 2026 | Fix FK cliente_id en seed script, toggle hide/show secciones, paginación 10 items, botón Limpiar filtros, paginación 4 items, paginación OT |
 | 1.5 | Julio 2026 | Campos actividad y observaciones en OT, columna y filtro de estado |
 | 1.6 | Julio 2026 | Mayúsculas automáticas en formularios (Clientes, Equipos, OT), limpieza de código muerto |
+| 1.7 | Julio 2026 | Vista expandida de cliente compacta, teléfono visible en dropdown OT |
 
 ## Cambios Recientes (20 Mayo 2026)
 
@@ -839,3 +840,20 @@ ALTER TABLE ordenes_trabajo ADD COLUMN IF NOT EXISTS observaciones TEXT;
 - El dropdown de búsqueda de cliente en Nueva/Editar Orden ahora muestra el teléfono del cliente (`Tel: +569...`)
 - Formato: `RUT: XX.XXX.XXX-X | Dirección, Comuna | Tel: +569XXXXXXXX`
 - El teléfono ya se cargaba en "Fono Principal" al seleccionar; ahora también es visible antes de seleccionar
+
+### 33. Vista expandida de cliente más compacta
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `frontend/src/components/clientes/ClienteExpandido.jsx`
+- `frontend/src/components/clientes/clientes-componentes.css`
+
+**Cambios:**
+- Header reducido: padding 20px → 8px, font 1.25rem → 0.85rem, botones más pequeños
+- Datos del cliente: padding 20px → 6px, gap 16px → 4px, font más pequeño
+- Secciones Equipos/OTs: padding 20px → 6px, márgenes reducidos
+- Tablas internas: padding 12px → 5px, font 0.9rem → 0.75rem
+- Paginación: botones 32px → 22px
+- Iconos: todos reducidos (~10-12px)
+- Todo el contenido se ve significativamente más compacto sin perder funcionalidad
+
+**Para revertir:** Aumentar los valores de padding, font-size, gap y size de iconos en `clientes-componentes.css` y `ClienteExpandido.jsx`.
