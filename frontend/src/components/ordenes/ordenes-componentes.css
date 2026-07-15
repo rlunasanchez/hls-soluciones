@@ -83,6 +83,21 @@
   outline: none;
 }
 
+/* Filtro fila de selects (desktop: inline) */
+.filtro-fila-selects {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.filtro-grupo-select label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .header-orden {
@@ -93,9 +108,39 @@
   .table-header-actions {
     flex-direction: column;
     width: 100%;
+    gap: 8px;
   }
 
   .filtro-orden-input {
     min-width: 100%;
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+
+  .filtro-fila-selects {
+    width: 100%;
+    gap: 8px;
+  }
+
+  .filtro-grupo-select {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .filtro-garantia-select {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    min-width: 0;
+  }
+
+  .filtro-grupo-select label {
+    font-size: 0.75rem;
+  }
+
+  .main-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 16px;
   }
 }

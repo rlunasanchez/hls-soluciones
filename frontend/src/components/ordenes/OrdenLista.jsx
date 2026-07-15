@@ -17,24 +17,32 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
             onChange={(e) => onFiltroChange(e.target.value)}
             className="filtro-orden-input"
           />
-          <select
-            value={filtroGarantia}
-            onChange={(e) => onFiltroGarantiaChange(e.target.value)}
-            className="filtro-garantia-select"
-          >
-            <option value="todos">Todas</option>
-            <option value="si">Garantía</option>
-            <option value="no">No garantía</option>
-          </select>
-          <select
-            value={filtroEstado}
-            onChange={(e) => onFiltroEstadoChange(e.target.value)}
-            className="filtro-garantia-select"
-          >
-            <option value="todos">Todas</option>
-            <option value="cerrada">Cerrada</option>
-            <option value="pendiente">Pendiente</option>
-          </select>
+          <div className="filtro-fila-selects">
+            <div className="filtro-grupo-select">
+              <label>Garantía</label>
+              <select
+                value={filtroGarantia}
+                onChange={(e) => onFiltroGarantiaChange(e.target.value)}
+                className="filtro-garantia-select"
+              >
+                <option value="todos">Todas</option>
+                <option value="si">Garantía</option>
+                <option value="no">No garantía</option>
+              </select>
+            </div>
+            <div className="filtro-grupo-select">
+              <label>Estado</label>
+              <select
+                value={filtroEstado}
+                onChange={(e) => onFiltroEstadoChange(e.target.value)}
+                className="filtro-garantia-select"
+              >
+                <option value="todos">Todas</option>
+                <option value="cerrada">Cerrada</option>
+                <option value="pendiente">Pendiente</option>
+              </select>
+            </div>
+          </div>
         </div>
       </div>
 
