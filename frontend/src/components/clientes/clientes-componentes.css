@@ -302,49 +302,49 @@
 
 .cliente-exp-header {
   background: var(--gradient);
-  padding: 20px 24px;
+  padding: 12px 16px;
   color: white;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 8px;
 }
 
 .cliente-exp-header h3 {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 0.95rem;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   text-transform: uppercase;
 }
 
 .cliente-exp-header p {
-  margin: 8px 0 0;
+  margin: 4px 0 0;
   opacity: 0.9;
-  font-size: 0.9rem;
+  font-size: 0.78rem;
   text-transform: uppercase;
 }
 
 .cliente-acciones {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
 .btn-nueva-ot-header,
 .btn-editar-header,
 .btn-eliminar-header {
-  padding: 6px 12px;
-  border-radius: 6px;
+  padding: 4px 10px;
+  border-radius: 5px;
   border: none;
   cursor: pointer;
   color: white;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 .btn-nueva-ot-header {
@@ -360,62 +360,63 @@
 }
 
 .cliente-datos {
-  padding: 20px 24px;
+  padding: 10px 16px;
   border-bottom: 1px solid var(--border);
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
 }
 
 .dato-item label {
-  font-size: 0.75rem;
+  font-size: 0.68rem;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .dato-item p {
-  margin: 4px 0 0;
+  margin: 2px 0 0;
   font-weight: 500;
+  font-size: 0.82rem;
   text-transform: uppercase;
 }
 
 .dato-item .contacto-email {
-  margin: 2px 0 0;
-  font-size: 0.85rem;
+  margin: 1px 0 0;
+  font-size: 0.75rem;
   color: var(--text-muted);
 }
 
 /* OTs Asociadas */
 .cliente-ots,
 .ots-asociadas {
-  padding: 20px 24px;
+  padding: 10px 16px;
 }
 
 .ots-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 6px;
 }
 
 .ots-header h4 {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.85rem;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .btn-nueva-ot {
   background: #6366f1;
   color: white;
   border: none;
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 0.85rem;
+  border-radius: 5px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -428,7 +429,7 @@
 
 .ots-tabla-wrapper table {
   width: 100%;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   border-collapse: collapse;
 }
 
@@ -437,15 +438,17 @@
 }
 
 .ots-tabla-wrapper th {
-  padding: 12px;
+  padding: 8px 10px;
   text-align: left;
   font-weight: 600;
   color: #6366f1;
+  font-size: 0.72rem;
 }
 
 .ots-tabla-wrapper td {
-  padding: 10px 12px;
+  padding: 7px 10px;
   border-bottom: 1px solid var(--border);
+  font-size: 0.8rem;
 }
 
 .ot-numero {
@@ -455,10 +458,10 @@
 
 .ots-vacio {
   text-align: center;
-  padding: 24px;
+  padding: 14px;
   color: var(--text-muted);
   background: #f9fafb;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 .ots-vacio svg {
@@ -466,7 +469,8 @@
 }
 
 .ots-vacio p {
-  margin: 8px 0 0;
+  margin: 4px 0 0;
+  font-size: 0.8rem;
 }
 
 .ots-header-actions {
@@ -478,8 +482,8 @@
 .btn-toggle-seccion {
   background: none;
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 6px;
+  border-radius: 5px;
+  padding: 4px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -497,23 +501,23 @@
 .paginacion-cliente {
   display: flex;
   justify-content: center;
-  gap: 4px;
+  gap: 3px;
   align-items: center;
-  padding: 12px 0 4px;
+  padding: 6px 0 2px;
 }
 
 .paginacion-cliente button {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 32px;
-  height: 32px;
-  padding: 0 8px;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 6px;
   border: 1px solid var(--border);
   background: white;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   transition: all 0.15s;
 }
 
@@ -540,17 +544,17 @@
 }
 
 .btn-crear-primera {
-  margin-top: 12px;
-  padding: 8px 16px;
-  font-size: 0.9rem;
+  margin-top: 8px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
   background: var(--primary);
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 5px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 /* Responsive */
