@@ -30,6 +30,8 @@ function OrdenTrabajo() {
   const [filtroNumeroOrden, setFiltroNumeroOrden] = useState("");
   const [filtroGarantia, setFiltroGarantia] = useState("todos");
   const [filtroEstado, setFiltroEstado] = useState("todos");
+  const [filtroFechaDesde, setFiltroFechaDesde] = useState("");
+  const [filtroFechaHasta, setFiltroFechaHasta] = useState("");
   const [fromClientes, setFromClientes] = useState(false);
   
   // Estados para autocompletar clientes y equipos
@@ -221,7 +223,7 @@ function OrdenTrabajo() {
   };
 
   // Resetear paginación al filtrar
-  useEffect(() => { setPaginaActual(1); }, [filtroNumeroOrden, filtroGarantia, filtroEstado]);
+  useEffect(() => { setPaginaActual(1); }, [filtroNumeroOrden, filtroGarantia, filtroEstado, filtroFechaDesde, filtroFechaHasta]);
 
   // Buscar equipos por código via API (datos siempre frescos)
   useEffect(() => {
@@ -285,6 +287,8 @@ function OrdenTrabajo() {
     if (filtroGarantia === "no" && orden.es_garantia) return false;
     if (filtroEstado === "cerrada" && !orden.fecha_entrega) return false;
     if (filtroEstado === "pendiente" && orden.fecha_entrega) return false;
+    if (filtroFechaDesde && orden.fecha && orden.fecha.substring(0, 10) < filtroFechaDesde) return false;
+    if (filtroFechaHasta && orden.fecha && orden.fecha.substring(0, 10) > filtroFechaHasta) return false;
     return true;
   });
 
@@ -720,6 +724,10 @@ function OrdenTrabajo() {
             onFiltroGarantiaChange={setFiltroGarantia}
             filtroEstado={filtroEstado}
             onFiltroEstadoChange={setFiltroEstado}
+            filtroFechaDesde={filtroFechaDesde}
+            onFiltroFechaDesdeChange={setFiltroFechaDesde}
+            filtroFechaHasta={filtroFechaHasta}
+            onFiltroFechaHastaChange={setFiltroFechaHasta}
             onNueva={abrirNuevaOrden}
             paginaActual={paginaActual}
             totalPaginas={totalPaginas}
