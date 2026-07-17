@@ -365,3 +365,42 @@ Vista de tarjetas (`cards-table`) implementada en:
 - Los campos comentados en `OrdenTrabajo.jsx` pueden restaurarse descomentando el bloque indicado.
 - El buscador por serie es ahora el estándar en ambos componentes.
 - Las vistas responsive se probaron para: 1600px+, 1280px, 1024px, 768px, 480px.
+
+---
+
+## Fecha: 2026-07-16 (Sesión 4)
+
+### Badges "Cliente inactivo" y "Equipo asignado a otro cliente" en formulario OT
+
+**Problema:** Al editar una OT cuyo cliente fue eliminado (soft delete) o cuyo equipo fue reasignado a otro cliente, no había indicador visual. El formulario mostraba los campos vacíos sin explicación.
+
+**Solución:** Badges naranjas de advertencia en el formulario de OT.
+
+**Archivos modificados:**
+1. `frontend/src/pages/OrdenTrabajo.jsx`
+2. `frontend/src/components/ordenes/OrdenFormCliente.jsx`
+3. `frontend/src/components/ordenes/OrdenFormEquipo.jsx`
+
+**Cambios:**
+
+#### OrdenTrabajo.jsx
+- **Nuevos estados**: `clienteInactivo` (boolean) y `equipoOtroCliente` (boolean)
+- **Detección en `editarOrden()`**: Si `orden.cliente_id` existe pero el cliente no se encuentra en la lista de clientes activos → `clienteInactivo = true`
+- **Detección en carga de equipo**: Si `eq.cliente_id !== orden.cliente_id` → `equipoOtroCliente = true` (tanto en carga fresca API como fallback local)
+- **Al seleccionar equipo**: Se recalcula `equipoOtroCliente` comparando `equipo.cliente_id` con `clienteSeleccionado.id`
+- **Reset**: Se resetean ambos flags al crear nueva OT, seleccionar nuevo cliente, o resetear formulario
+- **Props**: Se pasan `clienteInactivo` y `equipoOtroCliente` a `OrdenFormCliente` y `OrdenFormEquipo`
+
+#### OrdenFormCliente.jsx
+- **Nuevo prop**: `clienteInactivo` (default: false)
+- **Badge naranja** (fondo `#F97316`): "⚠ Cliente inactivo" — se muestra cuando `clienteInactivo` es true
+- **Badge verde** (éxito): "✓ Seleccionado" — se muestra solo cuando `clienteSeleccionado` existe Y `clienteInactivo` es false
+
+#### OrdenFormEquipo.jsx
+- **Nuevo prop**: `equipoOtroCliente` (default: false)
+- **Badge naranja** (fondo `#FFF3E0`, texto `#F97316`): "⚠ Equipo asignado a otro cliente: {equipo} - {marca} {modelo}"
+- **Badge verde** (éxito): "✓ Seleccionado: ..." — se muestra solo cuando `equipoSeleccionado` existe Y `equipoOtroCliente` es false
+
+**Lógica de detección:**
+- **Cliente inactivo**: `orden.cliente_id` tiene valor pero `clientes.find(c => c.id === orden.cliente_id)` retorna undefined (porque `clientes` solo contiene registros con `activo = 1`)
+- **Equipo de otro cliente**: `equipo.cliente_id !== orden.cliente_id` — el equipo fue reasignado (soft delete + crear nueva OT con el mismo equipo)

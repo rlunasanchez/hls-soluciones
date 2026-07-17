@@ -712,6 +712,7 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.7 | Julio 2026 | Vista expandida de cliente compacta, teléfono visible en dropdown OT |
 | 1.8 | Julio 2026 | Fix cascade actividades/observaciones en OT, fix doble confirm eliminar OT |
 | 1.9 | Julio 2026 | Mostrar actividad/observaciones en Equipos y Clientes, fix INSERT equipos, Contador Páginas OUT en OT, keepalive MySQL |
+| 1.10 | Julio 2026 | Badges "Cliente inactivo" y "Equipo asignado a otro cliente" en formulario OT |
 
 ---
 
