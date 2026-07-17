@@ -104,7 +104,7 @@ function OrdenFormEquipo({
               ✓ Seleccionado: {equipoSeleccionado.equipo} - {equipoSeleccionado.marca} {equipoSeleccionado.modelo}
             </div>
           )}
-          {clienteSeleccionado && !fromClientes && !esEdicion && (
+          {clienteSeleccionado && !fromClientes && (!esEdicion || !equipoSeleccionado || equipoOtroCliente) && (
             <button
               type="button"
               onClick={() => setMostrarModalEquipo(true)}
