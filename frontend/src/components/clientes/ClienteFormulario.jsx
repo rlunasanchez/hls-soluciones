@@ -131,7 +131,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
         <form onSubmit={handleSubmit} className="cf">
           <div className="cf-grid">
             <div className="cf-sec cf-sec-empresa">
-              <h3>Datos de la Empresa</h3>
+              <h3>Datos del Cliente</h3>
               <div className="cf-codigo" style={{ marginBottom: 6 }}>
                 <div className="cf-field">
                   <label>Código</label>
