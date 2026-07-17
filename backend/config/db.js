@@ -11,7 +11,10 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME || "soporte_tecnico_db",
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  connectTimeout: 10000,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0
 });
 
 export default pool;
