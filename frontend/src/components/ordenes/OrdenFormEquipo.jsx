@@ -20,6 +20,7 @@ function OrdenFormEquipo({
   fetchEquipos,
   clienteSeleccionado,
   fromClientes = false,
+  esEdicion = false,
   equipoOtroCliente = false
 }) {
   const [mostrarModalEquipo, setMostrarModalEquipo] = useState(false);
@@ -103,7 +104,7 @@ function OrdenFormEquipo({
               ✓ Seleccionado: {equipoSeleccionado.equipo} - {equipoSeleccionado.marca} {equipoSeleccionado.modelo}
             </div>
           )}
-          {clienteSeleccionado && !fromClientes && (
+          {clienteSeleccionado && !fromClientes && !esEdicion && (
             <button
               type="button"
               onClick={() => setMostrarModalEquipo(true)}
