@@ -25,6 +25,18 @@ function EquipoCard({ equipo, onEditar, onEliminar }) {
           <span className="data-card-value">{equipo.averia}</span>
         </div>
       )}
+      {equipo.actividad && (
+        <div className="data-card-row">
+          <span className="data-card-label">Actividad</span>
+          <span className="data-card-value">{equipo.actividad}</span>
+        </div>
+      )}
+      {equipo.observaciones && (
+        <div className="data-card-row">
+          <span className="data-card-label">Observaciones</span>
+          <span className="data-card-value">{equipo.observaciones}</span>
+        </div>
+      )}
       <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
         <button className="table-btn edit-btn" onClick={() => onEditar(equipo)} style={{ flex: 1, justifyContent: 'center' }}>
           <Edit size={14} /> Editar
