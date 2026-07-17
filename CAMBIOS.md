@@ -404,3 +404,47 @@ Vista de tarjetas (`cards-table`) implementada en:
 **Lógica de detección:**
 - **Cliente inactivo**: `orden.cliente_id` tiene valor pero `clientes.find(c => c.id === orden.cliente_id)` retorna undefined (porque `clientes` solo contiene registros con `activo = 1`)
 - **Equipo de otro cliente**: `equipo.cliente_id !== orden.cliente_id` — el equipo fue reasignado (soft delete + crear nueva OT con el mismo equipo)
+
+---
+
+## Fecha: 2026-07-17 (Sesión 5)
+
+### Fix limpieza de datos al cambiar cliente en OT
+
+**Problema:** Al editar una OT con cliente/equipo inactivo y asignar un nuevo cliente, los campos de avería/actividad/observaciones quedaban con los datos viejos del equipo anterior.
+
+**Archivo modificado:** `frontend/src/pages/OrdenTrabajo.jsx`
+
+**Cambios en `seleccionarCliente()`:**
+- Se limpia `equipoSeleccionado = null`, `busquedaCodigo = ""`, `busquedaSerie = ""`
+- Se limpian campos del formulario: equipo, modelo, marca, serie, nivelTinta, contadorPagOut
+- **NUEVO**: Se limpian también `averia = ""`, `actividad = ""`, `observaciones = ""`
+
+### Botón "+ Nuevo" solo visible cuando no tiene cliente/equipo
+
+**Problema:** Los botones "+ Nuevo" para crear cliente y equipo aparecían siempre al editar OT, incluso cuando ya había un cliente/equipo asignado.
+
+**Archivos modificados:**
+- `frontend/src/components/ordenes/OrdenFormCliente.jsx`
+- `frontend/src/components/ordenes/OrdenFormEquipo.jsx`
+- `frontend/src/pages/OrdenTrabajo.jsx`
+
+**Cambios:**
+- **Cliente**: `!fromClientes && !esEdicion` → `!fromClientes && (!esEdicion || !clienteSeleccionado)` — se oculta solo si ya tiene cliente seleccionado
+- **Equipo**: `clienteSeleccionado && !fromClientes` → `clienteSeleccionado && !fromClientes && (!esEdicion || !equipoSeleccionado || equipoOtroCliente)` — se oculta solo si ya tiene equipo seleccionado
+- Se pasó prop `esEdicion={!!editingId}` a `OrdenFormEquipo`
+
+### Cargar avería/actividad/observaciones al crear equipo nuevo desde OT
+
+**Problema:** Al crear un equipo nuevo desde el modal "+ Nuevo" en OT, los campos avería/actividad/observaciones del modal no se copiaban al formulario de la OT.
+
+**Archivo modificado:** `frontend/src/components/ordenes/OrdenFormEquipo.jsx`
+
+**Cambio en `guardarNuevoEquipo()`:**
+- Después de `seleccionarEquipo(creado)`, se agrega `setNuevaOrden` que copia `averia`, `actividad` y `observaciones` del equipo creado al formulario
+
+### Rate limiter subido a 500 requests/15min
+
+**Archivo modificado:** `backend/server.js`
+
+**Cambio:** `max: 100` → `max: 500` en el rate limiter general (el de login se mantiene en 100)
