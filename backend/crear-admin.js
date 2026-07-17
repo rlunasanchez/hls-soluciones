@@ -1,10 +1,13 @@
 import pg from 'pg';
 import bcrypt from 'bcrypt';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const { Pool } = pg;
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_fgic5sYlSoz9@ep-cold-art-acx567jp-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require'
+  connectionString: process.env.DATABASE_URL
 });
 
 async function crearAdmin() {

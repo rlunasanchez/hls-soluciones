@@ -34,11 +34,6 @@ function App() {
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
-  const handleLogin = () => {
-    setAuthenticated(true);
-    window.history.replaceState(null, "", "/home");
-  };
-
   const handleLogout = () => {
     localStorage.removeItem("token");
     setAuthenticated(false);
@@ -53,48 +48,48 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<Login onLogin={handleLogin} />} />
-        <Route path="/" element={<Login onLogin={handleLogin} />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Login />} />
         <Route 
           path="/usuarios" 
           element={
-            authenticated ? <GestionUsuarios onLogout={handleLogout} /> : <Navigate to="/login" />
+            authenticated ? <GestionUsuarios /> : <Navigate to="/login" />
           } 
         />
         <Route 
           path="/equipos" 
           element={
-            authenticated ? <Equipos onLogout={handleLogout} /> : <Navigate to="/login" />
+            authenticated ? <Equipos /> : <Navigate to="/login" />
           } 
         />
         <Route 
           path="/clientes" 
           element={
-            authenticated ? <Clientes onLogout={handleLogout} /> : <Navigate to="/login" />
+            authenticated ? <Clientes /> : <Navigate to="/login" />
           } 
         />
         <Route 
           path="/informes" 
           element={
-            authenticated ? <Informes onLogout={handleLogout} /> : <Navigate to="/login" />
+            authenticated ? <Informes /> : <Navigate to="/login" />
           } 
         />
         <Route 
           path="/cotizaciones" 
           element={
-            authenticated ? <Cotizaciones onLogout={handleLogout} /> : <Navigate to="/login" />
+            authenticated ? <Cotizaciones /> : <Navigate to="/login" />
           } 
         />
         <Route 
           path="/orden-trabajo" 
           element={
-            authenticated ? <OrdenTrabajo onLogout={handleLogout} /> : <Navigate to="/login" />
+            authenticated ? <OrdenTrabajo /> : <Navigate to="/login" />
           } 
         />
         <Route 
           path="/orden-compra" 
           element={
-            authenticated ? <OrdenCompra onLogout={handleLogout} /> : <Navigate to="/login" />
+            authenticated ? <OrdenCompra /> : <Navigate to="/login" />
           } 
         />
         <Route 

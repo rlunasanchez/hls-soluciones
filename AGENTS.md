@@ -23,6 +23,20 @@ Sistema de gestión de soporte técnico con módulos para:
 - **Build**: Se sirve desde backend en producción
 - **Estilos**: CSS personalizado con variables CSS
 
+### Utilities Compartidos (`frontend/src/utils/helpers.js`)
+- `toUpper(v)` — convierte a mayúsculas con null safety
+- `validarRUT(rut)` — validación de RUT chileno (módulo 11)
+- `parseToken()` — extrae `{ usuario, rol }` del JWT almacenado
+
+### Componentes Compartidos
+| Componente | Ubicación | Uso |
+|---|---|---|
+| `ClienteFormulario` | `components/clientes/ClienteFormulario.jsx` | Form de cliente (crear/editar). Usado por Clientes.jsx y OrdenFormCliente.jsx |
+| `Pagination` | `components/Pagination.jsx` | Paginación principal de listados |
+| `HeaderCliente` | `components/clientes/HeaderCliente.jsx` | Header del módulo Clientes |
+| `HeaderEquipo` | `components/equipos/HeaderEquipo.jsx` | Header del módulo Equipos |
+| `HeaderOrdenTrabajo` | `components/ordenes/HeaderOrdenTrabajo.jsx` | Header del módulo OT |
+
 ## Convenciones de Código
 
 ### Códigos Auto-generados
@@ -51,7 +65,7 @@ const [filtroYyy, setFiltroYyy] = useState("");
 
 // Paginación
 const [paginaActual, setPaginaActual] = useState(1);
-const ITEMS_POR_PAGINA = 5; // o 10 según contexto
+const ITEMS_POR_PAGINA = 4; // Estándar en todos los módulos
 ```
 
 ### Dropdowns (Patrón)
@@ -79,6 +93,42 @@ useEffect(() => {
   {mostrarDropdown && <div className="dropdown">...</div>}
 </div>
 ```
+
+## Cambios Recientes (Julio 2026)
+
+### 1. Seguridad y Limpieza de Código
+**Archivos modificados:**
+- `backend/crear-admin.js` — eliminado connection string Neon hardcodeado
+- `backend/middleware/authMiddleware.js` — eliminado fallback JWT `"clave_secreta"`
+- `backend/routes/auth.js` — eliminado fallback JWT
+- `backend/package.json` — fix `"sbackend"` → `"hls-backend"`
+- 8 scripts en `scripts/` migrados a usar dotenv en vez de passwords hardcodeadas
+
+**Archivos eliminados:**
+- `frontend/src/components/CustomSelect.jsx` — dead code
+- `frontend/src/components/clientes/OTAsociadas.jsx` — componente huérfano
+- `backend/test2.js` — script sin uso
+
+### 2. Utilities Compartidos
+**Nuevo archivo:** `frontend/src/utils/helpers.js`
+- `toUpper(v)`, `validarRUT(rut)`, `parseToken()`
+- Eliminadas 7 copias de `toUpper` en OrdenTrabajo.jsx
+- Eliminada `validarRUT()` duplicada en Clientes.jsx
+- Eliminado JWT parsing duplicado en Clientes.jsx y GestionUsuarios.jsx
+
+### 3. Refactor Formulario de Cliente
+**Nuevo archivo:** `frontend/src/components/clientes/ClienteFormulario.jsx`
+- Componente compartido para crear/editar clientes
+- Usado por `Clientes.jsx` (form completo) y `OrdenFormCliente.jsx` (modal en OT)
+- `Clientes.jsx`: de 544 a 150 líneas (-72%)
+- `OrdenFormCliente.jsx`: de 566 a 200 líneas (-65%)
+
+### 4. Fixes Varios
+- Paginación unificada a 4 items en todos los módulos (antes: 5 en Clientes/Equipos)
+- `fetchOrdenes` limit unificado a 10000 (antes: 1000 en Clientes)
+- `actualizarSucursal` corregido con deep copy en vez de mutación
+- Columna `observaciones` agregada a `ordenes_trabajo` en DB local
+- Scripts utilitarios movidos de `backend/` a `scripts/`
 
 ## Cambios Recientes (Mayo 2026)
 
@@ -243,6 +293,8 @@ useEffect(() => {
 3. **Dropdowns**: Siempre usar el patrón con `useRef` para cerrar al clickear fuera
 4. **Paginación**: Usar slice() en frontend, no paginación SQL (datasets pequeños)
 5. **Estilos**: Usar variables CSS definidas en :root, no colores hardcodeados
+6. **Utilities**: Usar `toUpper()`, `validarRUT()`, `parseToken()` de `utils/helpers.js` en vez de duplicar
+7. **Formulario Cliente**: Usar `<ClienteFormulario>` compartido, no duplicar el form
 
 ## Build y Deploy
 
@@ -653,6 +705,11 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.0 | 17 Mayo 2026 | Sistema base con Clientes, Equipos, Órdenes |
 | 1.1 | 17-18 Mayo 2026 | Responsive móvil, fix Vercel, optimización |
 | 1.2 | 18 Mayo 2026 | Documentación completa |
+| 1.3 | 18 Mayo 2026 | Separación ramas main (MySQL) vs deploy/cloud (PostgreSQL), fix fechas editar orden |
+| 1.4 | 20 Mayo 2026 | Fix FK cliente_id en seed script, toggle hide/show, paginación 10 items, botón Limpiar filtros, paginación 4 items, paginación OT |
+| 1.5 | Julio 2026 | Campos actividad y observaciones en OT, columna y filtro de estado |
+| 1.6 | Julio 2026 | Mayúsculas automáticas en formularios (Clientes, Equipos, OT), limpieza de código muerto |
+| 1.7 | Julio 2026 | Vista expandida de cliente compacta, teléfono visible en dropdown OT |
 
 ---
 

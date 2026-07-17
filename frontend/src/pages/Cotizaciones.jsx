@@ -4,10 +4,6 @@ import { FileSpreadsheet, Package, Users, UserCog, LogOut, FileText, ClipboardLi
 function Cotizaciones() {
   const navigate = useNavigate();
 
-  const volverHome = () => {
-    navigate("/home");
-  };
-
   const cerrarSesion = () => {
     localStorage.removeItem("token");
     navigate("/login");

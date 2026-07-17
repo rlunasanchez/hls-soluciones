@@ -88,7 +88,7 @@ router.post("/", authMiddleware, async (req, res) => {
 
     let finalClienteId = clienteId || null;
     if (!finalClienteId && cliente) {
-      const [existeCliente] = await connection.query("SELECT id FROM clientes WHERE razon_social = ?", [cliente]);
+      const [existeCliente] = await connection.query("SELECT id FROM clientes WHERE razon_social = ? AND activo = 1", [cliente]);
       if (existeCliente.length > 0) {
         finalClienteId = existeCliente[0].id;
       } else {
@@ -100,7 +100,7 @@ router.post("/", authMiddleware, async (req, res) => {
 
     let finalEquipoId = equipoId || null;
     if (!finalEquipoId && equipo && serie) {
-      const [existeEquipo] = await connection.query("SELECT id FROM equipos WHERE serie = ?", [serie]);
+      const [existeEquipo] = await connection.query("SELECT id FROM equipos WHERE serie = ? AND activo = 1", [serie]);
       if (existeEquipo.length > 0) {
         finalEquipoId = existeEquipo[0].id;
       } else {
@@ -140,25 +140,17 @@ router.put("/:id", authMiddleware, async (req, res) => {
 
     let finalClienteId = clienteId || null;
     if (!finalClienteId && cliente) {
-      const [existeCliente] = await connection.query("SELECT id FROM clientes WHERE razon_social = ?", [cliente]);
+      const [existeCliente] = await connection.query("SELECT id FROM clientes WHERE razon_social = ? AND activo = 1", [cliente]);
       if (existeCliente.length > 0) {
         finalClienteId = existeCliente[0].id;
-      } else {
-        const [result] = await connection.query("INSERT INTO clientes (razon_social, direccion, comuna, contacto_nombre, telefono) VALUES (?, ?, ?, ?, ?)", [cliente, direccion || null, comuna || null, contacto || null, fonoPrincipal || null]);
-        finalClienteId = result.insertId;
-        await connection.query("INSERT INTO clientes_direcciones (cliente_id, tipo_direccion, direccion, comuna, fono) VALUES (?, 'Matriz', ?, ?, ?)", [finalClienteId, direccion || null, comuna || null, fonoPrincipal || null]);
       }
     }
 
     let finalEquipoId = equipoId || null;
     if (!finalEquipoId && equipo && serie) {
-      const [existeEquipo] = await connection.query("SELECT id FROM equipos WHERE serie = ?", [serie]);
+      const [existeEquipo] = await connection.query("SELECT id FROM equipos WHERE serie = ? AND activo = 1", [serie]);
       if (existeEquipo.length > 0) {
         finalEquipoId = existeEquipo[0].id;
-      } else {
-        const codigo = await generarCodigoEquipo();
-        const [result] = await connection.query("INSERT INTO equipos (codigo, cliente_id, equipo, modelo, marca, serie, contador_pag, nivel_tintas, insumo1, insumo2, insumo3, insumo4, insumo5, insumo6, insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [codigo, finalClienteId, equipo, modelo, marca, serie, contadorPagOut || 0, nivelTinta || null, insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null, insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null, insumo9 || null, insumo10 || null, insumo11 || null, insumo12 || null, averia || null]);
-        finalEquipoId = result.insertId;
       }
     }
 
@@ -172,12 +164,12 @@ router.put("/:id", authMiddleware, async (req, res) => {
           contador_pag = ?, nivel_tintas = ?,
           insumo1 = ?, insumo2 = ?, insumo3 = ?, insumo4 = ?, insumo5 = ?, insumo6 = ?,
           insumo7 = ?, insumo8 = ?, insumo9 = ?, insumo10 = ?, insumo11 = ?, insumo12 = ?,
-          averia = ? WHERE id = ?`,
+          averia = ?, actividad = ?, observaciones = ? WHERE id = ?`,
         [equipo, modelo, marca, serie || null, contadorPagOut || 0, nivelTinta || null,
           insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null,
           insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null,
           insumo9 || null, insumo10 || null, insumo11 || null, insumo12 || null, averia || null,
-          finalEquipoId]
+          actividad || null, observaciones || null, finalEquipoId]
       );
     }
 

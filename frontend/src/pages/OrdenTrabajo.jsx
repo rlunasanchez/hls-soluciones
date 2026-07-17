@@ -5,6 +5,7 @@ import {
   Save, X, Wrench
 } from "lucide-react";
 import api from "../services/api";
+import { toUpper } from "../utils/helpers";
 import './OrdenTrabajo.css';
 import "../components/ordenes/ordenes-componentes.css";
 import HeaderOrdenTrabajo from "../components/ordenes/HeaderOrdenTrabajo";
@@ -29,6 +30,7 @@ function OrdenTrabajo() {
   const [filtroNumeroOrden, setFiltroNumeroOrden] = useState("");
   const [filtroGarantia, setFiltroGarantia] = useState("todos");
   const [filtroEstado, setFiltroEstado] = useState("todos");
+  const [fromClientes, setFromClientes] = useState(false);
   
   // Estados para autocompletar clientes y equipos
   const [clientes, setClientes] = useState([]);
@@ -41,6 +43,8 @@ function OrdenTrabajo() {
   const [mostrarDropdownClientes, setMostrarDropdownClientes] = useState(false);
   const [mostrarDropdownEquipos, setMostrarDropdownEquipos] = useState(false);
   const [mostrarDropdownCodigo, setMostrarDropdownCodigo] = useState(false);
+  const [equiposSugeridos, setEquiposSugeridos] = useState([]);
+  const [equiposCodigoSugeridos, setEquiposCodigoSugeridos] = useState([]);
   
   // Refs para detectar clics fuera de los dropdowns
   const equipoDropdownRef = useRef(null);
@@ -121,11 +125,14 @@ function OrdenTrabajo() {
         const fechaActual = new Date().toISOString().split("T")[0];
         const numeroOt = await calcularSiguienteNumeroOrden();
         setEditingId(null);
+        setFromClientes(true);
         setClienteSeleccionado(clienteFromNav);
         setEquipoSeleccionado(null);
         setBusquedaCliente((clienteFromNav.razon_social || "").toUpperCase());
         setBusquedaSerie("");
         setBusquedaCodigo("");
+        setEquiposSugeridos([]);
+        setEquiposCodigoSugeridos([]);
         setInsumos([
           { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
           { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
@@ -180,6 +187,7 @@ function OrdenTrabajo() {
 
   // Función para abrir formulario de nueva orden con valores automáticos
   const abrirNuevaOrden = async () => {
+    await fetchClientes();
     const fechaActual = new Date().toISOString().split("T")[0];
     const numeroOt = await calcularSiguienteNumeroOrden();
     setNuevaOrden(prev => ({
@@ -188,11 +196,14 @@ function OrdenTrabajo() {
       fecha: fechaActual
     }));
     setEditingId(null);
+    setFromClientes(false);
     setClienteSeleccionado(null);
     setEquipoSeleccionado(null);
     setBusquedaCliente("");
     setBusquedaSerie("");
     setBusquedaCodigo("");
+    setEquiposSugeridos([]);
+    setEquiposCodigoSugeridos([]);
     setInsumos([
       { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
       { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
@@ -205,6 +216,30 @@ function OrdenTrabajo() {
 
   // Resetear paginación al filtrar
   useEffect(() => { setPaginaActual(1); }, [filtroNumeroOrden, filtroGarantia, filtroEstado]);
+
+  // Buscar equipos por código via API (datos siempre frescos)
+  useEffect(() => {
+    if (busquedaCodigo.length < 2) { setEquiposCodigoSugeridos([]); return; }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await api.get(`/api/equipos?q=${encodeURIComponent(busquedaCodigo)}`);
+        setEquiposCodigoSugeridos(res.data);
+      } catch { setEquiposCodigoSugeridos([]); }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [busquedaCodigo]);
+
+  // Buscar equipos por serie via API (datos siempre frescos)
+  useEffect(() => {
+    if (busquedaSerie.length < 2) { setEquiposSugeridos([]); return; }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await api.get(`/api/equipos?q=${encodeURIComponent(busquedaSerie)}`);
+        setEquiposSugeridos(res.data);
+      } catch { setEquiposSugeridos([]); }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [busquedaSerie]);
 
   // Cierra los dropdowns al hacer clic fuera
   useEffect(() => {
@@ -262,7 +297,6 @@ function OrdenTrabajo() {
     setMostrarFormulario(true);
     
     // Cargar datos de la orden en el formulario
-    const toUpper = (v) => (v || "").toUpperCase();
     setNuevaOrden({
       numeroOrden: orden.numero_orden || "",
       fecha: fmtDate(orden.fecha),
@@ -301,7 +335,6 @@ function OrdenTrabajo() {
           setEquipoSeleccionado(eq);
           setBusquedaCodigo(eq.codigo || "");
           setBusquedaSerie((eq.serie || "").toUpperCase());
-          const toUpper = (v) => (v || "").toUpperCase();
           setNuevaOrden(prev => ({
             ...prev,
             equipo: toUpper(eq.equipo) || prev.equipo,
@@ -339,8 +372,6 @@ function OrdenTrabajo() {
         setEquipoSeleccionado(eq);
         setBusquedaCodigo(eq.codigo || "");
         setBusquedaSerie((eq.serie || "").toUpperCase());
-      } else if (orden.serie) {
-        setBusquedaSerie((orden.serie || "").toUpperCase());
       }
     };
     cargarEquipoFresco();
@@ -375,7 +406,6 @@ function OrdenTrabajo() {
     if (!window.confirm("¿Está seguro de eliminar esta orden de trabajo?")) return;
     try {
       await api.delete(`/api/ordenes/${id}`);
-      alert("Orden eliminada exitosamente");
       fetchOrdenes();
     } catch (err) {
       console.error("Error al eliminar orden:", err);
@@ -403,7 +433,6 @@ function OrdenTrabajo() {
 
   // Seleccionar cliente y cargar sus datos
   const seleccionarCliente = (cliente) => {
-    const toUpper = (v) => (v || "").toUpperCase();
     setClienteSeleccionado(cliente);
     setNuevaOrden(prev => ({
       ...prev,
@@ -419,7 +448,6 @@ function OrdenTrabajo() {
 
   // Seleccionar equipo por serie - NO carga avería (puede haber duplicados)
   const seleccionarEquipo = (equipo) => {
-    const toUpper = (v) => (v || "").toUpperCase();
     setEquipoSeleccionado(equipo);
     setNuevaOrden(prev => ({
       ...prev,
@@ -455,7 +483,6 @@ function OrdenTrabajo() {
       const res = await api.get(`/api/equipos?q=${encodeURIComponent(codigo)}`);
       const eq = res.data[0];
       if (!eq) return;
-      const toUpper = (v) => (v || "").toUpperCase();
       setEquipoSeleccionado(eq);
       setMostrarDropdownCodigo(false);
       setNuevaOrden(prev => ({
@@ -487,7 +514,6 @@ function OrdenTrabajo() {
         const resC = await api.get(`/api/clientes`);
         const cliente = resC.data.find(c => c.id === eq.cliente_id);
         if (cliente) {
-          const toUpper = (v) => (v || "").toUpperCase();
           setClienteSeleccionado(cliente);
           setBusquedaCliente(toUpper(cliente.razon_social));
           setNuevaOrden(prev => ({
@@ -505,22 +531,16 @@ function OrdenTrabajo() {
     }
   };
 
-  // Filtrar clientes y equipos para la búsqueda
+  // Filtrar clientes para la búsqueda (local)
   const clientesFiltrados = busquedaCliente.length >= 2 ? clientes.filter(c => 
     c.razon_social?.toLowerCase().includes(busquedaCliente.toLowerCase()) ||
     c.rut?.toLowerCase().includes(busquedaCliente.toLowerCase()) ||
     c.codigo?.toLowerCase().includes(busquedaCliente.toLowerCase())
   ).slice(0, 10) : [];
 
-   const equiposFiltrados = busquedaSerie.length >= 2 ? equipos.filter(e => {
-     const serie = busquedaSerie.toLowerCase();
-     return e.serie?.toLowerCase().includes(serie);
-   }).slice(0, 10) : [];
-
-   const equiposCodigoFiltrados = busquedaCodigo.length >= 2 ? equipos.filter(e => {
-     const codigo = busquedaCodigo.toLowerCase();
-     return e.codigo?.toLowerCase().includes(codigo);
-   }).slice(0, 10) : [];
+  // Equipos filtrados por API (siempre frescos)
+  const equiposFiltrados = equiposSugeridos;
+  const equiposCodigoFiltrados = equiposCodigoSugeridos;
 
   // Verificar número de orden único
   const verificarNumeroOrden = async (numero) => {
@@ -637,6 +657,8 @@ function OrdenTrabajo() {
     setBusquedaCliente("");
     setBusquedaSerie("");
     setBusquedaCodigo("");
+    setEquiposSugeridos([]);
+    setEquiposCodigoSugeridos([]);
     setEditingId(null);
     setErrorNumeroOrden("");
     setFiltroNumeroOrden("");
@@ -716,6 +738,8 @@ function OrdenTrabajo() {
                 setNuevaOrden={setNuevaOrden}
                 clientes={clientes}
                 esEdicion={!!editingId}
+                fetchClientes={fetchClientes}
+                fromClientes={fromClientes}
               />
 
               <OrdenFormEquipo
@@ -736,6 +760,9 @@ function OrdenTrabajo() {
                 equipoSeleccionado={equipoSeleccionado}
                 nuevaOrden={nuevaOrden}
                 setNuevaOrden={setNuevaOrden}
+                fetchEquipos={fetchEquipos}
+                clienteSeleccionado={clienteSeleccionado}
+                fromClientes={fromClientes}
               >
                 <OrdenFormInsumos
                   insumos={insumos}

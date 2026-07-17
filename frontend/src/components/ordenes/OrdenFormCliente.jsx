@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Search, ChevronDown, Plus, X, Trash2, Save, Users } from "lucide-react";
+import { Search, ChevronDown, Plus } from "lucide-react";
 import api from "../../services/api";
+import ClienteFormulario from "../clientes/ClienteFormulario";
 import "../../pages/Clientes.css";
 
 function OrdenFormCliente({
@@ -12,90 +13,38 @@ function OrdenFormCliente({
   seleccionarCliente,
   nuevaOrden, setNuevaOrden,
   clientes = [],
-  esEdicion = false
+  esEdicion = false,
+  fetchClientes,
+  fromClientes = false
 }) {
   const [mostrarModalCliente, setMostrarModalCliente] = useState(false);
-  const [creandoCliente, setCreandoCliente] = useState(false);
-  const [nuevoCliente, setNuevoCliente] = useState({
-    razon_social: "", giro: "", rut: "", direccion: "", ciudad: "",
-    comuna: "", telefono: "", email: "", contacto_nombre: "",
-    contacto_email: "", contacto_fono: "", contacto_cargo: "", contacto_direccion: ""
-  });
-  const [sucursales, setSucursales] = useState([
-    { tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" },
-    { tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" },
-    { tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" },
-    { tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" },
-    { tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" }
-  ]);
-  const [sucursalesVisibles, setSucursalesVisibles] = useState(1);
-  const [rutError, setRutError] = useState("");
 
-  const validarRUT = (rut) => {
-    if (!rut) return false;
-    const limpio = rut.replace(/\./g, "").toUpperCase();
-    const match = limpio.match(/^(\d+)-([K0-9])$/);
-    if (!match) return false;
-    const num = parseInt(match[1], 10);
-    if (num < 100000) return false;
-    const dv = match[2];
-    let suma = 0, mul = 2;
-    const digits = String(num).split("").reverse().join("");
-    for (let i = 0; i < digits.length; i++) {
-      suma += parseInt(digits[i], 10) * mul;
-      mul = mul === 7 ? 2 : mul + 1;
-    }
-    const res = 11 - (suma % 11);
-    const esperado = res === 11 ? "0" : res === 10 ? "K" : String(res);
-    return dv === esperado;
-  };
-
-  const resetModal = () => {
-    setNuevoCliente({
-      razon_social: "", giro: "", rut: "", direccion: "", ciudad: "",
-      comuna: "", telefono: "", email: "", contacto_nombre: "",
-      contacto_email: "", contacto_fono: "", contacto_cargo: "", contacto_direccion: ""
-    });
-    setSucursales([
-      { tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" },
-      { tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" },
-      { tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" },
-      { tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" },
-      { tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" }
-    ]);
-    setSucursalesVisibles(1);
-    setRutError("");
-  };
-
-  const guardarNuevoCliente = async (e) => {
-    e.preventDefault();
-    if (nuevoCliente.rut && !validarRUT(nuevoCliente.rut)) {
-      alert("RUT inválido. Ejemplo: 12.345.678-9");
-      return;
-    }
-    setCreandoCliente(true);
+  const guardarNuevoCliente = async (clienteData, resetFormulario) => {
     try {
-      const dirs = sucursales.filter((s) => s.direccion.trim() !== "");
-      await api.post("/api/clientes", { ...nuevoCliente, direcciones: dirs });
-      const res = await api.get("/api/clientes");
-      const clientesActualizados = res.data;
-      const nuevo = clientesActualizados.find(c => c.razon_social === nuevoCliente.razon_social && c.rut === nuevoCliente.rut);
-      if (nuevo) {
-        seleccionarCliente(nuevo);
-      }
+      const resPost = await api.post("/api/clientes", clienteData);
+      const { codigo: codigoCreado, id: clienteId } = resPost.data;
+      if (fetchClientes) await fetchClientes();
+      seleccionarCliente({
+        id: clienteId,
+        codigo: codigoCreado,
+        razon_social: clienteData.razon_social || "",
+        rut: clienteData.rut || "",
+        direccion: clienteData.direccion || "",
+        ciudad: clienteData.ciudad || "",
+        comuna: clienteData.comuna || "",
+        telefono: clienteData.telefono || "",
+        contacto_nombre: clienteData.contacto_nombre || "",
+        contacto_email: clienteData.contacto_email || "",
+        contacto_fono: clienteData.contacto_fono || "",
+        contacto_cargo: clienteData.contacto_cargo || "",
+        contacto_direccion: clienteData.contacto_direccion || ""
+      });
       setMostrarModalCliente(false);
-      resetModal();
+      if (resetFormulario) resetFormulario();
     } catch (err) {
+      console.error("Error al crear cliente:", err);
       alert(err.response?.data?.msg || "Error al crear cliente");
-    } finally {
-      setCreandoCliente(false);
     }
-  };
-
-  const actualizarSucursal = (idx, campo, valor) => {
-    const nuevas = [...sucursales];
-    nuevas[idx][campo] = valor;
-    setSucursales(nuevas);
   };
 
   return (
@@ -206,11 +155,11 @@ function OrdenFormCliente({
               </div>
             )}
           </div>
-          {!esEdicion && (
-            <button
-              type="button"
-              onClick={() => { resetModal(); setMostrarModalCliente(true); }}
-              title="Crear nuevo cliente"
+          {!fromClientes && (
+          <button
+            type="button"
+            onClick={() => setMostrarModalCliente(true)}
+            title="Crear nuevo cliente"
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -228,217 +177,27 @@ function OrdenFormCliente({
                 height: '32px'
               }}
             >
-              <Plus size={14} /> Nuevo
-            </button>
+            <Plus size={14} /> Nuevo
+          </button>
           )}
         </div>
       </div>
 
-      {/* Modal Nuevo Cliente -- mismo diseño que Clientes.jsx */}
+      {/* Modal Nuevo Cliente */}
       {mostrarModalCliente && (
         <div style={{
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999,
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
         }}
-          onClick={(e) => { if (e.target === e.currentTarget) { setMostrarModalCliente(false); resetModal(); } }}
+          onClick={(e) => { if (e.target === e.currentTarget) setMostrarModalCliente(false); }}
         >
-          <div className="cf-wrap" style={{ maxHeight: '90vh', overflow: 'auto' }}>
-            <div className="cf-card">
-              <div className="cf-head">
-                <h2><Users size={24} />Nuevo Cliente</h2>
-                <button onClick={() => { setMostrarModalCliente(false); resetModal(); }}><X size={20} /></button>
-              </div>
-              <form onSubmit={guardarNuevoCliente} className="cf">
-                <div className="cf-grid">
-                  <div className="cf-sec cf-sec-empresa">
-                    <h3>Datos de la Empresa</h3>
-                    <div className="cf-codigo" style={{ marginBottom: 6 }}>
-                      <div className="cf-field">
-                        <label>Código</label>
-                        <input value={(() => {
-                          let max = 0;
-                          (clientes || []).forEach((c) => {
-                            if (c.codigo && c.codigo.startsWith("CL-")) {
-                              const num = parseInt(c.codigo.split("-")[1], 10);
-                              if (num > max) max = num;
-                            }
-                          });
-                          return `CL-${String(max + 1).padStart(4, "0")}`;
-                        })()} disabled />
-                      </div>
-                    </div>
-                    <div className="cf-r2" style={{ gap: 6 }}>
-                      <div className="cf-field">
-                        <label>Razón Social *</label>
-                        <input placeholder="Razón social" value={nuevoCliente.razon_social}
-                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, razon_social: e.target.value.toUpperCase() })} required />
-                      </div>
-                      <div className="cf-field">
-                        <label>Giro</label>
-                        <input placeholder="Giro" value={nuevoCliente.giro}
-                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, giro: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
-                      </div>
-                    </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "200px", gap: 6, marginTop: 6 }}>
-                      <div className="cf-field">
-                        <label>RUT {rutError && <span style={{ color: "#dc2626", fontSize: ".72rem" }}> — {rutError}</span>}</label>
-                        <input placeholder="Ej: 12.345.678-9" value={nuevoCliente.rut}
-                          style={rutError ? { border: "2px solid #dc2626", background: "#fef2f2" } : {}}
-                          onChange={(e) => {
-                            let val = e.target.value.toUpperCase().replace(/[^0-9K-]/g, "");
-                            if (val.length > 12) val = val.slice(0, 12);
-                            const partes = val.split("-");
-                            if (partes.length === 2) {
-                              if (partes[1].length > 1) partes[1] = partes[1][0];
-                              if (partes[0].length > 0) partes[0] = partes[0].replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
-                            } else if (partes.length === 1 && partes[0].length > 0) {
-                              partes[0] = partes[0].replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
-                            }
-                            val = partes.join("-");
-                            setNuevoCliente({ ...nuevoCliente, rut: val });
-                            if (rutError && val.length >= 9 && validarRUT(val)) setRutError("");
-                          }}
-                          onBlur={(e) => {
-                            const val = e.target.value;
-                            if (!val) { setRutError(""); return; }
-                            const limpio = val.replace(/\./g, "").toUpperCase();
-                            const tieneGuion = limpio.includes("-");
-                            const match = limpio.match(/^(\d+)-([K0-9])$/);
-                            if (match) { if (validarRUT(val)) setRutError(""); else setRutError("RUT inválido"); return; }
-                            if (tieneGuion && !match) setRutError("RUT inválido");
-                            else if (!tieneGuion && limpio.length >= 5) setRutError("Falta el guion y dígito verificador");
-                            else setRutError("");
-                          }} />
-                      </div>
-                    </div>
-                    <div className="cf-r1 cf-mt">
-                      <div className="cf-field">
-                        <label>Dirección</label>
-                        <input placeholder="Ingrese la dirección completa" value={nuevoCliente.direccion}
-                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, direccion: e.target.value.toUpperCase() })} />
-                      </div>
-                    </div>
-                    <div className="cf-r3 cf-mt">
-                      <div className="cf-field">
-                        <label>Ciudad</label>
-                        <input placeholder="Ciudad" value={nuevoCliente.ciudad}
-                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, ciudad: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
-                      </div>
-                      <div className="cf-field">
-                        <label>Comuna</label>
-                        <input placeholder="Comuna" value={nuevoCliente.comuna}
-                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, comuna: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
-                      </div>
-                      <div className="cf-field">
-                        <label>Fono</label>
-                        <input placeholder="Fono" value={nuevoCliente.telefono}
-                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, telefono: e.target.value.replace(/[^0-9+]/g, "") })} />
-                      </div>
-                    </div>
-                    <div className="cf-r1 cf-mt">
-                      <div className="cf-field">
-                        <label>Email</label>
-                        <input type="email" placeholder="Email" value={nuevoCliente.email}
-                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, email: e.target.value })} />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="cf-sec cf-sec-contacto">
-                    <h3>Datos del Contacto</h3>
-                    <div className="cf-r1 cf-mt">
-                      <div className="cf-field">
-                        <label>Nombre Contacto</label>
-                        <input placeholder="Nombre" value={nuevoCliente.contacto_nombre}
-                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_nombre: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
-                      </div>
-                    </div>
-                    <div className="cf-r2 cf-mt">
-                      <div className="cf-field">
-                        <label>Email</label>
-                        <input type="email" placeholder="Email" value={nuevoCliente.contacto_email}
-                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_email: e.target.value })} />
-                      </div>
-                      <div className="cf-field">
-                        <label>Fono</label>
-                        <input placeholder="Fono" value={nuevoCliente.contacto_fono}
-                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_fono: e.target.value.replace(/[^0-9+]/g, "") })} />
-                      </div>
-                    </div>
-                    <div className="cf-r1 cf-mt">
-                      <div className="cf-field">
-                        <label>Cargo</label>
-                        <input placeholder="Cargo" value={nuevoCliente.contacto_cargo}
-                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_cargo: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
-                      </div>
-                    </div>
-                    <div className="cf-r1 cf-mt">
-                      <div className="cf-field">
-                        <label>Dirección Contacto</label>
-                        <input placeholder="Ingrese la dirección completa" value={nuevoCliente.contacto_direccion}
-                          onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_direccion: e.target.value.toUpperCase() })} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="cf-sec cf-sec-suc">
-                  <div className="cf-sh">
-                    <h3>Sucursales/Direcciones</h3>
-                    {sucursalesVisibles < 5 && (
-                      <button type="button" className="cf-btn-a" onClick={() => setSucursalesVisibles(sucursalesVisibles + 1)}>+ Agregar</button>
-                    )}
-                  </div>
-                  {sucursales.slice(0, sucursalesVisibles).map((suc, idx) => (
-                    <div key={idx} className="cf-sc">
-                      <div className="cf-r2 cf-mb">
-                        <div className="cf-field cf-m0">
-                          <label>Tipo</label>
-                          <select value={suc.tipo_direccion} onChange={(e) => actualizarSucursal(idx, "tipo_direccion", e.target.value)}>
-                            <option value="">Seleccionar</option>
-                            <option value="Matriz">Matriz</option>
-                            <option value="Sucursal">Sucursal</option>
-                          </select>
-                        </div>
-                        <div className="cf-field cf-m0">
-                          <label>Dirección</label>
-                          <input placeholder="Ingrese la dirección completa" value={suc.direccion} onChange={(e) => actualizarSucursal(idx, "direccion", e.target.value.toUpperCase())} />
-                        </div>
-                      </div>
-                      <div className="cf-r3 cf-mb">
-                        <div className="cf-field cf-m0">
-                          <label>Ciudad</label>
-                          <input placeholder="Ciudad" value={suc.ciudad} onChange={(e) => actualizarSucursal(idx, "ciudad", e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ""))} />
-                        </div>
-                        <div className="cf-field cf-m0">
-                          <label>Fono</label>
-                          <input placeholder="Fono" value={suc.fono} onChange={(e) => actualizarSucursal(idx, "fono", e.target.value.replace(/[^0-9+]/g, ""))} />
-                        </div>
-                        <div className="cf-field cf-m0">
-                          <label>Comuna</label>
-                          <input placeholder="Comuna" value={suc.comuna} onChange={(e) => actualizarSucursal(idx, "comuna", e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ""))} />
-                        </div>
-                      </div>
-                      <div className="cf-sc-del">
-                        <button type="button" className="cf-btn-d" onClick={() => {
-                          const nuevas = sucursales.filter((_, i) => i !== idx);
-                          while (nuevas.length < 5) nuevas.push({ tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" });
-                          setSucursales(nuevas);
-                          setSucursalesVisibles(Math.max(1, sucursalesVisibles - 1));
-                        }}>
-                          <Trash2 size={14} /> Eliminar
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="cf-sub">
-                  <button type="button" className="cf-btn-c" onClick={() => { setMostrarModalCliente(false); resetModal(); }}><X size={18} /> Cancelar</button>
-                  <button type="submit" className="cf-btn-p" disabled={creandoCliente}><Save size={18} /> {creandoCliente ? "Guardando..." : "Guardar Cliente"}</button>
-                </div>
-              </form>
-            </div>
+          <div style={{ maxHeight: '90vh', overflow: 'auto', width: '100%', maxWidth: '900px' }}>
+            <ClienteFormulario
+              clienteEditando={null}
+              clientes={clientes}
+              onSave={guardarNuevoCliente}
+              onCancel={() => setMostrarModalCliente(false)}
+            />
           </div>
         </div>
       )}

@@ -33,6 +33,7 @@ router.get("/", async (req, res) => {
         ), '') as direcciones
       FROM clientes c
       LEFT JOIN clientes_direcciones cd ON c.id = cd.cliente_id
+      WHERE c.activo = 1
       GROUP BY c.id
       ORDER BY c.id DESC
     `);
@@ -69,7 +70,7 @@ router.post("/", authMiddleware, async (req, res) => {
       }
     }
 
-    res.status(201).json({ msg: "Cliente creado", codigo });
+    res.status(201).json({ msg: "Cliente creado", codigo, id: clienteId });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
@@ -120,11 +121,24 @@ router.put("/:id", authMiddleware, async (req, res) => {
   }
 });
 
+router.get("/:id/equipos", authMiddleware, async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      "SELECT id, codigo, equipo, marca, modelo, serie FROM equipos WHERE cliente_id = ? AND activo = 1",
+      [req.params.id]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Error del servidor" });
+  }
+});
+
 router.delete("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
   try {
-    await pool.query("DELETE FROM clientes WHERE id = ?", [id]);
-    res.json({ msg: "Cliente eliminado" });
+    await pool.query("UPDATE clientes SET activo = 0 WHERE id = ?", [id]);
+    res.json({ msg: "Cliente desactivado" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });

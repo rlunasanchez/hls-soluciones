@@ -25,6 +25,7 @@ function OrdenFormInsumos({ insumos, insumosVisibles, setInsumosVisibles, setIns
               <input type="text" placeholder={`Insumo ${idx + 1}`} value={ins.nombre} onChange={(e) => actualizarInsumo(idx, e.target.value)} />
             </div>
             <button type="button" className="of-ins-del" onClick={() => {
+              if (!window.confirm(`¿Eliminar insumo ${idx + 1}?`)) return;
               const nuevas = insumos.filter((_, i) => i !== idx);
               while (nuevas.length < 12) nuevas.push({ nombre: "" });
               setInsumos(nuevas);

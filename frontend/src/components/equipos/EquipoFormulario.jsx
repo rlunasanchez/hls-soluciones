@@ -7,7 +7,8 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes:
     codigo: "", equipo: "", modelo: "", marca: "", serie: "",
     contador_pag: 0, nivel_tintas: "", cliente_id: "",
     insumo1: "", insumo2: "", insumo3: "", insumo4: "", insumo5: "", insumo6: "",
-    insumo7: "", insumo8: "", insumo9: "", insumo10: "", insumo11: "", insumo12: "", averia: ""
+    insumo7: "", insumo8: "", insumo9: "", insumo10: "", insumo11: "", insumo12: "",
+    averia: "", actividad: "", observaciones: ""
   });
 
   const [clientes, setClientes] = useState([]);
@@ -74,7 +75,9 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes:
         insumo10: toUpper(equipoEditando.insumo10),
         insumo11: toUpper(equipoEditando.insumo11),
         insumo12: toUpper(equipoEditando.insumo12),
-        averia: toUpper(equipoEditando.averia)
+        averia: toUpper(equipoEditando.averia),
+        actividad: toUpper(equipoEditando.actividad),
+        observaciones: toUpper(equipoEditando.observaciones)
       });
       const arr = [
         equipoEditando.insumo1, equipoEditando.insumo2, equipoEditando.insumo3,
@@ -219,6 +222,7 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes:
                     </div>
                     <button type="button" className="ef-ins-del"
                       onClick={() => {
+                        if (!window.confirm(`¿Eliminar insumo ${idx + 1}?`)) return;
                         const nuevas = insumos.filter((_, i) => i !== idx);
                         while (nuevas.length < 12) nuevas.push({ nombre: "" });
                         setInsumos(nuevas);
@@ -233,6 +237,20 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes:
               <div className="ef-f">
                 <textarea placeholder="Descripción de falla o incidencia..." value={nuevoEquipo.averia}
                   onChange={e => setNuevoEquipo({...nuevoEquipo, averia: e.target.value.toUpperCase()})} rows={3} style={{ minHeight: '70px' }} />
+              </div>
+            </div>
+            <div className="ef-s muted">
+              <div className="ef-st muted">Actividad</div>
+              <div className="ef-f">
+                <textarea placeholder="Descripción de actividad realizada..." value={nuevoEquipo.actividad}
+                  onChange={e => setNuevoEquipo({...nuevoEquipo, actividad: e.target.value.toUpperCase()})} rows={3} style={{ minHeight: '70px' }} />
+              </div>
+            </div>
+            <div className="ef-s muted">
+              <div className="ef-st muted">Observaciones</div>
+              <div className="ef-f">
+                <textarea placeholder="Observaciones adicionales..." value={nuevoEquipo.observaciones}
+                  onChange={e => setNuevoEquipo({...nuevoEquipo, observaciones: e.target.value.toUpperCase()})} rows={3} style={{ minHeight: '70px' }} />
               </div>
             </div>
             <div className="ef-sub">
