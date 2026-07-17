@@ -171,7 +171,7 @@ function OrdenFormCliente({
               </div>
             )}
           </div>
-          {!fromClientes && (
+          {!fromClientes && !esEdicion && (
           <button
             type="button"
             onClick={() => setMostrarModalCliente(true)}

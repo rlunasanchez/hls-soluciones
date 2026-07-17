@@ -781,6 +781,7 @@ function OrdenTrabajo() {
                 fetchEquipos={fetchEquipos}
                 clienteSeleccionado={clienteSeleccionado}
                 fromClientes={fromClientes}
+                esEdicion={!!editingId}
                 equipoOtroCliente={equipoOtroCliente}
               >
                 <OrdenFormInsumos
