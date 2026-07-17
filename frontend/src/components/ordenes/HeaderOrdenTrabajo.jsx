@@ -1,4 +1,4 @@
-import { Home, Users, Package, FileText, FileSpreadsheet, ClipboardList, ShoppingCart, UserCog, LogOut } from "lucide-react";
+import { ClipboardList, LogOut } from "lucide-react";
 
 function HeaderOrdenTrabajo({ navItems, onLogout }) {
   const colors = [
@@ -12,7 +12,7 @@ function HeaderOrdenTrabajo({ navItems, onLogout }) {
       </div>
       <div className="nav-buttons" style={{ gap: '10px' }}>
         {navItems.map((item, i) => (
-          <button key={item.path} onClick={item.onClick} className="logout-btn" style={{ background: colors[i], color: 'white' }}>
+          <button key={item.label} onClick={item.onClick} className="logout-btn" style={{ background: colors[i], color: 'white' }}>
             <item.icon size={18} />
             <span className="btn-label">{item.label}</span>
           </button>

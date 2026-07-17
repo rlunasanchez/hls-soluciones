@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Home, Users, Package, FileText, FileSpreadsheet, ShoppingCart, UserCog, LogOut,
-  ClipboardList, Save, X, Wrench
+  Home, Users, Package, FileText, FileSpreadsheet, ShoppingCart, UserCog,
+  Save, X, Wrench
 } from "lucide-react";
 import api from "../services/api";
+import { toUpper } from "../utils/helpers";
 import './OrdenTrabajo.css';
 import "../components/ordenes/ordenes-componentes.css";
 import HeaderOrdenTrabajo from "../components/ordenes/HeaderOrdenTrabajo";
@@ -28,6 +29,8 @@ function OrdenTrabajo() {
   const [editingId, setEditingId] = useState(null);
   const [filtroNumeroOrden, setFiltroNumeroOrden] = useState("");
   const [filtroGarantia, setFiltroGarantia] = useState("todos");
+  const [filtroEstado, setFiltroEstado] = useState("todos");
+  const [fromClientes, setFromClientes] = useState(false);
   
   // Estados para autocompletar clientes y equipos
   const [clientes, setClientes] = useState([]);
@@ -40,7 +43,8 @@ function OrdenTrabajo() {
   const [mostrarDropdownClientes, setMostrarDropdownClientes] = useState(false);
   const [mostrarDropdownEquipos, setMostrarDropdownEquipos] = useState(false);
   const [mostrarDropdownCodigo, setMostrarDropdownCodigo] = useState(false);
-  const [equiposCodigo, setEquiposCodigo] = useState([]);
+  const [equiposSugeridos, setEquiposSugeridos] = useState([]);
+  const [equiposCodigoSugeridos, setEquiposCodigoSugeridos] = useState([]);
   
   // Refs para detectar clics fuera de los dropdowns
   const equipoDropdownRef = useRef(null);
@@ -85,7 +89,9 @@ function OrdenTrabajo() {
     contadorPagOut: "",
     nivelTinta: "",
     // Avería/Falla/Incidencia
-    averia: ""
+    averia: "",
+    actividad: "",
+    observaciones: ""
   });
 
   // Cargar clientes, equipos y órdenes al montar el componente
@@ -119,11 +125,14 @@ function OrdenTrabajo() {
         const fechaActual = new Date().toISOString().split("T")[0];
         const numeroOt = await calcularSiguienteNumeroOrden();
         setEditingId(null);
+        setFromClientes(true);
         setClienteSeleccionado(clienteFromNav);
         setEquipoSeleccionado(null);
-        setBusquedaCliente(clienteFromNav.razon_social || "");
+        setBusquedaCliente((clienteFromNav.razon_social || "").toUpperCase());
         setBusquedaSerie("");
         setBusquedaCodigo("");
+        setEquiposSugeridos([]);
+        setEquiposCodigoSugeridos([]);
         setInsumos([
           { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
           { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
@@ -143,10 +152,10 @@ function OrdenTrabajo() {
           fechaEntregaCheck: false,
         fechaCompra: "",
         fechaCompraCheck: false,
-        cliente: clienteFromNav.razon_social || "",
-        direccion: clienteFromNav.direccion || "",
-        comuna: clienteFromNav.comuna || "",
-        contacto: clienteFromNav.contacto_nombre || "",
+        cliente: (clienteFromNav.razon_social || "").toUpperCase(),
+        direccion: (clienteFromNav.direccion || "").toUpperCase(),
+        comuna: (clienteFromNav.comuna || "").toUpperCase(),
+        contacto: (clienteFromNav.contacto_nombre || "").toUpperCase(),
         fonoPrincipal: clienteFromNav.telefono || clienteFromNav.contacto_fono || "",
         tecnicoAsignado: "",
         equipo: "",
@@ -155,7 +164,9 @@ function OrdenTrabajo() {
         serie: "",
         contadorPagOut: "",
         nivelTinta: "",
-        averia: ""
+        averia: "",
+        actividad: "",
+        observaciones: ""
       });
       setMostrarFormulario(true);
     }
@@ -176,6 +187,7 @@ function OrdenTrabajo() {
 
   // Función para abrir formulario de nueva orden con valores automáticos
   const abrirNuevaOrden = async () => {
+    await fetchClientes();
     const fechaActual = new Date().toISOString().split("T")[0];
     const numeroOt = await calcularSiguienteNumeroOrden();
     setNuevaOrden(prev => ({
@@ -184,11 +196,14 @@ function OrdenTrabajo() {
       fecha: fechaActual
     }));
     setEditingId(null);
+    setFromClientes(false);
     setClienteSeleccionado(null);
     setEquipoSeleccionado(null);
     setBusquedaCliente("");
     setBusquedaSerie("");
     setBusquedaCodigo("");
+    setEquiposSugeridos([]);
+    setEquiposCodigoSugeridos([]);
     setInsumos([
       { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
       { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
@@ -200,7 +215,31 @@ function OrdenTrabajo() {
   };
 
   // Resetear paginación al filtrar
-  useEffect(() => { setPaginaActual(1); }, [filtroNumeroOrden, filtroGarantia]);
+  useEffect(() => { setPaginaActual(1); }, [filtroNumeroOrden, filtroGarantia, filtroEstado]);
+
+  // Buscar equipos por código via API (datos siempre frescos)
+  useEffect(() => {
+    if (busquedaCodigo.length < 2) { setEquiposCodigoSugeridos([]); return; }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await api.get(`/api/equipos?q=${encodeURIComponent(busquedaCodigo)}`);
+        setEquiposCodigoSugeridos(res.data);
+      } catch { setEquiposCodigoSugeridos([]); }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [busquedaCodigo]);
+
+  // Buscar equipos por serie via API (datos siempre frescos)
+  useEffect(() => {
+    if (busquedaSerie.length < 2) { setEquiposSugeridos([]); return; }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await api.get(`/api/equipos?q=${encodeURIComponent(busquedaSerie)}`);
+        setEquiposSugeridos(res.data);
+      } catch { setEquiposSugeridos([]); }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [busquedaSerie]);
 
   // Cierra los dropdowns al hacer clic fuera
   useEffect(() => {
@@ -238,6 +277,8 @@ function OrdenTrabajo() {
     if (filtroNumeroOrden && !orden.numero_orden?.toLowerCase().includes(filtroNumeroOrden.toLowerCase())) return false;
     if (filtroGarantia === "si" && !orden.es_garantia) return false;
     if (filtroGarantia === "no" && orden.es_garantia) return false;
+    if (filtroEstado === "cerrada" && !orden.fecha_entrega) return false;
+    if (filtroEstado === "pendiente" && orden.fecha_entrega) return false;
     return true;
   });
 
@@ -268,19 +309,21 @@ function OrdenTrabajo() {
       fechaEntregaCheck: orden.fecha_entrega_check || false,
       fechaCompra: fmtDate(orden.fecha_compra),
       fechaCompraCheck: orden.fecha_compra_check || false,
-      cliente: orden.cliente || "",
-      direccion: orden.direccion || "",
-      comuna: orden.comuna || "",
-      contacto: orden.contacto || "",
+      cliente: toUpper(orden.cliente),
+      direccion: toUpper(orden.direccion),
+      comuna: toUpper(orden.comuna),
+      contacto: toUpper(orden.contacto),
       fonoPrincipal: orden.fono_principal || "",
-      tecnicoAsignado: orden.tecnico_asignado || "",
-      equipo: orden.equipo || "",
-      modelo: orden.modelo || "",
-      marca: orden.marca || "",
-      serie: orden.serie || "",
+      tecnicoAsignado: toUpper(orden.tecnico_asignado),
+      equipo: toUpper(orden.equipo),
+      modelo: toUpper(orden.modelo),
+      marca: toUpper(orden.marca),
+      serie: toUpper(orden.serie),
       contadorPagOut: orden.contador_pag_out || "",
-      nivelTinta: orden.nivel_tinta || "",
-      averia: orden.averia || ""
+      nivelTinta: toUpper(orden.nivel_tinta),
+      averia: toUpper(orden.averia),
+      actividad: toUpper(orden.actividad),
+      observaciones: toUpper(orden.observaciones)
     });
 
     // Buscar equipo asociado - primero intentar con datos frescos del API
@@ -291,21 +334,21 @@ function OrdenTrabajo() {
           const eq = res.data;
           setEquipoSeleccionado(eq);
           setBusquedaCodigo(eq.codigo || "");
-          setBusquedaSerie(eq.serie || "");
+          setBusquedaSerie((eq.serie || "").toUpperCase());
           setNuevaOrden(prev => ({
             ...prev,
-            equipo: eq.equipo || prev.equipo,
-            modelo: eq.modelo || prev.modelo,
-            marca: eq.marca || prev.marca,
-            serie: eq.serie || prev.serie,
+            equipo: toUpper(eq.equipo) || prev.equipo,
+            modelo: toUpper(eq.modelo) || prev.modelo,
+            marca: toUpper(eq.marca) || prev.marca,
+            serie: toUpper(eq.serie) || prev.serie,
             contadorPagOut: eq.contador_pag?.toString() || prev.contadorPagOut,
-            nivelTinta: eq.nivel_tintas || prev.nivelTinta,
-            averia: eq.averia || prev.averia
+            nivelTinta: toUpper(eq.nivel_tintas) || prev.nivelTinta,
+            averia: toUpper(eq.averia) || prev.averia
           }));
           const insumosEquipo = [];
           for (let i = 1; i <= 12; i++) {
             const insumo = eq[`insumo${i}`];
-            if (insumo) insumosEquipo.push({ nombre: insumo });
+            if (insumo) insumosEquipo.push({ nombre: insumo.toUpperCase() });
           }
           if (insumosEquipo.length > 0) {
             const nuevosInsumos = [...insumosEquipo];
@@ -328,9 +371,7 @@ function OrdenTrabajo() {
       if (eq) {
         setEquipoSeleccionado(eq);
         setBusquedaCodigo(eq.codigo || "");
-        setBusquedaSerie(eq.serie || "");
-      } else if (orden.serie) {
-        setBusquedaSerie(orden.serie);
+        setBusquedaSerie((eq.serie || "").toUpperCase());
       }
     };
     cargarEquipoFresco();
@@ -342,9 +383,9 @@ function OrdenTrabajo() {
     );
     if (cl) {
       setClienteSeleccionado(cl);
-      setBusquedaCliente(cl.razon_social || orden.cliente || "");
+      setBusquedaCliente((cl.razon_social || orden.cliente || "").toUpperCase());
     } else {
-      setBusquedaCliente(orden.cliente || "");
+      setBusquedaCliente((orden.cliente || "").toUpperCase());
     }
 
     // Cargar insumos
@@ -365,7 +406,6 @@ function OrdenTrabajo() {
     if (!window.confirm("¿Está seguro de eliminar esta orden de trabajo?")) return;
     try {
       await api.delete(`/api/ordenes/${id}`);
-      alert("Orden eliminada exitosamente");
       fetchOrdenes();
     } catch (err) {
       console.error("Error al eliminar orden:", err);
@@ -396,13 +436,13 @@ function OrdenTrabajo() {
     setClienteSeleccionado(cliente);
     setNuevaOrden(prev => ({
       ...prev,
-      cliente: cliente.razon_social || "",
-      direccion: cliente.direccion || "",
-      comuna: cliente.comuna || "",
-      contacto: cliente.contacto_nombre || "",
+      cliente: toUpper(cliente.razon_social),
+      direccion: toUpper(cliente.direccion),
+      comuna: toUpper(cliente.comuna),
+      contacto: toUpper(cliente.contacto_nombre),
       fonoPrincipal: cliente.telefono || cliente.contacto_fono || ""
     }));
-    setBusquedaCliente(cliente.razon_social || "");
+    setBusquedaCliente(toUpper(cliente.razon_social));
     setMostrarDropdownClientes(false);
   };
 
@@ -411,12 +451,12 @@ function OrdenTrabajo() {
     setEquipoSeleccionado(equipo);
     setNuevaOrden(prev => ({
       ...prev,
-      equipo: equipo.equipo || "",
-      modelo: equipo.modelo || "",
-      marca: equipo.marca || "",
-      serie: equipo.serie || "",
+      equipo: toUpper(equipo.equipo),
+      modelo: toUpper(equipo.modelo),
+      marca: toUpper(equipo.marca),
+      serie: toUpper(equipo.serie),
       contadorPagOut: equipo.contador_pag?.toString() || "",
-      nivelTinta: equipo.nivel_tintas || ""
+      nivelTinta: toUpper(equipo.nivel_tintas)
       // NOTA: No carga avería aquí, solo al buscar por código
     }));
     
@@ -424,7 +464,7 @@ function OrdenTrabajo() {
     const insumosEquipo = [];
     for (let i = 1; i <= 12; i++) {
       const insumo = equipo[`insumo${i}`];
-      if (insumo) insumosEquipo.push({ nombre: insumo });
+      if (insumo) insumosEquipo.push({ nombre: insumo.toUpperCase() });
     }
     
     const nuevosInsumos = [...insumosEquipo];
@@ -434,7 +474,7 @@ function OrdenTrabajo() {
     setInsumos(nuevosInsumos);
     setInsumosVisibles(Math.max(2, insumosEquipo.length));
     
-     setBusquedaSerie(equipo.serie || "");
+     setBusquedaSerie((equipo.serie || "").toUpperCase());
      setMostrarDropdownEquipos(false);
   };
 
@@ -447,18 +487,18 @@ function OrdenTrabajo() {
       setMostrarDropdownCodigo(false);
       setNuevaOrden(prev => ({
         ...prev,
-        equipo: eq.equipo || "",
-        modelo: eq.modelo || "",
-        marca: eq.marca || "",
-        serie: eq.serie || "",
+        equipo: toUpper(eq.equipo),
+        modelo: toUpper(eq.modelo),
+        marca: toUpper(eq.marca),
+        serie: toUpper(eq.serie),
         contadorPagOut: eq.contador_pag?.toString() || "",
-        nivelTinta: eq.nivel_tintas || "",
-        averia: eq.averia || ""
+        nivelTinta: toUpper(eq.nivel_tintas),
+        averia: toUpper(eq.averia)
       }));
       const insumosEquipo = [];
       for (let i = 1; i <= 12; i++) {
         const insumo = eq[`insumo${i}`];
-        if (insumo) insumosEquipo.push({ nombre: insumo });
+        if (insumo) insumosEquipo.push({ nombre: insumo.toUpperCase() });
       }
       const nuevosInsumos = [...insumosEquipo];
       while (nuevosInsumos.length < 12) {
@@ -466,7 +506,7 @@ function OrdenTrabajo() {
       }
       setInsumos(nuevosInsumos);
       setInsumosVisibles(Math.max(2, insumosEquipo.length));
-      setBusquedaSerie(eq.serie || "");
+      setBusquedaSerie((eq.serie || "").toUpperCase());
       setBusquedaCodigo(codigo);
 
       // Si el equipo tiene cliente asociado, cargarlo
@@ -475,13 +515,13 @@ function OrdenTrabajo() {
         const cliente = resC.data.find(c => c.id === eq.cliente_id);
         if (cliente) {
           setClienteSeleccionado(cliente);
-          setBusquedaCliente(cliente.razon_social);
+          setBusquedaCliente(toUpper(cliente.razon_social));
           setNuevaOrden(prev => ({
             ...prev,
-            cliente: cliente.razon_social || "",
-            direccion: cliente.direccion || "",
-            comuna: cliente.comuna || "",
-            contacto: cliente.contacto_nombre || "",
+            cliente: toUpper(cliente.razon_social),
+            direccion: toUpper(cliente.direccion),
+            comuna: toUpper(cliente.comuna),
+            contacto: toUpper(cliente.contacto_nombre),
             fonoPrincipal: cliente.telefono || cliente.contacto_fono || ""
           }));
         }
@@ -491,22 +531,16 @@ function OrdenTrabajo() {
     }
   };
 
-  // Filtrar clientes y equipos para la búsqueda
+  // Filtrar clientes para la búsqueda (local)
   const clientesFiltrados = busquedaCliente.length >= 2 ? clientes.filter(c => 
     c.razon_social?.toLowerCase().includes(busquedaCliente.toLowerCase()) ||
     c.rut?.toLowerCase().includes(busquedaCliente.toLowerCase()) ||
     c.codigo?.toLowerCase().includes(busquedaCliente.toLowerCase())
   ).slice(0, 10) : [];
 
-   const equiposFiltrados = busquedaSerie.length >= 2 ? equipos.filter(e => {
-     const serie = busquedaSerie.toLowerCase();
-     return e.serie?.toLowerCase().includes(serie);
-   }).slice(0, 10) : [];
-
-   const equiposCodigoFiltrados = busquedaCodigo.length >= 2 ? equipos.filter(e => {
-     const codigo = busquedaCodigo.toLowerCase();
-     return e.codigo?.toLowerCase().includes(codigo);
-   }).slice(0, 10) : [];
+  // Equipos filtrados por API (siempre frescos)
+  const equiposFiltrados = equiposSugeridos;
+  const equiposCodigoFiltrados = equiposCodigoSugeridos;
 
   // Verificar número de orden único
   const verificarNumeroOrden = async (numero) => {
@@ -608,7 +642,9 @@ function OrdenTrabajo() {
       serie: "",
       contadorPagOut: "",
       nivelTinta: "",
-      averia: ""
+      averia: "",
+      actividad: "",
+      observaciones: ""
     });
     setInsumos([
       { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
@@ -621,10 +657,13 @@ function OrdenTrabajo() {
     setBusquedaCliente("");
     setBusquedaSerie("");
     setBusquedaCodigo("");
+    setEquiposSugeridos([]);
+    setEquiposCodigoSugeridos([]);
     setEditingId(null);
     setErrorNumeroOrden("");
     setFiltroNumeroOrden("");
     setFiltroGarantia("todos");
+    setFiltroEstado("todos");
   };
   // Funciones de navegación eliminadas (accesos desde el menú)
 
@@ -650,6 +689,8 @@ function OrdenTrabajo() {
             onFiltroChange={setFiltroNumeroOrden}
             filtroGarantia={filtroGarantia}
             onFiltroGarantiaChange={setFiltroGarantia}
+            filtroEstado={filtroEstado}
+            onFiltroEstadoChange={setFiltroEstado}
             onNueva={abrirNuevaOrden}
             paginaActual={paginaActual}
             totalPaginas={totalPaginas}
@@ -695,6 +736,10 @@ function OrdenTrabajo() {
                 seleccionarCliente={seleccionarCliente}
                 nuevaOrden={nuevaOrden}
                 setNuevaOrden={setNuevaOrden}
+                clientes={clientes}
+                esEdicion={!!editingId}
+                fetchClientes={fetchClientes}
+                fromClientes={fromClientes}
               />
 
               <OrdenFormEquipo
@@ -715,6 +760,9 @@ function OrdenTrabajo() {
                 equipoSeleccionado={equipoSeleccionado}
                 nuevaOrden={nuevaOrden}
                 setNuevaOrden={setNuevaOrden}
+                fetchEquipos={fetchEquipos}
+                clienteSeleccionado={clienteSeleccionado}
+                fromClientes={fromClientes}
               >
                 <OrdenFormInsumos
                   insumos={insumos}

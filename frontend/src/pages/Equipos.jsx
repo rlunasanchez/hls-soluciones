@@ -19,20 +19,9 @@ function Equipos() {
   const [equipoEditando, setEquipoEditando] = useState(null);
   const [busqueda, setBusqueda] = useState("");
   const [paginaActual, setPaginaActual] = useState(1);
-  const equiposPorPagina = 5;
+  const equiposPorPagina = 4;
   const [clientes, setClientes] = useState([]);
   const [equiposExpandidos, setEquiposExpandidos] = useState({});
-
-  const token = localStorage.getItem("token");
-  let usuarioActual = "Usuario";
-  if (token) {
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      usuarioActual = payload.usuario;
-    } catch {
-      usuarioActual = "Usuario";
-    }
-  }
 
   const fetchEquipos = async () => {
     try {

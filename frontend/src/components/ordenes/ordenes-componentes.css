@@ -2,51 +2,6 @@
    COMPONENTES - ORDENES DE TRABAJO
    ========================= */
 
-/* HeaderOrdenTrabajo - mismo estilo que Equipos */
-.header-orden {
-  background: var(--gradient);
-  padding: 20px 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 16px;
-  border-radius: 12px;
-  margin-bottom: 16px;
-}
-
-.header-orden .header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.header-orden .header-left h1 {
-  color: white;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.header-orden .nav-buttons {
-  display: flex;
-  gap: 10px;
-}
-
-.header-orden .logout-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 8px;
-  color: white;
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-}
-
 /* Tabla header actions */
 .table-header-actions {
   display: flex;
@@ -83,19 +38,59 @@
   outline: none;
 }
 
+/* Filtro fila de selects (desktop: inline) */
+.filtro-fila-selects {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.filtro-grupo-select label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
-  .header-orden {
-    flex-direction: column;
-    padding: 16px;
-  }
-
   .table-header-actions {
     flex-direction: column;
     width: 100%;
+    gap: 8px;
   }
 
   .filtro-orden-input {
     min-width: 100%;
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+
+  .filtro-fila-selects {
+    width: 100%;
+    gap: 8px;
+  }
+
+  .filtro-grupo-select {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .filtro-garantia-select {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    min-width: 0;
+  }
+
+  .filtro-grupo-select label {
+    font-size: 0.75rem;
+  }
+
+  .main-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 16px;
   }
 }

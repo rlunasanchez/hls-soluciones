@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { ClipboardList, FileSpreadsheet, Edit, Trash2 } from "lucide-react";
 
-function ClienteLista({ clientes, ordenesPorCliente, onEditar, onEliminar }) {
+function ClienteLista({ clientes, onEditar, onEliminar }) {
   const navigate = useNavigate();
 
   return (

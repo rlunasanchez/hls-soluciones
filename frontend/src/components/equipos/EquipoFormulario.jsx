@@ -7,7 +7,8 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes:
     codigo: "", equipo: "", modelo: "", marca: "", serie: "",
     contador_pag: 0, nivel_tintas: "", cliente_id: "",
     insumo1: "", insumo2: "", insumo3: "", insumo4: "", insumo5: "", insumo6: "",
-    insumo7: "", insumo8: "", insumo9: "", insumo10: "", insumo11: "", insumo12: "", averia: ""
+    insumo7: "", insumo8: "", insumo9: "", insumo10: "", insumo11: "", insumo12: "",
+    averia: "", actividad: "", observaciones: ""
   });
 
   const [clientes, setClientes] = useState([]);
@@ -52,35 +53,38 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes:
 
   useEffect(() => {
     if (equipoEditando) {
+      const toUpper = (v) => (v || "").toUpperCase();
       setNuevoEquipo({
         codigo: equipoEditando.codigo || "",
-        equipo: equipoEditando.equipo || "",
-        modelo: equipoEditando.modelo || "",
-        marca: equipoEditando.marca || "",
-        serie: equipoEditando.serie || "",
+        equipo: toUpper(equipoEditando.equipo),
+        modelo: toUpper(equipoEditando.modelo),
+        marca: toUpper(equipoEditando.marca),
+        serie: toUpper(equipoEditando.serie),
         contador_pag: equipoEditando.contador_pag || 0,
-        nivel_tintas: equipoEditando.nivel_tintas || "",
+        nivel_tintas: toUpper(equipoEditando.nivel_tintas),
         cliente_id: equipoEditando.cliente_id || "",
-        insumo1: equipoEditando.insumo1 || "",
-        insumo2: equipoEditando.insumo2 || "",
-        insumo3: equipoEditando.insumo3 || "",
-        insumo4: equipoEditando.insumo4 || "",
-        insumo5: equipoEditando.insumo5 || "",
-        insumo6: equipoEditando.insumo6 || "",
-        insumo7: equipoEditando.insumo7 || "",
-        insumo8: equipoEditando.insumo8 || "",
-        insumo9: equipoEditando.insumo9 || "",
-        insumo10: equipoEditando.insumo10 || "",
-        insumo11: equipoEditando.insumo11 || "",
-        insumo12: equipoEditando.insumo12 || "",
-        averia: equipoEditando.averia || ""
+        insumo1: toUpper(equipoEditando.insumo1),
+        insumo2: toUpper(equipoEditando.insumo2),
+        insumo3: toUpper(equipoEditando.insumo3),
+        insumo4: toUpper(equipoEditando.insumo4),
+        insumo5: toUpper(equipoEditando.insumo5),
+        insumo6: toUpper(equipoEditando.insumo6),
+        insumo7: toUpper(equipoEditando.insumo7),
+        insumo8: toUpper(equipoEditando.insumo8),
+        insumo9: toUpper(equipoEditando.insumo9),
+        insumo10: toUpper(equipoEditando.insumo10),
+        insumo11: toUpper(equipoEditando.insumo11),
+        insumo12: toUpper(equipoEditando.insumo12),
+        averia: toUpper(equipoEditando.averia),
+        actividad: toUpper(equipoEditando.actividad),
+        observaciones: toUpper(equipoEditando.observaciones)
       });
       const arr = [
         equipoEditando.insumo1, equipoEditando.insumo2, equipoEditando.insumo3,
         equipoEditando.insumo4, equipoEditando.insumo5, equipoEditando.insumo6,
         equipoEditando.insumo7, equipoEditando.insumo8, equipoEditando.insumo9,
         equipoEditando.insumo10, equipoEditando.insumo11, equipoEditando.insumo12
-      ].map(i => ({ nombre: i || "" }));
+      ].map(i => ({ nombre: (i || "").toUpperCase() }));
       while (arr.length < 12) arr.push({ nombre: "" });
       setInsumos(arr);
       setInsumosVisibles(arr.filter(i => i.nombre).length || 2);
@@ -89,7 +93,7 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes:
         const c = clientes.find(cl => cl.id === equipoEditando.cliente_id);
         if (c) {
           setClienteSeleccionado(c);
-          setBusquedaCliente(c.razon_social);
+          setBusquedaCliente((c.razon_social || "").toUpperCase());
           setNuevoEquipo(prev => ({ ...prev, cliente_id: c.id }));
         }
       }
@@ -98,7 +102,7 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes:
 
   const seleccionarCliente = (cliente) => {
     setClienteSeleccionado(cliente);
-    setBusquedaCliente(cliente.razon_social);
+    setBusquedaCliente((cliente.razon_social || "").toUpperCase());
     setNuevoEquipo(prev => ({ ...prev, cliente_id: cliente.id }));
     setMostrarDropdownClientes(false);
   };
@@ -109,7 +113,7 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes:
 
   const actualizarInsumo = (idx, valor) => {
     const nuevos = [...insumos];
-    nuevos[idx].nombre = valor;
+    nuevos[idx].nombre = valor.toUpperCase();
     setInsumos(nuevos);
   };
 
@@ -150,7 +154,7 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes:
                   <label>Cliente Asociado *</label>
                   <div ref={clienteDropdownRef} className="ef-sc">
                     <input placeholder="Buscar cliente..." value={busquedaCliente}
-                      onChange={(e) => { setBusquedaCliente(e.target.value); setMostrarDropdownClientes(e.target.value.length >= 2); }}
+                      onChange={(e) => { setBusquedaCliente(e.target.value.toUpperCase()); setMostrarDropdownClientes(e.target.value.length >= 2); }}
                       onFocus={() => { if (busquedaCliente.length >= 2) setMostrarDropdownClientes(true); }} required />
                     {clienteSeleccionado && <span className="ef-sc-ok">✓</span>}
                     {mostrarDropdownClientes && clientesFiltrados.length > 0 && (
@@ -170,24 +174,24 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes:
                 <div className="ef-f">
                   <label>Equipo *</label>
                   <input placeholder="Nombre del equipo" value={nuevoEquipo.equipo}
-                    onChange={e => setNuevoEquipo({...nuevoEquipo, equipo: e.target.value})} required />
+                    onChange={e => setNuevoEquipo({...nuevoEquipo, equipo: e.target.value.toUpperCase()})} required />
                 </div>
                 <div className="ef-f">
                   <label>Marca *</label>
                   <input placeholder="Marca" value={nuevoEquipo.marca}
-                    onChange={e => setNuevoEquipo({...nuevoEquipo, marca: e.target.value})} required />
+                    onChange={e => setNuevoEquipo({...nuevoEquipo, marca: e.target.value.toUpperCase()})} required />
                 </div>
               </div>
               <div className="ef-r3" style={{ marginTop: '8px' }}>
                 <div className="ef-f">
                   <label>Modelo *</label>
                   <input placeholder="Modelo" value={nuevoEquipo.modelo}
-                    onChange={e => setNuevoEquipo({...nuevoEquipo, modelo: e.target.value})} required />
+                    onChange={e => setNuevoEquipo({...nuevoEquipo, modelo: e.target.value.toUpperCase()})} required />
                 </div>
                 <div className="ef-f">
                   <label>Serie</label>
                   <input placeholder="Número de serie" value={nuevoEquipo.serie}
-                    onChange={e => setNuevoEquipo({...nuevoEquipo, serie: e.target.value})} />
+                    onChange={e => setNuevoEquipo({...nuevoEquipo, serie: e.target.value.toUpperCase()})} />
                 </div>
                 <div className="ef-f">
                   <label>Contador Páginas</label>
@@ -198,7 +202,7 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes:
               <div className="ef-f" style={{ marginTop: '8px' }}>
                 <label>Nivel Tintas</label>
                 <input placeholder="Nivel de tintas" value={nuevoEquipo.nivel_tintas}
-                  onChange={e => setNuevoEquipo({...nuevoEquipo, nivel_tintas: e.target.value})} />
+                  onChange={e => setNuevoEquipo({...nuevoEquipo, nivel_tintas: e.target.value.toUpperCase()})} />
               </div>
             </div>
             <div className="ef-s success">
@@ -218,6 +222,7 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes:
                     </div>
                     <button type="button" className="ef-ins-del"
                       onClick={() => {
+                        if (!window.confirm(`¿Eliminar insumo ${idx + 1}?`)) return;
                         const nuevas = insumos.filter((_, i) => i !== idx);
                         while (nuevas.length < 12) nuevas.push({ nombre: "" });
                         setInsumos(nuevas);
@@ -231,7 +236,21 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes:
               <div className="ef-st muted">Avería/Falla/Incidencia</div>
               <div className="ef-f">
                 <textarea placeholder="Descripción de falla o incidencia..." value={nuevoEquipo.averia}
-                  onChange={e => setNuevoEquipo({...nuevoEquipo, averia: e.target.value})} rows={3} style={{ minHeight: '70px' }} />
+                  onChange={e => setNuevoEquipo({...nuevoEquipo, averia: e.target.value.toUpperCase()})} rows={3} style={{ minHeight: '70px' }} />
+              </div>
+            </div>
+            <div className="ef-s muted">
+              <div className="ef-st muted">Actividad</div>
+              <div className="ef-f">
+                <textarea placeholder="Descripción de actividad realizada..." value={nuevoEquipo.actividad}
+                  onChange={e => setNuevoEquipo({...nuevoEquipo, actividad: e.target.value.toUpperCase()})} rows={3} style={{ minHeight: '70px' }} />
+              </div>
+            </div>
+            <div className="ef-s muted">
+              <div className="ef-st muted">Observaciones</div>
+              <div className="ef-f">
+                <textarea placeholder="Observaciones adicionales..." value={nuevoEquipo.observaciones}
+                  onChange={e => setNuevoEquipo({...nuevoEquipo, observaciones: e.target.value.toUpperCase()})} rows={3} style={{ minHeight: '70px' }} />
               </div>
             </div>
             <div className="ef-sub">

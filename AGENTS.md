@@ -23,6 +23,20 @@ Sistema de gestión de soporte técnico con módulos para:
 - **Build**: Se sirve desde backend en producción
 - **Estilos**: CSS personalizado con variables CSS
 
+### Utilities Compartidos (`frontend/src/utils/helpers.js`)
+- `toUpper(v)` — convierte a mayúsculas con null safety
+- `validarRUT(rut)` — validación de RUT chileno (módulo 11)
+- `parseToken()` — extrae `{ usuario, rol }` del JWT almacenado
+
+### Componentes Compartidos
+| Componente | Ubicación | Uso |
+|---|---|---|
+| `ClienteFormulario` | `components/clientes/ClienteFormulario.jsx` | Form de cliente (crear/editar). Usado por Clientes.jsx y OrdenFormCliente.jsx |
+| `Pagination` | `components/Pagination.jsx` | Paginación principal de listados |
+| `HeaderCliente` | `components/clientes/HeaderCliente.jsx` | Header del módulo Clientes |
+| `HeaderEquipo` | `components/equipos/HeaderEquipo.jsx` | Header del módulo Equipos |
+| `HeaderOrdenTrabajo` | `components/ordenes/HeaderOrdenTrabajo.jsx` | Header del módulo OT |
+
 ## Convenciones de Código
 
 ### Códigos Auto-generados
@@ -51,7 +65,7 @@ const [filtroYyy, setFiltroYyy] = useState("");
 
 // Paginación
 const [paginaActual, setPaginaActual] = useState(1);
-const ITEMS_POR_PAGINA = 5; // o 10 según contexto
+const ITEMS_POR_PAGINA = 4; // Estándar en todos los módulos
 ```
 
 ### Dropdowns (Patrón)
@@ -79,6 +93,42 @@ useEffect(() => {
   {mostrarDropdown && <div className="dropdown">...</div>}
 </div>
 ```
+
+## Cambios Recientes (Julio 2026)
+
+### 1. Seguridad y Limpieza de Código
+**Archivos modificados:**
+- `backend/crear-admin.js` — eliminado connection string Neon hardcodeado
+- `backend/middleware/authMiddleware.js` — eliminado fallback JWT `"clave_secreta"`
+- `backend/routes/auth.js` — eliminado fallback JWT
+- `backend/package.json` — fix `"sbackend"` → `"hls-backend"`
+- 8 scripts en `scripts/` migrados a usar dotenv en vez de passwords hardcodeadas
+
+**Archivos eliminados:**
+- `frontend/src/components/CustomSelect.jsx` — dead code
+- `frontend/src/components/clientes/OTAsociadas.jsx` — componente huérfano
+- `backend/test2.js` — script sin uso
+
+### 2. Utilities Compartidos
+**Nuevo archivo:** `frontend/src/utils/helpers.js`
+- `toUpper(v)`, `validarRUT(rut)`, `parseToken()`
+- Eliminadas 7 copias de `toUpper` en OrdenTrabajo.jsx
+- Eliminada `validarRUT()` duplicada en Clientes.jsx
+- Eliminado JWT parsing duplicado en Clientes.jsx y GestionUsuarios.jsx
+
+### 3. Refactor Formulario de Cliente
+**Nuevo archivo:** `frontend/src/components/clientes/ClienteFormulario.jsx`
+- Componente compartido para crear/editar clientes
+- Usado por `Clientes.jsx` (form completo) y `OrdenFormCliente.jsx` (modal en OT)
+- `Clientes.jsx`: de 544 a 150 líneas (-72%)
+- `OrdenFormCliente.jsx`: de 566 a 200 líneas (-65%)
+
+### 4. Fixes Varios
+- Paginación unificada a 4 items en todos los módulos (antes: 5 en Clientes/Equipos)
+- `fetchOrdenes` limit unificado a 10000 (antes: 1000 en Clientes)
+- `actualizarSucursal` corregido con deep copy en vez de mutación
+- Columna `observaciones` agregada a `ordenes_trabajo` en DB local
+- Scripts utilitarios movidos de `backend/` a `scripts/`
 
 ## Cambios Recientes (Mayo 2026)
 
@@ -243,6 +293,8 @@ useEffect(() => {
 3. **Dropdowns**: Siempre usar el patrón con `useRef` para cerrar al clickear fuera
 4. **Paginación**: Usar slice() en frontend, no paginación SQL (datasets pequeños)
 5. **Estilos**: Usar variables CSS definidas en :root, no colores hardcodeados
+6. **Utilities**: Usar `toUpper()`, `validarRUT()`, `parseToken()` de `utils/helpers.js` en vez de duplicar
+7. **Formulario Cliente**: Usar `<ClienteFormulario>` compartido, no duplicar el form
 
 ## Build y Deploy
 
@@ -591,7 +643,21 @@ Así los assets (JS, CSS) se sirven directamente y las rutas de React Router van
    git merge main
    git push origin deploy/cloud
    git checkout main
-   ```
+```
+
+### 30. Columna y filtro de Estado en Órdenes de Trabajo
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `frontend/src/components/ordenes/OrdenLista.jsx`
+- `frontend/src/pages/OrdenTrabajo.jsx`
+- `frontend/src/index.css`
+
+**Cambios:**
+- Nueva columna "Estado" en tabla y tarjetas de la lista de OT
+- Lógica: si `fecha_entrega` tiene valor → badge verde "Cerrada", si no → badge amarillo "Pendiente"
+- Nuevo dropdown de filtro "Todos estados" / "Cerrada" / "Pendiente"
+- Reseteo a página 1 al cambiar filtro de estado
+- Estilos `.badge-estado-cerrada` y `.badge-estado-pendiente`
 3. **Ir a Vercel → Deployments → Promote to Production**
 4. **Probar en móvil**
 
@@ -639,6 +705,11 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.0 | 17 Mayo 2026 | Sistema base con Clientes, Equipos, Órdenes |
 | 1.1 | 17-18 Mayo 2026 | Responsive móvil, fix Vercel, optimización |
 | 1.2 | 18 Mayo 2026 | Documentación completa |
+| 1.3 | 18 Mayo 2026 | Separación ramas main (MySQL) vs deploy/cloud (PostgreSQL), fix fechas editar orden |
+| 1.4 | 20 Mayo 2026 | Fix FK cliente_id en seed script, toggle hide/show, paginación 10 items, botón Limpiar filtros, paginación 4 items, paginación OT |
+| 1.5 | Julio 2026 | Campos actividad y observaciones en OT, columna y filtro de estado |
+| 1.6 | Julio 2026 | Mayúsculas automáticas en formularios (Clientes, Equipos, OT), limpieza de código muerto |
+| 1.7 | Julio 2026 | Vista expandida de cliente compacta, teléfono visible en dropdown OT |
 
 ---
 
@@ -702,6 +773,9 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.2 | 18 Mayo 2026 | Documentación completa |
 | 1.3 | 18 Mayo 2026 | Separación ramas main (MySQL) vs deploy/cloud (PostgreSQL), fix fechas editar orden |
 | 1.4 | 20 Mayo 2026 | Fix FK cliente_id en seed script, toggle hide/show secciones, paginación 10 items, botón Limpiar filtros, paginación 4 items, paginación OT |
+| 1.5 | Julio 2026 | Campos actividad y observaciones en OT, columna y filtro de estado |
+| 1.6 | Julio 2026 | Mayúsculas automáticas en formularios (Clientes, Equipos, OT), limpieza de código muerto |
+| 1.7 | Julio 2026 | Vista expandida de cliente compacta, teléfono visible en dropdown OT |
 
 ## Cambios Recientes (20 Mayo 2026)
 
@@ -760,3 +834,83 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 - 4 items por página (`ITEMS_POR_PAG = 4`)
 - Reseteo a página 1 al cambiar filtros (useEffect)
 - Filtros ahora actúan sobre el dataset completo, no solo la página actual
+
+### 29. Campos Actividad y Observaciones en Orden de Trabajo
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `backend/crear_tablas.sql`
+- `backend/routes/ordenes.js` (ambas ramas)
+- `frontend/src/pages/OrdenTrabajo.jsx`
+- `frontend/src/components/ordenes/OrdenFormAveria.jsx`
+- `scripts/migrar_actividad_observaciones.sql` (nuevo)
+
+**Cambios:**
+- Agregados campos `actividad TEXT` y `observaciones TEXT` a la tabla `ordenes_trabajo`
+- Backend POST y PUT reciben, guardan y devuelven ambos campos
+- Frontend: textarea "Actividad" y "Observaciones" debajo de "Avería/Falla/Incidencia" en formulario nueva/editar orden
+- Migración SQL para DB local (MySQL) y nube (PostgreSQL/Neon)
+
+**Migración SQL:**
+- MySQL: `scripts/migrar_actividad_observaciones.sql`
+- PostgreSQL (Neon):
+```sql
+ALTER TABLE ordenes_trabajo ADD COLUMN IF NOT EXISTS actividad TEXT;
+ALTER TABLE ordenes_trabajo ADD COLUMN IF NOT EXISTS observaciones TEXT;
+```
+
+### 31. Mayúsculas automáticas en formularios y vistas
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `frontend/src/pages/Clientes.jsx`
+- `frontend/src/components/clientes/clientes-componentes.css`
+- `frontend/src/pages/Equipos.jsx`
+- `frontend/src/pages/Equipos.css`
+- `frontend/src/components/equipos/EquipoFormulario.jsx`
+- `frontend/src/pages/OrdenTrabajo.jsx`
+- `frontend/src/pages/OrdenTrabajo.css`
+- `frontend/src/components/ordenes/OrdenFormCliente.jsx`
+- `frontend/src/components/ordenes/OrdenFormEquipo.jsx`
+- `frontend/src/components/ordenes/OrdenFormAveria.jsx`
+- `frontend/src/components/ordenes/OrdenFormInsumos.jsx`
+
+**Cambios:**
+- Todos los campos de texto (inputs, textareas) convierten automáticamente a MAYÚSCULAS al escribir
+- Excepciones: Email (permite mayúsculas y minúsculas), Fono/contador (solo números)
+- Al **editar** un registro existente, los datos se cargan en mayúsculas aunque estén guardados en minúsculas
+- La **vista de tabla/tarjetas** muestra todo en mayúsculas via CSS (`text-transform: uppercase`)
+- Búsquedas de cliente y serie también se muestran en mayúsculas
+- Se eliminó código muerto: imports no usados, estado `equiposCodigo`, variable `usuarioActual` en Equipos
+
+**Módulos afectados:**
+- **Clientes** (Crear/Editar): razón social, giro, dirección, ciudad, comuna, contacto, cargo, dirección contacto, sucursales
+- **Equipos** (Crear/Editar): equipo, marca, modelo, serie, nivel tintas, insumos, avería
+- **Orden de Trabajo** (Crear/Editar): cliente, dirección, comuna, contacto, técnico, equipo, marca, modelo, serie, nivel tinta, insumos, avería, actividad, observaciones
+
+**Para revertir:** Quitar `.toUpperCase()` de los `onChange` y `toUpper()` de las funciones `editar*` y `setNuevaOrden`. Quitar reglas CSS `text-transform: uppercase` de `clientes-componentes.css`, `Equipos.css` y `OrdenTrabajo.css`.
+
+### 32. Teléfono visible en dropdown de búsqueda de cliente (OT)
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `frontend/src/components/ordenes/OrdenFormCliente.jsx`
+
+**Cambios:**
+- El dropdown de búsqueda de cliente en Nueva/Editar Orden ahora muestra el teléfono del cliente (`Tel: +569...`)
+- Formato: `RUT: XX.XXX.XXX-X | Dirección, Comuna | Tel: +569XXXXXXXX`
+- El teléfono ya se cargaba en "Fono Principal" al seleccionar; ahora también es visible antes de seleccionar
+
+### 33. Vista expandida de cliente más compacta
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `frontend/src/components/clientes/ClienteExpandido.jsx`
+- `frontend/src/components/clientes/clientes-componentes.css`
+
+**Cambios:**
+- Header reducido: padding 20px → 8px, font 1.25rem → 0.85rem, botones más pequeños
+- Datos del cliente: padding 20px → 6px, gap 16px → 4px, font más pequeño
+- Secciones Equipos/OTs: padding 20px → 6px, márgenes reducidos
+- Tablas internas: padding 12px → 5px, font 0.9rem → 0.75rem
+- Paginación: botones 32px → 22px
+- Iconos: todos reducidos (~10-12px)
+- Todo el contenido se ve significativamente más compacto sin perder funcionalidad
+
+**Para revertir:** Aumentar los valores de padding, font-size, gap y size de iconos en `clientes-componentes.css` y `ClienteExpandido.jsx`.

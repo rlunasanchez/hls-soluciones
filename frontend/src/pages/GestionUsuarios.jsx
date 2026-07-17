@@ -4,6 +4,7 @@ import {
   Plus, Key, Edit, ToggleLeft, ToggleRight, Trash2
 } from "lucide-react";
 import api from "../services/api";
+import { parseToken } from "../utils/helpers";
 import HeaderUsuario from "../components/usuarios/HeaderUsuario";
 import UsuarioFormulario from "../components/usuarios/UsuarioFormulario";
 import CambioPasswordForm from "../components/usuarios/CambioPasswordForm";
@@ -15,18 +16,7 @@ function GestionUsuarios() {
   const [mostrarCambioPassword, setMostrarCambioPassword] = useState(false);
   const [usuarioEditando, setUsuarioEditando] = useState(null);
 
-  const token = localStorage.getItem("token");
-  let usuarioActual = "Usuario";
-  let rol = "tecnico";
-  if (token) {
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      usuarioActual = payload.usuario;
-      rol = payload.rol || "tecnico";
-    } catch {
-      usuarioActual = "Usuario";
-    }
-  }
+  const { usuarioActual, rol } = parseToken();
 
   const fetchUsuarios = async () => {
     try {

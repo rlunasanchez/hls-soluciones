@@ -6,7 +6,27 @@ function OrdenFormAveria({ nuevaOrden, setNuevaOrden }) {
         <textarea
           placeholder="Describa la avería, falla o incidencia del equipo..."
           value={nuevaOrden.averia}
-          onChange={(e) => setNuevaOrden({...nuevaOrden, averia: e.target.value})}
+          onChange={(e) => setNuevaOrden({...nuevaOrden, averia: e.target.value.toUpperCase()})}
+          rows={3}
+        />
+      </div>
+
+      <div className="of-st muted">Actividad</div>
+      <div className="of-f">
+        <textarea
+          placeholder="Describa la actividad realizada..."
+          value={nuevaOrden.actividad}
+          onChange={(e) => setNuevaOrden({...nuevaOrden, actividad: e.target.value.toUpperCase()})}
+          rows={3}
+        />
+      </div>
+
+      <div className="of-st muted">Observaciones</div>
+      <div className="of-f">
+        <textarea
+          placeholder="Observaciones adicionales..."
+          value={nuevaOrden.observaciones}
+          onChange={(e) => setNuevaOrden({...nuevaOrden, observaciones: e.target.value.toUpperCase()})}
           rows={3}
         />
       </div>

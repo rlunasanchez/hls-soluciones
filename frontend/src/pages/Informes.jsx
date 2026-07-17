@@ -4,10 +4,6 @@ import { FileText, Package, Users, UserCog, LogOut, FileSpreadsheet, ClipboardLi
 function Informes() {
   const navigate = useNavigate();
 
-  const volverHome = () => {
-    navigate("/home");
-  };
-
   const cerrarSesion = () => {
     localStorage.removeItem("token");
     navigate("/login");
