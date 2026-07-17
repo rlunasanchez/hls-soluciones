@@ -265,6 +265,12 @@ function OrdenFormEquipo({
             onChange={(e) => setNuevaOrden({...nuevaOrden, nivelTinta: e.target.value.toUpperCase()})}
             style={inputStyle} />
         </div>
+        <div className="of-f">
+          <label>Contador Páginas OUT</label>
+          <input type="number" placeholder="0" value={nuevaOrden.contadorPagOut}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, contadorPagOut: e.target.value})}
+            style={inputStyle} />
+        </div>
       </div>
 
       {/* Modal Nuevo Equipo */}
