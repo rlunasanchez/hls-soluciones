@@ -446,14 +446,23 @@ function OrdenTrabajo() {
   const seleccionarCliente = (cliente) => {
     setClienteSeleccionado(cliente);
     setClienteInactivo(false);
+    setEquipoSeleccionado(null);
     setEquipoOtroCliente(false);
+    setBusquedaCodigo("");
+    setBusquedaSerie("");
     setNuevaOrden(prev => ({
       ...prev,
       cliente: toUpper(cliente.razon_social),
       direccion: toUpper(cliente.direccion),
       comuna: toUpper(cliente.comuna),
       contacto: toUpper(cliente.contacto_nombre),
-      fonoPrincipal: cliente.telefono || cliente.contacto_fono || ""
+      fonoPrincipal: cliente.telefono || cliente.contacto_fono || "",
+      equipo: "",
+      modelo: "",
+      marca: "",
+      serie: "",
+      nivelTinta: "",
+      contadorPagOut: ""
     }));
     setBusquedaCliente(toUpper(cliente.razon_social));
     setMostrarDropdownClientes(false);
