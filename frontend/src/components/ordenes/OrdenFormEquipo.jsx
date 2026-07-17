@@ -19,7 +19,8 @@ function OrdenFormEquipo({
   nuevaOrden, setNuevaOrden,
   fetchEquipos,
   clienteSeleccionado,
-  fromClientes = false
+  fromClientes = false,
+  equipoOtroCliente = false
 }) {
   const [mostrarModalEquipo, setMostrarModalEquipo] = useState(false);
   const [nuevoEquipo, setNuevoEquipo] = useState({
@@ -84,7 +85,16 @@ function OrdenFormEquipo({
 
       <div style={{ marginBottom: '10px' }}>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '10px' }}>
-          {equipoSeleccionado && (
+          {equipoOtroCliente && equipoSeleccionado && (
+            <div style={{
+              background: '#FFF3E0', padding: '6px 12px',
+              borderRadius: '6px', fontSize: '0.85rem', color: '#F97316',
+              display: 'flex', alignItems: 'center', gap: '6px'
+            }}>
+              ⚠ Equipo asignado a otro cliente: {equipoSeleccionado.equipo} - {equipoSeleccionado.marca} {equipoSeleccionado.modelo}
+            </div>
+          )}
+          {!equipoOtroCliente && equipoSeleccionado && (
             <div style={{
               background: 'var(--success-light)', padding: '6px 12px',
               borderRadius: '6px', fontSize: '0.85rem', color: 'var(--success)',
