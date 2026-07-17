@@ -50,13 +50,22 @@
   .ef-sub button { width: 100%; justify-content: center; }
 }
 
-/* Filtros - igual a Clientes */
+/* Filtros - mismos estilos que Clientes */
 .filters-section { background: var(--panel); border-radius: var(--radius); margin-bottom: 16px; box-shadow: var(--shadow); overflow: hidden; }
 .filters-content { display: flex; gap: 10px; align-items: flex-end; padding: 10px 12px; flex-wrap: wrap; }
 .filtro-grupo-equipos { flex: 0 0 auto; width: 200px; }
 .filtro-grupo-equipos label { display: block; margin-bottom: 4px; font-weight: 600; font-size: 0.8rem; color: var(--text-muted); }
-.filtro-grupo-equipos input { width: 100%; padding: 6px 10px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.85rem; }
+.filtro-grupo-equipos input { width: 100%; padding: 6px 10px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.85rem; font-family: inherit; transition: border-color 0.2s; }
 .filtro-grupo-equipos input:focus { border-color: var(--primary); outline: none; }
+.btn-limpiar-equipos { display: flex; align-items: center; gap: 4px; padding: 6px 12px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500; white-space: nowrap; }
+.btn-limpiar-equipos:hover { background: #1d4ed8; }
+
+@media (max-width: 768px) {
+  .filters-content { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .filtro-grupo-equipos { width: 100%; }
+  .filtro-grupo-equipos input { padding: 10px 12px; font-size: .9rem; min-height: 44px; box-sizing: border-box; }
+  .filters-content .btn-limpiar-equipos { grid-column: 1 / -1; justify-content: center; padding: 10px 16px; }
+}
 
 /* Vista tabla - mayúsculas */
 .table-wrapper td { text-transform: uppercase; }

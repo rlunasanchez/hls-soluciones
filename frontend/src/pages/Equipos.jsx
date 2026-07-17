@@ -17,7 +17,10 @@ function Equipos() {
   const [equipos, setEquipos] = useState([]);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [equipoEditando, setEquipoEditando] = useState(null);
-  const [busqueda, setBusqueda] = useState("");
+  const [filtroCodigo, setFiltroCodigo] = useState("");
+  const [filtroCliente, setFiltroCliente] = useState("");
+  const [filtroModelo, setFiltroModelo] = useState("");
+  const [filtroSerie, setFiltroSerie] = useState("");
   const [paginaActual, setPaginaActual] = useState(1);
   const equiposPorPagina = 4;
   const [clientes, setClientes] = useState([]);
@@ -48,24 +51,36 @@ function Equipos() {
 
   useEffect(() => {
     setPaginaActual(1);
-  }, [busqueda]);
+  }, [filtroCodigo, filtroCliente, filtroModelo, filtroSerie]);
 
   useEffect(() => {
     const clienteId = params.get("clienteId");
     if (clienteId && equipos.length > 0) {
       const cliente = clientes.find(c => c.id == clienteId);
       if (cliente) {
-        setBusqueda(cliente.razon_social);
+        setFiltroCliente(cliente.razon_social);
       }
     }
   }, [equipos, clientes]);
 
   const equiposFiltrados = equipos.filter(eq => {
-    const texto = busqueda.toLowerCase();
-    return !texto ||
-      eq.serie?.toLowerCase().includes(texto) ||
-      eq.codigo?.toLowerCase().includes(texto) ||
-      eq.cliente_nombre?.toLowerCase().includes(texto);
+    if (filtroCodigo) {
+      const c = filtroCodigo.toLowerCase();
+      if (!eq.codigo?.toLowerCase().includes(c)) return false;
+    }
+    if (filtroCliente) {
+      const cl = filtroCliente.toLowerCase();
+      if (!eq.cliente_nombre?.toLowerCase().includes(cl)) return false;
+    }
+    if (filtroModelo) {
+      const m = filtroModelo.toLowerCase();
+      if (!eq.modelo?.toLowerCase().includes(m)) return false;
+    }
+    if (filtroSerie) {
+      const s = filtroSerie.toLowerCase();
+      if (!eq.serie?.toLowerCase().includes(s)) return false;
+    }
+    return true;
   });
 
   const totalPaginas = Math.ceil(equiposFiltrados.length / equiposPorPagina);
@@ -130,15 +145,21 @@ function Equipos() {
     <div className="container">
       <HeaderEquipo navigate={navigate} onLogout={cerrarSesion} />
 
-      <FiltrosEquipo
-        busqueda={busqueda}
-        onBusquedaChange={(v) => { setBusqueda(v); setPaginaActual(1); }}
-        onLimpiar={() => { setBusqueda(""); setPaginaActual(1); }}
-      />
+        <FiltrosEquipo
+          filtroCodigo={filtroCodigo}
+          onFiltroCodigoChange={setFiltroCodigo}
+          filtroCliente={filtroCliente}
+          onFiltroClienteChange={setFiltroCliente}
+          filtroModelo={filtroModelo}
+          onFiltroModeloChange={setFiltroModelo}
+          filtroSerie={filtroSerie}
+          onFiltroSerieChange={setFiltroSerie}
+          onLimpiar={() => { setFiltroCodigo(""); setFiltroCliente(""); setFiltroModelo(""); setFiltroSerie(""); }}
+        />
 
       <EquipoTabla
         equipos={equiposPagina}
-        busqueda={busqueda}
+        hayBusqueda={!!filtroCodigo || !!filtroCliente || !!filtroModelo || !!filtroSerie}
         equiposExpandidos={equiposExpandidos}
         setEquiposExpandidos={setEquiposExpandidos}
         onEditar={editarEquipo}
