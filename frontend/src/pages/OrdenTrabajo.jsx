@@ -45,6 +45,8 @@ function OrdenTrabajo() {
   const [mostrarDropdownCodigo, setMostrarDropdownCodigo] = useState(false);
   const [equiposSugeridos, setEquiposSugeridos] = useState([]);
   const [equiposCodigoSugeridos, setEquiposCodigoSugeridos] = useState([]);
+  const [clienteInactivo, setClienteInactivo] = useState(false);
+  const [equipoOtroCliente, setEquipoOtroCliente] = useState(false);
   
   // Refs para detectar clics fuera de los dropdowns
   const equipoDropdownRef = useRef(null);
@@ -127,6 +129,8 @@ function OrdenTrabajo() {
         setEditingId(null);
         setFromClientes(true);
         setClienteSeleccionado(clienteFromNav);
+        setClienteInactivo(false);
+        setEquipoOtroCliente(false);
         setEquipoSeleccionado(null);
         setBusquedaCliente((clienteFromNav.razon_social || "").toUpperCase());
         setBusquedaSerie("");
@@ -199,6 +203,8 @@ function OrdenTrabajo() {
     setFromClientes(false);
     setClienteSeleccionado(null);
     setEquipoSeleccionado(null);
+    setClienteInactivo(false);
+    setEquipoOtroCliente(false);
     setBusquedaCliente("");
     setBusquedaSerie("");
     setBusquedaCodigo("");
@@ -333,6 +339,7 @@ function OrdenTrabajo() {
           const res = await api.get(`/api/equipos/${orden.equipo_id}`);
           const eq = res.data;
           setEquipoSeleccionado(eq);
+          setEquipoOtroCliente(orden.cliente_id && eq.cliente_id && eq.cliente_id !== orden.cliente_id);
           setBusquedaCodigo(eq.codigo || "");
           setBusquedaSerie((eq.serie || "").toUpperCase());
           setNuevaOrden(prev => ({
@@ -370,6 +377,7 @@ function OrdenTrabajo() {
       );
       if (eq) {
         setEquipoSeleccionado(eq);
+        setEquipoOtroCliente(orden.cliente_id && eq.cliente_id && eq.cliente_id !== orden.cliente_id);
         setBusquedaCodigo(eq.codigo || "");
         setBusquedaSerie((eq.serie || "").toUpperCase());
       }
@@ -383,8 +391,11 @@ function OrdenTrabajo() {
     );
     if (cl) {
       setClienteSeleccionado(cl);
+      setClienteInactivo(false);
       setBusquedaCliente((cl.razon_social || orden.cliente || "").toUpperCase());
     } else {
+      setClienteSeleccionado(null);
+      setClienteInactivo(!!orden.cliente_id);
       setBusquedaCliente((orden.cliente || "").toUpperCase());
     }
 
@@ -434,6 +445,8 @@ function OrdenTrabajo() {
   // Seleccionar cliente y cargar sus datos
   const seleccionarCliente = (cliente) => {
     setClienteSeleccionado(cliente);
+    setClienteInactivo(false);
+    setEquipoOtroCliente(false);
     setNuevaOrden(prev => ({
       ...prev,
       cliente: toUpper(cliente.razon_social),
@@ -449,6 +462,7 @@ function OrdenTrabajo() {
   // Seleccionar equipo por serie - NO carga avería (puede haber duplicados)
   const seleccionarEquipo = (equipo) => {
     setEquipoSeleccionado(equipo);
+    setEquipoOtroCliente(clienteSeleccionado?.id && equipo.cliente_id && equipo.cliente_id !== clienteSeleccionado.id);
     setNuevaOrden(prev => ({
       ...prev,
       equipo: toUpper(equipo.equipo),
@@ -484,6 +498,7 @@ function OrdenTrabajo() {
       const eq = res.data[0];
       if (!eq) return;
       setEquipoSeleccionado(eq);
+      setEquipoOtroCliente(clienteSeleccionado?.id && eq.cliente_id && eq.cliente_id !== clienteSeleccionado.id);
       setMostrarDropdownCodigo(false);
       setNuevaOrden(prev => ({
         ...prev,
@@ -659,6 +674,8 @@ function OrdenTrabajo() {
     setBusquedaCodigo("");
     setEquiposSugeridos([]);
     setEquiposCodigoSugeridos([]);
+    setClienteInactivo(false);
+    setEquipoOtroCliente(false);
     setEditingId(null);
     setErrorNumeroOrden("");
     setFiltroNumeroOrden("");
@@ -740,6 +757,7 @@ function OrdenTrabajo() {
                 esEdicion={!!editingId}
                 fetchClientes={fetchClientes}
                 fromClientes={fromClientes}
+                clienteInactivo={clienteInactivo}
               />
 
               <OrdenFormEquipo
@@ -763,6 +781,7 @@ function OrdenTrabajo() {
                 fetchEquipos={fetchEquipos}
                 clienteSeleccionado={clienteSeleccionado}
                 fromClientes={fromClientes}
+                equipoOtroCliente={equipoOtroCliente}
               >
                 <OrdenFormInsumos
                   insumos={insumos}

@@ -15,7 +15,8 @@ function OrdenFormCliente({
   clientes = [],
   esEdicion = false,
   fetchClientes,
-  fromClientes = false
+  fromClientes = false,
+  clienteInactivo = false
 }) {
   const [mostrarModalCliente, setMostrarModalCliente] = useState(false);
 
@@ -78,7 +79,22 @@ function OrdenFormCliente({
                 background: clienteSeleccionado ? '#E0F2FE' : 'white'
               }}
             />
-            {clienteSeleccionado && (
+            {clienteInactivo && (
+              <span style={{
+                position: 'absolute',
+                right: '40px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: '#F97316',
+                color: 'white',
+                padding: '2px 8px',
+                borderRadius: '4px',
+                fontSize: '0.75rem'
+              }}>
+                ⚠ Cliente inactivo
+              </span>
+            )}
+            {!clienteInactivo && clienteSeleccionado && (
               <span style={{
                 position: 'absolute',
                 right: '40px',
