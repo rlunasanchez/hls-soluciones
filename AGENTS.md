@@ -710,6 +710,7 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.5 | Julio 2026 | Campos actividad y observaciones en OT, columna y filtro de estado |
 | 1.6 | Julio 2026 | Mayúsculas automáticas en formularios (Clientes, Equipos, OT), limpieza de código muerto |
 | 1.7 | Julio 2026 | Vista expandida de cliente compacta, teléfono visible en dropdown OT |
+| 1.8 | Julio 2026 | Fix cascade actividades/observaciones en OT, fix doble confirm eliminar OT |
 
 ---
 
@@ -914,3 +915,21 @@ ALTER TABLE ordenes_trabajo ADD COLUMN IF NOT EXISTS observaciones TEXT;
 - Todo el contenido se ve significativamente más compacto sin perder funcionalidad
 
 **Para revertir:** Aumentar los valores de padding, font-size, gap y size de iconos en `clientes-componentes.css` y `ClienteExpandido.jsx`.
+
+### 34. Fix cascade actividades/observaciones en OT
+**Fecha:** Julio 2026
+**Archivo modificado:** `backend/routes/ordenes.js`
+
+**Problema:** Al editar una OT que tenía actividad y observaciones, esos campos no se actualizaban en el registro maestro del equipo (tabla `equipos`).
+
+**Causa:** El `PUT /api/ordenes/:id` ejecuta un `UPDATE equipos SET ...` para cascada de cambios, pero las columnas `actividad` y `observaciones` no estaban incluidas en ese query.
+
+**Solución:** Agregados `actividad = ?` y `observaciones = ?` al `UPDATE` cascade.
+
+### 35. Fix doble confirm al eliminar OT
+**Fecha:** Julio 2026
+**Archivo modificado:** `frontend/src/pages/OrdenTrabajo.jsx`
+
+**Problema:** Al eliminar una orden de trabajo, se mostraban dos diálogos de confirmación (confirm + alert).
+
+**Solución:** Eliminado el `alert("Orden eliminada exitosamente")` redundante. La lista se refresca automáticamente.

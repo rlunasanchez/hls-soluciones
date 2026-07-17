@@ -200,6 +200,8 @@ function ClienteExpandido({ cliente, ordenes, onEditar, onEliminar, onEliminarOT
                     <th>Fecha</th>
                     <th>Equipo</th>
                     <th>Técnico</th>
+                    <th>Actividad</th>
+                    <th>Observaciones</th>
                     <th>Acción</th>
                   </tr>
                 </thead>
@@ -218,6 +220,8 @@ function ClienteExpandido({ cliente, ordenes, onEditar, onEliminar, onEliminarOT
                         {ot.equipo} {ot.marca}
                       </td>
                       <td>{ot.tecnico_asignado || "-"}</td>
+                      <td title={ot.actividad || ""}>{ot.actividad || "-"}</td>
+                      <td title={ot.observaciones || ""}>{ot.observaciones || "-"}</td>
                       <td className="acciones">
                         <button
                           onClick={() =>
