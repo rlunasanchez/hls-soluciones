@@ -63,6 +63,12 @@ function OrdenFormEquipo({
       const creado = res.data.find(e => e.codigo === codigoCreado);
       if (creado) {
         seleccionarEquipo(creado);
+        setNuevaOrden(prev => ({
+          ...prev,
+          averia: toUpper(creado.averia) || prev.averia,
+          actividad: toUpper(creado.actividad) || prev.actividad,
+          observaciones: toUpper(creado.observaciones) || prev.observaciones
+        }));
         setBusquedaCodigo(creado.codigo || "");
       }
       setMostrarModalEquipo(false);
