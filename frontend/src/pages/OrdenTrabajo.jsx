@@ -462,7 +462,10 @@ function OrdenTrabajo() {
       marca: "",
       serie: "",
       nivelTinta: "",
-      contadorPagOut: ""
+      contadorPagOut: "",
+      averia: "",
+      actividad: "",
+      observaciones: ""
     }));
     setBusquedaCliente(toUpper(cliente.razon_social));
     setMostrarDropdownClientes(false);
