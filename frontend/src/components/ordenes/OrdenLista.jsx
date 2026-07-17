@@ -10,13 +10,16 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
           <button className="main-btn" onClick={onNueva} style={{ marginRight: '8px' }}>
             <Plus size={16} /> Nueva Orden
           </button>
-          <input
-            type="text"
-            placeholder="Buscar por N° de Orden..."
-            value={filtroNumeroOrden}
-            onChange={(e) => onFiltroChange(e.target.value)}
-            className="filtro-orden-input"
-          />
+          <div className="filtro-grupo-select">
+            <label>N° de Orden</label>
+            <input
+              type="text"
+              placeholder="Buscar..."
+              value={filtroNumeroOrden}
+              onChange={(e) => onFiltroChange(e.target.value)}
+              className="filtro-garantia-select"
+            />
+          </div>
           <div className="filtro-fila-selects">
             <div className="filtro-grupo-select">
               <label>Garantía</label>

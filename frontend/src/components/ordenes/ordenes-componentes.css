@@ -10,20 +10,6 @@
   flex-wrap: wrap;
 }
 
-.filtro-orden-input {
-  padding: 6px 10px;
-  border: 1.5px solid var(--border);
-  border-radius: 6px;
-  font-size: 0.82rem;
-  font-family: inherit;
-  min-width: 250px;
-}
-
-.filtro-orden-input:focus {
-  border-color: var(--primary);
-  outline: none;
-}
-
 .filtro-garantia-select,
 .filtro-fecha-input {
   padding: 6px 10px;
@@ -63,12 +49,6 @@
     flex-direction: column;
     width: 100%;
     gap: 8px;
-  }
-
-  .filtro-orden-input {
-    min-width: 100%;
-    padding: 10px 12px;
-    font-size: 0.9rem;
   }
 
   .filtro-fila-selects {
