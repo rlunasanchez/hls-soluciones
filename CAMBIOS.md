@@ -1,5 +1,27 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-07-16 (Sesión 2)
+
+### Fix cascade UPDATE equipos desde OT — actividad/observaciones
+
+**Problema:** Al editar una OT que tiene actividad y observaciones, esos campos no se actualizaban en el registro maestro del equipo (tabla `equipos`).
+
+**Causa:** El `PUT /api/ordenes/:id` ejecuta un `UPDATE equipos SET ...` para cascada de cambios, pero las columnas `actividad` y `observaciones` no estaban incluidas en ese query.
+
+**Solución:** Agregados `actividad = ?` y `observaciones = ?` al `UPDATE` cascade en `backend/routes/ordenes.js`.
+
+**Archivo:** `backend/routes/ordenes.js` (línea ~163)
+
+### Fix doble confirm al eliminar OT
+
+**Problema:** Al eliminar una orden de trabajo, se mostraban dos diálogos de confirmación (confirm + alert).
+
+**Solución:** Eliminado el `alert("Orden eliminada exitosamente")` redundante. La lista se refresca automáticamente.
+
+**Archivo:** `frontend/src/pages/OrdenTrabajo.jsx`
+
+---
+
 ## Fecha: 2026-07-16
 
 ### Limpieza de seguridad y optimización de código
