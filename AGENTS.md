@@ -711,6 +711,7 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.6 | Julio 2026 | Mayúsculas automáticas en formularios (Clientes, Equipos, OT), limpieza de código muerto |
 | 1.7 | Julio 2026 | Vista expandida de cliente compacta, teléfono visible en dropdown OT |
 | 1.8 | Julio 2026 | Fix cascade actividades/observaciones en OT, fix doble confirm eliminar OT |
+| 1.9 | Julio 2026 | Mostrar actividad/observaciones en Equipos y Clientes, fix INSERT equipos, Contador Páginas OUT en OT, keepalive MySQL |
 
 ---
 
@@ -933,3 +934,43 @@ ALTER TABLE ordenes_trabajo ADD COLUMN IF NOT EXISTS observaciones TEXT;
 **Problema:** Al eliminar una orden de trabajo, se mostraban dos diálogos de confirmación (confirm + alert).
 
 **Solución:** Eliminado el `alert("Orden eliminada exitosamente")` redundante. La lista se refresca automáticamente.
+
+### 36. Mostrar actividad/observaciones en módulo Equipos
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `frontend/src/components/equipos/EquipoTabla.jsx`
+- `frontend/src/components/equipos/EquipoCard.jsx`
+
+**Cambios:**
+- Tabla: fila expandida con chevron muestra actividad/observaciones
+- Tarjetas: filas de actividad y observaciones debajo de avería
+
+### 37. Mostrar actividad/observaciones en tabla OT de Clientes
+**Fecha:** Julio 2026
+**Archivo modificado:** `frontend/src/components/clientes/ClienteExpandido.jsx`
+
+**Cambios:** Agregadas columnas "Actividad" y "Observaciones" a la tabla de OT del módulo Clientes
+
+### 38. Fix INSERT equipos desde OT — actividad/observaciones
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `backend/routes/ordenes.js` (main — MySQL)
+- `backend/routes/ordenes.js` (deploy/cloud — PostgreSQL)
+
+**Problema:** Al crear OT nueva con equipo nuevo, el INSERT en `equipos` no incluía actividad ni observaciones.
+
+**Solución:** Agregados `actividad` y `observaciones` al INSERT de equipos en POST y PUT.
+
+### 39. Agregar Contador Páginas OUT al formulario de OT
+**Fecha:** Julio 2026
+**Archivo modificado:** `frontend/src/components/ordenes/OrdenFormEquipo.jsx`
+
+**Cambios:** Campo "Contador Páginas OUT" agregado junto a "Nivel de Tinta" en la grilla de Datos del Equipo
+
+### 40. Fix pool MySQL — keepalive y connectTimeout
+**Fecha:** Julio 2026
+**Archivo modificado:** `backend/config/db.js` (solo rama `main`)
+
+**Problema:** Se perdía conexión MySQL cuando la conexión quedaba idle.
+
+**Solución:** Agregados `enableKeepAlive: true`, `keepAliveInitialDelay: 0`, `connectTimeout: 10000` al pool.
