@@ -1,5 +1,53 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-07-16 (Sesión 3)
+
+### Mostrar actividad/observaciones en módulo Equipos
+
+**Problema:** Los campos actividad y observaciones no se mostraban en el mantenedor de Equipos.
+
+**Archivos modificados:**
+- `frontend/src/components/equipos/EquipoTabla.jsx` — Fila expandida muestra actividad/observaciones al hacer clic en chevron
+- `frontend/src/components/equipos/EquipoCard.jsx` — Tarjetas móvil muestran actividad y observaciones
+
+### Mostrar actividad/observaciones en tabla OT de Clientes
+
+**Problema:** La tabla de OT dentro del módulo Clientes no mostraba actividad/observaciones.
+
+**Archivo modificado:** `frontend/src/components/clientes/ClienteExpandido.jsx` — Agregadas columnas "Actividad" y "Observaciones" a la tabla de OT
+
+### Fix INSERT equipos desde OT — actividad/observaciones
+
+**Problema:** Al crear una OT nueva con un equipo nuevo, el INSERT en `equipos` no incluía actividad ni observaciones. El PUT cascade sí los guardaba, pero el POST (creación) no.
+
+**Causa:** El `INSERT INTO equipos` en el POST de `ordenes.js` solo incluía 21 columnas (hasta `averia`), faltando `actividad` y `observaciones`.
+
+**Solución:** Agregados `actividad` y `observaciones` al INSERT de equipos en POST y PUT de `backend/routes/ordenes.js` (ambas ramas: MySQL y PostgreSQL).
+
+**Archivos:**
+- `backend/routes/ordenes.js` (main) — MySQL: `INSERT INTO equipos (... averia, actividad, observaciones) VALUES (?, ?, ..., ?, ?)`
+- `backend/routes/ordenes.js` (deploy/cloud) — PostgreSQL: `$22, $23` params
+
+### Agregar Contador Páginas OUT al formulario de OT
+
+**Problema:** El campo "Contador Páginas OUT" no aparecía al crear/editar una OT en "Datos del Equipo".
+
+**Solución:** Agregado campo `input type="number"` junto a "Nivel de Tinta" en la grilla del formulario.
+
+**Archivo:** `frontend/src/components/ordenes/OrdenFormEquipo.jsx`
+
+### Fix pool MySQL — keepalive y connectTimeout
+
+**Problema:** Se perdía conexión con la base de datos MySQL cuando la conexión quedaba idle.
+
+**Causa:** El pool MySQL no tenía configurado keepalive, así que MySQL cerraba conexiones inactivas tras su timeout (8h por defecto).
+
+**Solución:** Agregados `enableKeepAlive: true`, `keepAliveInitialDelay: 0`, `connectTimeout: 10000` al pool.
+
+**Archivo:** `backend/config/db.js` (solo rama `main` — MySQL)
+
+---
+
 ## Fecha: 2026-07-16 (Sesión 2)
 
 ### Fix cascade UPDATE equipos desde OT — actividad/observaciones
