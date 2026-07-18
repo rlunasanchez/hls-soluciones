@@ -49,6 +49,7 @@ function OrdenTrabajo() {
   const [equiposCodigoSugeridos, setEquiposCodigoSugeridos] = useState([]);
   const [clienteInactivo, setClienteInactivo] = useState(false);
   const [equipoOtroCliente, setEquipoOtroCliente] = useState(false);
+  const [equipoNoExiste, setEquipoNoExiste] = useState(false);
   
   // Refs para detectar clics fuera de los dropdowns
   const equipoDropdownRef = useRef(null);
@@ -133,6 +134,7 @@ function OrdenTrabajo() {
         setClienteSeleccionado(clienteFromNav);
         setClienteInactivo(false);
         setEquipoOtroCliente(false);
+        setEquipoNoExiste(false);
         setEquipoSeleccionado(null);
         setBusquedaCliente((clienteFromNav.razon_social || "").toUpperCase());
         setBusquedaSerie("");
@@ -207,6 +209,7 @@ function OrdenTrabajo() {
     setEquipoSeleccionado(null);
     setClienteInactivo(false);
     setEquipoOtroCliente(false);
+    setEquipoNoExiste(false);
     setBusquedaCliente("");
     setBusquedaSerie("");
     setBusquedaCodigo("");
@@ -337,6 +340,7 @@ function OrdenTrabajo() {
     });
 
     // Buscar equipo asociado - primero intentar con datos frescos del API
+    setEquipoNoExiste(false);
     const cargarEquipoFresco = async () => {
       try {
         if (orden.equipo_id) {
@@ -344,6 +348,7 @@ function OrdenTrabajo() {
           const eq = res.data;
           setEquipoSeleccionado(eq);
           setEquipoOtroCliente(orden.cliente_id && eq.cliente_id && eq.cliente_id !== orden.cliente_id);
+          setEquipoNoExiste(false);
           setBusquedaCodigo(eq.codigo || "");
           setBusquedaSerie((eq.serie || "").toUpperCase());
           setNuevaOrden(prev => ({
@@ -373,6 +378,7 @@ function OrdenTrabajo() {
         }
       } catch (err) {
         console.error("Error al cargar equipo fresco:", err);
+        setEquipoNoExiste(true);
       }
       // Fallback: buscar en la lista local
       const eq = equipos.find(e => 
@@ -382,8 +388,11 @@ function OrdenTrabajo() {
       if (eq) {
         setEquipoSeleccionado(eq);
         setEquipoOtroCliente(orden.cliente_id && eq.cliente_id && eq.cliente_id !== orden.cliente_id);
+        setEquipoNoExiste(false);
         setBusquedaCodigo(eq.codigo || "");
         setBusquedaSerie((eq.serie || "").toUpperCase());
+      } else if (orden.equipo_id) {
+        setEquipoNoExiste(true);
       }
     };
     cargarEquipoFresco();
@@ -452,6 +461,7 @@ function OrdenTrabajo() {
     setClienteInactivo(false);
     setEquipoSeleccionado(null);
     setEquipoOtroCliente(false);
+    setEquipoNoExiste(false);
     setBusquedaCodigo("");
     setBusquedaSerie("");
     setNuevaOrden(prev => ({
@@ -479,6 +489,7 @@ function OrdenTrabajo() {
   const seleccionarEquipo = (equipo) => {
     setEquipoSeleccionado(equipo);
     setEquipoOtroCliente(clienteSeleccionado?.id && equipo.cliente_id && equipo.cliente_id !== clienteSeleccionado.id);
+    setEquipoNoExiste(false);
     setNuevaOrden(prev => ({
       ...prev,
       equipo: toUpper(equipo.equipo),
@@ -515,6 +526,7 @@ function OrdenTrabajo() {
       if (!eq) return;
       setEquipoSeleccionado(eq);
       setEquipoOtroCliente(clienteSeleccionado?.id && eq.cliente_id && eq.cliente_id !== clienteSeleccionado.id);
+      setEquipoNoExiste(false);
       setMostrarDropdownCodigo(false);
       setNuevaOrden(prev => ({
         ...prev,
@@ -803,6 +815,7 @@ function OrdenTrabajo() {
                 fromClientes={fromClientes}
                 esEdicion={!!editingId}
                 equipoOtroCliente={equipoOtroCliente}
+                equipoNoExiste={equipoNoExiste}
               >
                 <OrdenFormInsumos
                   insumos={insumos}
