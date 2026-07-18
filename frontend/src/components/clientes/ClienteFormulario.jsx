@@ -28,7 +28,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
         dirs = clienteEditando.direcciones.split(";;").map((d) => {
           const parts = d.split("|");
           return {
-            tipo_direccion: toUpper(parts[0] || ""), direccion: toUpper(parts[1] || ""),
+            tipo_direccion: parts[0] || "", direccion: toUpper(parts[1] || ""),
             fono: parts[2] || "", ciudad: toUpper(parts[3] || ""), comuna: toUpper(parts[4] || "")
           };
         }).filter((d) => d.direccion);
