@@ -6,34 +6,24 @@
 .table-header-actions {
   display: flex;
   gap: 12px;
-  align-items: center;
+  align-items: flex-end;
   flex-wrap: wrap;
 }
 
-.filtro-orden-input {
+.filtro-garantia-select,
+.filtro-fecha-input {
   padding: 6px 10px;
-  border: 2px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: 6px;
-  font-size: 0.95rem;
-  min-width: 250px;
-}
-
-.filtro-orden-input:focus {
-  border-color: var(--primary);
-  outline: none;
-}
-
-.filtro-garantia-select {
-  padding: 6px 10px;
-  border: 2px solid var(--border);
-  border-radius: 6px;
-  font-size: 0.95rem;
+  font-size: 0.82rem;
+  font-family: inherit;
   min-width: 140px;
   background: white;
   cursor: pointer;
 }
 
-.filtro-garantia-select:focus {
+.filtro-garantia-select:focus,
+.filtro-fecha-input:focus {
   border-color: var(--primary);
   outline: none;
 }
@@ -61,27 +51,24 @@
     gap: 8px;
   }
 
-  .filtro-orden-input {
-    min-width: 100%;
-    padding: 10px 12px;
-    font-size: 0.9rem;
-  }
-
   .filtro-fila-selects {
     width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 8px;
   }
 
   .filtro-grupo-select {
-    flex: 1;
     min-width: 0;
   }
 
-  .filtro-garantia-select {
+  .filtro-garantia-select,
+  .filtro-fecha-input {
     width: 100%;
     padding: 10px 12px;
-    font-size: 0.9rem;
+    font-size: 0.82rem;
     min-width: 0;
+    box-sizing: border-box;
   }
 
   .filtro-grupo-select label {

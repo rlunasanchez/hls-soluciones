@@ -1,6 +1,6 @@
 import { ChevronDown, Edit, Trash2 } from "lucide-react";
 
-function EquipoTabla({ equipos, busqueda, equiposExpandidos, setEquiposExpandidos, onEditar, onEliminar }) {
+function EquipoTabla({ equipos, hayBusqueda, equiposExpandidos, setEquiposExpandidos, onEditar, onEliminar }) {
   return (
     <div className="table-wrapper">
       <table>
@@ -23,7 +23,7 @@ function EquipoTabla({ equipos, busqueda, equiposExpandidos, setEquiposExpandido
                 <tr key={eq.id}>
                   <td data-label="Código">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      {busqueda && (
+                      {hayBusqueda && (
                         <span style={{ color: 'var(--primary)', transition: 'transform 0.2s', transform: expandido ? 'rotate(180deg)' : 'rotate(0deg)', cursor: 'pointer' }}
                           onClick={() => setEquiposExpandidos(prev => ({ ...prev, [eq.id]: !prev[eq.id] }))}>
                           <ChevronDown size={16} />

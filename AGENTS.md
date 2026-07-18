@@ -714,6 +714,7 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.9 | Julio 2026 | Mostrar actividad/observaciones en Equipos y Clientes, fix INSERT equipos, Contador Páginas OUT en OT, keepalive MySQL |
 | 1.10 | Julio 2026 | Badges "Cliente inactivo" y "Equipo asignado a otro cliente" en formulario OT |
 | 1.11 | Julio 2026 | Fix limpieza de datos al cambiar cliente en OT, botón "+ Nuevo" visible solo cuando no tiene cliente/equipo, rate limiter subido a 500 |
+| 1.12 | Julio 2026 | Filtros separados en Equipos (Código, Cliente, Modelo, Serie), botón Limpiar azul always visible, fix alineación filtros OT, filtro N° de Orden con label y mismo tamaño que los demás |
 
 ---
 
@@ -976,3 +977,22 @@ ALTER TABLE ordenes_trabajo ADD COLUMN IF NOT EXISTS observaciones TEXT;
 **Problema:** Se perdía conexión MySQL cuando la conexión quedaba idle.
 
 **Solución:** Agregados `enableKeepAlive: true`, `keepAliveInitialDelay: 0`, `connectTimeout: 10000` al pool.
+
+### 41. Filtros separados en Equipos y fix alineación OT
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `frontend/src/components/equipos/FiltrosEquipo.jsx`
+- `frontend/src/pages/Equipos.jsx`
+- `frontend/src/pages/Equipos.css`
+- `frontend/src/components/equipos/EquipoTabla.jsx`
+- `frontend/src/components/ordenes/ordenes-componentes.css`
+
+**Cambios:**
+- **Equipos**: Filtros separados en 4 inputs independientes: Código, Cliente, Modelo, Serie (antes étaita todo junto en un solo filtro)
+- Código se convierte a mayúsculas automáticamente
+- Eliminado estado `busqueda` de Equipos.jsx, reemplazado por `filtroCodigo` y `filtroCliente` separados
+- EquipoTabla: prop `busqueda` renombrada a `hayBusqueda` (boolean)
+- **Botón Limpiar**: siempre visible (no solo cuando hay filtro activo), color azul (`var(--primary)`) en vez de rojo
+- **CSS**: Filtros de Equipos ahora iguales a los de Clientes (`width: 200px`, `font-size: 0.85rem`, `padding: 6px 10px`)
+- **OT**: Fix alineación filtros con botón "Nueva Orden" — `align-items: flex-end` en vez de `center`
+- **OT**: Filtro "N° de Orden" ahora tiene label arriba y usa clase `filtro-garantia-select` (mismo tamaño que Garantía, Estado, Desde, Hasta). Eliminado CSS viejo `filtro-orden-input`

@@ -1,7 +1,7 @@
 import { ClipboardList, FileText, FileSpreadsheet, Edit, Trash2, Plus } from "lucide-react";
 import Pagination from "../Pagination";
 
-function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtroGarantia, onFiltroGarantiaChange, filtroEstado, onFiltroEstadoChange, onNueva, paginaActual, totalPaginas, onPageChange, onEditar, onEliminar, onInforme, onCotizacion }) {
+function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtroGarantia, onFiltroGarantiaChange, filtroEstado, onFiltroEstadoChange, filtroFechaDesde, onFiltroFechaDesdeChange, filtroFechaHasta, onFiltroFechaHastaChange, onNueva, paginaActual, totalPaginas, onPageChange, onEditar, onEliminar, onInforme, onCotizacion }) {
 
   return (
     <>
@@ -10,13 +10,16 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
           <button className="main-btn" onClick={onNueva} style={{ marginRight: '8px' }}>
             <Plus size={16} /> Nueva Orden
           </button>
-          <input
-            type="text"
-            placeholder="Buscar por N° de Orden..."
-            value={filtroNumeroOrden}
-            onChange={(e) => onFiltroChange(e.target.value)}
-            className="filtro-orden-input"
-          />
+          <div className="filtro-grupo-select">
+            <label>N° de Orden</label>
+            <input
+              type="text"
+              placeholder="Buscar..."
+              value={filtroNumeroOrden}
+              onChange={(e) => onFiltroChange(e.target.value)}
+              className="filtro-garantia-select"
+            />
+          </div>
           <div className="filtro-fila-selects">
             <div className="filtro-grupo-select">
               <label>Garantía</label>
@@ -41,6 +44,24 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                 <option value="cerrada">Cerrada</option>
                 <option value="pendiente">Pendiente</option>
               </select>
+            </div>
+            <div className="filtro-grupo-select">
+              <label>Desde</label>
+              <input
+                type="date"
+                value={filtroFechaDesde}
+                onChange={(e) => onFiltroFechaDesdeChange(e.target.value)}
+                className="filtro-fecha-input"
+              />
+            </div>
+            <div className="filtro-grupo-select">
+              <label>Hasta</label>
+              <input
+                type="date"
+                value={filtroFechaHasta}
+                onChange={(e) => onFiltroFechaHastaChange(e.target.value)}
+                className="filtro-fecha-input"
+              />
             </div>
           </div>
         </div>
