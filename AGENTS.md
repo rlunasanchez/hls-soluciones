@@ -698,6 +698,51 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 
 ---
 
+## Cambios Recientes (Julio 2026)
+
+### 30. Badge "Equipo desactivado" en Orden de Trabajo
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `frontend/src/pages/OrdenTrabajo.jsx`
+- `frontend/src/components/ordenes/OrdenFormEquipo.jsx`
+
+**Problema:** Al editar una OT que tenía un equipo desactivado (activo=0), no se mostraba ninguna advertencia. El badge "Cliente desactivado" ya existía para clientes, pero no había equivalente para equipos.
+
+**Cambios:**
+- Nuevo estado `equipoNoExiste` en `OrdenTrabajo.jsx`
+- Detección automática: si `equipo_id` existe pero el API retorna 404 → `equipoNoExiste = true`
+- Fallback: si no se encuentra en la lista local y tiene `equipo_id` → `equipoNoExiste = true`
+- Badge rojo **"⚠ Equipo desactivado — el equipo asociado fue desactivado del sistema"** en `OrdenFormEquipo.jsx`
+- Badge éxito solo se muestra cuando `equipoOtroCliente` y `equipoNoExiste` son ambos `false`
+- Reset automático al seleccionar equipo, cambiar cliente, o abrir nueva orden
+
+### 31. Fix campo Matriz/Sucursal no se cargaba al editar cliente
+**Fecha:** Julio 2026
+**Archivo modificado:** `frontend/src/components/clientes/ClienteFormulario.jsx`
+
+**Problema:** Al editar un cliente con sucursales guardadas, el campo "Tipo" (Matriz/Sucursal) aparecía vacío en el select.
+
+**Causa:** `toUpper()` convertía "Matriz" a "MATRIZ", pero los `<option value="Matriz">` del select mantenían el valor original. No coincidían, así que el select mostraba "Seleccionar".
+
+**Solución:** Quitar `toUpper()` de `tipo_direccion` en el parseo de direcciones (línea 31).
+
+### 32. Badge "Cliente desactivado" (antes "inactivo")
+**Fecha:** Julio 2026
+**Archivo modificado:** `frontend/src/components/ordenes/OrdenFormCliente.jsx`
+
+**Cambio:** Texto del badge de "⚠ Cliente inactivo" → "⚠ Cliente desactivado" para ser consistente con el soft delete (activo=0, no se borra de la DB).
+
+### 33. Columna email agregada a tabla clientes
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `backend/routes/clientes.js` (POST y PUT incluyen `email`)
+- `frontend/src/components/clientes/ClienteFormulario.jsx` (campo email en formulario)
+- **Migración SQL:** `ALTER TABLE clientes ADD COLUMN email VARCHAR(255) AFTER telefono;`
+
+**Problema:** El código del backend incluía `email` en INSERT/UPDATE pero la tabla no tenía esa columna, causando error `ER_BAD_FIELD_ERROR`.
+
+---
+
 ## Historial de Versiones
 
 | Versión | Fecha | Cambios |
@@ -715,6 +760,7 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.10 | Julio 2026 | Badges "Cliente inactivo" y "Equipo asignado a otro cliente" en formulario OT |
 | 1.11 | Julio 2026 | Fix limpieza de datos al cambiar cliente en OT, botón "+ Nuevo" visible solo cuando no tiene cliente/equipo, rate limiter subido a 500 |
 | 1.12 | Julio 2026 | Filtros separados en Equipos (Código, Cliente, Modelo, Serie), botón Limpiar azul always visible, fix alineación filtros OT, filtro N° de Orden con label y mismo tamaño que los demás |
+| 1.13 | Julio 2026 | Badge "Equipo desactivado" en OT, badge "Cliente desactivado" (antes "inactivo"), fix campo Matriz/Sucursal no se cargaba al editar cliente, columna email agregada a tabla clientes |
 
 ---
 
