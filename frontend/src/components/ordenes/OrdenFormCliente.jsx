@@ -91,7 +91,7 @@ function OrdenFormCliente({
                 borderRadius: '4px',
                 fontSize: '0.75rem'
               }}>
-                ⚠ Cliente inactivo
+                ⚠ Cliente desactivado
               </span>
             )}
             {!clienteInactivo && clienteSeleccionado && (
