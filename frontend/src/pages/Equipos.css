@@ -71,5 +71,3 @@
 .table-wrapper td { text-transform: uppercase; }
 .data-card-row .value, .data-card-value { text-transform: uppercase; }
 .data-card-header strong, .badge-info { text-transform: uppercase; }
-.btn-nuevo-cliente { padding: 8px 14px; background: var(--primary); color: white !important; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500; display: flex; align-items: center; gap: 5px; white-space: nowrap; }
-.btn-nuevo-cliente:hover { background: #1d4ed8; color: white !important; }

@@ -13,7 +13,7 @@ async function generarCodigo() {
   return `EQ-${String(num + 1).padStart(4, "0")}`;
 }
 
-router.get("/next-codigo", async (req, res) => {
+router.get("/next-codigo", authMiddleware, async (req, res) => {
   try {
     const codigo = await generarCodigo();
     res.json({ codigo });
@@ -23,7 +23,7 @@ router.get("/next-codigo", async (req, res) => {
   }
 });
 
-router.get("/", async (req, res) => {
+router.get("/", authMiddleware, async (req, res) => {
   try {
     const { q, cliente_id } = req.query;
     let sql = `SELECT e.*, c.razon_social as cliente_nombre, c.rut as cliente_rut, c.codigo as cliente_codigo
@@ -50,7 +50,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", authMiddleware, async (req, res) => {
   try {
     const [rows] = await pool.query(
       `SELECT e.*, c.razon_social as cliente_nombre, c.rut as cliente_rut, c.codigo as cliente_codigo

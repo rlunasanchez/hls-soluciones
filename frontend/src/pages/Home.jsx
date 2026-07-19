@@ -1,17 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { Package, Users, UserCog, FileText, FileSpreadsheet, ClipboardList, Home as HomeIcon, LogOut, ChevronRight, ShoppingCart } from "lucide-react";
+import { cerrarSesion } from "../utils/helpers";
 
 function Home({ onLogout }) {
   const navigate = useNavigate();
-  
-  const cerrarSesion = () => {
-    if (onLogout) {
-      onLogout();
-    } else {
-      localStorage.removeItem("token");
-      window.location.replace("/login");
-    }
-  };
 
   const menuItems = [
     { title: "Clientes", icon: Users, path: "/clientes", desc: "Mantenedor de clientes" },

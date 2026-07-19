@@ -35,7 +35,7 @@ router.get("/", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/siguiente-numero", async (req, res) => {
+router.get("/siguiente-numero", authMiddleware, async (req, res) => {
   const year = new Date().getFullYear();
   try {
     const [rows] = await pool.query("SELECT numero_orden FROM ordenes_trabajo WHERE numero_orden LIKE ? ORDER BY numero_orden DESC LIMIT 1", [`OT-${year}-%`]);
@@ -50,7 +50,7 @@ router.get("/siguiente-numero", async (req, res) => {
   }
 });
 
-router.get("/verificar/:numeroOrden", async (req, res) => {
+router.get("/verificar/:numeroOrden", authMiddleware, async (req, res) => {
   const { numeroOrden } = req.params;
   const { excluir } = req.query;
   try {

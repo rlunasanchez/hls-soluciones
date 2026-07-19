@@ -5,7 +5,7 @@ import {
   Save, X, Wrench
 } from "lucide-react";
 import api from "../services/api";
-import { toUpper } from "../utils/helpers";
+import { toUpper, cerrarSesion } from "../utils/helpers";
 import './OrdenTrabajo.css';
 import "../components/ordenes/ordenes-componentes.css";
 import HeaderOrdenTrabajo from "../components/ordenes/HeaderOrdenTrabajo";
@@ -101,9 +101,11 @@ function OrdenTrabajo() {
 
   // Cargar clientes, equipos y órdenes al montar el componente
   useEffect(() => {
-    fetchClientes();
-    fetchEquipos();
-    fetchOrdenes();
+    const controller = new AbortController();
+    fetchClientes(controller.signal);
+    fetchEquipos(controller.signal);
+    fetchOrdenes(controller.signal);
+    return () => controller.abort();
   }, []);
 
   // Recibir cliente u orden desde Clientes
@@ -271,14 +273,14 @@ function OrdenTrabajo() {
     };
   }, []);
 
-  const fetchOrdenes = async () => {
+  const fetchOrdenes = async (signal) => {
     setLoading(true);
     try {
-      const res = await api.get("/api/ordenes?page=1&limit=10000");
+      const res = await api.get("/api/ordenes?page=1&limit=10000", { signal });
       setOrdenes(res.data.ordenes);
       setPaginaActual(1);
     } catch (err) {
-      console.error("Error al cargar órdenes:", err);
+      if (err.name !== "CanceledError") console.error("Error al cargar órdenes:", err);
     } finally {
       setLoading(false);
     }
@@ -437,21 +439,21 @@ function OrdenTrabajo() {
     }
   };
 
-  const fetchClientes = async () => {
+  const fetchClientes = async (signal) => {
     try {
-      const res = await api.get("/api/clientes");
+      const res = await api.get("/api/clientes", { signal });
       setClientes(res.data);
     } catch (err) {
-      console.error("Error al cargar clientes:", err);
+      if (err.name !== "CanceledError") console.error("Error al cargar clientes:", err);
     }
   };
 
-  const fetchEquipos = async () => {
+  const fetchEquipos = async (signal) => {
     try {
-      const res = await api.get("/api/equipos");
+      const res = await api.get("/api/equipos", { signal });
       setEquipos(res.data);
     } catch (err) {
-      console.error("Error al cargar equipos:", err);
+      if (err.name !== "CanceledError") console.error("Error al cargar equipos:", err);
     }
   };
 
@@ -552,10 +554,9 @@ function OrdenTrabajo() {
       setBusquedaSerie((eq.serie || "").toUpperCase());
       setBusquedaCodigo(codigo);
 
-      // Si el equipo tiene cliente asociado, cargarlo
+      // Si el equipo tiene cliente asociado, buscarlo en los datos locales
       if (eq.cliente_id) {
-        const resC = await api.get(`/api/clientes`);
-        const cliente = resC.data.find(c => c.id === eq.cliente_id);
+        const cliente = clientes.find(c => c.id === eq.cliente_id);
         if (cliente) {
           setClienteSeleccionado(cliente);
           setBusquedaCliente(toUpper(cliente.razon_social));
@@ -601,11 +602,6 @@ function OrdenTrabajo() {
     } catch (err) {
       console.error("Error al verificar número de orden:", err);
     }
-  };
-
-  const cerrarSesion = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
   };
 
   const guardarOrden = async (e) => {
@@ -706,9 +702,6 @@ function OrdenTrabajo() {
     setEquipoOtroCliente(false);
     setEditingId(null);
     setErrorNumeroOrden("");
-    setFiltroNumeroOrden("");
-    setFiltroGarantia("todos");
-    setFiltroEstado("todos");
   };
   // Funciones de navegación eliminadas (accesos desde el menú)
 

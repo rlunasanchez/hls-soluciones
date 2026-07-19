@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import pool from "../config/db.js";
-import { authMiddleware } from "../middleware/authMiddleware.js";
+import { authMiddleware, adminOnly } from "../middleware/authMiddleware.js";
 
 dotenv.config();
 const router = express.Router();
@@ -53,7 +53,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.post("/registrar", authMiddleware, async (req, res) => {
+router.post("/registrar", authMiddleware, adminOnly, async (req, res) => {
   const { usuario, password, rol, email } = req.body;
   try {
     const passwordEncriptada = await bcrypt.hash(password, 10);
@@ -72,7 +72,8 @@ router.post("/registrar", authMiddleware, async (req, res) => {
 });
 
 router.put("/cambiar-password", authMiddleware, async (req, res) => {
-  const { usuario, passwordActual, nuevaPassword } = req.body;
+  const { passwordActual, nuevaPassword } = req.body;
+  const usuario = req.user.usuario;
   try {
     const [users] = await pool.query("SELECT * FROM usuarios WHERE usuario = ?", [usuario]);
     if (users.length === 0) {
@@ -102,7 +103,7 @@ router.get("/usuarios", authMiddleware, async (req, res) => {
   }
 });
 
-router.put("/resetear-password/:id", authMiddleware, async (req, res) => {
+router.put("/resetear-password/:id", authMiddleware, adminOnly, async (req, res) => {
   const { id } = req.params;
   const { nuevaPassword } = req.body;
   try {
@@ -115,7 +116,7 @@ router.put("/resetear-password/:id", authMiddleware, async (req, res) => {
   }
 });
 
-router.put("/activar-usuario/:id", authMiddleware, async (req, res) => {
+router.put("/activar-usuario/:id", authMiddleware, adminOnly, async (req, res) => {
   const { id } = req.params;
   const { activo } = req.body;
   try {
@@ -127,7 +128,7 @@ router.put("/activar-usuario/:id", authMiddleware, async (req, res) => {
   }
 });
 
-router.delete("/eliminar-usuario/:id", authMiddleware, async (req, res) => {
+router.delete("/eliminar-usuario/:id", authMiddleware, adminOnly, async (req, res) => {
   try {
     await pool.query("DELETE FROM usuarios WHERE id = ?", [req.params.id]);
     res.json({ msg: "Usuario eliminado" });
@@ -137,7 +138,7 @@ router.delete("/eliminar-usuario/:id", authMiddleware, async (req, res) => {
   }
 });
 
-router.put("/actualizar-usuario/:id", authMiddleware, async (req, res) => {
+router.put("/actualizar-usuario/:id", authMiddleware, adminOnly, async (req, res) => {
   const { id } = req.params;
   const { usuario, rol, email } = req.body;
   try {

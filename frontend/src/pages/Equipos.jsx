@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Package } from "lucide-react";
 import api from "../services/api";
 import './Equipos.css';
+import { cerrarSesion } from "../utils/helpers";
 import HeaderEquipo from "../components/equipos/HeaderEquipo";
 import FiltrosEquipo from "../components/equipos/FiltrosEquipo";
 import EquipoFormulario from "../components/equipos/EquipoFormulario";
@@ -26,27 +27,29 @@ function Equipos() {
   const [clientes, setClientes] = useState([]);
   const [equiposExpandidos, setEquiposExpandidos] = useState({});
 
-  const fetchEquipos = async () => {
+  const fetchEquipos = async (signal) => {
     try {
-      const res = await api.get("/api/equipos");
+      const res = await api.get("/api/equipos", { signal });
       setEquipos(res.data);
     } catch (err) {
-      console.error(err);
+      if (err.name !== "CanceledError") console.error(err);
     }
   };
 
-  const fetchClientes = async () => {
+  const fetchClientes = async (signal) => {
     try {
-      const res = await api.get("/api/clientes");
+      const res = await api.get("/api/clientes", { signal });
       setClientes(res.data);
     } catch (err) {
-      console.error(err);
+      if (err.name !== "CanceledError") console.error(err);
     }
   };
 
   useEffect(() => {
-    fetchEquipos();
-    fetchClientes();
+    const controller = new AbortController();
+    fetchEquipos(controller.signal);
+    fetchClientes(controller.signal);
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
@@ -118,11 +121,6 @@ function Equipos() {
     } catch (err) {
       alert("Error al guardar");
     }
-  };
-
-  const cerrarSesion = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
   };
 
   if (mostrarFormulario) {
