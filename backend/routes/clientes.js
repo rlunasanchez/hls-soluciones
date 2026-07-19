@@ -119,6 +119,37 @@ router.put("/:id", authMiddleware, async (req, res) => {
   }
 });
 
+router.get("/:id/equipos", authMiddleware, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      "SELECT id, codigo, equipo, marca, modelo, serie FROM equipos WHERE cliente_id = $1 AND activo = true",
+      [req.params.id]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Error del servidor" });
+  }
+});
+
+router.put("/:id/desactivar", authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("UPDATE equipos SET cliente_id = NULL WHERE cliente_id = $1", [id]);
+    await client.query("UPDATE clientes SET activo = false WHERE id = $1", [id]);
+    await client.query("COMMIT");
+    res.json({ msg: "Cliente desactivado y equipos desvinculados" });
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error(err);
+    res.status(500).json({ msg: "Error del servidor" });
+  } finally {
+    client.release();
+  }
+});
+
 router.delete("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
   try {
