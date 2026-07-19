@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Package, Save, X, Trash2 } from "lucide-react";
 import api from "../../services/api";
+import { toUpper } from "../../utils/helpers";
 
 function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes: clientesProp }) {
   const [nuevoEquipo, setNuevoEquipo] = useState({
@@ -53,7 +54,6 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes:
 
   useEffect(() => {
     if (equipoEditando) {
-      const toUpper = (v) => (v || "").toUpperCase();
       setNuevoEquipo({
         codigo: equipoEditando.codigo || "",
         equipo: toUpper(equipoEditando.equipo),

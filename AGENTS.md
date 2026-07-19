@@ -743,6 +743,103 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 
 ---
 
+## Cambios Recientes (Julio 2026)
+
+### 34. Seguridad: authMiddleware en todos los GET + adminOnly
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `backend/middleware/authMiddleware.js` — nuevo export `adminOnly`, distinción `TokenExpiredError`
+- `backend/routes/clientes.js` — GET `/` y GET `/next-codigo` ahora requieren auth
+- `backend/routes/equipos.js` — GET `/`, GET `/next-codigo`, GET `/:id` ahora requieren auth
+- `backend/routes/ordenes.js` — GET `/siguiente-numero` y GET `/verificar/:numeroOrden` ahora requieren auth
+- `backend/routes/auth.js` — `registrar`, `resetear-password`, `activar-usuario`, `eliminar-usuario`, `actualizar-usuario` ahora requieren `adminOnly`
+
+**Problema:** 6 endpoints GET exponían datos de clientes, equipos y órdenes sin autenticación. Cualquier usuario autenticado podía crear usuarios, resetear passwords y eliminar cuentas.
+
+**Solución:**
+1. Agregado `authMiddleware` a todos los GET endpoints protegidos
+2. Nuevo middleware `adminOnly` que verifica `req.user.rol === 'admin'`
+3. Agregado `adminOnly` a endpoints sensibles de gestión de usuarios
+
+### 35. Fix cambiar-password: usar req.user en vez de req.body
+**Fecha:** Julio 2026
+**Archivo modificado:** `backend/routes/auth.js`
+
+**Problema:** El endpoint `cambiar-password` tomaba `usuario` de `req.body`, permitiendo que cualquier usuario autenticado cambiara el password de CUALQUIER otro usuario.
+
+**Solución:** Cambiar `const { usuario, passwordActual, nuevaPassword } = req.body` por `const { passwordActual, nuevaPassword } = req.body; const usuario = req.user.usuario;`
+
+### 36. Fix SUCURSAL_VACIA shared object reference
+**Fecha:** Julio 2026
+**Archivo modificado:** `frontend/src/components/clientes/ClienteFormulario.jsx`
+
+**Problema:** `SUCURSAL_VACIA` era una constante usada 5 veces en un array. Todos los elementos apuntaban al mismo objeto en memoria, causando bug latente de mutación compartida.
+
+**Solución:** Reemplazado `const SUCURSAL_VACIA = {...}` por `const crearSucursalVacia = () => ({...})`. Todas las referencias ahora llaman a la función para obtener objetos frescos.
+
+### 37. Fix resetFormulario en OT que limpiaba filtros
+**Fecha:** Julio 2026
+**Archivo modificado:** `frontend/src/pages/OrdenTrabajo.jsx`
+
+**Problema:** `resetFormulario()` reseteaba `filtroNumeroOrden`, `filtroGarantia` y `filtroEstado`, borrando los filtros activos del listado al guardar o cancelar una orden.
+
+**Solución:** Eliminadas las líneas `setFiltroNumeroOrden("")`, `setFiltroGarantia("todos")` y `setFiltroEstado("todos")` de `resetFormulario()`.
+
+### 38. Fix seleccionarEquipoPorCodigo re-cargaba clientes
+**Fecha:** Julio 2026
+**Archivo modificado:** `frontend/src/pages/OrdenTrabajo.jsx`
+
+**Problema:** Al seleccionar un equipo por código, se hacía `api.get("/api/clientes")` para buscar el cliente asociado, aunque los clientes ya estaban cargados en estado local.
+
+**Solución:** Reemplazado `api.get('/api/clientes')` por `clientes.find(c => c.id === eq.cliente_id)` usando el array local.
+
+### 39. cerrarSesion extraída a utility compartida
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `frontend/src/utils/helpers.js` — nueva función `cerrarSesion()`
+- `frontend/src/pages/Home.jsx` — importa de helpers
+- `frontend/src/pages/Cotizaciones.jsx` — importa de helpers
+- `frontend/src/pages/Informes.jsx` — importa de helpers
+- `frontend/src/pages/OrdenCompra.jsx` — importa de helpers
+- `frontend/src/pages/Equipos.jsx` — importa de helpers
+- `frontend/src/pages/GestionUsuarios.jsx` — importa de helpers
+- `frontend/src/pages/OrdenTrabajo.jsx` — importa de helpers
+
+**Problema:** `cerrarSesion()` estaba duplicada en 8 páginas con código idéntico.
+
+**Solución:** Función centralizada en `helpers.js` usando `window.location.href = "/login"` en vez de `navigate()`.
+
+### 40. AbortController en useEffects con fetch
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `frontend/src/pages/Clientes.jsx`
+- `frontend/src/pages/Equipos.jsx`
+- `frontend/src/pages/OrdenTrabajo.jsx`
+
+**Problema:** Los useEffects que cargaban datos no tenían cleanup, causando memory leaks si el componente se desmontaba antes de que completaran las llamadas API.
+
+**Solución:** Agregado `AbortController` al useEffect principal de cada página. Los fetch functions ahora aceptan `signal` y lo pasan a `api.get()`. El cleanup aborta las llamadas pendientes.
+
+### 41. CSS duplicado limpiado
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `frontend/src/components/clientes/clientes-componentes.css` — eliminado `.btn-nuevo-cliente` duplicado
+- `frontend/src/pages/Equipos.css` — eliminado `.btn-nuevo-cliente` duplicado
+
+**Problema:** `.btn-nuevo-cliente` estaba definido 3 veces (index.css, clientes-componentes.css, Equip.css) con reglas idénticas.
+
+**Solución:** Mantenida solo la definición en `index.css`, eliminadas las duplicadas.
+
+### 42. toUpper unificado en EquipoFormulario
+**Fecha:** Julio 2026
+**Archivo modificado:** `frontend/src/components/equipos/EquipoFormulario.jsx`
+
+**Problema:** `EquipoFormulario.jsx` definía una función local `toUpper` en vez de importar la compartida de `utils/helpers.js`.
+
+**Solución:** Agregado import de `toUpper` desde `../../utils/helpers` y eliminada la definición local.
+
+---
+
 ## Historial de Versiones
 
 | Versión | Fecha | Cambios |
@@ -761,6 +858,7 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.11 | Julio 2026 | Fix limpieza de datos al cambiar cliente en OT, botón "+ Nuevo" visible solo cuando no tiene cliente/equipo, rate limiter subido a 500 |
 | 1.12 | Julio 2026 | Filtros separados en Equipos (Código, Cliente, Modelo, Serie), botón Limpiar azul always visible, fix alineación filtros OT, filtro N° de Orden con label y mismo tamaño que los demás |
 | 1.13 | Julio 2026 | Badge "Equipo desactivado" en OT, badge "Cliente desactivado" (antes "inactivo"), fix campo Matriz/Sucursal no se cargaba al editar cliente, columna email agregada a tabla clientes |
+| 1.14 | Julio 2026 | Seguridad: authMiddleware en todos los GET, adminOnly en gestión usuarios, fix cambiar-password. Bugs: SUCURSAL_VACIA compartida, resetFormulario limpiaba filtros, seleccionarEquipoPorCodigo re-cargaba clientes. Mejoras: cerrarSesion compartida, AbortController en fetch, CSS duplicado limpiado, toUpper unificado en helpers |
 
 ---
 
@@ -827,6 +925,13 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.5 | Julio 2026 | Campos actividad y observaciones en OT, columna y filtro de estado |
 | 1.6 | Julio 2026 | Mayúsculas automáticas en formularios (Clientes, Equipos, OT), limpieza de código muerto |
 | 1.7 | Julio 2026 | Vista expandida de cliente compacta, teléfono visible en dropdown OT |
+| 1.8 | Julio 2026 | Fix cascade actividades/observaciones en OT, fix doble confirm eliminar OT |
+| 1.9 | Julio 2026 | Mostrar actividad/observaciones en Equipos y Clientes, fix INSERT equipos, Contador Páginas OUT en OT, keepalive MySQL |
+| 1.10 | Julio 2026 | Badges "Cliente inactivo" y "Equipo asignado a otro cliente" en formulario OT |
+| 1.11 | Julio 2026 | Fix limpieza de datos al cambiar cliente en OT, botón "+ Nuevo" visible solo cuando no tiene cliente/equipo, rate limiter subido a 500 |
+| 1.12 | Julio 2026 | Filtros separados en Equipos (Código, Cliente, Modelo, Serie), botón Limpiar azul always visible, fix alineación filtros OT, filtro N° de Orden con label y mismo tamaño que los demás |
+| 1.13 | Julio 2026 | Badge "Equipo desactivado" en OT, badge "Cliente desactivado" (antes "inactivo"), fix campo Matriz/Sucursal no se cargaba al editar cliente, columna email agregada a tabla clientes |
+| 1.14 | Julio 2026 | Seguridad: authMiddleware en todos los GET, adminOnly en gestión usuarios, fix cambiar-password. Bugs: SUCURSAL_VACIA compartida, resetFormulario limpiaba filtros, seleccionarEquipoPorCodigo re-cargaba clientes. Mejoras: cerrarSesion compartida, AbortController en fetch, CSS duplicado limpiado, toUpper unificado en helpers |
 
 ## Cambios Recientes (20 Mayo 2026)
 

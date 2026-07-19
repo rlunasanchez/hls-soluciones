@@ -1,13 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { ShoppingCart, Package, Users, UserCog, LogOut, FileSpreadsheet, ClipboardList, FileText, Home } from "lucide-react";
+import { cerrarSesion } from "../utils/helpers";
 
 function OrdenCompra() {
   const navigate = useNavigate();
-
-  const cerrarSesion = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
 
   return (
     <div className="container" style={{ background: 'var(--bg)', minHeight: '100vh' }}>

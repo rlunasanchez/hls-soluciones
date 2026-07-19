@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Save, X, Trash2 } from "lucide-react";
 import { toUpper, validarRUT } from "../../utils/helpers";
 
-const SUCURSAL_VACIA = { tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" };
+const crearSucursalVacia = () => ({ tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" });
 
 const ESTADO_INICIAL_CLIENTE = {
   razon_social: "", giro: "", rut: "", direccion: "", ciudad: "",
@@ -13,7 +13,7 @@ const ESTADO_INICIAL_CLIENTE = {
 function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, titulo }) {
   const [nuevoCliente, setNuevoCliente] = useState(ESTADO_INICIAL_CLIENTE);
   const [sucursales, setSucursales] = useState([
-    SUCURSAL_VACIA, SUCURSAL_VACIA, SUCURSAL_VACIA, SUCURSAL_VACIA, SUCURSAL_VACIA
+    crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia()
   ]);
   const [sucursalesVisibles, setSucursalesVisibles] = useState(1);
   const [rutError, setRutError] = useState("");
@@ -21,7 +21,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
   useEffect(() => {
     if (clienteEditando) {
       setSucursales([
-        SUCURSAL_VACIA, SUCURSAL_VACIA, SUCURSAL_VACIA, SUCURSAL_VACIA, SUCURSAL_VACIA
+        crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia()
       ]);
       let dirs = [];
       if (clienteEditando.direcciones) {
@@ -33,7 +33,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
           };
         }).filter((d) => d.direccion);
         if (dirs.length > 0) {
-          while (dirs.length < 5) dirs.push(SUCURSAL_VACIA);
+          while (dirs.length < 5) dirs.push(crearSucursalVacia());
           setSucursales(dirs);
         }
       }
@@ -78,7 +78,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
   const resetFormulario = () => {
     setNuevoCliente(ESTADO_INICIAL_CLIENTE);
     setSucursales([
-      SUCURSAL_VACIA, SUCURSAL_VACIA, SUCURSAL_VACIA, SUCURSAL_VACIA, SUCURSAL_VACIA
+      crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia()
     ]);
     setSucursalesVisibles(1);
     setRutError("");
@@ -273,7 +273,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                   <button type="button" className="cf-btn-d" onClick={() => {
                     if (!window.confirm(`¿Eliminar sucursal ${idx + 1}?`)) return;
                     const nuevas = sucursales.filter((_, i) => i !== idx);
-                    while (nuevas.length < 5) nuevas.push(SUCURSAL_VACIA);
+                    while (nuevas.length < 5) nuevas.push(crearSucursalVacia());
                     setSucursales(nuevas);
                     setSucursalesVisibles(Math.max(1, sucursalesVisibles - 1));
                   }}>
