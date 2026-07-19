@@ -133,6 +133,11 @@ function Clientes() {
     }
   };
 
+  const desactivarSinReasignar = () => {
+    setModalReasignar(null);
+    fetchClientes();
+  };
+
   if (mostrarFormulario) {
     return (
       <div className="container">
@@ -204,6 +209,7 @@ function Clientes() {
           clientes={clientes}
           clienteId={modalReasignar.clienteId}
           onConfirm={confirmarReasignacion}
+          onDesactivar={desactivarSinReasignar}
           onCancel={() => setModalReasignar(null)}
         />
       )}

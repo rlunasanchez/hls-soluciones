@@ -2,7 +2,7 @@ import { useState } from "react";
 import { AlertTriangle } from "lucide-react";
 import api from "../../services/api";
 
-function ModalReasignarEquipos({ equipos, clientes, clienteId, onConfirm, onCancel }) {
+function ModalReasignarEquipos({ equipos, clientes, clienteId, onConfirm, onDesactivar, onCancel }) {
   const [asignaciones, setAsignaciones] = useState(
     equipos.reduce((acc, eq) => ({ ...acc, [eq.id]: "" }), {})
   );
@@ -27,6 +27,19 @@ function ModalReasignarEquipos({ equipos, clientes, clienteId, onConfirm, onCanc
       onConfirm();
     } catch (err) {
       alert("Error al reasignar equipos");
+    } finally {
+      setProcesando(false);
+    }
+  };
+
+  const handleSoloDesactivar = async () => {
+    if (!window.confirm("El cliente será desactivado y sus equipos quedarán sin cliente asignado. Podrás reasignarlos después desde el módulo Equipos. ¿Continuar?")) return;
+    setProcesando(true);
+    try {
+      await api.put(`/api/clientes/${clienteId}/desactivar`);
+      onDesactivar();
+    } catch (err) {
+      alert("Error al desactivar cliente");
     } finally {
       setProcesando(false);
     }
@@ -59,7 +72,7 @@ function ModalReasignarEquipos({ equipos, clientes, clienteId, onConfirm, onCanc
               Este cliente tiene {equipos.length} equipo{equipos.length > 1 ? "s" : ""}
             </h3>
             <p style={{ margin: 0, fontSize: "0.8rem", color: "var(--text-muted)" }}>
-              Asigná cada equipo a otro cliente antes de eliminar
+              Reasigná cada equipo a otro cliente, o desactivá el cliente y dejalos sin asignar
             </p>
           </div>
         </div>
@@ -90,7 +103,7 @@ function ModalReasignarEquipos({ equipos, clientes, clienteId, onConfirm, onCanc
                   fontSize: "0.8rem", background: "white",
                 }}
               >
-                <option value="">Seleccionar cliente...</option>
+                <option value="">Sin asignar</option>
                 {clientesDisponibles.map((c) => (
                   <option key={c.id} value={c.id}>{c.razon_social}</option>
                 ))}
@@ -99,7 +112,7 @@ function ModalReasignarEquipos({ equipos, clientes, clienteId, onConfirm, onCanc
           ))}
         </div>
 
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", flexWrap: "wrap" }}>
           <button
             type="button" onClick={onCancel}
             style={{
@@ -108,6 +121,18 @@ function ModalReasignarEquipos({ equipos, clientes, clienteId, onConfirm, onCanc
             }}
           >
             Cancelar
+          </button>
+          <button
+            type="button" onClick={handleSoloDesactivar}
+            disabled={procesando}
+            style={{
+              padding: "8px 16px", border: "none", borderRadius: "6px",
+              background: procesando ? "#ccc" : "#DC2626",
+              color: "white", cursor: procesando ? "not-allowed" : "pointer",
+              fontWeight: 500, fontSize: "0.85rem",
+            }}
+          >
+            {procesando ? "Procesando..." : "Solo Desactivar"}
           </button>
           <button
             type="button" onClick={handleReasignar}

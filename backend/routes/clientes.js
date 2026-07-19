@@ -134,6 +134,24 @@ router.get("/:id/equipos", authMiddleware, async (req, res) => {
   }
 });
 
+router.put("/:id/desactivar", authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    await connection.query("UPDATE equipos SET cliente_id = NULL WHERE cliente_id = ?", [id]);
+    await connection.query("UPDATE clientes SET activo = 0 WHERE id = ?", [id]);
+    await connection.commit();
+    res.json({ msg: "Cliente desactivado y equipos desvinculados" });
+  } catch (err) {
+    await connection.rollback();
+    console.error(err);
+    res.status(500).json({ msg: "Error del servidor" });
+  } finally {
+    connection.release();
+  }
+});
+
 router.delete("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
   try {
