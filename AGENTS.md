@@ -838,6 +838,29 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 
 **Solución:** Agregado import de `toUpper` desde `../../utils/helpers` y eliminada la definición local.
 
+### 43. Opción "Solo Desactivar" en eliminación de clientes con equipos
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `backend/routes/clientes.js` (ambas ramas)
+- `frontend/src/components/clientes/ModalReasignarEquipos.jsx`
+- `frontend/src/pages/Clientes.jsx`
+
+**Problema:** Al intentar eliminar un cliente con equipos asociados, solo se ofrecía la opción de reasignar cada equipo a otro cliente. No había forma de desactivar el cliente y dejar los equipos sin dueño (por si se van a reasignar después desde el módulo Equipos).
+
+**Solución:**
+1. **Backend**: Nuevo endpoint `PUT /api/clientes/:id/desactivar` — en una transacción, pone `cliente_id = NULL` en todos los equipos del cliente y desactiva el cliente (`activo = 0`)
+2. **Frontend**: Botón rojo "Solo Desactivar" en el modal `ModalReasignarEquipos`, con doble confirmación (prompt + confirm)
+3. **Clientes.jsx**: Nueva función `desactivarSinReasignar()` que cierra el modal y refresca la lista
+
+**Flujo de eliminación de cliente:**
+- Sin equipos → se desactiva directo
+- Con equipos → modal con 3 opciones:
+  - **Reasignar y Eliminar**: asigna equipos a otro cliente y elimina el registro
+  - **Solo Desactivar**: desvincula equipos (quedan sin cliente) y desactiva el cliente
+  - **Cancelar**: no hace nada
+- Equipos sin cliente (`cliente_id = NULL`) se muestran con `-` en tabla/tarjetas del módulo Equipos
+- Se pueden reasignar después desde el formulario de edición de cada equipo (`PUT /:id/reasignar`)
+
 ---
 
 ## Historial de Versiones
@@ -859,6 +882,7 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.12 | Julio 2026 | Filtros separados en Equipos (Código, Cliente, Modelo, Serie), botón Limpiar azul always visible, fix alineación filtros OT, filtro N° de Orden con label y mismo tamaño que los demás |
 | 1.13 | Julio 2026 | Badge "Equipo desactivado" en OT, badge "Cliente desactivado" (antes "inactivo"), fix campo Matriz/Sucursal no se cargaba al editar cliente, columna email agregada a tabla clientes |
 | 1.14 | Julio 2026 | Seguridad: authMiddleware en todos los GET, adminOnly en gestión usuarios, fix cambiar-password. Bugs: SUCURSAL_VACIA compartida, resetFormulario limpiaba filtros, seleccionarEquipoPorCodigo re-cargaba clientes. Mejoras: cerrarSesion compartida, AbortController en fetch, CSS duplicado limpiado, toUpper unificado en helpers |
+| 1.15 | Julio 2026 | Opción "Solo Desactivar" en eliminación de clientes con equipos (endpoint desactivar, modal con 3 opciones) |
 
 ---
 
@@ -932,6 +956,7 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.12 | Julio 2026 | Filtros separados en Equipos (Código, Cliente, Modelo, Serie), botón Limpiar azul always visible, fix alineación filtros OT, filtro N° de Orden con label y mismo tamaño que los demás |
 | 1.13 | Julio 2026 | Badge "Equipo desactivado" en OT, badge "Cliente desactivado" (antes "inactivo"), fix campo Matriz/Sucursal no se cargaba al editar cliente, columna email agregada a tabla clientes |
 | 1.14 | Julio 2026 | Seguridad: authMiddleware en todos los GET, adminOnly en gestión usuarios, fix cambiar-password. Bugs: SUCURSAL_VACIA compartida, resetFormulario limpiaba filtros, seleccionarEquipoPorCodigo re-cargaba clientes. Mejoras: cerrarSesion compartida, AbortController en fetch, CSS duplicado limpiado, toUpper unificado en helpers |
+| 1.15 | Julio 2026 | Opción "Solo Desactivar" en eliminación de clientes con equipos (endpoint desactivar, modal con 3 opciones) |
 
 ## Cambios Recientes (20 Mayo 2026)
 
