@@ -951,6 +951,7 @@ table tr:last-child td {
     flex-direction: column;
     gap: 4px;
     width: 100%;
+    align-items: stretch;
   }
   
   .table-btn {
@@ -959,6 +960,8 @@ table tr:last-child td {
     justify-content: center;
     align-items: center;
     padding: 8px;
+    text-align: center;
+    white-space: nowrap;
   }
 }
 
