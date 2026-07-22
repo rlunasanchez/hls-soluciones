@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { ClipboardList, FileSpreadsheet, Edit, Trash2 } from "lucide-react";
+import { ClipboardList, FileSpreadsheet, Edit, Trash2, Eye } from "lucide-react";
 
-function ClienteLista({ clientes, onEditar, onEliminar }) {
+function ClienteLista({ clientes, onVer, onEditar, onEliminar }) {
   const navigate = useNavigate();
 
   return (
@@ -50,6 +50,13 @@ function ClienteLista({ clientes, onEditar, onEliminar }) {
                       }
                     >
                       <FileSpreadsheet size={14} /> Cotización
+                    </button>
+                    <button
+                      className="table-btn"
+                      style={{ background: '#0D9488', color: 'white' }}
+                      onClick={() => onVer(c)}
+                    >
+                      <Eye size={14} /> Ver
                     </button>
                     <button
                       className="table-btn edit-btn"
@@ -112,6 +119,9 @@ function ClienteLista({ clientes, onEditar, onEliminar }) {
                 }
               >
                 <FileSpreadsheet size={14} /> Cotización
+              </button>
+              <button className="table-btn" style={{ flex: 1, background: '#0D9488', color: 'white' }} onClick={() => onVer(c)}>
+                <Eye size={14} /> Ver
               </button>
               <button className="table-btn edit-btn" style={{ flex: 1 }} onClick={() => onEditar(c)}>
                 <Edit size={14} /> Editar

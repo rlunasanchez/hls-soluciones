@@ -24,6 +24,7 @@ function Clientes() {
   const clientesPorPagina = 4;
   const [ordenesCliente, setOrdenesCliente] = useState([]);
   const [modalReasignar, setModalReasignar] = useState(null);
+  const [soloLectura, setSoloLectura] = useState(false);
 
   const ordenesPorCliente = {};
   ordenesCliente.forEach((ot) => {
@@ -95,6 +96,7 @@ function Clientes() {
       }
       resetFormulario();
       setClienteEditando(null);
+      setSoloLectura(false);
       setMostrarFormulario(false);
       fetchClientes();
     } catch (err) {
@@ -104,6 +106,13 @@ function Clientes() {
 
   const editarCliente = (c) => {
     setClienteEditando(c);
+    setSoloLectura(false);
+    setMostrarFormulario(true);
+  };
+
+  const verCliente = (c) => {
+    setClienteEditando(c);
+    setSoloLectura(true);
     setMostrarFormulario(true);
   };
 
@@ -145,7 +154,8 @@ function Clientes() {
           clienteEditando={clienteEditando}
           clientes={clientes}
           onSave={guardarCliente}
-          onCancel={() => { setClienteEditando(null); setMostrarFormulario(false); }}
+          onCancel={() => { setClienteEditando(null); setSoloLectura(false); setMostrarFormulario(false); }}
+          readOnly={soloLectura}
         />
       </div>
     );
@@ -164,7 +174,7 @@ function Clientes() {
       />
 
       <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 16 }}>
-        <button className="btn-nuevo-cliente" onClick={() => { setClienteEditando(null); setMostrarFormulario(true); }}>
+        <button className="btn-nuevo-cliente" onClick={() => { setClienteEditando(null); setSoloLectura(false); setMostrarFormulario(true); }}>
           <Plus size={16} /> Nuevo Cliente
         </button>
       </div>
@@ -189,6 +199,7 @@ function Clientes() {
           clientes={clientesPagina}
           onNuevaOT={(c) => navigate("/orden-trabajo", { state: { cliente: c } })}
           onCotizacion={(c) => navigate("/cotizaciones", { state: { cliente: c } })}
+          onVer={verCliente}
           onEditar={editarCliente}
           onEliminar={eliminarCliente}
         />
