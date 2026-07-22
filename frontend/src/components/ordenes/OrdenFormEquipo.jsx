@@ -21,7 +21,8 @@ function OrdenFormEquipo({
   clienteSeleccionado,
   fromClientes = false,
   esEdicion = false,
-  equipoOtroCliente = false
+  equipoOtroCliente = false,
+  equipoNoExiste = false
 }) {
   const [mostrarModalEquipo, setMostrarModalEquipo] = useState(false);
   const [nuevoEquipo, setNuevoEquipo] = useState({
@@ -101,7 +102,16 @@ function OrdenFormEquipo({
               ⚠ Equipo asignado a otro cliente: {equipoSeleccionado.equipo} - {equipoSeleccionado.marca} {equipoSeleccionado.modelo}
             </div>
           )}
-          {!equipoOtroCliente && equipoSeleccionado && (
+          {equipoNoExiste && (
+            <div style={{
+              background: '#FEE2E2', padding: '6px 12px',
+              borderRadius: '6px', fontSize: '0.85rem', color: '#DC2626',
+              display: 'flex', alignItems: 'center', gap: '6px'
+            }}>
+              ⚠ Equipo desactivado — el equipo asociado fue desactivado del sistema
+            </div>
+          )}
+          {!equipoOtroCliente && !equipoNoExiste && equipoSeleccionado && (
             <div style={{
               background: 'var(--success-light)', padding: '6px 12px',
               borderRadius: '6px', fontSize: '0.85rem', color: 'var(--success)',

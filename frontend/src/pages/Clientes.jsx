@@ -33,21 +33,21 @@ function Clientes() {
 
   const { usuarioActual } = parseToken();
 
-  const fetchClientes = async () => {
+  const fetchClientes = async (signal) => {
     try {
-      const res = await api.get("/api/clientes");
+      const res = await api.get("/api/clientes", { signal });
       setClientes(res.data);
     } catch (err) {
-      console.error("Error al cargar clientes:", err);
+      if (err.name !== "CanceledError") console.error("Error al cargar clientes:", err);
     }
   };
 
-  const fetchOrdenes = async () => {
+  const fetchOrdenes = async (signal) => {
     try {
-      const res = await api.get("/api/ordenes?page=1&limit=10000");
+      const res = await api.get("/api/ordenes?page=1&limit=10000", { signal });
       setOrdenesCliente(res.data.ordenes || []);
     } catch (err) {
-      console.error("Error al cargar órdenes:", err);
+      if (err.name !== "CanceledError") console.error("Error al cargar órdenes:", err);
     }
   };
 
@@ -62,8 +62,10 @@ function Clientes() {
   };
 
   useEffect(() => {
-    fetchClientes();
-    fetchOrdenes();
+    const controller = new AbortController();
+    fetchClientes(controller.signal);
+    fetchOrdenes(controller.signal);
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
@@ -129,6 +131,11 @@ function Clientes() {
     } catch (err) {
       alert("Error al eliminar cliente");
     }
+  };
+
+  const desactivarSinReasignar = () => {
+    setModalReasignar(null);
+    fetchClientes();
   };
 
   if (mostrarFormulario) {
@@ -202,6 +209,7 @@ function Clientes() {
           clientes={clientes}
           clienteId={modalReasignar.clienteId}
           onConfirm={confirmarReasignacion}
+          onDesactivar={desactivarSinReasignar}
           onCancel={() => setModalReasignar(null)}
         />
       )}

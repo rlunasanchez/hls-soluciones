@@ -26,27 +26,6 @@
   }
 }
 
-.btn-nuevo-cliente {
-  background: var(--primary);
-  color: white !important;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 0.8rem;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  transition: all 0.2s;
-  white-space: nowrap;
-}
-
-.btn-nuevo-cliente:hover {
-  background: #1d4ed8;
-  color: white !important;
-}
-
 .filtro-grupo label {
   display: block;
   margin-bottom: 4px;

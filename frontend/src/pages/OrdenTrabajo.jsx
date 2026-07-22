@@ -5,7 +5,7 @@ import {
   Save, X, Wrench
 } from "lucide-react";
 import api from "../services/api";
-import { toUpper } from "../utils/helpers";
+import { toUpper, cerrarSesion } from "../utils/helpers";
 import './OrdenTrabajo.css';
 import "../components/ordenes/ordenes-componentes.css";
 import HeaderOrdenTrabajo from "../components/ordenes/HeaderOrdenTrabajo";
@@ -49,6 +49,7 @@ function OrdenTrabajo() {
   const [equiposCodigoSugeridos, setEquiposCodigoSugeridos] = useState([]);
   const [clienteInactivo, setClienteInactivo] = useState(false);
   const [equipoOtroCliente, setEquipoOtroCliente] = useState(false);
+  const [equipoNoExiste, setEquipoNoExiste] = useState(false);
   
   // Refs para detectar clics fuera de los dropdowns
   const equipoDropdownRef = useRef(null);
@@ -100,9 +101,11 @@ function OrdenTrabajo() {
 
   // Cargar clientes, equipos y órdenes al montar el componente
   useEffect(() => {
-    fetchClientes();
-    fetchEquipos();
-    fetchOrdenes();
+    const controller = new AbortController();
+    fetchClientes(controller.signal);
+    fetchEquipos(controller.signal);
+    fetchOrdenes(controller.signal);
+    return () => controller.abort();
   }, []);
 
   // Recibir cliente u orden desde Clientes
@@ -133,6 +136,7 @@ function OrdenTrabajo() {
         setClienteSeleccionado(clienteFromNav);
         setClienteInactivo(false);
         setEquipoOtroCliente(false);
+        setEquipoNoExiste(false);
         setEquipoSeleccionado(null);
         setBusquedaCliente((clienteFromNav.razon_social || "").toUpperCase());
         setBusquedaSerie("");
@@ -207,6 +211,7 @@ function OrdenTrabajo() {
     setEquipoSeleccionado(null);
     setClienteInactivo(false);
     setEquipoOtroCliente(false);
+    setEquipoNoExiste(false);
     setBusquedaCliente("");
     setBusquedaSerie("");
     setBusquedaCodigo("");
@@ -268,14 +273,14 @@ function OrdenTrabajo() {
     };
   }, []);
 
-  const fetchOrdenes = async () => {
+  const fetchOrdenes = async (signal) => {
     setLoading(true);
     try {
-      const res = await api.get("/api/ordenes?page=1&limit=10000");
+      const res = await api.get("/api/ordenes?page=1&limit=10000", { signal });
       setOrdenes(res.data.ordenes);
       setPaginaActual(1);
     } catch (err) {
-      console.error("Error al cargar órdenes:", err);
+      if (err.name !== "CanceledError") console.error("Error al cargar órdenes:", err);
     } finally {
       setLoading(false);
     }
@@ -337,6 +342,7 @@ function OrdenTrabajo() {
     });
 
     // Buscar equipo asociado - primero intentar con datos frescos del API
+    setEquipoNoExiste(false);
     const cargarEquipoFresco = async () => {
       try {
         if (orden.equipo_id) {
@@ -344,6 +350,7 @@ function OrdenTrabajo() {
           const eq = res.data;
           setEquipoSeleccionado(eq);
           setEquipoOtroCliente(orden.cliente_id && eq.cliente_id && eq.cliente_id !== orden.cliente_id);
+          setEquipoNoExiste(false);
           setBusquedaCodigo(eq.codigo || "");
           setBusquedaSerie((eq.serie || "").toUpperCase());
           setNuevaOrden(prev => ({
@@ -373,6 +380,7 @@ function OrdenTrabajo() {
         }
       } catch (err) {
         console.error("Error al cargar equipo fresco:", err);
+        setEquipoNoExiste(true);
       }
       // Fallback: buscar en la lista local
       const eq = equipos.find(e => 
@@ -382,8 +390,11 @@ function OrdenTrabajo() {
       if (eq) {
         setEquipoSeleccionado(eq);
         setEquipoOtroCliente(orden.cliente_id && eq.cliente_id && eq.cliente_id !== orden.cliente_id);
+        setEquipoNoExiste(false);
         setBusquedaCodigo(eq.codigo || "");
         setBusquedaSerie((eq.serie || "").toUpperCase());
+      } else if (orden.equipo_id) {
+        setEquipoNoExiste(true);
       }
     };
     cargarEquipoFresco();
@@ -428,21 +439,21 @@ function OrdenTrabajo() {
     }
   };
 
-  const fetchClientes = async () => {
+  const fetchClientes = async (signal) => {
     try {
-      const res = await api.get("/api/clientes");
+      const res = await api.get("/api/clientes", { signal });
       setClientes(res.data);
     } catch (err) {
-      console.error("Error al cargar clientes:", err);
+      if (err.name !== "CanceledError") console.error("Error al cargar clientes:", err);
     }
   };
 
-  const fetchEquipos = async () => {
+  const fetchEquipos = async (signal) => {
     try {
-      const res = await api.get("/api/equipos");
+      const res = await api.get("/api/equipos", { signal });
       setEquipos(res.data);
     } catch (err) {
-      console.error("Error al cargar equipos:", err);
+      if (err.name !== "CanceledError") console.error("Error al cargar equipos:", err);
     }
   };
 
@@ -452,6 +463,7 @@ function OrdenTrabajo() {
     setClienteInactivo(false);
     setEquipoSeleccionado(null);
     setEquipoOtroCliente(false);
+    setEquipoNoExiste(false);
     setBusquedaCodigo("");
     setBusquedaSerie("");
     setNuevaOrden(prev => ({
@@ -479,6 +491,7 @@ function OrdenTrabajo() {
   const seleccionarEquipo = (equipo) => {
     setEquipoSeleccionado(equipo);
     setEquipoOtroCliente(clienteSeleccionado?.id && equipo.cliente_id && equipo.cliente_id !== clienteSeleccionado.id);
+    setEquipoNoExiste(false);
     setNuevaOrden(prev => ({
       ...prev,
       equipo: toUpper(equipo.equipo),
@@ -515,6 +528,7 @@ function OrdenTrabajo() {
       if (!eq) return;
       setEquipoSeleccionado(eq);
       setEquipoOtroCliente(clienteSeleccionado?.id && eq.cliente_id && eq.cliente_id !== clienteSeleccionado.id);
+      setEquipoNoExiste(false);
       setMostrarDropdownCodigo(false);
       setNuevaOrden(prev => ({
         ...prev,
@@ -540,10 +554,9 @@ function OrdenTrabajo() {
       setBusquedaSerie((eq.serie || "").toUpperCase());
       setBusquedaCodigo(codigo);
 
-      // Si el equipo tiene cliente asociado, cargarlo
+      // Si el equipo tiene cliente asociado, buscarlo en los datos locales
       if (eq.cliente_id) {
-        const resC = await api.get(`/api/clientes`);
-        const cliente = resC.data.find(c => c.id === eq.cliente_id);
+        const cliente = clientes.find(c => c.id === eq.cliente_id);
         if (cliente) {
           setClienteSeleccionado(cliente);
           setBusquedaCliente(toUpper(cliente.razon_social));
@@ -589,11 +602,6 @@ function OrdenTrabajo() {
     } catch (err) {
       console.error("Error al verificar número de orden:", err);
     }
-  };
-
-  const cerrarSesion = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
   };
 
   const guardarOrden = async (e) => {
@@ -694,9 +702,6 @@ function OrdenTrabajo() {
     setEquipoOtroCliente(false);
     setEditingId(null);
     setErrorNumeroOrden("");
-    setFiltroNumeroOrden("");
-    setFiltroGarantia("todos");
-    setFiltroEstado("todos");
   };
   // Funciones de navegación eliminadas (accesos desde el menú)
 
@@ -803,6 +808,7 @@ function OrdenTrabajo() {
                 fromClientes={fromClientes}
                 esEdicion={!!editingId}
                 equipoOtroCliente={equipoOtroCliente}
+                equipoNoExiste={equipoNoExiste}
               >
                 <OrdenFormInsumos
                   insumos={insumos}

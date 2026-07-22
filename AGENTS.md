@@ -698,6 +698,171 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 
 ---
 
+## Cambios Recientes (Julio 2026)
+
+### 30. Badge "Equipo desactivado" en Orden de Trabajo
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `frontend/src/pages/OrdenTrabajo.jsx`
+- `frontend/src/components/ordenes/OrdenFormEquipo.jsx`
+
+**Problema:** Al editar una OT que tenía un equipo desactivado (activo=0), no se mostraba ninguna advertencia. El badge "Cliente desactivado" ya existía para clientes, pero no había equivalente para equipos.
+
+**Cambios:**
+- Nuevo estado `equipoNoExiste` en `OrdenTrabajo.jsx`
+- Detección automática: si `equipo_id` existe pero el API retorna 404 → `equipoNoExiste = true`
+- Fallback: si no se encuentra en la lista local y tiene `equipo_id` → `equipoNoExiste = true`
+- Badge rojo **"⚠ Equipo desactivado — el equipo asociado fue desactivado del sistema"** en `OrdenFormEquipo.jsx`
+- Badge éxito solo se muestra cuando `equipoOtroCliente` y `equipoNoExiste` son ambos `false`
+- Reset automático al seleccionar equipo, cambiar cliente, o abrir nueva orden
+
+### 31. Fix campo Matriz/Sucursal no se cargaba al editar cliente
+**Fecha:** Julio 2026
+**Archivo modificado:** `frontend/src/components/clientes/ClienteFormulario.jsx`
+
+**Problema:** Al editar un cliente con sucursales guardadas, el campo "Tipo" (Matriz/Sucursal) aparecía vacío en el select.
+
+**Causa:** `toUpper()` convertía "Matriz" a "MATRIZ", pero los `<option value="Matriz">` del select mantenían el valor original. No coincidían, así que el select mostraba "Seleccionar".
+
+**Solución:** Quitar `toUpper()` de `tipo_direccion` en el parseo de direcciones (línea 31).
+
+### 32. Badge "Cliente desactivado" (antes "inactivo")
+**Fecha:** Julio 2026
+**Archivo modificado:** `frontend/src/components/ordenes/OrdenFormCliente.jsx`
+
+**Cambio:** Texto del badge de "⚠ Cliente inactivo" → "⚠ Cliente desactivado" para ser consistente con el soft delete (activo=0, no se borra de la DB).
+
+### 33. Columna email agregada a tabla clientes
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `backend/routes/clientes.js` (POST y PUT incluyen `email`)
+- `frontend/src/components/clientes/ClienteFormulario.jsx` (campo email en formulario)
+- **Migración SQL:** `ALTER TABLE clientes ADD COLUMN email VARCHAR(255) AFTER telefono;`
+
+**Problema:** El código del backend incluía `email` en INSERT/UPDATE pero la tabla no tenía esa columna, causando error `ER_BAD_FIELD_ERROR`.
+
+---
+
+## Cambios Recientes (Julio 2026)
+
+### 34. Seguridad: authMiddleware en todos los GET + adminOnly
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `backend/middleware/authMiddleware.js` — nuevo export `adminOnly`, distinción `TokenExpiredError`
+- `backend/routes/clientes.js` — GET `/` y GET `/next-codigo` ahora requieren auth
+- `backend/routes/equipos.js` — GET `/`, GET `/next-codigo`, GET `/:id` ahora requieren auth
+- `backend/routes/ordenes.js` — GET `/siguiente-numero` y GET `/verificar/:numeroOrden` ahora requieren auth
+- `backend/routes/auth.js` — `registrar`, `resetear-password`, `activar-usuario`, `eliminar-usuario`, `actualizar-usuario` ahora requieren `adminOnly`
+
+**Problema:** 6 endpoints GET exponían datos de clientes, equipos y órdenes sin autenticación. Cualquier usuario autenticado podía crear usuarios, resetear passwords y eliminar cuentas.
+
+**Solución:**
+1. Agregado `authMiddleware` a todos los GET endpoints protegidos
+2. Nuevo middleware `adminOnly` que verifica `req.user.rol === 'admin'`
+3. Agregado `adminOnly` a endpoints sensibles de gestión de usuarios
+
+### 35. Fix cambiar-password: usar req.user en vez de req.body
+**Fecha:** Julio 2026
+**Archivo modificado:** `backend/routes/auth.js`
+
+**Problema:** El endpoint `cambiar-password` tomaba `usuario` de `req.body`, permitiendo que cualquier usuario autenticado cambiara el password de CUALQUIER otro usuario.
+
+**Solución:** Cambiar `const { usuario, passwordActual, nuevaPassword } = req.body` por `const { passwordActual, nuevaPassword } = req.body; const usuario = req.user.usuario;`
+
+### 36. Fix SUCURSAL_VACIA shared object reference
+**Fecha:** Julio 2026
+**Archivo modificado:** `frontend/src/components/clientes/ClienteFormulario.jsx`
+
+**Problema:** `SUCURSAL_VACIA` era una constante usada 5 veces en un array. Todos los elementos apuntaban al mismo objeto en memoria, causando bug latente de mutación compartida.
+
+**Solución:** Reemplazado `const SUCURSAL_VACIA = {...}` por `const crearSucursalVacia = () => ({...})`. Todas las referencias ahora llaman a la función para obtener objetos frescos.
+
+### 37. Fix resetFormulario en OT que limpiaba filtros
+**Fecha:** Julio 2026
+**Archivo modificado:** `frontend/src/pages/OrdenTrabajo.jsx`
+
+**Problema:** `resetFormulario()` reseteaba `filtroNumeroOrden`, `filtroGarantia` y `filtroEstado`, borrando los filtros activos del listado al guardar o cancelar una orden.
+
+**Solución:** Eliminadas las líneas `setFiltroNumeroOrden("")`, `setFiltroGarantia("todos")` y `setFiltroEstado("todos")` de `resetFormulario()`.
+
+### 38. Fix seleccionarEquipoPorCodigo re-cargaba clientes
+**Fecha:** Julio 2026
+**Archivo modificado:** `frontend/src/pages/OrdenTrabajo.jsx`
+
+**Problema:** Al seleccionar un equipo por código, se hacía `api.get("/api/clientes")` para buscar el cliente asociado, aunque los clientes ya estaban cargados en estado local.
+
+**Solución:** Reemplazado `api.get('/api/clientes')` por `clientes.find(c => c.id === eq.cliente_id)` usando el array local.
+
+### 39. cerrarSesion extraída a utility compartida
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `frontend/src/utils/helpers.js` — nueva función `cerrarSesion()`
+- `frontend/src/pages/Home.jsx` — importa de helpers
+- `frontend/src/pages/Cotizaciones.jsx` — importa de helpers
+- `frontend/src/pages/Informes.jsx` — importa de helpers
+- `frontend/src/pages/OrdenCompra.jsx` — importa de helpers
+- `frontend/src/pages/Equipos.jsx` — importa de helpers
+- `frontend/src/pages/GestionUsuarios.jsx` — importa de helpers
+- `frontend/src/pages/OrdenTrabajo.jsx` — importa de helpers
+
+**Problema:** `cerrarSesion()` estaba duplicada en 8 páginas con código idéntico.
+
+**Solución:** Función centralizada en `helpers.js` usando `window.location.href = "/login"` en vez de `navigate()`.
+
+### 40. AbortController en useEffects con fetch
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `frontend/src/pages/Clientes.jsx`
+- `frontend/src/pages/Equipos.jsx`
+- `frontend/src/pages/OrdenTrabajo.jsx`
+
+**Problema:** Los useEffects que cargaban datos no tenían cleanup, causando memory leaks si el componente se desmontaba antes de que completaran las llamadas API.
+
+**Solución:** Agregado `AbortController` al useEffect principal de cada página. Los fetch functions ahora aceptan `signal` y lo pasan a `api.get()`. El cleanup aborta las llamadas pendientes.
+
+### 41. CSS duplicado limpiado
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `frontend/src/components/clientes/clientes-componentes.css` — eliminado `.btn-nuevo-cliente` duplicado
+- `frontend/src/pages/Equipos.css` — eliminado `.btn-nuevo-cliente` duplicado
+
+**Problema:** `.btn-nuevo-cliente` estaba definido 3 veces (index.css, clientes-componentes.css, Equip.css) con reglas idénticas.
+
+**Solución:** Mantenida solo la definición en `index.css`, eliminadas las duplicadas.
+
+### 42. toUpper unificado en EquipoFormulario
+**Fecha:** Julio 2026
+**Archivo modificado:** `frontend/src/components/equipos/EquipoFormulario.jsx`
+
+**Problema:** `EquipoFormulario.jsx` definía una función local `toUpper` en vez de importar la compartida de `utils/helpers.js`.
+
+**Solución:** Agregado import de `toUpper` desde `../../utils/helpers` y eliminada la definición local.
+
+### 43. Opción "Solo Desactivar" en eliminación de clientes con equipos
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `backend/routes/clientes.js` (ambas ramas)
+- `frontend/src/components/clientes/ModalReasignarEquipos.jsx`
+- `frontend/src/pages/Clientes.jsx`
+
+**Problema:** Al intentar eliminar un cliente con equipos asociados, solo se ofrecía la opción de reasignar cada equipo a otro cliente. No había forma de desactivar el cliente y dejar los equipos sin dueño (por si se van a reasignar después desde el módulo Equipos).
+
+**Solución:**
+1. **Backend**: Nuevo endpoint `PUT /api/clientes/:id/desactivar` — en una transacción, pone `cliente_id = NULL` en todos los equipos del cliente y desactiva el cliente (`activo = 0`)
+2. **Frontend**: Botón rojo "Solo Desactivar" en el modal `ModalReasignarEquipos`, con doble confirmación (prompt + confirm)
+3. **Clientes.jsx**: Nueva función `desactivarSinReasignar()` que cierra el modal y refresca la lista
+
+**Flujo de eliminación de cliente:**
+- Sin equipos → se desactiva directo
+- Con equipos → modal con 3 opciones:
+  - **Reasignar y Eliminar**: asigna equipos a otro cliente y elimina el registro
+  - **Solo Desactivar**: desvincula equipos (quedan sin cliente) y desactiva el cliente
+  - **Cancelar**: no hace nada
+- Equipos sin cliente (`cliente_id = NULL`) se muestran con `-` en tabla/tarjetas del módulo Equipos
+- Se pueden reasignar después desde el formulario de edición de cada equipo (`PUT /:id/reasignar`)
+
+---
+
 ## Historial de Versiones
 
 | Versión | Fecha | Cambios |
@@ -715,6 +880,9 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.10 | Julio 2026 | Badges "Cliente inactivo" y "Equipo asignado a otro cliente" en formulario OT |
 | 1.11 | Julio 2026 | Fix limpieza de datos al cambiar cliente en OT, botón "+ Nuevo" visible solo cuando no tiene cliente/equipo, rate limiter subido a 500 |
 | 1.12 | Julio 2026 | Filtros separados en Equipos (Código, Cliente, Modelo, Serie), botón Limpiar azul always visible, fix alineación filtros OT, filtro N° de Orden con label y mismo tamaño que los demás |
+| 1.13 | Julio 2026 | Badge "Equipo desactivado" en OT, badge "Cliente desactivado" (antes "inactivo"), fix campo Matriz/Sucursal no se cargaba al editar cliente, columna email agregada a tabla clientes |
+| 1.14 | Julio 2026 | Seguridad: authMiddleware en todos los GET, adminOnly en gestión usuarios, fix cambiar-password. Bugs: SUCURSAL_VACIA compartida, resetFormulario limpiaba filtros, seleccionarEquipoPorCodigo re-cargaba clientes. Mejoras: cerrarSesion compartida, AbortController en fetch, CSS duplicado limpiado, toUpper unificado en helpers |
+| 1.15 | Julio 2026 | Opción "Solo Desactivar" en eliminación de clientes con equipos (endpoint desactivar, modal con 3 opciones) |
 
 ---
 
@@ -781,6 +949,14 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.5 | Julio 2026 | Campos actividad y observaciones en OT, columna y filtro de estado |
 | 1.6 | Julio 2026 | Mayúsculas automáticas en formularios (Clientes, Equipos, OT), limpieza de código muerto |
 | 1.7 | Julio 2026 | Vista expandida de cliente compacta, teléfono visible en dropdown OT |
+| 1.8 | Julio 2026 | Fix cascade actividades/observaciones en OT, fix doble confirm eliminar OT |
+| 1.9 | Julio 2026 | Mostrar actividad/observaciones en Equipos y Clientes, fix INSERT equipos, Contador Páginas OUT en OT, keepalive MySQL |
+| 1.10 | Julio 2026 | Badges "Cliente inactivo" y "Equipo asignado a otro cliente" en formulario OT |
+| 1.11 | Julio 2026 | Fix limpieza de datos al cambiar cliente en OT, botón "+ Nuevo" visible solo cuando no tiene cliente/equipo, rate limiter subido a 500 |
+| 1.12 | Julio 2026 | Filtros separados en Equipos (Código, Cliente, Modelo, Serie), botón Limpiar azul always visible, fix alineación filtros OT, filtro N° de Orden con label y mismo tamaño que los demás |
+| 1.13 | Julio 2026 | Badge "Equipo desactivado" en OT, badge "Cliente desactivado" (antes "inactivo"), fix campo Matriz/Sucursal no se cargaba al editar cliente, columna email agregada a tabla clientes |
+| 1.14 | Julio 2026 | Seguridad: authMiddleware en todos los GET, adminOnly en gestión usuarios, fix cambiar-password. Bugs: SUCURSAL_VACIA compartida, resetFormulario limpiaba filtros, seleccionarEquipoPorCodigo re-cargaba clientes. Mejoras: cerrarSesion compartida, AbortController en fetch, CSS duplicado limpiado, toUpper unificado en helpers |
+| 1.15 | Julio 2026 | Opción "Solo Desactivar" en eliminación de clientes con equipos (endpoint desactivar, modal con 3 opciones) |
 
 ## Cambios Recientes (20 Mayo 2026)
 

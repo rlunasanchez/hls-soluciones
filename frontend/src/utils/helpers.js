@@ -29,3 +29,8 @@ export const parseToken = () => {
     return { usuario: "Usuario", rol: "tecnico" };
   }
 };
+
+export const cerrarSesion = () => {
+  localStorage.removeItem("token");
+  window.location.href = "/login";
+};
