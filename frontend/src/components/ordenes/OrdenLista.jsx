@@ -45,23 +45,25 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                 <option value="pendiente">Pendiente</option>
               </select>
             </div>
-            <div className="filtro-grupo-select">
-              <label>Desde</label>
-              <input
-                type="date"
-                value={filtroFechaDesde}
-                onChange={(e) => onFiltroFechaDesdeChange(e.target.value)}
-                className="filtro-fecha-input"
-              />
-            </div>
-            <div className="filtro-grupo-select">
-              <label>Hasta</label>
-              <input
-                type="date"
-                value={filtroFechaHasta}
-                onChange={(e) => onFiltroFechaHastaChange(e.target.value)}
-                className="filtro-fecha-input"
-              />
+            <div className="filtro-fechas-group">
+              <div className="filtro-grupo-select">
+                <label>Desde</label>
+                <input
+                  type="date"
+                  value={filtroFechaDesde}
+                  onChange={(e) => onFiltroFechaDesdeChange(e.target.value)}
+                  className="filtro-fecha-input"
+                />
+              </div>
+              <div className="filtro-grupo-select">
+                <label>Hasta</label>
+                <input
+                  type="date"
+                  value={filtroFechaHasta}
+                  onChange={(e) => onFiltroFechaHastaChange(e.target.value)}
+                  className="filtro-fecha-input"
+                />
+              </div>
             </div>
           </div>
         </div>

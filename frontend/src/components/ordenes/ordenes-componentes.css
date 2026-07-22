@@ -63,6 +63,16 @@
     min-width: 0;
   }
 
+  .filtro-fechas-group {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 8px;
+  }
+
+  .filtro-fechas-group .filtro-grupo-select {
+    flex: 1;
+  }
+
   .filtro-garantia-select,
   .filtro-fecha-input {
     width: 100%;
