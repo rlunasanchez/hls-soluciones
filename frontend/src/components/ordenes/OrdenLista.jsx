@@ -21,48 +21,6 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                 className="filtro-garantia-select"
               />
             </div>
-            <div className="filtro-grupo-select">
-              <label>Garantía</label>
-              <select
-                value={filtroGarantia}
-                onChange={(e) => onFiltroGarantiaChange(e.target.value)}
-                className="filtro-garantia-select"
-              >
-                <option value="todos">Todas</option>
-                <option value="si">Garantía</option>
-                <option value="no">No garantía</option>
-              </select>
-            </div>
-            <div className="filtro-grupo-select">
-              <label>Estado</label>
-              <select
-                value={filtroEstado}
-                onChange={(e) => onFiltroEstadoChange(e.target.value)}
-                className="filtro-garantia-select"
-              >
-                <option value="todos">Todas</option>
-                <option value="cerrada">Cerrada</option>
-                <option value="pendiente">Pendiente</option>
-              </select>
-            </div>
-            <div className="filtro-grupo-select">
-              <label>Desde</label>
-              <input
-                type="date"
-                value={filtroFechaDesde}
-                onChange={(e) => onFiltroFechaDesdeChange(e.target.value)}
-                className="filtro-fecha-input"
-              />
-            </div>
-            <div className="filtro-grupo-select">
-              <label>Hasta</label>
-              <input
-                type="date"
-                value={filtroFechaHasta}
-                onChange={(e) => onFiltroFechaHastaChange(e.target.value)}
-                className="filtro-fecha-input"
-              />
-            </div>
           </div>
         </div>
       </div>
