@@ -883,6 +883,7 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.13 | Julio 2026 | Badge "Equipo desactivado" en OT, badge "Cliente desactivado" (antes "inactivo"), fix campo Matriz/Sucursal no se cargaba al editar cliente, columna email agregada a tabla clientes |
 | 1.14 | Julio 2026 | Seguridad: authMiddleware en todos los GET, adminOnly en gestión usuarios, fix cambiar-password. Bugs: SUCURSAL_VACIA compartida, resetFormulario limpiaba filtros, seleccionarEquipoPorCodigo re-cargaba clientes. Mejoras: cerrarSesion compartida, AbortController en fetch, CSS duplicado limpiado, toUpper unificado en helpers |
 | 1.15 | Julio 2026 | Opción "Solo Desactivar" en eliminación de clientes con equipos (endpoint desactivar, modal con 3 opciones) |
+| 1.16 | Julio 2026 | Botón "Ver" en todos los módulos (solo lectura), fix alineación botones mobile, filtros OT responsive (N° Orden full width, Desde/Hasta lado a lado), limpieza CSS muerto |
 
 ---
 
@@ -1172,3 +1173,49 @@ ALTER TABLE ordenes_trabajo ADD COLUMN IF NOT EXISTS observaciones TEXT;
 - **CSS**: Filtros de Equipos ahora iguales a los de Clientes (`width: 200px`, `font-size: 0.85rem`, `padding: 6px 10px`)
 - **OT**: Fix alineación filtros con botón "Nueva Orden" — `align-items: flex-end` en vez de `center`
 - **OT**: Filtro "N° de Orden" ahora tiene label arriba y usa clase `filtro-garantia-select` (mismo tamaño que Garantía, Estado, Desde, Hasta). Eliminado CSS viejo `filtro-orden-input`
+
+### 42. Botón "Ver" en todos los módulos
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `frontend/src/components/clientes/ClienteLista.jsx`
+- `frontend/src/components/equipos/EquipoCard.jsx`
+- `frontend/src/components/ordenes/OrdenLista.jsx`
+- `frontend/src/pages/Clientes.jsx`
+- `frontend/src/pages/Equipos.jsx`
+- `frontend/src/pages/OrdenTrabajo.jsx`
+- `frontend/src/components/ordenes/OrdenFormDatos.jsx`
+- `frontend/src/components/ordenes/OrdenFormCliente.jsx`
+- `frontend/src/components/ordenes/OrdenFormEquipo.jsx`
+- `frontend/src/components/ordenes/OrdenFormAveria.jsx`
+- `frontend/src/components/ordenes/OrdenFormInsumos.jsx`
+
+**Cambios:**
+- Nuevo botón "Ver" (icono Eye, color teal `#0D9488`) en lista de Clientes, Equipos y OT
+- **Clientes/Equipos**: `readOnly` en `ClienteFormulario`/`EquipoFormulario` para modo solo lectura
+- **OT**: Implementación completa con `readOnly` en los 5 form components (Datos, Cliente, Equipo, Avería, Insumos), estado `soloLectura`, función `verOrden()`
+- En modo solo lectura: todos los inputs se deshabilitan, botones "+ Nuevo", agregar/eliminar se ocultan
+
+### 43. Fix alineación botones mobile
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `frontend/src/components/clientes/ClienteLista.jsx`
+- `frontend/src/components/ordenes/OrdenLista.jsx`
+- `frontend/src/index.css`
+
+**Cambios:**
+- Eliminados `flex: 1` inline de botones en ClienteLista y OrdenLista mobile
+- CSS `.table-btn`: `display: flex; width: 100%; justify-content: flex-start; align-items: center; white-space: nowrap`
+- Botones alineados a la izquierda (icono + texto) en mobile
+- Botón Ver usa clase `.ver-btn` con color teal `#0D9488`
+
+### 44. Filtros OT responsive mobile
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `frontend/src/components/ordenes/OrdenLista.jsx`
+- `frontend/src/components/ordenes/ordenes-componentes.css`
+
+**Cambios:**
+- Filtros de OT en mobile ahora usan CSS Grid 2 columnas
+- N° de Orden ocupa las 2 columnas (`filtro-full-width`) en mobile
+- Desde/Hasta envueltos en `filtro-fechas-group` (flex row) para estar lado a lado en mobile
+- Eliminado CSS `.filtro-mobile-only` no utilizado
