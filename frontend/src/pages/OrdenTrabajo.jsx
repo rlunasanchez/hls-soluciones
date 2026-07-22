@@ -50,6 +50,7 @@ function OrdenTrabajo() {
   const [clienteInactivo, setClienteInactivo] = useState(false);
   const [equipoOtroCliente, setEquipoOtroCliente] = useState(false);
   const [equipoNoExiste, setEquipoNoExiste] = useState(false);
+  const [soloLectura, setSoloLectura] = useState(false);
   
   // Refs para detectar clics fuera de los dropdowns
   const equipoDropdownRef = useRef(null);
@@ -206,6 +207,7 @@ function OrdenTrabajo() {
       fecha: fechaActual
     }));
     setEditingId(null);
+    setSoloLectura(false);
     setFromClientes(false);
     setClienteSeleccionado(null);
     setEquipoSeleccionado(null);
@@ -415,6 +417,123 @@ function OrdenTrabajo() {
     }
 
     // Cargar insumos
+    const insumosData = [];
+    for (let i = 1; i <= 12; i++) {
+      const insumo = orden[`insumo${i}`];
+      if (insumo) insumosData.push({ nombre: insumo });
+    }
+    const nuevosInsumos = [...insumosData];
+    while (nuevosInsumos.length < 12) {
+      nuevosInsumos.push({ nombre: "" });
+    }
+    setInsumos(nuevosInsumos);
+    setInsumosVisibles(Math.max(2, insumosData.length));
+  };
+
+  const verOrden = async (orden) => {
+    setSoloLectura(true);
+    setEditingId(null);
+    setMostrarFormulario(true);
+    
+    setNuevaOrden({
+      numeroOrden: orden.numero_orden || "",
+      fecha: fmtDate(orden.fecha),
+      esGarantia: orden.es_garantia || false,
+      fechaIngreso: fmtDate(orden.fecha_ingreso),
+      fechaIngresoCheck: orden.fecha_ingreso_check || false,
+      fechaTermino: fmtDate(orden.fecha_termino),
+      fechaTerminoCheck: orden.fecha_termino_check || false,
+      fechaEntrega: fmtDate(orden.fecha_entrega),
+      fechaEntregaCheck: orden.fecha_entrega_check || false,
+      fechaCompra: fmtDate(orden.fecha_compra),
+      fechaCompraCheck: orden.fecha_compra_check || false,
+      cliente: toUpper(orden.cliente),
+      direccion: toUpper(orden.direccion),
+      comuna: toUpper(orden.comuna),
+      contacto: toUpper(orden.contacto),
+      fonoPrincipal: orden.fono_principal || "",
+      tecnicoAsignado: toUpper(orden.tecnico_asignado),
+      equipo: toUpper(orden.equipo),
+      modelo: toUpper(orden.modelo),
+      marca: toUpper(orden.marca),
+      serie: toUpper(orden.serie),
+      contadorPagOut: orden.contador_pag_out || "",
+      nivelTinta: toUpper(orden.nivel_tinta),
+      averia: toUpper(orden.averia),
+      actividad: toUpper(orden.actividad),
+      observaciones: toUpper(orden.observaciones)
+    });
+
+    setEquipoNoExiste(false);
+    const cargarEquipoFresco = async () => {
+      try {
+        if (orden.equipo_id) {
+          const res = await api.get(`/api/equipos/${orden.equipo_id}`);
+          const eq = res.data;
+          setEquipoSeleccionado(eq);
+          setEquipoOtroCliente(orden.cliente_id && eq.cliente_id && eq.cliente_id !== orden.cliente_id);
+          setEquipoNoExiste(false);
+          setBusquedaCodigo(eq.codigo || "");
+          setBusquedaSerie((eq.serie || "").toUpperCase());
+          setNuevaOrden(prev => ({
+            ...prev,
+            equipo: toUpper(eq.equipo) || prev.equipo,
+            modelo: toUpper(eq.modelo) || prev.modelo,
+            marca: toUpper(eq.marca) || prev.marca,
+            serie: toUpper(eq.serie) || prev.serie,
+            contadorPagOut: eq.contador_pag?.toString() || prev.contadorPagOut,
+            nivelTinta: toUpper(eq.nivel_tintas) || prev.nivelTinta,
+            averia: toUpper(eq.averia) || prev.averia
+          }));
+          const insumosEquipo = [];
+          for (let i = 1; i <= 12; i++) {
+            const insumo = eq[`insumo${i}`];
+            if (insumo) insumosEquipo.push({ nombre: insumo.toUpperCase() });
+          }
+          if (insumosEquipo.length > 0) {
+            const nuevosInsumos = [...insumosEquipo];
+            while (nuevosInsumos.length < 12) {
+              nuevosInsumos.push({ nombre: "" });
+            }
+            setInsumos(nuevosInsumos);
+            setInsumosVisibles(Math.max(2, insumosEquipo.length));
+          }
+          return;
+        }
+      } catch (err) {
+        console.error("Error al cargar equipo fresco:", err);
+        setEquipoNoExiste(true);
+      }
+      const eq = equipos.find(e => 
+        (orden.equipo_id && e.id === orden.equipo_id) || 
+        (orden.serie && e.serie === orden.serie)
+      );
+      if (eq) {
+        setEquipoSeleccionado(eq);
+        setEquipoOtroCliente(orden.cliente_id && eq.cliente_id && eq.cliente_id !== orden.cliente_id);
+        setEquipoNoExiste(false);
+        setBusquedaCodigo(eq.codigo || "");
+        setBusquedaSerie((eq.serie || "").toUpperCase());
+      } else if (orden.equipo_id) {
+        setEquipoNoExiste(true);
+      }
+    };
+    cargarEquipoFresco();
+
+    const cl = clientes.find(c => 
+      (orden.cliente_id && c.id === orden.cliente_id) || 
+      (orden.cliente && c.razon_social === orden.cliente)
+    );
+    if (cl) {
+      setClienteSeleccionado(cl);
+      setClienteInactivo(false);
+      setBusquedaCliente((cl.razon_social || orden.cliente || "").toUpperCase());
+    } else {
+      setClienteSeleccionado(null);
+      setClienteInactivo(!!orden.cliente_id);
+      setBusquedaCliente((orden.cliente || "").toUpperCase());
+    }
+
     const insumosData = [];
     for (let i = 1; i <= 12; i++) {
       const insumo = orden[`insumo${i}`];
@@ -644,6 +763,7 @@ function OrdenTrabajo() {
       const vinoDeCliente = navState?.cliente || navState?.orden;
       setMostrarFormulario(false);
       resetFormulario();
+      setSoloLectura(false);
       window.history.replaceState({}, document.title);
       if (vinoDeCliente) {
         navigate("/clientes");
@@ -737,6 +857,7 @@ function OrdenTrabajo() {
             paginaActual={paginaActual}
             totalPaginas={totalPaginas}
             onPageChange={setPaginaActual}
+            onVer={verOrden}
             onEditar={editarOrden}
             onEliminar={eliminarOrden}
             onInforme={(orden) => navigate('/informes', { state: { orden } })}
@@ -748,13 +869,14 @@ function OrdenTrabajo() {
           <div style={{ maxWidth: '900px', margin: '0 auto', padding: '12px' }}>
             <div className="of-wrap">
               <div className="of-head">
-                <h2><Wrench size={20} /> {editingId ? "Editar Orden" : "Nueva Orden"}</h2>
+                <h2><Wrench size={20} /> {soloLectura ? "Ver Orden" : editingId ? "Editar Orden" : "Nueva Orden"}</h2>
                 <button type="button" className="of-head-close" onClick={() => { 
       const navState = window.history.state?.usr;
       const vinoDeCliente = navState?.cliente || navState?.orden;
       setMostrarFormulario(false); 
       resetFormulario(); 
-      setEditingId(null); 
+      setEditingId(null);
+      setSoloLectura(false);
       window.history.replaceState({}, document.title); 
       if (vinoDeCliente) navigate("/clientes");
     }}><X size={18} /></button>
@@ -765,6 +887,7 @@ function OrdenTrabajo() {
                 setNuevaOrden={setNuevaOrden}
                 errorNumeroOrden={errorNumeroOrden}
                 verificarNumeroOrden={verificarNumeroOrden}
+                readOnly={soloLectura}
               />
 
               <OrdenFormCliente
@@ -783,6 +906,7 @@ function OrdenTrabajo() {
                 fetchClientes={fetchClientes}
                 fromClientes={fromClientes}
                 clienteInactivo={clienteInactivo}
+                readOnly={soloLectura}
               />
 
               <OrdenFormEquipo
@@ -809,18 +933,21 @@ function OrdenTrabajo() {
                 esEdicion={!!editingId}
                 equipoOtroCliente={equipoOtroCliente}
                 equipoNoExiste={equipoNoExiste}
+                readOnly={soloLectura}
               >
                 <OrdenFormInsumos
                   insumos={insumos}
                   insumosVisibles={insumosVisibles}
                   setInsumosVisibles={setInsumosVisibles}
                   setInsumos={setInsumos}
+                  readOnly={soloLectura}
                 />
               </OrdenFormEquipo>
 
               <OrdenFormAveria
                 nuevaOrden={nuevaOrden}
                 setNuevaOrden={setNuevaOrden}
+                readOnly={soloLectura}
               />
 
               {/* Botones de acción del formulario */}
@@ -830,15 +957,18 @@ function OrdenTrabajo() {
       const vinoDeCliente = navState?.cliente || navState?.orden;
       setMostrarFormulario(false); 
       resetFormulario(); 
-      setEditingId(null); 
+      setEditingId(null);
+      setSoloLectura(false);
       window.history.replaceState({}, document.title); 
       if (vinoDeCliente) navigate("/clientes");
     }}>
-                  <X size={16} /> Cancelar
+                  <X size={16} /> {soloLectura ? "Cerrar" : "Cancelar"}
                 </button>
-                <button type="submit" className="of-btn-p">
-                  <Save size={16} /> {editingId ? "Guardar Cambios" : "Guardar Orden"}
-                </button>
+                {!soloLectura && (
+                  <button type="submit" className="of-btn-p">
+                    <Save size={16} /> {editingId ? "Guardar Cambios" : "Guardar Orden"}
+                  </button>
+                )}
               </div>
             </form>
             </div>

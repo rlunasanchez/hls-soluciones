@@ -1,7 +1,7 @@
-import { ClipboardList, FileText, FileSpreadsheet, Edit, Trash2, Plus } from "lucide-react";
+import { ClipboardList, FileText, FileSpreadsheet, Edit, Trash2, Plus, Eye } from "lucide-react";
 import Pagination from "../Pagination";
 
-function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtroGarantia, onFiltroGarantiaChange, filtroEstado, onFiltroEstadoChange, filtroFechaDesde, onFiltroFechaDesdeChange, filtroFechaHasta, onFiltroFechaHastaChange, onNueva, paginaActual, totalPaginas, onPageChange, onEditar, onEliminar, onInforme, onCotizacion }) {
+function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtroGarantia, onFiltroGarantiaChange, filtroEstado, onFiltroEstadoChange, filtroFechaDesde, onFiltroFechaDesdeChange, filtroFechaHasta, onFiltroFechaHastaChange, onNueva, paginaActual, totalPaginas, onPageChange, onVer, onEditar, onEliminar, onInforme, onCotizacion }) {
 
   return (
     <>
@@ -129,6 +129,9 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                         <button className="table-btn" style={{ background: '#DB2777', color: 'white' }} onClick={() => onCotizacion(orden)}>
                           <FileSpreadsheet size={14} /> Cotización
                         </button>
+                        <button className="table-btn ver-btn" onClick={() => onVer(orden)}>
+                          <Eye size={14} /> Ver
+                        </button>
                         <button className="table-btn edit-btn" onClick={() => onEditar(orden)}>
                           <Edit size={14} /> Editar
                         </button>
@@ -190,6 +193,9 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                   </button>
                   <button className="table-btn" style={{ flex: 1, background: '#DB2777', color: 'white' }} onClick={() => onCotizacion(orden)}>
                     <FileSpreadsheet size={14} /> Cotización
+                  </button>
+                  <button className="table-btn ver-btn" style={{ flex: 1 }} onClick={() => onVer(orden)}>
+                    <Eye size={14} /> Ver
                   </button>
                   <button className="table-btn edit-btn" style={{ flex: 1 }} onClick={() => onEditar(orden)}>
                     <Edit size={14} /> Editar

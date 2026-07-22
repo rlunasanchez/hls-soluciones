@@ -1,6 +1,6 @@
 import { AlertCircle } from "lucide-react";
 
-function OrdenFormDatos({ nuevaOrden, setNuevaOrden, errorNumeroOrden, verificarNumeroOrden }) {
+function OrdenFormDatos({ nuevaOrden, setNuevaOrden, errorNumeroOrden, verificarNumeroOrden, readOnly }) {
   return (
     <div className="of-sec primary">
       <div className="of-st primary">Datos de la Orden</div>
@@ -16,6 +16,7 @@ function OrdenFormDatos({ nuevaOrden, setNuevaOrden, errorNumeroOrden, verificar
               setNuevaOrden({...nuevaOrden, numeroOrden: e.target.value});
               verificarNumeroOrden(e.target.value);
             }}
+            disabled={readOnly}
             required
           />
           {errorNumeroOrden && (
@@ -31,6 +32,7 @@ function OrdenFormDatos({ nuevaOrden, setNuevaOrden, errorNumeroOrden, verificar
             type="date"
             value={nuevaOrden.fecha}
             onChange={(e) => setNuevaOrden({...nuevaOrden, fecha: e.target.value})}
+            disabled={readOnly}
             required
           />
         </div>
@@ -41,6 +43,7 @@ function OrdenFormDatos({ nuevaOrden, setNuevaOrden, errorNumeroOrden, verificar
               type="checkbox"
               checked={nuevaOrden.esGarantia}
               onChange={(e) => setNuevaOrden({...nuevaOrden, esGarantia: e.target.checked})}
+              disabled={readOnly}
             />
             Garantía
           </label>
@@ -49,24 +52,24 @@ function OrdenFormDatos({ nuevaOrden, setNuevaOrden, errorNumeroOrden, verificar
 
       <div className="of-dates">
         <div className="of-date">
-          <input type="checkbox" checked={nuevaOrden.fechaIngresoCheck} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaIngresoCheck: e.target.checked})} />
+          <input type="checkbox" checked={nuevaOrden.fechaIngresoCheck} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaIngresoCheck: e.target.checked})} disabled={readOnly} />
           <span style={{fontSize:'.75rem',fontWeight:600}}>Ingreso</span>
-          {nuevaOrden.fechaIngresoCheck && <div className="of-date-f"><input type="date" value={nuevaOrden.fechaIngreso} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaIngreso: e.target.value})} /></div>}
+          {nuevaOrden.fechaIngresoCheck && <div className="of-date-f"><input type="date" value={nuevaOrden.fechaIngreso} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaIngreso: e.target.value})} disabled={readOnly} /></div>}
         </div>
         <div className="of-date">
-          <input type="checkbox" checked={nuevaOrden.fechaTerminoCheck} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaTerminoCheck: e.target.checked})} />
+          <input type="checkbox" checked={nuevaOrden.fechaTerminoCheck} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaTerminoCheck: e.target.checked})} disabled={readOnly} />
           <span style={{fontSize:'.75rem',fontWeight:600}}>Término</span>
-          {nuevaOrden.fechaTerminoCheck && <div className="of-date-f"><input type="date" value={nuevaOrden.fechaTermino} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaTermino: e.target.value})} /></div>}
+          {nuevaOrden.fechaTerminoCheck && <div className="of-date-f"><input type="date" value={nuevaOrden.fechaTermino} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaTermino: e.target.value})} disabled={readOnly} /></div>}
         </div>
         <div className="of-date">
-          <input type="checkbox" checked={nuevaOrden.fechaEntregaCheck} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaEntregaCheck: e.target.checked})} />
+          <input type="checkbox" checked={nuevaOrden.fechaEntregaCheck} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaEntregaCheck: e.target.checked})} disabled={readOnly} />
           <span style={{fontSize:'.75rem',fontWeight:600}}>Entrega</span>
-          {nuevaOrden.fechaEntregaCheck && <div className="of-date-f"><input type="date" value={nuevaOrden.fechaEntrega} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaEntrega: e.target.value})} /></div>}
+          {nuevaOrden.fechaEntregaCheck && <div className="of-date-f"><input type="date" value={nuevaOrden.fechaEntrega} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaEntrega: e.target.value})} disabled={readOnly} /></div>}
         </div>
         <div className="of-date">
-          <input type="checkbox" checked={nuevaOrden.fechaCompraCheck} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaCompraCheck: e.target.checked})} />
+          <input type="checkbox" checked={nuevaOrden.fechaCompraCheck} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaCompraCheck: e.target.checked})} disabled={readOnly} />
           <span style={{fontSize:'.75rem',fontWeight:600}}>Compra</span>
-          {nuevaOrden.fechaCompraCheck && <div className="of-date-f"><input type="date" value={nuevaOrden.fechaCompra} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaCompra: e.target.value})} /></div>}
+          {nuevaOrden.fechaCompraCheck && <div className="of-date-f"><input type="date" value={nuevaOrden.fechaCompra} onChange={(e) => setNuevaOrden({...nuevaOrden, fechaCompra: e.target.value})} disabled={readOnly} /></div>}
         </div>
       </div>
     </div>

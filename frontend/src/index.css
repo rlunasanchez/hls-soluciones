@@ -404,6 +404,16 @@ table tr:last-child td {
   color: white;
 }
 
+.ver-btn {
+  background: #2563EB;
+  color: white;
+}
+
+.ver-btn:hover {
+  background: #1D4ED8;
+  color: white;
+}
+
 .badge-garantia {
   display: inline-block;
   padding: 4px 12px;
