@@ -104,7 +104,7 @@ function ClienteLista({ clientes, onVer, onEditar, onEliminar }) {
             <div className="action-buttons">
               <button
                 className="table-btn"
-                style={{ flex: 1, background: '#6366f1', color: 'white' }}
+                style={{ background: '#6366f1', color: 'white' }}
                 onClick={() =>
                   navigate("/orden-trabajo", { state: { cliente: c } })
                 }
@@ -113,22 +113,21 @@ function ClienteLista({ clientes, onVer, onEditar, onEliminar }) {
               </button>
               <button
                 className="table-btn"
-                style={{ flex: 1, background: '#DB2777', color: 'white' }}
+                style={{ background: '#DB2777', color: 'white' }}
                 onClick={() =>
                   navigate("/cotizaciones", { state: { cliente: c } })
                 }
               >
                 <FileSpreadsheet size={14} /> Cotización
               </button>
-              <button className="table-btn" style={{ flex: 1, background: '#0D9488', color: 'white' }} onClick={() => onVer(c)}>
+              <button className="table-btn ver-btn" onClick={() => onVer(c)}>
                 <Eye size={14} /> Ver
               </button>
-              <button className="table-btn edit-btn" style={{ flex: 1 }} onClick={() => onEditar(c)}>
+              <button className="table-btn edit-btn" onClick={() => onEditar(c)}>
                 <Edit size={14} /> Editar
               </button>
               <button
                 className="table-btn delete-btn"
-                style={{ flex: 1 }}
                 onClick={() => onEliminar(c.id)}
               >
                 <Trash2 size={14} /> Eliminar
