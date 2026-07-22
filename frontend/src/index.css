@@ -382,7 +382,7 @@ table tr:last-child td {
 }
 
 .filtro-mobile-only {
-  display: none;
+  display: block;
 }
 
 .table-btn {
@@ -815,7 +815,7 @@ table tr:last-child td {
   }
 
   .filtro-mobile-only {
-    display: block;
+    display: none;
   }
   
   .pagination {

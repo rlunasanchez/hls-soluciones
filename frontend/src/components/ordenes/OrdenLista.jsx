@@ -11,7 +11,7 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
             <Plus size={16} /> Nueva Orden
           </button>
           <div className="filtro-fila-selects">
-            <div className="filtro-grupo-select">
+            <div className="filtro-grupo-select filtro-mobile-only">
               <label>N° de Orden</label>
               <input
                 type="text"
