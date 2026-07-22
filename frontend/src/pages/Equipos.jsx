@@ -26,6 +26,7 @@ function Equipos() {
   const equiposPorPagina = 4;
   const [clientes, setClientes] = useState([]);
   const [equiposExpandidos, setEquiposExpandidos] = useState({});
+  const [soloLectura, setSoloLectura] = useState(false);
 
   const fetchEquipos = async (signal) => {
     try {
@@ -93,6 +94,14 @@ function Equipos() {
   const editarEquipo = async (eq) => {
     await fetchClientes();
     setEquipoEditando(eq);
+    setSoloLectura(false);
+    setMostrarFormulario(true);
+  };
+
+  const verEquipo = async (eq) => {
+    await fetchClientes();
+    setEquipoEditando(eq);
+    setSoloLectura(true);
     setMostrarFormulario(true);
   };
 
@@ -115,6 +124,7 @@ function Equipos() {
       }
       setMostrarFormulario(false);
       setEquipoEditando(null);
+      setSoloLectura(false);
       navigate('/equipos', { replace: true });
       const res = await api.get("/api/equipos");
       setEquipos(res.data);
@@ -132,9 +142,11 @@ function Equipos() {
         onCancel={() => {
           setMostrarFormulario(false);
           setEquipoEditando(null);
+          setSoloLectura(false);
           navigate('/equipos', { replace: true });
         }}
         onSave={guardarEquipo}
+        readOnly={soloLectura}
       />
     );
   }
@@ -160,13 +172,14 @@ function Equipos() {
         hayBusqueda={!!filtroCodigo || !!filtroCliente || !!filtroModelo || !!filtroSerie}
         equiposExpandidos={equiposExpandidos}
         setEquiposExpandidos={setEquiposExpandidos}
+        onVer={verEquipo}
         onEditar={editarEquipo}
         onEliminar={eliminarEquipo}
       />
 
       <div className="cards-table">
         {equiposPagina.map((eq) => (
-          <EquipoCard key={eq.id} equipo={eq} onEditar={editarEquipo} onEliminar={eliminarEquipo} />
+          <EquipoCard key={eq.id} equipo={eq} onVer={verEquipo} onEditar={editarEquipo} onEliminar={eliminarEquipo} />
         ))}
       </div>
 

@@ -3,7 +3,7 @@ import { Package, Save, X, Trash2 } from "lucide-react";
 import api from "../../services/api";
 import { toUpper } from "../../utils/helpers";
 
-function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes: clientesProp }) {
+function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes: clientesProp, readOnly = false }) {
   const [nuevoEquipo, setNuevoEquipo] = useState({
     codigo: "", equipo: "", modelo: "", marca: "", serie: "",
     contador_pag: 0, nivel_tintas: "", cliente_id: "",
@@ -139,7 +139,7 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes:
       <div style={{ maxWidth: '740px', margin: '0 auto', padding: '20px' }}>
         <div className="ef-wrap">
           <div className="ef-head">
-            <h2><Package size={22} />{equipoEditando ? "Editar Equipo" : "Nuevo Equipo"}</h2>
+            <h2><Package size={22} />{readOnly ? "Ver Equipo" : equipoEditando ? "Editar Equipo" : "Nuevo Equipo"}</h2>
             <button type="button" className="ef-head-close" onClick={onCancel}><X size={20} /></button>
           </div>
           <form onSubmit={handleSubmit} className="ef-form">
@@ -154,6 +154,7 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes:
                   <label>Cliente Asociado *</label>
                   <div ref={clienteDropdownRef} className="ef-sc">
                     <input placeholder="Buscar cliente..." value={busquedaCliente}
+                      disabled={readOnly}
                       onChange={(e) => { setBusquedaCliente(e.target.value.toUpperCase()); setMostrarDropdownClientes(e.target.value.length >= 2); }}
                       onFocus={() => { if (busquedaCliente.length >= 2) setMostrarDropdownClientes(true); }} required />
                     {clienteSeleccionado && <span className="ef-sc-ok">✓</span>}
@@ -174,11 +175,13 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes:
                 <div className="ef-f">
                   <label>Equipo *</label>
                   <input placeholder="Nombre del equipo" value={nuevoEquipo.equipo}
+                    disabled={readOnly}
                     onChange={e => setNuevoEquipo({...nuevoEquipo, equipo: e.target.value.toUpperCase()})} required />
                 </div>
                 <div className="ef-f">
                   <label>Marca *</label>
                   <input placeholder="Marca" value={nuevoEquipo.marca}
+                    disabled={readOnly}
                     onChange={e => setNuevoEquipo({...nuevoEquipo, marca: e.target.value.toUpperCase()})} required />
                 </div>
               </div>
@@ -186,29 +189,33 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes:
                 <div className="ef-f">
                   <label>Modelo *</label>
                   <input placeholder="Modelo" value={nuevoEquipo.modelo}
+                    disabled={readOnly}
                     onChange={e => setNuevoEquipo({...nuevoEquipo, modelo: e.target.value.toUpperCase()})} required />
                 </div>
                 <div className="ef-f">
                   <label>Serie</label>
                   <input placeholder="Número de serie" value={nuevoEquipo.serie}
+                    disabled={readOnly}
                     onChange={e => setNuevoEquipo({...nuevoEquipo, serie: e.target.value.toUpperCase()})} />
                 </div>
                 <div className="ef-f">
                   <label>Contador Páginas</label>
                   <input type="number" placeholder="Contador" value={nuevoEquipo.contador_pag}
+                    disabled={readOnly}
                     onChange={e => setNuevoEquipo({...nuevoEquipo, contador_pag: e.target.value})} />
                 </div>
               </div>
               <div className="ef-f" style={{ marginTop: '8px' }}>
                 <label>Nivel Tintas</label>
                 <input placeholder="Nivel de tintas" value={nuevoEquipo.nivel_tintas}
+                  disabled={readOnly}
                   onChange={e => setNuevoEquipo({...nuevoEquipo, nivel_tintas: e.target.value.toUpperCase()})} />
               </div>
             </div>
             <div className="ef-s success">
               <div className="ef-st success">
                 <span>Insumos</span>
-                {insumosVisibles < 12 && (
+                {insumosVisibles < 12 && !readOnly && (
                   <button type="button" className="ef-btn-a" onClick={() => setInsumosVisibles(insumosVisibles + 1)}>+ Agregar</button>
                 )}
               </div>
@@ -218,8 +225,10 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes:
                     <div>
                       <label>Insumo {idx + 1}</label>
                       <input placeholder={`Insumo ${idx + 1}`} value={ins.nombre}
+                        disabled={readOnly}
                         onChange={e => actualizarInsumo(idx, e.target.value)} />
                     </div>
+                    {!readOnly && (
                     <button type="button" className="ef-ins-del"
                       onClick={() => {
                         if (!window.confirm(`¿Eliminar insumo ${idx + 1}?`)) return;
@@ -228,6 +237,7 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes:
                         setInsumos(nuevas);
                         setInsumosVisibles(Math.max(2, insumosVisibles - 1));
                       }}><Trash2 size={14} /></button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -236,6 +246,7 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes:
               <div className="ef-st muted">Avería/Falla/Incidencia</div>
               <div className="ef-f">
                 <textarea placeholder="Descripción de falla o incidencia..." value={nuevoEquipo.averia}
+                  disabled={readOnly}
                   onChange={e => setNuevoEquipo({...nuevoEquipo, averia: e.target.value.toUpperCase()})} rows={3} style={{ minHeight: '70px' }} />
               </div>
             </div>
@@ -243,6 +254,7 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes:
               <div className="ef-st muted">Actividad</div>
               <div className="ef-f">
                 <textarea placeholder="Descripción de actividad realizada..." value={nuevoEquipo.actividad}
+                  disabled={readOnly}
                   onChange={e => setNuevoEquipo({...nuevoEquipo, actividad: e.target.value.toUpperCase()})} rows={3} style={{ minHeight: '70px' }} />
               </div>
             </div>
@@ -250,12 +262,19 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, clientes:
               <div className="ef-st muted">Observaciones</div>
               <div className="ef-f">
                 <textarea placeholder="Observaciones adicionales..." value={nuevoEquipo.observaciones}
+                  disabled={readOnly}
                   onChange={e => setNuevoEquipo({...nuevoEquipo, observaciones: e.target.value.toUpperCase()})} rows={3} style={{ minHeight: '70px' }} />
               </div>
             </div>
             <div className="ef-sub">
-              <button type="button" className="ef-btn-c" onClick={onCancel}><X size={18} /> Cancelar</button>
-              <button type="submit" className="ef-btn-p"><Save size={18} /> {equipoEditando ? "Guardar Cambios" : "Guardar Equipo"}</button>
+              {readOnly ? (
+                <button type="button" className="ef-btn-c" onClick={onCancel}><X size={18} /> Cerrar</button>
+              ) : (
+                <>
+                  <button type="button" className="ef-btn-c" onClick={onCancel}><X size={18} /> Cancelar</button>
+                  <button type="submit" className="ef-btn-p"><Save size={18} /> {equipoEditando ? "Guardar Cambios" : "Guardar Equipo"}</button>
+                </>
+              )}
             </div>
           </form>
         </div>

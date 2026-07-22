@@ -1,6 +1,6 @@
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Eye } from "lucide-react";
 
-function EquipoCard({ equipo, onEditar, onEliminar }) {
+function EquipoCard({ equipo, onVer, onEditar, onEliminar }) {
   return (
     <div key={equipo.id} className="data-card">
       <div className="data-card-header">
@@ -38,6 +38,9 @@ function EquipoCard({ equipo, onEditar, onEliminar }) {
         </div>
       )}
       <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+        <button className="table-btn" onClick={() => onVer(equipo)} style={{ flex: 1, justifyContent: 'center', background: '#0D9488', color: 'white' }}>
+          <Eye size={14} /> Ver
+        </button>
         <button className="table-btn edit-btn" onClick={() => onEditar(equipo)} style={{ flex: 1, justifyContent: 'center' }}>
           <Edit size={14} /> Editar
         </button>
