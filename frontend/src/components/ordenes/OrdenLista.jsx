@@ -187,20 +187,20 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                     )}
                   </span>
                 </div>
-                <div className="action-buttons" style={{ justifyContent: 'center' }}>
-                  <button className="table-btn" style={{ flex: 1, background: '#EA580C', color: 'white' }} onClick={() => onInforme(orden)}>
+                <div className="action-buttons">
+                  <button className="table-btn" style={{ background: '#EA580C', color: 'white' }} onClick={() => onInforme(orden)}>
                     <FileText size={14} /> Informe
                   </button>
-                  <button className="table-btn" style={{ flex: 1, background: '#DB2777', color: 'white' }} onClick={() => onCotizacion(orden)}>
+                  <button className="table-btn" style={{ background: '#DB2777', color: 'white' }} onClick={() => onCotizacion(orden)}>
                     <FileSpreadsheet size={14} /> Cotización
                   </button>
-                  <button className="table-btn ver-btn" style={{ flex: 1 }} onClick={() => onVer(orden)}>
+                  <button className="table-btn ver-btn" onClick={() => onVer(orden)}>
                     <Eye size={14} /> Ver
                   </button>
-                  <button className="table-btn edit-btn" style={{ flex: 1 }} onClick={() => onEditar(orden)}>
+                  <button className="table-btn edit-btn" onClick={() => onEditar(orden)}>
                     <Edit size={14} /> Editar
                   </button>
-                  <button className="table-btn delete-btn" style={{ flex: 1 }} onClick={() => onEliminar(orden.id)}>
+                  <button className="table-btn delete-btn" onClick={() => onEliminar(orden.id)}>
                     <Trash2 size={14} /> Eliminar
                   </button>
                 </div>
