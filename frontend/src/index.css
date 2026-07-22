@@ -950,6 +950,7 @@ table tr:last-child td {
   .action-buttons {
     flex-direction: column;
     gap: 4px;
+    width: 100%;
   }
   
   .table-btn {
