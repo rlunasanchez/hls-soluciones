@@ -73,6 +73,10 @@
     flex: 1;
   }
 
+  .filtro-full-width {
+    grid-column: 1 / -1;
+  }
+
   .filtro-garantia-select,
   .filtro-fecha-input {
     width: 100%;
