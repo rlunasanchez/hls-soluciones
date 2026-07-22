@@ -1,6 +1,6 @@
-import { ChevronDown, Edit, Trash2 } from "lucide-react";
+import { ChevronDown, Edit, Trash2, Eye } from "lucide-react";
 
-function EquipoTabla({ equipos, hayBusqueda, equiposExpandidos, setEquiposExpandidos, onEditar, onEliminar }) {
+function EquipoTabla({ equipos, hayBusqueda, equiposExpandidos, setEquiposExpandidos, onVer, onEditar, onEliminar }) {
   return (
     <div className="table-wrapper">
       <table>
@@ -39,6 +39,9 @@ function EquipoTabla({ equipos, hayBusqueda, equiposExpandidos, setEquiposExpand
                   <td data-label="Cliente">{eq.cliente_codigo ? `${eq.cliente_codigo} - ${eq.cliente_nombre}` : '-'}</td>
                   <td data-label="Acciones">
                     <div className="action-buttons">
+                      <button className="table-btn" style={{ background: '#0D9488', color: 'white' }} onClick={() => onVer(eq)}>
+                        <Eye size={14} /> Ver
+                      </button>
                       <button className="table-btn edit-btn" onClick={() => onEditar(eq)}>
                         <Edit size={14} /> Editar
                       </button>
