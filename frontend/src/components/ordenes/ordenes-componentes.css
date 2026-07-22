@@ -45,6 +45,11 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .table-header {
+    margin: 0 calc(-1 * clamp(16px, 2vw, 24px));
+    padding: 0 clamp(16px, 2vw, 24px);
+  }
+
   .table-header-actions {
     flex-direction: column;
     width: 100%;
