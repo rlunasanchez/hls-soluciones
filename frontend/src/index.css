@@ -953,8 +953,10 @@ table tr:last-child td {
   }
   
   .table-btn {
+    display: flex;
     width: 100%;
     justify-content: center;
+    align-items: center;
     padding: 8px;
   }
 }
