@@ -381,10 +381,6 @@ table tr:last-child td {
   gap: 8px;
 }
 
-.filtro-mobile-only {
-  display: block;
-}
-
 .table-btn {
   display: inline-flex;
   align-items: center;
@@ -812,10 +808,6 @@ table tr:last-child td {
   
   .cards-table {
     display: block;
-  }
-
-  .filtro-mobile-only {
-    display: none;
   }
   
   .pagination {
