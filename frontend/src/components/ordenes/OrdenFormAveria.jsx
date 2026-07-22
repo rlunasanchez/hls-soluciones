@@ -1,4 +1,4 @@
-function OrdenFormAveria({ nuevaOrden, setNuevaOrden }) {
+function OrdenFormAveria({ nuevaOrden, setNuevaOrden, readOnly }) {
   return (
     <div className="of-sec muted">
       <div className="of-st muted">Avería/Falla/Incidencia</div>
@@ -8,6 +8,7 @@ function OrdenFormAveria({ nuevaOrden, setNuevaOrden }) {
           value={nuevaOrden.averia}
           onChange={(e) => setNuevaOrden({...nuevaOrden, averia: e.target.value.toUpperCase()})}
           rows={3}
+          disabled={readOnly}
         />
       </div>
 
@@ -18,6 +19,7 @@ function OrdenFormAveria({ nuevaOrden, setNuevaOrden }) {
           value={nuevaOrden.actividad}
           onChange={(e) => setNuevaOrden({...nuevaOrden, actividad: e.target.value.toUpperCase()})}
           rows={3}
+          disabled={readOnly}
         />
       </div>
 
@@ -28,6 +30,7 @@ function OrdenFormAveria({ nuevaOrden, setNuevaOrden }) {
           value={nuevaOrden.observaciones}
           onChange={(e) => setNuevaOrden({...nuevaOrden, observaciones: e.target.value.toUpperCase()})}
           rows={3}
+          disabled={readOnly}
         />
       </div>
     </div>

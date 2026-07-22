@@ -16,7 +16,8 @@ function OrdenFormCliente({
   esEdicion = false,
   fetchClientes,
   fromClientes = false,
-  clienteInactivo = false
+  clienteInactivo = false,
+  readOnly = false
 }) {
   const [mostrarModalCliente, setMostrarModalCliente] = useState(false);
 
@@ -70,6 +71,7 @@ function OrdenFormCliente({
               onFocus={() => {
                 if (busquedaCliente.length >= 2) setMostrarDropdownClientes(true);
               }}
+              disabled={readOnly}
               style={{
                 width: '100%',
                 padding: '6px 10px',
@@ -171,7 +173,7 @@ function OrdenFormCliente({
               </div>
             )}
           </div>
-          {!fromClientes && (!esEdicion || !clienteSeleccionado) && (
+          {!readOnly && !fromClientes && (!esEdicion || !clienteSeleccionado) && (
           <button
             type="button"
             onClick={() => setMostrarModalCliente(true)}
@@ -231,6 +233,7 @@ function OrdenFormCliente({
             placeholder="Nombre del cliente"
             value={nuevaOrden.cliente}
             onChange={(e) => setNuevaOrden({...nuevaOrden, cliente: e.target.value.toUpperCase()})}
+            disabled={readOnly}
             required
             style={{
               width: '100%',
@@ -249,6 +252,7 @@ function OrdenFormCliente({
             placeholder="Dirección del cliente"
             value={nuevaOrden.direccion}
             onChange={(e) => setNuevaOrden({...nuevaOrden, direccion: e.target.value.toUpperCase()})}
+            disabled={readOnly}
             style={{
               width: '100%',
               padding: '6px 10px',
@@ -266,6 +270,7 @@ function OrdenFormCliente({
             placeholder="Comuna"
             value={nuevaOrden.comuna}
             onChange={(e) => setNuevaOrden({...nuevaOrden, comuna: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
+            disabled={readOnly}
             style={{
               width: '100%',
               padding: '6px 10px',
@@ -289,6 +294,7 @@ function OrdenFormCliente({
             placeholder="Nombre del contacto"
             value={nuevaOrden.contacto}
             onChange={(e) => setNuevaOrden({...nuevaOrden, contacto: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
+            disabled={readOnly}
             style={{
               width: '100%',
               padding: '6px 10px',
@@ -306,6 +312,7 @@ function OrdenFormCliente({
             placeholder="Teléfono de contacto"
             value={nuevaOrden.fonoPrincipal}
             onChange={(e) => setNuevaOrden({...nuevaOrden, fonoPrincipal: e.target.value.replace(/[^0-9+]/g, '')})}
+            disabled={readOnly}
             style={{
               width: '100%',
               padding: '6px 10px',
@@ -323,6 +330,7 @@ function OrdenFormCliente({
             placeholder="Nombre y apellido del técnico"
             value={nuevaOrden.tecnicoAsignado}
             onChange={(e) => setNuevaOrden({...nuevaOrden, tecnicoAsignado: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
+            disabled={readOnly}
             required
             style={{
               width: '100%',

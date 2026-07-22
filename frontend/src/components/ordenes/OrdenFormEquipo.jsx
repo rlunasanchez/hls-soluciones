@@ -22,7 +22,8 @@ function OrdenFormEquipo({
   fromClientes = false,
   esEdicion = false,
   equipoOtroCliente = false,
-  equipoNoExiste = false
+  equipoNoExiste = false,
+  readOnly = false
 }) {
   const [mostrarModalEquipo, setMostrarModalEquipo] = useState(false);
   const [nuevoEquipo, setNuevoEquipo] = useState({
@@ -120,7 +121,7 @@ function OrdenFormEquipo({
               ✓ Seleccionado: {equipoSeleccionado.equipo} - {equipoSeleccionado.marca} {equipoSeleccionado.modelo}
             </div>
           )}
-          {clienteSeleccionado && !fromClientes && (!esEdicion || !equipoSeleccionado || equipoOtroCliente) && (
+          {clienteSeleccionado && !readOnly && !fromClientes && (!esEdicion || !equipoSeleccionado || equipoOtroCliente) && (
             <button
               type="button"
               onClick={() => setMostrarModalEquipo(true)}
@@ -158,6 +159,7 @@ function OrdenFormEquipo({
               onFocus={() => {
                 if (busquedaCodigo.length >= 6) setMostrarDropdownCodigo(true);
               }}
+              disabled={readOnly}
               style={{
                 width: '100%', padding: '6px 10px',
                 border: '2px solid var(--info)', borderRadius: '6px', fontSize: '.82rem',
@@ -216,6 +218,7 @@ function OrdenFormEquipo({
               onFocus={() => {
                 if (busquedaSerie.length >= 2) setMostrarDropdownEquipos(true);
               }}
+              disabled={readOnly}
               style={{
                 width: '100%', padding: '6px 10px',
                 border: '2px solid var(--success)', borderRadius: '6px', fontSize: '.82rem',
@@ -266,36 +269,42 @@ function OrdenFormEquipo({
           <label>Equipo *</label>
           <input type="text" placeholder="Tipo de equipo" value={nuevaOrden.equipo}
             onChange={(e) => setNuevaOrden({...nuevaOrden, equipo: e.target.value.toUpperCase()})}
+            disabled={readOnly}
             required style={inputStyle} />
         </div>
         <div className="of-f">
           <label>Marca *</label>
           <input type="text" placeholder="Marca del equipo" value={nuevaOrden.marca}
             onChange={(e) => setNuevaOrden({...nuevaOrden, marca: e.target.value.toUpperCase()})}
+            disabled={readOnly}
             required style={inputStyle} />
         </div>
         <div className="of-f">
           <label>Modelo *</label>
           <input type="text" placeholder="Modelo del equipo" value={nuevaOrden.modelo}
             onChange={(e) => setNuevaOrden({...nuevaOrden, modelo: e.target.value.toUpperCase()})}
+            disabled={readOnly}
             required style={inputStyle} />
         </div>
         <div className="of-f">
           <label>Serie</label>
           <input type="text" placeholder="Número de serie" value={nuevaOrden.serie}
             onChange={(e) => setNuevaOrden({...nuevaOrden, serie: e.target.value.toUpperCase()})}
+            disabled={readOnly}
             style={inputStyle} />
         </div>
         <div className="of-f">
           <label>Nivel de Tinta</label>
           <input type="text" placeholder="Ej: 80%, lleno, etc." value={nuevaOrden.nivelTinta}
             onChange={(e) => setNuevaOrden({...nuevaOrden, nivelTinta: e.target.value.toUpperCase()})}
+            disabled={readOnly}
             style={inputStyle} />
         </div>
         <div className="of-f">
           <label>Contador Páginas OUT</label>
           <input type="number" placeholder="0" value={nuevaOrden.contadorPagOut}
             onChange={(e) => setNuevaOrden({...nuevaOrden, contadorPagOut: e.target.value})}
+            disabled={readOnly}
             style={inputStyle} />
         </div>
       </div>
