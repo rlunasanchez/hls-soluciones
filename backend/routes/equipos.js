@@ -24,15 +24,24 @@ router.get("/next-codigo", authMiddleware, async (req, res) => {
 
 router.get("/", authMiddleware, async (req, res) => {
   try {
-    const { q } = req.query;
+    const { q, cliente_id } = req.query;
     let sql = `SELECT e.*, c.razon_social as cliente_nombre, c.rut as cliente_rut, c.codigo as cliente_codigo
       FROM equipos e
       LEFT JOIN clientes c ON e.cliente_id = c.id`;
+    let conditions = [];
     let params = [];
+    let paramIdx = 1;
+    if (cliente_id) {
+      conditions.push(`e.cliente_id = $${paramIdx++}`);
+      params.push(cliente_id);
+    }
     if (q && q.trim()) {
       const term = `%${q.trim()}%`;
-      sql += ` WHERE (LOWER(e.codigo) LIKE LOWER($1) OR LOWER(e.serie) LIKE LOWER($2) OR LOWER(e.equipo) LIKE LOWER($3) OR LOWER(e.marca) LIKE LOWER($4) OR LOWER(e.modelo) LIKE LOWER($5))`;
-      params = [term, term, term, term, term];
+      conditions.push(`(LOWER(e.codigo) LIKE LOWER($${paramIdx}) OR LOWER(e.serie) LIKE LOWER($${paramIdx + 1}) OR LOWER(e.equipo) LIKE LOWER($${paramIdx + 2}) OR LOWER(e.marca) LIKE LOWER($${paramIdx + 3}) OR LOWER(e.modelo) LIKE LOWER($${paramIdx + 4}))`);
+      params.push(term, term, term, term, term);
+    }
+    if (conditions.length > 0) {
+      sql += ` WHERE ${conditions.join(' AND ')}`;
     }
     sql += ` ORDER BY e.id DESC`;
     const result = await pool.query(sql, params);
