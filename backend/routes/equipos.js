@@ -33,8 +33,8 @@ router.get("/", authMiddleware, async (req, res) => {
     let params = [];
     if (q && q.trim()) {
       const term = `%${q.trim()}%`;
-      sql += ` WHERE (LOWER(e.codigo) LIKE LOWER(?) OR LOWER(e.serie) LIKE LOWER(?) OR LOWER(e.equipo) LIKE LOWER(?) OR LOWER(e.marca) LIKE LOWER(?))`;
-      params = [term, term, term, term];
+      sql += ` WHERE (LOWER(e.codigo) LIKE LOWER(?) OR LOWER(e.serie) LIKE LOWER(?) OR LOWER(e.equipo) LIKE LOWER(?) OR LOWER(e.marca) LIKE LOWER(?) OR LOWER(e.modelo) LIKE LOWER(?))`;
+      params = [term, term, term, term, term];
     }
     sql += ` ORDER BY e.id DESC`;
     const [rows] = await pool.query(sql, params);
