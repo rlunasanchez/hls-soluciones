@@ -282,7 +282,7 @@ function OrdenFormEquipo({
               disabled={readOnly}
               style={{
                 width: '100%', padding: '6px 10px',
-                border: '2px solid var(--warning)', borderRadius: '6px', fontSize: '.82rem',
+                border: '2px solid var(--info)', borderRadius: '6px', fontSize: '.82rem',
                 background: equipoSeleccionado?.modelo === busquedaModelo ? '#DCFCE7' : 'white'
               }}
             />
