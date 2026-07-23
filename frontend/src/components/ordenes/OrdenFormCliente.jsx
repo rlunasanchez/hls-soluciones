@@ -220,12 +220,7 @@ function OrdenFormCliente({
         </div>
       )}
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '20px',
-        marginBottom: '20px'
-      }}>
+      <div className="of-form-grid">
         <div className="of-f">
           <label>Cliente *</label>
           <input
@@ -282,11 +277,7 @@ function OrdenFormCliente({
         </div>
       </div>
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '20px'
-      }}>
+      <div className="of-form-grid">
         <div className="of-f">
           <label>Contacto</label>
           <input
