@@ -884,6 +884,7 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.14 | Julio 2026 | Seguridad: authMiddleware en todos los GET, adminOnly en gestión usuarios, fix cambiar-password. Bugs: SUCURSAL_VACIA compartida, resetFormulario limpiaba filtros, seleccionarEquipoPorCodigo re-cargaba clientes. Mejoras: cerrarSesion compartida, AbortController en fetch, CSS duplicado limpiado, toUpper unificado en helpers |
 | 1.15 | Julio 2026 | Opción "Solo Desactivar" en eliminación de clientes con equipos (endpoint desactivar, modal con 3 opciones) |
 | 1.16 | Julio 2026 | Botón "Ver" en todos los módulos (solo lectura), fix alineación botones mobile, filtros OT responsive (N° Orden full width, Desde/Hasta lado a lado), limpieza CSS muerto |
+| 1.17 | Julio 2026 | Fix búsqueda Modelo en OT no filtraba (busquedaModelo no se reseteaba), fix equipos GET soporte filtro cliente_id, fix backend deploy/cloud reconstruido (archivos faltantes/corruptos), fix filtros fechas desktop |
 
 ---
 
@@ -1001,6 +1002,8 @@ grep '"pg"' backend/package.json
 | 1.13 | Julio 2026 | Badge "Equipo desactivado" en OT, badge "Cliente desactivado" (antes "inactivo"), fix campo Matriz/Sucursal no se cargaba al editar cliente, columna email agregada a tabla clientes |
 | 1.14 | Julio 2026 | Seguridad: authMiddleware en todos los GET, adminOnly en gestión usuarios, fix cambiar-password. Bugs: SUCURSAL_VACIA compartida, resetFormulario limpiaba filtros, seleccionarEquipoPorCodigo re-cargaba clientes. Mejoras: cerrarSesion compartida, AbortController en fetch, CSS duplicado limpiado, toUpper unificado en helpers |
 | 1.15 | Julio 2026 | Opción "Solo Desactivar" en eliminación de clientes con equipos (endpoint desactivar, modal con 3 opciones) |
+| 1.16 | Julio 2026 | Botón "Ver" en todos los módulos (solo lectura), fix alineación botones mobile, filtros OT responsive |
+| 1.17 | Julio 2026 | Fix búsqueda Modelo en OT no filtraba (busquedaModelo no se reseteaba), fix equipos GET soporte filtro cliente_id, fix backend deploy/cloud reconstruido (archivos faltantes/corruptos), fix filtros fechas desktop |
 
 ## Cambios Recientes (20 Mayo 2026)
 
@@ -1262,3 +1265,32 @@ ALTER TABLE ordenes_trabajo ADD COLUMN IF NOT EXISTS observaciones TEXT;
 - N° de Orden ocupa las 2 columnas (`filtro-full-width`) en mobile
 - Desde/Hasta envueltos en `filtro-fechas-group` (flex row) para estar lado a lado en mobile
 - Eliminado CSS `.filtro-mobile-only` no utilizado
+
+### 45. Fix búsqueda Modelo en OT + filtro cliente_id en equipos + backend deploy/cloud reconstruido
+**Fecha:** Julio 2026
+**Commits:** `a0b4db1` (main), `7883030`/`94e37db` (deploy/cloud), `66fc84d`/`cac2e48` (filtro cliente_id)
+
+**Bug 1: Búsqueda de Modelo en OT no filtraba**
+- **Archivo:** `frontend/src/pages/OrdenTrabajo.jsx`
+- **Causa:** `busquedaModelo` no se reseteaba en `resetFormulario()`, `abrirNuevaOrden()`, `seleccionarEquipo()`, `seleccionarEquipoPorCodigo()`, ni se sincronizaba en `editarOrden()`/`verOrden()`
+- **Fix:** Agregado `setBusquedaModelo('')` en las funciones de reset y apertura; `setBusquedaModelo(equipo.modelo || '')` en selección de equipo; `setBusquedaModelo(ot.equipo_modelo || '')` al editar/ver
+
+**Bug 2: Endpoint equipos GET no soportaba filtro por cliente_id**
+- **Archivo:** `frontend/src/components/clientes/ClienteExpandido.jsx`
+- `ClienteExpandido` pasaba `?cliente_id=${cliente.id}` pero el backend lo ignoraba
+- **Backend main (MySQL):** Agregado `if (clienteId) { sql += ' AND e.cliente_id = ?'; params.push(clienteId); }`
+- **Backend deploy/cloud (PostgreSQL):** Agregado `if (clienteId) {条件 += ' AND e.cliente_id = $1'; params.push(clienteId); }`
+
+**Bug 3: Backend deploy/cloud — archivos faltantes o corruptos (UTF-16)**
+- **Archivos reconstruidos como UTF-8 PostgreSQL:**
+  - `equipos.js`: modelo search en GET `/`, `authMiddleware` en GET, `GET /:id`, `PUT /:id/reasignar`, campos actividad/observaciones
+  - `ordenes.js`: Sintaxis completa PostgreSQL (`$1,$2`, `result.rows`, `pool.connect()`, `RETURNING`)
+  - `clientes.js`: `authMiddleware` en GET, endpoint `desactivar`, `STRING_AGG`/`COALESCE`
+  - `auth.js`: `adminOnly` middleware, `cambiar-password` usa `req.user.usuario`
+  - `middleware/authMiddleware.js`: Exporta `authMiddleware` + `adminOnly`, distingue `TokenExpiredError`
+  - `package.json`: `pg` dependency, nombre `hls-backend`
+  - `crear-admin.js`: Usa `dotenv` en vez de connection string hardcoded
+
+**Mejora: Alineación fechas desktop**
+- **Archivo:** `frontend/src/components/ordenes/ordenes-componentes.css`
+- `.filtro-fechas-group` con `display: flex; gap: 8px` para que Desde/Hasta estén lado a lado
