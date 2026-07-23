@@ -43,6 +43,16 @@
   font-size: 0.8rem;
 }
 
+/* Filtro fechas lado a lado */
+.filtro-fechas-group {
+  display: flex;
+  gap: 8px;
+}
+
+.filtro-fechas-group .filtro-grupo-select {
+  flex: 1;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .table-header-actions {
