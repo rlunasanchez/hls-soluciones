@@ -26,15 +26,23 @@ router.get("/next-codigo", authMiddleware, async (req, res) => {
 
 router.get("/", authMiddleware, async (req, res) => {
   try {
-    const { q } = req.query;
+    const { q, cliente_id } = req.query;
     let sql = `SELECT e.*, c.razon_social as cliente_nombre, c.rut as cliente_rut, c.codigo as cliente_codigo
       FROM equipos e
       LEFT JOIN clientes c ON e.cliente_id = c.id`;
+    let conditions = [];
     let params = [];
+    if (cliente_id) {
+      conditions.push(`e.cliente_id = ?`);
+      params.push(cliente_id);
+    }
     if (q && q.trim()) {
       const term = `%${q.trim()}%`;
-      sql += ` WHERE (LOWER(e.codigo) LIKE LOWER(?) OR LOWER(e.serie) LIKE LOWER(?) OR LOWER(e.equipo) LIKE LOWER(?) OR LOWER(e.marca) LIKE LOWER(?) OR LOWER(e.modelo) LIKE LOWER(?))`;
-      params = [term, term, term, term, term];
+      conditions.push(`(LOWER(e.codigo) LIKE LOWER(?) OR LOWER(e.serie) LIKE LOWER(?) OR LOWER(e.equipo) LIKE LOWER(?) OR LOWER(e.marca) LIKE LOWER(?) OR LOWER(e.modelo) LIKE LOWER(?))`);
+      params.push(term, term, term, term, term);
+    }
+    if (conditions.length > 0) {
+      sql += ` WHERE ${conditions.join(' AND ')}`;
     }
     sql += ` ORDER BY e.id DESC`;
     const [rows] = await pool.query(sql, params);
