@@ -937,6 +937,49 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 - Trabajar en `main`, hacer merge a `deploy/cloud` **sin sobrescribir backend** (PostgreSQL)
 - Si se toca frontend, se puede copiar el archivo directamente a ambas ramas
 - `main` usa MySQL local; `deploy/cloud` usa PostgreSQL en Neon/Render
+- **NUNCA hacer `git merge main` directo a `deploy/cloud` sin verificar los archivos backend**
+- **Siempre resolver conflictos aceptando la versión de `deploy/cloud` para archivos backend**
+
+### ⚠️ Problema conocido: Archivos backend corruptos (UTF-16)
+
+**Fecha:** Julio 2026
+
+**Problema:** Los archivos backend de ambas ramas quedaron guardados en git como UTF-16 (con BOM) en vez de UTF-8. Al hacer `git restore`, los archivos se restauraban corruptos. Además, en algún momento los archivos PostgreSQL de `deploy/cloud` se copiaron a `main`, dejando el backend local con sintaxis PostgreSQL en vez de MySQL.
+
+**Síntomas:**
+- `node server.js` falla con `ERR_INVALID_PACKAGE_CONFIG`
+- `file backend/package.json` muestra `Unicode text, UTF-16`
+- Archivos muestran caracteres extraños (`├│`, `├í`, `├▒`)
+- Backend de `main` tiene `pg` en vez de `mysql2`, `$1` en vez de `?`
+
+**Causa:** Commits anteriores guardaron los archivos en UTF-16 (posiblemente por editor o merge tool). Luego un merge incorrecto de `main` a `deploy/cloud` sobrescribió los archivos backend de `main` con sintaxis PostgreSQL.
+
+**Solución aplicada:**
+1. Reescribir todos los archivos backend como UTF-8 correcto
+2. Restaurar sintaxis MySQL en `main` (`?`, `result[0]`, `IFNULL`, `GROUP_CONCAT`, `insertId`, `pool.getConnection()`)
+3. Restaurar sintaxis PostgreSQL en `deploy/cloud` (`$1, $2...`, `result.rows`, `COALESCE`, `STRING_AGG`, `RETURNING id`, `pool.connect()`)
+
+**Archivos que SIEMPRE difieren entre ramas (backend):**
+- `backend/config/db.js` — mysql2 vs pg
+- `backend/package.json` — dependencia mysql2 vs pg
+- `backend/routes/auth.js` — sintaxis MySQL vs PostgreSQL
+- `backend/routes/clientes.js` — sintaxis MySQL vs PostgreSQL
+- `backend/routes/equipos.js` — sintaxis MySQL vs PostgreSQL
+- `backend/routes/ordenes.js` — sintaxis MySQL vs PostgreSQL
+- `backend/middleware/authMiddleware.js` — idéntico en ambas
+- `backend/server.js` — idéntico en ambas
+
+**Para verificar que los archivos están bien:**
+```bash
+# En main, debe mostrar ASCII/UTF-8 (NO UTF-16)
+file backend/package.json backend/config/db.js backend/routes/*.js
+
+# En main, debe usar mysql2
+grep "mysql2" backend/package.json
+
+# En deploy/cloud, debe usar pg
+grep '"pg"' backend/package.json
+```
 
 ## Historial de Versiones
 
