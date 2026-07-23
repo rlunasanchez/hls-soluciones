@@ -42,11 +42,14 @@ function OrdenTrabajo() {
   const [busquedaCliente, setBusquedaCliente] = useState("");
   const [busquedaSerie, setBusquedaSerie] = useState("");
   const [busquedaCodigo, setBusquedaCodigo] = useState("");
+  const [busquedaModelo, setBusquedaModelo] = useState("");
   const [mostrarDropdownClientes, setMostrarDropdownClientes] = useState(false);
   const [mostrarDropdownEquipos, setMostrarDropdownEquipos] = useState(false);
   const [mostrarDropdownCodigo, setMostrarDropdownCodigo] = useState(false);
+  const [mostrarDropdownModelo, setMostrarDropdownModelo] = useState(false);
   const [equiposSugeridos, setEquiposSugeridos] = useState([]);
   const [equiposCodigoSugeridos, setEquiposCodigoSugeridos] = useState([]);
+  const [equiposModeloSugeridos, setEquiposModeloSugeridos] = useState([]);
   const [clienteInactivo, setClienteInactivo] = useState(false);
   const [equipoOtroCliente, setEquipoOtroCliente] = useState(false);
   const [equipoNoExiste, setEquipoNoExiste] = useState(false);
@@ -55,6 +58,7 @@ function OrdenTrabajo() {
   // Refs para detectar clics fuera de los dropdowns
   const equipoDropdownRef = useRef(null);
   const equipoCodigoDropdownRef = useRef(null);
+  const equipoModeloDropdownRef = useRef(null);
   const clienteDropdownRef = useRef(null);
   
   // Estado para los insumos dinámicos
@@ -141,9 +145,11 @@ function OrdenTrabajo() {
         setEquipoSeleccionado(null);
         setBusquedaCliente((clienteFromNav.razon_social || "").toUpperCase());
         setBusquedaSerie("");
-        setBusquedaCodigo("");
-        setEquiposSugeridos([]);
-        setEquiposCodigoSugeridos([]);
+    setBusquedaCodigo("");
+    setBusquedaModelo("");
+    setEquiposSugeridos([]);
+    setEquiposCodigoSugeridos([]);
+    setEquiposModeloSugeridos([]);
         setInsumos([
           { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
           { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
@@ -256,6 +262,18 @@ function OrdenTrabajo() {
     return () => clearTimeout(timer);
   }, [busquedaSerie]);
 
+  // Buscar equipos por modelo via API
+  useEffect(() => {
+    if (busquedaModelo.length < 2) { setEquiposModeloSugeridos([]); return; }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await api.get(`/api/equipos?q=${encodeURIComponent(busquedaModelo)}`);
+        setEquiposModeloSugeridos(res.data);
+      } catch { setEquiposModeloSugeridos([]); }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [busquedaModelo]);
+
   // Cierra los dropdowns al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -264,6 +282,9 @@ function OrdenTrabajo() {
       }
       if (equipoCodigoDropdownRef.current && !equipoCodigoDropdownRef.current.contains(event.target)) {
         setMostrarDropdownCodigo(false);
+      }
+      if (equipoModeloDropdownRef.current && !equipoModeloDropdownRef.current.contains(event.target)) {
+        setMostrarDropdownModelo(false);
       }
       if (clienteDropdownRef.current && !clienteDropdownRef.current.contains(event.target)) {
         setMostrarDropdownClientes(false);
@@ -704,6 +725,7 @@ function OrdenTrabajo() {
   // Equipos filtrados por API (siempre frescos)
   const equiposFiltrados = equiposSugeridos;
   const equiposCodigoFiltrados = equiposCodigoSugeridos;
+  const equiposModeloFiltrados = equiposModeloSugeridos;
 
   // Verificar número de orden único
   const verificarNumeroOrden = async (numero) => {
@@ -917,6 +939,12 @@ function OrdenTrabajo() {
                 equiposCodigoFiltrados={equiposCodigoFiltrados}
                 equipoCodigoDropdownRef={equipoCodigoDropdownRef}
                 seleccionarEquipoPorCodigo={seleccionarEquipoPorCodigo}
+                busquedaModelo={busquedaModelo}
+                setBusquedaModelo={setBusquedaModelo}
+                mostrarDropdownModelo={mostrarDropdownModelo}
+                setMostrarDropdownModelo={setMostrarDropdownModelo}
+                equiposModeloFiltrados={equiposModeloFiltrados}
+                equipoModeloDropdownRef={equipoModeloDropdownRef}
                 busquedaSerie={busquedaSerie}
                 setBusquedaSerie={setBusquedaSerie}
                 mostrarDropdownEquipos={mostrarDropdownEquipos}

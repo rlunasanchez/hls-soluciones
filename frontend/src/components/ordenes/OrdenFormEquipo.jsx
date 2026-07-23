@@ -23,7 +23,11 @@ function OrdenFormEquipo({
   esEdicion = false,
   equipoOtroCliente = false,
   equipoNoExiste = false,
-  readOnly = false
+  readOnly = false,
+  busquedaModelo, setBusquedaModelo,
+  mostrarDropdownModelo, setMostrarDropdownModelo,
+  equiposModeloFiltrados,
+  equipoModeloDropdownRef
 }) {
   const [mostrarModalEquipo, setMostrarModalEquipo] = useState(false);
   const [nuevoEquipo, setNuevoEquipo] = useState({
@@ -140,7 +144,7 @@ function OrdenFormEquipo({
         </div>
       </div>
 
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px',marginBottom:'8px'}}>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:'10px',marginBottom:'8px'}}>
         <div>
           <div ref={equipoCodigoDropdownRef} style={{ position: 'relative' }}>
             <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)' }}>
@@ -251,6 +255,63 @@ function OrdenFormEquipo({
                 ) : (
                   <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                     No se encontraron equipos con serie "{busquedaSerie}"
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <div ref={equipoModeloDropdownRef} style={{ position: 'relative' }}>
+            <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)' }}>
+              <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
+              Buscar por Modelo
+            </label>
+            <input
+              type="text"
+              placeholder="Ej: IR2520"
+              value={busquedaModelo}
+              onChange={(e) => {
+                setBusquedaModelo(e.target.value.toUpperCase());
+                setMostrarDropdownModelo(e.target.value.length >= 2);
+              }}
+              onFocus={() => {
+                if (busquedaModelo.length >= 2) setMostrarDropdownModelo(true);
+              }}
+              disabled={readOnly}
+              style={{
+                width: '100%', padding: '6px 10px',
+                border: '2px solid var(--warning)', borderRadius: '6px', fontSize: '.82rem',
+                background: equipoSeleccionado?.modelo === busquedaModelo ? '#DCFCE7' : 'white'
+              }}
+            />
+
+            {mostrarDropdownModelo && busquedaModelo.length >= 2 && (
+              <div style={{
+                position: 'absolute', top: '100%', left: 0, right: 0,
+                background: 'white', border: '2px solid var(--border)', borderTop: 'none',
+                borderRadius: '0 0 8px 8px', maxHeight: '250px', overflow: 'auto',
+                zIndex: 1000, boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+              }}>
+                {equiposModeloFiltrados.length > 0 ? (
+                  equiposModeloFiltrados.map((equipo) => (
+                    <div key={equipo.id} onClick={() => seleccionarEquipo(equipo)}
+                      style={{ padding: '6px 10px', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--primary-light)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+                    >
+                      <div style={{ fontWeight: '600', color: 'var(--text)' }}>
+                        {equipo.equipo} {equipo.marca} {equipo.modelo}
+                      </div>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                        Código: {equipo.codigo || 'N/A'} | Serie: {equipo.serie || 'N/A'}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                    No se encontraron equipos con modelo "{busquedaModelo}"
                   </div>
                 )}
               </div>
