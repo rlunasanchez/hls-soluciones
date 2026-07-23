@@ -223,8 +223,10 @@ function OrdenTrabajo() {
     setBusquedaCliente("");
     setBusquedaSerie("");
     setBusquedaCodigo("");
+    setBusquedaModelo("");
     setEquiposSugeridos([]);
     setEquiposCodigoSugeridos([]);
+    setEquiposModeloSugeridos([]);
     setInsumos([
       { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
       { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
@@ -376,6 +378,7 @@ function OrdenTrabajo() {
           setEquipoNoExiste(false);
           setBusquedaCodigo(eq.codigo || "");
           setBusquedaSerie((eq.serie || "").toUpperCase());
+          setBusquedaModelo((eq.modelo || "").toUpperCase());
           setNuevaOrden(prev => ({
             ...prev,
             equipo: toUpper(eq.equipo) || prev.equipo,
@@ -416,6 +419,7 @@ function OrdenTrabajo() {
         setEquipoNoExiste(false);
         setBusquedaCodigo(eq.codigo || "");
         setBusquedaSerie((eq.serie || "").toUpperCase());
+        setBusquedaModelo((eq.modelo || "").toUpperCase());
       } else if (orden.equipo_id) {
         setEquipoNoExiste(true);
       }
@@ -496,6 +500,7 @@ function OrdenTrabajo() {
           setEquipoNoExiste(false);
           setBusquedaCodigo(eq.codigo || "");
           setBusquedaSerie((eq.serie || "").toUpperCase());
+          setBusquedaModelo((eq.modelo || "").toUpperCase());
           setNuevaOrden(prev => ({
             ...prev,
             equipo: toUpper(eq.equipo) || prev.equipo,
@@ -535,6 +540,7 @@ function OrdenTrabajo() {
         setEquipoNoExiste(false);
         setBusquedaCodigo(eq.codigo || "");
         setBusquedaSerie((eq.serie || "").toUpperCase());
+        setBusquedaModelo((eq.modelo || "").toUpperCase());
       } else if (orden.equipo_id) {
         setEquipoNoExiste(true);
       }
@@ -606,6 +612,7 @@ function OrdenTrabajo() {
     setEquipoNoExiste(false);
     setBusquedaCodigo("");
     setBusquedaSerie("");
+    setBusquedaModelo("");
     setNuevaOrden(prev => ({
       ...prev,
       cliente: toUpper(cliente.razon_social),
@@ -658,7 +665,9 @@ function OrdenTrabajo() {
     setInsumosVisibles(Math.max(2, insumosEquipo.length));
     
      setBusquedaSerie((equipo.serie || "").toUpperCase());
+     setBusquedaModelo((equipo.modelo || "").toUpperCase());
      setMostrarDropdownEquipos(false);
+     setMostrarDropdownModelo(false);
   };
 
   const seleccionarEquipoPorCodigo = async (codigo) => {
@@ -693,6 +702,7 @@ function OrdenTrabajo() {
       setInsumosVisibles(Math.max(2, insumosEquipo.length));
       setBusquedaSerie((eq.serie || "").toUpperCase());
       setBusquedaCodigo(codigo);
+      setBusquedaModelo((eq.modelo || "").toUpperCase());
 
       // Si el equipo tiene cliente asociado, buscarlo en los datos locales
       if (eq.cliente_id) {
@@ -838,8 +848,11 @@ function OrdenTrabajo() {
     setBusquedaCliente("");
     setBusquedaSerie("");
     setBusquedaCodigo("");
+    setBusquedaModelo("");
     setEquiposSugeridos([]);
     setEquiposCodigoSugeridos([]);
+    setEquiposModeloSugeridos([]);
+    setMostrarDropdownModelo(false);
     setClienteInactivo(false);
     setEquipoOtroCliente(false);
     setEditingId(null);
