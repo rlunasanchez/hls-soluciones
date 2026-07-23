@@ -225,8 +225,8 @@ function OrdenFormEquipo({
               disabled={readOnly}
               style={{
                 width: '100%', padding: '6px 10px',
-                border: '2px solid var(--success)', borderRadius: '6px', fontSize: '.82rem',
-                background: equipoSeleccionado ? '#DCFCE7' : 'white'
+                border: '2px solid var(--info)', borderRadius: '6px', fontSize: '.82rem',
+                background: equipoSeleccionado?.serie === busquedaSerie ? '#DCFCE7' : 'white'
               }}
             />
 
