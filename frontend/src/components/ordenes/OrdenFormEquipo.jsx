@@ -167,7 +167,7 @@ function OrdenFormEquipo({
               style={{
                 width: '100%', padding: '6px 10px',
                 border: '2px solid var(--info)', borderRadius: '6px', fontSize: '.82rem',
-                background: equipoSeleccionado?.codigo === busquedaCodigo ? '#DCFCE7' : 'white'
+                background: equipoSeleccionado ? '#DCFCE7' : 'white'
               }}
             />
 
@@ -226,7 +226,7 @@ function OrdenFormEquipo({
               style={{
                 width: '100%', padding: '6px 10px',
                 border: '2px solid var(--info)', borderRadius: '6px', fontSize: '.82rem',
-                background: equipoSeleccionado?.serie === busquedaSerie ? '#DCFCE7' : 'white'
+                background: equipoSeleccionado ? '#DCFCE7' : 'white'
               }}
             />
 
@@ -283,7 +283,7 @@ function OrdenFormEquipo({
               style={{
                 width: '100%', padding: '6px 10px',
                 border: '2px solid var(--info)', borderRadius: '6px', fontSize: '.82rem',
-                background: equipoSeleccionado?.modelo === busquedaModelo ? '#DCFCE7' : 'white'
+                background: equipoSeleccionado ? '#DCFCE7' : 'white'
               }}
             />
 
