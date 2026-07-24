@@ -1380,6 +1380,21 @@ WHERE contacto_nombre IS NOT NULL AND contacto_nombre != '';
 
 **NOTA:** La migración SQL **debe ejecutarse manualmente en Neon** antes de que el frontend funcione correctamente con contactos múltiples.
 
+### 48. Límite visual de contactos y sucursales en formulario de cliente
+**Fecha:** 24 Julio 2026
+**Archivos modificados:**
+- `frontend/src/components/clientes/ClienteFormulario.jsx`
+- `frontend/src/pages/Clientes.css`
+
+**Problema:** Al editar un cliente con muchos contactos o sucursales, la pantalla se llenaba de datos y se hacía difícil de navegar.
+
+**Cambios:**
+- **Contactos**: máximo 4 chips visibles por defecto, botón `+N más` / `Mostrar menos` para expandir/colapsar
+- **Sucursales**: máximo 1 visible por defecto, botón `Ver todas (X)` / `Ver menos` para expandir/colapsar
+- **Scroll**: contenedor de chips con `max-height: 120px` y scrollbar custom para evitar deformación de pantalla
+- **"+ Agregar" sucursal**: expande automáticamente al agregar una nueva
+- **Bordes solid**: todos los botones toggle cambiaron de `dashed` a `solid` para consistencia visual
+
 ---
 
 ## Historial de Versiones
@@ -1406,3 +1421,4 @@ WHERE contacto_nombre IS NOT NULL AND contacto_nombre != '';
 | 1.17 | Julio 2026 | Fix búsqueda Modelo en OT, fix equipos GET filtro cliente_id, backend deploy/cloud reconstruido |
 | 1.18 | Julio 2026 | Cascade actualización de cliente a OTs asociadas |
 | 1.19 | 24 Julio 2026 | Múltiples contactos por cliente (tabla clientes_contactos, modal, chips con popup detalle) |
+| 1.20 | 24 Julio 2026 | Límite visual de contactos y sucursales: max 4 contactos + toggle, max 1 sucursal + toggle, max-height con scroll, bordes solid en todos los botones toggle |

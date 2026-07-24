@@ -17,9 +17,11 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
     crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia()
   ]);
   const [sucursalesVisibles, setSucursalesVisibles] = useState(1);
+  const [sucursalesExpandidos, setSucursalesExpandidos] = useState(false);
   const [contactos, setContactos] = useState([]);
   const [mostrarModalContactos, setMostrarModalContactos] = useState(false);
   const [contactoSeleccionado, setContactoSeleccionado] = useState(null);
+  const [contactosExpandidos, setContactosExpandidos] = useState(false);
   const [rutError, setRutError] = useState("");
 
   useEffect(() => {
@@ -112,8 +114,10 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
       crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia()
     ]);
     setSucursalesVisibles(1);
+    setSucursalesExpandidos(false);
     setContactos([]);
     setMostrarModalContactos(false);
+    setContactosExpandidos(false);
     setRutError("");
   };
 
@@ -303,12 +307,17 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                   </button>
                   {contactos.length > 0 && (
                     <div className="contactos-lista-preview">
-                      {contactos.map((c, i) => (
+                      {(contactosExpandidos ? contactos : contactos.slice(0, 4)).map((c, i) => (
                         <div key={i} className="contacto-chip" style={{ cursor: "pointer" }} onClick={() => setContactoSeleccionado(c)}>
                           <span className="contacto-chip-nombre">{c.nombre}</span>
                           {c.cargo && <span className="contacto-chip-cargo">{c.cargo}</span>}
                         </div>
                       ))}
+                      {contactos.length > 4 && (
+                        <button type="button" className="contacto-chip-toggle" onClick={() => setContactosExpandidos(!contactosExpandidos)}>
+                          {contactosExpandidos ? "Mostrar menos" : `+${contactos.length - 4} más`}
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -316,12 +325,17 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                 <div className="contactos-adicionales">
                   <label style={{ fontSize: ".78rem", fontWeight: 600, color: "#475569" }}>Contactos Adicionales</label>
                   <div className="contactos-lista-preview">
-                    {contactos.map((c, i) => (
+                    {(contactosExpandidos ? contactos : contactos.slice(0, 4)).map((c, i) => (
                       <div key={i} className="contacto-chip" style={{ cursor: "pointer" }} onClick={() => setContactoSeleccionado(c)}>
                         <span className="contacto-chip-nombre">{c.nombre}</span>
                         {c.cargo && <span className="contacto-chip-cargo">{c.cargo}</span>}
                       </div>
                     ))}
+                    {contactos.length > 4 && (
+                      <button type="button" className="contacto-chip-toggle" onClick={() => setContactosExpandidos(!contactosExpandidos)}>
+                        {contactosExpandidos ? "Mostrar menos" : `+${contactos.length - 4} más`}
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
@@ -331,11 +345,18 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
           <div className="cf-sec cf-sec-suc">
             <div className="cf-sh">
               <h3>Sucursales/Direcciones</h3>
-              {sucursalesVisibles < 5 && !readOnly && (
-                <button type="button" className="cf-btn-a" onClick={() => setSucursalesVisibles(sucursalesVisibles + 1)}>+ Agregar</button>
-              )}
+              <div className="cf-sh-actions">
+                {sucursalesVisibles > 1 && (
+                  <button type="button" className="cf-btn-toggle-suc" onClick={() => setSucursalesExpandidos(!sucursalesExpandidos)}>
+                    {sucursalesExpandidos ? "Ver menos" : `Ver todas (${sucursalesVisibles})`}
+                  </button>
+                )}
+                {sucursalesVisibles < 5 && !readOnly && (
+                  <button type="button" className="cf-btn-a" onClick={() => { setSucursalesVisibles(sucursalesVisibles + 1); setSucursalesExpandidos(true); }}>+ Agregar</button>
+                )}
+              </div>
             </div>
-            {sucursales.slice(0, sucursalesVisibles).map((suc, idx) => (
+            {sucursales.slice(0, sucursalesExpandidos ? sucursalesVisibles : 1).map((suc, idx) => (
               <div key={idx} className="cf-sc">
                 <div className="cf-r2 cf-mb">
                   <div className="cf-field cf-m0">
