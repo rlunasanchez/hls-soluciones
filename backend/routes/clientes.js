@@ -105,6 +105,10 @@ router.put("/:id", authMiddleware, async (req, res) => {
         }
       }
     }
+    await connection.query(
+      `UPDATE ordenes_trabajo SET cliente = ?, direccion = ?, comuna = ?, contacto = ?, fono_principal = ? WHERE cliente_id = ?`,
+      [razon_social, direccion || null, comuna || null, contacto_nombre || null, telefono || null, id]
+    );
     await connection.commit();
     res.json({ msg: "Cliente actualizado", codigo });
   } catch (err) {
