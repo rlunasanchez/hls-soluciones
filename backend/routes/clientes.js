@@ -7,8 +7,9 @@ dotenv.config();
 const router = express.Router();
 
 async function generarCodigo() {
-  const result = await pool.query("SELECT MAX(CAST(SUBSTRING(codigo, 4) AS INTEGER)) AS num FROM clientes WHERE codigo LIKE 'CL-%'");
-  const num = result.rows[0]?.num || 0;
+  const result = await pool.query("SELECT codigo FROM clientes WHERE codigo LIKE 'CL-%' ORDER BY id DESC LIMIT 1");
+  if (result.rows.length === 0) return "CL-0001";
+  const num = parseInt(result.rows[0].codigo.split("-")[1], 10) || 0;
   return `CL-${String(num + 1).padStart(4, "0")}`;
 }
 
@@ -52,7 +53,7 @@ router.post("/", authMiddleware, async (req, res) => {
     const result = await pool.query(
       `INSERT INTO clientes (codigo, razon_social, giro, rut, direccion, ciudad, comuna, telefono, email, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id`,
-      [codigo, razon_social, giro, rut, direccion, ciudad, comuna, telefono, email, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion]
+      [codigo, razon_social, giro, rut, direccion, ciudad, comuna, telefono, email || null, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion]
     );
     const clienteId = result.rows[0].id;
 
@@ -81,36 +82,57 @@ router.put("/:id", authMiddleware, async (req, res) => {
     contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion,
     direcciones
   } = req.body;
-  const client = await pool.connect();
   try {
-    const result = await client.query("SELECT codigo FROM clientes WHERE id = $1", [id]);
+    const result = await pool.query("SELECT codigo FROM clientes WHERE id = $1", [id]);
     let codigo = result.rows[0]?.codigo;
     if (!codigo) codigo = await generarCodigo();
 
-    await client.query("BEGIN");
-    await client.query(
-      `UPDATE clientes SET codigo=$1, razon_social=$2, giro=$3, rut=$4, direccion=$5, ciudad=$6, comuna=$7, telefono=$8, email=$9, contacto_nombre=$10, contacto_email=$11, contacto_fono=$12, contacto_cargo=$13, contacto_direccion=$14 WHERE id=$15`,
-      [codigo, razon_social, giro, rut, direccion, ciudad, comuna, telefono, email, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion, id]
-    );
-    await client.query("DELETE FROM clientes_direcciones WHERE cliente_id = $1", [id]);
-    if (direcciones && direcciones.length > 0) {
-      for (const d of direcciones) {
-        if (d.direccion && d.direccion.trim()) {
-          await client.query(
-            "INSERT INTO clientes_direcciones (cliente_id, tipo_direccion, direccion, fono, ciudad, comuna) VALUES ($1, $2, $3, $4, $5, $6)",
-            [id, d.tipo_direccion || '', d.direccion, d.fono || '', d.ciudad || '', d.comuna || '']
-          );
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query(
+        `UPDATE clientes SET codigo=$1, razon_social=$2, giro=$3, rut=$4, direccion=$5, ciudad=$6, comuna=$7, telefono=$8, email=$9, contacto_nombre=$10, contacto_email=$11, contacto_fono=$12, contacto_cargo=$13, contacto_direccion=$14 WHERE id=$15`,
+        [codigo, razon_social, giro, rut, direccion, ciudad, comuna, telefono, email || null, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion, id]
+      );
+      await client.query("DELETE FROM clientes_direcciones WHERE cliente_id = $1", [id]);
+      if (direcciones && direcciones.length > 0) {
+        for (const d of direcciones) {
+          if (d.direccion && d.direccion.trim()) {
+            await client.query(
+              "INSERT INTO clientes_direcciones (cliente_id, tipo_direccion, direccion, fono, ciudad, comuna) VALUES ($1, $2, $3, $4, $5, $6)",
+              [id, d.tipo_direccion || '', d.direccion, d.fono || '', d.ciudad || '', d.comuna || '']
+            );
+          }
         }
       }
+      await client.query(
+        `UPDATE ordenes_trabajo SET cliente = $1, direccion = $2, comuna = $3, contacto = $4, fono_principal = $5 WHERE cliente_id = $6`,
+        [razon_social, direccion || null, comuna || null, contacto_nombre || null, telefono || null, id]
+      );
+      await client.query("COMMIT");
+      res.json({ msg: "Cliente actualizado", codigo });
+    } catch (err) {
+      await client.query("ROLLBACK");
+      throw err;
+    } finally {
+      client.release();
     }
-    await client.query("COMMIT");
-    res.json({ msg: "Cliente actualizado", codigo });
   } catch (err) {
-    await client.query("ROLLBACK");
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
-  } finally {
-    client.release();
+  }
+});
+
+router.get("/:id/equipos", authMiddleware, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      "SELECT id, codigo, equipo, marca, modelo, serie FROM equipos WHERE cliente_id = $1 AND activo = true",
+      [req.params.id]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Error del servidor" });
   }
 });
 

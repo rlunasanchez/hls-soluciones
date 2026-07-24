@@ -11,7 +11,7 @@ const router = express.Router();
 router.post("/setup-admin", async (req, res) => {
   const { key } = req.body;
   if (key !== "hls-setup-2026") {
-    return res.status(403).json({ msg: "Key inválida" });
+    return res.status(403).json({ msg: "Key inv├ílida" });
   }
   try {
     const passwordHash = await bcrypt.hash("admin123", 10);
@@ -84,18 +84,18 @@ router.put("/cambiar-password", authMiddleware, async (req, res) => {
     const user = result.rows[0];
     const passwordValida = await bcrypt.compare(passwordActual, user.password);
     if (!passwordValida) {
-      return res.status(401).json({ msg: "Contraseña actual incorrecta" });
+      return res.status(401).json({ msg: "Contrase├▒a actual incorrecta" });
     }
     const nuevaPasswordEncriptada = await bcrypt.hash(nuevaPassword, 10);
     await pool.query("UPDATE usuarios SET password = $1 WHERE usuario = $2", [nuevaPasswordEncriptada, usuario]);
-    res.json({ msg: "Contraseña actualizada correctamente" });
+    res.json({ msg: "Contrase├▒a actualizada correctamente" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
   }
 });
 
-router.get("/usuarios", authMiddleware, adminOnly, async (req, res) => {
+router.get("/usuarios", authMiddleware, async (req, res) => {
   try {
     const result = await pool.query("SELECT id, usuario, email, rol, activo, fecha_creacion FROM usuarios ORDER BY id DESC");
     res.json(result.rows);
@@ -111,7 +111,7 @@ router.put("/resetear-password/:id", authMiddleware, adminOnly, async (req, res)
   try {
     const nuevaPasswordEncriptada = await bcrypt.hash(nuevaPassword, 10);
     await pool.query("UPDATE usuarios SET password = $1 WHERE id = $2", [nuevaPasswordEncriptada, id]);
-    res.json({ msg: "Contraseña restablecida correctamente" });
+    res.json({ msg: "Contrase├▒a restablecida correctamente" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });

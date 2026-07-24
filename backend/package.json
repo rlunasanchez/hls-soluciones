@@ -1,5 +1,5 @@
 {
-  "name": "hls-backend",
+  "name": "sbackend",
   "version": "1.0.0",
   "type": "module",
   "main": "server.js",
