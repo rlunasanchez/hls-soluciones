@@ -885,6 +885,7 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.15 | Julio 2026 | Opción "Solo Desactivar" en eliminación de clientes con equipos (endpoint desactivar, modal con 3 opciones) |
 | 1.16 | Julio 2026 | Botón "Ver" en todos los módulos (solo lectura), fix alineación botones mobile, filtros OT responsive (N° Orden full width, Desde/Hasta lado a lado), limpieza CSS muerto |
 | 1.17 | Julio 2026 | Fix búsqueda Modelo en OT no filtraba (busquedaModelo no se reseteaba), fix equipos GET soporte filtro cliente_id, fix backend deploy/cloud reconstruido (archivos faltantes/corruptos), fix filtros fechas desktop |
+| 1.18 | Julio 2026 | Cascade actualización de cliente a OTs asociadas (PUT cliente → UPDATE ordenes_trabajo) |
 
 ---
 
@@ -1004,6 +1005,7 @@ grep '"pg"' backend/package.json
 | 1.15 | Julio 2026 | Opción "Solo Desactivar" en eliminación de clientes con equipos (endpoint desactivar, modal con 3 opciones) |
 | 1.16 | Julio 2026 | Botón "Ver" en todos los módulos (solo lectura), fix alineación botones mobile, filtros OT responsive |
 | 1.17 | Julio 2026 | Fix búsqueda Modelo en OT no filtraba (busquedaModelo no se reseteaba), fix equipos GET soporte filtro cliente_id, fix backend deploy/cloud reconstruido (archivos faltantes/corruptos), fix filtros fechas desktop |
+| 1.18 | Julio 2026 | Cascade actualización de cliente a OTs asociadas (PUT cliente → UPDATE ordenes_trabajo) |
 
 ## Cambios Recientes (20 Mayo 2026)
 
@@ -1294,3 +1296,26 @@ ALTER TABLE ordenes_trabajo ADD COLUMN IF NOT EXISTS observaciones TEXT;
 **Mejora: Alineación fechas desktop**
 - **Archivo:** `frontend/src/components/ordenes/ordenes-componentes.css`
 - `.filtro-fechas-group` con `display: flex; gap: 8px` para que Desde/Hasta estén lado a lado
+
+### 46. Cascade actualización de cliente a OTs asociadas
+**Fecha:** Julio 2026
+**Archivos modificados:**
+- `backend/routes/clientes.js` (ambas ramas)
+
+**Problema:** Al editar un cliente (razón social, dirección, comuna, contacto, teléfono), los cambios no se reflejaban en las Órdenes de Trabajo asociadas. La OT guardaba copias estáticas de los datos del cliente al momento de crearse/editarse, y nunca se actualizaban.
+
+**Causa:** La tabla `ordenes_trabajo` tiene columnas desnormalizadas (`cliente`, `direccion`, `comuna`, `contacto`, `fono_principal`) que son snapshots del cliente en el momento de guardar la OT. No había cascade al editar el cliente.
+
+**Solución:** Agregado cascade en `PUT /api/clientes/:id` — después de actualizar el cliente, se ejecuta un `UPDATE ordenes_trabajo` que sobreescribe los datos desnormalizados en todas las OTs con ese `cliente_id`.
+
+**Query cascade (MySQL - main):**
+```sql
+UPDATE ordenes_trabajo SET cliente = ?, direccion = ?, comuna = ?, contacto = ?, fono_principal = ? WHERE cliente_id = ?
+```
+
+**Query cascade (PostgreSQL - deploy/cloud):**
+```sql
+UPDATE ordenes_trabajo SET cliente = $1, direccion = $2, comuna = $3, contacto = $4, fono_principal = $5 WHERE cliente_id = $6
+```
+
+**Nota:** El cascade está dentro de la transacción — si falla, se hace rollback del UPDATE del cliente también.
