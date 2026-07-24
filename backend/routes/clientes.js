@@ -28,12 +28,13 @@ router.get("/", authMiddleware, async (req, res) => {
   try {
     const [rows] = await pool.query(`
       SELECT c.*,
-        IFNULL(GROUP_CONCAT(
-          CONCAT(IFNULL(cd.tipo_direccion, ''), '|', IFNULL(cd.direccion, ''), '|', IFNULL(cd.fono, ''), '|', IFNULL(cd.ciudad, ''), '|', IFNULL(cd.comuna, ''))
-        SEPARATOR ';;'), '') as direcciones
+        (SELECT IFNULL(GROUP_CONCAT(
+          CONCAT(IFNULL(d.tipo_direccion, ''), '|', IFNULL(d.direccion, ''), '|', IFNULL(d.fono, ''), '|', IFNULL(d.ciudad, ''), '|', IFNULL(d.comuna, ''))
+        SEPARATOR ';;'), '') FROM clientes_direcciones d WHERE d.cliente_id = c.id) as direcciones,
+        (SELECT IFNULL(GROUP_CONCAT(
+          CONCAT(IFNULL(co.nombre, ''), '|', IFNULL(co.email, ''), '|', IFNULL(co.fono, ''), '|', IFNULL(co.cargo, ''), '|', IFNULL(co.direccion, ''))
+        SEPARATOR ';;'), '') FROM clientes_contactos co WHERE co.cliente_id = c.id) as contactos
       FROM clientes c
-      LEFT JOIN clientes_direcciones cd ON c.id = cd.cliente_id
-      GROUP BY c.id
       ORDER BY c.id DESC
     `);
     res.json(rows);
@@ -47,7 +48,7 @@ router.post("/", authMiddleware, async (req, res) => {
   const {
     razon_social, giro, rut, direccion, ciudad, comuna, telefono, email,
     contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion,
-    direcciones
+    direcciones, contactos
   } = req.body;
   const codigo = await generarCodigo();
   try {
@@ -69,6 +70,17 @@ router.post("/", authMiddleware, async (req, res) => {
       }
     }
 
+    if (contactos && contactos.length > 0) {
+      for (const c of contactos) {
+        if (c.nombre && c.nombre.trim()) {
+          await pool.query(
+            "INSERT INTO clientes_contactos (cliente_id, nombre, email, fono, cargo, direccion) VALUES (?, ?, ?, ?, ?, ?)",
+            [clienteId, c.nombre, c.email || '', c.fono || '', c.cargo || '', c.direccion || '']
+          );
+        }
+      }
+    }
+
     res.status(201).json({ msg: "Cliente creado", codigo });
   } catch (err) {
     console.error(err);
@@ -81,7 +93,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
   const {
     razon_social, giro, rut, direccion, ciudad, comuna, telefono, email,
     contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion,
-    direcciones
+    direcciones, contactos
   } = req.body;
   const connection = await pool.getConnection();
   try {
@@ -101,6 +113,17 @@ router.put("/:id", authMiddleware, async (req, res) => {
           await connection.query(
             "INSERT INTO clientes_direcciones (cliente_id, tipo_direccion, direccion, fono, ciudad, comuna) VALUES (?, ?, ?, ?, ?, ?)",
             [id, d.tipo_direccion || '', d.direccion, d.fono || '', d.ciudad || '', d.comuna || '']
+          );
+        }
+      }
+    }
+    await connection.query("DELETE FROM clientes_contactos WHERE cliente_id = ?", [id]);
+    if (contactos && contactos.length > 0) {
+      for (const c of contactos) {
+        if (c.nombre && c.nombre.trim()) {
+          await connection.query(
+            "INSERT INTO clientes_contactos (cliente_id, nombre, email, fono, cargo, direccion) VALUES (?, ?, ?, ?, ?, ?)",
+            [id, c.nombre, c.email || '', c.fono || '', c.cargo || '', c.direccion || '']
           );
         }
       }
