@@ -1319,3 +1319,90 @@ UPDATE ordenes_trabajo SET cliente = $1, direccion = $2, comuna = $3, contacto =
 ```
 
 **Nota:** El cascade está dentro de la transacción — si falla, se hace rollback del UPDATE del cliente también.
+
+### 47. Múltiples Contactos por Cliente
+**Fecha:** 24 Julio 2026
+**Commits:** `ddbe102`, `02004ca`, `cb7b1b4`, `e9b60d8`
+
+**Problema:** Cada cliente solo podía tener un contacto asociado (campos `contacto_nombre`, `contacto_email`, etc. en la tabla `clientes`). No había forma de guardar múltiples contactos por cliente.
+
+**Solución:** Nueva tabla `clientes_contactos` con relación 1:N a `clientes`.
+
+**Archivos modificados:**
+- `backend/routes/clientes.js` (ambas ramas) — GET usa `STRING_AGG`/`GROUP_CONCAT` para concatenar contactos; POST inserta contactos individualmente; PUT borra y re-inserta (delete-and-reinsert)
+- `frontend/src/components/clientes/ClienteFormulario.jsx` — array `contactos`, chips de preview, popup de detalle, integración con formulario existente
+- `frontend/src/components/clientes/ModalContactos.jsx` (nuevo) — modal para editar contactos adicionales (122 líneas)
+- `frontend/src/pages/Clientes.css` — estilos para chips, popup de detalle, modal de contactos
+
+**Migración SQL (PostgreSQL/Neon):**
+```sql
+CREATE TABLE IF NOT EXISTS clientes_contactos (
+  id SERIAL PRIMARY KEY,
+  cliente_id INTEGER NOT NULL REFERENCES clientes(id) ON DELETE CASCADE,
+  nombre VARCHAR(100),
+  email VARCHAR(100),
+  fono VARCHAR(20),
+  cargo VARCHAR(100),
+  direccion VARCHAR(255)
+);
+
+INSERT INTO clientes_contactos (cliente_id, nombre, email, fono, cargo, direccion)
+SELECT id, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion
+FROM clientes
+WHERE contacto_nombre IS NOT NULL AND contacto_nombre != '';
+```
+
+**Migración SQL (MySQL/main):**
+```sql
+CREATE TABLE IF NOT EXISTS clientes_contactos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  cliente_id INT NOT NULL,
+  nombre VARCHAR(100),
+  email VARCHAR(100),
+  fono VARCHAR(20),
+  cargo VARCHAR(100),
+  direccion VARCHAR(255),
+  FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
+);
+
+INSERT INTO clientes_contactos (cliente_id, nombre, email, fono, cargo, direccion)
+SELECT id, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion
+FROM clientes
+WHERE contacto_nombre IS NOT NULL AND contacto_nombre != '';
+```
+
+**Flujo en Frontend:**
+1. El primer contacto de la lista se muestra en los campos principales del formulario (Nombre, Email, Fono, Cargo)
+2. Los contactos adicionales se muestran como chips verdes debajo de "Datos del Contacto"
+3. Click en chip → popup con detalle del contacto + botones Editar/Eliminar
+4. Botón "+ Agregar otro contacto" abre `ModalContactos` para gestionar contactos adicionales
+5. Al guardar, se combinan el contacto principal + adicionales y se envían como array `contactos`
+
+**NOTA:** La migración SQL **debe ejecutarse manualmente en Neon** antes de que el frontend funcione correctamente con contactos múltiples.
+
+---
+
+## Historial de Versiones
+
+| Versión | Fecha | Cambios |
+|---------|-------|---------|
+| 1.0 | 17 Mayo 2026 | Sistema base con Clientes, Equipos, Órdenes |
+| 1.1 | 17-18 Mayo 2026 | Responsive móvil, fix Vercel, optimización |
+| 1.2 | 18 Mayo 2026 | Documentación completa |
+| 1.3 | 18 Mayo 2026 | Separación ramas main (MySQL) vs deploy/cloud (PostgreSQL), fix fechas editar orden |
+| 1.4 | 20 Mayo 2026 | Fix FK cliente_id en seed script, toggle hide/show, paginación 10→4 items, paginación OT |
+| 1.5 | Julio 2026 | Campos actividad y observaciones en OT, columna y filtro de estado |
+| 1.6 | Julio 2026 | Mayúsculas automáticas en formularios, limpieza de código muerto |
+| 1.7 | Julio 2026 | Vista expandida de cliente compacta, teléfono visible en dropdown OT |
+| 1.8 | Julio 2026 | Fix cascade actividades/observaciones en OT, fix doble confirm eliminar OT |
+| 1.9 | Julio 2026 | Mostrar actividad/observaciones en Equipos y Clientes, fix INSERT equipos, Contador Páginas OUT, keepalive MySQL |
+| 1.10 | Julio 2026 | Badges "Cliente inactivo" y "Equipo asignado a otro cliente" en formulario OT |
+| 1.11 | Julio 2026 | Fix limpieza de datos al cambiar cliente en OT, botón "+ Nuevo" visible solo cuando no tiene cliente/equipo |
+| 1.12 | Julio 2026 | Filtros separados en Equipos, fix alineación filtros OT |
+| 1.13 | Julio 2026 | Badge "Equipo desactivado", badge "Cliente desactivado", fix campo Matriz/Sucursal, columna email |
+| 1.14 | Julio 2026 | Seguridad: authMiddleware en GET, adminOnly. Bugs: SUCURSAL_VACIA, resetFormulario, cerrarSesion compartida, AbortController |
+| 1.15 | Julio 2026 | Opción "Solo Desactivar" en eliminación de clientes con equipos |
+| 1.16 | Julio 2026 | Botón "Ver" en todos los módulos, fix alineación botones mobile, filtros OT responsive |
+| 1.17 | Julio 2026 | Fix búsqueda Modelo en OT, fix equipos GET filtro cliente_id, backend deploy/cloud reconstruido |
+| 1.18 | Julio 2026 | Cascade actualización de cliente a OTs asociadas |
+| 1.19 | 24 Julio 2026 | Múltiples contactos por cliente (tabla clientes_contactos, modal, chips con popup detalle) |
