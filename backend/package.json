@@ -1,5 +1,5 @@
 {
-  "name": "sbackend",
+  "name": "hls-backend",
   "version": "1.0.0",
   "type": "module",
   "main": "server.js",
@@ -14,6 +14,6 @@
     "express": "^4.21.0",
     "express-rate-limit": "^7.4.0",
     "jsonwebtoken": "^9.0.2",
-    "pg": "^8.13.0"
+    "mysql2": "^3.11.0"
   }
 }

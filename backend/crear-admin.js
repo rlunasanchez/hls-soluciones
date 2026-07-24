@@ -1,24 +1,29 @@
-import pg from 'pg';
+import mysql from 'mysql2/promise';
 import bcrypt from 'bcrypt';
+import dotenv from 'dotenv';
 
-const { Pool } = pg;
+dotenv.config();
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_fgic5sYlSoz9@ep-cold-art-acx567jp-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require'
+const pool = mysql.createPool({
+  host: process.env.DB_HOST || 'localhost',
+  port: process.env.DB_PORT || 3306,
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '6498',
+  database: process.env.DB_NAME || 'soporte_tecnico_db',
 });
 
 async function crearAdmin() {
   try {
     const passwordHash = await bcrypt.hash('admin123', 10);
     
-    const result = await pool.query(`
-      INSERT INTO usuarios (usuario, password, rol, email, activo)
-      VALUES ('admin', $1, 'admin', 'admin@hls.cl', true)
-      ON CONFLICT (usuario) DO UPDATE SET password = $1, rol = 'admin', activo = true
-      RETURNING id, usuario, rol
-    `, [passwordHash]);
+    await pool.query(
+      `INSERT INTO usuarios (usuario, password, rol, email, activo)
+       VALUES (?, ?, 'admin', 'admin@hls.cl', true)
+       ON DUPLICATE KEY UPDATE password = VALUES(password), rol = 'admin', activo = true`,
+      ['admin', passwordHash]
+    );
     
-    console.log('Admin creado/actualizado:', result.rows[0]);
+    console.log('Admin creado/actualizado correctamente');
     process.exit(0);
   } catch (err) {
     console.error('Error:', err.message);
