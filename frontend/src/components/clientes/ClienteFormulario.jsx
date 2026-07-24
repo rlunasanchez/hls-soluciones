@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { Save, X, Trash2 } from "lucide-react";
+import { Save, X, Trash2, Users } from "lucide-react";
 import { toUpper, validarRUT } from "../../utils/helpers";
+import ModalContactos from "./ModalContactos";
 
 const crearSucursalVacia = () => ({ tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" });
 
@@ -16,6 +17,9 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
     crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia()
   ]);
   const [sucursalesVisibles, setSucursalesVisibles] = useState(1);
+  const [contactos, setContactos] = useState([]);
+  const [mostrarModalContactos, setMostrarModalContactos] = useState(false);
+  const [contactoSeleccionado, setContactoSeleccionado] = useState(null);
   const [rutError, setRutError] = useState("");
 
   useEffect(() => {
@@ -38,6 +42,33 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
         }
       }
       setSucursalesVisibles(dirs.filter((s) => s.direccion).length || 1);
+
+      let contacts = [];
+      if (clienteEditando.contactos) {
+        contacts = clienteEditando.contactos.split(";;").map((c) => {
+          const parts = c.split("|");
+          return {
+            nombre: toUpper(parts[0] || ""),
+            email: parts[1] || "",
+            fono: parts[2] || "",
+            cargo: toUpper(parts[3] || ""),
+            direccion: toUpper(parts[4] || "")
+          };
+        }).filter((c) => c.nombre);
+      }
+      if (contacts.length === 0 && clienteEditando.contacto_nombre) {
+        contacts = [{
+          nombre: toUpper(clienteEditando.contacto_nombre),
+          email: clienteEditando.contacto_email || "",
+          fono: clienteEditando.contacto_fono || "",
+          cargo: toUpper(clienteEditando.contacto_cargo),
+          direccion: toUpper(clienteEditando.contacto_direccion)
+        }];
+      }
+      const primerContacto = contacts[0] || {};
+      const contactosAdicionales = contacts.slice(1);
+      setContactos(contactosAdicionales);
+
       setRutError("");
       setNuevoCliente({
         codigo: clienteEditando.codigo || "",
@@ -49,11 +80,11 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
         comuna: toUpper(clienteEditando.comuna),
         telefono: clienteEditando.telefono || "",
         email: clienteEditando.email || "",
-        contacto_nombre: toUpper(clienteEditando.contacto_nombre),
-        contacto_email: clienteEditando.contacto_email || "",
-        contacto_fono: clienteEditando.contacto_fono || "",
-        contacto_cargo: toUpper(clienteEditando.contacto_cargo),
-        contacto_direccion: toUpper(clienteEditando.contacto_direccion),
+        contacto_nombre: primerContacto.nombre || toUpper(clienteEditando.contacto_nombre) || "",
+        contacto_email: primerContacto.email || clienteEditando.contacto_email || "",
+        contacto_fono: primerContacto.fono || clienteEditando.contacto_fono || "",
+        contacto_cargo: primerContacto.cargo || toUpper(clienteEditando.contacto_cargo) || "",
+        contacto_direccion: primerContacto.direccion || toUpper(clienteEditando.contacto_direccion) || "",
         direcciones: dirs
       });
     }
@@ -81,6 +112,8 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
       crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia()
     ]);
     setSucursalesVisibles(1);
+    setContactos([]);
+    setMostrarModalContactos(false);
     setRutError("");
   };
 
@@ -91,7 +124,23 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
       return;
     }
     const dirs = sucursales.filter((s) => s.direccion.trim() !== "");
-    onSave({ ...nuevoCliente, direcciones: dirs }, resetFormulario);
+    const primerContacto = {
+      nombre: nuevoCliente.contacto_nombre,
+      email: nuevoCliente.contacto_email,
+      fono: nuevoCliente.contacto_fono,
+      cargo: nuevoCliente.contacto_cargo,
+      direccion: nuevoCliente.contacto_direccion
+    };
+    const todosContactos = [];
+    if (primerContacto.nombre && primerContacto.nombre.trim()) {
+      todosContactos.push(primerContacto);
+    }
+    todosContactos.push(...contactos);
+    onSave({
+      ...nuevoCliente,
+      direcciones: dirs,
+      contactos: todosContactos
+    }, resetFormulario);
   };
 
   const handleRutChange = (e) => {
@@ -242,6 +291,40 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                     onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_direccion: e.target.value.toUpperCase() })} />
                 </div>
               </div>
+              {!readOnly ? (
+                <div className="contactos-adicionales">
+                  <button type="button" className="cf-btn-contactos" onClick={() => setMostrarModalContactos(true)}>
+                    <Users size={15} />
+                    <span>
+                      {contactos.length > 0
+                        ? `${contactos.length} contacto${contactos.length > 1 ? 's' : ''} adicional${contactos.length > 1 ? 'es' : ''}`
+                        : "+ Agregar otro contacto"}
+                    </span>
+                  </button>
+                  {contactos.length > 0 && (
+                    <div className="contactos-lista-preview">
+                      {contactos.map((c, i) => (
+                        <div key={i} className="contacto-chip" style={{ cursor: "pointer" }} onClick={() => setContactoSeleccionado(c)}>
+                          <span className="contacto-chip-nombre">{c.nombre}</span>
+                          {c.cargo && <span className="contacto-chip-cargo">{c.cargo}</span>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : contactos.length > 0 && (
+                <div className="contactos-adicionales">
+                  <label style={{ fontSize: ".78rem", fontWeight: 600, color: "#475569" }}>Contactos Adicionales</label>
+                  <div className="contactos-lista-preview">
+                    {contactos.map((c, i) => (
+                      <div key={i} className="contacto-chip" style={{ cursor: "pointer" }} onClick={() => setContactoSeleccionado(c)}>
+                        <span className="contacto-chip-nombre">{c.nombre}</span>
+                        {c.cargo && <span className="contacto-chip-cargo">{c.cargo}</span>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -311,6 +394,51 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
           </div>
         </form>
       </div>
+      {mostrarModalContactos && (
+        <ModalContactos
+          contactos={contactos}
+          onChange={setContactos}
+          onClose={() => setMostrarModalContactos(false)}
+          readOnly={readOnly}
+        />
+      )}
+      {contactoSeleccionado && (
+        <div className="modal-overlay" onClick={() => setContactoSeleccionado(null)}>
+          <div className="modal-contacto-detalle" onClick={e => e.stopPropagation()}>
+            <div className="modal-contacto-detalle-head">
+              <h3><Users size={16} /> {contactoSeleccionado.nombre}</h3>
+              <button type="button" onClick={() => setContactoSeleccionado(null)}><X size={16} /></button>
+            </div>
+            <div className="modal-contacto-detalle-body">
+              {contactoSeleccionado.cargo && (
+                <div className="detalle-row"><span className="detalle-label">Cargo</span><span className="detalle-valor">{contactoSeleccionado.cargo}</span></div>
+              )}
+              {contactoSeleccionado.email && (
+                <div className="detalle-row"><span className="detalle-label">Email</span><span className="detalle-valor">{contactoSeleccionado.email}</span></div>
+              )}
+              {contactoSeleccionado.fono && (
+                <div className="detalle-row"><span className="detalle-label">Fono</span><span className="detalle-valor">{contactoSeleccionado.fono}</span></div>
+              )}
+              {contactoSeleccionado.direccion && (
+                <div className="detalle-row"><span className="detalle-label">Dirección</span><span className="detalle-valor">{contactoSeleccionado.direccion}</span></div>
+              )}
+              {!readOnly && (
+                <div className="detalle-acciones">
+                  <button type="button" className="cf-btn-c" onClick={() => {
+                    setContactoSeleccionado(null);
+                    setMostrarModalContactos(true);
+                  }}>Editar</button>
+                  <button type="button" className="cf-btn-d" onClick={() => {
+                    if (!window.confirm(`¿Eliminar contacto ${contactoSeleccionado.nombre}?`)) return;
+                    setContactos(contactos.filter(c => c !== contactoSeleccionado));
+                    setContactoSeleccionado(null);
+                  }}><Trash2 size={13} /> Eliminar</button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
