@@ -186,6 +186,13 @@ router.put("/:id", authMiddleware, async (req, res) => {
       );
     }
 
+    if (finalClienteId) {
+      await connection.query(
+        `UPDATE clientes SET razon_social = ?, direccion = ?, comuna = ?, contacto_nombre = ?, telefono = ? WHERE id = ?`,
+        [cliente, direccion || null, comuna || null, contacto || null, fonoPrincipal || null, finalClienteId]
+      );
+    }
+
     await connection.commit();
     res.json({ msg: "Orden actualizada" });
   } catch (err) {
