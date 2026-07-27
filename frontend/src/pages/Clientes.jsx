@@ -177,7 +177,16 @@ function Clientes() {
           clienteEditando={clienteEditando}
           clientes={clientes}
           onSave={guardarCliente}
-          onCancel={() => { setClienteEditando(null); setSoloLectura(false); setMostrarFormulario(false); setReturnToOT(false); }}
+          onCancel={() => {
+            if (returnToOT && ordenParaVolver) {
+              navigate("/orden-trabajo", { state: { orden: ordenParaVolver } });
+            }
+            setClienteEditando(null);
+            setSoloLectura(false);
+            setMostrarFormulario(false);
+            setReturnToOT(false);
+            setOrdenParaVolver(null);
+          }}
           readOnly={soloLectura}
         />
       </div>
