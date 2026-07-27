@@ -27,6 +27,8 @@ function Equipos() {
   const [clientes, setClientes] = useState([]);
   const [equiposExpandidos, setEquiposExpandidos] = useState({});
   const [soloLectura, setSoloLectura] = useState(false);
+  const [returnToOT, setReturnToOT] = useState(false);
+  const [ordenParaVolver, setOrdenParaVolver] = useState(null);
 
   const fetchEquipos = async (signal) => {
     try {
@@ -56,6 +58,22 @@ function Equipos() {
   useEffect(() => {
     setPaginaActual(1);
   }, [filtroCodigo, filtroCliente, filtroModelo, filtroSerie]);
+
+  useEffect(() => {
+    const navState = window.history.state?.usr;
+    if (navState?.equipo && (navState?.editar || navState?.ver)) {
+      if (navState?.returnToOT) {
+        setReturnToOT(true);
+        setOrdenParaVolver(navState.orden || null);
+      }
+      fetchClientes().then(() => {
+        setEquipoEditando(navState.equipo);
+        setSoloLectura(!!navState.ver);
+        setMostrarFormulario(true);
+      });
+      window.history.replaceState({}, document.title);
+    }
+  }, []);
 
   useEffect(() => {
     const clienteId = params.get("clienteId");
@@ -125,7 +143,13 @@ function Equipos() {
       setMostrarFormulario(false);
       setEquipoEditando(null);
       setSoloLectura(false);
-      navigate('/equipos', { replace: true });
+      if (returnToOT && ordenParaVolver) {
+        setReturnToOT(false);
+        const equipoActualizado = id ? { ...payload, id } : payload;
+        navigate("/orden-trabajo", { state: { orden: ordenParaVolver, equipoEditado: equipoActualizado } });
+      } else {
+        navigate('/equipos', { replace: true });
+      }
       const res = await api.get("/api/equipos");
       setEquipos(res.data);
     } catch (err) {
@@ -143,7 +167,12 @@ function Equipos() {
           setMostrarFormulario(false);
           setEquipoEditando(null);
           setSoloLectura(false);
-          navigate('/equipos', { replace: true });
+          if (returnToOT && ordenParaVolver) {
+            setReturnToOT(false);
+            navigate("/orden-trabajo", { state: { orden: ordenParaVolver } });
+          } else {
+            navigate('/equipos', { replace: true });
+          }
         }}
         onSave={guardarEquipo}
         readOnly={soloLectura}

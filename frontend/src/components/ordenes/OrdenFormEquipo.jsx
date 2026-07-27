@@ -1,7 +1,10 @@
 import { useState } from "react";
-import { Search, Plus, Trash2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Search, Plus, Trash2, Eye, Edit } from "lucide-react";
 import api from "../../services/api";
 import { toUpper } from "../../utils/helpers";
+import EquipoFormulario from "../equipos/EquipoFormulario";
+import "../../pages/Equipos.css";
 
 function OrdenFormEquipo({
   children,
@@ -24,12 +27,16 @@ function OrdenFormEquipo({
   equipoOtroCliente = false,
   equipoNoExiste = false,
   readOnly = false,
+  ordenEditando = null,
   busquedaModelo, setBusquedaModelo,
   mostrarDropdownModelo, setMostrarDropdownModelo,
   equiposModeloFiltrados,
-  equipoModeloDropdownRef
+  equipoModeloDropdownRef,
+  clientes = [],
+  equipos = []
 }) {
   const [mostrarModalEquipo, setMostrarModalEquipo] = useState(false);
+  const [mostrarDetalleEquipo, setMostrarDetalleEquipo] = useState(false);
   const [nuevoEquipo, setNuevoEquipo] = useState({
     equipo: "", marca: "", modelo: "", serie: "", nivel_tintas: "",
     contador_pag: 0, averia: "", actividad: "", observaciones: ""
@@ -38,6 +45,7 @@ function OrdenFormEquipo({
     Array(12).fill(null).map(() => ({ nombre: "" }))
   );
   const [insumosVisibles, setInsumosVisibles] = useState(2);
+  const navigate = useNavigate();
 
   const guardarNuevoEquipo = async () => {
     if (!nuevoEquipo.equipo.trim() || !nuevoEquipo.marca.trim() || !nuevoEquipo.modelo.trim()) {
@@ -124,6 +132,38 @@ function OrdenFormEquipo({
             }}>
               ✓ Seleccionado: {equipoSeleccionado.equipo} - {equipoSeleccionado.marca} {equipoSeleccionado.modelo}
             </div>
+          )}
+          {equipoSeleccionado && readOnly && !equipoOtroCliente && !equipoNoExiste && (
+            <button
+              type="button"
+              onClick={() => setMostrarDetalleEquipo(true)}
+              title="Ver datos del equipo"
+              style={{
+                display: 'flex', alignItems: 'center', gap: '4px',
+                background: '#0D9488', color: 'white', border: 'none',
+                padding: '6px 12px', borderRadius: '6px', cursor: 'pointer',
+                fontWeight: 500, fontSize: '0.8rem', whiteSpace: 'nowrap',
+                flexShrink: 0, height: '32px', marginLeft: 'auto'
+              }}
+            >
+              <Eye size={14} /> Ver
+            </button>
+          )}
+          {equipoSeleccionado && esEdicion && !readOnly && !equipoOtroCliente && !equipoNoExiste && (
+            <button
+              type="button"
+              onClick={() => navigate('/equipos', { state: { equipo: equipoSeleccionado, editar: true, returnToOT: true, orden: ordenEditando } })}
+              title="Editar datos del equipo"
+              style={{
+                display: 'flex', alignItems: 'center', gap: '4px',
+                background: 'var(--primary)', color: 'white', border: 'none',
+                padding: '6px 12px', borderRadius: '6px', cursor: 'pointer',
+                fontWeight: 500, fontSize: '0.8rem', whiteSpace: 'nowrap',
+                flexShrink: 0, height: '32px', marginLeft: 'auto'
+              }}
+            >
+              <Edit size={14} /> Editar
+            </button>
           )}
           {clienteSeleccionado && !readOnly && !fromClientes && (!esEdicion || !equipoSeleccionado || equipoOtroCliente) && (
             <button
@@ -506,6 +546,27 @@ function OrdenFormEquipo({
                 Crear Equipo
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Detalle Equipo (solo lectura) */}
+      {mostrarDetalleEquipo && equipoSeleccionado && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
+        }}
+          onClick={(e) => { if (e.target === e.currentTarget) setMostrarDetalleEquipo(false); }}
+        >
+          <div style={{ maxHeight: '90vh', overflow: 'auto', width: '100%', maxWidth: '900px' }}>
+            <EquipoFormulario
+              equipoEditando={equipoSeleccionado}
+              equipos={equipos}
+              clientes={clientes}
+              onSave={() => {}}
+              onCancel={() => setMostrarDetalleEquipo(false)}
+              readOnly
+            />
           </div>
         </div>
       )}
