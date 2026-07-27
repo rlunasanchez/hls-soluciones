@@ -25,19 +25,44 @@ router.get("/next-codigo", authMiddleware, async (req, res) => {
 
 router.get("/", authMiddleware, async (req, res) => {
   try {
-    const { q } = req.query;
+    const { q, cliente_id } = req.query;
     let sql = `SELECT e.*, c.razon_social as cliente_nombre, c.rut as cliente_rut, c.codigo as cliente_codigo
       FROM equipos e
       LEFT JOIN clientes c ON e.cliente_id = c.id`;
+    let conditions = [];
     let params = [];
+    if (cliente_id) {
+      conditions.push(`e.cliente_id = $${params.length + 1}`);
+      params.push(cliente_id);
+    }
     if (q && q.trim()) {
       const term = `%${q.trim()}%`;
-      sql += ` WHERE LOWER(e.codigo) LIKE LOWER($1) OR LOWER(e.serie) LIKE LOWER($2) OR LOWER(e.equipo) LIKE LOWER($3) OR LOWER(e.marca) LIKE LOWER($4)`;
-      params = [term, term, term, term];
+      const start = params.length + 1;
+      conditions.push(`(LOWER(e.codigo) LIKE LOWER($${start}) OR LOWER(e.serie) LIKE LOWER($${start + 1}) OR LOWER(e.equipo) LIKE LOWER($${start + 2}) OR LOWER(e.marca) LIKE LOWER($${start + 3}) OR LOWER(e.modelo) LIKE LOWER($${start + 4}))`);
+      params.push(term, term, term, term, term);
+    }
+    if (conditions.length > 0) {
+      sql += ` WHERE ${conditions.join(' AND ')}`;
     }
     sql += ` ORDER BY e.id DESC`;
     const result = await pool.query(sql, params);
     res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Error del servidor" });
+  }
+});
+
+router.get("/:id", authMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT e.*, c.razon_social as cliente_nombre FROM equipos e LEFT JOIN clientes c ON e.cliente_id = c.id WHERE e.id = $1",
+      [req.params.id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ msg: "Equipo no encontrado" });
+    }
+    res.json(result.rows[0]);
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
@@ -102,6 +127,18 @@ router.put("/:id", authMiddleware, async (req, res) => {
     } finally {
       client.release();
     }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Error del servidor" });
+  }
+});
+
+router.put("/:id/reasignar", authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const { cliente_id } = req.body;
+  try {
+    await pool.query("UPDATE equipos SET cliente_id = $1 WHERE id = $2", [cliente_id || null, id]);
+    res.json({ msg: "Equipo reasignado" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
