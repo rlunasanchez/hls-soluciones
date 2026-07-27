@@ -892,6 +892,7 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.22 | 27 Julio 2026 | Fix editarOrden sobreescribía datos del cliente de la OT con datos frescos del API — campos cliente/direccion/comuna/contacto/fonoPrincipal ahora se mantienen desde el snapshot de la OT |
 | 1.23 | 27 Julio 2026 | Botones Ver/Editar equipo en OT (modal inline + navegación returnToOT), fix sobreescribir datos equipo al editar OT, eliminado cascade UPDATE equipos desde PUT ordenes |
 | 1.24 | 27 Julio 2026 | Fix deploy/cloud: auth adminOnly en GET/usuarios, crear-admin sin password hardcodeado, migración columnas actividad/observaciones en tabla equipos Neon |
+| 1.25 | 27 Julio 2026 | Fix Cancelar en editar cliente desde OT vuelve a editar OT |
 
 ---
 
@@ -1454,6 +1455,16 @@ ALTER TABLE equipos ADD COLUMN IF NOT EXISTS actividad TEXT;
 ALTER TABLE equipos ADD COLUMN IF NOT EXISTS observaciones TEXT;
 ```
 Estas columnas faltaban y causaban error 500 al editar/guardar equipos desde OT.
+
+### 52. Fix Cancelar en editar cliente desde OT no volvía a OT
+**Fecha:** 27 Julio 2026
+**Archivo modificado:** `frontend/src/pages/Clientes.jsx`
+
+**Problema:** Al editar una OT, hacer click en "Editar" en datos del cliente, y luego "Cancelar" en el formulario de cliente, el usuario quedaba en el mantenedor de Clientes en vez de volver a editar la OT.
+
+**Causa:** El `onCancel` del `ClienteFormulario` solo cerraba el formulario (`setMostrarFormulario(false)`) sin verificar si la navegación venía de OT.
+
+**Solución:** Agregada verificación `returnToOT && ordenParaVolver` en `onCancel` — si es true, navega a `/orden-trabajo` con el estado de la orden para continuar editándola.
 
 ---
 
