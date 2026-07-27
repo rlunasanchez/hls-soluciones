@@ -886,6 +886,10 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.16 | Julio 2026 | Botón "Ver" en todos los módulos (solo lectura), fix alineación botones mobile, filtros OT responsive (N° Orden full width, Desde/Hasta lado a lado), limpieza CSS muerto |
 | 1.17 | Julio 2026 | Fix búsqueda Modelo en OT no filtraba (busquedaModelo no se reseteaba), fix equipos GET soporte filtro cliente_id, fix backend deploy/cloud reconstruido (archivos faltantes/corruptos), fix filtros fechas desktop |
 | 1.18 | Julio 2026 | Cascade actualización de cliente a OTs asociadas (PUT cliente → UPDATE ordenes_trabajo) |
+| 1.19 | 24 Julio 2026 | Múltiples contactos por cliente (tabla clientes_contactos, modal, chips con popup detalle) |
+| 1.20 | 24 Julio 2026 | Límite visual de contactos y sucursales: max 4 contactos + toggle, max 1 sucursal + toggle, max-height con scroll, bordes solid en todos los botones toggle |
+| 1.21 | 27 Julio 2026 | Botones Ver/Editar cliente en OT: "Ver" en modo solo lectura abre modal read-only; "Editar" en modo edición navega a /clientes con returnToOT. Al guardar cliente vuelve a editar OT con datos frescos. Fix: lookup cliente por API si no está en lista local, sobreescribe campos stale del cliente en volver |
+| 1.22 | 27 Julio 2026 | Fix editarOrden sobreescribía datos del cliente de la OT con datos frescos del API — campos cliente/direccion/comuna/contacto/fonoPrincipal ahora se mantienen desde el snapshot de la OT |
 
 ---
 
@@ -1395,6 +1399,18 @@ WHERE contacto_nombre IS NOT NULL AND contacto_nombre != '';
 - **"+ Agregar" sucursal**: expande automáticamente al agregar una nueva
 - **Bordes solid**: todos los botones toggle cambiaron de `dashed` a `solid` para consistencia visual
 
+### 49. Fix editarOrden sobreescribía datos del cliente de la OT
+**Fecha:** 27 Julio 2026
+**Archivo modificado:** `frontend/src/pages/OrdenTrabajo.jsx`
+
+**Problema:** Al editar una OT, cambiar datos del cliente (nombre, dirección, etc.) y guardar, los cambios se reflejaban en la tabla de OT. Pero al volver a editar la misma OT, los campos del cliente se sobreescribían con los datos frescos del API (razón social original, dirección original, etc.), deshaciendo los cambios del usuario.
+
+**Causa:** `editarOrden()` buscaba el cliente asociado y ejecutaba `setNuevaOrden()` para sobreescribir los campos `cliente`, `direccion`, `comuna`, `contacto`, `fonoPrincipal` con los datos actuales del registro `clientes`. Esto anulaba los valores que el usuario había editado y guardado en la OT.
+
+**Solución:** Eliminar los `setNuevaOrden()` del bloque de búsqueda de cliente en `editarOrden()`. La búsqueda de cliente ahora solo setea `clienteSeleccionado` (para badges/estado) y `busquedaCliente` (para el campo de texto). Los campos del cliente en `nuevaOrden` se mantienen desde el snapshot de la OT (ya cargado al inicio de `editarOrden`).
+
+**Nota:** `verOrden()` ya no tenía este problema (no sobreescribía `nuevaOrden`).
+
 ---
 
 ## Historial de Versiones
@@ -1423,3 +1439,4 @@ WHERE contacto_nombre IS NOT NULL AND contacto_nombre != '';
 | 1.19 | 24 Julio 2026 | Múltiples contactos por cliente (tabla clientes_contactos, modal, chips con popup detalle) |
 | 1.20 | 24 Julio 2026 | Límite visual de contactos y sucursales: max 4 contactos + toggle, max 1 sucursal + toggle, max-height con scroll, bordes solid en todos los botones toggle |
 | 1.21 | 27 Julio 2026 | Botones Ver/Editar cliente en OT: "Ver" en modo solo lectura abre modal read-only; "Editar" en modo edición navega a /clientes con returnToOT. Al guardar cliente vuelve a editar OT con datos frescos. Fix: lookup cliente por API si no está en lista local, sobreescribe campos stale del cliente en volver |
+| 1.22 | 27 Julio 2026 | Fix editarOrden sobreescribía datos del cliente de la OT con datos frescos del API — campos cliente/direccion/comuna/contacto/fonoPrincipal ahora se mantienen desde el snapshot de la OT |
