@@ -891,6 +891,7 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.21 | 27 Julio 2026 | Botones Ver/Editar cliente en OT: "Ver" en modo solo lectura abre modal read-only; "Editar" en modo edición navega a /clientes con returnToOT. Al guardar cliente vuelve a editar OT con datos frescos. Fix: lookup cliente por API si no está en lista local, sobreescribe campos stale del cliente en volver |
 | 1.22 | 27 Julio 2026 | Fix editarOrden sobreescribía datos del cliente de la OT con datos frescos del API — campos cliente/direccion/comuna/contacto/fonoPrincipal ahora se mantienen desde el snapshot de la OT |
 | 1.23 | 27 Julio 2026 | Botones Ver/Editar equipo en OT (modal inline + navegación returnToOT), fix sobreescribir datos equipo al editar OT, eliminado cascade UPDATE equipos desde PUT ordenes |
+| 1.24 | 27 Julio 2026 | Fix deploy/cloud: auth adminOnly en GET/usuarios, crear-admin sin password hardcodeado, migración columnas actividad/observaciones en tabla equipos Neon |
 
 ---
 
@@ -1438,6 +1439,21 @@ WHERE contacto_nombre IS NOT NULL AND contacto_nombre != '';
 7. **Backend** — Eliminado cascade `UPDATE equipos` desde `PUT /api/ordenes/:id` (ambas ramas). Solo se actualiza la OT, no el registro maestro del equipo.
 
 **Nota:** Mismo patrón que el fix v1.22 para clientes. Los campos desnormalizados en `ordenes_trabajo` (equipo, marca, modelo, serie, etc.) son snapshots del momento de guardar la OT y no deben sobreescribirse con datos frescos de la tabla `equipos`.
+
+### 51. Fix deploy/cloud: sync completo con main
+**Fecha:** 27 Julio 2026
+**Archivos modificados (solo deploy/cloud):**
+- `backend/routes/auth.js` — agregado `adminOnly` a `GET /usuarios` (faltaba, cualquier usuario autenticado veía todas las cuentas)
+- `backend/crear-admin.js` — eliminado connection string de Neon hardcodeado, usa dotenv
+
+**Problema:** El deploy/cloud tenía un endpoint `GET /api/auth/usuarios` sin middleware `adminOnly`, lo que permitía que cualquier usuario autenticado (técnico) pudiera listar todas las cuentas de usuario.
+
+**Migración ejecutada en Neon:**
+```sql
+ALTER TABLE equipos ADD COLUMN IF NOT EXISTS actividad TEXT;
+ALTER TABLE equipos ADD COLUMN IF NOT EXISTS observaciones TEXT;
+```
+Estas columnas faltaban y causaban error 500 al editar/guardar equipos desde OT.
 
 ---
 
