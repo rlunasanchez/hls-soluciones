@@ -120,7 +120,7 @@ function Clientes() {
       fetchClientes();
       if (returnToOT && ordenParaVolver) {
         setReturnToOT(false);
-        navigate("/orden-trabajo", { state: { orden: ordenParaVolver } });
+        navigate("/orden-trabajo", { state: { orden: ordenParaVolver, clienteEditado: clienteData } });
       }
     } catch (err) {
       alert(err.response?.data?.msg || "Error al guardar");

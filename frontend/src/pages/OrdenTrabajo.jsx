@@ -128,11 +128,44 @@ function OrdenTrabajo() {
       
       const ordenFromNav = navState?.orden;
       const clienteFromNav = navState?.cliente;
+      const clienteEditado = navState?.clienteEditado;
+      const equipoEditado = navState?.equipoEditado;
       
       if (ordenFromNav) {
         // Cargar clientes frescos antes de editar la orden
         await fetchClientes();
+        await fetchEquipos();
         editarOrden(ordenFromNav);
+        // Si volvimos de editar el cliente, actualizar campos en la OT
+        if (clienteEditado) {
+          setNuevaOrden(prev => ({
+            ...prev,
+            cliente: toUpper(clienteEditado.razon_social),
+            direccion: toUpper(clienteEditado.direccion),
+            comuna: toUpper(clienteEditado.comuna),
+            contacto: toUpper(clienteEditado.contacto_nombre),
+            fonoPrincipal: clienteEditado.telefono || clienteEditado.contacto_fono || ""
+          }));
+        }
+        // Si volvimos de editar el equipo, actualizar campos en la OT
+        if (equipoEditado) {
+          setNuevaOrden(prev => ({
+            ...prev,
+            equipo: toUpper(equipoEditado.equipo),
+            marca: toUpper(equipoEditado.marca),
+            modelo: toUpper(equipoEditado.modelo),
+            serie: toUpper(equipoEditado.serie),
+            nivelTinta: toUpper(equipoEditado.nivel_tintas || equipoEditado.nivelTinta || ""),
+            contadorPagOut: equipoEditado.contador_pag || ""
+          }));
+          const nuevosInsumos = [];
+          for (let i = 1; i <= 12; i++) {
+            nuevosInsumos.push({ nombre: toUpper(equipoEditado[`insumo${i}`]) || "" });
+          }
+          setInsumos(nuevosInsumos);
+          const visibles = nuevosInsumos.filter(n => n.nombre).length;
+          setInsumosVisibles(Math.max(2, visibles));
+        }
         window.history.replaceState({}, document.title);
       }
       
@@ -370,7 +403,7 @@ function OrdenTrabajo() {
       observaciones: toUpper(orden.observaciones)
     });
 
-    // Buscar equipo asociado - primero intentar con datos frescos del API
+    // Buscar equipo asociado - solo para badge/estado, NO sobreescribir datos de la OT
     setEquipoNoExiste(false);
     const cargarEquipoFresco = async () => {
       try {
@@ -383,29 +416,6 @@ function OrdenTrabajo() {
           setBusquedaCodigo(eq.codigo || "");
           setBusquedaSerie((eq.serie || "").toUpperCase());
           setBusquedaModelo((eq.modelo || "").toUpperCase());
-          setNuevaOrden(prev => ({
-            ...prev,
-            equipo: toUpper(eq.equipo) || prev.equipo,
-            modelo: toUpper(eq.modelo) || prev.modelo,
-            marca: toUpper(eq.marca) || prev.marca,
-            serie: toUpper(eq.serie) || prev.serie,
-            contadorPagOut: eq.contador_pag?.toString() || prev.contadorPagOut,
-            nivelTinta: toUpper(eq.nivel_tintas) || prev.nivelTinta,
-            averia: toUpper(eq.averia) || prev.averia
-          }));
-          const insumosEquipo = [];
-          for (let i = 1; i <= 12; i++) {
-            const insumo = eq[`insumo${i}`];
-            if (insumo) insumosEquipo.push({ nombre: insumo.toUpperCase() });
-          }
-          if (insumosEquipo.length > 0) {
-            const nuevosInsumos = [...insumosEquipo];
-            while (nuevosInsumos.length < 12) {
-              nuevosInsumos.push({ nombre: "" });
-            }
-            setInsumos(nuevosInsumos);
-            setInsumosVisibles(Math.max(2, insumosEquipo.length));
-          }
           return;
         }
       } catch (err) {
@@ -446,7 +456,7 @@ function OrdenTrabajo() {
         if (clFresco) {
           setClienteSeleccionado(clFresco);
           setClienteInactivo(false);
-          setBusquedaCliente((cl.razon_social || orden.cliente || "").toUpperCase());
+          setBusquedaCliente((clFresco.razon_social || orden.cliente || "").toUpperCase());
         } else {
           setClienteSeleccionado(null);
           setClienteInactivo(true);
@@ -523,29 +533,6 @@ function OrdenTrabajo() {
           setBusquedaCodigo(eq.codigo || "");
           setBusquedaSerie((eq.serie || "").toUpperCase());
           setBusquedaModelo((eq.modelo || "").toUpperCase());
-          setNuevaOrden(prev => ({
-            ...prev,
-            equipo: toUpper(eq.equipo) || prev.equipo,
-            modelo: toUpper(eq.modelo) || prev.modelo,
-            marca: toUpper(eq.marca) || prev.marca,
-            serie: toUpper(eq.serie) || prev.serie,
-            contadorPagOut: eq.contador_pag?.toString() || prev.contadorPagOut,
-            nivelTinta: toUpper(eq.nivel_tintas) || prev.nivelTinta,
-            averia: toUpper(eq.averia) || prev.averia
-          }));
-          const insumosEquipo = [];
-          for (let i = 1; i <= 12; i++) {
-            const insumo = eq[`insumo${i}`];
-            if (insumo) insumosEquipo.push({ nombre: insumo.toUpperCase() });
-          }
-          if (insumosEquipo.length > 0) {
-            const nuevosInsumos = [...insumosEquipo];
-            while (nuevosInsumos.length < 12) {
-              nuevosInsumos.push({ nombre: "" });
-            }
-            setInsumos(nuevosInsumos);
-            setInsumosVisibles(Math.max(2, insumosEquipo.length));
-          }
           return;
         }
       } catch (err) {
@@ -1017,6 +1004,9 @@ function OrdenTrabajo() {
                 equipoOtroCliente={equipoOtroCliente}
                 equipoNoExiste={equipoNoExiste}
                 readOnly={soloLectura}
+                ordenEditando={ordenEditando}
+                clientes={clientes}
+                equipos={equipos}
               >
                 <OrdenFormInsumos
                   insumos={insumos}
