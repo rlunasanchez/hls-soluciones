@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Search, ChevronDown, Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Search, ChevronDown, Plus, Eye, Edit } from "lucide-react";
 import api from "../../services/api";
 import ClienteFormulario from "../clientes/ClienteFormulario";
 import "../../pages/Clientes.css";
@@ -17,9 +18,12 @@ function OrdenFormCliente({
   fetchClientes,
   fromClientes = false,
   clienteInactivo = false,
-  readOnly = false
+  readOnly = false,
+  ordenEditando = null
 }) {
+  const navigate = useNavigate();
   const [mostrarModalCliente, setMostrarModalCliente] = useState(false);
+  const [mostrarDetalleCliente, setMostrarDetalleCliente] = useState(false);
 
   const guardarNuevoCliente = async (clienteData, resetFormulario) => {
     try {
@@ -198,8 +202,78 @@ function OrdenFormCliente({
             <Plus size={14} /> Nuevo
           </button>
           )}
+          {clienteSeleccionado && readOnly && (
+            <button
+              type="button"
+              onClick={() => setMostrarDetalleCliente(true)}
+              title="Ver todos los datos del cliente"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                background: '#0D9488',
+                color: 'white',
+                border: 'none',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: 500,
+                fontSize: '0.8rem',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                height: '32px'
+              }}
+            >
+              <Eye size={14} /> Ver
+            </button>
+          )}
+          {clienteSeleccionado && esEdicion && !readOnly && (
+            <button
+              type="button"
+              onClick={() => navigate('/clientes', { state: { cliente: clienteSeleccionado, editar: true, returnToOT: true, orden: ordenEditando } })}
+              title="Editar datos del cliente"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                background: 'var(--primary)',
+                color: 'white',
+                border: 'none',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: 500,
+                fontSize: '0.8rem',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                height: '32px'
+              }}
+            >
+              <Edit size={14} /> Editar
+            </button>
+          )}
         </div>
       </div>
+
+      {/* Modal Detalle Cliente (solo lectura) */}
+      {mostrarDetalleCliente && clienteSeleccionado && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
+        }}
+          onClick={(e) => { if (e.target === e.currentTarget) setMostrarDetalleCliente(false); }}
+        >
+          <div style={{ maxHeight: '90vh', overflow: 'auto', width: '100%', maxWidth: '900px' }}>
+            <ClienteFormulario
+              clienteEditando={clienteSeleccionado}
+              clientes={clientes}
+              onSave={() => {}}
+              onCancel={() => setMostrarDetalleCliente(false)}
+              readOnly
+            />
+          </div>
+        </div>
+      )}
 
       {/* Modal Nuevo Cliente */}
       {mostrarModalCliente && (

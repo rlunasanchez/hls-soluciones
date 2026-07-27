@@ -25,6 +25,8 @@ function Clientes() {
   const [ordenesCliente, setOrdenesCliente] = useState([]);
   const [modalReasignar, setModalReasignar] = useState(null);
   const [soloLectura, setSoloLectura] = useState(false);
+  const [returnToOT, setReturnToOT] = useState(false);
+  const [ordenParaVolver, setOrdenParaVolver] = useState(null);
 
   const ordenesPorCliente = {};
   ordenesCliente.forEach((ot) => {
@@ -69,6 +71,23 @@ function Clientes() {
     return () => controller.abort();
   }, []);
 
+  // Recibir cliente para editar desde OT
+  useEffect(() => {
+    const navState = window.history.state?.usr;
+    if (navState?.cliente && navState?.editar) {
+      if (navState?.returnToOT) {
+        setReturnToOT(true);
+        setOrdenParaVolver(navState.orden || null);
+      }
+      fetchClientes().then(() => {
+        setClienteEditando(navState.cliente);
+        setSoloLectura(false);
+        setMostrarFormulario(true);
+      });
+      window.history.replaceState({}, document.title);
+    }
+  }, []);
+
   useEffect(() => {
     setPaginaActual(1);
   }, [busqueda, filtroRut]);
@@ -99,6 +118,10 @@ function Clientes() {
       setSoloLectura(false);
       setMostrarFormulario(false);
       fetchClientes();
+      if (returnToOT && ordenParaVolver) {
+        setReturnToOT(false);
+        navigate("/orden-trabajo", { state: { orden: ordenParaVolver } });
+      }
     } catch (err) {
       alert(err.response?.data?.msg || "Error al guardar");
     }
@@ -154,7 +177,7 @@ function Clientes() {
           clienteEditando={clienteEditando}
           clientes={clientes}
           onSave={guardarCliente}
-          onCancel={() => { setClienteEditando(null); setSoloLectura(false); setMostrarFormulario(false); }}
+          onCancel={() => { setClienteEditando(null); setSoloLectura(false); setMostrarFormulario(false); setReturnToOT(false); }}
           readOnly={soloLectura}
         />
       </div>
