@@ -430,7 +430,7 @@ function OrdenTrabajo() {
     };
     cargarEquipoFresco();
 
-    // Buscar cliente asociado - primero local, luego API fresca
+    // Buscar cliente asociado - solo para badge/estado, NO sobreescribir datos de la OT
     const cl = clientes.find(c => 
       (orden.cliente_id && c.id === orden.cliente_id) || 
       (orden.cliente && c.razon_social === orden.cliente)
@@ -439,31 +439,14 @@ function OrdenTrabajo() {
       setClienteSeleccionado(cl);
       setClienteInactivo(false);
       setBusquedaCliente((cl.razon_social || orden.cliente || "").toUpperCase());
-      setNuevaOrden(prev => ({
-        ...prev,
-        cliente: toUpper(cl.razon_social),
-        direccion: toUpper(cl.direccion),
-        comuna: toUpper(cl.comuna),
-        contacto: toUpper(cl.contacto_nombre),
-        fonoPrincipal: cl.telefono || cl.contacto_fono || ""
-      }));
     } else if (orden.cliente_id) {
-      // Si no está en la lista local, buscar fresco del API
       try {
         const resCli = await api.get(`/api/clientes`);
         const clFresco = resCli.data.find(c => c.id === orden.cliente_id);
         if (clFresco) {
           setClienteSeleccionado(clFresco);
           setClienteInactivo(false);
-          setBusquedaCliente((clFresco.razon_social || orden.cliente || "").toUpperCase());
-          setNuevaOrden(prev => ({
-            ...prev,
-            cliente: toUpper(clFresco.razon_social),
-            direccion: toUpper(clFresco.direccion),
-            comuna: toUpper(clFresco.comuna),
-            contacto: toUpper(clFresco.contacto_nombre),
-            fonoPrincipal: clFresco.telefono || clFresco.contacto_fono || ""
-          }));
+          setBusquedaCliente((cl.razon_social || orden.cliente || "").toUpperCase());
         } else {
           setClienteSeleccionado(null);
           setClienteInactivo(true);
