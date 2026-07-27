@@ -27,6 +27,7 @@ function OrdenTrabajo() {
   const [paginaActual, setPaginaActual] = useState(1);
   const ITEMS_POR_PAG = 4;
   const [editingId, setEditingId] = useState(null);
+  const [ordenEditando, setOrdenEditando] = useState(null);
   const [filtroNumeroOrden, setFiltroNumeroOrden] = useState("");
   const [filtroGarantia, setFiltroGarantia] = useState("todos");
   const [filtroEstado, setFiltroEstado] = useState("todos");
@@ -129,8 +130,10 @@ function OrdenTrabajo() {
       const clienteFromNav = navState?.cliente;
       
       if (ordenFromNav) {
-        // Editar orden existente - llamar a editarOrden
+        // Cargar clientes frescos antes de editar la orden
+        await fetchClientes();
         editarOrden(ordenFromNav);
+        window.history.replaceState({}, document.title);
       }
       
       if (clienteFromNav) {
@@ -334,6 +337,7 @@ function OrdenTrabajo() {
 
   const editarOrden = async (orden) => {
     setEditingId(orden.id);
+    setOrdenEditando(orden);
     setMostrarFormulario(true);
     
     // Cargar datos de la orden en el formulario
@@ -426,7 +430,7 @@ function OrdenTrabajo() {
     };
     cargarEquipoFresco();
 
-    // Buscar cliente asociado en la lista cargada
+    // Buscar cliente asociado - primero local, luego API fresca
     const cl = clientes.find(c => 
       (orden.cliente_id && c.id === orden.cliente_id) || 
       (orden.cliente && c.razon_social === orden.cliente)
@@ -435,6 +439,41 @@ function OrdenTrabajo() {
       setClienteSeleccionado(cl);
       setClienteInactivo(false);
       setBusquedaCliente((cl.razon_social || orden.cliente || "").toUpperCase());
+      setNuevaOrden(prev => ({
+        ...prev,
+        cliente: toUpper(cl.razon_social),
+        direccion: toUpper(cl.direccion),
+        comuna: toUpper(cl.comuna),
+        contacto: toUpper(cl.contacto_nombre),
+        fonoPrincipal: cl.telefono || cl.contacto_fono || ""
+      }));
+    } else if (orden.cliente_id) {
+      // Si no está en la lista local, buscar fresco del API
+      try {
+        const resCli = await api.get(`/api/clientes`);
+        const clFresco = resCli.data.find(c => c.id === orden.cliente_id);
+        if (clFresco) {
+          setClienteSeleccionado(clFresco);
+          setClienteInactivo(false);
+          setBusquedaCliente((clFresco.razon_social || orden.cliente || "").toUpperCase());
+          setNuevaOrden(prev => ({
+            ...prev,
+            cliente: toUpper(clFresco.razon_social),
+            direccion: toUpper(clFresco.direccion),
+            comuna: toUpper(clFresco.comuna),
+            contacto: toUpper(clFresco.contacto_nombre),
+            fonoPrincipal: clFresco.telefono || clFresco.contacto_fono || ""
+          }));
+        } else {
+          setClienteSeleccionado(null);
+          setClienteInactivo(true);
+          setBusquedaCliente((orden.cliente || "").toUpperCase());
+        }
+      } catch {
+        setClienteSeleccionado(null);
+        setClienteInactivo(true);
+        setBusquedaCliente((orden.cliente || "").toUpperCase());
+      }
     } else {
       setClienteSeleccionado(null);
       setClienteInactivo(!!orden.cliente_id);
@@ -555,6 +594,24 @@ function OrdenTrabajo() {
       setClienteSeleccionado(cl);
       setClienteInactivo(false);
       setBusquedaCliente((cl.razon_social || orden.cliente || "").toUpperCase());
+    } else if (orden.cliente_id) {
+      try {
+        const resCli = await api.get(`/api/clientes`);
+        const clFresco = resCli.data.find(c => c.id === orden.cliente_id);
+        if (clFresco) {
+          setClienteSeleccionado(clFresco);
+          setClienteInactivo(false);
+          setBusquedaCliente((clFresco.razon_social || orden.cliente || "").toUpperCase());
+        } else {
+          setClienteSeleccionado(null);
+          setClienteInactivo(true);
+          setBusquedaCliente((orden.cliente || "").toUpperCase());
+        }
+      } catch {
+        setClienteSeleccionado(null);
+        setClienteInactivo(true);
+        setBusquedaCliente((orden.cliente || "").toUpperCase());
+      }
     } else {
       setClienteSeleccionado(null);
       setClienteInactivo(!!orden.cliente_id);
@@ -856,6 +913,7 @@ function OrdenTrabajo() {
     setClienteInactivo(false);
     setEquipoOtroCliente(false);
     setEditingId(null);
+    setOrdenEditando(null);
     setErrorNumeroOrden("");
   };
   // Funciones de navegación eliminadas (accesos desde el menú)
@@ -942,6 +1000,7 @@ function OrdenTrabajo() {
                 fromClientes={fromClientes}
                 clienteInactivo={clienteInactivo}
                 readOnly={soloLectura}
+                ordenEditando={ordenEditando}
               />
 
               <OrdenFormEquipo
