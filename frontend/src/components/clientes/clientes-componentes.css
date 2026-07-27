@@ -80,6 +80,17 @@
   padding: 12px 16px;
   border-bottom: 1px solid var(--border);
   text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.table-wrapper td:last-child {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  max-width: none;
 }
 
 .codigo-badge {
