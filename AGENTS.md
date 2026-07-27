@@ -890,6 +890,7 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.20 | 24 Julio 2026 | Límite visual de contactos y sucursales: max 4 contactos + toggle, max 1 sucursal + toggle, max-height con scroll, bordes solid en todos los botones toggle |
 | 1.21 | 27 Julio 2026 | Botones Ver/Editar cliente en OT: "Ver" en modo solo lectura abre modal read-only; "Editar" en modo edición navega a /clientes con returnToOT. Al guardar cliente vuelve a editar OT con datos frescos. Fix: lookup cliente por API si no está en lista local, sobreescribe campos stale del cliente en volver |
 | 1.22 | 27 Julio 2026 | Fix editarOrden sobreescribía datos del cliente de la OT con datos frescos del API — campos cliente/direccion/comuna/contacto/fonoPrincipal ahora se mantienen desde el snapshot de la OT |
+| 1.23 | 27 Julio 2026 | Botones Ver/Editar equipo en OT (modal inline + navegación returnToOT), fix sobreescribir datos equipo al editar OT, eliminado cascade UPDATE equipos desde PUT ordenes |
 
 ---
 
@@ -1411,6 +1412,33 @@ WHERE contacto_nombre IS NOT NULL AND contacto_nombre != '';
 
 **Nota:** `verOrden()` ya no tenía este problema (no sobreescribía `nuevaOrden`).
 
+### 50. Botones Ver/Editar equipo en OT + fix sobreescribir datos equipo
+**Fecha:** 27 Julio 2026
+**Archivos modificados:**
+- `frontend/src/components/ordenes/OrdenFormEquipo.jsx`
+- `frontend/src/pages/Equipos.jsx`
+- `frontend/src/pages/Clientes.jsx`
+- `frontend/src/pages/OrdenTrabajo.jsx`
+- `backend/routes/ordenes.js` (ambas ramas)
+
+**Cambios:**
+
+1. **Botón "Ver" equipo en OT** — Abre modal inline con `EquipoFormulario` en modo solo lectura (no navega fuera de OT, igual que el botón Ver de clientes)
+
+2. **Botón "Editar" equipo en OT** — Navega a `/equipos` con router state `{ equipo, editar: true, returnToOT: true, orden }`. Al guardar en Equipos, retorna a OT con `{ orden, equipoEditado }`.
+
+3. **Equipos.jsx** — Nuevo useEffect detecta nav state desde OT (returnToOT), `guardarEquipo()` retorna con `equipoEditado`, `onCancel` retorna a OT.
+
+4. **Clientes.jsx** — `guardarCliente()` ahora retorna con `clienteEditado` en nav state (antes solo pasaba `orden`).
+
+5. **OrdenTrabajo.jsx init useEffect** — Maneja `clienteEditado` y `equipoEditado` del nav state para actualizar campos en la OT al volver.
+
+6. **Fix: cargarEquipoFresco ya NO sobreescribe datos de la OT** — En `editarOrden()` y `verOrden()`, la función `cargarEquipoFresco()` ya no ejecuta `setNuevaOrden()` para sobreescribir equipo/marca/modelo/serie/nivelTinta/averia con datos de la tabla `equipos`. Solo setea badge/estado (`equipoSeleccionado`, `equipoOtroCliente`, `equipoNoExiste`) y búsquedas. Los campos del equipo en la OT se mantienen desde el snapshot de la OT.
+
+7. **Backend** — Eliminado cascade `UPDATE equipos` desde `PUT /api/ordenes/:id` (ambas ramas). Solo se actualiza la OT, no el registro maestro del equipo.
+
+**Nota:** Mismo patrón que el fix v1.22 para clientes. Los campos desnormalizados en `ordenes_trabajo` (equipo, marca, modelo, serie, etc.) son snapshots del momento de guardar la OT y no deben sobreescribirse con datos frescos de la tabla `equipos`.
+
 ---
 
 ## Historial de Versiones
@@ -1438,5 +1466,6 @@ WHERE contacto_nombre IS NOT NULL AND contacto_nombre != '';
 | 1.18 | Julio 2026 | Cascade actualización de cliente a OTs asociadas |
 | 1.19 | 24 Julio 2026 | Múltiples contactos por cliente (tabla clientes_contactos, modal, chips con popup detalle) |
 | 1.20 | 24 Julio 2026 | Límite visual de contactos y sucursales: max 4 contactos + toggle, max 1 sucursal + toggle, max-height con scroll, bordes solid en todos los botones toggle |
-| 1.21 | 27 Julio 2026 | Botones Ver/Editar cliente en OT: "Ver" en modo solo lectura abre modal read-only; "Editar" en modo edición navega a /clientes con returnToOT. Al guardar cliente vuelve a editar OT con datos frescos. Fix: lookup cliente por API si no está en lista local, sobreescribe campos stale del cliente en volver |
-| 1.22 | 27 Julio 2026 | Fix editarOrden sobreescribía datos del cliente de la OT con datos frescos del API — campos cliente/direccion/comuna/contacto/fonoPrincipal ahora se mantienen desde el snapshot de la OT |
+| 1.21 | 27 Julio 2026 | Botones Ver/Editar cliente en OT: "Ver" en modo solo lectura abre modal read-only; "Editar" en modo edición navega a /clientes con returnToOT |
+| 1.22 | 27 Julio 2026 | Fix editarOrden sobreescribía datos del cliente de la OT con datos frescos del API |
+| 1.23 | 27 Julio 2026 | Botones Ver/Editar equipo en OT (modal inline + navegación returnToOT), fix sobreescribir datos equipo al editar OT, eliminado cascade UPDATE equipos desde PUT ordenes |
