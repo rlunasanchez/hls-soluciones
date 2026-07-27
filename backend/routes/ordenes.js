@@ -170,7 +170,6 @@ router.put("/:id", authMiddleware, async (req, res) => {
     await client.query(`UPDATE ordenes_trabajo SET numero_orden = $1, fecha = $2, es_garantia = $3, fecha_ingreso = $4, fecha_ingreso_check = $5, fecha_termino = $6, fecha_termino_check = $7, fecha_entrega = $8, fecha_entrega_check = $9, fecha_compra = $10, fecha_compra_check = $11, cliente = $12, direccion = $13, comuna = $14, contacto = $15, fono_principal = $16, tecnico_asignado = $17, equipo = $18, modelo = $19, marca = $20, serie = $21, contador_pag_out = $22, nivel_tinta = $23, insumo1 = $24, insumo2 = $25, insumo3 = $26, insumo4 = $27, insumo5 = $28, insumo6 = $29, insumo7 = $30, insumo8 = $31, insumo9 = $32, insumo10 = $33, insumo11 = $34, insumo12 = $35, averia = $36, actividad = $37, observaciones = $38, cliente_id = $39, equipo_id = $40 WHERE id = $41`,
       [numeroOrden, toDateMySQL(fecha), esGarantia || false, toDateMySQL(fechaIngreso), fechaIngresoCheck || false, toDateMySQL(fechaTermino), fechaTerminoCheck || false, toDateMySQL(fechaEntrega), fechaEntregaCheck || false, toDateMySQL(fechaCompra), fechaCompraCheck || false, cliente, direccion || null, comuna || null, contacto || null, fonoPrincipal || null, tecnicoAsignado, equipo, modelo, marca, serie || null, contadorPagOut || null, nivelTinta || null, insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null, insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null, insumo9 || null, insumo10 || null, insumo11 || null, insumo12 || null, averia || null, actividad || null, observaciones || null, finalClienteId, finalEquipoId, id]);
 
-    // Al editar desde OT, actualizar tambi├®n el registro maestro del equipo
     if (finalEquipoId) {
       await client.query(
         `UPDATE equipos SET equipo = $1, modelo = $2, marca = $3, serie = $4,
@@ -183,6 +182,14 @@ router.put("/:id", authMiddleware, async (req, res) => {
           insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null,
           insumo9 || null, insumo10 || null, insumo11 || null, insumo12 || null, averia || null,
           actividad || null, observaciones || null, finalEquipoId]
+      );
+    }
+
+    // Cascade: actualizar datos del cliente en tabla clientes
+    if (finalClienteId) {
+      await client.query(
+        `UPDATE clientes SET razon_social = $1, direccion = $2, comuna = $3, contacto_nombre = $4, telefono = $5 WHERE id = $6`,
+        [cliente, direccion || null, comuna || null, contacto || null, fonoPrincipal || null, finalClienteId]
       );
     }
 
