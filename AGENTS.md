@@ -893,6 +893,7 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 | 1.23 | 27 Julio 2026 | Botones Ver/Editar equipo en OT (modal inline + navegación returnToOT), fix sobreescribir datos equipo al editar OT, eliminado cascade UPDATE equipos desde PUT ordenes |
 | 1.24 | 27 Julio 2026 | Fix deploy/cloud: auth adminOnly en GET/usuarios, crear-admin sin password hardcodeado, migración columnas actividad/observaciones en tabla equipos Neon |
 | 1.25 | 27 Julio 2026 | Fix Cancelar en editar cliente desde OT vuelve a editar OT |
+| 1.26 | 27 Julio 2026 | Tablas: nowrap, truncado de texto con ellipsis, botones acciones visibles |
 
 ---
 
@@ -1465,6 +1466,31 @@ Estas columnas faltaban y causaban error 500 al editar/guardar equipos desde OT.
 **Causa:** El `onCancel` del `ClienteFormulario` solo cerraba el formulario (`setMostrarFormulario(false)`) sin verificar si la navegación venía de OT.
 
 **Solución:** Agregada verificación `returnToOT && ordenParaVolver` en `onCancel` — si es true, navega a `/orden-trabajo` con el estado de la orden para continuar editándola.
+
+### 53. Tablas: nowrap, truncado de texto y botones visibles
+**Fecha:** 27 Julio 2026
+**Archivos modificados:**
+- `frontend/src/index.css` — estilos globales `table td`
+- `frontend/src/components/clientes/clientes-componentes.css` — estilo `.table-wrapper td`
+- `frontend/src/pages/Equipos.css` — estilo `.table-wrapper td`
+- `frontend/src/pages/OrdenTrabajo.css` — estilo `.table-wrapper td`
+
+**Problema:**
+1. Los datos en las tablas (N° Orden, Cliente, Equipo, etc.) se salían de línea cuando eran largos (ej: "OT-2026-02800" se partía en dos, "AGENCIA DE ADUANAS HERNAN TELLERIA" ocupaba varias líneas)
+2. El `overflow: hidden` + `max-width` en `table td` cortaba los botones de acciones (solo se veía "Ver", no "Editar", "Eliminar", etc.)
+
+**Solución:**
+- `table td`: `white-space: nowrap` + `overflow: hidden` + `text-overflow: ellipsis` + `max-width: 200px`
+- `table td:last-child`: `white-space: normal` + `overflow: visible` + `text-overflow: unset` + `max-width: none`
+- Los campos largos se truncan con `...` (no generan scroll horizontal)
+- La columna de acciones (última celda) muestra todos los botones completos
+- `table-wrapper` mantiene `overflow-x: auto` como fallback
+
+**Archivos con estilo `.table-wrapper td` propio (sobreescribe el global):**
+- `clientes-componentes.css:79` — Clientes
+- `Equipos.css:71` — Equipos
+- `OrdenTrabajo.css:42` — Orden de Trabajo
+- Todos tuvieron que actualizarse individualmente porque sobreescriben el estilo global de `index.css`
 
 ---
 
