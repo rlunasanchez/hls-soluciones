@@ -366,6 +366,7 @@ table td {
   border-bottom: 1px solid var(--border);
   font-size: 0.8rem;
   vertical-align: middle;
+  white-space: nowrap;
 }
 
 table tr:hover {
