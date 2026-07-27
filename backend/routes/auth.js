@@ -95,7 +95,7 @@ router.put("/cambiar-password", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/usuarios", authMiddleware, async (req, res) => {
+router.get("/usuarios", authMiddleware, adminOnly, async (req, res) => {
   try {
     const result = await pool.query("SELECT id, usuario, email, rol, activo, fecha_creacion FROM usuarios ORDER BY id DESC");
     res.json(result.rows);
