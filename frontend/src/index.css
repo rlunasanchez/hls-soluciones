@@ -367,9 +367,10 @@ table td {
   font-size: 0.8rem;
   vertical-align: middle;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 200px;
+}
+
+table td:last-child {
+  white-space: normal;
 }
 
 table tr:hover {
