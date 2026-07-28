@@ -85,13 +85,13 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
             <table>
               <thead>
                 <tr>
-                  <th>N° Orden</th>
-                  <th>Fecha</th>
-                  <th>Cliente</th>
-                  <th>Equipo</th>
-                  <th>Técnico</th>
-                  <th>Garantía</th>
-                  <th>Estado</th>
+                  <th style={{width:'110px'}}>N° Orden</th>
+                  <th style={{width:'100px'}}>Fecha</th>
+                  <th style={{width:'200px'}}>Cliente</th>
+                  <th style={{width:'200px'}}>Equipo</th>
+                  <th style={{width:'130px'}}>Técnico</th>
+                  <th style={{width:'90px'}}>Garantía</th>
+                  <th style={{width:'100px'}}>Estado</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
