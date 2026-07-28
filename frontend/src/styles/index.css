@@ -391,11 +391,6 @@ table tr:last-child td {
   border-bottom: none;
 }
 
-.action-buttons {
-  display: flex;
-  gap: 8px;
-}
-
 .table-btn {
   display: inline-flex;
   align-items: center;
@@ -407,6 +402,13 @@ table tr:last-child td {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .edit-btn {
