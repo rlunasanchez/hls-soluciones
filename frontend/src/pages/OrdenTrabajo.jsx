@@ -6,8 +6,8 @@ import {
 } from "lucide-react";
 import api from "../services/api";
 import { toUpper, cerrarSesion } from "../utils/helpers";
-import './OrdenTrabajo.css';
-import "../components/ordenes/ordenes-componentes.css";
+import '../styles/OrdenTrabajo.css';
+import "../styles/ordenes-componentes.css";
 import HeaderOrdenTrabajo from "../components/ordenes/HeaderOrdenTrabajo";
 import OrdenLista from "../components/ordenes/OrdenLista";
 import OrdenFormDatos from "../components/ordenes/OrdenFormDatos";

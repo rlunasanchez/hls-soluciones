@@ -4,7 +4,7 @@ import { Search, Plus, Trash2, Eye, Edit } from "lucide-react";
 import api from "../../services/api";
 import { toUpper } from "../../utils/helpers";
 import EquipoFormulario from "../equipos/EquipoFormulario";
-import "../../pages/Equipos.css";
+import "../../styles/Equipos.css";
 
 function OrdenFormEquipo({
   children,
