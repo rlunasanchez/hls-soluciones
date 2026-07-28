@@ -448,3 +448,17 @@ Vista de tarjetas (`cards-table`) implementada en:
 **Archivo modificado:** `backend/server.js`
 
 **Cambio:** `max: 100` → `max: 500` en el rate limiter general (el de login se mantiene en 100)
+
+---
+
+## Fecha: 2026-07-28
+
+### Eliminado fallback password hardcodeado en db.js
+
+**Problema:** El pool de MySQL tenía un fallback con la password hardcodeada `"6498"` en el código fuente.
+
+**Solución:** Eliminado el fallback `|| "6498"`, ahora la password solo se obtiene del `.env` mediante `process.env.DB_PASSWORD`.
+
+**Archivo modificado:** `backend/config/db.js`
+
+**Impacto:** Si no hay `.env` con `DB_PASSWORD`, la conexión falla (no más password por defecto).
