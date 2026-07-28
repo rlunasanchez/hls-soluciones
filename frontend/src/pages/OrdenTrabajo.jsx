@@ -903,6 +903,7 @@ function OrdenTrabajo() {
       <HeaderOrdenTrabajo navItems={navItems} onLogout={cerrarSesion} />
 
       {!mostrarFormulario ? (
+          <div className="ot-list-wrap">
           <OrdenLista
             ordenes={ordenesPag}
             loading={loading}
@@ -926,6 +927,7 @@ function OrdenTrabajo() {
             onInforme={(orden) => navigate('/informes', { state: { orden } })}
             onCotizacion={(orden) => navigate('/cotizaciones', { state: { orden } })}
           />
+          </div>
         ) : (
           /* Formulario para crear orden */
           <>
