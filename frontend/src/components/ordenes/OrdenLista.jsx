@@ -91,7 +91,7 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                   <th style={{width:'190px'}}>Equipo</th>
                   <th style={{width:'120px'}}>Técnico</th>
                   <th style={{width:'80px'}}>Garantía</th>
-                  <th style={{width:'90px'}}>Estado</th>
+                  <th style={{width:'110px'}}>Estado</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
