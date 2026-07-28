@@ -462,3 +462,18 @@ Vista de tarjetas (`cards-table`) implementada en:
 **Archivo modificado:** `backend/config/db.js`
 
 **Impacto:** Si no hay `.env` con `DB_PASSWORD`, la conexión falla (no más password por defecto).
+
+### Fix scroll horizontal en tabla OT
+
+**Problema:** Al navegar a la página 2 de la lista de Órdenes de Trabajo, aparecía un scroll horizontal en la tabla porque algunos datos eran más largos y expandían la tabla.
+
+**Causa:** Sin `table-layout: fixed`, los navegadores ignoran `max-width` en celdas `td`, permitiendo que el contenido largo agrande la tabla.
+
+**Soluciones:**
+1. `scrollbar-gutter: stable` en `<html>` — evita layout shift al aparecer/desaparecer el scroll vertical del navegador
+2. `table-layout: fixed` + anchos explícitos en `<th>` — la tabla respeta los anchos definidos y el texto se trunca con `...`
+
+**Archivos modificados:**
+- `frontend/src/styles/index.css` — `scrollbar-gutter: stable`
+- `frontend/src/styles/OrdenTrabajo.css` — `table{table-layout:fixed}`
+- `frontend/src/components/ordenes/OrdenLista.jsx` — anchors fijos en `<th>`
