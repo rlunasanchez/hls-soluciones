@@ -1014,6 +1014,15 @@ grep '"pg"' backend/package.json
 | 1.16 | Julio 2026 | Botón "Ver" en todos los módulos (solo lectura), fix alineación botones mobile, filtros OT responsive |
 | 1.17 | Julio 2026 | Fix búsqueda Modelo en OT no filtraba (busquedaModelo no se reseteaba), fix equipos GET soporte filtro cliente_id, fix backend deploy/cloud reconstruido (archivos faltantes/corruptos), fix filtros fechas desktop |
 | 1.18 | Julio 2026 | Cascade actualización de cliente a OTs asociadas (PUT cliente → UPDATE ordenes_trabajo) |
+| 1.19 | 24 Julio 2026 | Múltiples contactos por cliente (tabla clientes_contactos, modal, chips con popup detalle) |
+| 1.20 | 24 Julio 2026 | Límite visual de contactos y sucursales: max 4 contactos + toggle, max 1 sucursal + toggle, max-height con scroll, bordes solid en todos los botones toggle |
+| 1.21 | 27 Julio 2026 | Botones Ver/Editar cliente en OT: "Ver" en modo solo lectura abre modal read-only; "Editar" en modo edición navega a /clientes con returnToOT. Al guardar cliente vuelve a editar OT con datos frescos. Fix: lookup cliente por API si no está en lista local, sobreescribe campos stale del cliente en volver |
+| 1.22 | 27 Julio 2026 | Fix editarOrden sobreescribía datos del cliente de la OT con datos frescos del API — campos cliente/direccion/comuna/contacto/fonoPrincipal ahora se mantienen desde el snapshot de la OT |
+| 1.23 | 27 Julio 2026 | Botones Ver/Editar equipo en OT (modal inline + navegación returnToOT), fix sobreescribir datos equipo al editar OT, eliminado cascade UPDATE equipos desde PUT ordenes |
+| 1.24 | 27 Julio 2026 | Fix deploy/cloud: auth adminOnly en GET/usuarios, crear-admin sin password hardcodeado, migración columnas actividad/observaciones en tabla equipos Neon |
+| 1.25 | 27 Julio 2026 | Fix Cancelar en editar cliente desde OT vuelve a editar OT |
+| 1.26 | 27 Julio 2026 | Tablas: nowrap, truncado de texto con ellipsis, botones acciones visibles |
+| 1.27 | 28 Julio 2026 | Seguridad: eliminado fallback password hardcodeado "6498" en db.js, ahora solo vía .env |
 
 ## Cambios Recientes (20 Mayo 2026)
 
@@ -1522,3 +1531,7 @@ Estas columnas faltaban y causaban error 500 al editar/guardar equipos desde OT.
 | 1.21 | 27 Julio 2026 | Botones Ver/Editar cliente en OT: "Ver" en modo solo lectura abre modal read-only; "Editar" en modo edición navega a /clientes con returnToOT |
 | 1.22 | 27 Julio 2026 | Fix editarOrden sobreescribía datos del cliente de la OT con datos frescos del API |
 | 1.23 | 27 Julio 2026 | Botones Ver/Editar equipo en OT (modal inline + navegación returnToOT), fix sobreescribir datos equipo al editar OT, eliminado cascade UPDATE equipos desde PUT ordenes |
+| 1.24 | 27 Julio 2026 | Fix deploy/cloud: auth adminOnly en GET/usuarios, crear-admin sin password hardcodeado, migración columnas equipos Neon |
+| 1.25 | 27 Julio 2026 | Fix Cancelar en editar cliente desde OT vuelve a editar OT |
+| 1.26 | 27 Julio 2026 | Tablas: nowrap, truncado de texto con ellipsis, botones acciones visibles |
+| 1.27 | 28 Julio 2026 | Seguridad: eliminado fallback password hardcodeado "6498" en db.js, ahora solo vía .env |

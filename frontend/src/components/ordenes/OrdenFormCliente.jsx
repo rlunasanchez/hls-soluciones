@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Search, ChevronDown, Plus, Eye, Edit } from "lucide-react";
 import api from "../../services/api";
 import ClienteFormulario from "../clientes/ClienteFormulario";
-import "../../pages/Clientes.css";
+import "../../styles/Clientes.css";
 
 function OrdenFormCliente({
   busquedaCliente, setBusquedaCliente,

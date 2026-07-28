@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Package } from "lucide-react";
 import api from "../services/api";
-import './Equipos.css';
+import '../styles/Equipos.css';
 import { cerrarSesion } from "../utils/helpers";
 import HeaderEquipo from "../components/equipos/HeaderEquipo";
 import FiltrosEquipo from "../components/equipos/FiltrosEquipo";
