@@ -85,7 +85,7 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
             <table>
               <thead>
                 <tr>
-                  <th style={{width:'110px'}}>N° Orden</th>
+                  <th style={{width:'150px'}}>N° Orden</th>
                   <th style={{width:'100px'}}>Fecha</th>
                   <th style={{width:'200px'}}>Cliente</th>
                   <th style={{width:'200px'}}>Equipo</th>
@@ -99,7 +99,7 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                 {ordenes.map((orden) => (
                   <tr key={orden.id}>
                     <td data-label="N° Orden">
-                      <span className="codigo-badge">{orden.numero_orden}</span>
+                      <span className="codigo-badge">{orden.numero_orden?.split("-").pop()}</span>
                     </td>
                     <td data-label="Fecha">
                       {orden.fecha ? new Date(orden.fecha).toLocaleDateString() : "-"}
@@ -152,7 +152,7 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
             {ordenes.map((orden) => (
               <div key={orden.id} className="data-card">
                 <div className="data-card-header">
-                  <strong>{orden.numero_orden}</strong>
+                  <strong>{orden.numero_orden?.split("-").pop()}</strong>
                   {orden.es_garantia ? (
                     <span className="badge-garantia">Garantía</span>
                   ) : (

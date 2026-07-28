@@ -209,7 +209,7 @@ function ClienteExpandido({ cliente, ordenes, onEditar, onEliminar, onEliminarOT
                   {otsPag.map((ot) => (
                     <tr key={ot.id}>
                       <td>
-                        <span className="ot-numero">{ot.numero_orden}</span>
+                        <span className="ot-numero">{ot.numero_orden?.split("-").pop()}</span>
                       </td>
                       <td>
                         {ot.fecha
