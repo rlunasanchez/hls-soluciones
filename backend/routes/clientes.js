@@ -44,6 +44,19 @@ router.get("/", authMiddleware, async (req, res) => {
   }
 });
 
+router.get("/:id/equipos", authMiddleware, async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      "SELECT id, codigo, equipo, marca, modelo, serie FROM equipos WHERE cliente_id = ? AND activo = true",
+      [req.params.id]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Error del servidor" });
+  }
+});
+
 router.post("/", authMiddleware, async (req, res) => {
   const {
     razon_social, giro, rut, direccion, ciudad, comuna, telefono, email,

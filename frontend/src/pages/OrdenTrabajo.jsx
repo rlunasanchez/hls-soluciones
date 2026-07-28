@@ -632,8 +632,12 @@ function OrdenTrabajo() {
 
   // Seleccionar cliente y cargar sus datos
   const seleccionarCliente = (cliente) => {
+    const mismoCliente = clienteSeleccionado?.id === cliente.id;
     setClienteSeleccionado(cliente);
     setClienteInactivo(false);
+    setBusquedaCliente(toUpper(cliente.razon_social));
+    setMostrarDropdownClientes(false);
+    if (mismoCliente && editingId) return;
     setEquipoSeleccionado(null);
     setEquipoOtroCliente(false);
     setEquipoNoExiste(false);
@@ -657,8 +661,6 @@ function OrdenTrabajo() {
       actividad: "",
       observaciones: ""
     }));
-    setBusquedaCliente(toUpper(cliente.razon_social));
-    setMostrarDropdownClientes(false);
   };
 
   // Seleccionar equipo por serie - NO carga avería (puede haber duplicados)
