@@ -477,3 +477,7 @@ Vista de tarjetas (`cards-table`) implementada en:
 - `frontend/src/styles/index.css` — `scrollbar-gutter: stable`
 - `frontend/src/styles/OrdenTrabajo.css` — `table{table-layout:fixed}`
 - `frontend/src/components/ordenes/OrdenLista.jsx` — anchors fijos en `<th>`
+- `frontend/src/pages/OrdenTrabajo.jsx` — wrapper `.ot-list-wrap` para scoped table-layout
+- `frontend/src/styles/OrdenTrabajo.css` — `.ot-list-wrap table` scoped (evita afectar Clientes/Equipos)
+- `frontend/src/styles/index.css` — `.action-buttons` con `flex-wrap: wrap` para evitar scroll horizontal
+- Mostrar solo número (02800) en vez de OT-2026-02800 en todas las vistas

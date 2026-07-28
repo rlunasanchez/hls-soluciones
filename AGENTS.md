@@ -1022,7 +1022,7 @@ grep '"pg"' backend/package.json
 | 1.24 | 27 Julio 2026 | Fix deploy/cloud: auth adminOnly en GET/usuarios, crear-admin sin password hardcodeado, migración columnas actividad/observaciones en tabla equipos Neon |
 | 1.25 | 27 Julio 2026 | Fix Cancelar en editar cliente desde OT vuelve a editar OT |
 | 1.26 | 27 Julio 2026 | Tablas: nowrap, truncado de texto con ellipsis, botones acciones visibles |
-| 1.27 | 28 Julio 2026 | Seguridad: eliminado fallback password hardcodeado "6498" en db.js, ahora solo vía .env. Fix: scrollbar-gutter stable en html para evitar layout shift. Fix: table-layout fixed + column widths en tabla OT para evitar scroll horizontal por datos largos. |
+| 1.27 | 28 Julio 2026 | Seguridad: eliminado fallback password hardcodeado "6498" en db.js, ahora solo vía .env. Fix: scrollbar-gutter stable en html para evitar layout shift. Fix: table-layout fixed scoped solo a tablas OT + flex-wrap en action-buttons + mostrar solo número en OT (02800). Refactor: CSS movido a frontend/src/styles/ |
 
 ## Cambios Recientes (20 Mayo 2026)
 
@@ -1534,4 +1534,4 @@ Estas columnas faltaban y causaban error 500 al editar/guardar equipos desde OT.
 | 1.24 | 27 Julio 2026 | Fix deploy/cloud: auth adminOnly en GET/usuarios, crear-admin sin password hardcodeado, migración columnas equipos Neon |
 | 1.25 | 27 Julio 2026 | Fix Cancelar en editar cliente desde OT vuelve a editar OT |
 | 1.26 | 27 Julio 2026 | Tablas: nowrap, truncado de texto con ellipsis, botones acciones visibles |
-| 1.27 | 28 Julio 2026 | Seguridad: eliminado fallback password hardcodeado "6498" en db.js, ahora solo vía .env. Fix: scrollbar-gutter stable en html para evitar layout shift. Fix: table-layout fixed + column widths en tabla OT para evitar scroll horizontal por datos largos. |
+| 1.27 | 28 Julio 2026 | Seguridad: eliminado fallback password hardcodeado "6498" en db.js, ahora solo vía .env. Fix: scrollbar-gutter stable en html para evitar layout shift. Fix: table-layout fixed scoped solo a tablas OT + flex-wrap en action-buttons + mostrar solo número en OT (02800). Refactor: CSS movido a frontend/src/styles/ |
