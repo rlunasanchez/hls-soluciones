@@ -1,6 +1,4 @@
-import { AlertCircle } from "lucide-react";
-
-function OrdenFormDatos({ nuevaOrden, setNuevaOrden, errorNumeroOrden, verificarNumeroOrden, readOnly }) {
+function OrdenFormDatos({ nuevaOrden, setNuevaOrden, readOnly }) {
   return (
     <div className="of-sec primary">
       <div className="of-st primary">Datos de la Orden</div>
@@ -10,20 +8,10 @@ function OrdenFormDatos({ nuevaOrden, setNuevaOrden, errorNumeroOrden, verificar
           <label>Número de Orden *</label>
           <input
             type="text"
-            placeholder="Ej: OT-2024-001"
             value={nuevaOrden.numeroOrden}
-            onChange={(e) => {
-              setNuevaOrden({...nuevaOrden, numeroOrden: e.target.value});
-              verificarNumeroOrden(e.target.value);
-            }}
-            disabled={readOnly}
-            required
+            disabled
+            title="El número de orden se asigna automáticamente"
           />
-          {errorNumeroOrden && (
-            <span style={{ color: 'var(--danger)', fontSize: '0.85rem', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <AlertCircle size={14} /> {errorNumeroOrden}
-            </span>
-          )}
         </div>
 
         <div className="of-f">

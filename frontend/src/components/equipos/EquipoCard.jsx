@@ -15,28 +15,6 @@ function EquipoCard({ equipo, onVer, onEditar, onEliminar }) {
         <span className="data-card-label">Serie</span>
         <span className="data-card-value">{equipo.serie || '-'}</span>
       </div>
-      <div className="data-card-row">
-        <span className="data-card-label">Cliente</span>
-        <span className="data-card-value">{equipo.cliente_nombre || '-'}</span>
-      </div>
-      {equipo.averia && (
-        <div className="data-card-row">
-          <span className="data-card-label">Avería</span>
-          <span className="data-card-value">{equipo.averia}</span>
-        </div>
-      )}
-      {equipo.actividad && (
-        <div className="data-card-row">
-          <span className="data-card-label">Actividad</span>
-          <span className="data-card-value">{equipo.actividad}</span>
-        </div>
-      )}
-      {equipo.observaciones && (
-        <div className="data-card-row">
-          <span className="data-card-label">Observaciones</span>
-          <span className="data-card-value">{equipo.observaciones}</span>
-        </div>
-      )}
       <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
         <button className="table-btn" onClick={() => onVer(equipo)} style={{ flex: 1, justifyContent: 'center', background: '#0D9488', color: 'white' }}>
           <Eye size={14} /> Ver

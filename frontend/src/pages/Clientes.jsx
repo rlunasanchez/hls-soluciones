@@ -11,7 +11,6 @@ import FiltrosCliente from "../components/clientes/FiltrosCliente";
 import ClienteLista from "../components/clientes/ClienteLista";
 import ClienteExpandido from "../components/clientes/ClienteExpandido";
 import ClienteFormulario from "../components/clientes/ClienteFormulario";
-import ModalReasignarEquipos from "../components/clientes/ModalReasignarEquipos";
 
 function Clientes() {
   const navigate = useNavigate();
@@ -23,10 +22,7 @@ function Clientes() {
   const [paginaActual, setPaginaActual] = useState(1);
   const clientesPorPagina = 4;
   const [ordenesCliente, setOrdenesCliente] = useState([]);
-  const [modalReasignar, setModalReasignar] = useState(null);
   const [soloLectura, setSoloLectura] = useState(false);
-  const [returnToOT, setReturnToOT] = useState(false);
-  const [ordenParaVolver, setOrdenParaVolver] = useState(null);
 
   const ordenesPorCliente = {};
   ordenesCliente.forEach((ot) => {
@@ -71,23 +67,6 @@ function Clientes() {
     return () => controller.abort();
   }, []);
 
-  // Recibir cliente para editar desde OT
-  useEffect(() => {
-    const navState = window.history.state?.usr;
-    if (navState?.cliente && navState?.editar) {
-      if (navState?.returnToOT) {
-        setReturnToOT(true);
-        setOrdenParaVolver(navState.orden || null);
-      }
-      fetchClientes().then(() => {
-        setClienteEditando(navState.cliente);
-        setSoloLectura(false);
-        setMostrarFormulario(true);
-      });
-      window.history.replaceState({}, document.title);
-    }
-  }, []);
-
   useEffect(() => {
     setPaginaActual(1);
   }, [busqueda, filtroRut]);
@@ -118,10 +97,6 @@ function Clientes() {
       setSoloLectura(false);
       setMostrarFormulario(false);
       fetchClientes();
-      if (returnToOT && ordenParaVolver) {
-        setReturnToOT(false);
-        navigate("/orden-trabajo", { state: { orden: ordenParaVolver, clienteEditado: clienteData } });
-      }
     } catch (err) {
       alert(err.response?.data?.msg || "Error al guardar");
     }
@@ -140,34 +115,13 @@ function Clientes() {
   };
 
   const eliminarCliente = async (id) => {
+    if (!window.confirm("¿Eliminar este cliente?")) return;
     try {
-      const res = await api.get(`/api/clientes/${id}/equipos`);
-      if (res.data.length > 0) {
-        setModalReasignar({ clienteId: id, equipos: res.data });
-      } else {
-        if (!window.confirm("¿Eliminar este cliente?")) return;
-        await api.delete(`/api/clientes/${id}`);
-        fetchClientes();
-      }
+      await api.delete(`/api/clientes/${id}`);
+      fetchClientes();
     } catch (err) {
       alert("Error al eliminar");
     }
-  };
-
-  const confirmarReasignacion = async () => {
-    const { clienteId } = modalReasignar;
-    try {
-      await api.delete(`/api/clientes/${clienteId}`);
-      setModalReasignar(null);
-      fetchClientes();
-    } catch (err) {
-      alert("Error al eliminar cliente");
-    }
-  };
-
-  const desactivarSinReasignar = () => {
-    setModalReasignar(null);
-    fetchClientes();
   };
 
   if (mostrarFormulario) {
@@ -178,14 +132,9 @@ function Clientes() {
           clientes={clientes}
           onSave={guardarCliente}
           onCancel={() => {
-            if (returnToOT && ordenParaVolver) {
-              navigate("/orden-trabajo", { state: { orden: ordenParaVolver } });
-            }
             setClienteEditando(null);
             setSoloLectura(false);
             setMostrarFormulario(false);
-            setReturnToOT(false);
-            setOrdenParaVolver(null);
           }}
           readOnly={soloLectura}
         />
@@ -245,17 +194,6 @@ function Clientes() {
       )}
 
       <Pagination currentPage={paginaActual} totalPages={totalPaginas} onPageChange={setPaginaActual} />
-
-      {modalReasignar && (
-        <ModalReasignarEquipos
-          equipos={modalReasignar.equipos}
-          clientes={clientes}
-          clienteId={modalReasignar.clienteId}
-          onConfirm={confirmarReasignacion}
-          onDesactivar={desactivarSinReasignar}
-          onCancel={() => setModalReasignar(null)}
-        />
-      )}
     </div>
   );
 }
