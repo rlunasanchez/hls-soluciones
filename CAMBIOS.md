@@ -1,5 +1,70 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-08-04
+
+### Auditoría y limpieza de dead code
+
+**Problema:** Había archivos, scripts, SQL y endpoints backend sin ningún uso en el sistema.
+
+**Archivos eliminados:**
+- `backend/crear_db.sql` — esquema viejo UTF-16 corrupto
+- `backend/migrar_clientes.sql`, `backend/migrar_equipos.sql` — migraciones antiguas sin uso
+- `scripts/crear_clientes.js`, `scripts/crear_equipos.js`, `scripts/insert_equipos.js` — seeds duplicados del seed-test-data
+- `scripts/crear-admin-local.js`, `scripts/agregar_insumos.js`, `scripts/test_insert.js` — scripts de prueba
+- `scripts/update_pass.js`, `scripts/verificar_insumos.js` — sin uso
+- `scripts/migrar_contactos.sql`, `scripts/migrar_actividad_observaciones.sql` — migraciones ya aplicadas en BD
+- `scripts/seed_neon.sql`, `scripts/seed_neon_no_transaction.sql` — seeds PostgreSQL obsoletos (viven en deploy/cloud)
+- `frontend/src/components/clientes/ModalReasignarEquipos.jsx` — componente reemplazado por el flujo de reasignación en Clientes.jsx
+
+**Endpoints muertos eliminados (`backend/routes/`):**
+- `GET /api/equipos/next-codigo` y helper `generarCodigo()` (el de clientes se mantiene porque `POST /` lo usa)
+- `GET /api/clientes/next-codigo`
+- `PUT /api/clientes/:id/desactivar`
+- `GET /api/ordenes/verificar/:numeroOrden`
+
+**Defaults hardcodeados MySQL eliminados (todo sale de `.env`):**
+- `backend/config/db.js`, `backend/crear-admin.js`, `scripts/seed-test-data.js` — sin host/port/user/password/database hardcodeados
+
+**Refactor identidad de equipos desacoplada:**
+- `EquipoFormulario.jsx` ahora solo maneja identidad (codigo, equipo, marca, modelo, serie); los datos de servicio (insumos, contador, avería, actividad, observaciones, cliente_id) viven en `ordenes_trabajo`
+- Simplificados `OrdenFormEquipo.jsx`, `OrdenFormCliente.jsx`, `ClienteExpandido.jsx`, `EquipoTabla.jsx`, `EquipoCard.jsx`, `FiltrosEquipo.jsx`, `Clientes.jsx`, `Equipos.jsx`
+
+### `numero_orden` inmutable y autogenerado
+
+**Problema:** El número de orden se podía modificar manualmente al editar una OT.
+
+**Cambios backend (`backend/routes/ordenes.js`):**
+- Nuevo helper `calcularSiguienteNumero()` — base 2800, `Math.max(parseInt(partes[2], 10) + 1, 2800)`
+- `GET /siguiente-numero` lo usa
+- `POST /` genera el número server-side dentro de la transacción (ignora `numeroOrden` del body, re-check único con rollback)
+- `PUT /:id` ya no toca `numero_orden`
+
+**Cambios frontend:**
+- Eliminados `errorNumeroOrden`, `verificarNumeroOrden` y el endpoint `/verificar`
+- `OrdenFormDatos.jsx`: campo N° de Orden siempre `<input disabled>` ("El número de orden se asigna automáticamente")
+
+### Editar OT: volver a poder re-seleccionar cliente y equipo
+
+**Problema:** Al editar una OT, el cliente y el equipo estaban fijos (chips), sin buscadores para cambiarlos.
+
+**Archivo modificado:** `frontend/src/pages/OrdenTrabajo.jsx`
+
+**Cambio en `editarOrden()`:** `clienteFijo = false` y `equipoFijo = false` → se muestran los buscadores de cliente (nombre/RUT) y equipo (serie/modelo) para re-seleccionar. `verOrden()` mantiene los chips en solo lectura.
+
+### `backend/crear_tablas.sql` sincronizado con el esquema real
+
+**Problema:** El script de creación de tablas no reflejaba las constraints del esquema MySQL actual.
+
+**Cambios:**
+- `clientes.razon_social NOT NULL`
+- `ordenes_trabajo.cliente`, `tecnico_asignado`, `equipo`, `modelo`, `marca` ahora `NOT NULL`
+- `usuarios.usuario NOT NULL UNIQUE`, `usuarios.password NOT NULL`
+- Todas las tablas: `ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`
+
+**Verificación:** aplicado en BD scratch y las 6 tablas coinciden 100% con el esquema vivo (ignorando whitespace/collation).
+
+---
+
 ## Fecha: 2026-07-16 (Sesión 3)
 
 ### Mostrar actividad/observaciones en módulo Equipos

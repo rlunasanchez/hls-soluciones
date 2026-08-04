@@ -14,16 +14,6 @@ async function generarCodigo() {
   return `CL-${String(num + 1).padStart(4, "0")}`;
 }
 
-router.get("/next-codigo", authMiddleware, async (req, res) => {
-  try {
-    const codigo = await generarCodigo();
-    res.json({ codigo });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Error del servidor" });
-  }
-});
-
 router.get("/", authMiddleware, async (req, res) => {
   try {
     const [rows] = await pool.query(`
@@ -37,19 +27,6 @@ router.get("/", authMiddleware, async (req, res) => {
       FROM clientes c
       ORDER BY c.id DESC
     `);
-    res.json(rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Error del servidor" });
-  }
-});
-
-router.get("/:id/equipos", authMiddleware, async (req, res) => {
-  try {
-    const [rows] = await pool.query(
-      "SELECT id, codigo, equipo, marca, modelo, serie FROM equipos WHERE cliente_id = ? AND activo = true",
-      [req.params.id]
-    );
     res.json(rows);
   } catch (err) {
     console.error(err);
@@ -147,24 +124,6 @@ router.put("/:id", authMiddleware, async (req, res) => {
     );
     await connection.commit();
     res.json({ msg: "Cliente actualizado", codigo });
-  } catch (err) {
-    await connection.rollback();
-    console.error(err);
-    res.status(500).json({ msg: "Error del servidor" });
-  } finally {
-    connection.release();
-  }
-});
-
-router.put("/:id/desactivar", authMiddleware, async (req, res) => {
-  const { id } = req.params;
-  const connection = await pool.getConnection();
-  try {
-    await connection.beginTransaction();
-    await connection.query("UPDATE equipos SET cliente_id = NULL WHERE cliente_id = ?", [id]);
-    await connection.query("UPDATE clientes SET activo = 0 WHERE id = ?", [id]);
-    await connection.commit();
-    res.json({ msg: "Cliente desactivado y equipos desvinculados" });
   } catch (err) {
     await connection.rollback();
     console.error(err);

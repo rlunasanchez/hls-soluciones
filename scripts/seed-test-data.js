@@ -7,11 +7,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, "..", "backend", ".env") });
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || "localhost",
-  port: parseInt(process.env.DB_PORT || "3306"),
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "6498",
-  database: process.env.DB_NAME || "soporte_tecnico_db",
+  host: process.env.DB_HOST,
+  port: parseInt(process.env.DB_PORT, 10),
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
   waitForConnections: true,
   connectionLimit: 5,
 });
@@ -178,15 +178,11 @@ async function seed() {
     for (let i = 0; i < equiposDef.length; i++) {
       const e = equiposDef[i];
       const codigo = `EQ-${String(i + 1).padStart(4, "0")}`;
-      const cliCode = `CL-${String(distribucion[i]).padStart(4, "0")}`;
-      const clienteId = idPorCode[cliCode];
       const serie = `${e.marca.substring(0, 3).toUpperCase()}-${String(1000 + i)}-${String(i + 1).padStart(2, "0")}`;
       await connection.query(
-        `INSERT IGNORE INTO equipos (codigo, cliente_id, equipo, modelo, marca, serie, contador_pag, nivel_tintas, activo)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)`,
-        [codigo, clienteId, e.equipo, e.modelo, e.marca, serie,
-         Math.floor(Math.random() * 50000) + 1000,
-         ["Alto", "Medio", "Bajo", "Crítico"][Math.floor(Math.random() * 4)]]
+        `INSERT IGNORE INTO equipos (codigo, equipo, modelo, marca, serie, activo)
+         VALUES (?, ?, ?, ?, ?, 1)`,
+        [codigo, e.equipo, e.modelo, e.marca, serie]
       );
     }
     console.log(`  ${equiposDef.length} equipos procesados`);

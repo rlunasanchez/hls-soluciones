@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ClipboardList, Plus, Edit, Trash2, Package, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
-import api from "../../services/api";
+import { ClipboardList, Plus, Edit, Trash2, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 
 function Paginacion({ pagina, totalPaginas, setPagina }) {
   if (totalPaginas <= 1) return null;
@@ -39,30 +38,13 @@ function Paginacion({ pagina, totalPaginas, setPagina }) {
 function ClienteExpandido({ cliente, ordenes, onEditar, onEliminar, onEliminarOT }) {
   const navigate = useNavigate();
   const ots = ordenes || [];
-  const [equipos, setEquipos] = useState([]);
-  const [loadingEquipos, setLoadingEquipos] = useState(false);
-  const [mostrarEquipos, setMostrarEquipos] = useState(true);
   const [mostrarOTs, setMostrarOTs] = useState(true);
-  const [pagEquipos, setPagEquipos] = useState(1);
   const [pagOTs, setPagOTs] = useState(1);
   const ITEMS_POR_PAG = 4;
 
-  useEffect(() => {
-    if (cliente?.id) {
-      setLoadingEquipos(true);
-      api.get(`/api/equipos?cliente_id=${cliente.id}`)
-        .then((res) => setEquipos(res.data))
-        .catch((err) => console.error("Error al cargar equipos:", err))
-        .finally(() => setLoadingEquipos(false));
-    }
-  }, [cliente?.id]);
-
-  useEffect(() => { setPagEquipos(1); }, [equipos.length]);
   useEffect(() => { setPagOTs(1); }, [ots.length]);
 
-  const equiposPag = equipos.slice((pagEquipos - 1) * ITEMS_POR_PAG, pagEquipos * ITEMS_POR_PAG);
   const otsPag = ots.slice((pagOTs - 1) * ITEMS_POR_PAG, pagOTs * ITEMS_POR_PAG);
-  const totalPagEquipos = Math.ceil(equipos.length / ITEMS_POR_PAG);
   const totalPagOTs = Math.ceil(ots.length / ITEMS_POR_PAG);
 
   return (
@@ -117,55 +99,6 @@ function ClienteExpandido({ cliente, ordenes, onEditar, onEliminar, onEliminarOT
             {cliente.contacto_email || cliente.contacto_fono || ""}
           </p>
         </div>
-      </div>
-
-      {/* Equipos Asociados */}
-      <div className="cliente-ots">
-        <div className="ots-header">
-          <h4>
-            <Package size={12} />
-            Equipos Asociados ({equipos.length})
-          </h4>
-          <button className="btn-toggle-seccion" onClick={() => setMostrarEquipos(!mostrarEquipos)} title={mostrarEquipos ? "Ocultar equipos" : "Mostrar equipos"}>
-            {mostrarEquipos ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-          </button>
-        </div>
-        {mostrarEquipos && (loadingEquipos ? (
-          <div className="ots-vacio"><p>Cargando equipos...</p></div>
-        ) : equipos.length > 0 ? (
-          <>
-            <div className="ots-tabla-wrapper">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Código</th>
-                    <th>Equipo</th>
-                    <th>Marca</th>
-                    <th>Modelo</th>
-                    <th>Serie</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {equiposPag.map((eq) => (
-                    <tr key={eq.id}>
-                      <td><span className="ot-numero">{eq.codigo}</span></td>
-                      <td>{eq.equipo || "-"}</td>
-                      <td>{eq.marca || "-"}</td>
-                      <td>{eq.modelo || "-"}</td>
-                      <td>{eq.serie || "-"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <Paginacion pagina={pagEquipos} totalPaginas={totalPagEquipos} setPagina={setPagEquipos} />
-          </>
-        ) : (
-          <div className="ots-vacio">
-            <Package size={20} />
-            <p>Este cliente no tiene equipos asociados</p>
-          </div>
-        ))}
       </div>
 
       {/* OTs Asociadas */}

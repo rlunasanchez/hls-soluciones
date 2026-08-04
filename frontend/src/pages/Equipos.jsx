@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Package } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Package, Plus } from "lucide-react";
 import api from "../services/api";
 import '../styles/Equipos.css';
 import { cerrarSesion } from "../utils/helpers";
@@ -13,22 +13,14 @@ import Pagination from "../components/Pagination";
 
 function Equipos() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const params = new URLSearchParams(location.search);
   const [equipos, setEquipos] = useState([]);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [equipoEditando, setEquipoEditando] = useState(null);
-  const [filtroCodigo, setFiltroCodigo] = useState("");
-  const [filtroCliente, setFiltroCliente] = useState("");
   const [filtroModelo, setFiltroModelo] = useState("");
   const [filtroSerie, setFiltroSerie] = useState("");
   const [paginaActual, setPaginaActual] = useState(1);
   const equiposPorPagina = 4;
-  const [clientes, setClientes] = useState([]);
-  const [equiposExpandidos, setEquiposExpandidos] = useState({});
   const [soloLectura, setSoloLectura] = useState(false);
-  const [returnToOT, setReturnToOT] = useState(false);
-  const [ordenParaVolver, setOrdenParaVolver] = useState(null);
 
   const fetchEquipos = async (signal) => {
     try {
@@ -39,61 +31,17 @@ function Equipos() {
     }
   };
 
-  const fetchClientes = async (signal) => {
-    try {
-      const res = await api.get("/api/clientes", { signal });
-      setClientes(res.data);
-    } catch (err) {
-      if (err.name !== "CanceledError") console.error(err);
-    }
-  };
-
   useEffect(() => {
     const controller = new AbortController();
     fetchEquipos(controller.signal);
-    fetchClientes(controller.signal);
     return () => controller.abort();
   }, []);
 
   useEffect(() => {
     setPaginaActual(1);
-  }, [filtroCodigo, filtroCliente, filtroModelo, filtroSerie]);
-
-  useEffect(() => {
-    const navState = window.history.state?.usr;
-    if (navState?.equipo && (navState?.editar || navState?.ver)) {
-      if (navState?.returnToOT) {
-        setReturnToOT(true);
-        setOrdenParaVolver(navState.orden || null);
-      }
-      fetchClientes().then(() => {
-        setEquipoEditando(navState.equipo);
-        setSoloLectura(!!navState.ver);
-        setMostrarFormulario(true);
-      });
-      window.history.replaceState({}, document.title);
-    }
-  }, []);
-
-  useEffect(() => {
-    const clienteId = params.get("clienteId");
-    if (clienteId && equipos.length > 0) {
-      const cliente = clientes.find(c => c.id == clienteId);
-      if (cliente) {
-        setFiltroCliente(cliente.razon_social);
-      }
-    }
-  }, [equipos, clientes]);
+  }, [filtroModelo, filtroSerie]);
 
   const equiposFiltrados = equipos.filter(eq => {
-    if (filtroCodigo) {
-      const c = filtroCodigo.toLowerCase();
-      if (!eq.codigo?.toLowerCase().includes(c)) return false;
-    }
-    if (filtroCliente) {
-      const cl = filtroCliente.toLowerCase();
-      if (!eq.cliente_nombre?.toLowerCase().includes(cl)) return false;
-    }
     if (filtroModelo) {
       const m = filtroModelo.toLowerCase();
       if (!eq.modelo?.toLowerCase().includes(m)) return false;
@@ -109,17 +57,21 @@ function Equipos() {
   const indiceInicio = (paginaActual - 1) * equiposPorPagina;
   const equiposPagina = equiposFiltrados.slice(indiceInicio, indiceInicio + equiposPorPagina);
 
-  const editarEquipo = async (eq) => {
-    await fetchClientes();
+  const editarEquipo = (eq) => {
     setEquipoEditando(eq);
     setSoloLectura(false);
     setMostrarFormulario(true);
   };
 
-  const verEquipo = async (eq) => {
-    await fetchClientes();
+  const verEquipo = (eq) => {
     setEquipoEditando(eq);
     setSoloLectura(true);
+    setMostrarFormulario(true);
+  };
+
+  const nuevaEquipo = () => {
+    setEquipoEditando(null);
+    setSoloLectura(false);
     setMostrarFormulario(true);
   };
 
@@ -143,13 +95,7 @@ function Equipos() {
       setMostrarFormulario(false);
       setEquipoEditando(null);
       setSoloLectura(false);
-      if (returnToOT && ordenParaVolver) {
-        setReturnToOT(false);
-        const equipoActualizado = id ? { ...payload, id } : payload;
-        navigate("/orden-trabajo", { state: { orden: ordenParaVolver, equipoEditado: equipoActualizado } });
-      } else {
-        navigate('/equipos', { replace: true });
-      }
+      navigate('/equipos', { replace: true });
       const res = await api.get("/api/equipos");
       setEquipos(res.data);
     } catch (err) {
@@ -162,17 +108,11 @@ function Equipos() {
       <EquipoFormulario
         equipoEditando={equipoEditando}
         equipos={equipos}
-        clientes={clientes}
         onCancel={() => {
           setMostrarFormulario(false);
           setEquipoEditando(null);
           setSoloLectura(false);
-          if (returnToOT && ordenParaVolver) {
-            setReturnToOT(false);
-            navigate("/orden-trabajo", { state: { orden: ordenParaVolver } });
-          } else {
-            navigate('/equipos', { replace: true });
-          }
+          navigate('/equipos', { replace: true });
         }}
         onSave={guardarEquipo}
         readOnly={soloLectura}
@@ -185,22 +125,21 @@ function Equipos() {
       <HeaderEquipo navigate={navigate} onLogout={cerrarSesion} />
 
         <FiltrosEquipo
-          filtroCodigo={filtroCodigo}
-          onFiltroCodigoChange={setFiltroCodigo}
-          filtroCliente={filtroCliente}
-          onFiltroClienteChange={setFiltroCliente}
           filtroModelo={filtroModelo}
           onFiltroModeloChange={setFiltroModelo}
           filtroSerie={filtroSerie}
           onFiltroSerieChange={setFiltroSerie}
-          onLimpiar={() => { setFiltroCodigo(""); setFiltroCliente(""); setFiltroModelo(""); setFiltroSerie(""); }}
+          onLimpiar={() => { setFiltroModelo(""); setFiltroSerie(""); }}
         />
+
+      <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 16 }}>
+        <button className="btn-nuevo-cliente" onClick={nuevaEquipo}>
+          <Plus size={16} /> Nuevo Equipo
+        </button>
+      </div>
 
       <EquipoTabla
         equipos={equiposPagina}
-        hayBusqueda={!!filtroCodigo || !!filtroCliente || !!filtroModelo || !!filtroSerie}
-        equiposExpandidos={equiposExpandidos}
-        setEquiposExpandidos={setEquiposExpandidos}
         onVer={verEquipo}
         onEditar={editarEquipo}
         onEliminar={eliminarEquipo}

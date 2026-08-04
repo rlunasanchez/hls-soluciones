@@ -19,7 +19,6 @@ import OrdenFormAveria from "../components/ordenes/OrdenFormAveria";
 function OrdenTrabajo() {
   const navigate = useNavigate();
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
-  const [errorNumeroOrden, setErrorNumeroOrden] = useState("");
   
   // Estados para listar órdenes con paginación
   const [ordenes, setOrdenes] = useState([]);
@@ -27,38 +26,32 @@ function OrdenTrabajo() {
   const [paginaActual, setPaginaActual] = useState(1);
   const ITEMS_POR_PAG = 4;
   const [editingId, setEditingId] = useState(null);
-  const [ordenEditando, setOrdenEditando] = useState(null);
   const [filtroNumeroOrden, setFiltroNumeroOrden] = useState("");
   const [filtroGarantia, setFiltroGarantia] = useState("todos");
   const [filtroEstado, setFiltroEstado] = useState("todos");
   const [filtroFechaDesde, setFiltroFechaDesde] = useState("");
   const [filtroFechaHasta, setFiltroFechaHasta] = useState("");
-  const [fromClientes, setFromClientes] = useState(false);
   
   // Estados para autocompletar clientes y equipos
   const [clientes, setClientes] = useState([]);
   const [equipos, setEquipos] = useState([]);
   const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
+  const [clienteFijo, setClienteFijo] = useState(false);
   const [equipoSeleccionado, setEquipoSeleccionado] = useState(null);
+  const [equipoFijo, setEquipoFijo] = useState(false);
   const [busquedaCliente, setBusquedaCliente] = useState("");
   const [busquedaSerie, setBusquedaSerie] = useState("");
-  const [busquedaCodigo, setBusquedaCodigo] = useState("");
   const [busquedaModelo, setBusquedaModelo] = useState("");
   const [mostrarDropdownClientes, setMostrarDropdownClientes] = useState(false);
   const [mostrarDropdownEquipos, setMostrarDropdownEquipos] = useState(false);
-  const [mostrarDropdownCodigo, setMostrarDropdownCodigo] = useState(false);
   const [mostrarDropdownModelo, setMostrarDropdownModelo] = useState(false);
   const [equiposSugeridos, setEquiposSugeridos] = useState([]);
-  const [equiposCodigoSugeridos, setEquiposCodigoSugeridos] = useState([]);
   const [equiposModeloSugeridos, setEquiposModeloSugeridos] = useState([]);
   const [clienteInactivo, setClienteInactivo] = useState(false);
-  const [equipoOtroCliente, setEquipoOtroCliente] = useState(false);
-  const [equipoNoExiste, setEquipoNoExiste] = useState(false);
   const [soloLectura, setSoloLectura] = useState(false);
   
   // Refs para detectar clics fuera de los dropdowns
   const equipoDropdownRef = useRef(null);
-  const equipoCodigoDropdownRef = useRef(null);
   const equipoModeloDropdownRef = useRef(null);
   const clienteDropdownRef = useRef(null);
   
@@ -128,44 +121,12 @@ function OrdenTrabajo() {
       
       const ordenFromNav = navState?.orden;
       const clienteFromNav = navState?.cliente;
-      const clienteEditado = navState?.clienteEditado;
-      const equipoEditado = navState?.equipoEditado;
       
       if (ordenFromNav) {
         // Cargar clientes frescos antes de editar la orden
         await fetchClientes();
         await fetchEquipos();
         editarOrden(ordenFromNav);
-        // Si volvimos de editar el cliente, actualizar campos en la OT
-        if (clienteEditado) {
-          setNuevaOrden(prev => ({
-            ...prev,
-            cliente: toUpper(clienteEditado.razon_social),
-            direccion: toUpper(clienteEditado.direccion),
-            comuna: toUpper(clienteEditado.comuna),
-            contacto: toUpper(clienteEditado.contacto_nombre),
-            fonoPrincipal: clienteEditado.telefono || clienteEditado.contacto_fono || ""
-          }));
-        }
-        // Si volvimos de editar el equipo, actualizar campos en la OT
-        if (equipoEditado) {
-          setNuevaOrden(prev => ({
-            ...prev,
-            equipo: toUpper(equipoEditado.equipo),
-            marca: toUpper(equipoEditado.marca),
-            modelo: toUpper(equipoEditado.modelo),
-            serie: toUpper(equipoEditado.serie),
-            nivelTinta: toUpper(equipoEditado.nivel_tintas || equipoEditado.nivelTinta || ""),
-            contadorPagOut: equipoEditado.contador_pag || ""
-          }));
-          const nuevosInsumos = [];
-          for (let i = 1; i <= 12; i++) {
-            nuevosInsumos.push({ nombre: toUpper(equipoEditado[`insumo${i}`]) || "" });
-          }
-          setInsumos(nuevosInsumos);
-          const visibles = nuevosInsumos.filter(n => n.nombre).length;
-          setInsumosVisibles(Math.max(2, visibles));
-        }
         window.history.replaceState({}, document.title);
       }
       
@@ -173,18 +134,15 @@ function OrdenTrabajo() {
         const fechaActual = new Date().toISOString().split("T")[0];
         const numeroOt = await calcularSiguienteNumeroOrden();
         setEditingId(null);
-        setFromClientes(true);
         setClienteSeleccionado(clienteFromNav);
+        setClienteFijo(true);
         setClienteInactivo(false);
-        setEquipoOtroCliente(false);
-        setEquipoNoExiste(false);
         setEquipoSeleccionado(null);
+        setEquipoFijo(false);
         setBusquedaCliente((clienteFromNav.razon_social || "").toUpperCase());
         setBusquedaSerie("");
-    setBusquedaCodigo("");
     setBusquedaModelo("");
     setEquiposSugeridos([]);
-    setEquiposCodigoSugeridos([]);
     setEquiposModeloSugeridos([]);
         setInsumos([
           { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
@@ -192,7 +150,6 @@ function OrdenTrabajo() {
           { nombre: "" }, { nombre: "" }
         ]);
         setInsumosVisibles(2);
-        setErrorNumeroOrden("");
         setNuevaOrden({
           numeroOrden: numeroOt,
           fecha: fechaActual,
@@ -250,18 +207,15 @@ function OrdenTrabajo() {
     }));
     setEditingId(null);
     setSoloLectura(false);
-    setFromClientes(false);
     setClienteSeleccionado(null);
+    setClienteFijo(false);
     setEquipoSeleccionado(null);
+    setEquipoFijo(false);
     setClienteInactivo(false);
-    setEquipoOtroCliente(false);
-    setEquipoNoExiste(false);
     setBusquedaCliente("");
     setBusquedaSerie("");
-    setBusquedaCodigo("");
     setBusquedaModelo("");
     setEquiposSugeridos([]);
-    setEquiposCodigoSugeridos([]);
     setEquiposModeloSugeridos([]);
     setInsumos([
       { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
@@ -269,24 +223,11 @@ function OrdenTrabajo() {
       { nombre: "" }, { nombre: "" }
     ]);
     setInsumosVisibles(2);
-    setErrorNumeroOrden("");
     setMostrarFormulario(true);
   };
 
   // Resetear paginación al filtrar
   useEffect(() => { setPaginaActual(1); }, [filtroNumeroOrden, filtroGarantia, filtroEstado, filtroFechaDesde, filtroFechaHasta]);
-
-  // Buscar equipos por código via API (datos siempre frescos)
-  useEffect(() => {
-    if (busquedaCodigo.length < 2) { setEquiposCodigoSugeridos([]); return; }
-    const timer = setTimeout(async () => {
-      try {
-        const res = await api.get(`/api/equipos?q=${encodeURIComponent(busquedaCodigo)}`);
-        setEquiposCodigoSugeridos(res.data);
-      } catch { setEquiposCodigoSugeridos([]); }
-    }, 250);
-    return () => clearTimeout(timer);
-  }, [busquedaCodigo]);
 
   // Buscar equipos por serie via API (datos siempre frescos)
   useEffect(() => {
@@ -317,9 +258,6 @@ function OrdenTrabajo() {
     const handleClickOutside = (event) => {
       if (equipoDropdownRef.current && !equipoDropdownRef.current.contains(event.target)) {
         setMostrarDropdownEquipos(false);
-      }
-      if (equipoCodigoDropdownRef.current && !equipoCodigoDropdownRef.current.contains(event.target)) {
-        setMostrarDropdownCodigo(false);
       }
       if (equipoModeloDropdownRef.current && !equipoModeloDropdownRef.current.contains(event.target)) {
         setMostrarDropdownModelo(false);
@@ -370,7 +308,8 @@ function OrdenTrabajo() {
 
   const editarOrden = async (orden) => {
     setEditingId(orden.id);
-    setOrdenEditando(orden);
+    setClienteFijo(false);
+    setEquipoFijo(false);
     setMostrarFormulario(true);
     
     // Cargar datos de la orden en el formulario
@@ -403,24 +342,19 @@ function OrdenTrabajo() {
       observaciones: toUpper(orden.observaciones)
     });
 
-    // Buscar equipo asociado - solo para badge/estado, NO sobreescribir datos de la OT
-    setEquipoNoExiste(false);
+    // Buscar equipo asociado - solo para estado, NO sobreescribir datos de la OT
     const cargarEquipoFresco = async () => {
       try {
         if (orden.equipo_id) {
           const res = await api.get(`/api/equipos/${orden.equipo_id}`);
           const eq = res.data;
           setEquipoSeleccionado(eq);
-          setEquipoOtroCliente(orden.cliente_id && eq.cliente_id && eq.cliente_id !== orden.cliente_id);
-          setEquipoNoExiste(false);
-          setBusquedaCodigo(eq.codigo || "");
           setBusquedaSerie((eq.serie || "").toUpperCase());
           setBusquedaModelo((eq.modelo || "").toUpperCase());
           return;
         }
       } catch (err) {
         console.error("Error al cargar equipo fresco:", err);
-        setEquipoNoExiste(true);
       }
       // Fallback: buscar en la lista local
       const eq = equipos.find(e => 
@@ -429,13 +363,8 @@ function OrdenTrabajo() {
       );
       if (eq) {
         setEquipoSeleccionado(eq);
-        setEquipoOtroCliente(orden.cliente_id && eq.cliente_id && eq.cliente_id !== orden.cliente_id);
-        setEquipoNoExiste(false);
-        setBusquedaCodigo(eq.codigo || "");
         setBusquedaSerie((eq.serie || "").toUpperCase());
         setBusquedaModelo((eq.modelo || "").toUpperCase());
-      } else if (orden.equipo_id) {
-        setEquipoNoExiste(true);
       }
     };
     cargarEquipoFresco();
@@ -489,6 +418,8 @@ function OrdenTrabajo() {
 
   const verOrden = async (orden) => {
     setSoloLectura(true);
+    setClienteFijo(true);
+    setEquipoFijo(true);
     setEditingId(null);
     setMostrarFormulario(true);
     
@@ -521,23 +452,19 @@ function OrdenTrabajo() {
       observaciones: toUpper(orden.observaciones)
     });
 
-    setEquipoNoExiste(false);
+    // Buscar equipo asociado - solo para estado, NO sobreescribir datos de la OT
     const cargarEquipoFresco = async () => {
       try {
         if (orden.equipo_id) {
           const res = await api.get(`/api/equipos/${orden.equipo_id}`);
           const eq = res.data;
           setEquipoSeleccionado(eq);
-          setEquipoOtroCliente(orden.cliente_id && eq.cliente_id && eq.cliente_id !== orden.cliente_id);
-          setEquipoNoExiste(false);
-          setBusquedaCodigo(eq.codigo || "");
           setBusquedaSerie((eq.serie || "").toUpperCase());
           setBusquedaModelo((eq.modelo || "").toUpperCase());
           return;
         }
       } catch (err) {
         console.error("Error al cargar equipo fresco:", err);
-        setEquipoNoExiste(true);
       }
       const eq = equipos.find(e => 
         (orden.equipo_id && e.id === orden.equipo_id) || 
@@ -545,13 +472,8 @@ function OrdenTrabajo() {
       );
       if (eq) {
         setEquipoSeleccionado(eq);
-        setEquipoOtroCliente(orden.cliente_id && eq.cliente_id && eq.cliente_id !== orden.cliente_id);
-        setEquipoNoExiste(false);
-        setBusquedaCodigo(eq.codigo || "");
         setBusquedaSerie((eq.serie || "").toUpperCase());
         setBusquedaModelo((eq.modelo || "").toUpperCase());
-      } else if (orden.equipo_id) {
-        setEquipoNoExiste(true);
       }
     };
     cargarEquipoFresco();
@@ -639,9 +561,6 @@ function OrdenTrabajo() {
     setMostrarDropdownClientes(false);
     if (mismoCliente && editingId) return;
     setEquipoSeleccionado(null);
-    setEquipoOtroCliente(false);
-    setEquipoNoExiste(false);
-    setBusquedaCodigo("");
     setBusquedaSerie("");
     setBusquedaModelo("");
     setNuevaOrden(prev => ({
@@ -666,92 +585,19 @@ function OrdenTrabajo() {
   // Seleccionar equipo por serie - NO carga avería (puede haber duplicados)
   const seleccionarEquipo = (equipo) => {
     setEquipoSeleccionado(equipo);
-    setEquipoOtroCliente(clienteSeleccionado?.id && equipo.cliente_id && equipo.cliente_id !== clienteSeleccionado.id);
-    setEquipoNoExiste(false);
     setNuevaOrden(prev => ({
       ...prev,
       equipo: toUpper(equipo.equipo),
       modelo: toUpper(equipo.modelo),
       marca: toUpper(equipo.marca),
-      serie: toUpper(equipo.serie),
-      contadorPagOut: equipo.contador_pag?.toString() || "",
-      nivelTinta: toUpper(equipo.nivel_tintas)
+      serie: toUpper(equipo.serie)
       // NOTA: No carga avería aquí, solo al buscar por código
     }));
-    
-    // Cargar insumos del equipo
-    const insumosEquipo = [];
-    for (let i = 1; i <= 12; i++) {
-      const insumo = equipo[`insumo${i}`];
-      if (insumo) insumosEquipo.push({ nombre: insumo.toUpperCase() });
-    }
-    
-    const nuevosInsumos = [...insumosEquipo];
-    while (nuevosInsumos.length < 12) {
-      nuevosInsumos.push({ nombre: "" });
-    }
-    setInsumos(nuevosInsumos);
-    setInsumosVisibles(Math.max(2, insumosEquipo.length));
-    
+
      setBusquedaSerie((equipo.serie || "").toUpperCase());
      setBusquedaModelo((equipo.modelo || "").toUpperCase());
      setMostrarDropdownEquipos(false);
      setMostrarDropdownModelo(false);
-  };
-
-  const seleccionarEquipoPorCodigo = async (codigo) => {
-    try {
-      const res = await api.get(`/api/equipos?q=${encodeURIComponent(codigo)}`);
-      const eq = res.data[0];
-      if (!eq) return;
-      setEquipoSeleccionado(eq);
-      setEquipoOtroCliente(clienteSeleccionado?.id && eq.cliente_id && eq.cliente_id !== clienteSeleccionado.id);
-      setEquipoNoExiste(false);
-      setMostrarDropdownCodigo(false);
-      setNuevaOrden(prev => ({
-        ...prev,
-        equipo: toUpper(eq.equipo),
-        modelo: toUpper(eq.modelo),
-        marca: toUpper(eq.marca),
-        serie: toUpper(eq.serie),
-        contadorPagOut: eq.contador_pag?.toString() || "",
-        nivelTinta: toUpper(eq.nivel_tintas),
-        averia: toUpper(eq.averia)
-      }));
-      const insumosEquipo = [];
-      for (let i = 1; i <= 12; i++) {
-        const insumo = eq[`insumo${i}`];
-        if (insumo) insumosEquipo.push({ nombre: insumo.toUpperCase() });
-      }
-      const nuevosInsumos = [...insumosEquipo];
-      while (nuevosInsumos.length < 12) {
-        nuevosInsumos.push({ nombre: "" });
-      }
-      setInsumos(nuevosInsumos);
-      setInsumosVisibles(Math.max(2, insumosEquipo.length));
-      setBusquedaSerie((eq.serie || "").toUpperCase());
-      setBusquedaCodigo(codigo);
-      setBusquedaModelo((eq.modelo || "").toUpperCase());
-
-      // Si el equipo tiene cliente asociado, buscarlo en los datos locales
-      if (eq.cliente_id) {
-        const cliente = clientes.find(c => c.id === eq.cliente_id);
-        if (cliente) {
-          setClienteSeleccionado(cliente);
-          setBusquedaCliente(toUpper(cliente.razon_social));
-          setNuevaOrden(prev => ({
-            ...prev,
-            cliente: toUpper(cliente.razon_social),
-            direccion: toUpper(cliente.direccion),
-            comuna: toUpper(cliente.comuna),
-            contacto: toUpper(cliente.contacto_nombre),
-            fonoPrincipal: cliente.telefono || cliente.contacto_fono || ""
-          }));
-        }
-      }
-    } catch (err) {
-      console.error("Error al buscar por código:", err);
-    }
   };
 
   // Filtrar clientes para la búsqueda (local)
@@ -763,34 +609,10 @@ function OrdenTrabajo() {
 
   // Equipos filtrados por API (siempre frescos)
   const equiposFiltrados = equiposSugeridos;
-  const equiposCodigoFiltrados = equiposCodigoSugeridos;
   const equiposModeloFiltrados = equiposModeloSugeridos;
-
-  // Verificar número de orden único
-  const verificarNumeroOrden = async (numero) => {
-    if (!numero) return;
-    try {
-      const res = await api.get(editingId
-        ? `/api/ordenes/verificar/${numero}?excluir=${editingId}`
-        : `/api/ordenes/verificar/${numero}`
-      );
-      if (res.data.existe) {
-        setErrorNumeroOrden("Este número de orden ya existe");
-      } else {
-        setErrorNumeroOrden("");
-      }
-    } catch (err) {
-      console.error("Error al verificar número de orden:", err);
-    }
-  };
 
   const guardarOrden = async (e) => {
     e.preventDefault();
-    
-    if (errorNumeroOrden) {
-      alert("Por favor corrija el número de orden antes de guardar");
-      return;
-    }
     
     // Preparar insumos
     const ins = insumos.filter(i => i.nombre.trim() !== "").map(i => i.nombre);
@@ -873,20 +695,17 @@ function OrdenTrabajo() {
     ]);
     setInsumosVisibles(2);
     setClienteSeleccionado(null);
+    setClienteFijo(false);
     setEquipoSeleccionado(null);
+    setEquipoFijo(false);
     setBusquedaCliente("");
     setBusquedaSerie("");
-    setBusquedaCodigo("");
     setBusquedaModelo("");
     setEquiposSugeridos([]);
-    setEquiposCodigoSugeridos([]);
     setEquiposModeloSugeridos([]);
     setMostrarDropdownModelo(false);
     setClienteInactivo(false);
-    setEquipoOtroCliente(false);
     setEditingId(null);
-    setOrdenEditando(null);
-    setErrorNumeroOrden("");
   };
   // Funciones de navegación eliminadas (accesos desde el menú)
 
@@ -952,8 +771,6 @@ function OrdenTrabajo() {
               <OrdenFormDatos
                 nuevaOrden={nuevaOrden}
                 setNuevaOrden={setNuevaOrden}
-                errorNumeroOrden={errorNumeroOrden}
-                verificarNumeroOrden={verificarNumeroOrden}
                 readOnly={soloLectura}
               />
 
@@ -969,22 +786,12 @@ function OrdenTrabajo() {
                 nuevaOrden={nuevaOrden}
                 setNuevaOrden={setNuevaOrden}
                 clientes={clientes}
-                esEdicion={!!editingId}
-                fetchClientes={fetchClientes}
-                fromClientes={fromClientes}
                 clienteInactivo={clienteInactivo}
+                clienteFijo={clienteFijo}
                 readOnly={soloLectura}
-                ordenEditando={ordenEditando}
               />
 
               <OrdenFormEquipo
-                busquedaCodigo={busquedaCodigo}
-                setBusquedaCodigo={setBusquedaCodigo}
-                mostrarDropdownCodigo={mostrarDropdownCodigo}
-                setMostrarDropdownCodigo={setMostrarDropdownCodigo}
-                equiposCodigoFiltrados={equiposCodigoFiltrados}
-                equipoCodigoDropdownRef={equipoCodigoDropdownRef}
-                seleccionarEquipoPorCodigo={seleccionarEquipoPorCodigo}
                 busquedaModelo={busquedaModelo}
                 setBusquedaModelo={setBusquedaModelo}
                 mostrarDropdownModelo={mostrarDropdownModelo}
@@ -1001,16 +808,9 @@ function OrdenTrabajo() {
                 equipoSeleccionado={equipoSeleccionado}
                 nuevaOrden={nuevaOrden}
                 setNuevaOrden={setNuevaOrden}
-                fetchEquipos={fetchEquipos}
-                clienteSeleccionado={clienteSeleccionado}
-                fromClientes={fromClientes}
-                esEdicion={!!editingId}
-                equipoOtroCliente={equipoOtroCliente}
-                equipoNoExiste={equipoNoExiste}
                 readOnly={soloLectura}
-                ordenEditando={ordenEditando}
-                clientes={clientes}
                 equipos={equipos}
+                equipoFijo={equipoFijo}
               >
                 <OrdenFormInsumos
                   insumos={insumos}

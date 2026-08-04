@@ -1,7 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Search, ChevronDown, Plus, Eye, Edit } from "lucide-react";
-import api from "../../services/api";
+import { Search, Users, ChevronDown, Eye } from "lucide-react";
 import ClienteFormulario from "../clientes/ClienteFormulario";
 import "../../styles/Clientes.css";
 
@@ -14,44 +12,11 @@ function OrdenFormCliente({
   seleccionarCliente,
   nuevaOrden, setNuevaOrden,
   clientes = [],
-  esEdicion = false,
-  fetchClientes,
-  fromClientes = false,
   clienteInactivo = false,
-  readOnly = false,
-  ordenEditando = null
+  clienteFijo = false,
+  readOnly = false
 }) {
-  const navigate = useNavigate();
-  const [mostrarModalCliente, setMostrarModalCliente] = useState(false);
   const [mostrarDetalleCliente, setMostrarDetalleCliente] = useState(false);
-
-  const guardarNuevoCliente = async (clienteData, resetFormulario) => {
-    try {
-      const resPost = await api.post("/api/clientes", clienteData);
-      const { codigo: codigoCreado, id: clienteId } = resPost.data;
-      if (fetchClientes) await fetchClientes();
-      seleccionarCliente({
-        id: clienteId,
-        codigo: codigoCreado,
-        razon_social: clienteData.razon_social || "",
-        rut: clienteData.rut || "",
-        direccion: clienteData.direccion || "",
-        ciudad: clienteData.ciudad || "",
-        comuna: clienteData.comuna || "",
-        telefono: clienteData.telefono || "",
-        contacto_nombre: clienteData.contacto_nombre || "",
-        contacto_email: clienteData.contacto_email || "",
-        contacto_fono: clienteData.contacto_fono || "",
-        contacto_cargo: clienteData.contacto_cargo || "",
-        contacto_direccion: clienteData.contacto_direccion || ""
-      });
-      setMostrarModalCliente(false);
-      if (resetFormulario) resetFormulario();
-    } catch (err) {
-      console.error("Error al crear cliente:", err);
-      alert(err.response?.data?.msg || "Error al crear cliente");
-    }
-  };
 
   return (
     <div className="of-sec success">
@@ -59,11 +24,77 @@ function OrdenFormCliente({
 
       <div style={{ marginBottom: '12px' }}>
         <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)' }}>
-          <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
-          Buscar y Seleccionar Cliente
+          {clienteFijo && clienteSeleccionado ? (
+            <>
+              <Users size={16} style={{ display: 'inline', marginRight: '6px' }} />
+              Cliente Asignado
+            </>
+          ) : (
+            <>
+              <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
+              Buscar y Seleccionar Cliente
+            </>
+          )}
         </label>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-          <div ref={clienteDropdownRef} style={{ position: 'relative', flex: 1 }}>
+
+        {clienteFijo && clienteSeleccionado ? (
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+            <div style={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '8px 12px',
+              background: '#E0F2FE',
+              border: '2px solid var(--primary)',
+              borderRadius: '6px',
+              flexWrap: 'wrap'
+            }}>
+              <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' }}>
+                {clienteSeleccionado.codigo || 'CL-XXXX'}
+              </span>
+              <span style={{ fontWeight: '600', color: 'var(--text)', fontSize: '0.85rem' }}>
+                {clienteSeleccionado.razon_social}
+              </span>
+              {clienteInactivo ? (
+                <span style={{ background: '#F97316', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>
+                  ⚠ Cliente desactivado
+                </span>
+              ) : (
+                <span style={{ background: 'var(--success)', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>
+                  ✓ Seleccionado
+                </span>
+              )}
+            </div>
+            {readOnly && (
+              <button
+                type="button"
+                onClick={() => setMostrarDetalleCliente(true)}
+                title="Ver todos los datos del cliente"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  background: '#0D9488',
+                  color: 'white',
+                  border: 'none',
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 500,
+                  fontSize: '0.8rem',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                  height: '32px'
+                }}
+              >
+                <Eye size={14} /> Ver
+              </button>
+            )}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+            <div ref={clienteDropdownRef} style={{ position: 'relative', flex: 1 }}>
             <input
               type="text"
               placeholder="Escriba para buscar cliente por nombre o RUT..."
@@ -177,31 +208,6 @@ function OrdenFormCliente({
               </div>
             )}
           </div>
-          {!readOnly && !fromClientes && (!esEdicion || !clienteSeleccionado) && (
-          <button
-            type="button"
-            onClick={() => setMostrarModalCliente(true)}
-            title="Crear nuevo cliente"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                background: 'var(--primary)',
-                color: 'white',
-                border: 'none',
-                padding: '6px 12px',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontWeight: 500,
-                fontSize: '0.8rem',
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-                height: '32px'
-              }}
-            >
-            <Plus size={14} /> Nuevo
-          </button>
-          )}
           {clienteSeleccionado && readOnly && (
             <button
               type="button"
@@ -224,36 +230,12 @@ function OrdenFormCliente({
                 height: '32px'
               }}
             >
-              <Eye size={14} /> Ver
+                <Eye size={14} /> Ver
             </button>
           )}
-          {clienteSeleccionado && esEdicion && !readOnly && (
-            <button
-              type="button"
-              onClick={() => navigate('/clientes', { state: { cliente: clienteSeleccionado, editar: true, returnToOT: true, orden: ordenEditando } })}
-              title="Editar datos del cliente"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                background: 'var(--primary)',
-                color: 'white',
-                border: 'none',
-                padding: '6px 12px',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontWeight: 500,
-                fontSize: '0.8rem',
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-                height: '32px'
-              }}
-            >
-              <Edit size={14} /> Editar
-            </button>
+          </div>
           )}
         </div>
-      </div>
 
       {/* Modal Detalle Cliente (solo lectura) */}
       {mostrarDetalleCliente && clienteSeleccionado && (
@@ -270,25 +252,6 @@ function OrdenFormCliente({
               onSave={() => {}}
               onCancel={() => setMostrarDetalleCliente(false)}
               readOnly
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Modal Nuevo Cliente */}
-      {mostrarModalCliente && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
-        }}
-          onClick={(e) => { if (e.target === e.currentTarget) setMostrarModalCliente(false); }}
-        >
-          <div style={{ maxHeight: '90vh', overflow: 'auto', width: '100%', maxWidth: '900px' }}>
-            <ClienteFormulario
-              clienteEditando={null}
-              clientes={clientes}
-              onSave={guardarNuevoCliente}
-              onCancel={() => setMostrarModalCliente(false)}
             />
           </div>
         </div>
