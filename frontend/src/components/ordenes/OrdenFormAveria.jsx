@@ -1,7 +1,20 @@
+import { Trash2 } from "lucide-react";
+
 function OrdenFormAveria({ nuevaOrden, setNuevaOrden, readOnly }) {
   return (
     <div className="of-sec muted">
-      <div className="of-st muted">Avería/Falla/Incidencia</div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+        <span className="of-st muted">Avería/Falla/Incidencia</span>
+        {!readOnly && (
+          <button
+            type="button"
+            className="of-btn-a"
+            onClick={() => setNuevaOrden(prev => ({ ...prev, averia: "", actividad: "", observaciones: "" }))}
+          >
+            <Trash2 size={14} /> Limpiar
+          </button>
+        )}
+      </div>
       <div className="of-f">
         <textarea
           placeholder="Describa la avería, falla o incidencia del equipo..."

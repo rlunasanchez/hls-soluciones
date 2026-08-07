@@ -75,7 +75,10 @@ CREATE TABLE IF NOT EXISTS ordenes_trabajo (
   direccion VARCHAR(300),
   comuna VARCHAR(100),
   contacto VARCHAR(200),
+  fono_contacto VARCHAR(50),
+  email_contacto VARCHAR(100),
   fono_principal VARCHAR(50),
+  email VARCHAR(100),
   tecnico_asignado VARCHAR(200) NOT NULL,
   actividad TEXT,
 

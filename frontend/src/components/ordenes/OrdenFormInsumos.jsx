@@ -11,10 +11,20 @@ function OrdenFormInsumos({ insumos, insumosVisibles, setInsumosVisibles, setIns
     <div className="of-sec" style={{background:'white'}}>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'6px'}}>
         <span className="of-st muted">Insumos</span>
-        {!readOnly && insumosVisibles < 12 && (
-          <button type="button" className="of-btn-a" onClick={() => setInsumosVisibles(insumosVisibles + 1)}>
-            <Plus size={14} /> Agregar
-          </button>
+        {!readOnly && (
+          <div style={{ display: 'flex', gap: '6px' }}>
+            <button type="button" className="of-btn-a" onClick={() => {
+              setInsumos(Array(12).fill({ nombre: "" }));
+              setInsumosVisibles(2);
+            }}>
+              <Trash2 size={14} /> Limpiar
+            </button>
+            {insumosVisibles < 12 && (
+              <button type="button" className="of-btn-a" onClick={() => setInsumosVisibles(insumosVisibles + 1)}>
+                <Plus size={14} /> Agregar
+              </button>
+            )}
+          </div>
         )}
       </div>
       <div className="of-ins">
