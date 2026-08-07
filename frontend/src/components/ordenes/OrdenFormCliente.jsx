@@ -316,6 +316,42 @@ function OrdenFormCliente({
 
       <div className="of-form-grid">
         <div className="of-f">
+          <label>Email</label>
+          <input
+            type="email"
+            placeholder="Email del cliente"
+            value={nuevaOrden.email}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, email: e.target.value.toUpperCase()})}
+            disabled={readOnly}
+            style={{
+              width: '100%',
+              padding: '6px 10px',
+              border: '2px solid var(--border)',
+              borderRadius: '6px',
+              fontSize: '.82rem'
+            }}
+          />
+        </div>
+
+        <div className="of-f">
+          <label>Fono Principal</label>
+          <input
+            type="tel"
+            placeholder="Teléfono principal del cliente"
+            value={nuevaOrden.fonoPrincipal}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, fonoPrincipal: e.target.value.replace(/[^0-9+]/g, '')})}
+            disabled={readOnly}
+            style={{
+              width: '100%',
+              padding: '6px 10px',
+              border: '2px solid var(--border)',
+              borderRadius: '6px',
+              fontSize: '.82rem'
+            }}
+          />
+        </div>
+
+        <div className="of-f">
           <label>Contacto</label>
           <input
             type="text"
@@ -332,14 +368,34 @@ function OrdenFormCliente({
             }}
           />
         </div>
+      </div>
+
+      <div className="of-form-grid">
+        <div className="of-f">
+          <label>Email Contacto</label>
+          <input
+            type="email"
+            placeholder="Email del contacto"
+            value={nuevaOrden.emailContacto}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, emailContacto: e.target.value.toUpperCase()})}
+            disabled={readOnly}
+            style={{
+              width: '100%',
+              padding: '6px 10px',
+              border: '2px solid var(--border)',
+              borderRadius: '6px',
+              fontSize: '.82rem'
+            }}
+          />
+        </div>
 
         <div className="of-f">
-          <label>Fono Principal</label>
+          <label>Fono Contacto</label>
           <input
             type="tel"
-            placeholder="Teléfono de contacto"
-            value={nuevaOrden.fonoPrincipal}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, fonoPrincipal: e.target.value.replace(/[^0-9+]/g, '')})}
+            placeholder="Teléfono del contacto"
+            value={nuevaOrden.fonoContacto}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, fonoContacto: e.target.value.replace(/[^0-9+]/g, '')})}
             disabled={readOnly}
             style={{
               width: '100%',

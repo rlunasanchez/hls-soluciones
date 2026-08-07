@@ -82,8 +82,11 @@ function OrdenTrabajo() {
     cliente: "",
     direccion: "",
     comuna: "",
-    contacto: "",
+    email: "",
     fonoPrincipal: "",
+    contacto: "",
+    fonoContacto: "",
+    emailContacto: "",
     tecnicoAsignado: "",
     // Datos del Equipo
     equipo: "",
@@ -165,8 +168,11 @@ function OrdenTrabajo() {
         cliente: (clienteFromNav.razon_social || "").toUpperCase(),
         direccion: (clienteFromNav.direccion || "").toUpperCase(),
         comuna: (clienteFromNav.comuna || "").toUpperCase(),
+        email: clienteFromNav.email || "",
+        fonoPrincipal: clienteFromNav.telefono || "",
         contacto: (clienteFromNav.contacto_nombre || "").toUpperCase(),
-        fonoPrincipal: clienteFromNav.telefono || clienteFromNav.contacto_fono || "",
+        fonoContacto: clienteFromNav.contacto_fono || "",
+        emailContacto: clienteFromNav.contacto_email || "",
         tecnicoAsignado: "",
         equipo: "",
         modelo: "",
@@ -328,8 +334,11 @@ function OrdenTrabajo() {
       cliente: toUpper(orden.cliente),
       direccion: toUpper(orden.direccion),
       comuna: toUpper(orden.comuna),
-      contacto: toUpper(orden.contacto),
+      email: orden.email || "",
       fonoPrincipal: orden.fono_principal || "",
+      contacto: toUpper(orden.contacto),
+      fonoContacto: orden.fono_contacto || "",
+      emailContacto: orden.email_contacto || "",
       tecnicoAsignado: toUpper(orden.tecnico_asignado),
       equipo: toUpper(orden.equipo),
       modelo: toUpper(orden.modelo),
@@ -438,8 +447,11 @@ function OrdenTrabajo() {
       cliente: toUpper(orden.cliente),
       direccion: toUpper(orden.direccion),
       comuna: toUpper(orden.comuna),
-      contacto: toUpper(orden.contacto),
+      email: orden.email || "",
       fonoPrincipal: orden.fono_principal || "",
+      contacto: toUpper(orden.contacto),
+      fonoContacto: orden.fono_contacto || "",
+      emailContacto: orden.email_contacto || "",
       tecnicoAsignado: toUpper(orden.tecnico_asignado),
       equipo: toUpper(orden.equipo),
       modelo: toUpper(orden.modelo),
@@ -560,6 +572,23 @@ function OrdenTrabajo() {
     setBusquedaCliente(toUpper(cliente.razon_social));
     setMostrarDropdownClientes(false);
     if (mismoCliente && editingId) return;
+
+    // En modo edicion, solo actualizar datos del cliente sin limpiar equipo
+    if (editingId) {
+      setNuevaOrden(prev => ({
+        ...prev,
+        cliente: toUpper(cliente.razon_social),
+        direccion: toUpper(cliente.direccion),
+        comuna: toUpper(cliente.comuna),
+        email: cliente.email || "",
+        fonoPrincipal: cliente.telefono || "",
+        contacto: toUpper(cliente.contacto_nombre),
+        fonoContacto: cliente.contacto_fono || "",
+        emailContacto: cliente.contacto_email || ""
+      }));
+      return;
+    }
+
     setEquipoSeleccionado(null);
     setBusquedaSerie("");
     setBusquedaModelo("");
@@ -568,8 +597,11 @@ function OrdenTrabajo() {
       cliente: toUpper(cliente.razon_social),
       direccion: toUpper(cliente.direccion),
       comuna: toUpper(cliente.comuna),
+      email: cliente.email || "",
+      fonoPrincipal: cliente.telefono || "",
       contacto: toUpper(cliente.contacto_nombre),
-      fonoPrincipal: cliente.telefono || cliente.contacto_fono || "",
+      fonoContacto: cliente.contacto_fono || "",
+      emailContacto: cliente.contacto_email || "",
       equipo: "",
       modelo: "",
       marca: "",
@@ -675,8 +707,11 @@ function OrdenTrabajo() {
       cliente: "",
       direccion: "",
       comuna: "",
-      contacto: "",
+      email: "",
       fonoPrincipal: "",
+      contacto: "",
+      fonoContacto: "",
+      emailContacto: "",
       tecnicoAsignado: "",
       equipo: "",
       modelo: "",
