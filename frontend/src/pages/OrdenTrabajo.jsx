@@ -88,6 +88,8 @@ function OrdenTrabajo() {
     fonoContacto: "",
     emailContacto: "",
     tecnicoAsignado: "",
+    contactosExtra: [],
+    direccionesExtra: [],
     // Datos del Equipo
     equipo: "",
     modelo: "",
@@ -182,7 +184,9 @@ function OrdenTrabajo() {
         nivelTinta: "",
         averia: "",
         actividad: "",
-        observaciones: ""
+        observaciones: "",
+        contactosExtra: [],
+        direccionesExtra: []
       });
       setMostrarFormulario(true);
     }
@@ -312,6 +316,15 @@ function OrdenTrabajo() {
     return dt.toISOString().split("T")[0];
   };
 
+  const parseExtra = (val) => {
+    try {
+      const arr = JSON.parse(val || "[]");
+      return Array.isArray(arr) ? arr : [];
+    } catch {
+      return [];
+    }
+  };
+
   const editarOrden = async (orden) => {
     setEditingId(orden.id);
     setClienteFijo(false);
@@ -348,7 +361,9 @@ function OrdenTrabajo() {
       nivelTinta: toUpper(orden.nivel_tinta),
       averia: toUpper(orden.averia),
       actividad: toUpper(orden.actividad),
-      observaciones: toUpper(orden.observaciones)
+      observaciones: toUpper(orden.observaciones),
+      contactosExtra: parseExtra(orden.contactos_extra),
+      direccionesExtra: parseExtra(orden.direcciones_extra)
     });
 
     // Buscar equipo asociado - solo para estado, NO sobreescribir datos de la OT
@@ -461,7 +476,9 @@ function OrdenTrabajo() {
       nivelTinta: toUpper(orden.nivel_tinta),
       averia: toUpper(orden.averia),
       actividad: toUpper(orden.actividad),
-      observaciones: toUpper(orden.observaciones)
+      observaciones: toUpper(orden.observaciones),
+      contactosExtra: parseExtra(orden.contactos_extra),
+      direccionesExtra: parseExtra(orden.direcciones_extra)
     });
 
     // Buscar equipo asociado - solo para estado, NO sobreescribir datos de la OT
@@ -584,7 +601,9 @@ function OrdenTrabajo() {
         fonoPrincipal: cliente.telefono || "",
         contacto: toUpper(cliente.contacto_nombre),
         fonoContacto: cliente.contacto_fono || "",
-        emailContacto: cliente.contacto_email || ""
+        emailContacto: cliente.contacto_email || "",
+        contactosExtra: [],
+        direccionesExtra: []
       }));
       return;
     }
@@ -602,6 +621,8 @@ function OrdenTrabajo() {
       contacto: toUpper(cliente.contacto_nombre),
       fonoContacto: cliente.contacto_fono || "",
       emailContacto: cliente.contacto_email || "",
+      contactosExtra: [],
+      direccionesExtra: [],
       equipo: "",
       modelo: "",
       marca: "",
@@ -721,7 +742,9 @@ function OrdenTrabajo() {
       nivelTinta: "",
       averia: "",
       actividad: "",
-      observaciones: ""
+      observaciones: "",
+      contactosExtra: [],
+      direccionesExtra: []
     });
     setInsumos([
       { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
@@ -847,7 +870,7 @@ function OrdenTrabajo() {
                 equipos={equipos}
                 equipoFijo={equipoFijo}
               >
-                <OrdenFormInsumos
+<OrdenFormInsumos
                   insumos={insumos}
                   insumosVisibles={insumosVisibles}
                   setInsumosVisibles={setInsumosVisibles}

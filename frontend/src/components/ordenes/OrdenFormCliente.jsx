@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Users, ChevronDown, Eye } from "lucide-react";
+import { Search, Users, ChevronDown, Eye, UserPlus, MapPin } from "lucide-react";
 import ClienteFormulario from "../clientes/ClienteFormulario";
 import "../../styles/Clientes.css";
 
@@ -17,6 +17,8 @@ function OrdenFormCliente({
   readOnly = false
 }) {
   const [mostrarDetalleCliente, setMostrarDetalleCliente] = useState(false);
+  const [mostrarDireccionesExtra, setMostrarDireccionesExtra] = useState(false);
+  const [mostrarContactosExtra, setMostrarContactosExtra] = useState(false);
 
   return (
     <div className="of-sec success">
@@ -314,6 +316,209 @@ function OrdenFormCliente({
         </div>
       </div>
 
+      {/* Direcciones Extra / Sucursales (dinámicas) */}
+      <div style={{ marginTop: '14px', padding: '10px 12px', background: '#FFF7ED', border: '2px solid #EA580C', borderRadius: '8px' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer', fontSize: '0.9rem' }}>
+          <input
+            type="checkbox"
+            checked={mostrarDireccionesExtra}
+            disabled={readOnly && nuevaOrden.direccionesExtra.length === 0}
+            onChange={(e) => setMostrarDireccionesExtra(e.target.checked)}
+            style={{ width: '17px', height: '17px', cursor: 'pointer' }}
+          />
+          <MapPin size={16} style={{ color: '#EA580C' }} />
+          Otras Direcciones / Sucursales
+          {nuevaOrden.direccionesExtra.length > 0 && (
+            <span style={{
+              background: '#EA580C', color: 'white', padding: '1px 8px', borderRadius: '10px',
+              fontSize: '0.75rem', fontWeight: '700'
+            }}>
+              {nuevaOrden.direccionesExtra.length}
+            </span>
+          )}
+        </label>
+
+        {mostrarDireccionesExtra && (
+          <div style={{ marginTop: '10px' }}>
+            {(() => {
+              const direccionesCliente = clienteSeleccionado
+                ? String(clienteSeleccionado.direcciones || "").split(";;")
+                    .map(d => {
+                      const p = d.split("|");
+                      return {
+                        tipo_direccion: (p[0] || "").toUpperCase().trim(),
+                        direccion: (p[1] || "").toUpperCase().trim(),
+                        fono: p[2] || "",
+                        ciudad: (p[3] || "").toUpperCase().trim(),
+                        comuna: (p[4] || "").toUpperCase().trim()
+                      };
+                    })
+                    .filter(d => d.direccion)
+                : [];
+
+              const agregarDireccion = (dir) => {
+                setNuevaOrden({
+                  ...nuevaOrden,
+                  direccionesExtra: [...nuevaOrden.direccionesExtra, {
+                    direccion: dir.direccion,
+                    comuna: dir.comuna,
+                    fono: dir.fono || "",
+                    tipo: dir.tipo_direccion || ""
+                  }]
+                });
+              };
+
+              const actualizarDireccion = (idx, campo, valor) => {
+                const arr = [...nuevaOrden.direccionesExtra];
+                arr[idx] = { ...arr[idx], [campo]: valor };
+                setNuevaOrden({ ...nuevaOrden, direccionesExtra: arr });
+              };
+
+              return (
+                <>
+                  {direccionesCliente.length >= 1 && (
+                    <div style={{ marginBottom: '10px' }}>
+                      <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)', fontSize: '0.8rem' }}>
+                        Agregar dirección del cliente
+                      </label>
+                      <select
+                        disabled={readOnly}
+                        defaultValue=""
+                        onChange={(e) => {
+                          const i = parseInt(e.target.value, 10);
+                          if (isNaN(i) || !direccionesCliente[i]) return;
+                          agregarDireccion(direccionesCliente[i]);
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '6px 10px',
+                          border: '2px solid var(--border)',
+                          borderRadius: '6px',
+                          fontSize: '.82rem',
+                          background: 'white'
+                        }}
+                      >
+                        <option value="">-- Elegir dirección --</option>
+                        {direccionesCliente.map((d, idx) => (
+                          <option key={idx} value={idx}>
+                            {d.tipo_direccion ? `${d.tipo_direccion} | ` : ''}{d.direccion}{d.comuna ? ` | ${d.comuna}` : ''}{d.fono ? ` | F:${d.fono}` : ''}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {nuevaOrden.direccionesExtra.map((dir, idx) => (
+                    <div key={idx} style={{ marginBottom: '8px', border: '1px solid var(--border)', borderRadius: '6px', padding: '8px' }}>
+                      <div className="of-form-grid">
+                        <div className="of-f">
+                          <label>Dirección {idx + 1}</label>
+                          <input
+                            type="text"
+                            placeholder="Dirección de la sucursal"
+                            value={dir.direccion}
+                            onChange={(e) => actualizarDireccion(idx, 'direccion', e.target.value.toUpperCase())}
+                            disabled={readOnly}
+                            style={{
+                              width: '100%',
+                              padding: '6px 10px',
+                              border: '2px solid var(--border)',
+                              borderRadius: '6px',
+                              fontSize: '.82rem'
+                            }}
+                          />
+                        </div>
+
+                        <div className="of-f">
+                          <label>Comuna</label>
+                          <input
+                            type="text"
+                            placeholder="Comuna de la sucursal"
+                            value={dir.comuna}
+                            onChange={(e) => actualizarDireccion(idx, 'comuna', e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))}
+                            disabled={readOnly}
+                            style={{
+                              width: '100%',
+                              padding: '6px 10px',
+                              border: '2px solid var(--border)',
+                              borderRadius: '6px',
+                              fontSize: '.82rem'
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+                        <input
+                          type="tel"
+                          placeholder="Fono (opcional)"
+                          value={dir.fono}
+                          onChange={(e) => actualizarDireccion(idx, 'fono', e.target.value.replace(/[^0-9+]/g, ''))}
+                          disabled={readOnly}
+                          style={{
+                            width: '30%',
+                            padding: '6px 10px',
+                            border: '2px solid var(--border)',
+                            borderRadius: '6px',
+                            fontSize: '.82rem'
+                          }}
+                        />
+                        {!readOnly && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (!confirm("¿Seguro que desea eliminar esta dirección?")) return;
+                              const arr = nuevaOrden.direccionesExtra.filter((_, i) => i !== idx);
+                              setNuevaOrden({ ...nuevaOrden, direccionesExtra: arr });
+                            }}
+                            style={{
+                              background: '#FEF2F2',
+                              color: '#DC2626',
+                              border: '1px solid #FECACA',
+                              borderRadius: '6px',
+                              padding: '4px 12px',
+                              cursor: 'pointer',
+                              fontWeight: 600,
+                              fontSize: '0.8rem'
+                            }}
+                          >
+                            Quitar
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+
+                  {!readOnly && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNuevaOrden({
+                          ...nuevaOrden,
+                          direccionesExtra: [...nuevaOrden.direccionesExtra, { direccion: "", comuna: "", fono: "", tipo: "" }]
+                        });
+                      }}
+                      style={{
+                        marginTop: '6px',
+                        background: '#FFF7ED',
+                        color: '#EA580C',
+                        border: '2px solid #EA580C',
+                        borderRadius: '6px',
+                        padding: '6px 14px',
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                        fontSize: '0.8rem'
+                      }}
+                    >
+                      + Agregar dirección
+                    </button>
+                  )}
+                </>
+              );
+            })()}
+          </div>
+        )}
+      </div>
+
       <div className="of-form-grid">
         <div className="of-f">
           <label>Email</label>
@@ -425,6 +630,224 @@ function OrdenFormCliente({
             }}
           />
         </div>
+      </div>
+
+      {/* Contactos Extra (dinámicos) */}
+      <div style={{ marginTop: '14px', padding: '10px 12px', background: '#F0FDF4', border: '2px solid var(--success)', borderRadius: '8px' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer', fontSize: '0.9rem' }}>
+          <input
+            type="checkbox"
+            checked={mostrarContactosExtra}
+            disabled={readOnly && nuevaOrden.contactosExtra.length === 0}
+            onChange={(e) => setMostrarContactosExtra(e.target.checked)}
+            style={{ width: '17px', height: '17px', cursor: 'pointer' }}
+          />
+          <UserPlus size={16} style={{ color: 'var(--success)' }} />
+          Otros Contactos
+          {nuevaOrden.contactosExtra.length > 0 && (
+            <span style={{
+              background: 'var(--success)', color: 'white', padding: '1px 8px', borderRadius: '10px',
+              fontSize: '0.75rem', fontWeight: '700'
+            }}>
+              {nuevaOrden.contactosExtra.length}
+            </span>
+          )}
+        </label>
+
+        {mostrarContactosExtra && (
+          <div style={{ marginTop: '10px' }}>
+            {(() => {
+              const contactosCliente = clienteSeleccionado
+                ? String(clienteSeleccionado.contactos || "").split(";;")
+                    .map(c => {
+                      const p = c.split("|");
+                      return { nombre: (p[0] || "").toUpperCase().trim(), email: p[1] || "", fono: p[2] || "", cargo: p[3] || "" };
+                    })
+                    .filter(c => c.nombre)
+                : [];
+
+              const agregarContacto = (c) => {
+                setNuevaOrden({
+                  ...nuevaOrden,
+                  contactosExtra: [...nuevaOrden.contactosExtra, {
+                    nombre: c.nombre,
+                    email: c.email,
+                    fono: c.fono,
+                    cargo: c.cargo
+                  }]
+                });
+              };
+
+              const actualizarContacto = (idx, campo, valor) => {
+                const arr = [...nuevaOrden.contactosExtra];
+                arr[idx] = { ...arr[idx], [campo]: valor };
+                setNuevaOrden({ ...nuevaOrden, contactosExtra: arr });
+              };
+
+              return (
+                <>
+                  {contactosCliente.length >= 1 && (
+                    <div style={{ marginBottom: '10px' }}>
+                      <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)', fontSize: '0.8rem' }}>
+                        Agregar contacto del cliente
+                      </label>
+                      <select
+                        disabled={readOnly}
+                        defaultValue=""
+                        onChange={(e) => {
+                          const i = parseInt(e.target.value, 10);
+                          if (isNaN(i) || !contactosCliente[i]) return;
+                          agregarContacto(contactosCliente[i]);
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '6px 10px',
+                          border: '2px solid var(--border)',
+                          borderRadius: '6px',
+                          fontSize: '.82rem',
+                          background: 'white'
+                        }}
+                      >
+                        <option value="">-- Elegir contacto --</option>
+                        {contactosCliente.map((c, idx) => (
+                          <option key={idx} value={idx}>
+                            {c.nombre}{c.fono ? ` | ${c.fono}` : ''}{c.email ? ` | ${c.email}` : ''}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {nuevaOrden.contactosExtra.map((c, idx) => (
+                    <div key={idx} style={{ marginBottom: '8px', border: '1px solid var(--border)', borderRadius: '6px', padding: '8px' }}>
+                      <div className="of-form-grid">
+                        <div className="of-f">
+                          <label>Contacto {idx + 1}</label>
+                          <input
+                            type="text"
+                            placeholder="Nombre del contacto"
+                            value={c.nombre}
+                            onChange={(e) => actualizarContacto(idx, 'nombre', e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))}
+                            disabled={readOnly}
+                            style={{
+                              width: '100%',
+                              padding: '6px 10px',
+                              border: '2px solid var(--border)',
+                              borderRadius: '6px',
+                              fontSize: '.82rem'
+                            }}
+                          />
+                        </div>
+
+                        <div className="of-f">
+                          <label>Email</label>
+                          <input
+                            type="email"
+                            placeholder="Email del contacto"
+                            value={c.email}
+                            onChange={(e) => actualizarContacto(idx, 'email', e.target.value.toUpperCase())}
+                            disabled={readOnly}
+                            style={{
+                              width: '100%',
+                              padding: '6px 10px',
+                              border: '2px solid var(--border)',
+                              borderRadius: '6px',
+                              fontSize: '.82rem'
+                            }}
+                          />
+                        </div>
+
+                        <div className="of-f">
+                          <label>Fono</label>
+                          <input
+                            type="tel"
+                            placeholder="Teléfono del contacto"
+                            value={c.fono}
+                            onChange={(e) => actualizarContacto(idx, 'fono', e.target.value.replace(/[^0-9+]/g, ''))}
+                            disabled={readOnly}
+                            style={{
+                              width: '100%',
+                              padding: '6px 10px',
+                              border: '2px solid var(--border)',
+                              borderRadius: '6px',
+                              fontSize: '.82rem'
+                            }}
+                          />
+                        </div>
+
+                        <div className="of-f">
+                          <label>Cargo</label>
+                          <input
+                            type="text"
+                            placeholder="Cargo del contacto"
+                            value={c.cargo}
+                            onChange={(e) => actualizarContacto(idx, 'cargo', e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))}
+                            disabled={readOnly}
+                            style={{
+                              width: '100%',
+                              padding: '6px 10px',
+                              border: '2px solid var(--border)',
+                              borderRadius: '6px',
+                              fontSize: '.82rem'
+                            }}
+                          />
+                        </div>
+                      </div>
+                      {!readOnly && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!confirm("¿Seguro que desea eliminar este contacto?")) return;
+                            const arr = nuevaOrden.contactosExtra.filter((_, i) => i !== idx);
+                            setNuevaOrden({ ...nuevaOrden, contactosExtra: arr });
+                          }}
+                          style={{
+                            marginTop: '6px',
+                            background: '#FEF2F2',
+                            color: '#DC2626',
+                            border: '1px solid #FECACA',
+                            borderRadius: '6px',
+                            padding: '4px 12px',
+                            cursor: 'pointer',
+                            fontWeight: 600,
+                            fontSize: '0.8rem'
+                          }}
+                        >
+                          Quitar
+                        </button>
+                      )}
+                    </div>
+                  ))}
+
+                  {!readOnly && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNuevaOrden({
+                          ...nuevaOrden,
+                          contactosExtra: [...nuevaOrden.contactosExtra, { nombre: "", email: "", fono: "", cargo: "" }]
+                        });
+                      }}
+                      style={{
+                        marginTop: '6px',
+                        background: '#F0FDF4',
+                        color: 'var(--success)',
+                        border: '2px solid var(--success)',
+                        borderRadius: '6px',
+                        padding: '6px 14px',
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                        fontSize: '0.8rem'
+                      }}
+                    >
+                      + Agregar contacto
+                    </button>
+                  )}
+                </>
+              );
+            })()}
+          </div>
+        )}
       </div>
     </div>
   );

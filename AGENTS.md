@@ -1536,3 +1536,49 @@ Estas columnas faltaban y causaban error 500 al editar/guardar equipos desde OT.
 | 1.26 | 27 Julio 2026 | Tablas: nowrap, truncado de texto con ellipsis, botones acciones visibles |
 | 1.27 | 28 Julio 2026 | Seguridad: eliminado fallback password hardcodeado "6498" en db.js, ahora solo vía .env. Fix: scrollbar-gutter stable en html para evitar layout shift. Fix: table-layout fixed scoped solo a tablas OT + flex-wrap en action-buttons + mostrar solo número en OT (02800). Refactor: CSS movido a frontend/src/styles/ |
 | 1.28 | 04 Agosto 2026 | Auditoría dead code: archivos/scripts/SQL/endpoints muertos eliminados (ver CAMBIOS.md 2026-08-04), defaults MySQL hardcodeados eliminados (db.js, crear-admin.js, seed-test-data.js), identidad de equipos desacoplada (EquipoFormulario solo identidad). `numero_orden` inmutable y autogenerado server-side (base 2800; POST genera, PUT no lo toca). Editar OT: re-seleccionar cliente y equipo (`clienteFijo`/`equipoFijo` = false en editarOrden). `crear_tablas.sql` sincronizado con esquema real (NOT NULLs, `usuarios.usuario` UNIQUE, ENGINE/CHARSET) |
+| 1.29 | 09 Agosto 2026 | Contactos y direcciones dinámicas en OT (ilimitadas, JSON) reemplazan "Segundo Contacto"/"Segunda Dirección" fijos. Columnas `contactos_extra`/`direcciones_extra` en `ordenes_trabajo`; eliminadas columnas `_2` (0 registros con datos). UI colapsada con confirmación al quitar |
+
+---
+
+## CamBios Recientes (09 Agosto 2026)
+
+### 54. Contactos y Direcciones Dinámicas en Orden de Trabajo
+**Fecha:** 09 Agosto 2026
+**Ramás afectadas:** `main` (MySQL) — se debe replicar el mismo cambio en `deploy/cloud` (PostgreSQL)
+
+**Problema:** La OT solo permitía UN segundo contacto y UNA segunda dirección mediante columnas fijas (`contacto2`, `fono_contacto2`, `email_contacto2`, `direccion2`, `comuna2`). El cliente podía tener múltiples contactos/sucursales pero no se podían guardar más de 2 en la OT.
+
+**Solución:** Reemplazo por **listas dinámicas sin límite** de contactos y direcciones extras, guardadas como JSON (`contactos_extra`, `direcciones_extra`) en la tabla `ordenes_trabajo`. La UI se mantiene limpia: secciones colapsadas con checkbox + contador.
+
+**Migración SQL (MySQL - main):**
+```sql
+ALTER TABLE ordenes_trabajo ADD COLUMN contactos_extra TEXT;
+ALTER TABLE ordenes_trabajo ADD COLUMN direcciones_extra TEXT;
+ALTER TABLE ordenes_trabajo DROP COLUMN contacto2, DROP COLUMN fono_contacto2,
+  DROP COLUMN email_contacto2, DROP COLUMN direccion2, DROP COLUMN comuna2;
+```
+
+**Migración SQL (PostgreSQL - deploy/cloud):**
+```sql
+ALTER TABLE ordenes_trabajo ADD COLUMN IF NOT EXISTS contactos_extra TEXT;
+ALTER TABLE ordenes_trabajo ADD COLUMN IF NOT EXISTS direcciones_extra TEXT;
+ALTER TABLE ordenes_trabajo DROP COLUMN IF EXISTS contacto2, DROP COLUMN IF EXISTS fono_contacto2,
+  DROP COLUMN IF EXISTS email_contacto2, DROP COLUMN IF EXISTS direccion2, DROP COLUMN IF EXISTS comuna2;
+```
+
+**Archivos modificados:**
+- `backend/routes/ordenes.js` — POST y PUT reciben `contactosExtra`/`direccionesExtra`, los serializan con `JSON.stringify()` (o `null` si vienen vacíos) en `contactos_extra`/`direcciones_extra`
+- `backend/crear_tablas.sql` — columnas nuevas en lugar de `_2`
+- `frontend/src/pages/OrdenTrabajo.jsx` — estado `nuevaOrden` ahora incluye `contactosExtra: []` y `direccionesExtra: []`; helper `parseExtra()` para parsear el JSON al editar/ver; eliminados estados `usarSegundoContacto`/`usarSegundaDireccion` y todos los campos `_2` (reset, init, seleccionarCliente)
+- `frontend/src/components/ordenes/OrdenFormCliente.jsx` — dos secciones "Otras Direcciones / Sucursales" y "Otros Contactos": checkbox para expandir, select para agregar desde los datos del cliente (parsed de `contactos`/`direcciones` con separador `;;` y `|`), edición manual de cada item, botón "+ Agregar", y botón "Quitar" con confirmación (`confirm()`) antes de eliminar. En read-only (`Ver`) los inputs se deshabilitan pero muestran los datos existentes
+
+**Detalles del formato JSON:**
+```json
+// contactos_extra
+[{"nombre":"...","email":"...","fono":"...","cargo":"..."}]
+
+// direcciones_extra
+[{"direccion":"...","comuna":"...","fono":"...","tipo":"..."}]
+```
+
+**Nota:** `deploy/cloud` requiere además aplicar la migración PostgreSQL en Neon y el mismo cambio en `backend/routes/ordenes.js` (sintaxis `$1`, `result.rows`).
