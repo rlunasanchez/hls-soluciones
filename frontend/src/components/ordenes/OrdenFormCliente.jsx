@@ -578,8 +578,8 @@ function OrdenFormCliente({
       </div>
 
       {clienteSeleccionado && (
-        <div ref={contactoDropdownRef} style={{ position: 'relative', marginTop: '2px', maxWidth: '268px' }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)', fontSize: '0.8rem' }}>
+        <div ref={contactoDropdownRef} style={{ position: 'relative', marginTop: '14px', maxWidth: '268px' }}>
+          <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: 'var(--text)', fontSize: '0.8rem' }}>
             <Search size={14} style={{ display: 'inline', marginRight: '6px' }} />
             Buscar Contacto (por nombre o correo)
           </label>
@@ -596,13 +596,15 @@ function OrdenFormCliente({
             disabled={readOnly || contactosDisponibles.length === 0}
             style={{
               width: '100%',
-              padding: '6px 10px',
+              padding: '8px 10px',
               border: '1px solid #9AB8D9',
               borderRadius: '6px',
               fontSize: '.82rem',
               background: 'white'
             }}
           />
+
+          <div style={{ height: '6px' }} />
 
           {mostrarDropdownContacto && (
             <div style={{
@@ -615,7 +617,7 @@ function OrdenFormCliente({
                 contactosFiltrados.map((c, idx) => (
                   <div key={idx}
                     onClick={() => seleccionarContactoBusqueda(c)}
-                    style={{ padding: '6px 10px', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}
+                    style={{ padding: '8px 10px', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}
                     onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--primary-light)'; }}
                     onMouseLeave={(e) => { e.currentTarget.style.background = 'white'; }}
                   >
