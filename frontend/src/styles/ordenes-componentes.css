@@ -61,6 +61,88 @@
   margin-bottom: 20px;
 }
 
+/* =========================
+   CHECK CUSTOM (Otras Direcciones / Otros Contactos)
+   ========================= */
+.of-check input[type="checkbox"],
+input[type="checkbox"].of-check {
+  --check-color: var(--primary);
+}
+
+input[type="checkbox"].of-check {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  border: 2px solid #cbd5e1;
+  border-radius: 5px;
+  background: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+input[type="checkbox"].of-check:hover:not(:disabled):not(:checked) {
+  border-color: var(--check-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--check-color) 15%, transparent);
+}
+
+input[type="checkbox"].of-check:checked {
+  background: var(--check-color);
+  border-color: var(--check-color);
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--check-color) 35%, transparent);
+}
+
+input[type="checkbox"].of-check:checked::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 0px;
+  width: 5px;
+  height: 9px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+input[type="checkbox"].of-check:checked:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+input[type="checkbox"].of-check:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+input[type="checkbox"].of-check:focus-visible {
+  outline: 2px solid var(--check-color);
+  outline-offset: 2px;
+}
+
+input[type="checkbox"].of-check--direcciones {
+  --check-color: #0284C7;
+}
+
+input[type="checkbox"].of-check--contactos {
+  --check-color: var(--success);
+}
+
+/* Buscadores tenues (busca cliente, serie, modelo) - sin outline grueso en focus */
+.ot-search {
+  outline: none;
+}
+.ot-search:focus {
+  outline: none;
+  box-shadow: 0 0 0 1px rgba(154, 184, 217, 0.35);
+}
+.ot-search:focus:disabled {
+  box-shadow: none;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .table-header-actions {

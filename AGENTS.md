@@ -1537,6 +1537,7 @@ Estas columnas faltaban y causaban error 500 al editar/guardar equipos desde OT.
 | 1.27 | 28 Julio 2026 | Seguridad: eliminado fallback password hardcodeado "6498" en db.js, ahora solo vía .env. Fix: scrollbar-gutter stable en html para evitar layout shift. Fix: table-layout fixed scoped solo a tablas OT + flex-wrap en action-buttons + mostrar solo número en OT (02800). Refactor: CSS movido a frontend/src/styles/ |
 | 1.28 | 04 Agosto 2026 | Auditoría dead code: archivos/scripts/SQL/endpoints muertos eliminados (ver CAMBIOS.md 2026-08-04), defaults MySQL hardcodeados eliminados (db.js, crear-admin.js, seed-test-data.js), identidad de equipos desacoplada (EquipoFormulario solo identidad). `numero_orden` inmutable y autogenerado server-side (base 2800; POST genera, PUT no lo toca). Editar OT: re-seleccionar cliente y equipo (`clienteFijo`/`equipoFijo` = false en editarOrden). `crear_tablas.sql` sincronizado con esquema real (NOT NULLs, `usuarios.usuario` UNIQUE, ENGINE/CHARSET) |
 | 1.29 | 09 Agosto 2026 | Contactos y direcciones dinámicas en OT (ilimitadas, JSON) reemplazan "Segundo Contacto"/"Segunda Dirección" fijos. Columnas `contactos_extra`/`direcciones_extra` en `ordenes_trabajo`; eliminadas columnas `_2` (0 registros con datos). UI colapsada con confirmación al quitar |
+| 1.30 | 10 Agosto 2026 | UI compacta para notebook 14" (1366×768) y bordes tenues en form OT. Checks custom en "Otras Direcciones / Sucursales" y "Otros Contactos". Bordes de buscadores (cliente, serie, modelo) de 2px → 1px con colores suaves. Sin outline grueso en focus (`.ot-search`). Tarjetas y barras del form compactadas. Clientes: botones de acción en una línea + compactos (769–1366px), botones de header coloreados, estilos botones tabla OT |
 
 ---
 
@@ -1582,3 +1583,63 @@ ALTER TABLE ordenes_trabajo DROP COLUMN IF EXISTS contacto2, DROP COLUMN IF EXIS
 ```
 
 **Nota:** `deploy/cloud` requiere además aplicar la migración PostgreSQL en Neon y el mismo cambio en `backend/routes/ordenes.js` (sintaxis `$1`, `result.rows`).
+
+---
+
+## Cambios Recientes (10 Agosto 2026)
+
+### 55. UI compacta para notebook 14" + bordes tenues en formulario OT
+**Fecha:** 10 Agosto 2026
+**Ramás afectadas:** `main` (MySQL) — solo frontend, idéntico en `deploy/cloud` (PostgreSQL)
+**Archivos modificados (solo frontend):**
+- `frontend/src/components/ordenes/OrdenFormCliente.jsx`
+- `frontend/src/components/ordenes/OrdenFormEquipo.jsx`
+- `frontend/src/styles/OrdenTrabajo.css`
+- `frontend/src/styles/clientes-componentes.css`
+- `frontend/src/styles/ordenes-componentes.css`
+
+**Motivo:** El usuario trabaja en un notebook de 14" (viewport 1366×768). Las vistas post-login se veían mal: botones que hacían wrap, tarjetas altísimas, y marcos de campos demasiado gruesos.
+
+**Cambios en el formulario OT:**
+
+1. **Checks custom** en secciones "Otras Direcciones / Sucursales" y "Otros Contactos"
+   - Clase `input[type="checkbox"].of-check` (15×15px, border-radius 5px, checkmark blanco con `::after`)
+   - Variantes `--direcciones` (azul `#0284C7`) y `--contactos` (`var(--success)`)
+   - Hover con anillo suave `color-mix`, checked con sombra coloreada
+   - CSS en `ordenes-componentes.css`
+
+2. **Tarjetas compactas** en estado colapsado: `padding: 4px 10px`, `line-height: 1.2`, `font-size: 0.8rem`, iconos de 14px, borde 1px tenue
+   - Direcciones: `background: #E0F2FE`, `border: 1px solid #7CD0F0`
+   - Contactos: `background: #F0FDF4`, `border: 1px solid #7AD6EC`
+   - Label con `width: fit-content` para que check+número no estiren la fila (Direcciones 243px, Contactos 152px)
+
+3. **Bordes tenues en buscadores** (de 2px → 1px con tonos suaves):
+   - Buscar cliente: `border: 1px solid #9AB8D9` (antes `2px solid var(--primary)`)
+   - Buscar por serie / modelo: `border: 1px solid #C4B5FD` (antes `2px solid var(--info)`)
+   - Sin outline grueso del navegador al hacer focus: clase `.ot-search` con `outline: none` y `box-shadow: 0 0 0 1px rgba(154,184,217,0.35)` en focus (CSS en `ordenes-componentes.css`)
+
+4. **Separación de Email/Fono Principal/Contacto**: `.of-form-grid` con `marginTop: '14px'` para que no queden pegados a la tarjeta de checks
+
+5. **Barras del form compactadas** en `OrdenTrabajo.css`:
+   - `.of-head`: padding `12px→8px 16px`, h2 `15px→14px`, close `6px→5px`
+   - `.of-form`: padding `10px→8px`, gap `8px→6px`
+   - `.of-sec`: padding `8px→6px 8px`
+   - `.of-st`: font `11px→10px`, margin-bottom `6px→4px`
+
+**Cambios en Clientes:**
+
+6. **Botones de acción en una sola línea** (`clientes-componentes.css`):
+   - `@media (min-width: 769px)`: `.table-wrapper .action-buttons, .cards-table .action-buttons` con `flex-wrap: nowrap` + `white-space: nowrap` (antes el botón Eliminar pasaba a otra línea)
+   - `@media (min-width: 769px) and (max-width: 1366px)`: botones compactos `padding: 4px 6px`, `font-size: 0.68rem`
+
+7. **Botones de header de ClienteExpandido coloreados**:
+   - `.btn-nueva-ot-header`: `#6366f1` (indigo), hover `#4f46e5`
+   - `.btn-editar-header`: `var(--warning)`, hover `#ea8000`
+   - `.btn-eliminar-header`: `var(--danger)`, hover `#c62828`
+   - (antes todos `rgba(255,255,255,0.2)` iguales)
+
+8. **Botones de la tabla de OT asociadas** en ClienteExpandido (`.ots-tabla-wrapper .acciones`):
+   - Primer botón (Editar): `var(--warning-light)` con texto `#b45309`, hover amarillo
+   - `.btn-eliminar`: fondo `var(--danger-light)` con texto `var(--danger)`, hover rojo
+
+**Verificación (Playwright, Chrome, viewport 1366×768):** los 3 buscadores mantienen borde 1px tenue y sin outline en focus; chequeos 15px correctos; botones de acción en una línea sin overflow horizontal.

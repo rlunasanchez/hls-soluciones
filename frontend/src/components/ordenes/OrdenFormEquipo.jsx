@@ -92,6 +92,7 @@ function OrdenFormEquipo({
             </label>
             <input
               type="text"
+              className="ot-search"
               placeholder="Ingrese número de serie..."
               value={busquedaSerie}
               onChange={(e) => {
@@ -104,7 +105,7 @@ function OrdenFormEquipo({
               disabled={readOnly}
               style={{
                 width: '100%', padding: '6px 10px',
-                border: '2px solid var(--info)', borderRadius: '6px', fontSize: '.82rem',
+                border: '1px solid #C4B5FD', borderRadius: '6px', fontSize: '.82rem',
                 background: equipoSeleccionado ? '#DCFCE7' : 'white'
               }}
             />
@@ -149,6 +150,7 @@ function OrdenFormEquipo({
             </label>
             <input
               type="text"
+              className="ot-search"
               placeholder="Ej: IR2520"
               value={busquedaModelo}
               onChange={(e) => {
@@ -161,7 +163,7 @@ function OrdenFormEquipo({
               disabled={readOnly}
               style={{
                 width: '100%', padding: '6px 10px',
-                border: '2px solid var(--info)', borderRadius: '6px', fontSize: '.82rem',
+                border: '1px solid #C4B5FD', borderRadius: '6px', fontSize: '.82rem',
                 background: equipoSeleccionado ? '#DCFCE7' : 'white'
               }}
             />
