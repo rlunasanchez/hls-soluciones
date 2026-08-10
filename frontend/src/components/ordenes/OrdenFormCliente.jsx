@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Search, Users, ChevronDown, Eye, UserPlus, MapPin } from "lucide-react";
 import ClienteFormulario from "../clientes/ClienteFormulario";
 import "../../styles/Clientes.css";
@@ -19,6 +19,63 @@ function OrdenFormCliente({
   const [mostrarDetalleCliente, setMostrarDetalleCliente] = useState(false);
   const [mostrarDireccionesExtra, setMostrarDireccionesExtra] = useState(false);
   const [mostrarContactosExtra, setMostrarContactosExtra] = useState(false);
+  const [busquedaContacto, setBusquedaContacto] = useState("");
+  const [mostrarDropdownContacto, setMostrarDropdownContacto] = useState(false);
+  const contactoDropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (contactoDropdownRef.current && !contactoDropdownRef.current.contains(event.target)) {
+        setMostrarDropdownContacto(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    setBusquedaContacto("");
+    setMostrarDropdownContacto(false);
+  }, [clienteSeleccionado?.id, clienteSeleccionado?.razon_social]);
+
+  const contactosDisponibles = (() => {
+    if (!clienteSeleccionado) return [];
+    const extras = String(clienteSeleccionado.contactos || "")
+      .split(";;")
+      .map((c) => {
+        const p = c.split("|");
+        return { nombre: (p[0] || "").toUpperCase().trim(), email: p[1] || "", fono: p[2] || "", cargo: p[3] || "" };
+      })
+      .filter((c) => c.nombre);
+    const principal = clienteSeleccionado.contacto_nombre
+      ? [{
+          nombre: String(clienteSeleccionado.contacto_nombre).toUpperCase().trim(),
+          email: clienteSeleccionado.contacto_email || "",
+          fono: clienteSeleccionado.contacto_fono || "",
+          cargo: clienteSeleccionado.contacto_cargo || "",
+          principal: true
+        }]
+      : [];
+    return [...principal, ...extras];
+  })();
+
+  const contactosFiltrados = busquedaContacto.trim().length >= 2
+    ? contactosDisponibles.filter((c) => {
+        const q = busquedaContacto.toUpperCase();
+        return (c.nombre || "").includes(q) || (c.email || "").toUpperCase().includes(q);
+      })
+    : [];
+
+  const seleccionarContactoBusqueda = (c) => {
+    setNuevaOrden({
+      ...nuevaOrden,
+      contacto: c.nombre,
+      emailContacto: c.email || "",
+      fonoContacto: c.fono || ""
+    });
+    setBusquedaContacto(c.nombre);
+    setMostrarDropdownContacto(false);
+  };
 
   return (
     <div className="of-sec success">
@@ -519,6 +576,67 @@ function OrdenFormCliente({
           </div>
         )}
       </div>
+
+      {clienteSeleccionado && (
+        <div ref={contactoDropdownRef} style={{ position: 'relative', marginTop: '2px', maxWidth: '268px' }}>
+          <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)', fontSize: '0.8rem' }}>
+            <Search size={14} style={{ display: 'inline', marginRight: '6px' }} />
+            Buscar Contacto (por nombre o correo)
+          </label>
+          <input
+            type="text"
+            className="ot-search"
+            placeholder="Escriba para buscar contacto del cliente..."
+            value={busquedaContacto}
+            onChange={(e) => {
+              setBusquedaContacto(e.target.value);
+              setMostrarDropdownContacto(e.target.value.trim().length >= 2);
+            }}
+            onFocus={() => { if (busquedaContacto.trim().length >= 2) setMostrarDropdownContacto(true); }}
+            disabled={readOnly || contactosDisponibles.length === 0}
+            style={{
+              width: '100%',
+              padding: '6px 10px',
+              border: '1px solid #9AB8D9',
+              borderRadius: '6px',
+              fontSize: '.82rem',
+              background: 'white'
+            }}
+          />
+
+          {mostrarDropdownContacto && (
+            <div style={{
+              position: 'absolute', top: '100%', left: 0, right: 0,
+              background: 'white', border: '1px solid var(--border)', borderTop: 'none',
+              borderRadius: '0 0 8px 8px', maxHeight: '200px', overflow: 'auto',
+              zIndex: 1000, boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+            }}>
+              {contactosFiltrados.length > 0 ? (
+                contactosFiltrados.map((c, idx) => (
+                  <div key={idx}
+                    onClick={() => seleccionarContactoBusqueda(c)}
+                    style={{ padding: '6px 10px', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--primary-light)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'white'; }}
+                  >
+                    <div style={{ fontWeight: '600', color: 'var(--text)', fontSize: '0.82rem' }}>
+                      {c.nombre}
+                      {!c.principal && <span style={{ fontWeight: '400', color: 'var(--text-muted)' }}> (adicional)</span>}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      {c.email ? `✉ ${c.email}` : ''}{c.fono ? ` | Tel: ${c.fono}` : ''}{c.cargo ? ` | ${c.cargo}` : ''}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div style={{ padding: '12px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                  No se encontraron contactos
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="of-form-grid" style={{ marginTop: '14px' }}>
         <div className="of-f">

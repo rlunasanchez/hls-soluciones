@@ -1538,6 +1538,7 @@ Estas columnas faltaban y causaban error 500 al editar/guardar equipos desde OT.
 | 1.28 | 04 Agosto 2026 | Auditoría dead code: archivos/scripts/SQL/endpoints muertos eliminados (ver CAMBIOS.md 2026-08-04), defaults MySQL hardcodeados eliminados (db.js, crear-admin.js, seed-test-data.js), identidad de equipos desacoplada (EquipoFormulario solo identidad). `numero_orden` inmutable y autogenerado server-side (base 2800; POST genera, PUT no lo toca). Editar OT: re-seleccionar cliente y equipo (`clienteFijo`/`equipoFijo` = false en editarOrden). `crear_tablas.sql` sincronizado con esquema real (NOT NULLs, `usuarios.usuario` UNIQUE, ENGINE/CHARSET) |
 | 1.29 | 09 Agosto 2026 | Contactos y direcciones dinámicas en OT (ilimitadas, JSON) reemplazan "Segundo Contacto"/"Segunda Dirección" fijos. Columnas `contactos_extra`/`direcciones_extra` en `ordenes_trabajo`; eliminadas columnas `_2` (0 registros con datos). UI colapsada con confirmación al quitar |
 | 1.30 | 10 Agosto 2026 | UI compacta para notebook 14" (1366×768) y bordes tenues en form OT. Checks custom en "Otras Direcciones / Sucursales" y "Otros Contactos". Bordes de buscadores (cliente, serie, modelo) de 2px → 1px con colores suaves. Sin outline grueso en focus (`.ot-search`). Tarjetas y barras del form compactadas. Clientes: botones de acción en una línea + compactos (769–1366px), botones de header coloreados, estilos botones tabla OT |
+| 1.31 | 10 Agosto 2026 | Buscador "Buscar Contacto (por nombre o correo)" en form OT: autocompleta Contacto/Email Contacto/Fono Contacto desde el contacto principal y contactos adicionales del cliente. Ancho limitado a 268px (igual que campo Email) |
 
 ---
 
@@ -1643,3 +1644,24 @@ ALTER TABLE ordenes_trabajo DROP COLUMN IF EXISTS contacto2, DROP COLUMN IF EXIS
    - `.btn-eliminar`: fondo `var(--danger-light)` con texto `var(--danger)`, hover rojo
 
 **Verificación (Playwright, Chrome, viewport 1366×768):** los 3 buscadores mantienen borde 1px tenue y sin outline en focus; chequeos 15px correctos; botones de acción en una línea sin overflow horizontal.
+
+### 56. Buscador de Contacto (por nombre o correo) en formulario OT
+**Fecha:** 10 Agosto 2026
+**Ramás afectadas:** `main` (MySQL) — solo frontend, idéntico en `deploy/cloud` (PostgreSQL)
+**Archivo modificado:** `frontend/src/components/ordenes/OrdenFormCliente.jsx`
+
+**Motivo:** En la OT, al seleccionar un cliente, los campos de contacto (Contacto, Email Contacto, Fono Contacto) había que escribirlos a mano. El usuario pidió poder buscar los datos del contacto por nombre o correo y autocompletarlos.
+
+**Cambios:**
+1. **Nuevo campo "Buscar Contacto (por nombre o correo)"** bajo los datos del cliente, visible solo cuando hay `clienteSeleccionado`
+2. **Fuente de datos** = contacto principal (`clienteSeleccionado.contacto_nombre` / `contacto_email` / `contacto_fono` / `contacto_cargo`) + contactos adicionales (parseados del campo `contactos` concatenado con `;;` y `|`)
+3. **Filtro** con mínimo 2 caracteres, match sobre nombre o email (case-insensitive, uppercase)
+4. **Dropdown** con patrón estándar `useRef` + `mousedown` para cerrar al hacer clic fuera; marca `(adicional)` en contactos extra; muestra `✉ email | Tel: fono | cargo`
+5. **Al seleccionar**, autocompleta en `nuevaOrden`: `contacto`, `emailContacto`, `fonoContacto` y deja `busquedaContacto = nombre`
+6. **Reset** del buscador al cambiar de cliente (`useEffect` sobre `clienteSeleccionado.id`/`razon_social`)
+7. **Ancho limitado** a `maxWidth: 268px` (igual que el campo Email), con clase `ot-search` (borde tenue 1px `#9AB8D9`, sin outline en focus)
+8. Se deshabilita si `readOnly` o si el cliente no tiene contactos
+
+**Flujo:** buscar cliente → Escribir 2+ caracteres en contacto → click en resultado → campos Contacto/Email Contacto/Fono Contacto se llenan automáticamente.
+
+**Verificación (Playwright, Chrome):** dropdown muestra contacto principal y adicional de "DIEGO LUNA"; clickear el adicional autocompleta `contacto=DIEGO LUNA`, `emailC=diego@gmail.com`, `fonoC=6494960`; ancho del buscador 268px igual al campo Email.
