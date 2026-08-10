@@ -577,7 +577,7 @@ function OrdenFormCliente({
         )}
       </div>
 
-{clienteSeleccionado && (
+      {clienteSeleccionado && (
         <div ref={contactoDropdownRef} style={{ position: 'relative', marginTop: '14px', maxWidth: '268px' }}>
           <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: 'var(--text)', fontSize: '0.8rem' }}>
             <Search size={14} style={{ display: 'inline', marginRight: '6px' }} />
@@ -639,6 +639,7 @@ function OrdenFormCliente({
           )}
         </div>
       )}
+
       <div className="of-form-grid" style={{ marginTop: '14px' }}>
         <div className="of-f">
           <label>Email</label>
