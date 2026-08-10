@@ -105,6 +105,24 @@
   flex-wrap: wrap;
 }
 
+/* Mantener acciones en una sola línea en desktop/laptop */
+@media (min-width: 769px) {
+  .table-wrapper .action-buttons,
+  .cards-table .action-buttons {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
+}
+
+/* Compactar botones de acción en pantallas de notebook */
+@media (min-width: 769px) and (max-width: 1366px) {
+  .table-wrapper .action-buttons .table-btn,
+  .cards-table .action-buttons .table-btn {
+    padding: 4px 6px;
+    font-size: 0.68rem;
+  }
+}
+
 /* ClienteLista - Tarjetas móvil */
 .cards-table {
   display: none;
@@ -214,15 +232,27 @@
 }
 
 .btn-nueva-ot-header {
-  background: rgba(255, 255, 255, 0.2);
+  background: #6366f1;
+}
+
+.btn-nueva-ot-header:hover {
+  background: #4f46e5;
 }
 
 .btn-editar-header {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--warning);
+}
+
+.btn-editar-header:hover {
+  background: #ea8000;
 }
 
 .btn-eliminar-header {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--danger);
+}
+
+.btn-eliminar-header:hover {
+  background: #c62828;
 }
 
 .cliente-datos {
@@ -320,6 +350,37 @@
 .ot-numero {
   font-weight: 600;
   color: #6366f1;
+}
+
+.ots-tabla-wrapper .acciones button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ots-tabla-wrapper .acciones button:first-child {
+  background: var(--warning-light);
+  color: #b45309;
+}
+
+.ots-tabla-wrapper .acciones button:first-child:hover {
+  background: var(--warning);
+  color: white;
+}
+
+.ots-tabla-wrapper .acciones .btn-eliminar {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+.ots-tabla-wrapper .acciones .btn-eliminar:hover {
+  background: var(--danger);
+  color: white;
 }
 
 .ots-vacio {

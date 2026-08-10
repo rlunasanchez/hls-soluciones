@@ -99,6 +99,7 @@ function OrdenFormCliente({
             <div ref={clienteDropdownRef} style={{ position: 'relative', flex: 1 }}>
             <input
               type="text"
+              className="ot-search"
               placeholder="Escriba para buscar cliente por nombre o RUT..."
               value={busquedaCliente}
               onChange={(e) => {
@@ -112,7 +113,7 @@ function OrdenFormCliente({
               style={{
                 width: '100%',
                 padding: '6px 10px',
-                border: '2px solid var(--primary)',
+                border: '1px solid #9AB8D9',
                 borderRadius: '6px',
                 fontSize: '.82rem',
                 background: clienteSeleccionado ? '#E0F2FE' : 'white'
@@ -317,20 +318,20 @@ function OrdenFormCliente({
       </div>
 
       {/* Direcciones Extra / Sucursales (dinámicas) */}
-      <div style={{ marginTop: '14px', padding: '10px 12px', background: '#FFF7ED', border: '2px solid #EA580C', borderRadius: '8px' }}>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer', fontSize: '0.9rem' }}>
+      <div style={{ marginTop: '10px', padding: '4px 10px', background: '#E0F2FE', border: '1px solid #7CD0F0', borderRadius: '8px', lineHeight: '1.2' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer', fontSize: '0.8rem', width: 'fit-content', maxWidth: '100%' }}>
           <input
             type="checkbox"
+            className="of-check of-check--direcciones"
             checked={mostrarDireccionesExtra}
             disabled={readOnly && nuevaOrden.direccionesExtra.length === 0}
             onChange={(e) => setMostrarDireccionesExtra(e.target.checked)}
-            style={{ width: '17px', height: '17px', cursor: 'pointer' }}
           />
-          <MapPin size={16} style={{ color: '#EA580C' }} />
+          <MapPin size={14} style={{ color: '#0284C7', flexShrink: 0 }} />
           Otras Direcciones / Sucursales
           {nuevaOrden.direccionesExtra.length > 0 && (
             <span style={{
-              background: '#EA580C', color: 'white', padding: '1px 8px', borderRadius: '10px',
+              background: '#0284C7', color: 'white', padding: '1px 8px', borderRadius: '10px',
               fontSize: '0.75rem', fontWeight: '700'
             }}>
               {nuevaOrden.direccionesExtra.length}
@@ -499,9 +500,9 @@ function OrdenFormCliente({
                       }}
                       style={{
                         marginTop: '6px',
-                        background: '#FFF7ED',
-                        color: '#EA580C',
-                        border: '2px solid #EA580C',
+                        background: '#E0F2FE',
+                        color: '#0284C7',
+                        border: '1px solid #7CD0F0',
                         borderRadius: '6px',
                         padding: '6px 14px',
                         cursor: 'pointer',
@@ -519,7 +520,7 @@ function OrdenFormCliente({
         )}
       </div>
 
-      <div className="of-form-grid">
+      <div className="of-form-grid" style={{ marginTop: '14px' }}>
         <div className="of-f">
           <label>Email</label>
           <input
@@ -538,8 +539,8 @@ function OrdenFormCliente({
           />
         </div>
 
-        <div className="of-f">
-          <label>Fono Principal</label>
+        <div className="of-f" style={{ gap: '4px' }}>
+          <label style={{ fontSize: '10px' }}>Fono Principal</label>
           <input
             type="tel"
             placeholder="Teléfono principal del cliente"
@@ -556,8 +557,8 @@ function OrdenFormCliente({
           />
         </div>
 
-        <div className="of-f">
-          <label>Contacto</label>
+        <div className="of-f" style={{ gap: '4px' }}>
+          <label style={{ fontSize: '10px' }}>Contacto</label>
           <input
             type="text"
             placeholder="Nombre del contacto"
@@ -633,16 +634,16 @@ function OrdenFormCliente({
       </div>
 
       {/* Contactos Extra (dinámicos) */}
-      <div style={{ marginTop: '14px', padding: '10px 12px', background: '#F0FDF4', border: '2px solid var(--success)', borderRadius: '8px' }}>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer', fontSize: '0.9rem' }}>
+      <div style={{ marginTop: '10px', padding: '4px 10px', background: '#F0FDF4', border: '1px solid #7AD6EC', borderRadius: '8px', lineHeight: '1.2' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer', fontSize: '0.8rem', width: 'fit-content', maxWidth: '100%' }}>
           <input
             type="checkbox"
+            className="of-check of-check--contactos"
             checked={mostrarContactosExtra}
             disabled={readOnly && nuevaOrden.contactosExtra.length === 0}
             onChange={(e) => setMostrarContactosExtra(e.target.checked)}
-            style={{ width: '17px', height: '17px', cursor: 'pointer' }}
           />
-          <UserPlus size={16} style={{ color: 'var(--success)' }} />
+          <UserPlus size={14} style={{ color: 'var(--success)', flexShrink: 0 }} />
           Otros Contactos
           {nuevaOrden.contactosExtra.length > 0 && (
             <span style={{
@@ -832,7 +833,7 @@ function OrdenFormCliente({
                         marginTop: '6px',
                         background: '#F0FDF4',
                         color: 'var(--success)',
-                        border: '2px solid var(--success)',
+                        border: '1px solid #7AD6EC',
                         borderRadius: '6px',
                         padding: '6px 14px',
                         cursor: 'pointer',
