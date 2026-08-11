@@ -10,6 +10,7 @@ function OrdenFormEquipo({
   equiposFiltrados,
   equipoDropdownRef,
   seleccionarEquipo,
+  seleccionarEquipoPorModelo,
   equipoSeleccionado,
   nuevaOrden, setNuevaOrden,
   readOnly = false,
@@ -128,7 +129,7 @@ function OrdenFormEquipo({
                         {equipo.equipo} {equipo.marca} {equipo.modelo}
                       </div>
                       <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                        Serie: {equipo.serie || 'N/A'} | Código: {equipo.codigo || 'N/A'}
+                        Serie: {equipo.serie || 'N/A'}
                       </div>
                     </div>
                   ))
@@ -177,16 +178,13 @@ function OrdenFormEquipo({
               }}>
                 {equiposModeloFiltrados.length > 0 ? (
                   equiposModeloFiltrados.map((equipo) => (
-                    <div key={equipo.id} onClick={() => seleccionarEquipo(equipo)}
+                    <div key={equipo.id} onClick={() => seleccionarEquipoPorModelo(equipo)}
                       style={{ padding: '6px 10px', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}
                       onMouseEnter={(e) => e.currentTarget.style.background = 'var(--primary-light)'}
                       onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
                     >
                       <div style={{ fontWeight: '600', color: 'var(--text)' }}>
                         {equipo.equipo} {equipo.marca} {equipo.modelo}
-                      </div>
-                      <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                        Código: {equipo.codigo || 'N/A'} | Serie: {equipo.serie || 'N/A'}
                       </div>
                     </div>
                   ))
@@ -272,6 +270,7 @@ function OrdenFormEquipo({
         </div>
       )}
 
+      {/* Modal Nuevo Equipo (registrar en inventario desde la OT) */}
       {children}
     </div>
   );

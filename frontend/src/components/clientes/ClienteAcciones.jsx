@@ -1,0 +1,65 @@
+import { useState, useRef, useEffect } from "react";
+import { MoreHorizontal, ClipboardList, FileSpreadsheet, Eye, Edit, Trash2 } from "lucide-react";
+
+function ClienteAcciones({ cliente, onVer, onEditar, onEliminar, onOT, onCotizacion }) {
+  const [abierto, setAbierto] = useState(false);
+  const [pos, setPos] = useState({ top: 0, left: 0 });
+  const btnRef = useRef(null);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (btnRef.current && btnRef.current.contains(event.target)) return;
+      if (menuRef.current && menuRef.current.contains(event.target)) return;
+      setAbierto(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const toggle = (e) => {
+    e.stopPropagation();
+    if (abierto) {
+      setAbierto(false);
+      return;
+    }
+    const rect = btnRef.current.getBoundingClientRect();
+    setPos({ top: rect.bottom + 4, left: rect.right - 140 });
+    setAbierto(true);
+  };
+
+  return (
+    <div className="acciones-menu" style={{ position: "relative" }}>
+      <button
+        type="button"
+        ref={btnRef}
+        className="acciones-menu-btn"
+        onClick={toggle}
+        aria-label="Acciones"
+      >
+        <MoreHorizontal size={16} />
+      </button>
+      {abierto && (
+        <div className="acciones-dropdown" ref={menuRef} style={{ position: "fixed", top: pos.top, left: pos.left }}>
+          <button className="acciones-item ot" onClick={() => { setAbierto(false); onOT(cliente); }}>
+            <ClipboardList size={14} /> OT
+          </button>
+          <button className="acciones-item cotizacion" onClick={() => { setAbierto(false); onCotizacion(cliente); }}>
+            <FileSpreadsheet size={14} /> Cotización
+          </button>
+          <button className="acciones-item ver" onClick={() => { setAbierto(false); onVer(cliente); }}>
+            <Eye size={14} /> Ver
+          </button>
+          <button className="acciones-item edit" onClick={() => { setAbierto(false); onEditar(cliente); }}>
+            <Edit size={14} /> Editar
+          </button>
+          <button className="acciones-item delete" onClick={() => { setAbierto(false); onEliminar(cliente.id); }}>
+            <Trash2 size={14} /> Eliminar
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default ClienteAcciones;

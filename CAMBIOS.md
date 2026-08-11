@@ -1,5 +1,141 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-08-11
+
+### Ocultar campo Garantía en el listado de Orden de Trabajo
+
+**Problema:** El usuario no quería ver el campo "Garantía" en el mantenedor de OT (listado). Se mantiene el check en el formulario de nueva/editar orden para poder guardar el dato.
+
+**Archivos modificados (solo frontend):**
+- `frontend/src/components/ordenes/OrdenLista.jsx` — eliminados el filtro "Garantía", la columna de la tabla y el badge de las tarjetas
+- `frontend/src/pages/OrdenTrabajo.jsx` — eliminados el estado `filtroGarantia`, su lógica de filtrado y el paso de props
+
+**Se mantiene visible:**
+- `frontend/src/components/ordenes/OrdenFormDatos.jsx` — el checkbox "Garantía" sigue en el formulario (al final de la fila de fechas, después de Compra) y `esGarantia` se guarda normalmente.
+
+**Nota:** El valor `es_garantia` se sigue guardando en la DB (no se pierde data al editar), solo se ocultó del listado.
+
+### Ocultar campo Serie en la vista del mantenedor de Equipos
+
+**Problema:** El usuario no quería ver el campo "Serie" en la vista del mantenedor de Equipos (tabla, tarjetas y filtro). Se mantiene en el formulario de ingreso/edición de equipos para poder guardar el dato.
+
+**Archivos modificados (solo frontend):**
+- `frontend/src/components/equipos/EquipoTabla.jsx` — eliminada la columna "Serie"
+- `frontend/src/components/equipos/EquipoCard.jsx` — eliminada la fila "Serie" en tarjetas
+- `frontend/src/components/equipos/FiltrosEquipo.jsx` — eliminado el filtro de Serie
+- `frontend/src/pages/Equipos.jsx` — eliminados el estado `filtroSerie` y su lógica
+
+**Se mantiene visible:**
+- `frontend/src/components/equipos/EquipoFormulario.jsx` — el campo "Serie" sigue en el formulario de ingreso/edición (junto a Modelo) y se guarda normalmente.
+
+**Nota:** La serie se sigue guardando en la DB. Se conserva también en `OrdenFormEquipo.jsx` (búsqueda por serie en OT).
+
+### Acciones en menú desplegable "..."
+
+**Problema:** Los botones de acción (Ver, Editar, Eliminar, Informe, Cotización, OT) ocupaban mucho espacio en filas y tarjetas.
+
+**Archivos nuevos:**
+- `frontend/src/components/equipos/EquipoAcciones.jsx` — menú "..." con Ver/Editar/Eliminar
+- `frontend/src/components/clientes/ClienteAcciones.jsx` — menú "..." con OT/Cotización/Ver/Editar/Eliminar
+- `frontend/src/components/ordenes/OrdenAcciones.jsx` — menú "..." con Informe/Cotización/Ver/Editar/Eliminar
+
+**Archivos modificados:**
+- `frontend/src/components/equipos/EquipoTabla.jsx` y `EquipoCard.jsx` — usan `EquipoAcciones`
+- `frontend/src/components/clientes/ClienteLista.jsx` — usa `ClienteAcciones` (tabla y tarjetas)
+- `frontend/src/components/ordenes/OrdenLista.jsx` — usa `OrdenAcciones` (tabla y tarjetas)
+- `frontend/src/styles/index.css` — estilos `.acciones-menu`, `.acciones-menu-btn`, `.acciones-dropdown`, `.acciones-item` (variantes ver/edit/delete/ot/cotizacion/informe)
+
+**Detalles técnicos:**
+- Dropdown usa `position: fixed` con posición calculada via `getBoundingClientRect()` + `z-index: 9999` para que no se recorte dentro del `.table-wrapper` (que tiene `overflow-x: auto`)
+- Cierra al hacer clic fuera (patrón `useRef` + `mousedown`)
+
+### Distribución de ancho de la tabla OT alineada con otros mantenedores
+
+**Problema:** La tabla de OT usaba `table-layout: fixed` y anchos fijos en píxeles (`100px`, `190px`, etc.), quedando mal distribuida frente a Clientes/Equipos que usan distribución automática.
+
+**Archivos modificados:**
+- `frontend/src/components/ordenes/OrdenLista.jsx` — eliminados los anchos inline de las columnas
+- `frontend/src/styles/OrdenTrabajo.css` — quitado `table-layout: fixed` del listado `.ot-list-wrap table` (el del formulario `.of-wrap table` se mantiene)
+
+### Compactación del formulario "Datos de la Orden"
+
+**Problema:** La sección "Datos de la Orden" ocupaba demasiado espacio en alto; N° Orden y Fecha se veían muy grandes y los labels apilaban el alto.
+
+**Archivos modificados:**
+- `frontend/src/components/ordenes/OrdenFormDatos.jsx`:
+  - Título "Datos de la Orden" ahora a la izquierda en la misma fila que los campos (`.of-head-row`)
+  - Campos N° Orden y Fecha en layout inline (label al lado del input, clase `.of-f-inline`)
+  - N° Orden con clase `.of-f-num` (más angosto)
+  - Checkbox Garantía movido al final de la fila de fechas, después de Compra
+- `frontend/src/styles/OrdenTrabajo.css`:
+  - `.of-head-row` — fila flex con el título a la izquierda (`min-width: 110px`, nowrap) y los campos al lado
+  - `.of-f-inline` — label e input en la misma fila; inputs con `max-width: 150px`; `.of-f-num` con `max-width: 110px`
+  - `.of-dates` — 5 columnas (Ingreso, Término, Entrega, Compra, Garantía)
+  - Inputs del form OT compactos en alto: `padding: 2px 8px`, `line-height: 1.3` (mantiene `font-size: .82rem`)
+  - Ancho máximo del formulario reducido de `900px` a `720px` (en `OrdenTrabajo.jsx`)
+
+**Layout final de "Datos de la Orden":**
+- Fila 1: `Datos de la Orden` (título) | `N° Orden` | `Fecha`
+- Fila 2: `Ingreso` | `Término` | `Entrega` | `Compra` | `Garantía`
+
+### Paginación en mantenedor de Usuarios
+
+**Problema:** El mantenedor de usuarios no tenía paginación; se listaban todos los usuarios de una vez (a diferencia de Clientes, Equipos y OT que usan 4 por página).
+
+**Archivo modificado (solo frontend):**
+- `frontend/src/pages/GestionUsuarios.jsx`:
+  - Estado `paginaActual` + constante `usuariosPorPagina = 4` (mismo estándar que los demás módulos)
+  - Slice en frontend: `indiceInicio` + `usuariosFiltrados.slice(...)`
+  - Componente `<Pagination currentPage={paginaActual} totalPages={totalPaginas} onPageChange={setPaginaActual} />` al final del bloque admin (se oculta solo si hay ≤1 página)
+
+**Reglas replicadas desde Equipos/Clientes/OT:** 4 items por página, paginación frontend con `slice()` (no SQL), mismo componente `Pagination`.
+
+### Buscador de Usuarios por nombre o correo
+
+**Problema:** No había forma de filtrar la lista de usuarios.
+
+**Archivo modificado (solo frontend):**
+- `frontend/src/pages/GestionUsuarios.jsx`:
+  - Estado `filtroBusqueda` con input "Buscar Usuario" (placeholder "Nombre o correo...") en la zona admin, sobre la tabla
+  - Filtro case-insensitive sobre `usuario` y `email` (contiene el término, no solo inicio)
+  - `useEffect` resetea a página 1 al cambiar el filtro (patrón de Equipos)
+  - Botón "Limpiar" (icono `RotateCcw`) con la clase `btn-limpiar-equipos` (mismo estilo que los otros mantenedores)
+  - La paginación opera sobre `usuariosFiltrados`, no sobre el dataset completo
+
+### Fix error 500 al guardar Orden de Trabajo — placeholder de más en INSERT
+
+**Problema:** Al guardar una OT daba error 500 con `ER_PARSE_ERROR` (`...syntax to use near '?)'`).
+
+**Causa:** El INSERT de `backend/routes/ordenes.js` (POST) tenía **46 placeholders `?`** pero la query solo tiene **45 columnas**. El `?` sobrante quedaba literal al final del SQL (`..., 27, 23, ?)`) y MySQL lo rechazaba.
+
+**Archivo modificado:** `backend/routes/ordenes.js` — quitado un `?` de la lista `VALUES` del INSERT (quedó 45/45). Verificado también en `deploy/cloud` (ya estaba correcto, no se tocó).
+
+### Buscadores de Serie y Modelo en OT: solo llaman datos, sin vincular equipo
+
+**Problema:** Antes, al buscar por serie o modelo en la OT, se vinculaba el equipo (`equipo_id`) y aparecía el badge "✓ Seleccionado". El usuario quiere que una OT pueda tener el mismo modelo con otra serie: los buscadores solo deben **llamar los datos** (equipo, marca, modelo, serie) al formulario, sin ligar el equipo.
+
+**Archivos modificados:**
+
+- `frontend/src/pages/OrdenTrabajo.jsx`:
+  - `seleccionarEquipo` (búsqueda por serie): ya NO setea `equipoSeleccionado`; solo rellena equipo/marca/modelo/serie
+  - `seleccionarEquipoPorModelo` (nuevo): rellena equipo/marca/modelo, deja serie vacía y NO vincula equipo
+  - `guardarOrden`: `equipoId: null` siempre (las OT no se vinculan a equipos)
+  - `editarOrden`: eliminado `cargarEquipoFresco` (no se setea `equipoSeleccionado` → sin badge al editar; los datos vienen del snapshot de la OT)
+  - `equiposModeloFiltrados`: modelos únicos (deduplicados por `modelo` con `Map`) para no repetir por cada serie
+  - `verOrden`: se mantiene el badge de vinculación solo en modo Ver (solo lectura)
+- `frontend/src/components/ordenes/OrdenFormEquipo.jsx`: dropdown de modelo usa `seleccionarEquipoPorModelo`; quitado el texto "Solo modelo (sin serie)" y quitado el `Código` del dropdown de búsqueda por serie (solo muestra "Serie: XXX")
+- `backend/routes/ordenes.js` (solo `main`/MySQL):
+  - Eliminada la auto-vinculación en POST y PUT (`finalEquipoId = null`). Antes, si `equipoId` era null pero había `serie`, el backend buscaba o creaba el equipo por serie y lo ligaba. Ahora las OT solo guardan los datos copiados en sus columnas desnormalizadas (`equipo`, `modelo`, `marca`, `serie`).
+  - Las OT **no crean ni registran equipos**: el inventario de Equipos se gestiona exclusivamente desde el mantenedor de Equipos. Si en la OT se ingresa un equipo que no existe, la OT se guarda igual con los datos escritos a mano (no se crea nada en `equipos`).
+
+**Limpiado de código muerto (`backend/routes/ordenes.js`):**
+- Eliminada la función sin uso `generarCodigoEquipo()`
+- Eliminado `equipoId` de los destructuring de `req.body` en POST y PUT (ya no se usa)
+
+**Nota:** No se requiere migración de base de datos. La columna `equipo_id` se mantiene (las OT antiguas conservan su valor; las nuevas quedan `NULL`). No se tocó `deploy/cloud` (pendiente de replicar el cambio de backend si se desea).
+
+---
+
 ## Fecha: 2026-08-04
 
 ### Auditoría y limpieza de dead code

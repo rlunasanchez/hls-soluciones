@@ -13,14 +13,6 @@ const toDateMySQL = (val) => {
   return d.toISOString().split('T')[0];
 };
 
-async function generarCodigoEquipo() {
-  const [rows] = await pool.query(
-    "SELECT MAX(CAST(SUBSTRING(codigo, 4) AS UNSIGNED)) AS num FROM equipos WHERE codigo LIKE 'EQ-%'"
-  );
-  const num = rows[0].num || 0;
-  return `EQ-${String(num + 1).padStart(4, "0")}`;
-}
-
 router.get("/", authMiddleware, async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
@@ -68,7 +60,7 @@ router.get("/:id", authMiddleware, async (req, res) => {
 });
 
 router.post("/", authMiddleware, async (req, res) => {
-  const { fecha, esGarantia, fechaIngreso, fechaIngresoCheck, fechaTermino, fechaTerminoCheck, fechaEntrega, fechaEntregaCheck, fechaCompra, fechaCompraCheck, cliente, direccion, comuna, contacto, fonoContacto, emailContacto, fonoPrincipal, email, tecnicoAsignado, equipo, modelo, marca, serie, contadorPagOut, nivelTinta, insumo1, insumo2, insumo3, insumo4, insumo5, insumo6, insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia, actividad, observaciones, contactosExtra, direccionesExtra, clienteId, equipoId } = req.body;
+  const { fecha, esGarantia, fechaIngreso, fechaIngresoCheck, fechaTermino, fechaTerminoCheck, fechaEntrega, fechaEntregaCheck, fechaCompra, fechaCompraCheck, cliente, direccion, comuna, contacto, fonoContacto, emailContacto, fonoPrincipal, email, tecnicoAsignado, equipo, modelo, marca, serie, contadorPagOut, nivelTinta, insumo1, insumo2, insumo3, insumo4, insumo5, insumo6, insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia, actividad, observaciones, contactosExtra, direccionesExtra, clienteId } = req.body;
 
   const connection = await pool.getConnection();
   try {
@@ -93,20 +85,12 @@ router.post("/", authMiddleware, async (req, res) => {
       }
     }
 
-    let finalEquipoId = equipoId || null;
-    if (!finalEquipoId && equipo && serie) {
-      const [existeEquipo] = await connection.query("SELECT id FROM equipos WHERE serie = ?", [serie]);
-      if (existeEquipo.length > 0) {
-        finalEquipoId = existeEquipo[0].id;
-      } else {
-        const codigo = await generarCodigoEquipo();
-        const [result] = await connection.query(`INSERT INTO equipos (codigo, equipo, modelo, marca, serie) VALUES (?, ?, ?, ?, ?)`,
-          [codigo, equipo, modelo, marca, serie]);
-        finalEquipoId = result.insertId;
-      }
-    }
+    // Las OT NO se vinculan a equipos ni los registran: solo copian los datos
+    // (equipo/marca/modelo/serie). El inventario de equipos se gestiona a mano
+    // desde el mantenedor de Equipos.
+    const finalEquipoId = null;
 
-    await connection.query(`INSERT INTO ordenes_trabajo (numero_orden, fecha, es_garantia, fecha_ingreso, fecha_ingreso_check, fecha_termino, fecha_termino_check, fecha_entrega, fecha_entrega_check, fecha_compra, fecha_compra_check, cliente, direccion, comuna, contacto, fono_contacto, email_contacto, fono_principal, email, tecnico_asignado, equipo, modelo, marca, serie, contador_pag_out, nivel_tinta, insumo1, insumo2, insumo3, insumo4, insumo5, insumo6, insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia, actividad, observaciones, contactos_extra, direcciones_extra, cliente_id, equipo_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    await connection.query(`INSERT INTO ordenes_trabajo (numero_orden, fecha, es_garantia, fecha_ingreso, fecha_ingreso_check, fecha_termino, fecha_termino_check, fecha_entrega, fecha_entrega_check, fecha_compra, fecha_compra_check, cliente, direccion, comuna, contacto, fono_contacto, email_contacto, fono_principal, email, tecnico_asignado, equipo, modelo, marca, serie, contador_pag_out, nivel_tinta, insumo1, insumo2, insumo3, insumo4, insumo5, insumo6, insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia, actividad, observaciones, contactos_extra, direcciones_extra, cliente_id, equipo_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [numeroOrden, toDateMySQL(fecha), esGarantia || false, toDateMySQL(fechaIngreso), fechaIngresoCheck || false, toDateMySQL(fechaTermino), fechaTerminoCheck || false, toDateMySQL(fechaEntrega), fechaEntregaCheck || false, toDateMySQL(fechaCompra), fechaCompraCheck || false, cliente, direccion || null, comuna || null, contacto || null, fonoContacto || null, emailContacto || null, fonoPrincipal || null, email || null, tecnicoAsignado, equipo, modelo, marca, serie || null, contadorPagOut || null, nivelTinta || null, insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null, insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null, insumo9 || null, insumo10 || null, insumo11 || null, insumo12 || null, averia || null, actividad || null, observaciones || null, contactosExtra ? JSON.stringify(contactosExtra) : null, direccionesExtra ? JSON.stringify(direccionesExtra) : null, finalClienteId, finalEquipoId]);
 
     await connection.commit();
@@ -122,7 +106,7 @@ router.post("/", authMiddleware, async (req, res) => {
 
 router.put("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
-  const { fecha, esGarantia, fechaIngreso, fechaIngresoCheck, fechaTermino, fechaTerminoCheck, fechaEntrega, fechaEntregaCheck, fechaCompra, fechaCompraCheck, cliente, direccion, comuna, contacto, fonoContacto, emailContacto, fonoPrincipal, email, tecnicoAsignado, equipo, modelo, marca, serie, contadorPagOut, nivelTinta, insumo1, insumo2, insumo3, insumo4, insumo5, insumo6, insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia, actividad, observaciones, contactosExtra, direccionesExtra, clienteId, equipoId } = req.body;
+  const { fecha, esGarantia, fechaIngreso, fechaIngresoCheck, fechaTermino, fechaTerminoCheck, fechaEntrega, fechaEntregaCheck, fechaCompra, fechaCompraCheck, cliente, direccion, comuna, contacto, fonoContacto, emailContacto, fonoPrincipal, email, tecnicoAsignado, equipo, modelo, marca, serie, contadorPagOut, nivelTinta, insumo1, insumo2, insumo3, insumo4, insumo5, insumo6, insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia, actividad, observaciones, contactosExtra, direccionesExtra, clienteId } = req.body;
 
   const connection = await pool.getConnection();
   try {
@@ -140,18 +124,10 @@ router.put("/:id", authMiddleware, async (req, res) => {
       }
     }
 
-    let finalEquipoId = equipoId || null;
-    if (!finalEquipoId && equipo && serie) {
-      const [existeEquipo] = await connection.query("SELECT id FROM equipos WHERE serie = ?", [serie]);
-      if (existeEquipo.length > 0) {
-        finalEquipoId = existeEquipo[0].id;
-      } else {
-        const codigo = await generarCodigoEquipo();
-        const [result] = await connection.query(`INSERT INTO equipos (codigo, equipo, modelo, marca, serie) VALUES (?, ?, ?, ?, ?)`,
-          [codigo, equipo, modelo, marca, serie]);
-        finalEquipoId = result.insertId;
-      }
-    }
+    // Las OT NO se vinculan a equipos ni los registran: solo copian los datos
+    // (equipo/marca/modelo/serie). El inventario de equipos se gestiona a mano
+    // desde el mantenedor de Equipos.
+    const finalEquipoId = null;
 
     await connection.query(`UPDATE ordenes_trabajo SET fecha = ?, es_garantia = ?, fecha_ingreso = ?, fecha_ingreso_check = ?, fecha_termino = ?, fecha_termino_check = ?, fecha_entrega = ?, fecha_entrega_check = ?, fecha_compra = ?, fecha_compra_check = ?, cliente = ?, direccion = ?, comuna = ?, contacto = ?, fono_contacto = ?, email_contacto = ?, fono_principal = ?, email = ?, tecnico_asignado = ?, equipo = ?, modelo = ?, marca = ?, serie = ?, contador_pag_out = ?, nivel_tinta = ?, insumo1 = ?, insumo2 = ?, insumo3 = ?, insumo4 = ?, insumo5 = ?, insumo6 = ?, insumo7 = ?, insumo8 = ?, insumo9 = ?, insumo10 = ?, insumo11 = ?, insumo12 = ?, averia = ?, actividad = ?, observaciones = ?, contactos_extra = ?, direcciones_extra = ?, cliente_id = ?, equipo_id = ? WHERE id = ?`,
       [toDateMySQL(fecha), esGarantia || false, toDateMySQL(fechaIngreso), fechaIngresoCheck || false, toDateMySQL(fechaTermino), fechaTerminoCheck || false, toDateMySQL(fechaEntrega), fechaEntregaCheck || false, toDateMySQL(fechaCompra), fechaCompraCheck || false, cliente, direccion || null, comuna || null, contacto || null, fonoContacto || null, emailContacto || null, fonoPrincipal || null, email || null, tecnicoAsignado, equipo, modelo, marca, serie || null, contadorPagOut || null, nivelTinta || null, insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null, insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null, insumo9 || null, insumo10 || null, insumo11 || null, insumo12 || null, averia || null, actividad || null, observaciones || null, contactosExtra ? JSON.stringify(contactosExtra) : null, direccionesExtra ? JSON.stringify(direccionesExtra) : null, finalClienteId, finalEquipoId, id]);

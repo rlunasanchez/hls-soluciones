@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Plus, Key, Edit, ToggleLeft, ToggleRight, Trash2
+  Plus, Key, ToggleLeft, ToggleRight, RotateCcw
 } from "lucide-react";
 import api from "../services/api";
 import { parseToken, cerrarSesion } from "../utils/helpers";
 import HeaderUsuario from "../components/usuarios/HeaderUsuario";
 import UsuarioFormulario from "../components/usuarios/UsuarioFormulario";
 import CambioPasswordForm from "../components/usuarios/CambioPasswordForm";
+import UsuarioAcciones from "../components/usuarios/UsuarioAcciones";
+import Pagination from "../components/Pagination";
 
 function GestionUsuarios() {
   const navigate = useNavigate();
@@ -15,6 +17,23 @@ function GestionUsuarios() {
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [mostrarCambioPassword, setMostrarCambioPassword] = useState(false);
   const [usuarioEditando, setUsuarioEditando] = useState(null);
+  const [filtroBusqueda, setFiltroBusqueda] = useState("");
+  const [paginaActual, setPaginaActual] = useState(1);
+  const usuariosPorPagina = 4;
+
+  useEffect(() => {
+    setPaginaActual(1);
+  }, [filtroBusqueda]);
+
+  const usuariosFiltrados = usuarios.filter(u => {
+    if (!filtroBusqueda) return true;
+    const termino = filtroBusqueda.toLowerCase();
+    return (u.usuario || "").toLowerCase().includes(termino) || (u.email || "").toLowerCase().includes(termino);
+  });
+
+  const totalPaginas = Math.ceil(usuariosFiltrados.length / usuariosPorPagina);
+  const indiceInicio = (paginaActual - 1) * usuariosPorPagina;
+  const usuariosPagina = usuariosFiltrados.slice(indiceInicio, indiceInicio + usuariosPorPagina);
 
   const { usuarioActual, rol } = parseToken();
 
@@ -135,6 +154,25 @@ function GestionUsuarios() {
         </div>
       )}
 
+      {rol === 'admin' && (
+        <div className="filters-section">
+          <div className="filters-content">
+            <div className="filtro-grupo-equipos">
+              <label>Buscar Usuario</label>
+              <input
+                type="text"
+                placeholder="Nombre o correo..."
+                value={filtroBusqueda}
+                onChange={(e) => setFiltroBusqueda(e.target.value)}
+              />
+            </div>
+            <button onClick={() => setFiltroBusqueda("")} className="btn-limpiar-equipos">
+              <RotateCcw size={14} /> Limpiar
+            </button>
+          </div>
+        </div>
+      )}
+
       {rol === 'admin' ? (
         <>
           <div className="table-container">
@@ -151,7 +189,7 @@ function GestionUsuarios() {
                 </tr>
               </thead>
               <tbody>
-                {usuarios.map((u) => (
+                {usuariosPagina.map((u) => (
                   <tr key={u.id}>
                     <td data-label="ID">{u.id}</td>
                     <td data-label="Usuario"><strong>{u.usuario}</strong></td>
@@ -168,20 +206,12 @@ function GestionUsuarios() {
                     </td>
                     <td data-label="Fecha">{u.fecha_creacion ? new Date(u.fecha_creacion).toLocaleDateString("es-CL") : '-'}</td>
                     <td data-label="Acciones">
-                      <div className="action-buttons">
-                        <button className="table-btn edit-btn" onClick={() => editarUsuario(u)}>
-                          <Edit size={14} /> Editar
-                        </button>
-                        <button className="table-btn" onClick={() => resetearPassword(u.id)}
-                          style={{ background: 'var(--warning-light)', color: 'var(--warning)' }}>
-                          <Key size={14} /> Reset
-                        </button>
-                        {u.usuario !== 'admin' && (
-                          <button className="table-btn delete-btn" onClick={() => eliminarUsuario(u.id)}>
-                            <Trash2 size={14} /> Eliminar
-                          </button>
-                        )}
-                      </div>
+                      <UsuarioAcciones
+                        usuario={u}
+                        onEditar={editarUsuario}
+                        onResetearPassword={resetearPassword}
+                        onEliminar={eliminarUsuario}
+                      />
                     </td>
                   </tr>
                 ))}
@@ -190,7 +220,7 @@ function GestionUsuarios() {
           </div>
 
           <div className="cards-table">
-            {usuarios.map((u) => (
+            {usuariosPagina.map((u) => (
               <div key={u.id} className="data-card">
                 <div className="data-card-header">
                   <strong>{u.usuario}</strong>
@@ -210,28 +240,24 @@ function GestionUsuarios() {
                   <span className="data-card-label">Creado</span>
                   <span className="data-card-value">{u.fecha_creacion ? new Date(u.fecha_creacion).toLocaleDateString("es-CL") : '-'}</span>
                 </div>
-                <div style={{ display: 'flex', gap: '6px', marginTop: '12px', flexWrap: 'wrap' }}>
-                  <button className="table-btn edit-btn" onClick={() => editarUsuario(u)} style={{ flex: 1, justifyContent: 'center', minWidth: '70px' }}>
-                    <Edit size={14} /> Editar
-                  </button>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
                   <button className="table-btn" onClick={() => toggleActivo(u.id, u.activo)}
                     style={{ background: u.activo ? 'var(--success-light)' : 'var(--danger-light)', color: u.activo ? 'var(--success)' : 'var(--danger)', flex: 1, justifyContent: 'center', minWidth: '80px' }}>
                     {u.activo ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
                     {u.activo ? 'Activo' : 'Inactivo'}
                   </button>
-                  <button className="table-btn" onClick={() => resetearPassword(u.id)}
-                    style={{ background: 'var(--warning-light)', color: 'var(--warning)', flex: 1, justifyContent: 'center', minWidth: '70px' }}>
-                    <Key size={14} /> Reset
-                  </button>
-                  {u.usuario !== 'admin' && (
-                    <button className="table-btn delete-btn" onClick={() => eliminarUsuario(u.id)} style={{ flex: 1, justifyContent: 'center', minWidth: '80px' }}>
-                      <Trash2 size={14} /> Eliminar
-                    </button>
-                  )}
+                  <UsuarioAcciones
+                    usuario={u}
+                    onEditar={editarUsuario}
+                    onResetearPassword={resetearPassword}
+                    onEliminar={eliminarUsuario}
+                  />
                 </div>
               </div>
             ))}
           </div>
+
+          <Pagination currentPage={paginaActual} totalPages={totalPaginas} onPageChange={setPaginaActual} />
         </>
       ) : (
         <div className="table-container" style={{ padding: '40px', textAlign: 'center' }}>
