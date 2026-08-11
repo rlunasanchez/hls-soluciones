@@ -134,6 +134,17 @@
 
 **Nota:** No se requiere migración de base de datos. La columna `equipo_id` se mantiene (las OT antiguas conservan su valor; las nuevas quedan `NULL`). No se tocó `deploy/cloud` (pendiente de replicar el cambio de backend si se desea).
 
+### Botones "Limpiar" en form OT solo visibles si hay datos
+
+**Problema:** Al crear una OT nueva, los botones "Limpiar" de Avería/Actividad/Observaciones y de Insumos se mostraban siempre, aunque los campos estuvieran vacíos.
+
+**Solución:** Ambos botones ahora solo se renderizan si hay contenido:
+
+- `frontend/src/components/ordenes/OrdenFormAveria.jsx` — visible solo si `averia`, `actividad` u `observaciones` tienen texto
+- `frontend/src/components/ordenes/OrdenFormInsumos.jsx` — visible solo si al menos un insumo tiene nombre (`insumos.some(i => i.nombre)`)
+
+Solo frontend, idéntico en `deploy/cloud`.
+
 ---
 
 ## Fecha: 2026-08-04
