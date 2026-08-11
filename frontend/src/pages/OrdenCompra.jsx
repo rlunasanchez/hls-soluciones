@@ -59,7 +59,7 @@ function OrdenCompra() {
           padding: 'clamp(20px, 4vw, 40px)',
           textAlign: 'center'
         }}>
-          <ShoppingCart size={64} style={{ color: '#8B5CF6', marginBottom: '24px' }} />
+          <ShoppingCart size={64} style={{ color: '#1E40AF', marginBottom: '24px' }} />
           <h2 style={{ color: 'var(--text)', marginBottom: '16px' }}>
             Mantenedor de Orden de Compra
           </h2>

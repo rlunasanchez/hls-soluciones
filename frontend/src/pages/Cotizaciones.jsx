@@ -35,7 +35,7 @@ function Cotizaciones() {
             <FileText size={18} />
             <span className="btn-label">Informes Técnicos</span>
           </button>
-          <button onClick={() => navigate("/orden-compra")} className="logout-btn" style={{ background: '#8B5CF6', color: 'white' }}>
+          <button onClick={() => navigate("/orden-compra")} className="logout-btn" style={{ background: '#1E40AF', color: 'white' }}>
             <ShoppingCart size={18} />
             <span className="btn-label">Orden de Compra</span>
           </button>

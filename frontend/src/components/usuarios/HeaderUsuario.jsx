@@ -25,7 +25,7 @@ function HeaderUsuario({ navigate, onLogout, rol }) {
         <button onClick={() => navigate("/cotizaciones")} className="logout-btn" style={{ background: '#DB2777', color: 'white' }}>
           <FileSpreadsheet size={18} /><span className="btn-label">Cotizaciones</span>
         </button>
-        <button onClick={() => navigate("/orden-compra")} className="logout-btn" style={{ background: '#8B5CF6', color: 'white' }}>
+        <button onClick={() => navigate("/orden-compra")} className="logout-btn" style={{ background: '#1E40AF', color: 'white' }}>
           <ShoppingCart size={18} /><span className="btn-label">Orden de Compra</span>
         </button>
         <button onClick={onLogout} className="logout-btn" style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }}>

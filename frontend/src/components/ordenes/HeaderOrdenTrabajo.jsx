@@ -1,18 +1,14 @@
 import { ClipboardList, LogOut } from "lucide-react";
 
 function HeaderOrdenTrabajo({ navItems, onLogout }) {
-  const colors = [
-    "var(--primary)", "var(--warning)", "var(--success)", "#6366F1", "#EA580C", "#DB2777", "#8B5CF6", "#0D9488"
-  ];
-
   return (
     <div className="header" style={{ background: 'var(--gradient)', padding: '20px 32px', flexDirection: 'row', alignItems: 'center', gap: '16px' }}>
       <div className="header-left">
         <h1 style={{ color: 'white' }}><ClipboardList size={28} /> Orden de Trabajo</h1>
       </div>
       <div className="nav-buttons" style={{ gap: '10px' }}>
-        {navItems.map((item, i) => (
-          <button key={item.label} onClick={item.onClick} className="logout-btn" style={{ background: colors[i], color: 'white' }}>
+        {navItems.map((item) => (
+          <button key={item.label} onClick={item.onClick} className="logout-btn" style={{ background: item.color, color: 'white' }}>
             <item.icon size={18} />
             <span className="btn-label">{item.label}</span>
           </button>
