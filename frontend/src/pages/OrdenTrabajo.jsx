@@ -27,7 +27,6 @@ function OrdenTrabajo() {
   const ITEMS_POR_PAG = 4;
   const [editingId, setEditingId] = useState(null);
   const [filtroNumeroOrden, setFiltroNumeroOrden] = useState("");
-  const [filtroGarantia, setFiltroGarantia] = useState("todos");
   const [filtroEstado, setFiltroEstado] = useState("todos");
   const [filtroFechaDesde, setFiltroFechaDesde] = useState("");
   const [filtroFechaHasta, setFiltroFechaHasta] = useState("");
@@ -237,7 +236,7 @@ function OrdenTrabajo() {
   };
 
   // Resetear paginación al filtrar
-  useEffect(() => { setPaginaActual(1); }, [filtroNumeroOrden, filtroGarantia, filtroEstado, filtroFechaDesde, filtroFechaHasta]);
+  useEffect(() => { setPaginaActual(1); }, [filtroNumeroOrden, filtroEstado, filtroFechaDesde, filtroFechaHasta]);
 
   // Buscar equipos por serie via API (datos siempre frescos)
   useEffect(() => {
@@ -297,8 +296,6 @@ function OrdenTrabajo() {
 
   const ordenesFiltradas = ordenes.filter(orden => {
     if (filtroNumeroOrden && !orden.numero_orden?.toLowerCase().includes(filtroNumeroOrden.toLowerCase())) return false;
-    if (filtroGarantia === "si" && !orden.es_garantia) return false;
-    if (filtroGarantia === "no" && orden.es_garantia) return false;
     if (filtroEstado === "cerrada" && !orden.fecha_entrega) return false;
     if (filtroEstado === "pendiente" && orden.fecha_entrega) return false;
     if (filtroFechaDesde && orden.fecha && orden.fecha.substring(0, 10) < filtroFechaDesde) return false;
@@ -366,32 +363,8 @@ function OrdenTrabajo() {
       direccionesExtra: parseExtra(orden.direcciones_extra)
     });
 
-    // Buscar equipo asociado - solo para estado, NO sobreescribir datos de la OT
-    const cargarEquipoFresco = async () => {
-      try {
-        if (orden.equipo_id) {
-          const res = await api.get(`/api/equipos/${orden.equipo_id}`);
-          const eq = res.data;
-          setEquipoSeleccionado(eq);
-          setBusquedaSerie((eq.serie || "").toUpperCase());
-          setBusquedaModelo((eq.modelo || "").toUpperCase());
-          return;
-        }
-      } catch (err) {
-        console.error("Error al cargar equipo fresco:", err);
-      }
-      // Fallback: buscar en la lista local
-      const eq = equipos.find(e => 
-        (orden.equipo_id && e.id === orden.equipo_id) || 
-        (orden.serie && e.serie === orden.serie)
-      );
-      if (eq) {
-        setEquipoSeleccionado(eq);
-        setBusquedaSerie((eq.serie || "").toUpperCase());
-        setBusquedaModelo((eq.modelo || "").toUpperCase());
-      }
-    };
-    cargarEquipoFresco();
+    // Las OT no se vinculan a equipos: los datos ya vienen del snapshot de la OT
+    // (sin badge de vinculación ni equipoSeleccionado)
 
     // Buscar cliente asociado - solo para badge/estado, NO sobreescribir datos de la OT
     const cl = clientes.find(c => 
@@ -635,19 +608,35 @@ function OrdenTrabajo() {
     }));
   };
 
-  // Seleccionar equipo por serie - NO carga avería (puede haber duplicados)
+  // Seleccionar equipo por serie - NO vincula equipo ni carga avería (solo los datos de esa serie)
   const seleccionarEquipo = (equipo) => {
-    setEquipoSeleccionado(equipo);
     setNuevaOrden(prev => ({
       ...prev,
       equipo: toUpper(equipo.equipo),
       modelo: toUpper(equipo.modelo),
       marca: toUpper(equipo.marca),
       serie: toUpper(equipo.serie)
-      // NOTA: No carga avería aquí, solo al buscar por código
+      // NOTA: No vincula equipo (equipoId = null), solo trae los datos de la serie
     }));
 
      setBusquedaSerie((equipo.serie || "").toUpperCase());
+     setBusquedaModelo((equipo.modelo || "").toUpperCase());
+     setMostrarDropdownEquipos(false);
+     setMostrarDropdownModelo(false);
+  };
+
+  // Seleccionar solo el modelo - NO vincula serie ni equipo (solo rellena los datos del modelo)
+  const seleccionarEquipoPorModelo = (equipo) => {
+    setNuevaOrden(prev => ({
+      ...prev,
+      equipo: toUpper(equipo.equipo),
+      modelo: toUpper(equipo.modelo),
+      marca: toUpper(equipo.marca),
+      serie: ""
+      // NOTA: No vincula equipo (equipoId = null) ni serie, solo los datos del modelo
+    }));
+
+     setBusquedaSerie("");
      setBusquedaModelo((equipo.modelo || "").toUpperCase());
      setMostrarDropdownEquipos(false);
      setMostrarDropdownModelo(false);
@@ -662,7 +651,8 @@ function OrdenTrabajo() {
 
   // Equipos filtrados por API (siempre frescos)
   const equiposFiltrados = equiposSugeridos;
-  const equiposModeloFiltrados = equiposModeloSugeridos;
+  // Modelos únicos (sin duplicar por serie) para el buscador de modelo
+  const equiposModeloFiltrados = [...new Map(equiposModeloSugeridos.map(eq => [eq.modelo, eq])).values()];
 
   const guardarOrden = async (e) => {
     e.preventDefault();
@@ -673,7 +663,7 @@ function OrdenTrabajo() {
     const payload = {
       ...nuevaOrden,
       clienteId: clienteSeleccionado?.id || null,
-      equipoId: equipoSeleccionado?.id || null,
+      equipoId: null, // Las OT no se vinculan a equipos: se copian los datos (mismo modelo puede tener otra serie)
       insumo1: ins[0] || "",
       insumo2: ins[1] || "",
       insumo3: ins[2] || "",
@@ -788,8 +778,6 @@ function OrdenTrabajo() {
             loading={loading}
             filtroNumeroOrden={filtroNumeroOrden}
             onFiltroChange={setFiltroNumeroOrden}
-            filtroGarantia={filtroGarantia}
-            onFiltroGarantiaChange={setFiltroGarantia}
             filtroEstado={filtroEstado}
             onFiltroEstadoChange={setFiltroEstado}
             filtroFechaDesde={filtroFechaDesde}
@@ -810,7 +798,7 @@ function OrdenTrabajo() {
         ) : (
           /* Formulario para crear orden */
           <>
-          <div style={{ maxWidth: '900px', margin: '0 auto', padding: '12px' }}>
+          <div style={{ maxWidth: '720px', margin: '0 auto', padding: '12px' }}>
             <div className="of-wrap">
               <div className="of-head">
                 <h2><Wrench size={20} /> {soloLectura ? "Ver Orden" : editingId ? "Editar Orden" : "Nueva Orden"}</h2>
@@ -863,6 +851,7 @@ function OrdenTrabajo() {
                 equiposFiltrados={equiposFiltrados}
                 equipoDropdownRef={equipoDropdownRef}
                 seleccionarEquipo={seleccionarEquipo}
+                seleccionarEquipoPorModelo={seleccionarEquipoPorModelo}
                 equipoSeleccionado={equipoSeleccionado}
                 nuevaOrden={nuevaOrden}
                 setNuevaOrden={setNuevaOrden}

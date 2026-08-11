@@ -1,7 +1,8 @@
-import { ClipboardList, FileText, FileSpreadsheet, Edit, Trash2, Plus, Eye } from "lucide-react";
+import { ClipboardList, Plus } from "lucide-react";
 import Pagination from "../Pagination";
+import OrdenAcciones from "./OrdenAcciones";
 
-function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtroGarantia, onFiltroGarantiaChange, filtroEstado, onFiltroEstadoChange, filtroFechaDesde, onFiltroFechaDesdeChange, filtroFechaHasta, onFiltroFechaHastaChange, onNueva, paginaActual, totalPaginas, onPageChange, onVer, onEditar, onEliminar, onInforme, onCotizacion }) {
+function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtroEstado, onFiltroEstadoChange, filtroFechaDesde, onFiltroFechaDesdeChange, filtroFechaHasta, onFiltroFechaHastaChange, onNueva, paginaActual, totalPaginas, onPageChange, onVer, onEditar, onEliminar, onInforme, onCotizacion }) {
 
   return (
     <>
@@ -20,18 +21,6 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                 onChange={(e) => onFiltroChange(e.target.value)}
                 className="filtro-garantia-select"
               />
-            </div>
-            <div className="filtro-grupo-select">
-              <label>Garantía</label>
-              <select
-                value={filtroGarantia}
-                onChange={(e) => onFiltroGarantiaChange(e.target.value)}
-                className="filtro-garantia-select"
-              >
-                <option value="todos">Todas</option>
-                <option value="si">Garantía</option>
-                <option value="no">No garantía</option>
-              </select>
             </div>
             <div className="filtro-grupo-select">
               <label>Estado</label>
@@ -85,13 +74,12 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
             <table>
               <thead>
                 <tr>
-                  <th style={{width:'100px'}}>N° Orden</th>
-                  <th style={{width:'100px'}}>Fecha</th>
-                  <th style={{width:'190px'}}>Cliente</th>
-                  <th style={{width:'190px'}}>Equipo</th>
-                  <th style={{width:'120px'}}>Técnico</th>
-                  <th style={{width:'80px'}}>Garantía</th>
-                  <th style={{width:'130px'}}>Estado</th>
+                  <th>N° Orden</th>
+                  <th>Fecha</th>
+                  <th>Cliente</th>
+                  <th>Equipo</th>
+                  <th>Técnico</th>
+                  <th>Estado</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
@@ -109,13 +97,6 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                       {orden.equipo} {orden.marca} {orden.modelo}
                     </td>
                     <td data-label="Técnico">{orden.tecnico_asignado}</td>
-                    <td data-label="Garantía">
-                      {orden.es_garantia ? (
-                        <span className="badge-garantia">Sí</span>
-                      ) : (
-                        <span className="badge-no-garantia">No</span>
-                      )}
-                    </td>
                     <td data-label="Estado">
                       {orden.fecha_entrega ? (
                         <span className="badge-estado-cerrada">Cerrada</span>
@@ -124,23 +105,14 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                       )}
                     </td>
                     <td data-label="Acciones">
-                      <div className="action-buttons">
-                        <button className="table-btn" style={{ background: '#EA580C', color: 'white' }} onClick={() => onInforme(orden)}>
-                          <FileText size={14} /> Informe
-                        </button>
-                        <button className="table-btn" style={{ background: '#DB2777', color: 'white' }} onClick={() => onCotizacion(orden)}>
-                          <FileSpreadsheet size={14} /> Cotización
-                        </button>
-                        <button className="table-btn ver-btn" onClick={() => onVer(orden)}>
-                          <Eye size={14} /> Ver
-                        </button>
-                        <button className="table-btn edit-btn" onClick={() => onEditar(orden)}>
-                          <Edit size={14} /> Editar
-                        </button>
-                        <button className="table-btn delete-btn" onClick={() => onEliminar(orden.id)}>
-                          <Trash2 size={14} /> Eliminar
-                        </button>
-                      </div>
+                      <OrdenAcciones
+                        orden={orden}
+                        onVer={onVer}
+                        onEditar={onEditar}
+                        onEliminar={onEliminar}
+                        onInforme={onInforme}
+                        onCotizacion={onCotizacion}
+                      />
                     </td>
                   </tr>
                 ))}
@@ -153,11 +125,6 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
               <div key={orden.id} className="data-card">
                 <div className="data-card-header">
                   <strong>{orden.numero_orden?.split("-").pop()}</strong>
-                  {orden.es_garantia ? (
-                    <span className="badge-garantia">Garantía</span>
-                  ) : (
-                    <span className="badge-no-garantia">No garantía</span>
-                  )}
                 </div>
                 <div className="data-card-row">
                   <span className="label">Fecha</span>
@@ -189,22 +156,15 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                     )}
                   </span>
                 </div>
-                <div className="action-buttons">
-                  <button className="table-btn" style={{ background: '#EA580C', color: 'white' }} onClick={() => onInforme(orden)}>
-                    <FileText size={14} /> Informe
-                  </button>
-                  <button className="table-btn" style={{ background: '#DB2777', color: 'white' }} onClick={() => onCotizacion(orden)}>
-                    <FileSpreadsheet size={14} /> Cotización
-                  </button>
-                  <button className="table-btn ver-btn" onClick={() => onVer(orden)}>
-                    <Eye size={14} /> Ver
-                  </button>
-                  <button className="table-btn edit-btn" onClick={() => onEditar(orden)}>
-                    <Edit size={14} /> Editar
-                  </button>
-                  <button className="table-btn delete-btn" onClick={() => onEliminar(orden.id)}>
-                    <Trash2 size={14} /> Eliminar
-                  </button>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px' }}>
+                  <OrdenAcciones
+                    orden={orden}
+                    onVer={onVer}
+                    onEditar={onEditar}
+                    onEliminar={onEliminar}
+                    onInforme={onInforme}
+                    onCotizacion={onCotizacion}
+                  />
                 </div>
               </div>
             ))}

@@ -40,16 +40,25 @@ function OrdenFormCliente({
 
   const contactosDisponibles = (() => {
     if (!clienteSeleccionado) return [];
+    const principalNombre = String(clienteSeleccionado.contacto_nombre || "").toUpperCase().trim();
+    const principalEmail = String(clienteSeleccionado.contacto_email || "").toUpperCase().trim();
     const extras = String(clienteSeleccionado.contactos || "")
       .split(";;")
       .map((c) => {
         const p = c.split("|");
         return { nombre: (p[0] || "").toUpperCase().trim(), email: p[1] || "", fono: p[2] || "", cargo: p[3] || "" };
       })
-      .filter((c) => c.nombre);
-    const principal = clienteSeleccionado.contacto_nombre
+      .filter((c) => c.nombre)
+      .filter((c) => {
+        const n = c.nombre.toUpperCase().trim();
+        const e = (c.email || "").toUpperCase().trim();
+        if (principalNombre && n === principalNombre) return false;
+        if (principalEmail && e && e === principalEmail) return false;
+        return true;
+      });
+    const principal = principalNombre
       ? [{
-          nombre: String(clienteSeleccionado.contacto_nombre).toUpperCase().trim(),
+          nombre: principalNombre,
           email: clienteSeleccionado.contacto_email || "",
           fono: clienteSeleccionado.contacto_fono || "",
           cargo: clienteSeleccionado.contacto_cargo || "",

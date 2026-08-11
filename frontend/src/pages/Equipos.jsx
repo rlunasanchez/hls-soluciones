@@ -17,7 +17,6 @@ function Equipos() {
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [equipoEditando, setEquipoEditando] = useState(null);
   const [filtroModelo, setFiltroModelo] = useState("");
-  const [filtroSerie, setFiltroSerie] = useState("");
   const [paginaActual, setPaginaActual] = useState(1);
   const equiposPorPagina = 4;
   const [soloLectura, setSoloLectura] = useState(false);
@@ -39,16 +38,12 @@ function Equipos() {
 
   useEffect(() => {
     setPaginaActual(1);
-  }, [filtroModelo, filtroSerie]);
+  }, [filtroModelo]);
 
   const equiposFiltrados = equipos.filter(eq => {
     if (filtroModelo) {
       const m = filtroModelo.toLowerCase();
       if (!eq.modelo?.toLowerCase().includes(m)) return false;
-    }
-    if (filtroSerie) {
-      const s = filtroSerie.toLowerCase();
-      if (!eq.serie?.toLowerCase().includes(s)) return false;
     }
     return true;
   });
@@ -127,9 +122,7 @@ function Equipos() {
         <FiltrosEquipo
           filtroModelo={filtroModelo}
           onFiltroModeloChange={setFiltroModelo}
-          filtroSerie={filtroSerie}
-          onFiltroSerieChange={setFiltroSerie}
-          onLimpiar={() => { setFiltroModelo(""); setFiltroSerie(""); }}
+          onLimpiar={() => { setFiltroModelo(""); }}
         />
 
       <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 16 }}>

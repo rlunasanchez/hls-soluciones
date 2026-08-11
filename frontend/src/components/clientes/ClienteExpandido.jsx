@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ClipboardList, Plus, Edit, Trash2, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import ClienteExpandidoAcciones from "./ClienteExpandidoAcciones";
 
 function Paginacion({ pagina, totalPaginas, setPagina }) {
   if (totalPaginas <= 1) return null;
@@ -62,23 +63,12 @@ function ClienteExpandido({ cliente, ordenes, onEditar, onEliminar, onEliminarOT
           </p>
         </div>
         <div className="cliente-acciones">
-          <button
-            className="btn-nueva-ot-header"
-            onClick={() =>
-              navigate("/orden-trabajo", { state: { cliente } })
-            }
-          >
-            <ClipboardList size={10} /> Agregar OT
-          </button>
-          <button className="btn-editar-header" onClick={() => onEditar(cliente)}>
-            <Edit size={10} /> Editar
-          </button>
-          <button
-            className="btn-eliminar-header"
-            onClick={() => onEliminar(cliente.id)}
-          >
-            <Trash2 size={10} /> Eliminar
-          </button>
+          <ClienteExpandidoAcciones
+            cliente={cliente}
+            onNuevaOT={() => navigate("/orden-trabajo", { state: { cliente } })}
+            onEditar={onEditar}
+            onEliminar={onEliminar}
+          />
         </div>
       </div>
 

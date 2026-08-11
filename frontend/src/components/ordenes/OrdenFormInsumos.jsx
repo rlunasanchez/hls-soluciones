@@ -11,7 +11,7 @@ function OrdenFormInsumos({ insumos, insumosVisibles, setInsumosVisibles, setIns
     <div className="of-sec" style={{background:'white'}}>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'6px'}}>
         <span className="of-st muted">Insumos</span>
-        {!readOnly && (
+        {!readOnly && insumos.some(i => i.nombre) && (
           <div style={{ display: 'flex', gap: '6px' }}>
             <button type="button" className="of-btn-a" onClick={() => {
               setInsumos(Array(12).fill({ nombre: "" }));

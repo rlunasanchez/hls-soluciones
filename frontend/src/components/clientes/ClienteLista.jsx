@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ClipboardList, FileSpreadsheet, Edit, Trash2, Eye } from "lucide-react";
+import ClienteAcciones from "./ClienteAcciones";
 
 function ClienteLista({ clientes, onVer, onEditar, onEliminar }) {
   const navigate = useNavigate();
@@ -32,45 +32,14 @@ function ClienteLista({ clientes, onVer, onEditar, onEliminar }) {
                 <td>{c.ciudad}</td>
                 <td>{c.contacto_nombre}</td>
                 <td>
-                  <div className="action-buttons">
-                    <button
-                      className="table-btn"
-                      style={{ background: '#6366f1', color: 'white' }}
-                      onClick={() =>
-                        navigate("/orden-trabajo", { state: { cliente: c } })
-                      }
-                    >
-                      <ClipboardList size={14} /> OT
-                    </button>
-                    <button
-                      className="table-btn"
-                      style={{ background: '#DB2777', color: 'white' }}
-                      onClick={() =>
-                        navigate("/cotizaciones", { state: { cliente: c } })
-                      }
-                    >
-                      <FileSpreadsheet size={14} /> Cotización
-                    </button>
-                    <button
-                      className="table-btn"
-                      style={{ background: '#0D9488', color: 'white' }}
-                      onClick={() => onVer(c)}
-                    >
-                      <Eye size={14} /> Ver
-                    </button>
-                    <button
-                      className="table-btn edit-btn"
-                      onClick={() => onEditar(c)}
-                    >
-                      <Edit size={14} /> Editar
-                    </button>
-                    <button
-                      className="table-btn delete-btn"
-                      onClick={() => onEliminar(c.id)}
-                    >
-                      <Trash2 size={14} /> Eliminar
-                    </button>
-                  </div>
+                  <ClienteAcciones
+                    cliente={c}
+                    onVer={onVer}
+                    onEditar={onEditar}
+                    onEliminar={onEliminar}
+                    onOT={() => navigate("/orden-trabajo", { state: { cliente: c } })}
+                    onCotizacion={() => navigate("/cotizaciones", { state: { cliente: c } })}
+                  />
                 </td>
               </tr>
             ))}
@@ -101,37 +70,15 @@ function ClienteLista({ clientes, onVer, onEditar, onEliminar }) {
               <span className="label">Contacto</span>
               <span className="value">{c.contacto_nombre}</span>
             </div>
-            <div className="action-buttons">
-              <button
-                className="table-btn"
-                style={{ background: '#6366f1', color: 'white' }}
-                onClick={() =>
-                  navigate("/orden-trabajo", { state: { cliente: c } })
-                }
-              >
-                <ClipboardList size={14} /> OT
-              </button>
-              <button
-                className="table-btn"
-                style={{ background: '#DB2777', color: 'white' }}
-                onClick={() =>
-                  navigate("/cotizaciones", { state: { cliente: c } })
-                }
-              >
-                <FileSpreadsheet size={14} /> Cotización
-              </button>
-              <button className="table-btn ver-btn" onClick={() => onVer(c)}>
-                <Eye size={14} /> Ver
-              </button>
-              <button className="table-btn edit-btn" onClick={() => onEditar(c)}>
-                <Edit size={14} /> Editar
-              </button>
-              <button
-                className="table-btn delete-btn"
-                onClick={() => onEliminar(c.id)}
-              >
-                <Trash2 size={14} /> Eliminar
-              </button>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px' }}>
+              <ClienteAcciones
+                cliente={c}
+                onVer={onVer}
+                onEditar={onEditar}
+                onEliminar={onEliminar}
+                onOT={() => navigate("/orden-trabajo", { state: { cliente: c } })}
+                onCotizacion={() => navigate("/cotizaciones", { state: { cliente: c } })}
+              />
             </div>
           </div>
         ))}

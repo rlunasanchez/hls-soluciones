@@ -5,7 +5,7 @@ function OrdenFormAveria({ nuevaOrden, setNuevaOrden, readOnly }) {
     <div className="of-sec muted">
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
         <span className="of-st muted">Avería/Falla/Incidencia</span>
-        {!readOnly && (
+        {!readOnly && (nuevaOrden.averia || nuevaOrden.actividad || nuevaOrden.observaciones) && (
           <button
             type="button"
             className="of-btn-a"
