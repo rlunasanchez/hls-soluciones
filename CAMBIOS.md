@@ -155,6 +155,18 @@ Solo frontend, idéntico en `deploy/cloud`.
 
 Solo frontend, idéntico en `deploy/cloud`.
 
+### Form OT con ancho de 900px (igual que nuevo cliente) + focus tenue en inputs y botones
+
+**Cambios (solo frontend):**
+
+1. **Ancho del form de OT** (`frontend/src/pages/OrdenTrabajo.jsx`): el contenedor del form de Nueva/Editar/Ver Orden cambió de `max-width: 720px` a `900px`, igual que el formulario de Nuevo Cliente (`.cf-wrap`).
+
+2. **Focus tenue en inputs del form OT** (`frontend/src/styles/OrdenTrabajo.css`):
+   - `.of-f input/select/textarea:focus`: antes `border-color: var(--primary)` (azul oscuro) + sombra 2px; ahora borde `#9AB8D9` + sombra sutil de 1px (`rgba(154,184,217,.35)`), sin outline
+   - `.of-ins-item input:focus` y `.of-date input[type="date"]:focus`: agregado el mismo focus tenue (antes usaban el outline grueso azul del navegador al hacer clic en "Insumo 1" o en las fechas)
+
+3. **Focus tenue en botones del form OT**: `.of-btn-a`, `.of-btn-p`, `.of-btn-c`, `.of-head-close` y `.of-ins-del` con `:focus-visible` ahora tienen `outline: none` y una sombra de 1px `rgba(154,184,217,.4)` (antes outline grueso del navegador al resaltar con Tab/clic).
+
 ---
 
 ## Fecha: 2026-08-04
