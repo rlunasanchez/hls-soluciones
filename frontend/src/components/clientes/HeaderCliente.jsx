@@ -15,7 +15,7 @@ function HeaderCliente({ usuarioActual, onLogout }) {
   ];
 
   const colors = [
-    "var(--primary)", "var(--success)", "#6366F1", "#EA580C", "#DB2777", "#8B5CF6", "#0D9488"
+    "var(--primary)", "var(--success)", "#6366F1", "#EA580C", "#DB2777", "#1E40AF", "#0D9488"
   ];
 
   return (

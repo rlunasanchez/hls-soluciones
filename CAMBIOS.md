@@ -167,6 +167,16 @@ Solo frontend, idéntico en `deploy/cloud`.
 
 3. **Focus tenue en botones del form OT**: `.of-btn-a`, `.of-btn-p`, `.of-btn-c`, `.of-head-close` y `.of-ins-del` con `:focus-visible` ahora tienen `outline: none` y una sombra de 1px `rgba(154,184,217,.4)` (antes outline grueso del navegador al resaltar con Tab/clic).
 
+### Color fijo en botones del header y "Nuevo Cliente" (sin cambio de color en hover)
+
+**Problema:** Al pasar el mouse, los botones de navegación del header (`.logout-btn`) se pintaban de rojo completo, y el botón "Nuevo Cliente" (`.btn-nuevo-cliente`) cambiaba su fondo azul a un azul más claro (`#1d4ed8`). El usuario quiere los colores fijos, como el botón "Guardar Cliente" (solo se oscurece levemente).
+
+**Cambios (`frontend/src/styles/index.css`):**
+- `.logout-btn:hover`: reemplazado `background: var(--danger); color: white` por `filter: brightness(0.92)` — el botón mantiene su color y solo se oscurece apenas
+- `.btn-nuevo-cliente:hover`: reemplazado `background: #1d4ed8; color: white !important` por `filter: brightness(0.92)`
+
+**Además:** el color del botón "Orden de Compra" ahora es azul marino `#1E40AF` (antes púrpura `#8B5CF6` que se confundía con "Orden de Trabajo" `#6366F1`). Aplicado en todos los headers (Clientes, Equipos, Usuarios, Informes, Cotizaciones, Orden Compra, OT) y en las tarjetas de Home (que usaban `#6366F1`).
+
 ---
 
 ## Fecha: 2026-08-04

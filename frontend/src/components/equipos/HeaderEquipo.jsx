@@ -22,7 +22,7 @@ function HeaderEquipo({ navigate, onLogout }) {
         <button onClick={() => navigate("/cotizaciones")} className="logout-btn" style={{ background: '#DB2777', color: 'white' }}>
           <FileSpreadsheet size={18} /><span className="btn-label">Cotizaciones</span>
         </button>
-        <button onClick={() => navigate("/orden-compra")} className="logout-btn" style={{ background: '#8B5CF6', color: 'white' }}>
+        <button onClick={() => navigate("/orden-compra")} className="logout-btn" style={{ background: '#1E40AF', color: 'white' }}>
           <ShoppingCart size={18} /><span className="btn-label">Orden de Compra</span>
         </button>
         <button onClick={() => navigate("/usuarios")} className="logout-btn" style={{ background: '#0D9488', color: 'white' }}>

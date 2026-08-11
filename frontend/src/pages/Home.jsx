@@ -64,11 +64,11 @@ function Home({ onLogout }) {
               width: '80px',
               height: '80px',
               borderRadius: '50%',
-              background: idx === 0 ? 'var(--primary-light)' : idx === 1 ? 'var(--success-light)' : idx === 2 ? 'var(--warning-light)' : idx === 3 ? '#FFEDD5' : idx === 4 ? '#FCE7F3' : '#E0E7FF',
+              background: idx === 0 ? 'var(--primary-light)' : idx === 1 ? 'var(--success-light)' : idx === 2 ? 'var(--warning-light)' : idx === 3 ? '#FFEDD5' : idx === 4 ? '#FCE7F3' : '#E0F2FE',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: idx === 0 ? 'var(--primary)' : idx === 1 ? 'var(--success)' : idx === 2 ? 'var(--warning)' : idx === 3 ? '#EA580C' : idx === 4 ? '#DB2777' : '#6366F1'
+              color: idx === 0 ? 'var(--primary)' : idx === 1 ? 'var(--success)' : idx === 2 ? 'var(--warning)' : idx === 3 ? '#EA580C' : idx === 4 ? '#DB2777' : '#1E40AF'
             }}>
               <item.icon size={40} />
             </div>
