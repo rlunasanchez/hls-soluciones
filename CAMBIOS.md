@@ -177,6 +177,13 @@ Solo frontend, idéntico en `deploy/cloud`.
 
 **Además:** el color del botón "Orden de Compra" ahora es azul marino `#1E40AF` (antes púrpura `#8B5CF6` que se confundía con "Orden de Trabajo" `#6366F1`). Aplicado en todos los headers (Clientes, Equipos, Usuarios, Informes, Cotizaciones, Orden Compra, OT) y en las tarjetas de Home (que usaban `#6366F1`).
 
+### Botones azules uniformes: "Nueva Orden", "Limpiar" (Equipos) y hover sin elevación
+
+**Cambios (`frontend/src/styles/index.css` y `Equipos.css`):**
+- `.main-btn` (botón "Nueva Orden" y otros azules): `background` de `var(--gradient)` (degradado) a `var(--primary)` (azul sólido), igual que "Nuevo Cliente"
+- `.main-btn:hover`: eliminado `transform: translateY(-1px)` y el cambio de `box-shadow` (efecto de elevación), ahora solo `filter: brightness(0.92)`
+- `.btn-limpiar-equipos:hover`: reemplazado `background: #1d4ed8` (cambio de color) por `filter: brightness(0.92)`
+
 ---
 
 ## Fecha: 2026-08-04

@@ -58,7 +58,7 @@
 .filtro-grupo-equipos input { width: 100%; padding: 6px 10px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.85rem; font-family: inherit; transition: border-color 0.2s; }
 .filtro-grupo-equipos input:focus { border-color: var(--primary); outline: none; }
 .btn-limpiar-equipos { display: flex; align-items: center; gap: 4px; padding: 6px 12px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500; white-space: nowrap; }
-.btn-limpiar-equipos:hover { background: #1d4ed8; }
+.btn-limpiar-equipos:hover { filter: brightness(0.92); }
 
 @media (max-width: 768px) {
   .filters-content { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
