@@ -798,7 +798,7 @@ function OrdenTrabajo() {
         ) : (
           /* Formulario para crear orden */
           <>
-          <div style={{ maxWidth: '720px', margin: '0 auto', padding: '12px' }}>
+          <div style={{ maxWidth: '900px', margin: '0 auto', padding: '12px' }}>
             <div className="of-wrap">
               <div className="of-head">
                 <h2><Wrench size={20} /> {soloLectura ? "Ver Orden" : editingId ? "Editar Orden" : "Nueva Orden"}</h2>
