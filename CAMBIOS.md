@@ -145,6 +145,16 @@
 
 Solo frontend, idéntico en `deploy/cloud`.
 
+### Fix: contacto principal duplicado en buscador "Buscar Contacto" de la OT
+
+**Problema:** En el buscador de contacto por nombre o correo del form de OT, el contacto principal del cliente aparecía a veces dos veces en el dropdown.
+
+**Causa:** `contactosDisponibles` en `frontend/src/components/ordenes/OrdenFormCliente.jsx` agregaba el contacto principal (`clienteSeleccionado.contacto_nombre`/`email`/`fono`/`cargo`) y además el campo concatenado `clienteSeleccionado.contactos` ya contiene el contacto principal (heredado de la migración a `clientes_contactos`), por lo que se mostraba duplicado.
+
+**Solución:** Al construir `contactosDisponibles`, se filtran de los `extras` los contactos cuyo nombre **o** email coincida exactamente (case-insensitive) con el contacto principal. El principal se agrega una sola vez con flag `principal: true`.
+
+Solo frontend, idéntico en `deploy/cloud`.
+
 ---
 
 ## Fecha: 2026-08-04
