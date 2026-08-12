@@ -1,0 +1,33 @@
+# .graphifyignore — HLS Soluciones
+# Solo indexar el código funcional del proyecto (backend + frontend/src + docs raíz).
+# Excluir skills de agentes, scripts de seed, builds, y outputs del grafo.
+
+# ── Skills de agentes (no son código del proyecto) ──
+.agents/
+
+# ── Scripts auxiliares / seed (periféricos) ──
+scripts/
+backend/crear-admin.js
+backend/crear_tablas.sql
+
+# ── Build outputs y assets estáticos ──
+frontend/dist/
+frontend/public/
+
+# ── Dependencias ──
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# ── Output de graphify ──
+graphify-out/
+
+# ── Git y configuración de editor ──
+.git/
+.gitignore
+.vscode/
+
+# ── Lockfiles (no aportan semántica) ──
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
