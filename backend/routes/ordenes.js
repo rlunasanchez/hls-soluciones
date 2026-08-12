@@ -73,17 +73,10 @@ router.post("/", authMiddleware, async (req, res) => {
       return res.status(400).json({ msg: "El número de orden ya existe" });
     }
 
-    let finalClienteId = clienteId || null;
-    if (!finalClienteId && cliente) {
-      const [existeCliente] = await connection.query("SELECT id FROM clientes WHERE razon_social = ?", [cliente]);
-      if (existeCliente.length > 0) {
-        finalClienteId = existeCliente[0].id;
-      } else {
-        const [result] = await connection.query("INSERT INTO clientes (razon_social, direccion, comuna, contacto_nombre, telefono) VALUES (?, ?, ?, ?, ?)", [cliente, direccion || null, comuna || null, contacto || null, fonoPrincipal || null]);
-        finalClienteId = result.insertId;
-        await connection.query("INSERT INTO clientes_direcciones (cliente_id, tipo_direccion, direccion, comuna, fono) VALUES (?, 'Matriz', ?, ?, ?)", [finalClienteId, direccion || null, comuna || null, fonoPrincipal || null]);
-      }
-    }
+    // La OT se vincula al cliente SOLO si se seleccionó del buscador (clienteId).
+    // Si el cliente se escribió a mano en la OT, los datos quedan solo en la OT
+    // (no se crea ni se busca ningún cliente en el mantenedor).
+    const finalClienteId = clienteId || null;
 
     // Las OT NO se vinculan a equipos ni los registran: solo copian los datos
     // (equipo/marca/modelo/serie). El inventario de equipos se gestiona a mano
@@ -112,17 +105,10 @@ router.put("/:id", authMiddleware, async (req, res) => {
   try {
     await connection.beginTransaction();
 
-    let finalClienteId = clienteId || null;
-    if (!finalClienteId && cliente) {
-      const [existeCliente] = await connection.query("SELECT id FROM clientes WHERE razon_social = ?", [cliente]);
-      if (existeCliente.length > 0) {
-        finalClienteId = existeCliente[0].id;
-      } else {
-        const [result] = await connection.query("INSERT INTO clientes (razon_social, direccion, comuna, contacto_nombre, telefono) VALUES (?, ?, ?, ?, ?)", [cliente, direccion || null, comuna || null, contacto || null, fonoPrincipal || null]);
-        finalClienteId = result.insertId;
-        await connection.query("INSERT INTO clientes_direcciones (cliente_id, tipo_direccion, direccion, comuna, fono) VALUES (?, 'Matriz', ?, ?, ?)", [finalClienteId, direccion || null, comuna || null, fonoPrincipal || null]);
-      }
-    }
+    // La OT se vincula al cliente SOLO si se seleccionó del buscador (clienteId).
+    // Si el cliente se escribió a mano en la OT, los datos quedan solo en la OT
+    // (no se crea ni se busca ningún cliente en el mantenedor).
+    const finalClienteId = clienteId || null;
 
     // Las OT NO se vinculan a equipos ni los registran: solo copian los datos
     // (equipo/marca/modelo/serie). El inventario de equipos se gestiona a mano

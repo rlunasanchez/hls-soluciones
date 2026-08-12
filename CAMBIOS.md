@@ -208,6 +208,14 @@ Cada botón de navegación del header ahora usa el mismo color que su tarjeta en
 - `frontend/src/components/usuarios/HeaderUsuario.jsx` — Inicio `var(--gradient)`, Clientes `var(--primary)`, OT `var(--warning)`
 - `frontend/src/pages/Informes.jsx`, `pages/Cotizaciones.jsx`, `pages/OrdenCompra.jsx` — Inicio `var(--gradient)`, Clientes `var(--primary)`, OT `var(--warning)`
 
+### OT a mano no crea ni vincula clientes en el mantenedor
+
+**Cambio (`backend/routes/ordenes.js`):**
+- `POST` y `PUT`: se eliminó el bloque que buscaba o creaba un cliente en `clientes` cuando se escribía a mano en la OT.
+- Antes: si `clienteId` era `null`, se hacía `SELECT id FROM clientes WHERE razon_social = ?`, y si no existía se creaba un registro en `clientes` + dirección "Matriz" en `clientes_direcciones`.
+- Ahora: `const finalClienteId = clienteId || null`. La OT se vincula al cliente **solo** si fue seleccionado del buscador (se envía `clienteId`). Si se escribió a mano, `cliente_id` en la OT queda `null` y los datos quedan solo en la tabla `ordenes_trabajo` (snapshot).
+- El comportamiento es idéntico al de los **equipos**: la OT solo usa datos existentes para autocompletar, pero no registra ni vincula en los mantenedores.
+
 ---
 
 ## Fecha: 2026-08-04
