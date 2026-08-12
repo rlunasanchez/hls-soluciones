@@ -817,28 +817,26 @@ function OrdenFormCliente({
                   )}
 
                   {nuevaOrden.contactosExtra.map((c, idx) => (
-                    <div key={idx} style={{ marginBottom: '6px', border: '1px solid var(--border)', borderRadius: '6px', padding: '4px' }}>
-                      <div className="of-form-grid" style={{ gap: '8px' }}>
-                        <div className="of-f">
-                          <label>Contacto {idx + 1}</label>
-                          <input type="text" placeholder="Nombre" value={c.nombre} onChange={(e) => actualizarContacto(idx, 'nombre', e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={readOnly} />
-                        </div>
-                        <div className="of-f">
-                          <label>Email</label>
-                          <input type="email" placeholder="Email" value={c.email} onChange={(e) => actualizarContacto(idx, 'email', e.target.value.toUpperCase())} disabled={readOnly} />
-                        </div>
-                        <div className="of-f">
-                          <label>Fono</label>
-                          <input type="tel" placeholder="Fono" value={c.fono} onChange={(e) => actualizarContacto(idx, 'fono', e.target.value.replace(/[^0-9+]/g, ''))} disabled={readOnly} />
-                        </div>
-                        <div className="of-f">
-                          <label>Dirección Contacto</label>
-                          <input type="text" placeholder="Dirección Contacto" value={c.direccion} onChange={(e) => actualizarContacto(idx, 'direccion', e.target.value.toUpperCase())} disabled={readOnly} />
-                        </div>
-                        <div className="of-f">
-                          <label>Cargo</label>
-                          <input type="text" placeholder="Cargo" value={c.cargo} onChange={(e) => actualizarContacto(idx, 'cargo', e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={readOnly} />
-                        </div>
+                    <div key={idx} style={{ display: 'flex', gap: '6px', alignItems: 'flex-end', marginBottom: '6px', border: '1px solid var(--border)', borderRadius: '6px', padding: '4px' }}>
+                      <div className="of-f" style={{ flex: '1 1 0' }}>
+                        <label>Contacto {idx + 1}</label>
+                        <input type="text" placeholder="Nombre" value={c.nombre} onChange={(e) => actualizarContacto(idx, 'nombre', e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={readOnly} />
+                      </div>
+                      <div className="of-f" style={{ flex: '1 1 0' }}>
+                        <label>Email</label>
+                        <input type="email" placeholder="Email" value={c.email} onChange={(e) => actualizarContacto(idx, 'email', e.target.value.toUpperCase())} disabled={readOnly} />
+                      </div>
+                      <div className="of-f" style={{ flex: '0 0 100px' }}>
+                        <label>Fono</label>
+                        <input type="tel" placeholder="Fono" value={c.fono} onChange={(e) => actualizarContacto(idx, 'fono', e.target.value.replace(/[^0-9+]/g, ''))} disabled={readOnly} />
+                      </div>
+                      <div className="of-f" style={{ flex: '1 1 0' }}>
+                        <label>Dirección Contacto</label>
+                        <input type="text" placeholder="Dirección Contacto" value={c.direccion} onChange={(e) => actualizarContacto(idx, 'direccion', e.target.value.toUpperCase())} disabled={readOnly} />
+                      </div>
+                      <div className="of-f" style={{ flex: '0 0 110px' }}>
+                        <label>Cargo</label>
+                        <input type="text" placeholder="Cargo" value={c.cargo} onChange={(e) => actualizarContacto(idx, 'cargo', e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={readOnly} />
                       </div>
                       {!readOnly && (
                         <button
@@ -848,17 +846,7 @@ function OrdenFormCliente({
                             const arr = nuevaOrden.contactosExtra.filter((_, i) => i !== idx);
                             setNuevaOrden({ ...nuevaOrden, contactosExtra: arr });
                           }}
-                          style={{
-                            marginTop: '4px',
-                            background: '#FEF2F2',
-                            color: '#DC2626',
-                            border: '1px solid #FECACA',
-                            borderRadius: '6px',
-                            padding: '2px 8px',
-                            cursor: 'pointer',
-                            fontWeight: 600,
-                            fontSize: '0.75rem'
-                          }}
+                          style={{ flex: '0 0 auto', background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA', borderRadius: '6px', padding: '2px 8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.75rem', lineHeight: '1.3' }}
                         >
                           Quitar
                         </button>
