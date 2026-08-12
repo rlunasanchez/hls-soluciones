@@ -758,8 +758,8 @@ function OrdenTrabajo() {
   // Funciones de navegación eliminadas (accesos desde el menú)
 
   const navItems = [
-    { label: "Inicio", icon: Home, onClick: () => navigate("/home"), color: "var(--primary)" },
-    { label: "Clientes", icon: Users, onClick: () => navigate("/clientes"), color: "var(--warning)" },
+    { label: "Inicio", icon: Home, onClick: () => navigate("/home"), color: "var(--gradient)" },
+    { label: "Clientes", icon: Users, onClick: () => navigate("/clientes"), color: "var(--primary)" },
     { label: "Equipos", icon: Package, onClick: () => navigate("/equipos"), color: "var(--success)" },
     { label: "Informes Técnicos", icon: FileText, onClick: () => navigate("/informes"), color: "#EA580C" },
     { label: "Cotizaciones", icon: FileSpreadsheet, onClick: () => navigate("/cotizaciones"), color: "#DB2777" },
