@@ -216,6 +216,20 @@ Cada botón de navegación del header ahora usa el mismo color que su tarjeta en
 - Ahora: `const finalClienteId = clienteId || null`. La OT se vincula al cliente **solo** si fue seleccionado del buscador (se envía `clienteId`). Si se escribió a mano, `cliente_id` en la OT queda `null` y los datos quedan solo en la tabla `ordenes_trabajo` (snapshot).
 - El comportamiento es idéntico al de los **equipos**: la OT solo usa datos existentes para autocompletar, pero no registra ni vincula en los mantenedores.
 
+### Campos extra en OT igualados al mantenedor: direcciones (Tipo/Ciudad) y contactos (Dirección Contacto)
+
+**Cambios (`frontend/src/components/ordenes/OrdenFormCliente.jsx`):**
+
+**Otras Direcciones / Sucursales:**
+- Agregados campos **Tipo** (select Matriz/Sucursal) y **Ciudad**, que faltaban. Ahora tiene: Tipo | Dirección (fila 1), Ciudad | Fono | Comuna | Quitar (fila 2).
+- Fix: `tipo_direccion` ya no se pasa por `toUpperCase()` en el parseo del select, para que coincida con los `<option value="Matriz">`/`"Sucursal"`.
+- Compactación: padding, gaps y botones reducidos (igual estilo que el resto del form OT).
+
+**Otros Contactos:**
+- Agregado campo **Dirección Contacto** (el mantenedor de clientes ya lo tenía; faltaba en la OT).
+- Ahora tiene: Nombre | Email | Fono | Dirección Contacto | Cargo | Quitar.
+- Compactación de estilos igual que direcciones.
+
 ---
 
 ## Fecha: 2026-08-04
