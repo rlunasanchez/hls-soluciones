@@ -184,6 +184,30 @@ Solo frontend, idéntico en `deploy/cloud`.
 - `.main-btn:hover`: eliminado `transform: translateY(-1px)` y el cambio de `box-shadow` (efecto de elevación), ahora solo `filter: brightness(0.92)`
 - `.btn-limpiar-equipos:hover`: reemplazado `background: #1d4ed8` (cambio de color) por `filter: brightness(0.92)`
 
+### Colores de los botones del header alineados con las tarjetas de Home
+
+**Cambios (`frontend/src/components/*/Header*.jsx`, `HeaderOrdenTrabajo.jsx` via `navItems`, `pages/Informes.jsx`, `pages/Cotizaciones.jsx`, `pages/OrdenCompra.jsx`):**
+
+Cada botón de navegación del header ahora usa el mismo color que su tarjeta en Home:
+
+| Botón | Color |
+|---|---|
+| Inicio | `var(--gradient)` (degradado del header, para diferenciarse de Clientes) |
+| Clientes | `var(--primary)` (era `var(--warning)`) |
+| Equipos | `var(--success)` |
+| Orden de Trabajo | `var(--warning)` (era `#6366F1`) |
+| Informes Técnicos | `#EA580C` |
+| Cotizaciones | `#DB2777` |
+| Orden de Compra | `#1E40AF` |
+| Usuarios | `#0D9488` |
+
+**Archivos modificados (solo frontend):**
+- `frontend/src/pages/OrdenTrabajo.jsx` — `navItems`: Inicio a `var(--gradient)`, Clientes a `var(--primary)`, OT a `var(--warning)` (el header OT usa `item.color`, así que se propaga solo)
+- `frontend/src/components/clientes/HeaderCliente.jsx` — `colors[0]` a `var(--gradient)`, `colors[2]` (OT) a `var(--warning)`
+- `frontend/src/components/equipos/HeaderEquipo.jsx` — Inicio `var(--gradient)`, Clientes `var(--primary)`, OT `var(--warning)`
+- `frontend/src/components/usuarios/HeaderUsuario.jsx` — Inicio `var(--gradient)`, Clientes `var(--primary)`, OT `var(--warning)`
+- `frontend/src/pages/Informes.jsx`, `pages/Cotizaciones.jsx`, `pages/OrdenCompra.jsx` — Inicio `var(--gradient)`, Clientes `var(--primary)`, OT `var(--warning)`
+
 ---
 
 ## Fecha: 2026-08-04

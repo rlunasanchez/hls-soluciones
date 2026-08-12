@@ -7,13 +7,13 @@ function HeaderEquipo({ navigate, onLogout }) {
         <h1 style={{ color: 'white' }}><Package size={28} /> Mantenedor de Equipos</h1>
       </div>
       <div className="nav-buttons" style={{ gap: '10px' }}>
-        <button onClick={() => navigate("/home")} className="logout-btn" style={{ background: 'var(--primary)', color: 'white' }}>
+        <button onClick={() => navigate("/home")} className="logout-btn" style={{ background: 'var(--gradient)', color: 'white' }}>
           <Home size={18} /><span className="btn-label">Inicio</span>
         </button>
-        <button onClick={() => navigate("/clientes")} className="logout-btn" style={{ background: 'var(--warning)', color: 'white' }}>
+        <button onClick={() => navigate("/clientes")} className="logout-btn" style={{ background: 'var(--primary)', color: 'white' }}>
           <Users size={18} /><span className="btn-label">Clientes</span>
         </button>
-        <button onClick={() => navigate("/orden-trabajo")} className="logout-btn" style={{ background: '#6366F1', color: 'white' }}>
+        <button onClick={() => navigate("/orden-trabajo")} className="logout-btn" style={{ background: 'var(--warning)', color: 'white' }}>
           <ClipboardList size={18} /><span className="btn-label">Orden de Trabajo</span>
         </button>
         <button onClick={() => navigate("/informes")} className="logout-btn" style={{ background: '#EA580C', color: 'white' }}>
