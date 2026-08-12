@@ -38,6 +38,14 @@ function OrdenFormCliente({
     setMostrarDropdownContacto(false);
   }, [clienteSeleccionado?.id, clienteSeleccionado?.razon_social]);
 
+  // En modo solo lectura (Ver), expandir automáticamente las secciones que tengan datos
+  useEffect(() => {
+    if (readOnly) {
+      if (nuevaOrden.direccionesExtra?.length > 0) setMostrarDireccionesExtra(true);
+      if (nuevaOrden.contactosExtra?.length > 0) setMostrarContactosExtra(true);
+    }
+  }, [readOnly, nuevaOrden.direccionesExtra?.length, nuevaOrden.contactosExtra?.length]);
+
   const contactosDisponibles = (() => {
     if (!clienteSeleccionado) return [];
     const principalNombre = String(clienteSeleccionado.contacto_nombre || "").toUpperCase().trim();
