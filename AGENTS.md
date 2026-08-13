@@ -317,7 +317,7 @@ DB_PORT=3306
 DB_USER=root
 DB_PASSWORD=6498
 DB_NAME=soporte_tecnico_db
-JWT_SECRET=mi_secreto_seguro_123
+JWT_SECRET=24aa4cb95be7a1a0568b5e8bf2dbf408136aa77bf88a0658c34d4dad185c3b06
 ```
 
 ## Migraciones SQL Requeridas
@@ -543,7 +543,7 @@ Así los assets (JS, CSS) se sirven directamente y las rutas de React Router van
 | Variable | Valor |
 |----------|-------|
 | `DATABASE_URL` | `postgresql://neondb_owner:...` |
-| `JWT_SECRET` | `mi_secreto_seguro_123` |
+| `JWT_SECRET` | `24aa4cb95be7a1a0568b5e8bf2dbf408136aa77bf88a0658c34d4dad185c3b06` |
 | `NODE_ENV` | `production` |
 | `FRONTEND_URL` | `https://hls-soluciones.vercel.app` |
 
