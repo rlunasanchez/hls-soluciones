@@ -14,13 +14,13 @@ const pool = mysql.createPool({
 
 async function crearAdmin() {
   try {
-    const passwordHash = await bcrypt.hash('admin123', 10);
+    const passwordHash = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
     
     await pool.query(
       `INSERT INTO usuarios (usuario, password, rol, email, activo)
-       VALUES (?, ?, 'admin', 'admin@hls.cl', true)
+       VALUES (?, ?, 'admin', ?, true)
        ON DUPLICATE KEY UPDATE password = VALUES(password), rol = 'admin', activo = true`,
-      ['admin', passwordHash]
+      ['admin', passwordHash, process.env.ADMIN_EMAIL]
     );
     
     console.log('Admin creado/actualizado correctamente');

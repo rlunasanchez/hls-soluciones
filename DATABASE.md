@@ -17,10 +17,8 @@ CREATE TABLE IF NOT EXISTS usuarios (
   fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Usuario admin por defecto (password: admin123)
-INSERT INTO usuarios (usuario, password, rol, email, activo) 
-VALUES ('admin', '$2b$10$aU9gGKL5F3GUHLjgA56FIOre7lBKK85wddtqaXROgflL/lT2BgEYG', 'admin', 'admin@hls.com', true)
-ON DUPLICATE KEY UPDATE usuario=usuario;
+-- Usuario admin por defecto (password: variable ADMIN_PASSWORD en backend/.env)
+-- Para crearlo usa el endpoint POST /api/auth/setup-admin (key SETUP_ADMIN_KEY)
 
 -- ============================================
 -- TABLA DE CLIENTES
@@ -180,4 +178,4 @@ CREATE TABLE IF NOT EXISTS ordenes_trabajo (
 --    para facilitar futuras modificaciones
 -- 3. En el mantenedor de equipos (Equipos.jsx) se mantiene
 --    el formulario completo con todos los campos
--- 4. Usuario admin por defecto: admin / admin123
+-- 4. Usuario admin por defecto: admin (password en backend/.env, variable ADMIN_PASSWORD)
