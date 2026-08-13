@@ -10,16 +10,16 @@ const router = express.Router();
 
 router.post("/setup-admin", async (req, res) => {
   const { key } = req.body;
-  if (key !== "hls-setup-2026") {
-    return res.status(403).json({ msg: "Key inv├ílida" });
+  if (key !== process.env.SETUP_ADMIN_KEY) {
+    return res.status(403).json({ msg: "Key inválida" });
   }
   try {
-    const passwordHash = await bcrypt.hash("admin123", 10);
+    const passwordHash = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
     await pool.query(
       `INSERT INTO usuarios (usuario, password, rol, email, activo) 
-       VALUES ($1, $2, 'admin', 'admin@hls.cl', true)
-       ON CONFLICT (usuario) DO UPDATE SET password = $3, rol = 'admin', activo = true`,
-      ["admin", passwordHash, passwordHash]
+       VALUES ($1, $2, 'admin', $3, true)
+       ON CONFLICT (usuario) DO UPDATE SET password = $4, rol = 'admin', activo = true`,
+      ["admin", passwordHash, process.env.ADMIN_EMAIL, passwordHash]
     );
     res.json({ msg: "Admin creado/actualizado correctamente" });
   } catch (err) {

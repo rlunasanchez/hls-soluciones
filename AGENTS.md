@@ -318,6 +318,9 @@ DB_USER=root
 DB_PASSWORD=<password_mysql_local>
 DB_NAME=soporte_tecnico_db
 JWT_SECRET=<generado_con:_openssl_rand_-hex_32>
+SETUP_ADMIN_KEY=<key_para_crear_admin_inicial>
+ADMIN_PASSWORD=<password_admin_inicial>
+ADMIN_EMAIL=<email_admin_inicial>
 ```
 
 ## Migraciones SQL Requeridas
@@ -927,9 +930,9 @@ Si no se hace esto, los cambios solo estarán en estado "Preview" y no se verán
 
 **Archivo:** `backend/routes/auth.js`
 
-**Endpoint:** `POST /api/auth/setup-admin` con key `hls-setup-2026`
+**Endpoint:** `POST /api/auth/setup-admin` con key `SETUP_ADMIN_KEY` (variable de entorno, ver `backend/.env`)
 
-**Credenciales:** usuario: `admin`, contraseña: `admin123`
+**Credenciales:** usuario: `admin`, contraseña: `ADMIN_PASSWORD` (variable de entorno, ver `backend/.env`)
 
 ---
 

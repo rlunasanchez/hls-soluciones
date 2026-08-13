@@ -12,14 +12,14 @@ const pool = new Pool({
 
 async function crearAdmin() {
   try {
-    const passwordHash = await bcrypt.hash('admin123', 10);
+    const passwordHash = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
     
     const result = await pool.query(`
       INSERT INTO usuarios (usuario, password, rol, email, activo)
-      VALUES ('admin', $1, 'admin', 'admin@hls.cl', true)
+      VALUES ('admin', $1, 'admin', $2, true)
       ON CONFLICT (usuario) DO UPDATE SET password = $1, rol = 'admin', activo = true
       RETURNING id, usuario, rol
-    `, [passwordHash]);
+    `, [passwordHash, process.env.ADMIN_EMAIL]);
     
     console.log('Admin creado/actualizado:', result.rows[0]);
     process.exit(0);
