@@ -311,6 +311,11 @@ tbody tr:hover {
   color: #009EE3;
 }
 
+.badge-success {
+  background: var(--success-light);
+  color: var(--success);
+}
+
 @media (max-width: 768px) {
   .form-grid {
     grid-template-columns: 1fr;
