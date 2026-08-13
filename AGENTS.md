@@ -315,9 +315,9 @@ El backend sirve automáticamente el frontend build desde `../frontend/dist`
 DB_HOST=localhost
 DB_PORT=3306
 DB_USER=root
-DB_PASSWORD=6498
+DB_PASSWORD=<password_mysql_local>
 DB_NAME=soporte_tecnico_db
-JWT_SECRET=mi_secreto_seguro_123
+JWT_SECRET=<generado_con:_openssl_rand_-hex_32>
 ```
 
 ## Migraciones SQL Requeridas
@@ -543,7 +543,7 @@ Así los assets (JS, CSS) se sirven directamente y las rutas de React Router van
 | Variable | Valor |
 |----------|-------|
 | `DATABASE_URL` | `postgresql://neondb_owner:...` |
-| `JWT_SECRET` | `mi_secreto_seguro_123` |
+| `JWT_SECRET` | `<generado_con:_openssl_rand_-hex_32>` |
 | `NODE_ENV` | `production` |
 | `FRONTEND_URL` | `https://hls-soluciones.vercel.app` |
 
