@@ -198,11 +198,15 @@ function GestionUsuarios() {
                       <span className={`badge ${u.rol === 'admin' ? 'badge-primary' : 'badge-info'}`}>{u.rol}</span>
                     </td>
                     <td data-label="Estado">
-                      <button className="table-btn" onClick={() => toggleActivo(u.id, u.activo)}
-                        style={{ background: u.activo ? 'var(--success-light)' : 'var(--danger-light)', color: u.activo ? 'var(--success)' : 'var(--danger)' }}>
-                        {u.activo ? <ToggleRight size={18} /> : <ToggleLeft size={18} />}
-                        {u.activo ? 'Activo' : 'Inactivo'}
-                      </button>
+                      {u.usuario === 'admin' ? (
+                        <span className="badge badge-success">Activo</span>
+                      ) : (
+                        <button className="table-btn" onClick={() => toggleActivo(u.id, u.activo)}
+                          style={{ background: u.activo ? 'var(--success-light)' : 'var(--danger-light)', color: u.activo ? 'var(--success)' : 'var(--danger)' }}>
+                          {u.activo ? <ToggleRight size={18} /> : <ToggleLeft size={18} />}
+                          {u.activo ? 'Activo' : 'Inactivo'}
+                        </button>
+                      )}
                     </td>
                     <td data-label="Fecha">{u.fecha_creacion ? new Date(u.fecha_creacion).toLocaleDateString("es-CL") : '-'}</td>
                     <td data-label="Acciones">
@@ -241,11 +245,15 @@ function GestionUsuarios() {
                   <span className="data-card-value">{u.fecha_creacion ? new Date(u.fecha_creacion).toLocaleDateString("es-CL") : '-'}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
-                  <button className="table-btn" onClick={() => toggleActivo(u.id, u.activo)}
-                    style={{ background: u.activo ? 'var(--success-light)' : 'var(--danger-light)', color: u.activo ? 'var(--success)' : 'var(--danger)', flex: 1, justifyContent: 'center', minWidth: '80px' }}>
-                    {u.activo ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
-                    {u.activo ? 'Activo' : 'Inactivo'}
-                  </button>
+                  {u.usuario === 'admin' ? (
+                    <span className="badge badge-success">Activo</span>
+                  ) : (
+                    <button className="table-btn" onClick={() => toggleActivo(u.id, u.activo)}
+                      style={{ background: u.activo ? 'var(--success-light)' : 'var(--danger-light)', color: u.activo ? 'var(--success)' : 'var(--danger)', flex: 1, justifyContent: 'center', minWidth: '80px' }}>
+                      {u.activo ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                      {u.activo ? 'Activo' : 'Inactivo'}
+                    </button>
+                  )}
                   <UsuarioAcciones
                     usuario={u}
                     onEditar={editarUsuario}

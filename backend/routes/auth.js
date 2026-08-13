@@ -122,6 +122,13 @@ router.put("/activar-usuario/:id", authMiddleware, adminOnly, async (req, res) =
   const { id } = req.params;
   const { activo } = req.body;
   try {
+    const [rows] = await pool.query("SELECT usuario FROM usuarios WHERE id = ?", [id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ msg: "Usuario no encontrado" });
+    }
+    if (rows[0].usuario === "admin" && activo === false) {
+      return res.status(400).json({ msg: "El usuario admin no puede desactivarse" });
+    }
     await pool.query("UPDATE usuarios SET activo = ? WHERE id = ?", [activo, id]);
     res.json({ msg: activo ? "Usuario activado" : "Usuario desactivado" });
   } catch (err) {
@@ -132,6 +139,13 @@ router.put("/activar-usuario/:id", authMiddleware, adminOnly, async (req, res) =
 
 router.delete("/eliminar-usuario/:id", authMiddleware, adminOnly, async (req, res) => {
   try {
+    const [rows] = await pool.query("SELECT usuario FROM usuarios WHERE id = ?", [req.params.id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ msg: "Usuario no encontrado" });
+    }
+    if (rows[0].usuario === "admin") {
+      return res.status(400).json({ msg: "El usuario admin no puede eliminarse" });
+    }
     await pool.query("DELETE FROM usuarios WHERE id = ?", [req.params.id]);
     res.json({ msg: "Usuario eliminado" });
   } catch (err) {
