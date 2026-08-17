@@ -38,9 +38,9 @@ function OrdenFormEquipo({
           {equipoFijo && equipoSeleccionado && (
             <div style={{
               flex: 1,
-              background: '#DCFCE7', border: '2px solid var(--success)',
-              padding: '8px 12px', borderRadius: '6px',
-              display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap'
+              background: '#DCFCE7', border: '1.5px solid var(--success)',
+              padding: '2px 8px', borderRadius: 'var(--radius-sm)',
+              display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap'
             }}>
               <span style={{ background: 'var(--success)', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' }}>
                 {equipoSeleccionado.codigo || 'EQ-XXXX'}
@@ -73,9 +73,9 @@ function OrdenFormEquipo({
               style={{
                 display: 'flex', alignItems: 'center', gap: '4px',
                 background: '#0D9488', color: 'white', border: 'none',
-                padding: '6px 12px', borderRadius: '6px', cursor: 'pointer',
-                fontWeight: 500, fontSize: '0.8rem', whiteSpace: 'nowrap',
-                flexShrink: 0, height: '32px', marginLeft: 'auto'
+                padding: '2px 8px', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
+                fontWeight: 500, fontSize: '0.75rem', whiteSpace: 'nowrap',
+                flexShrink: 0, height: '24px', marginLeft: 'auto'
               }}
             >
               <Eye size={14} /> Ver
