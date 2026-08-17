@@ -1,52 +1,19 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ClipboardList, Plus, Edit, Trash2, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { ClipboardList, Plus, Edit, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 import ClienteExpandidoAcciones from "./ClienteExpandidoAcciones";
 
-function Paginacion({ pagina, totalPaginas, setPagina }) {
-  if (totalPaginas <= 1) return null;
-  return (
-    <div className="paginacion-cliente">
-      <button disabled={pagina <= 1} onClick={() => setPagina(pagina - 1)}>
-        <ChevronLeft size={12} />
-      </button>
-      {(() => {
-        const maxVisibles = 7;
-        const pages = [];
-        let start = Math.max(1, pagina - Math.floor(maxVisibles / 2));
-        let end = Math.min(totalPaginas, start + maxVisibles - 1);
-        if (end - start + 1 < maxVisibles) {
-          start = Math.max(1, end - maxVisibles + 1);
-        }
-        if (start > 1) { pages.push(1); if (start > 2) pages.push("..."); }
-        for (let i = start; i <= end; i++) pages.push(i);
-        if (end < totalPaginas) { if (end < totalPaginas - 1) pages.push("..."); pages.push(totalPaginas); }
-        return pages.map((p, idx) =>
-          p === "..." ? <span key={"e" + idx} className="paginacion-puntos">...</span> : (
-            <button key={p} className={pagina === p ? "activo" : ""} onClick={() => setPagina(p)}>
-              {p}
-            </button>
-          )
-        );
-      })()}
-      <button disabled={pagina >= totalPaginas} onClick={() => setPagina(pagina + 1)}>
-        <ChevronRight size={12} />
-      </button>
-    </div>
-  );
-}
+const LIMITE_OTS = 1;
 
 function ClienteExpandido({ cliente, ordenes, onEditar, onEliminar, onEliminarOT }) {
   const navigate = useNavigate();
   const ots = ordenes || [];
   const [mostrarOTs, setMostrarOTs] = useState(true);
-  const [pagOTs, setPagOTs] = useState(1);
-  const ITEMS_POR_PAG = 4;
+  const [otsExpandidos, setOtsExpandidos] = useState(false);
 
-  useEffect(() => { setPagOTs(1); }, [ots.length]);
+  useEffect(() => { setOtsExpandidos(false); }, [ots.length]);
 
-  const otsPag = ots.slice((pagOTs - 1) * ITEMS_POR_PAG, pagOTs * ITEMS_POR_PAG);
-  const totalPagOTs = Math.ceil(ots.length / ITEMS_POR_PAG);
+  const otsPag = ots.slice(0, otsExpandidos ? ots.length : LIMITE_OTS);
 
   return (
     <div className="cliente-expandido">
@@ -107,6 +74,11 @@ function ClienteExpandido({ cliente, ordenes, onEditar, onEliminar, onEliminarOT
             >
               <Plus size={10} /> Nueva OT
             </button>
+            {ots.length > LIMITE_OTS && (
+              <button className="btn-ver-mas-ots" onClick={() => setOtsExpandidos(!otsExpandidos)}>
+                {otsExpandidos ? "Ver menos" : `Ver todas (${ots.length})`}
+              </button>
+            )}
             <button className="btn-toggle-seccion" onClick={() => setMostrarOTs(!mostrarOTs)} title={mostrarOTs ? "Ocultar órdenes" : "Mostrar órdenes"}>
               {mostrarOTs ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
             </button>
@@ -167,7 +139,6 @@ function ClienteExpandido({ cliente, ordenes, onEditar, onEliminar, onEliminarOT
                 </tbody>
               </table>
             </div>
-            <Paginacion pagina={pagOTs} totalPaginas={totalPagOTs} setPagina={setPagOTs} />
           </>
         )}
       </div>
