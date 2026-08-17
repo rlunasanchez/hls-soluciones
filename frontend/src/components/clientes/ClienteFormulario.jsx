@@ -23,6 +23,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
   const [contactoSeleccionado, setContactoSeleccionado] = useState(null);
   const [contactosExpandidos, setContactosExpandidos] = useState(false);
   const [rutError, setRutError] = useState("");
+  const [guardando, setGuardando] = useState(false);
 
   useEffect(() => {
     if (clienteEditando) {
@@ -123,6 +124,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (guardando) return;
     if (nuevoCliente.rut && !validarRUT(nuevoCliente.rut)) {
       alert("RUT inválido. Ejemplo: 12.345.678-9");
       return;
@@ -140,11 +142,12 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
       todosContactos.push(primerContacto);
     }
     todosContactos.push(...contactos);
-    onSave({
+    setGuardando(true);
+    Promise.resolve(onSave({
       ...nuevoCliente,
       direcciones: dirs,
       contactos: todosContactos
-    }, resetFormulario);
+    }, resetFormulario)).finally(() => setGuardando(false));
   };
 
   const handleRutChange = (e) => {
@@ -411,7 +414,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
             ) : (
               <>
                 <button type="button" className="cf-btn-c" onClick={() => { resetFormulario(); onCancel(); }}><X size={18} /> Cancelar</button>
-                <button type="button" className="cf-btn-p" onClick={handleSubmit}><Save size={18} /> {clienteEditando ? "Guardar Cambios" : "Guardar Cliente"}</button>
+                <button type="button" className="cf-btn-p" onClick={handleSubmit} disabled={guardando}><Save size={18} /> {guardando ? "Guardando..." : (clienteEditando ? "Guardar Cambios" : "Guardar Cliente")}</button>
               </>
             )}
           </div>
