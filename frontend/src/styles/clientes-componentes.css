@@ -338,7 +338,7 @@
 
 .ots-tabla-wrapper th {
   padding: 5px 8px;
-  text-align: left;
+  text-align: center;
   font-weight: 600;
   color: #6366f1;
   font-size: 0.68rem;
@@ -348,6 +348,7 @@
   padding: 4px 8px;
   border-bottom: 1px solid var(--border);
   font-size: 0.75rem;
+  text-align: center;
 }
 
 .ot-numero {
