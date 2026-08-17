@@ -267,6 +267,11 @@ td {
   border-bottom: 1px solid var(--border);
 }
 
+.table-container th,
+.table-container td {
+  text-align: center;
+}
+
 tbody tr:hover {
   background: var(--bg);
 }

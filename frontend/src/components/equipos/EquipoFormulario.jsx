@@ -57,13 +57,13 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, readOnly 
                   <label>Equipo *</label>
                   <input placeholder="Nombre del equipo" value={nuevoEquipo.equipo}
                     disabled={readOnly}
-                    onChange={e => setNuevoEquipo({...nuevoEquipo, equipo: e.target.value.toUpperCase()})} required />
+                    onChange={e => setNuevoEquipo({...nuevoEquipo, equipo: upperInput(e)})} required />
                 </div>
                 <div className="ef-f">
                   <label>Marca *</label>
                   <input placeholder="Marca" value={nuevoEquipo.marca}
                     disabled={readOnly}
-                    onChange={e => setNuevoEquipo({...nuevoEquipo, marca: e.target.value.toUpperCase()})} required />
+                    onChange={e => setNuevoEquipo({...nuevoEquipo, marca: upperInput(e)})} required />
                 </div>
               </div>
               <div className="ef-r2" style={{ marginTop: '8px' }}>
@@ -71,13 +71,13 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, readOnly 
                   <label>Modelo *</label>
                   <input placeholder="Modelo" value={nuevoEquipo.modelo}
                     disabled={readOnly}
-                    onChange={e => setNuevoEquipo({...nuevoEquipo, modelo: e.target.value.toUpperCase()})} required />
+                    onChange={e => setNuevoEquipo({...nuevoEquipo, modelo: upperInput(e)})} required />
                 </div>
                 <div className="ef-f">
                   <label>Serie</label>
                   <input placeholder="Número de serie" value={nuevoEquipo.serie}
                     disabled={readOnly}
-                    onChange={e => setNuevoEquipo({...nuevoEquipo, serie: e.target.value.toUpperCase()})} />
+                    onChange={e => setNuevoEquipo({...nuevoEquipo, serie: upperInput(e)})} />
                 </div>
               </div>
             </div>

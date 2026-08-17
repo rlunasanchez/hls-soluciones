@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Save, X, Trash2, Users } from "lucide-react";
-import { toUpper, validarRUT } from "../../utils/helpers";
+import { toUpper, validarRUT, upperInput } from "../../utils/helpers";
 import ModalContactos from "./ModalContactos";
 
 const crearSucursalVacia = () => ({ tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" });
@@ -151,7 +151,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
   };
 
   const handleRutChange = (e) => {
-    let val = e.target.value.toUpperCase().replace(/[^0-9K-]/g, "");
+    let val = upperInput(e, /[^0-9K-]/g);
     if (val.length > 12) val = val.slice(0, 12);
     const partes = val.split("-");
     if (partes.length === 2) {
@@ -202,7 +202,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                   <label>Razón Social *</label>
                   <input placeholder="Razón social" value={nuevoCliente.razon_social}
                     disabled={readOnly}
-                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, razon_social: e.target.value.toUpperCase() })} required />
+                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, razon_social: upperInput(e) })} required />
                 </div>
               </div>
               <div className="cf-r1" style={{ display: "none" }}>
@@ -210,7 +210,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                   <label>Giro</label>
                   <input placeholder="Giro" value={nuevoCliente.giro}
                     disabled={readOnly}
-                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, giro: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
+                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, giro: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
                 </div>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "200px", gap: 6, marginTop: 6 }}>
@@ -227,7 +227,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                   <label>Dirección</label>
                   <input placeholder="Ingrese la dirección completa" value={nuevoCliente.direccion}
                     disabled={readOnly}
-                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, direccion: e.target.value.toUpperCase() })} />
+                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, direccion: upperInput(e) })} />
                 </div>
               </div>
               <div className="cf-r3 cf-mt">
@@ -235,13 +235,13 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                   <label>Ciudad</label>
                   <input placeholder="Ciudad" value={nuevoCliente.ciudad}
                     disabled={readOnly}
-                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, ciudad: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
+                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, ciudad: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
                 </div>
                 <div className="cf-field">
                   <label>Comuna</label>
                   <input placeholder="Comuna" value={nuevoCliente.comuna}
                     disabled={readOnly}
-                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, comuna: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
+                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, comuna: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
                 </div>
                 <div className="cf-field">
                   <label>Fono</label>
@@ -267,7 +267,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                   <label>Nombre Contacto</label>
                   <input placeholder="Nombre" value={nuevoCliente.contacto_nombre}
                     disabled={readOnly}
-                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_nombre: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
+                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_nombre: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
                 </div>
               </div>
               <div className="cf-r2 cf-mt">
@@ -289,7 +289,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                   <label>Cargo</label>
                   <input placeholder="Cargo" value={nuevoCliente.contacto_cargo}
                     disabled={readOnly}
-                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_cargo: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
+                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_cargo: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
                 </div>
               </div>
               <div className="cf-r1 cf-mt">
@@ -297,7 +297,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                   <label>Dirección Contacto</label>
                   <input placeholder="Ingrese la dirección completa" value={nuevoCliente.contacto_direccion}
                     disabled={readOnly}
-                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_direccion: e.target.value.toUpperCase() })} />
+                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_direccion: upperInput(e) })} />
                 </div>
               </div>
               {!readOnly ? (
@@ -374,13 +374,13 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                   </div>
                   <div className="cf-field cf-m0">
                     <label>Dirección</label>
-                    <input placeholder="Ingrese la dirección completa" value={suc.direccion} disabled={readOnly} onChange={(e) => actualizarSucursal(idx, "direccion", e.target.value.toUpperCase())} />
+                    <input placeholder="Ingrese la dirección completa" value={suc.direccion} disabled={readOnly} onChange={(e) => actualizarSucursal(idx, "direccion", upperInput(e))} />
                   </div>
                 </div>
                 <div className="cf-r3 cf-mb">
                   <div className="cf-field cf-m0">
                     <label>Ciudad</label>
-                    <input placeholder="Ciudad" value={suc.ciudad} disabled={readOnly} onChange={(e) => actualizarSucursal(idx, "ciudad", e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ""))} />
+                    <input placeholder="Ciudad" value={suc.ciudad} disabled={readOnly} onChange={(e) => actualizarSucursal(idx, "ciudad", upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ""))} />
                   </div>
                   <div className="cf-field cf-m0">
                     <label>Fono</label>
@@ -388,7 +388,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                   </div>
                   <div className="cf-field cf-m0">
                     <label>Comuna</label>
-                    <input placeholder="Comuna" value={suc.comuna} disabled={readOnly} onChange={(e) => actualizarSucursal(idx, "comuna", e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ""))} />
+                    <input placeholder="Comuna" value={suc.comuna} disabled={readOnly} onChange={(e) => actualizarSucursal(idx, "comuna", upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ""))} />
                   </div>
                 </div>
                 {!readOnly && (

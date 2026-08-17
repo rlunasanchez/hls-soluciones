@@ -1,4 +1,5 @@
 import { RotateCcw } from "lucide-react";
+import { upperInput } from "../../utils/helpers";
 
 function FiltrosEquipo({ filtroModelo, onFiltroModeloChange, onLimpiar }) {
   return (
@@ -10,7 +11,7 @@ function FiltrosEquipo({ filtroModelo, onFiltroModeloChange, onLimpiar }) {
             type="text"
             placeholder="Modelo..."
             value={filtroModelo}
-            onChange={(e) => onFiltroModeloChange(e.target.value.toUpperCase())}
+            onChange={(e) => onFiltroModeloChange(upperInput(e))}
           />
         </div>
         <button onClick={onLimpiar} className="btn-limpiar-equipos">
