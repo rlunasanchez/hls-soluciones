@@ -19,6 +19,9 @@ function OrdenFormCliente({
   const [mostrarDetalleCliente, setMostrarDetalleCliente] = useState(false);
   const [mostrarDireccionesExtra, setMostrarDireccionesExtra] = useState(false);
   const [mostrarContactosExtra, setMostrarContactosExtra] = useState(false);
+  const [direccionesExpandidas, setDireccionesExpandidas] = useState(false);
+  const [contactosExpandidos, setContactosExpandidos] = useState(false);
+  const LIMITE_EXTRAS = 1;
   const [busquedaContacto, setBusquedaContacto] = useState("");
   const [mostrarDropdownContacto, setMostrarDropdownContacto] = useState(false);
   const contactoDropdownRef = useRef(null);
@@ -476,7 +479,7 @@ function OrdenFormCliente({
                     </div>
                   )}
 
-                  {nuevaOrden.direccionesExtra.map((dir, idx) => (
+                  {nuevaOrden.direccionesExtra.slice(0, direccionesExpandidas ? nuevaOrden.direccionesExtra.length : LIMITE_EXTRAS).map((dir, idx) => (
                     <div key={idx} style={{ marginBottom: '6px', border: '1px solid var(--border)', borderRadius: '6px', padding: '4px' }}>
                       <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-end', marginBottom: '4px' }}>
                         <div className="of-f" style={{ flex: '0 0 120px' }}>
@@ -521,6 +524,27 @@ function OrdenFormCliente({
                       </div>
                     </div>
                   ))}
+
+                  {nuevaOrden.direccionesExtra.length > LIMITE_EXTRAS && (
+                    <div style={{ marginTop: '4px' }}>
+                      <button
+                        type="button"
+                        onClick={() => setDireccionesExpandidas(!direccionesExpandidas)}
+                        style={{
+                          background: 'none',
+                          color: '#0284C7',
+                          border: '1px solid #7CD0F0',
+                          borderRadius: '6px',
+                          padding: '2px 10px',
+                          cursor: 'pointer',
+                          fontWeight: 600,
+                          fontSize: '0.75rem'
+                        }}
+                      >
+                        {direccionesExpandidas ? 'Ver menos' : `Ver todas (${nuevaOrden.direccionesExtra.length})`}
+                      </button>
+                    </div>
+                  )}
 
                   {!readOnly && (
                     <button
@@ -816,7 +840,7 @@ function OrdenFormCliente({
                     </div>
                   )}
 
-                  {nuevaOrden.contactosExtra.map((c, idx) => (
+                  {nuevaOrden.contactosExtra.slice(0, contactosExpandidos ? nuevaOrden.contactosExtra.length : LIMITE_EXTRAS).map((c, idx) => (
                     <div key={idx} style={{ marginBottom: '6px', border: '1px solid var(--border)', borderRadius: '6px', padding: '4px' }}>
                       <div className="of-form-grid" style={{ gap: '8px' }}>
                         <div className="of-f">
@@ -857,6 +881,27 @@ function OrdenFormCliente({
                       </div>
                     </div>
                   ))}
+
+                  {nuevaOrden.contactosExtra.length > LIMITE_EXTRAS && (
+                    <div style={{ marginTop: '4px' }}>
+                      <button
+                        type="button"
+                        onClick={() => setContactosExpandidos(!contactosExpandidos)}
+                        style={{
+                          background: 'none',
+                          color: 'var(--success)',
+                          border: '1px solid #7AD6EC',
+                          borderRadius: '6px',
+                          padding: '2px 10px',
+                          cursor: 'pointer',
+                          fontWeight: 600,
+                          fontSize: '0.75rem'
+                        }}
+                      >
+                        {contactosExpandidos ? 'Ver menos' : `Ver todos (${nuevaOrden.contactosExtra.length})`}
+                      </button>
+                    </div>
+                  )}
 
                   {!readOnly && (
                     <button
