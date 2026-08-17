@@ -30,9 +30,9 @@ router.get("/", authMiddleware, async (req, res) => {
   const offset = (page - 1) * limit;
 
   try {
-    const ordenes = await pool.query("SELECT * FROM ordenes_trabajo ORDER BY id DESC LIMIT $1 OFFSET $2", [limit, offset]);
+    const ordenesResult = await pool.query("SELECT * FROM ordenes_trabajo ORDER BY id DESC LIMIT $1 OFFSET $2", [limit, offset]);
     const totalResult = await pool.query("SELECT COUNT(*) as total FROM ordenes_trabajo");
-    res.json({ ordenes: ordenes.rows, pagination: { currentPage: page, totalPages: Math.ceil(parseInt(totalResult.rows[0].total) / limit), totalItems: parseInt(totalResult.rows[0].total), itemsPerPage: limit } });
+    res.json({ ordenes: ordenesResult.rows, pagination: { currentPage: page, totalPages: Math.ceil(parseInt(totalResult.rows[0].total) / limit), totalItems: parseInt(totalResult.rows[0].total), itemsPerPage: limit } });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });

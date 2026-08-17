@@ -48,11 +48,11 @@ router.get("/", authMiddleware, async (req, res) => {
 
 router.get("/:id/equipos", authMiddleware, async (req, res) => {
   try {
-    const { rows } = await pool.query(
+    const result = await pool.query(
       "SELECT id, codigo, equipo, marca, modelo, serie FROM equipos WHERE cliente_id = $1 AND activo = true",
       [req.params.id]
     );
-    res.json(rows);
+    res.json(result.rows);
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
