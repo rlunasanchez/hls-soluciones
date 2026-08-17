@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Save, X, Trash2, Users } from "lucide-react";
 import { toUpper, validarRUT, upperInput } from "../../utils/helpers";
 import ModalContactos from "./ModalContactos";
@@ -24,6 +24,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
   const [contactosExpandidos, setContactosExpandidos] = useState(false);
   const [rutError, setRutError] = useState("");
   const [guardando, setGuardando] = useState(false);
+  const guardandoRef = useRef(false);
 
   useEffect(() => {
     if (clienteEditando) {
@@ -124,7 +125,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (guardando) return;
+    if (guardandoRef.current) return;
     if (nuevoCliente.rut && !validarRUT(nuevoCliente.rut)) {
       alert("RUT inválido. Ejemplo: 12.345.678-9");
       return;
@@ -142,12 +143,16 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
       todosContactos.push(primerContacto);
     }
     todosContactos.push(...contactos);
+    guardandoRef.current = true;
     setGuardando(true);
     Promise.resolve(onSave({
       ...nuevoCliente,
       direcciones: dirs,
       contactos: todosContactos
-    }, resetFormulario)).finally(() => setGuardando(false));
+    }, resetFormulario)).finally(() => {
+      guardandoRef.current = false;
+      setGuardando(false);
+    });
   };
 
   const handleRutChange = (e) => {
