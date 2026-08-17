@@ -107,7 +107,7 @@ function OrdenFormEquipo({
               disabled={readOnly}
               style={{
                 width: '100%', padding: '2px 8px',
-                border: '1px solid #C4B5FD', borderRadius: '6px', fontSize: '.82rem',
+                border: '1.5px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '.82rem',
                 background: equipoSeleccionado ? '#DCFCE7' : 'white'
               }}
             />
@@ -165,7 +165,7 @@ function OrdenFormEquipo({
               disabled={readOnly}
               style={{
                 width: '100%', padding: '2px 8px',
-                border: '1px solid #C4B5FD', borderRadius: '6px', fontSize: '.82rem',
+                border: '1.5px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '.82rem',
                 background: equipoSeleccionado ? '#DCFCE7' : 'white'
               }}
             />

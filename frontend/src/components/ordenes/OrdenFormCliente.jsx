@@ -183,8 +183,8 @@ function OrdenFormCliente({
               style={{
                 width: '100%',
                 padding: '2px 8px',
-                border: '1px solid #9AB8D9',
-                borderRadius: '6px',
+                border: '1.5px solid var(--border)',
+                borderRadius: 'var(--radius-sm)',
                 fontSize: '.82rem',
                 background: clienteSeleccionado ? '#E0F2FE' : 'white'
               }}
@@ -597,9 +597,9 @@ function OrdenFormCliente({
             disabled={readOnly || contactosDisponibles.length === 0}
             style={{
               width: '100%',
-              padding: '8px 10px',
-              border: '1px solid #9AB8D9',
-              borderRadius: '6px',
+              padding: '2px 8px',
+              border: '1.5px solid var(--border)',
+              borderRadius: 'var(--radius-sm)',
               fontSize: '.82rem',
               background: 'white'
             }}
