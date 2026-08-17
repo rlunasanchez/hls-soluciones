@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, Trash2, UserPlus } from "lucide-react";
+import { upperInput } from "../../utils/helpers";
 
 const crearContactoVacio = () => ({ nombre: "", email: "", fono: "", cargo: "", direccion: "" });
 
@@ -62,7 +63,7 @@ function ModalContactos({ contactos = [], onChange, onClose, readOnly = false })
                   <label>Nombre *</label>
                   <input placeholder="Nombre del contacto" value={contacto.nombre}
                     disabled={readOnly}
-                    onChange={e => actualizar(idx, "nombre", e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ""))} />
+                    onChange={e => actualizar(idx, "nombre", upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ""))} />
                 </div>
                 <div className="cf-r2">
                   <div className="cf-field">
@@ -83,13 +84,13 @@ function ModalContactos({ contactos = [], onChange, onClose, readOnly = false })
                     <label>Cargo</label>
                     <input placeholder="Cargo" value={contacto.cargo}
                       disabled={readOnly}
-                      onChange={e => actualizar(idx, "cargo", e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ""))} />
+                      onChange={e => actualizar(idx, "cargo", upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ""))} />
                   </div>
                   <div className="cf-field">
                     <label>Dirección</label>
                     <input placeholder="Dirección" value={contacto.direccion}
                       disabled={readOnly}
-                      onChange={e => actualizar(idx, "direccion", e.target.value.toUpperCase())} />
+                      onChange={e => actualizar(idx, "direccion", upperInput(e))} />
                   </div>
                 </div>
               </div>

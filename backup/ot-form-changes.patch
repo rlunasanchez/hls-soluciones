@@ -1,0 +1,775 @@
+diff --git a/frontend/src/components/ordenes/OrdenFormAveria.jsx b/frontend/src/components/ordenes/OrdenFormAveria.jsx
+index 93c9cdb..1ed7a84 100644
+--- a/frontend/src/components/ordenes/OrdenFormAveria.jsx
++++ b/frontend/src/components/ordenes/OrdenFormAveria.jsx
+@@ -1,4 +1,5 @@
+ import { Trash2 } from "lucide-react";
++import { upperInput } from "../../utils/helpers";
+ 
+ function OrdenFormAveria({ nuevaOrden, setNuevaOrden, readOnly }) {
+   return (
+@@ -19,8 +20,8 @@ function OrdenFormAveria({ nuevaOrden, setNuevaOrden, readOnly }) {
+         <textarea
+           placeholder="Describa la avería, falla o incidencia del equipo..."
+           value={nuevaOrden.averia}
+-          onChange={(e) => setNuevaOrden({...nuevaOrden, averia: e.target.value.toUpperCase()})}
+-          rows={3}
++          onChange={(e) => setNuevaOrden({...nuevaOrden, averia: upperInput(e)})}
++          rows={4}
+           disabled={readOnly}
+         />
+       </div>
+@@ -30,19 +31,8 @@ function OrdenFormAveria({ nuevaOrden, setNuevaOrden, readOnly }) {
+         <textarea
+           placeholder="Describa la actividad realizada..."
+           value={nuevaOrden.actividad}
+-          onChange={(e) => setNuevaOrden({...nuevaOrden, actividad: e.target.value.toUpperCase()})}
+-          rows={3}
+-          disabled={readOnly}
+-        />
+-      </div>
+-
+-      <div className="of-st muted">Observaciones</div>
+-      <div className="of-f">
+-        <textarea
+-          placeholder="Observaciones adicionales..."
+-          value={nuevaOrden.observaciones}
+-          onChange={(e) => setNuevaOrden({...nuevaOrden, observaciones: e.target.value.toUpperCase()})}
+-          rows={3}
++          onChange={(e) => setNuevaOrden({...nuevaOrden, actividad: upperInput(e)})}
++          rows={4}
+           disabled={readOnly}
+         />
+       </div>
+@@ -50,4 +40,4 @@ function OrdenFormAveria({ nuevaOrden, setNuevaOrden, readOnly }) {
+   );
+ }
+ 
+-export default OrdenFormAveria;
++export default OrdenFormAveria;
+\ No newline at end of file
+diff --git a/frontend/src/components/ordenes/OrdenFormCliente.jsx b/frontend/src/components/ordenes/OrdenFormCliente.jsx
+index 0515839..c8209d3 100644
+--- a/frontend/src/components/ordenes/OrdenFormCliente.jsx
++++ b/frontend/src/components/ordenes/OrdenFormCliente.jsx
+@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
+ import { Search, Users, ChevronDown, Eye, UserPlus, MapPin } from "lucide-react";
+ import ClienteFormulario from "../clientes/ClienteFormulario";
+ import "../../styles/Clientes.css";
++import { upperInput } from "../../utils/helpers";
+ 
+ function OrdenFormCliente({
+   busquedaCliente, setBusquedaCliente,
+@@ -172,7 +173,7 @@ function OrdenFormCliente({
+               placeholder="Escriba para buscar cliente por nombre o RUT..."
+               value={busquedaCliente}
+               onChange={(e) => {
+-                setBusquedaCliente(e.target.value.toUpperCase());
++                setBusquedaCliente(upperInput(e));
+                 setMostrarDropdownClientes(e.target.value.length >= 2);
+               }}
+               onFocus={() => {
+@@ -181,7 +182,7 @@ function OrdenFormCliente({
+               disabled={readOnly}
+               style={{
+                 width: '100%',
+-                padding: '6px 10px',
++                padding: '2px 8px',
+                 border: '1px solid #9AB8D9',
+                 borderRadius: '6px',
+                 fontSize: '.82rem',
+@@ -236,7 +237,7 @@ function OrdenFormCliente({
+                 left: 0,
+                 right: 0,
+                 background: 'white',
+-                border: '2px solid var(--border)',
++                border: '1.5px solid var(--border)',
+                 borderTop: 'none',
+                 borderRadius: '0 0 8px 8px',
+                 maxHeight: '250px',
+@@ -250,7 +251,7 @@ function OrdenFormCliente({
+                       key={cliente.id}
+                       onClick={() => seleccionarCliente(cliente)}
+                       style={{
+-                        padding: '6px 10px',
++                        padding: '2px 8px',
+                         cursor: 'pointer',
+                         borderBottom: '1px solid var(--border)',
+                         transition: 'background 0.2s'
+@@ -330,19 +331,19 @@ function OrdenFormCliente({
+       )}
+ 
+       <div className="of-form-grid">
+-        <div className="of-f">
++        <div className="of-f" style={{ gridColumn: 'span 2' }}>
+           <label>Cliente *</label>
+           <input
+             type="text"
+             placeholder="Nombre del cliente"
+             value={nuevaOrden.cliente}
+-            onChange={(e) => setNuevaOrden({...nuevaOrden, cliente: e.target.value.toUpperCase()})}
++            onChange={(e) => setNuevaOrden({...nuevaOrden, cliente: upperInput(e)})}
+             disabled={readOnly}
+             required
+             style={{
+               width: '100%',
+-              padding: '6px 10px',
+-              border: '2px solid var(--border)',
++              padding: '2px 8px',
++              border: '1.5px solid var(--border)',
+               borderRadius: '6px',
+               fontSize: '.82rem'
+             }}
+@@ -350,35 +351,35 @@ function OrdenFormCliente({
+         </div>
+ 
+         <div className="of-f">
+-          <label>Dirección</label>
++          <label>Comuna</label>
+           <input
+             type="text"
+-            placeholder="Dirección del cliente"
+-            value={nuevaOrden.direccion}
+-            onChange={(e) => setNuevaOrden({...nuevaOrden, direccion: e.target.value.toUpperCase()})}
++            placeholder="Comuna"
++            value={nuevaOrden.comuna}
++            onChange={(e) => setNuevaOrden({...nuevaOrden, comuna: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
+             disabled={readOnly}
+             style={{
+               width: '100%',
+-              padding: '6px 10px',
+-              border: '2px solid var(--border)',
++              padding: '2px 8px',
++              border: '1.5px solid var(--border)',
+               borderRadius: '6px',
+               fontSize: '.82rem'
+             }}
+           />
+         </div>
+ 
+-        <div className="of-f">
+-          <label>Comuna</label>
++        <div className="of-f" style={{ gridColumn: '1 / -1' }}>
++          <label>Dirección</label>
+           <input
+             type="text"
+-            placeholder="Comuna"
+-            value={nuevaOrden.comuna}
+-            onChange={(e) => setNuevaOrden({...nuevaOrden, comuna: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
++            placeholder="Dirección del cliente"
++            value={nuevaOrden.direccion}
++            onChange={(e) => setNuevaOrden({...nuevaOrden, direccion: upperInput(e)})}
+             disabled={readOnly}
+             style={{
+               width: '100%',
+-              padding: '6px 10px',
+-              border: '2px solid var(--border)',
++              padding: '2px 8px',
++              border: '1.5px solid var(--border)',
+               borderRadius: '6px',
+               fontSize: '.82rem'
+             }}
+@@ -462,8 +463,8 @@ function OrdenFormCliente({
+                         }}
+                         style={{
+                           width: '100%',
+-                          padding: '6px 10px',
+-                          border: '2px solid var(--border)',
++                          padding: '2px 8px',
++                          border: '1.5px solid var(--border)',
+                           borderRadius: '6px',
+                           fontSize: '.82rem',
+                           background: 'white'
+@@ -492,13 +493,13 @@ function OrdenFormCliente({
+                         </div>
+                         <div className="of-f" style={{ flex: '1 1 0' }}>
+                           <label>Dirección {idx + 1}</label>
+-                          <input type="text" placeholder="Dirección" value={dir.direccion} onChange={(e) => actualizarDireccion(idx, 'direccion', e.target.value.toUpperCase())} disabled={readOnly} />
++                          <input type="text" placeholder="Dirección" value={dir.direccion} onChange={(e) => actualizarDireccion(idx, 'direccion', upperInput(e))} disabled={readOnly} />
+                         </div>
+                       </div>
+                       <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-end', marginTop: '4px' }}>
+                         <div className="of-f" style={{ flex: '0 0 140px' }}>
+                           <label>Ciudad</label>
+-                          <input type="text" placeholder="Ciudad" value={dir.ciudad} onChange={(e) => actualizarDireccion(idx, 'ciudad', e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={readOnly} />
++                          <input type="text" placeholder="Ciudad" value={dir.ciudad} onChange={(e) => actualizarDireccion(idx, 'ciudad', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={readOnly} />
+                         </div>
+                         <div className="of-f" style={{ flex: '0 0 130px' }}>
+                           <label>Fono</label>
+@@ -506,7 +507,7 @@ function OrdenFormCliente({
+                         </div>
+                         <div className="of-f" style={{ flex: '0 0 140px' }}>
+                           <label>Comuna</label>
+-                          <input type="text" placeholder="Comuna" value={dir.comuna} onChange={(e) => actualizarDireccion(idx, 'comuna', e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={readOnly} />
++                          <input type="text" placeholder="Comuna" value={dir.comuna} onChange={(e) => actualizarDireccion(idx, 'comuna', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={readOnly} />
+                         </div>
+                         {!readOnly && (
+                           <button
+@@ -647,12 +648,12 @@ function OrdenFormCliente({
+             type="email"
+             placeholder="Email del cliente"
+             value={nuevaOrden.email}
+-            onChange={(e) => setNuevaOrden({...nuevaOrden, email: e.target.value.toUpperCase()})}
++            onChange={(e) => setNuevaOrden({...nuevaOrden, email: upperInput(e)})}
+             disabled={readOnly}
+             style={{
+               width: '100%',
+-              padding: '6px 10px',
+-              border: '2px solid var(--border)',
++              padding: '2px 8px',
++              border: '1.5px solid var(--border)',
+               borderRadius: '6px',
+               fontSize: '.82rem'
+             }}
+@@ -669,8 +670,8 @@ function OrdenFormCliente({
+             disabled={readOnly}
+             style={{
+               width: '100%',
+-              padding: '6px 10px',
+-              border: '2px solid var(--border)',
++              padding: '2px 8px',
++              border: '1.5px solid var(--border)',
+               borderRadius: '6px',
+               fontSize: '.82rem'
+             }}
+@@ -683,12 +684,12 @@ function OrdenFormCliente({
+             type="text"
+             placeholder="Nombre del contacto"
+             value={nuevaOrden.contacto}
+-            onChange={(e) => setNuevaOrden({...nuevaOrden, contacto: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
++            onChange={(e) => setNuevaOrden({...nuevaOrden, contacto: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
+             disabled={readOnly}
+             style={{
+               width: '100%',
+-              padding: '6px 10px',
+-              border: '2px solid var(--border)',
++              padding: '2px 8px',
++              border: '1.5px solid var(--border)',
+               borderRadius: '6px',
+               fontSize: '.82rem'
+             }}
+@@ -703,12 +704,12 @@ function OrdenFormCliente({
+             type="email"
+             placeholder="Email del contacto"
+             value={nuevaOrden.emailContacto}
+-            onChange={(e) => setNuevaOrden({...nuevaOrden, emailContacto: e.target.value.toUpperCase()})}
++            onChange={(e) => setNuevaOrden({...nuevaOrden, emailContacto: upperInput(e)})}
+             disabled={readOnly}
+             style={{
+               width: '100%',
+-              padding: '6px 10px',
+-              border: '2px solid var(--border)',
++              padding: '2px 8px',
++              border: '1.5px solid var(--border)',
+               borderRadius: '6px',
+               fontSize: '.82rem'
+             }}
+@@ -725,8 +726,8 @@ function OrdenFormCliente({
+             disabled={readOnly}
+             style={{
+               width: '100%',
+-              padding: '6px 10px',
+-              border: '2px solid var(--border)',
++              padding: '2px 8px',
++              border: '1.5px solid var(--border)',
+               borderRadius: '6px',
+               fontSize: '.82rem'
+             }}
+@@ -739,13 +740,13 @@ function OrdenFormCliente({
+             type="text"
+             placeholder="Nombre y apellido del técnico"
+             value={nuevaOrden.tecnicoAsignado}
+-            onChange={(e) => setNuevaOrden({...nuevaOrden, tecnicoAsignado: e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
++            onChange={(e) => setNuevaOrden({...nuevaOrden, tecnicoAsignado: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
+             disabled={readOnly}
+             required
+             style={{
+               width: '100%',
+-              padding: '6px 10px',
+-              border: '2px solid var(--border)',
++              padding: '2px 8px',
++              border: '1.5px solid var(--border)',
+               borderRadius: '6px',
+               fontSize: '.82rem'
+             }}
+@@ -823,8 +824,8 @@ function OrdenFormCliente({
+                         }}
+                         style={{
+                           width: '100%',
+-                          padding: '6px 10px',
+-                          border: '2px solid var(--border)',
++                          padding: '2px 8px',
++                          border: '1.5px solid var(--border)',
+                           borderRadius: '6px',
+                           fontSize: '.82rem',
+                           background: 'white'
+@@ -845,11 +846,11 @@ function OrdenFormCliente({
+                       <div className="of-form-grid" style={{ gap: '8px' }}>
+                         <div className="of-f">
+                           <label>Contacto {idx + 1}</label>
+-                          <input type="text" placeholder="Nombre" value={c.nombre} onChange={(e) => actualizarContacto(idx, 'nombre', e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={readOnly} />
++                          <input type="text" placeholder="Nombre" value={c.nombre} onChange={(e) => actualizarContacto(idx, 'nombre', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={readOnly} />
+                         </div>
+                         <div className="of-f">
+                           <label>Email</label>
+-                          <input type="email" placeholder="Email" value={c.email} onChange={(e) => actualizarContacto(idx, 'email', e.target.value.toUpperCase())} disabled={readOnly} />
++                          <input type="email" placeholder="Email" value={c.email} onChange={(e) => actualizarContacto(idx, 'email', upperInput(e))} disabled={readOnly} />
+                         </div>
+                         <div className="of-f">
+                           <label>Fono</label>
+@@ -857,12 +858,12 @@ function OrdenFormCliente({
+                         </div>
+                         <div className="of-f">
+                           <label>Dirección Contacto</label>
+-                          <input type="text" placeholder="Dirección Contacto" value={c.direccion} onChange={(e) => actualizarContacto(idx, 'direccion', e.target.value.toUpperCase())} disabled={readOnly} />
++                          <input type="text" placeholder="Dirección Contacto" value={c.direccion} onChange={(e) => actualizarContacto(idx, 'direccion', upperInput(e))} disabled={readOnly} />
+                         </div>
+                         <div className="of-f">
+                           <label>Cargo</label>
+                           <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+-                            <input type="text" placeholder="Cargo" value={c.cargo} onChange={(e) => actualizarContacto(idx, 'cargo', e.target.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={readOnly} style={{ flex: '1 1 auto', width: 'auto' }} />
++                            <input type="text" placeholder="Cargo" value={c.cargo} onChange={(e) => actualizarContacto(idx, 'cargo', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={readOnly} style={{ flex: '1 1 auto', width: 'auto' }} />
+                             {!readOnly && (
+                               <button
+                                 type="button"
+diff --git a/frontend/src/components/ordenes/OrdenFormEquipo.jsx b/frontend/src/components/ordenes/OrdenFormEquipo.jsx
+index da56216..f4f6316 100644
+--- a/frontend/src/components/ordenes/OrdenFormEquipo.jsx
++++ b/frontend/src/components/ordenes/OrdenFormEquipo.jsx
+@@ -2,6 +2,7 @@ import { useState } from "react";
+ import { Search, Eye } from "lucide-react";
+ import EquipoFormulario from "../equipos/EquipoFormulario";
+ import "../../styles/Equipos.css";
++import { upperInput } from "../../utils/helpers";
+ 
+ function OrdenFormEquipo({
+   children,
+@@ -24,8 +25,8 @@ function OrdenFormEquipo({
+   const [mostrarDetalleEquipo, setMostrarDetalleEquipo] = useState(false);
+ 
+   const inputStyle = {
+-    width: '100%', padding: '6px 10px',
+-    border: '2px solid var(--border)', borderRadius: '6px', fontSize: '.82rem'
++    width: '100%', padding: '2px 8px',
++    border: '1.5px solid var(--border)', borderRadius: '6px', fontSize: '.82rem'
+   };
+ 
+   return (
+@@ -97,7 +98,7 @@ function OrdenFormEquipo({
+               placeholder="Ingrese número de serie..."
+               value={busquedaSerie}
+               onChange={(e) => {
+-                setBusquedaSerie(e.target.value.toUpperCase());
++                setBusquedaSerie(upperInput(e));
+                 setMostrarDropdownEquipos(e.target.value.length >= 2);
+               }}
+               onFocus={() => {
+@@ -105,7 +106,7 @@ function OrdenFormEquipo({
+               }}
+               disabled={readOnly}
+               style={{
+-                width: '100%', padding: '6px 10px',
++                width: '100%', padding: '2px 8px',
+                 border: '1px solid #C4B5FD', borderRadius: '6px', fontSize: '.82rem',
+                 background: equipoSeleccionado ? '#DCFCE7' : 'white'
+               }}
+@@ -121,7 +122,7 @@ function OrdenFormEquipo({
+                 {equiposFiltrados.length > 0 ? (
+                   equiposFiltrados.map((equipo) => (
+                     <div key={equipo.id} onClick={() => seleccionarEquipo(equipo)}
+-                      style={{ padding: '6px 10px', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}
++                      style={{ padding: '2px 8px', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}
+                       onMouseEnter={(e) => e.currentTarget.style.background = 'var(--success-light)'}
+                       onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+                     >
+@@ -155,7 +156,7 @@ function OrdenFormEquipo({
+               placeholder="Ej: IR2520"
+               value={busquedaModelo}
+               onChange={(e) => {
+-                setBusquedaModelo(e.target.value.toUpperCase());
++                setBusquedaModelo(upperInput(e));
+                 setMostrarDropdownModelo(e.target.value.length >= 2);
+               }}
+               onFocus={() => {
+@@ -163,7 +164,7 @@ function OrdenFormEquipo({
+               }}
+               disabled={readOnly}
+               style={{
+-                width: '100%', padding: '6px 10px',
++                width: '100%', padding: '2px 8px',
+                 border: '1px solid #C4B5FD', borderRadius: '6px', fontSize: '.82rem',
+                 background: equipoSeleccionado ? '#DCFCE7' : 'white'
+               }}
+@@ -179,7 +180,7 @@ function OrdenFormEquipo({
+                 {equiposModeloFiltrados.length > 0 ? (
+                   equiposModeloFiltrados.map((equipo) => (
+                     <div key={equipo.id} onClick={() => seleccionarEquipoPorModelo(equipo)}
+-                      style={{ padding: '6px 10px', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}
++                      style={{ padding: '2px 8px', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}
+                       onMouseEnter={(e) => e.currentTarget.style.background = 'var(--primary-light)'}
+                       onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+                     >
+@@ -206,38 +207,38 @@ function OrdenFormEquipo({
+         gap: '20px',
+         marginBottom: '20px'
+       }}>
+-        <div className="of-f">
++        <div className="of-f" style={{ gridColumn: 'span 2' }}>
+           <label>Equipo *</label>
+           <input type="text" placeholder="Tipo de equipo" value={nuevaOrden.equipo}
+-            onChange={(e) => setNuevaOrden({...nuevaOrden, equipo: e.target.value.toUpperCase()})}
++            onChange={(e) => setNuevaOrden({...nuevaOrden, equipo: upperInput(e)})}
+             disabled={readOnly}
+             required style={inputStyle} />
+         </div>
+         <div className="of-f">
+           <label>Marca *</label>
+           <input type="text" placeholder="Marca del equipo" value={nuevaOrden.marca}
+-            onChange={(e) => setNuevaOrden({...nuevaOrden, marca: e.target.value.toUpperCase()})}
++            onChange={(e) => setNuevaOrden({...nuevaOrden, marca: upperInput(e)})}
+             disabled={readOnly}
+             required style={inputStyle} />
+         </div>
+         <div className="of-f">
+           <label>Modelo *</label>
+           <input type="text" placeholder="Modelo del equipo" value={nuevaOrden.modelo}
+-            onChange={(e) => setNuevaOrden({...nuevaOrden, modelo: e.target.value.toUpperCase()})}
++            onChange={(e) => setNuevaOrden({...nuevaOrden, modelo: upperInput(e)})}
+             disabled={readOnly}
+             required style={inputStyle} />
+         </div>
+         <div className="of-f">
+           <label>Serie</label>
+           <input type="text" placeholder="Número de serie" value={nuevaOrden.serie}
+-            onChange={(e) => setNuevaOrden({...nuevaOrden, serie: e.target.value.toUpperCase()})}
++            onChange={(e) => setNuevaOrden({...nuevaOrden, serie: upperInput(e)})}
+             disabled={readOnly}
+             style={inputStyle} />
+         </div>
+         <div className="of-f">
+           <label>Nivel de Tinta</label>
+           <input type="text" placeholder="Ej: 80%, lleno, etc." value={nuevaOrden.nivelTinta}
+-            onChange={(e) => setNuevaOrden({...nuevaOrden, nivelTinta: e.target.value.toUpperCase()})}
++            onChange={(e) => setNuevaOrden({...nuevaOrden, nivelTinta: upperInput(e)})}
+             disabled={readOnly}
+             style={inputStyle} />
+         </div>
+diff --git a/frontend/src/components/ordenes/OrdenFormInsumos.jsx b/frontend/src/components/ordenes/OrdenFormInsumos.jsx
+index 1fe2804..6661050 100644
+--- a/frontend/src/components/ordenes/OrdenFormInsumos.jsx
++++ b/frontend/src/components/ordenes/OrdenFormInsumos.jsx
+@@ -40,12 +40,30 @@ function OrdenFormInsumos({ insumos, insumosVisibles, setInsumosVisibles, setIns
+                 const nuevas = insumos.filter((_, i) => i !== idx);
+                 while (nuevas.length < 12) nuevas.push({ nombre: "" });
+                 setInsumos(nuevas);
+-                setInsumosVisibles(Math.max(2, insumosVisibles - 1));
++                setInsumosVisibles(Math.max(4, insumosVisibles - 1));
+               }}><Trash2 size={14} /></button>
+             )}
+           </div>
+         ))}
+       </div>
++      {insumos.filter(i => i.nombre).length > 4 && (
++        <div style={{ marginTop: '6px', textAlign: 'center' }}>
++          <button
++            type="button"
++            className="of-btn-a"
++            onClick={() => {
++              if (insumosVisibles > 4) {
++                setInsumosVisibles(4);
++              } else {
++                const lastFilled = insumos.reduce((last, i, idx) => i.nombre ? idx : last, -1);
++                setInsumosVisibles(Math.max(4, lastFilled + 1));
++              }
++            }}
++          >
++            {insumosVisibles > 4 ? "Ver menos" : "Ver más"}
++          </button>
++        </div>
++      )}
+     </div>
+   );
+ }
+diff --git a/frontend/src/pages/OrdenTrabajo.jsx b/frontend/src/pages/OrdenTrabajo.jsx
+index 30af49d..a0e51b9 100644
+--- a/frontend/src/pages/OrdenTrabajo.jsx
++++ b/frontend/src/pages/OrdenTrabajo.jsx
+@@ -5,7 +5,7 @@ import {
+   Save, X, Wrench
+ } from "lucide-react";
+ import api from "../services/api";
+-import { toUpper, cerrarSesion } from "../utils/helpers";
++import { toUpper, cerrarSesion, upperInput } from "../utils/helpers";
+ import '../styles/OrdenTrabajo.css';
+ import "../styles/ordenes-componentes.css";
+ import HeaderOrdenTrabajo from "../components/ordenes/HeaderOrdenTrabajo";
+@@ -16,6 +16,7 @@ import OrdenFormEquipo from "../components/ordenes/OrdenFormEquipo";
+ import OrdenFormInsumos from "../components/ordenes/OrdenFormInsumos";
+ import OrdenFormAveria from "../components/ordenes/OrdenFormAveria";
+ 
++
+ function OrdenTrabajo() {
+   const navigate = useNavigate();
+   const [mostrarFormulario, setMostrarFormulario] = useState(false);
+@@ -60,7 +61,7 @@ function OrdenTrabajo() {
+     { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
+     { nombre: "" }, { nombre: "" }
+   ]);
+-  const [insumosVisibles, setInsumosVisibles] = useState(2);
++  const [insumosVisibles, setInsumosVisibles] = useState(4);
+   
+   // Estado principal de la orden
+   const [nuevaOrden, setNuevaOrden] = useState({
+@@ -153,7 +154,7 @@ function OrdenTrabajo() {
+           { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
+           { nombre: "" }, { nombre: "" }
+         ]);
+-        setInsumosVisibles(2);
++        setInsumosVisibles(4);
+         setNuevaOrden({
+           numeroOrden: numeroOt,
+           fecha: fechaActual,
+@@ -231,7 +232,7 @@ function OrdenTrabajo() {
+       { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
+       { nombre: "" }, { nombre: "" }
+     ]);
+-    setInsumosVisibles(2);
++    setInsumosVisibles(4);
+     setMostrarFormulario(true);
+   };
+ 
+@@ -410,7 +411,7 @@ function OrdenTrabajo() {
+       nuevosInsumos.push({ nombre: "" });
+     }
+     setInsumos(nuevosInsumos);
+-    setInsumosVisibles(Math.max(2, insumosData.length));
++    setInsumosVisibles(Math.max(4, insumosData.length));
+   };
+ 
+   const verOrden = async (orden) => {
+@@ -522,7 +523,7 @@ function OrdenTrabajo() {
+       nuevosInsumos.push({ nombre: "" });
+     }
+     setInsumos(nuevosInsumos);
+-    setInsumosVisibles(Math.max(2, insumosData.length));
++    setInsumosVisibles(Math.max(4, insumosData.length));
+   };
+ 
+   const eliminarOrden = async (id) => {
+@@ -741,7 +742,7 @@ function OrdenTrabajo() {
+       { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
+       { nombre: "" }, { nombre: "" }
+     ]);
+-    setInsumosVisibles(2);
++    setInsumosVisibles(4);
+     setClienteSeleccionado(null);
+     setClienteFijo(false);
+     setEquipoSeleccionado(null);
+@@ -798,7 +799,7 @@ function OrdenTrabajo() {
+         ) : (
+           /* Formulario para crear orden */
+           <>
+-          <div style={{ maxWidth: '900px', margin: '0 auto', padding: '12px' }}>
++          <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '12px' }}>
+             <div className="of-wrap">
+               <div className="of-head">
+                 <h2><Wrench size={20} /> {soloLectura ? "Ver Orden" : editingId ? "Editar Orden" : "Nueva Orden"}</h2>
+@@ -814,65 +815,86 @@ function OrdenTrabajo() {
+     }}><X size={18} /></button>
+               </div>
+             <form onSubmit={guardarOrden} className="of-form">
+-              <OrdenFormDatos
+-                nuevaOrden={nuevaOrden}
+-                setNuevaOrden={setNuevaOrden}
+-                readOnly={soloLectura}
+-              />
+-
+-              <OrdenFormCliente
+-                busquedaCliente={busquedaCliente}
+-                setBusquedaCliente={setBusquedaCliente}
+-                mostrarDropdownClientes={mostrarDropdownClientes}
+-                setMostrarDropdownClientes={setMostrarDropdownClientes}
+-                clienteSeleccionado={clienteSeleccionado}
+-                clientesFiltrados={clientesFiltrados}
+-                clienteDropdownRef={clienteDropdownRef}
+-                seleccionarCliente={seleccionarCliente}
+-                nuevaOrden={nuevaOrden}
+-                setNuevaOrden={setNuevaOrden}
+-                clientes={clientes}
+-                clienteInactivo={clienteInactivo}
+-                clienteFijo={clienteFijo}
+-                readOnly={soloLectura}
+-              />
+-
+-              <OrdenFormEquipo
+-                busquedaModelo={busquedaModelo}
+-                setBusquedaModelo={setBusquedaModelo}
+-                mostrarDropdownModelo={mostrarDropdownModelo}
+-                setMostrarDropdownModelo={setMostrarDropdownModelo}
+-                equiposModeloFiltrados={equiposModeloFiltrados}
+-                equipoModeloDropdownRef={equipoModeloDropdownRef}
+-                busquedaSerie={busquedaSerie}
+-                setBusquedaSerie={setBusquedaSerie}
+-                mostrarDropdownEquipos={mostrarDropdownEquipos}
+-                setMostrarDropdownEquipos={setMostrarDropdownEquipos}
+-                equiposFiltrados={equiposFiltrados}
+-                equipoDropdownRef={equipoDropdownRef}
+-                seleccionarEquipo={seleccionarEquipo}
+-                seleccionarEquipoPorModelo={seleccionarEquipoPorModelo}
+-                equipoSeleccionado={equipoSeleccionado}
+-                nuevaOrden={nuevaOrden}
+-                setNuevaOrden={setNuevaOrden}
+-                readOnly={soloLectura}
+-                equipos={equipos}
+-                equipoFijo={equipoFijo}
+-              >
+-<OrdenFormInsumos
+-                  insumos={insumos}
+-                  insumosVisibles={insumosVisibles}
+-                  setInsumosVisibles={setInsumosVisibles}
+-                  setInsumos={setInsumos}
++              <div className="of-col-full">
++                <OrdenFormDatos
++                  nuevaOrden={nuevaOrden}
++                  setNuevaOrden={setNuevaOrden}
++                  readOnly={soloLectura}
++                />
++              </div>
++
++              <div className="of-cols">
++                <div className="of-col-left">
++                <OrdenFormCliente
++                  busquedaCliente={busquedaCliente}
++                  setBusquedaCliente={setBusquedaCliente}
++                  mostrarDropdownClientes={mostrarDropdownClientes}
++                  setMostrarDropdownClientes={setMostrarDropdownClientes}
++                  clienteSeleccionado={clienteSeleccionado}
++                  clientesFiltrados={clientesFiltrados}
++                  clienteDropdownRef={clienteDropdownRef}
++                  seleccionarCliente={seleccionarCliente}
++                  nuevaOrden={nuevaOrden}
++                  setNuevaOrden={setNuevaOrden}
++                  clientes={clientes}
++                  clienteInactivo={clienteInactivo}
++                  clienteFijo={clienteFijo}
+                   readOnly={soloLectura}
+                 />
+-              </OrdenFormEquipo>
+ 
+-              <OrdenFormAveria
+-                nuevaOrden={nuevaOrden}
+-                setNuevaOrden={setNuevaOrden}
+-                readOnly={soloLectura}
+-              />
++                  <OrdenFormInsumos
++                    insumos={insumos}
++                    insumosVisibles={insumosVisibles}
++                    setInsumosVisibles={setInsumosVisibles}
++                    setInsumos={setInsumos}
++                    readOnly={soloLectura}
++                  />
++                </div>
++
++                <div className="of-col-right">
++                <OrdenFormEquipo
++                  busquedaModelo={busquedaModelo}
++                  setBusquedaModelo={setBusquedaModelo}
++                  mostrarDropdownModelo={mostrarDropdownModelo}
++                  setMostrarDropdownModelo={setMostrarDropdownModelo}
++                  equiposModeloFiltrados={equiposModeloFiltrados}
++                  equipoModeloDropdownRef={equipoModeloDropdownRef}
++                  busquedaSerie={busquedaSerie}
++                  setBusquedaSerie={setBusquedaSerie}
++                  mostrarDropdownEquipos={mostrarDropdownEquipos}
++                  setMostrarDropdownEquipos={setMostrarDropdownEquipos}
++                  equiposFiltrados={equiposFiltrados}
++                  equipoDropdownRef={equipoDropdownRef}
++                  seleccionarEquipo={seleccionarEquipo}
++                  seleccionarEquipoPorModelo={seleccionarEquipoPorModelo}
++                  equipoSeleccionado={equipoSeleccionado}
++                  nuevaOrden={nuevaOrden}
++                  setNuevaOrden={setNuevaOrden}
++                  readOnly={soloLectura}
++                  equipos={equipos}
++                  equipoFijo={equipoFijo}
++                />
++
++                  <OrdenFormAveria
++                    nuevaOrden={nuevaOrden}
++                    setNuevaOrden={setNuevaOrden}
++                    readOnly={soloLectura}
++                  />
++
++                  <div className="of-sec muted">
++                    <div className="of-st muted">Observaciones</div>
++                    <div className="of-f">
++                      <textarea
++                        placeholder="Observaciones adicionales..."
++                        value={nuevaOrden.observaciones}
++                        onChange={(e) => setNuevaOrden({...nuevaOrden, observaciones: upperInput(e)})}
++                        rows={4}
++                        disabled={soloLectura}
++                      />
++                    </div>
++                  </div>
++                </div>
++              </div>
+ 
+               {/* Botones de acción del formulario */}
+               <div className="of-sub">
+diff --git a/frontend/src/styles/OrdenTrabajo.css b/frontend/src/styles/OrdenTrabajo.css
+index f3721b2..9cec17f 100644
+--- a/frontend/src/styles/OrdenTrabajo.css
++++ b/frontend/src/styles/OrdenTrabajo.css
+@@ -4,6 +4,10 @@
+ .of-head h2{color:white;margin:0;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600}
+ .of-head-close{background:rgba(255,255,255,0.2);border:none;border-radius:6px;padding:5px;cursor:pointer;color:white;display:flex}
+ .of-form{padding:6px;display:grid;grid-template-columns:1fr;gap:4px}
++.of-col-full{grid-column:1/-1}
++.of-cols{display:grid;grid-template-columns:1fr 1fr;gap:8px}
++.of-col-left{grid-column:1;display:flex;flex-direction:column;gap:8px}
++.of-col-right{grid-column:2;display:flex;flex-direction:column;gap:8px}
+ .of-sec{padding:5px 6px;border-radius:8px}
+ .of-sec.primary{background:var(--primary-light)}
+ .of-sec.success{background:var(--success-light)}
+@@ -34,7 +38,7 @@
+ .of-date-f{flex:1;min-width:0;margin-left:3px}
+ .of-date-f input{width:100%}
+ .of-date input[type="date"]{padding:2px 6px;font-size:.82rem;border:1.5px solid var(--border);border-radius:6px;font-family:inherit}
+-.of-ins{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
++.of-ins{display:grid;grid-template-columns:repeat(2,1fr);gap:4px}
+ .of-ins-item{display:flex;align-items:end;gap:4px}
+ .of-ins-item>div{flex:1;min-width:0}
+ .of-ins-item label{font-size:9px;font-weight:600;color:var(--text-muted);text-transform:uppercase}
+@@ -48,6 +52,7 @@
+ .of-btn-c{padding:4px 12px;font-size:.78rem;background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px;transition:all .2s}
+ .of-btn-c:hover{background:#e2e8f0}
+ @media(max-width:768px){.of-r3,.of-r2,.of-grid,.of-dates,.of-ins{grid-template-columns:1fr}.of-form{padding:8px;gap:6px}.of-f input,.of-f select,.of-f textarea{padding:10px 12px;font-size:.9rem;min-height:44px}.of-sub{flex-direction:column}.of-sub button{width:100%;justify-content:center}}
++@media(max-width:1100px){.of-cols{grid-template-columns:1fr;grid-template-rows:auto}.of-col-left,.of-col-right{grid-column:1;grid-row:auto}.of-col-left{order:1}.of-col-right{order:2}}
+ 
+ /* Vista tabla - mayúsculas */
+ .table-wrapper th { text-align: center; }
+diff --git a/frontend/src/utils/helpers.js b/frontend/src/utils/helpers.js
+index 9401b05..b0f567c 100644
+--- a/frontend/src/utils/helpers.js
++++ b/frontend/src/utils/helpers.js
+@@ -1,5 +1,19 @@
+ export const toUpper = (v) => (v || "").toUpperCase();
+ 
++// Aplica transformación (mayúsculas + regex opcional) directamente en el input
++// y restaura el caret para evitar que React lo mueva al final.
++export const upperInput = (e, regex) => {
++  const el = e.target;
++  const pos = el.selectionStart;
++  let val = el.value.toUpperCase();
++  if (regex) val = val.replace(regex, "");
++  if (el.value !== val) {
++    el.value = val;
++    el.setSelectionRange(Math.min(pos, val.length), Math.min(pos, val.length));
++  }
++  return val;
++};
++
+ export const validarRUT = (rut) => {
+   if (!rut) return false;
+   const limpio = rut.replace(/\./g, "").toUpperCase();

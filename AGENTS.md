@@ -27,6 +27,7 @@ Sistema de gestión de soporte técnico con módulos para:
 - `toUpper(v)` — convierte a mayúsculas con null safety
 - `validarRUT(rut)` — validación de RUT chileno (módulo 11)
 - `parseToken()` — extrae `{ usuario, rol }` del JWT almacenado
+- `upperInput(e, regex?)` — aplica mayúsculas (y regex opcional) directamente en el DOM del input, restaura la posición del caret y retorna el valor transformado. Evita que React mueva el cursor al final en inputs controlados
 
 ### Componentes Compartidos
 | Componente | Ubicación | Uso |
@@ -1561,6 +1562,7 @@ Estas columnas faltaban y causaban error 500 al editar/guardar equipos desde OT.
 | 1.48 | 17 Agosto 2026 | Tabla de OTs de la vista expandida de cliente centrada (`.ots-tabla-wrapper th` y `td` con `text-align: center`). Encabezados N° OT, Fecha, Equipo, Técnico, Actividad, Observaciones, Acción y sus datos quedan centrados. Solo frontend |
 | 1.49 | 17 Agosto 2026 | Fix duplicación de clientes en la web: el botón "Guardar Cliente" no se deshabilitaba durante el POST, así que múltiples clics creaban clientes duplicados. `ClienteFormulario.jsx`: nuevo estado `guardando`, `handleSubmit` ignora clics si `guardando` es true y `onSave` se ejecuta con `Promise.resolve(...).finally(() => setGuardando(false))`. Botón muestra "Guardando..." y queda `disabled`. `Clientes.css`: `.cf-btn-p:disabled` con `opacity:.6; cursor:not-allowed`. Solo frontend |
 | 1.50 | 17 Agosto 2026 | Vista expandida de cliente (`ClienteExpandido.jsx` + `clientes-componentes.css`): la tabla de OTs ya NO usa paginación interna; ahora muestra **1 OT por defecto** (`LIMITE_OTS = 1`) y botón "Ver todas (N)"/"Ver menos" en el header cuando hay más de 1 OT. Eliminado el componente `Paginacion` local y su CSS `.paginacion-cliente`/`.paginacion-puntos`. La paginación de clientes (4/página) del mantenedor se mantiene intacta. Solo frontend |
+| 1.51 | 18 Agosto 2026 | Formulario OT reestructurado: Insumos a la izquierda (bajo Cliente), Avería/Actividad/Observaciones a la derecha (bajo Equipo). Grid simplificado de 4 celdas a 2 columnas flex. Insumos por defecto 4 visibles con toggle "Ver más/Ver menos" cuando hay >4 insumos ingresados. Fix cursor salta al final: nuevo helper `upperInput(e, regex?)` en `helpers.js` que aplica mayúsculas directamente en el DOM y restaura `selectionRange`; reemplazadas 45 ocurrencias de `e.target.value.toUpperCase()` en 8 archivos. Inputs compactos unificados: padding 2px 8px, font-size .82rem, line-height 1.3 en Clientes (`Clientes.css`, `clientes-componentes.css`), Equipos (`Equipos.css`) y filtros OT (`ordenes-componentes.css`). Tabla Usuarios centrada (`index.css`: `.table-container th, td`). Respaldo creado en `backup/ot-form-changes.patch` y `backup/actual/`. Solo frontend |
 
 ---
 
