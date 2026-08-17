@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Package, Save, X } from "lucide-react";
 import { toUpper } from "../../utils/helpers";
 
@@ -6,6 +6,8 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, readOnly 
   const [nuevoEquipo, setNuevoEquipo] = useState({
     codigo: "", equipo: "", modelo: "", marca: "", serie: ""
   });
+  const [guardando, setGuardando] = useState(false);
+  const guardandoRef = useRef(false);
 
   const codigoActual = (() => {
     let max = 0;
@@ -32,7 +34,13 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, readOnly 
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave({ ...nuevoEquipo }, equipoEditando?.id);
+    if (guardandoRef.current) return;
+    guardandoRef.current = true;
+    setGuardando(true);
+    Promise.resolve(onSave({ ...nuevoEquipo }, equipoEditando?.id)).finally(() => {
+      guardandoRef.current = false;
+      setGuardando(false);
+    });
   };
 
   return (
@@ -87,7 +95,7 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, readOnly 
               ) : (
                 <>
                   <button type="button" className="ef-btn-c" onClick={onCancel}><X size={18} /> Cancelar</button>
-                  <button type="submit" className="ef-btn-p"><Save size={18} /> {equipoEditando ? "Guardar Cambios" : "Guardar Equipo"}</button>
+                  <button type="submit" className="ef-btn-p" disabled={guardando}><Save size={18} /> {guardando ? "Guardando..." : (equipoEditando ? "Guardar Cambios" : "Guardar Equipo")}</button>
                 </>
               )}
             </div>
