@@ -113,7 +113,7 @@ function ClienteExpandido({ cliente, ordenes, onEditar, onEliminar, onEliminarOT
           </div>
         </div>
 
-        {mostrarOTs && (ots.length > 0 ? (
+        {mostrarOTs && ots.length > 0 && (
           <>
             <div className="ots-tabla-wrapper">
               <table>
@@ -169,20 +169,7 @@ function ClienteExpandido({ cliente, ordenes, onEditar, onEliminar, onEliminarOT
             </div>
             <Paginacion pagina={pagOTs} totalPaginas={totalPagOTs} setPagina={setPagOTs} />
           </>
-        ) : (
-          <div className="ots-vacio">
-            <ClipboardList size={13} />
-            <p>Este cliente no tiene órdenes de trabajo</p>
-            <button
-              className="btn-crear-primera"
-              onClick={() =>
-                navigate("/orden-trabajo", { state: { cliente } })
-              }
-            >
-              <ClipboardList size={11} /> Crear primera OT
-            </button>
-          </div>
-        ))}
+        )}
       </div>
     </div>
   );
