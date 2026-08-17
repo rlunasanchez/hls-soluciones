@@ -257,30 +257,32 @@
 }
 
 .cliente-datos {
-  padding: 6px 12px;
+  padding: 4px 12px;
   border-bottom: 1px solid var(--border);
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 4px;
+  gap: 2px;
+  text-align: center;
 }
 
 .dato-item label {
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .dato-item p {
-  margin: 1px 0 0;
+  margin: 0;
   font-weight: 500;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
+  line-height: 1.15;
 }
 
 .dato-item .contacto-email {
   margin: 0;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: var(--text-muted);
 }
 
@@ -386,19 +388,25 @@
 
 .ots-vacio {
   text-align: center;
-  padding: 10px;
+  padding: 3px 8px;
   color: var(--text-muted);
   background: #f9fafb;
   border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .ots-vacio svg {
   opacity: 0.5;
+  flex-shrink: 0;
 }
 
 .ots-vacio p {
-  margin: 2px 0 0;
-  font-size: 0.75rem;
+  margin: 0;
+  font-size: 0.7rem;
 }
 
 .ots-header-actions {
@@ -472,9 +480,9 @@
 }
 
 .btn-crear-primera {
-  margin-top: 4px;
-  padding: 4px 10px;
-  font-size: 0.72rem;
+  margin-top: 0;
+  padding: 2px 8px;
+  font-size: 0.68rem;
   background: var(--primary);
   color: white;
   border: none;
