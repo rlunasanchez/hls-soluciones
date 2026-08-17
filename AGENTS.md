@@ -1566,6 +1566,7 @@ Estas columnas faltaban y causaban error 500 al editar/guardar equipos desde OT.
 | 1.52 | 18 Agosto 2026 | Unificar estilos de buscadores en todos los mantenedores y formularios: mismo tamaño, borde redondeado (`var(--radius-sm)`), color de borde (`var(--border)`) y padding. Filtros de OT (`ordenes-componentes.css`) y buscadores del form OT (cliente, contacto, serie, modelo) ahora coinciden con los de Clientes y Equipos. Solo frontend |
 | 1.53 | 18 Agosto 2026 | Compactar tarjetas "Cliente Asignado" y "Equipo Asignado" en formulario OT: padding 2px 8px, borde 1.5px, border-radius `var(--radius-sm)`. Botón "Ver" reducido a height 24px y padding 2px 8px. Solo frontend |
 | 1.54 | 18 Agosto 2026 | Fix race condition duplicación de clientes/equipos al guardar: `useRef(guardandoRef)` como bandera síncrona que bloquea múltiples submits antes de que React re-renderice. `EquipoFormulario.jsx` ahora también tiene estado `guardando`, `disabled` en botón y texto "Guardando...". `Equipos.css`: `.ef-btn-p:disabled` con `opacity:.6; cursor:not-allowed`. Solo frontend |
+| 1.55 | 18 Agosto 2026 | Proteger OT contra duplicación al guardar: `useRef(guardandoRef)` como bandera síncrona en `guardarOrden()`. Botón "Guardar Orden" ahora tiene `disabled={guardando}` y texto "Guardando...". `OrdenTrabajo.css`: `.of-btn-p:disabled` con `opacity:.6; cursor:not-allowed`. Todos los ingresos (Clientes, Equipos, OT) ahora protegidos contra doble-submit. Solo frontend |
 
 ---
 
