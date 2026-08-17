@@ -194,13 +194,15 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                   />
                 </div>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: 6 }}>
+              <div className="cf-r1">
                 <div className="cf-field">
                   <label>Razón Social *</label>
                   <input placeholder="Razón social" value={nuevoCliente.razon_social}
                     disabled={readOnly}
                     onChange={(e) => setNuevoCliente({ ...nuevoCliente, razon_social: e.target.value.toUpperCase() })} required />
                 </div>
+              </div>
+              <div className="cf-r1" style={{ display: "none" }}>
                 <div className="cf-field">
                   <label>Giro</label>
                   <input placeholder="Giro" value={nuevoCliente.giro}

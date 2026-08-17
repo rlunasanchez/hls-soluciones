@@ -1,27 +1,29 @@
-import pg from 'pg';
+import mysql from 'mysql2/promise';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-const { Pool } = pg;
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL
+const pool = mysql.createPool({
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT),
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
 });
 
 async function crearAdmin() {
   try {
     const passwordHash = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
     
-    const result = await pool.query(`
-      INSERT INTO usuarios (usuario, password, rol, email, activo)
-      VALUES ('admin', $1, 'admin', $2, true)
-      ON CONFLICT (usuario) DO UPDATE SET password = $1, rol = 'admin', activo = true
-      RETURNING id, usuario, rol
-    `, [passwordHash, process.env.ADMIN_EMAIL]);
+    await pool.query(
+      `INSERT INTO usuarios (usuario, password, rol, email, activo)
+       VALUES (?, ?, 'admin', ?, true)
+       ON DUPLICATE KEY UPDATE password = VALUES(password), rol = 'admin', activo = true`,
+      ['admin', passwordHash, process.env.ADMIN_EMAIL]
+    );
     
-    console.log('Admin creado/actualizado:', result.rows[0]);
+    console.log('Admin creado/actualizado correctamente');
     process.exit(0);
   } catch (err) {
     console.error('Error:', err.message);
