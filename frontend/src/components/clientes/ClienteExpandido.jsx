@@ -171,7 +171,7 @@ function ClienteExpandido({ cliente, ordenes, onEditar, onEliminar, onEliminarOT
           </>
         ) : (
           <div className="ots-vacio">
-            <ClipboardList size={20} />
+            <ClipboardList size={13} />
             <p>Este cliente no tiene órdenes de trabajo</p>
             <button
               className="btn-crear-primera"
@@ -179,7 +179,7 @@ function ClienteExpandido({ cliente, ordenes, onEditar, onEliminar, onEliminarOT
                 navigate("/orden-trabajo", { state: { cliente } })
               }
             >
-              <ClipboardList size={12} /> Crear primera OT
+              <ClipboardList size={11} /> Crear primera OT
             </button>
           </div>
         ))}
