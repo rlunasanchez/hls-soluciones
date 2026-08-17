@@ -67,7 +67,7 @@
 
 .table-wrapper th {
   padding: 14px 16px;
-  text-align: left;
+  text-align: center;
   font-weight: 600;
   color: var(--text-muted);
   font-size: 0.8rem;
@@ -84,6 +84,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 200px;
+  text-align: center;
 }
 
 .table-wrapper td:last-child {
