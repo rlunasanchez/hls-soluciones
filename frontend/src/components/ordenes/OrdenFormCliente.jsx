@@ -115,11 +115,11 @@ function OrdenFormCliente({
               flex: 1,
               display: 'flex',
               alignItems: 'center',
-              gap: '10px',
-              padding: '8px 12px',
+              gap: '6px',
+              padding: '2px 8px',
               background: '#E0F2FE',
-              border: '2px solid var(--primary)',
-              borderRadius: '6px',
+              border: '1.5px solid var(--primary)',
+              borderRadius: 'var(--radius-sm)',
               flexWrap: 'wrap'
             }}>
               <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' }}>
@@ -150,14 +150,14 @@ function OrdenFormCliente({
                   background: '#0D9488',
                   color: 'white',
                   border: 'none',
-                  padding: '6px 12px',
-                  borderRadius: '6px',
+                  padding: '2px 8px',
+                  borderRadius: 'var(--radius-sm)',
                   cursor: 'pointer',
                   fontWeight: 500,
-                  fontSize: '0.8rem',
+                  fontSize: '0.75rem',
                   whiteSpace: 'nowrap',
                   flexShrink: 0,
-                  height: '32px'
+                  height: '24px'
                 }}
               >
                 <Eye size={14} /> Ver
