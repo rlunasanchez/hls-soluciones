@@ -49,6 +49,7 @@
 .of-btn-a:focus-visible,.of-btn-p:focus-visible,.of-btn-c:focus-visible,.of-head-close:focus-visible,.of-ins-del:focus-visible{outline:none;box-shadow:0 0 0 1px rgba(154,184,217,.4)}
 .of-sub{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:2px}
 .of-btn-p{padding:4px 12px;font-size:.78rem;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px}
+.of-btn-p:disabled{opacity:.6;cursor:not-allowed}
 .of-btn-c{padding:4px 12px;font-size:.78rem;background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px;transition:all .2s}
 .of-btn-c:hover{background:#e2e8f0}
 @media(max-width:768px){.of-r3,.of-r2,.of-grid,.of-dates,.of-ins{grid-template-columns:1fr}.of-form{padding:8px;gap:6px}.of-f input,.of-f select,.of-f textarea{padding:10px 12px;font-size:.9rem;min-height:44px}.of-sub{flex-direction:column}.of-sub button{width:100%;justify-content:center}}

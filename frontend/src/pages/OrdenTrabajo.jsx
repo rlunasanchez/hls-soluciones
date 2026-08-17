@@ -27,6 +27,8 @@ function OrdenTrabajo() {
   const [paginaActual, setPaginaActual] = useState(1);
   const ITEMS_POR_PAG = 4;
   const [editingId, setEditingId] = useState(null);
+  const [guardando, setGuardando] = useState(false);
+  const guardandoRef = useRef(false);
   const [filtroNumeroOrden, setFiltroNumeroOrden] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("todos");
   const [filtroFechaDesde, setFiltroFechaDesde] = useState("");
@@ -657,6 +659,7 @@ function OrdenTrabajo() {
 
   const guardarOrden = async (e) => {
     e.preventDefault();
+    if (guardandoRef.current) return;
     
     // Preparar insumos
     const ins = insumos.filter(i => i.nombre.trim() !== "").map(i => i.nombre);
@@ -679,6 +682,8 @@ function OrdenTrabajo() {
       insumo12: ins[11] || ""
     };
     
+    guardandoRef.current = true;
+    setGuardando(true);
     try {
       if (editingId) {
         await api.put(`/api/ordenes/${editingId}`, payload);
@@ -695,11 +700,14 @@ function OrdenTrabajo() {
       if (vinoDeCliente) {
         navigate("/clientes");
       } else {
-    fetchOrdenes();
+        fetchOrdenes();
       }
     } catch (err) {
       console.error("Error al guardar orden:", err);
       alert("Error al guardar la orden");
+    } finally {
+      guardandoRef.current = false;
+      setGuardando(false);
     }
   };
 
@@ -911,8 +919,8 @@ function OrdenTrabajo() {
                   <X size={16} /> {soloLectura ? "Cerrar" : "Cancelar"}
                 </button>
                 {!soloLectura && (
-                  <button type="submit" className="of-btn-p">
-                    <Save size={16} /> {editingId ? "Guardar Cambios" : "Guardar Orden"}
+                  <button type="submit" className="of-btn-p" disabled={guardando}>
+                    <Save size={16} /> {guardando ? "Guardando..." : (editingId ? "Guardar Cambios" : "Guardar Orden")}
                   </button>
                 )}
               </div>
