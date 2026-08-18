@@ -94,7 +94,7 @@ function OrdenFormCliente({
     <div className="of-sec success">
       <div className="of-st success">Datos del Cliente</div>
 
-      <div style={{ marginBottom: '12px' }}>
+      <div style={{ marginBottom: '8px' }}>
         <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)' }}>
           {clienteFijo && clienteSeleccionado ? (
             <>
@@ -330,8 +330,8 @@ function OrdenFormCliente({
         </div>
       )}
 
-      <div className="of-form-grid">
-        <div className="of-f" style={{ gridColumn: 'span 2' }}>
+      <div className="of-form-grid" style={{ gridTemplateColumns: '2fr 1fr', marginBottom: '15px' }}>
+        <div className="of-f">
           <label>Cliente *</label>
           <input
             type="text"
@@ -388,7 +388,7 @@ function OrdenFormCliente({
       </div>
 
       {/* Direcciones Extra / Sucursales (dinámicas) */}
-      <div style={{ marginTop: '10px', padding: '4px 10px', background: '#E0F2FE', border: '1px solid #7CD0F0', borderRadius: '8px', lineHeight: '1.2' }}>
+      <div style={{ marginTop: '34px', padding: '4px 10px', background: '#E0F2FE', border: '1px solid #7CD0F0', borderRadius: '8px', lineHeight: '1.2' }}>
         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer', fontSize: '0.8rem', width: 'fit-content', maxWidth: '100%' }}>
           <input
             type="checkbox"

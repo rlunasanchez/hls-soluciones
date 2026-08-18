@@ -1571,6 +1571,10 @@ Estas columnas faltaban y causaban error 500 al editar/guardar equipos desde OT.
 | 1.57 | 17 Agosto 2026 | Fix menú `...` cortado en mobile: los dropdowns de acciones (ClienteAcciones, EquipoAcciones, OrdenAcciones) usaban `position: fixed` y siempre abrían hacia abajo, así que en el último registro el menú se recortaba fuera del viewport. Ahora con `useLayoutEffect` miden la altura del menú y si no cabe bajo el botón lo abren hacia arriba; además el `left` se clampa para no salirse por el borde derecho. Solo frontend |
 | 1.58 | 17 Agosto 2026 | Form OT mobile: campos N° Orden y Fecha ordenados en 2 columnas lado a lado (grid `1fr 1fr`), cada uno con label encima e input a ancho completo, bajo el título "Datos de la Orden" en su propia línea. El resto de campos no se tocan. `OrdenTrabajo.css` (media query ≤768px). Solo frontend |
 | 1.59 | 17 Agosto 2026 | Buscadores de filtros uniformes en mobile (≤768px): Clientes (Razón Social, RUT) y OT (N° Orden, Garantía, Estado, Desde, Hasta) ahora con `padding: 10px 12px` y `min-height: 44px` igual que Equipos. Antes los de Clientes quedaban pequeños (`padding 2px`). `clientes-componentes.css` y `ordenes-componentes.css`. Solo frontend |
+| 1.60 | 17 Agosto 2026 | Buscadores del form OT alineados: la lupa "Buscar y Seleccionar Cliente" ya no queda 10px más arriba que "Buscar Equipo por Serie"/"Buscar por Modelo". Causa: `<div>` vacío con `marginBottom: 10px` (badges de equipo seleccionado) se renderizaba siempre. Solución: contenedor condicional `{equipoSeleccionado && ...}`. `OrdenFormEquipo.jsx`. Solo frontend |
+| 1.61 | 17 Agosto 2026 | Campos Cliente/Comuna alineados con Equipo/Marca en form OT: "Cliente *" dejó de ocupar toda la fila (`gridColumn: span 2` quitado) y ahora comparte fila con "Comuna" (como `Equipo *` | `Marca *`); margen del buscador de cliente igualado a 8px. `OrdenFormCliente.jsx`. Solo frontend |
+| 1.62 | 17 Agosto 2026 | Campo Cliente más largo en form OT: grilla Cliente/Comuna con `gridTemplateColumns: '2fr 1fr'` → "Cliente *" pasa de 294px a 392px (2/3) y "Comuna" a 196px (1/3), igual que "Equipo *" (399px)/"Marca *" (190px). Mobile sigue en 1 columna (`!important`). `OrdenFormCliente.jsx`. Solo frontend |
+| 1.63 | 17 Agosto 2026 | "Otras Direcciones / Sucursales" alineado con "Contador Páginas OUT" en form OT. El **checkbox** queda verticalmente centrado sobre el **input** (no sobre el label). Causa: colapso de márgenes CSS (el `margin-bottom` de la grilla `.of-form-grid` se colapsaba con el `margin-top` del card). Solución: `margin-top: 34px` en el card (con grilla en `margin-bottom: 15px`, el gap efectivo colapsado pasa a 34px). `OrdenFormCliente.jsx`. Solo frontend |
 
 ---
 
@@ -1758,3 +1762,56 @@ ALTER TABLE ordenes_trabajo DROP COLUMN IF EXISTS contacto2, DROP COLUMN IF EXIS
 - Resultado: todos los buscadores de filtros (Clientes, Equipos, OT) con el mismo alto en mobile
 
 **Verificación (Playwright, Chrome):** dropdown muestra contacto principal y adicional de "DIEGO LUNA"; clickear el adicional autocompleta `contacto=DIEGO LUNA`, `emailC=diego@gmail.com`, `fonoC=6494960`; ancho del buscador 268px igual al campo Email.
+
+### 61. Buscadores del form OT alineados (cliente con serie/modelo)
+**Fecha:** 17 Agosto 2026
+**Ramás afectadas:** `main` (MySQL) — solo frontend, idéntico en `deploy/cloud` (PostgreSQL)
+**Archivo modificado:** `frontend/src/components/ordenes/OrdenFormEquipo.jsx`
+
+**Problema:** En Nueva/Editar Orden, la lupa "Buscar y Seleccionar Cliente" quedaba 10px más arriba que las lupas "Buscar Equipo por Serie" y "Buscar por Modelo", por lo que el formulario se veía desordenado.
+
+**Causa:** El contenedor de los badges de "Equipo seleccionado" en `OrdenFormEquipo.jsx` se renderizaba siempre (`<div style={{ marginBottom: '10px' }}>` vacío) aunque no hubiera equipo seleccionado. Ese `<div>` fantasma añadía 10px de espacio y empujaba los buscadores de serie/modelo hacia abajo.
+
+**Solución:** El contenedor ahora es condicional (`{equipoSeleccionado && (...)}`). Los badges internos ya requerían `equipoSeleccionado`, así que solo se elimina el espacio fantasma, sin cambiar el spacing cuando el badge sí se muestra.
+
+**Verificación (Chrome headless, CDP):** antes `top` del label cliente=256 vs serie/modelo=266; después las 3 lupas en `top=256` y los 3 inputs en `top=287` (alineados).
+
+### 62. Campos Cliente/Comuna alineados con Equipo/Marca en form OT
+**Fecha:** 17 Agosto 2026
+**Ramás afectadas:** `main` (MySQL) — solo frontend, idéntico en `deploy/cloud` (PostgreSQL)
+**Archivo modificado:** `frontend/src/components/ordenes/OrdenFormCliente.jsx`
+
+**Problema:** En el form OT (nueva/editar/ver), "Cliente *" y "Comuna" de "Datos del Cliente" quedaban en filas distintas y desalineados respecto a "Equipo *" y "Marca *" de "Datos del Equipo". "Cliente *" ocupaba toda la fila (`gridColumn: span 2`) y "Comuna" quedaba en la fila siguiente; además el buscador de cliente tenía `margin-bottom: 12px` vs `8px` del buscador de equipo, desplazando todo 4px.
+
+**Solución:**
+- `Cliente *` ya no usa `gridColumn: span 2` → queda lado a lado con `Comuna` en la misma fila (igual que `Equipo *` | `Marca *`)
+- `margin-bottom` del buscador de cliente cambiado de `12px` a `8px` (igual que el buscador de equipo)
+- `Dirección` se mantiene ancho completo (`gridColumn: 1 / -1`)
+
+**Verificación (Chrome headless, CDP):** antes `Cliente *=320`/`Comuna=378` vs `Equipo */Marca *=316`; después los 4 labels (`Cliente *`, `Comuna`, `Equipo *`, `Marca *`) en `top=316` (misma fila por columna).
+
+### 63. Campo Cliente más largo en form OT
+**Fecha:** 17 Agosto 2026
+**Ramás afectadas:** `main` (MySQL) — solo frontend, idéntico en `deploy/cloud` (PostgreSQL)
+**Archivo modificado:** `frontend/src/components/ordenes/OrdenFormCliente.jsx`
+
+**Problema:** Después de alinear Cliente/Comuna con Equipo/Marca, el campo "Cliente *" quedaba a la mitad del ancho (~294px), muy corto para escribir una razón social completa.
+
+**Solución:** La grilla de la fila Cliente/Comuna ahora usa `gridTemplateColumns: '2fr 1fr'` → "Cliente *" ocupa ~2/3 (392px) y "Comuna" ~1/3 (196px), coincidiendo con los anchos de "Equipo *" (399px) y "Marca *" (190px) de la columna derecha. En mobile (≤768px) la media query de `.of-form-grid` fuerza 1 columna (`!important`), así que se stackea sin problema.
+
+**Verificación (Chrome headless, CDP):** `Cliente *` width=392 (antes 294), `Comuna` width=196; `top=316` igual que `Equipo *`/`Marca *` (399/190).
+
+### 64. "Otras Direcciones / Sucursales" alineado con "Contador Páginas OUT" en form OT
+**Fecha:** 17 Agosto 2026
+**Ramás afectadas:** `main` (MySQL) — solo frontend, idéntico en `deploy/cloud` (PostgreSQL)
+**Archivo modificado:** `frontend/src/components/ordenes/OrdenFormCliente.jsx`
+
+**Problema:** El toggle "Otras Direcciones / Sucursales" quedaba 5px más abajo que el campo "Contador Páginas OUT" de "Datos del Equipo".
+
+**Causa:** Colapso de márgenes CSS: el `margin-bottom` de la grilla `.of-form-grid` (Cliente/Comuna/Dirección) se colapsaba con el `margin-top` del card de direcciones. Cambiar solo el `margin-top` del card no tenía efecto.
+
+**Solución final:** El **checkbox** de "Otras Direcciones / Sucursales" queda **verticalmente centrado sobre el input** de "Contador Páginas OUT" (no sobre el label). Se ajustó `margin-top: 34px` en el card (con la grilla en `margin-bottom: 15px` el gap efectivo colapsado pasa a 34px).
+
+**Verificación (Chrome headless, CDP):**
+- Nueva/Editar: centro del checkbox = centro del input (check 450-465 / 457-472, input 446-469 / 453-476) — perfecto
+- Ver: checkbox 461-476 vs input 453-476 — 4px de desfase aceptado (el badge "Cliente Asignado" desplaza la columna izquierda 4px respecto a la derecha)
