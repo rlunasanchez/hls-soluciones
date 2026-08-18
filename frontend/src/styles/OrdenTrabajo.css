@@ -15,7 +15,11 @@
 .of-st{font-size:10px;font-weight:600;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px}
 .of-head-row{display:flex;align-items:center;gap:12px}
 .of-head-row .of-st{margin-bottom:0;white-space:nowrap;min-width:110px}
-.of-head-row .of-grid{flex:1}
+.of-head-row .of-grid{flex:1;grid-template-columns:repeat(2,auto);justify-content:flex-start}
+.of-head-row .of-grid input[type="date"]{width:fit-content;max-width:110px;padding-right:2px}
+.of-head-row .of-grid input[type="date"]::-webkit-datetime-edit{padding:0}
+.of-head-row .of-grid input[type="date"]::-webkit-datetime-edit-fields-wrapper{padding:0}
+.of-head-row .of-grid input[type="date"]::-webkit-calendar-picker-indicator{margin:0;padding:0}
 .of-st.primary{color:var(--primary)}
 .of-st.success{color:var(--success)}
 .of-st.muted{color:var(--text)}
@@ -30,7 +34,7 @@
 .of-f label{font-size:9px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px}
 .of-f input,.of-f select,.of-f textarea{padding:2px 8px;font-size:.82rem;line-height:1.3;border:1.5px solid var(--border);border-radius:6px;background:white;transition:border-color .15s;width:100%;box-sizing:border-box;font-family:inherit}.of-f textarea{resize:vertical;min-height:60px}
 .of-f input:focus,.of-f select:focus,.of-f textarea:focus{outline:none;border-color:#9AB8D9;box-shadow:0 0 0 1px rgba(154,184,217,.35)}
-.of-dates{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-top:4px}
+.of-head-row .of-dates{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:0}
 .of-date{display:flex;align-items:center;gap:3px}
 .of-date span{font-size:.75rem;font-weight:600}
 .of-chk{display:flex;align-items:center;gap:5px;font-size:.82rem;font-weight:600;color:var(--text);text-transform:none;letter-spacing:normal;cursor:pointer}
@@ -38,6 +42,10 @@
 .of-date-f{flex:1;min-width:0;margin-left:3px}
 .of-date-f input{width:100%}
 .of-date input[type="date"]{padding:2px 6px;font-size:.82rem;border:1.5px solid var(--border);border-radius:6px;font-family:inherit}
+.of-date-f input[type="date"]{width:fit-content;max-width:110px;padding-right:2px}
+.of-date-f input[type="date"]::-webkit-datetime-edit{padding:0}
+.of-date-f input[type="date"]::-webkit-datetime-edit-fields-wrapper{padding:0}
+.of-date-f input[type="date"]::-webkit-calendar-picker-indicator{margin:0;padding:0}
 .of-ins{display:grid;grid-template-columns:repeat(2,1fr);gap:4px}
 .of-ins-item{display:flex;align-items:end;gap:4px}
 .of-ins-item>div{flex:1;min-width:0}
@@ -52,7 +60,7 @@
 .of-btn-p:disabled{opacity:.6;cursor:not-allowed}
 .of-btn-c{padding:4px 12px;font-size:.78rem;background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px;transition:all .2s}
 .of-btn-c:hover{background:#e2e8f0}
-@media(max-width:768px){.of-r3,.of-r2,.of-grid,.of-dates,.of-ins{grid-template-columns:1fr}.of-form{padding:8px;gap:6px}.of-f input,.of-f select,.of-f textarea{padding:10px 12px;font-size:.9rem;min-height:44px}.of-sub{flex-direction:column}.of-sub button{width:100%;justify-content:center}.of-head-row{flex-direction:column;align-items:stretch;gap:6px}.of-head-row .of-st{min-width:0}.of-head-row .of-grid{grid-template-columns:1fr 1fr;gap:8px;width:100%}.of-head-row .of-f-inline{flex-direction:column;align-items:stretch}.of-head-row .of-f-inline input{max-width:none;flex:1;width:100%}}
+@media(max-width:768px){.of-r3,.of-r2,.of-grid,.of-ins{grid-template-columns:1fr}.of-form{padding:8px;gap:6px}.of-f input,.of-f select,.of-f textarea{padding:10px 12px;font-size:.9rem;min-height:44px}.of-sub{flex-direction:column}.of-sub button{width:100%;justify-content:center}.of-head-row{flex-direction:column;align-items:stretch;gap:6px}.of-head-row .of-st{min-width:0}.of-head-row .of-grid{grid-template-columns:1fr 1fr;gap:8px;width:100%}.of-head-row .of-f-inline{flex-direction:column;align-items:stretch}.of-head-row .of-f-inline input{max-width:none;flex:1;width:100%}.of-head-row .of-dates{width:100%;justify-content:flex-start}}
 @media(max-width:1100px){.of-cols{grid-template-columns:1fr;grid-template-rows:auto}.of-col-left,.of-col-right{grid-column:1;grid-row:auto}.of-col-left{order:1}.of-col-right{order:2}}
 
 /* Vista tabla - mayúsculas */
