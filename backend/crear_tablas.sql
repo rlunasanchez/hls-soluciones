@@ -74,6 +74,7 @@ CREATE TABLE IF NOT EXISTS ordenes_trabajo (
   cliente VARCHAR(200) NOT NULL,
   direccion VARCHAR(300),
   comuna VARCHAR(100),
+  rut VARCHAR(20),
   contacto VARCHAR(200),
   fono_contacto VARCHAR(50),
   email_contacto VARCHAR(100),

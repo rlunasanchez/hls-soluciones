@@ -234,10 +234,17 @@ function OrdenFormEquipo({
         </div>
         <div className="of-f">
           <label>Nivel de Tinta</label>
-          <input type="text" placeholder="Ej: 80%, lleno, etc." value={nuevaOrden.nivelTinta}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, nivelTinta: upperInput(e)})}
+          <select
+            value={nuevaOrden.nivelTinta}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, nivelTinta: e.target.value})}
             disabled={readOnly}
-            style={inputStyle} />
+            style={inputStyle}
+          >
+            <option value="">Seleccionar...</option>
+            <option value="LLENO">Lleno</option>
+            <option value="MEDIO">Medio</option>
+            <option value="BAJO">Bajo</option>
+          </select>
         </div>
         <div className="of-f">
           <label>Contador Páginas OUT</label>
