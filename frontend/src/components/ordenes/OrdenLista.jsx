@@ -2,7 +2,7 @@ import { ClipboardList, Plus, RotateCcw } from "lucide-react";
 import Pagination from "../Pagination";
 import OrdenAcciones from "./OrdenAcciones";
 
-function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtroCliente, onFiltroClienteChange, filtroSerie, onFiltroSerieChange, filtroEstado, onFiltroEstadoChange, filtroFechaDesde, onFiltroFechaDesdeChange, filtroFechaHasta, onFiltroFechaHastaChange, onLimpiar, onNueva, paginaActual, totalPaginas, onPageChange, onVer, onEditar, onEliminar, onInforme, onCotizacion }) {
+function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtroCliente, onFiltroClienteChange, filtroSerie, onFiltroSerieChange, filtroEstado, onFiltroEstadoChange, filtroGarantia, onFiltroGarantiaChange, filtroFechaDesde, onFiltroFechaDesdeChange, filtroFechaHasta, onFiltroFechaHastaChange, onLimpiar, onNueva, paginaActual, totalPaginas, onPageChange, onVer, onEditar, onEliminar, onInforme, onCotizacion }) {
 
   return (
     <>
@@ -52,6 +52,18 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                 <option value="todos">Todas</option>
                 <option value="cerrada">Cerrada</option>
                 <option value="pendiente">Pendiente</option>
+              </select>
+            </div>
+            <div className="filtro-grupo-select">
+              <label>Garantía</label>
+              <select
+                value={filtroGarantia}
+                onChange={(e) => onFiltroGarantiaChange(e.target.value)}
+                className="filtro-garantia-select"
+              >
+                <option value="todos">Todas</option>
+                <option value="si">Sí</option>
+                <option value="no">No</option>
               </select>
             </div>
             <div className="filtro-fechas-group">
