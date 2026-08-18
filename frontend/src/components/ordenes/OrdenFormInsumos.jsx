@@ -14,8 +14,8 @@ function OrdenFormInsumos({ insumos, insumosVisibles, setInsumosVisibles, setIns
         {!readOnly && insumos.some(i => i.nombre) && (
           <div style={{ display: 'flex', gap: '6px' }}>
             <button type="button" className="of-btn-a" onClick={() => {
-              setInsumos(Array(12).fill({ nombre: "" }));
-              setInsumosVisibles(2);
+              setInsumos(Array.from({ length: 12 }, () => ({ nombre: "" })));
+              setInsumosVisibles(4);
             }}>
               <Trash2 size={14} /> Limpiar
             </button>
