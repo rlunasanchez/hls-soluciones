@@ -106,7 +106,8 @@ function OrdenTrabajo() {
     // Avería/Falla/Incidencia
     averia: "",
     actividad: "",
-    observaciones: ""
+    observaciones: "",
+    infoInterna: ""
   });
 
   // Cargar clientes, equipos y órdenes al montar el componente
@@ -192,6 +193,7 @@ function OrdenTrabajo() {
         averia: "",
         actividad: "",
         observaciones: "",
+        infoInterna: "",
         contactosExtra: [],
         direccionesExtra: []
       });
@@ -372,6 +374,7 @@ function OrdenTrabajo() {
       averia: toUpper(orden.averia),
       actividad: toUpper(orden.actividad),
       observaciones: toUpper(orden.observaciones),
+      infoInterna: toUpper(orden.info_interna),
       contactosExtra: parseExtra(orden.contactos_extra),
       direccionesExtra: parseExtra(orden.direcciones_extra)
     });
@@ -464,6 +467,7 @@ function OrdenTrabajo() {
       averia: toUpper(orden.averia),
       actividad: toUpper(orden.actividad),
       observaciones: toUpper(orden.observaciones),
+      infoInterna: toUpper(orden.info_interna),
       contactosExtra: parseExtra(orden.contactos_extra),
       direccionesExtra: parseExtra(orden.direcciones_extra)
     });
@@ -755,6 +759,7 @@ function OrdenTrabajo() {
       averia: "",
       actividad: "",
       observaciones: "",
+      infoInterna: "",
       contactosExtra: [],
       direccionesExtra: []
     });
