@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
 
 function EquipoAcciones({ equipo, onVer, onEditar, onEliminar }) {
@@ -17,15 +17,21 @@ function EquipoAcciones({ equipo, onVer, onEditar, onEliminar }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useLayoutEffect(() => {
+    if (!abierto || !btnRef.current || !menuRef.current) return;
+    const rect = btnRef.current.getBoundingClientRect();
+    const menuHeight = menuRef.current.offsetHeight;
+    const left = Math.min(Math.max(rect.right - 140, 4), window.innerWidth - 140);
+    let top = rect.bottom + 4;
+    if (top + menuHeight > window.innerHeight) {
+      top = Math.max(rect.top - menuHeight - 4, 4);
+    }
+    setPos({ top, left });
+  }, [abierto]);
+
   const toggle = (e) => {
     e.stopPropagation();
-    if (abierto) {
-      setAbierto(false);
-      return;
-    }
-    const rect = btnRef.current.getBoundingClientRect();
-    setPos({ top: rect.bottom + 4, left: rect.right - 140 });
-    setAbierto(true);
+    setAbierto((v) => !v);
   };
 
   return (
