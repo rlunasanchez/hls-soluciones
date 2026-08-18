@@ -8,14 +8,14 @@ function OrdenFormInsumos({ insumos, insumosVisibles, setInsumosVisibles, setIns
   };
 
   return (
-    <div className="of-sec" style={{background:'white', marginTop:'26px'}}>
+    <div className="of-sec" style={{background:'white'}}>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'6px'}}>
         <span className="of-st muted">Insumos</span>
         {!readOnly && insumos.some(i => i.nombre) && (
           <div style={{ display: 'flex', gap: '6px' }}>
             <button type="button" className="of-btn-a" onClick={() => {
               setInsumos(Array.from({ length: 12 }, () => ({ nombre: "" })));
-              setInsumosVisibles(4);
+              setInsumosVisibles(2);
             }}>
               <Trash2 size={14} /> Limpiar
             </button>
@@ -33,33 +33,33 @@ function OrdenFormInsumos({ insumos, insumosVisibles, setInsumosVisibles, setIns
             <div>
               <input type="text" placeholder={`Insumo ${idx + 1}`} value={ins.nombre} onChange={(e) => actualizarInsumo(idx, e.target.value)} disabled={readOnly} />
             </div>
-            {!readOnly && (
+            {!readOnly && idx >= 2 && (
               <button type="button" className="of-ins-del" onClick={() => {
                 if (!window.confirm(`¿Eliminar insumo ${idx + 1}?`)) return;
                 const nuevas = insumos.filter((_, i) => i !== idx);
                 while (nuevas.length < 12) nuevas.push({ nombre: "" });
                 setInsumos(nuevas);
-                setInsumosVisibles(Math.max(4, insumosVisibles - 1));
+                setInsumosVisibles(Math.max(2, insumosVisibles - 1));
               }}><Trash2 size={14} /></button>
             )}
           </div>
         ))}
       </div>
-      {insumos.filter(i => i.nombre).length > 4 && (
+      {insumos.filter(i => i.nombre).length > 2 && (
         <div style={{ marginTop: '6px', textAlign: 'center' }}>
           <button
             type="button"
             className="of-btn-a"
             onClick={() => {
-              if (insumosVisibles > 4) {
-                setInsumosVisibles(4);
+              if (insumosVisibles > 2) {
+                setInsumosVisibles(2);
               } else {
                 const lastFilled = insumos.reduce((last, i, idx) => i.nombre ? idx : last, -1);
-                setInsumosVisibles(Math.max(4, lastFilled + 1));
+                setInsumosVisibles(Math.max(2, lastFilled + 1));
               }
             }}
           >
-            {insumosVisibles > 4 ? "Ver menos" : "Ver más"}
+            {insumosVisibles > 2 ? "Ver menos" : "Ver más"}
           </button>
         </div>
       )}
