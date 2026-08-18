@@ -1,8 +1,8 @@
-import { ClipboardList, Plus } from "lucide-react";
+import { ClipboardList, Plus, RotateCcw } from "lucide-react";
 import Pagination from "../Pagination";
 import OrdenAcciones from "./OrdenAcciones";
 
-function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtroEstado, onFiltroEstadoChange, filtroFechaDesde, onFiltroFechaDesdeChange, filtroFechaHasta, onFiltroFechaHastaChange, onNueva, paginaActual, totalPaginas, onPageChange, onVer, onEditar, onEliminar, onInforme, onCotizacion }) {
+function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtroCliente, onFiltroClienteChange, filtroSerie, onFiltroSerieChange, filtroEstado, onFiltroEstadoChange, filtroFechaDesde, onFiltroFechaDesdeChange, filtroFechaHasta, onFiltroFechaHastaChange, onLimpiar, onNueva, paginaActual, totalPaginas, onPageChange, onVer, onEditar, onEliminar, onInforme, onCotizacion }) {
 
   return (
     <>
@@ -19,6 +19,26 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                 placeholder="Buscar..."
                 value={filtroNumeroOrden}
                 onChange={(e) => onFiltroChange(e.target.value)}
+                className="filtro-garantia-select"
+              />
+            </div>
+            <div className="filtro-grupo-select">
+              <label>Cliente</label>
+              <input
+                type="text"
+                placeholder="Buscar..."
+                value={filtroCliente}
+                onChange={(e) => onFiltroClienteChange(e.target.value)}
+                className="filtro-garantia-select"
+              />
+            </div>
+            <div className="filtro-grupo-select">
+              <label>Serie</label>
+              <input
+                type="text"
+                placeholder="Buscar..."
+                value={filtroSerie}
+                onChange={(e) => onFiltroSerieChange(e.target.value)}
                 className="filtro-garantia-select"
               />
             </div>
@@ -54,6 +74,9 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                 />
               </div>
             </div>
+            <button onClick={onLimpiar} className="btn-limpiar-equipos" title="Limpiar filtros">
+              <RotateCcw size={14} /> Limpiar
+            </button>
           </div>
         </div>
       </div>

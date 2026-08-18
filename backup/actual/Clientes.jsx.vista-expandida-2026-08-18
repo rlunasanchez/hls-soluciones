@@ -9,6 +9,7 @@ import HeaderCliente from "../components/clientes/HeaderCliente";
 import Pagination from "../components/Pagination";
 import FiltrosCliente from "../components/clientes/FiltrosCliente";
 import ClienteLista from "../components/clientes/ClienteLista";
+import ClienteExpandido from "../components/clientes/ClienteExpandido";
 import ClienteFormulario from "../components/clientes/ClienteFormulario";
 
 function Clientes() {
@@ -20,7 +21,14 @@ function Clientes() {
   const [filtroRut, setFiltroRut] = useState("");
   const [paginaActual, setPaginaActual] = useState(1);
   const clientesPorPagina = 4;
+  const [ordenesCliente, setOrdenesCliente] = useState([]);
   const [soloLectura, setSoloLectura] = useState(false);
+
+  const ordenesPorCliente = {};
+  ordenesCliente.forEach((ot) => {
+    if (!ordenesPorCliente[ot.cliente_id]) ordenesPorCliente[ot.cliente_id] = [];
+    ordenesPorCliente[ot.cliente_id].push(ot);
+  });
 
   const { usuarioActual } = parseToken();
 
@@ -33,9 +41,29 @@ function Clientes() {
     }
   };
 
+  const fetchOrdenes = async (signal) => {
+    try {
+      const res = await api.get("/api/ordenes?page=1&limit=10000", { signal });
+      setOrdenesCliente(res.data.ordenes || []);
+    } catch (err) {
+      if (err.name !== "CanceledError") console.error("Error al cargar órdenes:", err);
+    }
+  };
+
+  const eliminarOrdenCliente = async (id) => {
+    if (!window.confirm("¿Eliminar esta orden de trabajo?")) return;
+    try {
+      await api.delete(`/api/ordenes/${id}`);
+      fetchOrdenes();
+    } catch (err) {
+      alert("Error al eliminar orden");
+    }
+  };
+
   useEffect(() => {
     const controller = new AbortController();
     fetchClientes(controller.signal);
+    fetchOrdenes(controller.signal);
     return () => controller.abort();
   }, []);
 
@@ -132,14 +160,31 @@ function Clientes() {
         </button>
       </div>
 
-      <ClienteLista
-        clientes={clientesPagina}
-        onNuevaOT={(c) => navigate("/orden-trabajo", { state: { cliente: c } })}
-        onCotizacion={(c) => navigate("/cotizaciones", { state: { cliente: c } })}
-        onVer={verCliente}
-        onEditar={editarCliente}
-        onEliminar={eliminarCliente}
-      />
+      {(busqueda || filtroRut) && clientesPagina.length > 0 && (
+        <div style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 24 }}>
+          {clientesPagina.map((c) => (
+            <ClienteExpandido
+              key={c.id}
+              cliente={c}
+              ordenes={ordenesPorCliente[c.id] || []}
+              onEliminar={eliminarCliente}
+              onEditar={() => editarCliente(c)}
+              onEliminarOT={eliminarOrdenCliente}
+            />
+          ))}
+        </div>
+      )}
+
+      {!busqueda && !filtroRut && (
+        <ClienteLista
+          clientes={clientesPagina}
+          onNuevaOT={(c) => navigate("/orden-trabajo", { state: { cliente: c } })}
+          onCotizacion={(c) => navigate("/cotizaciones", { state: { cliente: c } })}
+          onVer={verCliente}
+          onEditar={editarCliente}
+          onEliminar={eliminarCliente}
+        />
+      )}
 
       {clientesFiltrados.length === 0 && (
         <div className="empty-state">
