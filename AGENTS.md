@@ -1567,6 +1567,7 @@ Estas columnas faltaban y causaban error 500 al editar/guardar equipos desde OT.
 | 1.53 | 18 Agosto 2026 | Compactar tarjetas "Cliente Asignado" y "Equipo Asignado" en formulario OT: padding 2px 8px, borde 1.5px, border-radius `var(--radius-sm)`. Botón "Ver" reducido a height 24px y padding 2px 8px. Solo frontend |
 | 1.54 | 18 Agosto 2026 | Fix race condition duplicación de clientes/equipos al guardar: `useRef(guardandoRef)` como bandera síncrona que bloquea múltiples submits antes de que React re-renderice. `EquipoFormulario.jsx` ahora también tiene estado `guardando`, `disabled` en botón y texto "Guardando...". `Equipos.css`: `.ef-btn-p:disabled` con `opacity:.6; cursor:not-allowed`. Solo frontend |
 | 1.55 | 18 Agosto 2026 | Proteger OT contra duplicación al guardar: `useRef(guardandoRef)` como bandera síncrona en `guardarOrden()`. Botón "Guardar Orden" ahora tiene `disabled={guardando}` y texto "Guardando...". `OrdenTrabajo.css`: `.of-btn-p:disabled` con `opacity:.6; cursor:not-allowed`. Todos los ingresos (Clientes, Equipos, OT) ahora protegidos contra doble-submit. Solo frontend |
+| 1.56 | 17 Agosto 2026 | Fix RUT cortado en tarjetas móviles del mantenedor de Clientes: `.badge-rut` ahora con `white-space: nowrap` y `flex-shrink: 0` (antes el badge se comprimía y el RUT se partía en varias líneas cuando la razón social era larga). `.data-card-header strong` con `min-width: 0` para que la razón social sea la que se ajuste, no el RUT. Solo frontend |
 
 ---
 
@@ -1691,5 +1692,22 @@ ALTER TABLE ordenes_trabajo DROP COLUMN IF EXISTS contacto2, DROP COLUMN IF EXIS
 8. Se deshabilita si `readOnly` o si el cliente no tiene contactos
 
 **Flujo:** buscar cliente → Escribir 2+ caracteres en contacto → click en resultado → campos Contacto/Email Contacto/Fono Contacto se llenan automáticamente.
+
+---
+
+## Cambios Recientes (17 Agosto 2026)
+
+### 57. Fix RUT cortado en tarjetas móviles del mantenedor de Clientes
+**Fecha:** 17 Agosto 2026
+**Ramás afectadas:** `main` (MySQL) — solo frontend, idéntico en `deploy/cloud` (PostgreSQL)
+**Archivo modificado:** `frontend/src/styles/clientes-componentes.css`
+
+**Problema:** En la vista móvil del mantenedor de Clientes, el RUT de cada cliente quedaba cortado o partido en varias líneas dentro de la tarjeta.
+
+**Causa:** El header de la tarjeta (`.data-card-header`) usa `display: flex; justify-content: space-between` con el `strong` (código + razón social) y el badge del RUT (`.badge-rut`). Cuando la razón social era larga, el badge se comprimía y el RUT se partía en varias líneas porque `.badge-rut` no tenía `white-space: nowrap` ni protección contra encogerse.
+
+**Solución:**
+- `.badge-rut`: agregado `white-space: nowrap` + `flex-shrink: 0` → el RUT siempre queda en una sola línea y no se comprime
+- `.data-card-header strong`: agregado `min-width: 0` → la razón social es la que se ajusta (envuelve/recorta), no el RUT
 
 **Verificación (Playwright, Chrome):** dropdown muestra contacto principal y adicional de "DIEGO LUNA"; clickear el adicional autocompleta `contacto=DIEGO LUNA`, `emailC=diego@gmail.com`, `fonoC=6494960`; ancho del buscador 268px igual al campo Email.

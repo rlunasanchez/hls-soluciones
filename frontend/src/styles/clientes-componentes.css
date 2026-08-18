@@ -150,6 +150,7 @@
   font-size: 1rem;
   color: var(--text);
   text-transform: uppercase;
+  min-width: 0;
 }
 
 .badge-rut {
@@ -159,6 +160,8 @@
   border-radius: 4px;
   font-size: 0.8rem;
   font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .data-card-row {
