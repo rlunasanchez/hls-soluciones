@@ -1,0 +1,941 @@
+import { useState, useRef, useEffect } from "react";
+import { Search, Users, ChevronDown, Eye, UserPlus, MapPin } from "lucide-react";
+import ClienteFormulario from "../clientes/ClienteFormulario";
+import "../../styles/Clientes.css";
+import { upperInput } from "../../utils/helpers";
+
+function OrdenFormCliente({
+  busquedaCliente, setBusquedaCliente,
+  mostrarDropdownClientes, setMostrarDropdownClientes,
+  clienteSeleccionado,
+  clientesFiltrados,
+  clienteDropdownRef,
+  seleccionarCliente,
+  nuevaOrden, setNuevaOrden,
+  clientes = [],
+  clienteInactivo = false,
+  clienteFijo = false,
+  readOnly = false
+}) {
+  const [mostrarDetalleCliente, setMostrarDetalleCliente] = useState(false);
+  const [mostrarDireccionesExtra, setMostrarDireccionesExtra] = useState(false);
+  const [mostrarContactosExtra, setMostrarContactosExtra] = useState(false);
+  const [direccionesExpandidas, setDireccionesExpandidas] = useState(false);
+  const [contactosExpandidos, setContactosExpandidos] = useState(false);
+  const LIMITE_EXTRAS = 1;
+  const [busquedaContacto, setBusquedaContacto] = useState("");
+  const [mostrarDropdownContacto, setMostrarDropdownContacto] = useState(false);
+  const contactoDropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (contactoDropdownRef.current && !contactoDropdownRef.current.contains(event.target)) {
+        setMostrarDropdownContacto(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    setBusquedaContacto("");
+    setMostrarDropdownContacto(false);
+  }, [clienteSeleccionado?.id, clienteSeleccionado?.razon_social]);
+
+  const contactosDisponibles = (() => {
+    if (!clienteSeleccionado) return [];
+    const principalNombre = String(clienteSeleccionado.contacto_nombre || "").toUpperCase().trim();
+    const principalEmail = String(clienteSeleccionado.contacto_email || "").toUpperCase().trim();
+    const extras = String(clienteSeleccionado.contactos || "")
+      .split(";;")
+      .map((c) => {
+        const p = c.split("|");
+        return { nombre: (p[0] || "").toUpperCase().trim(), email: p[1] || "", fono: p[2] || "", cargo: p[3] || "" };
+      })
+      .filter((c) => c.nombre)
+      .filter((c) => {
+        const n = c.nombre.toUpperCase().trim();
+        const e = (c.email || "").toUpperCase().trim();
+        if (principalNombre && n === principalNombre) return false;
+        if (principalEmail && e && e === principalEmail) return false;
+        return true;
+      });
+    const principal = principalNombre
+      ? [{
+          nombre: principalNombre,
+          email: clienteSeleccionado.contacto_email || "",
+          fono: clienteSeleccionado.contacto_fono || "",
+          cargo: clienteSeleccionado.contacto_cargo || "",
+          principal: true
+        }]
+      : [];
+    return [...principal, ...extras];
+  })();
+
+  const contactosFiltrados = busquedaContacto.trim().length >= 2
+    ? contactosDisponibles.filter((c) => {
+        const q = busquedaContacto.toUpperCase();
+        return (c.nombre || "").includes(q) || (c.email || "").toUpperCase().includes(q);
+      })
+    : [];
+
+  const seleccionarContactoBusqueda = (c) => {
+    setNuevaOrden({
+      ...nuevaOrden,
+      contacto: c.nombre,
+      emailContacto: c.email || "",
+      fonoContacto: c.fono || ""
+    });
+    setBusquedaContacto(c.nombre);
+    setMostrarDropdownContacto(false);
+  };
+
+  return (
+    <div className="of-sec success">
+      <div className="of-st success">Datos del Cliente</div>
+
+      <div style={{ marginBottom: '8px' }}>
+        <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)' }}>
+          {clienteFijo && clienteSeleccionado ? (
+            <>
+              <Users size={16} style={{ display: 'inline', marginRight: '6px' }} />
+              Cliente Asignado
+            </>
+          ) : (
+            <>
+              <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
+              Buscar y Seleccionar Cliente
+            </>
+          )}
+        </label>
+
+        {clienteFijo && clienteSeleccionado ? (
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+            <div style={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '2px 8px',
+              background: '#E0F2FE',
+              border: '1.5px solid var(--primary)',
+              borderRadius: 'var(--radius-sm)',
+              flexWrap: 'wrap'
+            }}>
+              <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' }}>
+                {clienteSeleccionado.codigo || 'CL-XXXX'}
+              </span>
+              <span style={{ fontWeight: '600', color: 'var(--text)', fontSize: '0.85rem' }}>
+                {clienteSeleccionado.razon_social}
+              </span>
+              {clienteInactivo ? (
+                <span style={{ background: '#F97316', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>
+                  ⚠ Cliente desactivado
+                </span>
+              ) : (
+                <span style={{ background: 'var(--success)', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>
+                  ✓ Seleccionado
+                </span>
+              )}
+            </div>
+            {readOnly && (
+              <button
+                type="button"
+                onClick={() => setMostrarDetalleCliente(true)}
+                title="Ver todos los datos del cliente"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  background: '#0D9488',
+                  color: 'white',
+                  border: 'none',
+                  padding: '2px 8px',
+                  borderRadius: 'var(--radius-sm)',
+                  cursor: 'pointer',
+                  fontWeight: 500,
+                  fontSize: '0.75rem',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                  height: '24px'
+                }}
+              >
+                <Eye size={14} /> Ver
+              </button>
+            )}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+            <div ref={clienteDropdownRef} style={{ position: 'relative', flex: 1 }}>
+            <input
+              type="text"
+              className="ot-search"
+              placeholder="Escriba para buscar cliente por nombre o RUT..."
+              value={busquedaCliente}
+              onChange={(e) => {
+                setBusquedaCliente(upperInput(e));
+                setMostrarDropdownClientes(e.target.value.length >= 2);
+              }}
+              onFocus={() => {
+                if (busquedaCliente.length >= 2) setMostrarDropdownClientes(true);
+              }}
+              disabled={readOnly}
+              style={{
+                width: '100%',
+                padding: '2px 8px',
+                border: '1.5px solid var(--border)',
+                borderRadius: 'var(--radius-sm)',
+                fontSize: '.82rem',
+                background: clienteSeleccionado ? '#E0F2FE' : 'white'
+              }}
+            />
+            {clienteInactivo && (
+              <span style={{
+                position: 'absolute',
+                right: '40px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: '#F97316',
+                color: 'white',
+                padding: '2px 8px',
+                borderRadius: '4px',
+                fontSize: '0.75rem'
+              }}>
+                ⚠ Cliente desactivado
+              </span>
+            )}
+            {!clienteInactivo && clienteSeleccionado && (
+              <span style={{
+                position: 'absolute',
+                right: '40px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'var(--success)',
+                color: 'white',
+                padding: '2px 8px',
+                borderRadius: '4px',
+                fontSize: '0.75rem'
+              }}>
+                ✓ Seleccionado
+              </span>
+            )}
+            <ChevronDown
+              size={20}
+              style={{
+                position: 'absolute',
+                right: '12px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: 'var(--text-muted)'
+              }}
+            />
+
+            {mostrarDropdownClientes && busquedaCliente.length >= 2 && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                right: 0,
+                background: 'white',
+                border: '1.5px solid var(--border)',
+                borderTop: 'none',
+                borderRadius: '0 0 8px 8px',
+                maxHeight: '250px',
+                overflow: 'auto',
+                zIndex: 1000,
+                boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+              }}>
+                {clientesFiltrados.length > 0 ? (
+                  clientesFiltrados.map((cliente) => (
+                    <div
+                      key={cliente.id}
+                      onClick={() => seleccionarCliente(cliente)}
+                      style={{
+                        padding: '2px 8px',
+                        cursor: 'pointer',
+                        borderBottom: '1px solid var(--border)',
+                        transition: 'background 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--primary-light)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' }}>
+                          {cliente.codigo || 'CL-XXXX'}
+                        </span>
+                        <span style={{ fontWeight: '600', color: 'var(--text)' }}>
+                          {cliente.razon_social}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                        RUT: {cliente.rut || 'N/A'} | {cliente.direccion || ''}, {cliente.comuna || ''}
+                        {cliente.telefono ? ` | Tel: ${cliente.telefono}` : ''}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                    No se encontraron clientes con "{busquedaCliente}"
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          {clienteSeleccionado && readOnly && (
+            <button
+              type="button"
+              onClick={() => setMostrarDetalleCliente(true)}
+              title="Ver todos los datos del cliente"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                background: '#0D9488',
+                color: 'white',
+                border: 'none',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: 500,
+                fontSize: '0.8rem',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                height: '32px'
+              }}
+            >
+                <Eye size={14} /> Ver
+            </button>
+          )}
+          </div>
+          )}
+        </div>
+
+      {/* Modal Detalle Cliente (solo lectura) */}
+      {mostrarDetalleCliente && clienteSeleccionado && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
+        }}
+          onClick={(e) => { if (e.target === e.currentTarget) setMostrarDetalleCliente(false); }}
+        >
+          <div style={{ maxHeight: '90vh', overflow: 'auto', width: '100%', maxWidth: '900px' }}>
+            <ClienteFormulario
+              clienteEditando={clienteSeleccionado}
+              clientes={clientes}
+              onSave={() => {}}
+              onCancel={() => setMostrarDetalleCliente(false)}
+              readOnly
+            />
+          </div>
+        </div>
+      )}
+
+      <div className="of-form-grid" style={{ gridTemplateColumns: '2fr 1fr', marginBottom: '15px' }}>
+        <div className="of-f">
+          <label>Cliente *</label>
+          <input
+            type="text"
+            placeholder="Nombre del cliente"
+            value={nuevaOrden.cliente}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, cliente: upperInput(e)})}
+            disabled={readOnly}
+            required
+            style={{
+              width: '100%',
+              padding: '2px 8px',
+              border: '1.5px solid var(--border)',
+              borderRadius: '6px',
+              fontSize: '.82rem'
+            }}
+          />
+        </div>
+
+        <div className="of-f">
+          <label>Comuna</label>
+          <input
+            type="text"
+            placeholder="Comuna"
+            value={nuevaOrden.comuna}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, comuna: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
+            disabled={readOnly}
+            style={{
+              width: '100%',
+              padding: '2px 8px',
+              border: '1.5px solid var(--border)',
+              borderRadius: '6px',
+              fontSize: '.82rem'
+            }}
+          />
+        </div>
+
+        <div className="of-f" style={{ gridColumn: '1 / -1' }}>
+          <label>Dirección</label>
+          <input
+            type="text"
+            placeholder="Dirección del cliente"
+            value={nuevaOrden.direccion}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, direccion: upperInput(e)})}
+            disabled={readOnly}
+            style={{
+              width: '100%',
+              padding: '2px 8px',
+              border: '1.5px solid var(--border)',
+              borderRadius: '6px',
+              fontSize: '.82rem'
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Direcciones Extra / Sucursales (dinámicas) */}
+      <div style={{ marginTop: '34px', padding: '4px 10px', background: '#E0F2FE', border: '1px solid #7CD0F0', borderRadius: '8px', lineHeight: '1.2' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer', fontSize: '0.8rem', width: 'fit-content', maxWidth: '100%' }}>
+          <input
+            type="checkbox"
+            className="of-check of-check--direcciones"
+            checked={mostrarDireccionesExtra}
+            disabled={readOnly && nuevaOrden.direccionesExtra.length === 0}
+            onChange={(e) => setMostrarDireccionesExtra(e.target.checked)}
+          />
+          <MapPin size={14} style={{ color: '#0284C7', flexShrink: 0 }} />
+          Otras Direcciones / Sucursales
+          {nuevaOrden.direccionesExtra.length > 0 && (
+            <span style={{
+              background: '#0284C7', color: 'white', padding: '1px 8px', borderRadius: '10px',
+              fontSize: '0.75rem', fontWeight: '700'
+            }}>
+              {nuevaOrden.direccionesExtra.length}
+            </span>
+          )}
+        </label>
+
+        {mostrarDireccionesExtra && (
+          <div style={{ marginTop: '10px' }}>
+            {(() => {
+                      const direccionesCliente = clienteSeleccionado
+                ? String(clienteSeleccionado.direcciones || "").split(";;")
+                    .map(d => {
+                      const p = d.split("|");
+                      return {
+                        tipo_direccion: (p[0] || "").trim(),
+                        direccion: (p[1] || "").toUpperCase().trim(),
+                        fono: p[2] || "",
+                        ciudad: (p[3] || "").toUpperCase().trim(),
+                        comuna: (p[4] || "").toUpperCase().trim()
+                      };
+                    })
+                    .filter(d => d.direccion)
+                : [];
+
+              const agregarDireccion = (dir) => {
+                setNuevaOrden({
+                  ...nuevaOrden,
+                  direccionesExtra: [...nuevaOrden.direccionesExtra, {
+                    tipo: dir.tipo_direccion || "",
+                    direccion: dir.direccion,
+                    ciudad: dir.ciudad || "",
+                    fono: dir.fono || "",
+                    comuna: dir.comuna
+                  }]
+                });
+              };
+
+              const actualizarDireccion = (idx, campo, valor) => {
+                const arr = [...nuevaOrden.direccionesExtra];
+                arr[idx] = { ...arr[idx], [campo]: valor };
+                setNuevaOrden({ ...nuevaOrden, direccionesExtra: arr });
+              };
+
+              return (
+                <>
+                  {direccionesCliente.length >= 1 && (
+                    <div style={{ marginBottom: '10px' }}>
+                      <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)', fontSize: '0.8rem' }}>
+                        Agregar dirección del cliente
+                      </label>
+                      <select
+                        disabled={readOnly}
+                        defaultValue=""
+                        onChange={(e) => {
+                          const i = parseInt(e.target.value, 10);
+                          if (isNaN(i) || !direccionesCliente[i]) return;
+                          agregarDireccion(direccionesCliente[i]);
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '2px 8px',
+                          border: '1.5px solid var(--border)',
+                          borderRadius: '6px',
+                          fontSize: '.82rem',
+                          background: 'white'
+                        }}
+                      >
+                        <option value="">-- Elegir dirección --</option>
+                        {direccionesCliente.map((d, idx) => (
+                          <option key={idx} value={idx}>
+                            {d.tipo_direccion ? `${d.tipo_direccion} | ` : ''}{d.direccion}{d.ciudad ? ` | ${d.ciudad}` : ''}{d.comuna ? ` | ${d.comuna}` : ''}{d.fono ? ` | F:${d.fono}` : ''}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {nuevaOrden.direccionesExtra.slice(0, direccionesExpandidas ? nuevaOrden.direccionesExtra.length : LIMITE_EXTRAS).map((dir, idx) => (
+                    <div key={idx} style={{ marginBottom: '6px', border: '1px solid var(--border)', borderRadius: '6px', padding: '4px' }}>
+                      <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-end', marginBottom: '4px' }}>
+                        <div className="of-f" style={{ flex: '0 0 120px' }}>
+                          <label>Tipo</label>
+                          <select value={dir.tipo} onChange={(e) => actualizarDireccion(idx, 'tipo', e.target.value)} disabled={readOnly}>
+                            <option value="">Seleccionar</option>
+                            <option value="Matriz">Matriz</option>
+                            <option value="Sucursal">Sucursal</option>
+                          </select>
+                        </div>
+                        <div className="of-f" style={{ flex: '1 1 0' }}>
+                          <label>Dirección {idx + 1}</label>
+                          <input type="text" placeholder="Dirección" value={dir.direccion} onChange={(e) => actualizarDireccion(idx, 'direccion', upperInput(e))} disabled={readOnly} />
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-end', marginTop: '4px' }}>
+                        <div className="of-f" style={{ flex: '0 0 140px' }}>
+                          <label>Ciudad</label>
+                          <input type="text" placeholder="Ciudad" value={dir.ciudad} onChange={(e) => actualizarDireccion(idx, 'ciudad', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={readOnly} />
+                        </div>
+                        <div className="of-f" style={{ flex: '0 0 130px' }}>
+                          <label>Fono</label>
+                          <input type="tel" placeholder="Fono" value={dir.fono} onChange={(e) => actualizarDireccion(idx, 'fono', e.target.value.replace(/[^0-9+]/g, ''))} disabled={readOnly} />
+                        </div>
+                        <div className="of-f" style={{ flex: '0 0 140px' }}>
+                          <label>Comuna</label>
+                          <input type="text" placeholder="Comuna" value={dir.comuna} onChange={(e) => actualizarDireccion(idx, 'comuna', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={readOnly} />
+                        </div>
+                        {!readOnly && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (!confirm("¿Seguro que desea eliminar esta dirección?")) return;
+                              const arr = nuevaOrden.direccionesExtra.filter((_, i) => i !== idx);
+                              setNuevaOrden({ ...nuevaOrden, direccionesExtra: arr });
+                            }}
+                            style={{ background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA', borderRadius: '6px', padding: '2px 8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.75rem' }}
+                          >
+                            Quitar
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+
+                  {nuevaOrden.direccionesExtra.length > LIMITE_EXTRAS && (
+                    <div style={{ marginTop: '4px' }}>
+                      <button
+                        type="button"
+                        onClick={() => setDireccionesExpandidas(!direccionesExpandidas)}
+                        style={{
+                          background: 'none',
+                          color: '#0284C7',
+                          border: '1px solid #7CD0F0',
+                          borderRadius: '6px',
+                          padding: '2px 10px',
+                          cursor: 'pointer',
+                          fontWeight: 600,
+                          fontSize: '0.75rem'
+                        }}
+                      >
+                        {direccionesExpandidas ? 'Ver menos' : `Ver todas (${nuevaOrden.direccionesExtra.length})`}
+                      </button>
+                    </div>
+                  )}
+
+                  {!readOnly && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNuevaOrden({
+                          ...nuevaOrden,
+                          direccionesExtra: [...nuevaOrden.direccionesExtra, { tipo: "", direccion: "", ciudad: "", fono: "", comuna: "" }]
+                        });
+                      }}
+                      style={{
+                        marginTop: '6px',
+                        background: '#E0F2FE',
+                        color: '#0284C7',
+                        border: '1px solid #7CD0F0',
+                        borderRadius: '6px',
+                        padding: '2px 8px',
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                        fontSize: '0.75rem'
+                      }}
+                    >
+                      + Agregar dirección
+                    </button>
+                  )}
+                </>
+              );
+            })()}
+          </div>
+        )}
+      </div>
+
+      {clienteSeleccionado && (
+        <div ref={contactoDropdownRef} style={{ position: 'relative', marginTop: '14px', maxWidth: '268px' }}>
+          <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: 'var(--text)', fontSize: '0.8rem' }}>
+            <Search size={14} style={{ display: 'inline', marginRight: '6px' }} />
+            Buscar Contacto (por nombre o correo)
+          </label>
+          <input
+            type="text"
+            className="ot-search"
+            placeholder="Escriba para buscar contacto del cliente..."
+            value={busquedaContacto}
+            onChange={(e) => {
+              setBusquedaContacto(e.target.value);
+              setMostrarDropdownContacto(e.target.value.trim().length >= 2);
+            }}
+            onFocus={() => { if (busquedaContacto.trim().length >= 2) setMostrarDropdownContacto(true); }}
+            disabled={readOnly || contactosDisponibles.length === 0}
+            style={{
+              width: '100%',
+              padding: '2px 8px',
+              border: '1.5px solid var(--border)',
+              borderRadius: 'var(--radius-sm)',
+              fontSize: '.82rem',
+              background: 'white'
+            }}
+          />
+
+          <div style={{ height: '6px' }} />
+
+          {mostrarDropdownContacto && (
+            <div style={{
+              position: 'absolute', top: '100%', left: 0, right: 0,
+              background: 'white', border: '1px solid var(--border)', borderTop: 'none',
+              borderRadius: '0 0 8px 8px', maxHeight: '200px', overflow: 'auto',
+              zIndex: 1000, boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+            }}>
+              {contactosFiltrados.length > 0 ? (
+                contactosFiltrados.map((c, idx) => (
+                  <div key={idx}
+                    onClick={() => seleccionarContactoBusqueda(c)}
+                    style={{ padding: '8px 10px', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--primary-light)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'white'; }}
+                  >
+                    <div style={{ fontWeight: '600', color: 'var(--text)', fontSize: '0.82rem' }}>
+                      {c.nombre}
+                      {!c.principal && <span style={{ fontWeight: '400', color: 'var(--text-muted)' }}> (adicional)</span>}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      {c.email ? `✉ ${c.email}` : ''}{c.fono ? ` | Tel: ${c.fono}` : ''}{c.cargo ? ` | ${c.cargo}` : ''}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div style={{ padding: '12px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                  No se encontraron contactos
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="of-form-grid" style={{ marginTop: '14px' }}>
+        <div className="of-f">
+          <label>Email</label>
+          <input
+            type="email"
+            placeholder="Email del cliente"
+            value={nuevaOrden.email}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, email: upperInput(e)})}
+            disabled={readOnly}
+            style={{
+              width: '100%',
+              padding: '2px 8px',
+              border: '1.5px solid var(--border)',
+              borderRadius: '6px',
+              fontSize: '.82rem'
+            }}
+          />
+        </div>
+
+        <div className="of-f" style={{ gap: '4px' }}>
+          <label style={{ fontSize: '10px' }}>Fono Principal</label>
+          <input
+            type="tel"
+            placeholder="Teléfono principal del cliente"
+            value={nuevaOrden.fonoPrincipal}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, fonoPrincipal: e.target.value.replace(/[^0-9+]/g, '')})}
+            disabled={readOnly}
+            style={{
+              width: '100%',
+              padding: '2px 8px',
+              border: '1.5px solid var(--border)',
+              borderRadius: '6px',
+              fontSize: '.82rem'
+            }}
+          />
+        </div>
+
+        <div className="of-f" style={{ gap: '4px' }}>
+          <label style={{ fontSize: '10px' }}>Contacto</label>
+          <input
+            type="text"
+            placeholder="Nombre del contacto"
+            value={nuevaOrden.contacto}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, contacto: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
+            disabled={readOnly}
+            style={{
+              width: '100%',
+              padding: '2px 8px',
+              border: '1.5px solid var(--border)',
+              borderRadius: '6px',
+              fontSize: '.82rem'
+            }}
+          />
+        </div>
+      </div>
+
+      <div className="of-form-grid">
+        <div className="of-f">
+          <label>Email Contacto</label>
+          <input
+            type="email"
+            placeholder="Email del contacto"
+            value={nuevaOrden.emailContacto}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, emailContacto: upperInput(e)})}
+            disabled={readOnly}
+            style={{
+              width: '100%',
+              padding: '2px 8px',
+              border: '1.5px solid var(--border)',
+              borderRadius: '6px',
+              fontSize: '.82rem'
+            }}
+          />
+        </div>
+
+        <div className="of-f">
+          <label>Fono Contacto</label>
+          <input
+            type="tel"
+            placeholder="Teléfono del contacto"
+            value={nuevaOrden.fonoContacto}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, fonoContacto: e.target.value.replace(/[^0-9+]/g, '')})}
+            disabled={readOnly}
+            style={{
+              width: '100%',
+              padding: '2px 8px',
+              border: '1.5px solid var(--border)',
+              borderRadius: '6px',
+              fontSize: '.82rem'
+            }}
+          />
+        </div>
+
+        <div className="of-f">
+          <label>Técnico Asignado *</label>
+          <input
+            type="text"
+            placeholder="Nombre y apellido del técnico"
+            value={nuevaOrden.tecnicoAsignado}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, tecnicoAsignado: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
+            disabled={readOnly}
+            required
+            style={{
+              width: '100%',
+              padding: '2px 8px',
+              border: '1.5px solid var(--border)',
+              borderRadius: '6px',
+              fontSize: '.82rem'
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Contactos Extra (dinámicos) */}
+      <div style={{ marginTop: '10px', padding: '4px 10px', background: '#F0FDF4', border: '1px solid #7AD6EC', borderRadius: '8px', lineHeight: '1.2' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer', fontSize: '0.8rem', width: 'fit-content', maxWidth: '100%' }}>
+          <input
+            type="checkbox"
+            className="of-check of-check--contactos"
+            checked={mostrarContactosExtra}
+            disabled={readOnly && nuevaOrden.contactosExtra.length === 0}
+            onChange={(e) => setMostrarContactosExtra(e.target.checked)}
+          />
+          <UserPlus size={14} style={{ color: 'var(--success)', flexShrink: 0 }} />
+          Otros Contactos
+          {nuevaOrden.contactosExtra.length > 0 && (
+            <span style={{
+              background: 'var(--success)', color: 'white', padding: '1px 8px', borderRadius: '10px',
+              fontSize: '0.75rem', fontWeight: '700'
+            }}>
+              {nuevaOrden.contactosExtra.length}
+            </span>
+          )}
+        </label>
+
+        {mostrarContactosExtra && (
+          <div style={{ marginTop: '10px' }}>
+            {(() => {
+              const contactosCliente = clienteSeleccionado
+                ? String(clienteSeleccionado.contactos || "").split(";;")
+                    .map(c => {
+                      const p = c.split("|");
+                      return { nombre: (p[0] || "").toUpperCase().trim(), email: p[1] || "", fono: p[2] || "", cargo: p[3] || "", direccion: (p[4] || "").toUpperCase().trim() };
+                    })
+                    .filter(c => c.nombre)
+                : [];
+
+              const agregarContacto = (c) => {
+                setNuevaOrden({
+                  ...nuevaOrden,
+                  contactosExtra: [...nuevaOrden.contactosExtra, {
+                    nombre: c.nombre,
+                    email: c.email,
+                    fono: c.fono,
+                    cargo: c.cargo,
+                    direccion: c.direccion || ""
+                  }]
+                });
+              };
+
+              const actualizarContacto = (idx, campo, valor) => {
+                const arr = [...nuevaOrden.contactosExtra];
+                arr[idx] = { ...arr[idx], [campo]: valor };
+                setNuevaOrden({ ...nuevaOrden, contactosExtra: arr });
+              };
+
+              return (
+                <>
+                  {contactosCliente.length >= 1 && (
+                    <div style={{ marginBottom: '10px' }}>
+                      <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)', fontSize: '0.8rem' }}>
+                        Agregar contacto del cliente
+                      </label>
+                      <select
+                        disabled={readOnly}
+                        defaultValue=""
+                        onChange={(e) => {
+                          const i = parseInt(e.target.value, 10);
+                          if (isNaN(i) || !contactosCliente[i]) return;
+                          agregarContacto(contactosCliente[i]);
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '2px 8px',
+                          border: '1.5px solid var(--border)',
+                          borderRadius: '6px',
+                          fontSize: '.82rem',
+                          background: 'white'
+                        }}
+                      >
+                        <option value="">-- Elegir contacto --</option>
+                        {contactosCliente.map((c, idx) => (
+                          <option key={idx} value={idx}>
+                            {c.nombre}{c.fono ? ` | ${c.fono}` : ''}{c.email ? ` | ${c.email}` : ''}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {nuevaOrden.contactosExtra.slice(0, contactosExpandidos ? nuevaOrden.contactosExtra.length : LIMITE_EXTRAS).map((c, idx) => (
+                    <div key={idx} style={{ marginBottom: '6px', border: '1px solid var(--border)', borderRadius: '6px', padding: '4px' }}>
+                      <div className="of-form-grid" style={{ gap: '8px' }}>
+                        <div className="of-f">
+                          <label>Contacto {idx + 1}</label>
+                          <input type="text" placeholder="Nombre" value={c.nombre} onChange={(e) => actualizarContacto(idx, 'nombre', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={readOnly} />
+                        </div>
+                        <div className="of-f">
+                          <label>Email</label>
+                          <input type="email" placeholder="Email" value={c.email} onChange={(e) => actualizarContacto(idx, 'email', upperInput(e))} disabled={readOnly} />
+                        </div>
+                        <div className="of-f">
+                          <label>Fono</label>
+                          <input type="tel" placeholder="Fono" value={c.fono} onChange={(e) => actualizarContacto(idx, 'fono', e.target.value.replace(/[^0-9+]/g, ''))} disabled={readOnly} />
+                        </div>
+                        <div className="of-f">
+                          <label>Dirección Contacto</label>
+                          <input type="text" placeholder="Dirección Contacto" value={c.direccion} onChange={(e) => actualizarContacto(idx, 'direccion', upperInput(e))} disabled={readOnly} />
+                        </div>
+                        <div className="of-f">
+                          <label>Cargo</label>
+                          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                            <input type="text" placeholder="Cargo" value={c.cargo} onChange={(e) => actualizarContacto(idx, 'cargo', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={readOnly} style={{ flex: '1 1 auto', width: 'auto' }} />
+                            {!readOnly && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (!confirm("¿Seguro que desea eliminar este contacto?")) return;
+                                  const arr = nuevaOrden.contactosExtra.filter((_, i) => i !== idx);
+                                  setNuevaOrden({ ...nuevaOrden, contactosExtra: arr });
+                                }}
+                                style={{ background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA', borderRadius: '6px', padding: '2px 8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.75rem', lineHeight: '1.3', flexShrink: 0 }}
+                              >
+                                Quitar
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {nuevaOrden.contactosExtra.length > LIMITE_EXTRAS && (
+                    <div style={{ marginTop: '4px' }}>
+                      <button
+                        type="button"
+                        onClick={() => setContactosExpandidos(!contactosExpandidos)}
+                        style={{
+                          background: 'none',
+                          color: 'var(--success)',
+                          border: '1px solid #7AD6EC',
+                          borderRadius: '6px',
+                          padding: '2px 10px',
+                          cursor: 'pointer',
+                          fontWeight: 600,
+                          fontSize: '0.75rem'
+                        }}
+                      >
+                        {contactosExpandidos ? 'Ver menos' : `Ver todos (${nuevaOrden.contactosExtra.length})`}
+                      </button>
+                    </div>
+                  )}
+
+                  {!readOnly && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNuevaOrden({
+                          ...nuevaOrden,
+                          contactosExtra: [...nuevaOrden.contactosExtra, { nombre: "", email: "", fono: "", direccion: "", cargo: "" }]
+                        });
+                      }}
+                      style={{
+                        marginTop: '6px',
+                        background: '#F0FDF4',
+                        color: 'var(--success)',
+                        border: '1px solid #7AD6EC',
+                        borderRadius: '6px',
+                        padding: '2px 8px',
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                        fontSize: '0.75rem'
+                      }}
+                    >
+                      + Agregar contacto
+                    </button>
+                  )}
+                </>
+              );
+            })()}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default OrdenFormCliente;

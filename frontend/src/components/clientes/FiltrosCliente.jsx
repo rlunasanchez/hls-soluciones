@@ -1,7 +1,6 @@
 import { Search, RotateCcw } from "lucide-react";
 
 function FiltrosCliente({ busqueda, onBusquedaChange, filtroRut, onFiltroRutChange, onLimpiar }) {
-  const hayFiltro = busqueda || filtroRut;
   const formatearRut = (val) => {
     let v = val.toUpperCase().replace(/[^0-9K-]/g, "");
     if (v.length > 12) v = v.slice(0, 12);
@@ -38,11 +37,9 @@ function FiltrosCliente({ busqueda, onBusquedaChange, filtroRut, onFiltroRutChan
           onChange={(e) => onFiltroRutChange(formatearRut(e.target.value))}
         />
       </div>
-      {hayFiltro && (
-        <button className="btn-nuevo-cliente" onClick={onLimpiar} title="Limpiar filtros">
-          <RotateCcw size={14} /> Limpiar
-        </button>
-      )}
+      <button className="btn-limpiar-equipos" onClick={onLimpiar} title="Limpiar filtros">
+        <RotateCcw size={14} /> Limpiar
+      </button>
     </div>
   );
 }
