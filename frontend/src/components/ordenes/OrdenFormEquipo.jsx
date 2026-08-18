@@ -33,6 +33,7 @@ function OrdenFormEquipo({
     <div className="of-sec muted">
       <div className="of-st muted">Datos del Equipo</div>
 
+      {equipoSeleccionado && (
       <div style={{ marginBottom: '10px' }}>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '10px' }}>
           {equipoFijo && equipoSeleccionado && (
@@ -83,6 +84,7 @@ function OrdenFormEquipo({
           )}
         </div>
       </div>
+      )}
 
       {equipoFijo && equipoSeleccionado ? null : (
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px',marginBottom:'8px'}}>
