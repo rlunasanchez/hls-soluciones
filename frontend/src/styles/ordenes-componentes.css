@@ -135,10 +135,19 @@ input[type="checkbox"].of-check--contactos {
 /* Buscadores tenues (busca cliente, serie, modelo) - sin outline grueso en focus */
 .ot-search {
   outline: none;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 2px 8px;
+  font-size: .82rem;
+  width: 100%;
+  box-sizing: border-box;
+  background: white;
+  font-family: inherit;
 }
 .ot-search:focus {
   outline: none;
-  box-shadow: 0 0 0 1px rgba(154, 184, 217, 0.35);
+  border-color: #0C4A8C;
+  box-shadow: 0 0 0 2px rgba(12, 74, 140, 0.15);
 }
 .ot-search:focus:disabled {
   box-shadow: none;

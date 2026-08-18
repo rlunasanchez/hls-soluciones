@@ -11,8 +11,8 @@ const ufCss = `.uf-wrap{background:white;border-radius:16px;box-shadow:var(--sha
 .uf-r2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .uf-f{display:flex;flex-direction:column;gap:2px}
 .uf-f label{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px}
-.uf-f input,.uf-f select{padding:5px 8px;font-size:.78rem;border:1.5px solid var(--border);border-radius:6px;background:white;transition:border-color .15s}
-.uf-f input:focus,.uf-f select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px rgba(37,99,235,.1)}
+.uf-f input,.uf-f select{padding:2px 8px;font-size:.82rem;border:1.5px solid var(--border);border-radius:6px;background:white;transition:border-color .15s}
+.uf-f input:focus,.uf-f select:focus{outline:none;border-color:#0C4A8C;box-shadow:0 0 0 2px rgba(12,74,140,.15)}
 .uf-sub{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:2px}
 .uf-btn-p{padding:7px 16px;font-size:.8rem;background:var(--primary);color:white;border:none;border-radius:7px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px}
 .uf-btn-c{padding:7px 16px;font-size:.8rem;background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;border-radius:7px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px;transition:all .2s}

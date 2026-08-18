@@ -210,10 +210,6 @@ function OrdenFormCliente({
               disabled={readOnly}
               style={{
                 width: '100%',
-                padding: '2px 8px',
-                border: '1.5px solid var(--border)',
-                borderRadius: 'var(--radius-sm)',
-                fontSize: '.82rem',
                 background: clienteSeleccionado ? '#E0F2FE' : 'white'
               }}
             />
@@ -389,11 +385,8 @@ function OrdenFormCliente({
             disabled={readOnly}
             style={{
               width: '100%',
-              padding: '2px 8px',
-              border: rutError ? '1px solid #f87171' : '1.5px solid var(--border)',
-              background: rutError ? '#fef2f2' : undefined,
-              borderRadius: '6px',
-              fontSize: '.82rem'
+              border: rutError ? '1px solid #f87171' : undefined,
+              background: rutError ? '#fef2f2' : undefined
             }}
           />
         </div>
@@ -406,13 +399,7 @@ function OrdenFormCliente({
             value={nuevaOrden.direccion}
             onChange={(e) => setNuevaOrden({...nuevaOrden, direccion: upperInput(e)})}
             disabled={readOnly}
-            style={{
-              width: '100%',
-              padding: '2px 8px',
-              border: '1.5px solid var(--border)',
-              borderRadius: '6px',
-              fontSize: '.82rem'
-            }}
+            style={{ width: '100%' }}
           />
         </div>
 
@@ -424,13 +411,7 @@ function OrdenFormCliente({
             value={nuevaOrden.comuna}
             onChange={(e) => setNuevaOrden({...nuevaOrden, comuna: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
             disabled={readOnly}
-            style={{
-              width: '100%',
-              padding: '2px 8px',
-              border: '1.5px solid var(--border)',
-              borderRadius: '6px',
-              fontSize: '.82rem'
-            }}
+            style={{ width: '100%' }}
           />
         </div>
       </div>
