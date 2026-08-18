@@ -120,6 +120,7 @@ function OrdenFormCliente({
   };
 
   return (
+    <>
     <div className="of-sec primary">
       <div className="of-st success">Datos del Cliente</div>
 
@@ -964,6 +965,7 @@ function OrdenFormCliente({
           </div>
         )}
       </div>
+    </div>
 
       <div style={{ marginTop: '10px', padding: '4px 10px', background: '#FEF9E7', border: '1px solid #F5D48C', borderRadius: '8px', lineHeight: '1.2' }}>
         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer', fontSize: '0.8rem', width: 'fit-content', maxWidth: '100%' }}>
@@ -992,7 +994,7 @@ function OrdenFormCliente({
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 }
 
