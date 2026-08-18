@@ -417,7 +417,7 @@ function OrdenTrabajo() {
       nuevosInsumos.push({ nombre: "" });
     }
     setInsumos(nuevosInsumos);
-    setInsumosVisibles(Math.max(4, insumosData.length));
+    setInsumosVisibles(Math.max(2, insumosData.length));
   };
 
   const verOrden = async (orden) => {
@@ -529,7 +529,7 @@ function OrdenTrabajo() {
       nuevosInsumos.push({ nombre: "" });
     }
     setInsumos(nuevosInsumos);
-    setInsumosVisibles(Math.max(4, insumosData.length));
+    setInsumosVisibles(Math.max(2, insumosData.length));
   };
 
   const eliminarOrden = async (id) => {

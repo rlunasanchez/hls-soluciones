@@ -47,12 +47,12 @@
 .of-date-f input[type="date"]::-webkit-datetime-edit-fields-wrapper{padding:0}
 .of-date-f input[type="date"]::-webkit-calendar-picker-indicator{margin:0;padding:0}
 .of-ins{display:grid;grid-template-columns:repeat(2,1fr);gap:4px}
-.of-ins-item{display:flex;align-items:end;gap:4px}
+.of-ins-item{display:flex;align-items:center;gap:4px}
 .of-ins-item>div{flex:1;min-width:0}
 .of-ins-item label{font-size:9px;font-weight:600;color:var(--text-muted);text-transform:uppercase}
 .of-ins-item input{padding:2px 8px;font-size:.82rem;border:1.5px solid var(--border);border-radius:6px;width:100%;box-sizing:border-box}
 .of-ins-item input:focus,.of-date input[type="date"]:focus{outline:none;border-color:#9AB8D9;box-shadow:0 0 0 1px rgba(154,184,217,.35)}
-.of-ins-del{height:24px;width:24px;padding:0;display:flex;align-items:center;justify-content:center;background:#fee2e2;color:#dc2626;border:none;border-radius:4px;cursor:pointer;flex-shrink:0}
+.of-ins-del{height:21px;width:24px;padding:0;display:flex;align-items:center;justify-content:center;background:#fee2e2;color:#dc2626;border:none;border-radius:4px;cursor:pointer;flex-shrink:0}
 .of-btn-a{padding:3px 8px;font-size:.7rem;background:var(--success);color:white;border:none;border-radius:5px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:3px}
 .of-btn-a:focus-visible,.of-btn-p:focus-visible,.of-btn-c:focus-visible,.of-head-close:focus-visible,.of-ins-del:focus-visible{outline:none;box-shadow:0 0 0 1px rgba(154,184,217,.4)}
 .of-sub{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:2px}
