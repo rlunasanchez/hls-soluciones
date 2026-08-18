@@ -65,7 +65,7 @@ function OrdenTrabajo() {
     { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
     { nombre: "" }, { nombre: "" }
   ]);
-  const [insumosVisibles, setInsumosVisibles] = useState(4);
+  const [insumosVisibles, setInsumosVisibles] = useState(2);
   
   // Estado principal de la orden
   const [nuevaOrden, setNuevaOrden] = useState({
@@ -156,9 +156,9 @@ function OrdenTrabajo() {
         setInsumos([
           { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
           { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
-          { nombre: "" }, { nombre: "" }
+          { nombre: "" },           { nombre: "" }
         ]);
-        setInsumosVisibles(4);
+        setInsumosVisibles(2);
         setNuevaOrden({
           numeroOrden: numeroOt,
           fecha: fechaActual,
@@ -234,9 +234,9 @@ function OrdenTrabajo() {
     setInsumos([
       { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
       { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
-      { nombre: "" }, { nombre: "" }
+      { nombre: "" },       { nombre: "" }
     ]);
-    setInsumosVisibles(4);
+    setInsumosVisibles(2);
     setMostrarFormulario(true);
   };
 
@@ -752,9 +752,9 @@ function OrdenTrabajo() {
     setInsumos([
       { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
       { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
-      { nombre: "" }, { nombre: "" }
+      { nombre: "" },       { nombre: "" }
     ]);
-    setInsumosVisibles(4);
+    setInsumosVisibles(2);
     setClienteSeleccionado(null);
     setClienteFijo(false);
     setEquipoSeleccionado(null);
@@ -858,14 +858,6 @@ function OrdenTrabajo() {
                   clienteFijo={clienteFijo}
                   readOnly={soloLectura}
                 />
-
-                  <OrdenFormInsumos
-                    insumos={insumos}
-                    insumosVisibles={insumosVisibles}
-                    setInsumosVisibles={setInsumosVisibles}
-                    setInsumos={setInsumos}
-                    readOnly={soloLectura}
-                  />
                 </div>
 
                 <div className="of-col-right">
@@ -890,6 +882,14 @@ function OrdenTrabajo() {
                   readOnly={soloLectura}
                   equipos={equipos}
                   equipoFijo={equipoFijo}
+                />
+
+                <OrdenFormInsumos
+                  insumos={insumos}
+                  insumosVisibles={insumosVisibles}
+                  setInsumosVisibles={setInsumosVisibles}
+                  setInsumos={setInsumos}
+                  readOnly={soloLectura}
                 />
 
                   <OrdenFormAveria
