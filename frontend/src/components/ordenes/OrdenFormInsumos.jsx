@@ -8,7 +8,7 @@ function OrdenFormInsumos({ insumos, insumosVisibles, setInsumosVisibles, setIns
   };
 
   return (
-    <div className="of-sec" style={{background:'white'}}>
+    <div className="of-sec" style={{background:'white', marginTop:'26px'}}>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'6px'}}>
         <span className="of-st muted">Insumos</span>
         {!readOnly && insumos.some(i => i.nombre) && (
@@ -31,7 +31,6 @@ function OrdenFormInsumos({ insumos, insumosVisibles, setInsumosVisibles, setIns
         {insumos.slice(0, insumosVisibles).map((ins, idx) => (
           <div key={idx} className="of-ins-item">
             <div>
-              <label>Insumo {idx + 1}</label>
               <input type="text" placeholder={`Insumo ${idx + 1}`} value={ins.nombre} onChange={(e) => actualizarInsumo(idx, e.target.value)} disabled={readOnly} />
             </div>
             {!readOnly && (

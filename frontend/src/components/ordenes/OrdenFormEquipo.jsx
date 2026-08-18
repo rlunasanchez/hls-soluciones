@@ -203,13 +203,8 @@ function OrdenFormEquipo({
       </div>
       )}
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-        gap: '20px',
-        marginBottom: '20px'
-      }}>
-        <div className="of-f" style={{ gridColumn: 'span 2' }}>
+      <div className="of-r3" style={{ gap: '20px', marginBottom: '20px' }}>
+        <div className="of-f">
           <label>Equipo *</label>
           <input type="text" placeholder="Tipo de equipo" value={nuevaOrden.equipo}
             onChange={(e) => setNuevaOrden({...nuevaOrden, equipo: upperInput(e)})}
