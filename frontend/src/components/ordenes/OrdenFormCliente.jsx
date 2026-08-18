@@ -119,7 +119,7 @@ function OrdenFormCliente({
   };
 
   return (
-    <div className="of-sec success">
+    <div className="of-sec primary">
       <div className="of-st success">Datos del Cliente</div>
 
       <div style={{ marginBottom: '8px' }}>

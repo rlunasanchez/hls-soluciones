@@ -30,7 +30,7 @@ function OrdenFormEquipo({
   };
 
   return (
-    <div className="of-sec muted">
+    <div className="of-sec primary">
       <div className="of-st muted">Datos del Equipo</div>
 
       {equipoSeleccionado && (

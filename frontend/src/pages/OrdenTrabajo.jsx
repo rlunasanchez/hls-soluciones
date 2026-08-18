@@ -33,6 +33,7 @@ function OrdenTrabajo() {
   const [filtroCliente, setFiltroCliente] = useState("");
   const [filtroSerie, setFiltroSerie] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("todos");
+  const [filtroGarantia, setFiltroGarantia] = useState("todos");
   const [filtroFechaDesde, setFiltroFechaDesde] = useState("");
   const [filtroFechaHasta, setFiltroFechaHasta] = useState("");
   
@@ -243,7 +244,7 @@ function OrdenTrabajo() {
   };
 
   // Resetear paginación al filtrar
-  useEffect(() => { setPaginaActual(1); }, [filtroNumeroOrden, filtroCliente, filtroSerie, filtroEstado, filtroFechaDesde, filtroFechaHasta]);
+  useEffect(() => { setPaginaActual(1); }, [filtroNumeroOrden, filtroCliente, filtroSerie, filtroEstado, filtroGarantia, filtroFechaDesde, filtroFechaHasta]);
 
   // Buscar equipos por serie via API (datos siempre frescos)
   useEffect(() => {
@@ -307,6 +308,8 @@ function OrdenTrabajo() {
     if (filtroSerie && !orden.serie?.toLowerCase().includes(filtroSerie.toLowerCase())) return false;
     if (filtroEstado === "cerrada" && !orden.fecha_entrega) return false;
     if (filtroEstado === "pendiente" && orden.fecha_entrega) return false;
+    if (filtroGarantia === "si" && !orden.es_garantia) return false;
+    if (filtroGarantia === "no" && orden.es_garantia) return false;
     if (filtroFechaDesde && orden.fecha && orden.fecha.substring(0, 10) < filtroFechaDesde) return false;
     if (filtroFechaHasta && orden.fecha && orden.fecha.substring(0, 10) > filtroFechaHasta) return false;
     return true;
@@ -803,11 +806,13 @@ function OrdenTrabajo() {
             onFiltroSerieChange={setFiltroSerie}
             filtroEstado={filtroEstado}
             onFiltroEstadoChange={setFiltroEstado}
+            filtroGarantia={filtroGarantia}
+            onFiltroGarantiaChange={setFiltroGarantia}
             filtroFechaDesde={filtroFechaDesde}
             onFiltroFechaDesdeChange={setFiltroFechaDesde}
             filtroFechaHasta={filtroFechaHasta}
             onFiltroFechaHastaChange={setFiltroFechaHasta}
-            onLimpiar={() => { setFiltroNumeroOrden(""); setFiltroCliente(""); setFiltroSerie(""); setFiltroEstado("todos"); setFiltroFechaDesde(""); setFiltroFechaHasta(""); }}
+            onLimpiar={() => { setFiltroNumeroOrden(""); setFiltroCliente(""); setFiltroSerie(""); setFiltroEstado("todos"); setFiltroGarantia("todos"); setFiltroFechaDesde(""); setFiltroFechaHasta(""); }}
             onNueva={abrirNuevaOrden}
             paginaActual={paginaActual}
             totalPaginas={totalPaginas}
