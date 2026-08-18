@@ -219,11 +219,11 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                 </div>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "200px", gap: 6, marginTop: 6 }}>
-                <div className="cf-field">
-                  <label>RUT {rutError && <span style={{ color: "#dc2626", fontSize: ".72rem" }}> — {rutError}</span>}</label>
+                <div className="cf-field" style={{ position: "relative" }}>
+                  <label>RUT {rutError && <span style={{ position: "absolute", right: 0, top: 0, whiteSpace: "nowrap", color: "#dc2626", fontSize: ".7rem" }}>{rutError}</span>}</label>
                   <input placeholder="Ej: 12.345.678-9" value={nuevoCliente.rut}
                     disabled={readOnly}
-                    style={rutError ? { border: "2px solid #dc2626", background: "#fef2f2" } : {}}
+                    style={rutError ? { border: "1px solid #f87171", background: "#fef2f2" } : {}}
                     onChange={handleRutChange} onBlur={handleRutBlur} />
                 </div>
               </div>

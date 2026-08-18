@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Search, Users, ChevronDown, Eye, UserPlus, MapPin } from "lucide-react";
 import ClienteFormulario from "../clientes/ClienteFormulario";
 import "../../styles/Clientes.css";
-import { upperInput } from "../../utils/helpers";
+import { upperInput, validarRUT } from "../../utils/helpers";
 
 function OrdenFormCliente({
   busquedaCliente, setBusquedaCliente,
@@ -18,6 +18,7 @@ function OrdenFormCliente({
   readOnly = false
 }) {
   const [mostrarDetalleCliente, setMostrarDetalleCliente] = useState(false);
+  const [rutError, setRutError] = useState("");
   const [mostrarDireccionesExtra, setMostrarDireccionesExtra] = useState(false);
   const [mostrarContactosExtra, setMostrarContactosExtra] = useState(false);
   const [direccionesExpandidas, setDireccionesExpandidas] = useState(false);
@@ -26,6 +27,33 @@ function OrdenFormCliente({
   const [busquedaContacto, setBusquedaContacto] = useState("");
   const [mostrarDropdownContacto, setMostrarDropdownContacto] = useState(false);
   const contactoDropdownRef = useRef(null);
+
+  const handleRutChange = (e) => {
+    let val = upperInput(e, /[^0-9K-]/g);
+    if (val.length > 12) val = val.slice(0, 12);
+    const partes = val.split("-");
+    if (partes.length === 2) {
+      if (partes[1].length > 1) partes[1] = partes[1][0];
+      if (partes[0].length > 0) partes[0] = partes[0].replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+    } else if (partes.length === 1 && partes[0].length > 0) {
+      partes[0] = partes[0].replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+    }
+    val = partes.join("-");
+    setNuevaOrden({ ...nuevaOrden, rut: val });
+    if (rutError && val.length >= 9 && validarRUT(val)) setRutError("");
+  };
+
+  const handleRutBlur = (e) => {
+    const val = e.target.value;
+    if (!val) { setRutError(""); return; }
+    const limpio = val.replace(/\./g, "").toUpperCase();
+    const tieneGuion = limpio.includes("-");
+    const match = limpio.match(/^(\d+)-([K0-9])$/);
+    if (match) { if (validarRUT(val)) setRutError(""); else setRutError("RUT inválido"); return; }
+    if (tieneGuion && !match) setRutError("RUT inválido");
+    else if (!tieneGuion && limpio.length >= 5) setRutError("Falta el guion y dígito verificador");
+    else setRutError("");
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -350,18 +378,20 @@ function OrdenFormCliente({
           />
         </div>
 
-        <div className="of-f">
-          <label>RUT</label>
+        <div className="of-f" style={{ position: 'relative' }}>
+          <label>RUT {rutError && <span style={{ position: 'absolute', right: 0, top: 0, whiteSpace: 'nowrap', color: '#dc2626', fontSize: '.7rem', textTransform: 'none', letterSpacing: 'normal' }}>{rutError}</span>}</label>
           <input
             type="text"
             placeholder="Ej: 12.345.678-9"
             value={nuevaOrden.rut}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, rut: upperInput(e)})}
+            onChange={handleRutChange}
+            onBlur={handleRutBlur}
             disabled={readOnly}
             style={{
               width: '100%',
               padding: '2px 8px',
-              border: '1.5px solid var(--border)',
+              border: rutError ? '1px solid #f87171' : '1.5px solid var(--border)',
+              background: rutError ? '#fef2f2' : undefined,
               borderRadius: '6px',
               fontSize: '.82rem'
             }}
