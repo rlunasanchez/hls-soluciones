@@ -351,12 +351,12 @@ function OrdenFormCliente({
         </div>
 
         <div className="of-f">
-          <label>Comuna</label>
+          <label>RUT</label>
           <input
             type="text"
-            placeholder="Comuna"
-            value={nuevaOrden.comuna}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, comuna: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
+            placeholder="Ej: 12.345.678-9"
+            value={nuevaOrden.rut}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, rut: upperInput(e)})}
             disabled={readOnly}
             style={{
               width: '100%',
@@ -368,13 +368,31 @@ function OrdenFormCliente({
           />
         </div>
 
-        <div className="of-f" style={{ gridColumn: '1 / -1' }}>
+        <div className="of-f">
           <label>Dirección</label>
           <input
             type="text"
             placeholder="Dirección del cliente"
             value={nuevaOrden.direccion}
             onChange={(e) => setNuevaOrden({...nuevaOrden, direccion: upperInput(e)})}
+            disabled={readOnly}
+            style={{
+              width: '100%',
+              padding: '2px 8px',
+              border: '1.5px solid var(--border)',
+              borderRadius: '6px',
+              fontSize: '.82rem'
+            }}
+          />
+        </div>
+
+        <div className="of-f">
+          <label>Comuna</label>
+          <input
+            type="text"
+            placeholder="Comuna"
+            value={nuevaOrden.comuna}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, comuna: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
             disabled={readOnly}
             style={{
               width: '100%',
