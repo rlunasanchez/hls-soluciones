@@ -33,7 +33,7 @@ function OrdenFormInsumos({ insumos, insumosVisibles, setInsumosVisibles, setIns
             <div>
               <input type="text" placeholder={`Insumo ${idx + 1}`} value={ins.nombre} onChange={(e) => actualizarInsumo(idx, e.target.value)} disabled={readOnly} />
             </div>
-            {!readOnly && idx >= 2 && (
+            {!readOnly && (
               <button type="button" className="of-ins-del" onClick={() => {
                 if (!window.confirm(`¿Eliminar insumo ${idx + 1}?`)) return;
                 const nuevas = insumos.filter((_, i) => i !== idx);
