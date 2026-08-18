@@ -24,6 +24,13 @@
   .filtro-grupo {
     width: 100%;
   }
+
+  .filtro-grupo input {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    min-height: 44px;
+    box-sizing: border-box;
+  }
 }
 
 .filtro-grupo label {

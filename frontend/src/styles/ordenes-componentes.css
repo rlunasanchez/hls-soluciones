@@ -182,7 +182,8 @@ input[type="checkbox"].of-check--contactos {
   .filtro-fecha-input {
     width: 100%;
     padding: 10px 12px;
-    font-size: 0.82rem;
+    font-size: 0.9rem;
+    min-height: 44px;
     min-width: 0;
     box-sizing: border-box;
   }
