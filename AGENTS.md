@@ -1570,6 +1570,7 @@ Estas columnas faltaban y causaban error 500 al editar/guardar equipos desde OT.
 | 1.56 | 17 Agosto 2026 | Fix RUT cortado en tarjetas móviles del mantenedor de Clientes: `.badge-rut` ahora con `white-space: nowrap` y `flex-shrink: 0` (antes el badge se comprimía y el RUT se partía en varias líneas cuando la razón social era larga). `.data-card-header strong` con `min-width: 0` para que la razón social sea la que se ajuste, no el RUT. Solo frontend |
 | 1.57 | 17 Agosto 2026 | Fix menú `...` cortado en mobile: los dropdowns de acciones (ClienteAcciones, EquipoAcciones, OrdenAcciones) usaban `position: fixed` y siempre abrían hacia abajo, así que en el último registro el menú se recortaba fuera del viewport. Ahora con `useLayoutEffect` miden la altura del menú y si no cabe bajo el botón lo abren hacia arriba; además el `left` se clampa para no salirse por el borde derecho. Solo frontend |
 | 1.58 | 17 Agosto 2026 | Form OT mobile: campos N° Orden y Fecha ordenados en 2 columnas lado a lado (grid `1fr 1fr`), cada uno con label encima e input a ancho completo, bajo el título "Datos de la Orden" en su propia línea. El resto de campos no se tocan. `OrdenTrabajo.css` (media query ≤768px). Solo frontend |
+| 1.59 | 17 Agosto 2026 | Buscadores de filtros uniformes en mobile (≤768px): Clientes (Razón Social, RUT) y OT (N° Orden, Garantía, Estado, Desde, Hasta) ahora con `padding: 10px 12px` y `min-height: 44px` igual que Equipos. Antes los de Clientes quedaban pequeños (`padding 2px`). `clientes-componentes.css` y `ordenes-componentes.css`. Solo frontend |
 
 ---
 
@@ -1741,5 +1742,19 @@ ALTER TABLE ordenes_trabajo DROP COLUMN IF EXISTS contacto2, DROP COLUMN IF EXIS
 - N° Orden y Fecha en **2 columnas lado a lado** (`.of-head-row .of-grid` con `grid-template-columns: 1fr 1fr`)
 - Cada campo con label encima e input a ancho completo (`.of-head-row .of-f-inline` en columna, input `width: 100%`)
 - El resto de campos del formulario no se tocan
+
+### 60. Buscadores de filtros uniformes en mobile
+**Fecha:** 17 Agosto 2026
+**Ramás afectadas:** `main` (MySQL) — solo frontend, idéntico en `deploy/cloud` (PostgreSQL)
+**Archivos modificados:**
+- `frontend/src/styles/clientes-componentes.css`
+- `frontend/src/styles/ordenes-componentes.css`
+
+**Problema:** En la versión mobile, los buscadores de filtros no tenían todos la misma altura. Los de Clientes (Razón Social, RUT) quedaban pequeños (`padding: 2px 8px` sin `min-height`), mientras que los de Equipos y OT ya tenían `padding: 10px 12px` + `min-height: 44px`.
+
+**Solución:**
+- **Clientes** (`clientes-componentes.css`): `.filtro-grupo input` en media query ≤768px ahora con `padding: 10px 12px; font-size: 0.9rem; min-height: 44px; box-sizing: border-box`
+- **OT** (`ordenes-componentes.css`): `.filtro-garantia-select` y `.filtro-fecha-input` en media query ≤768px ahora con `font-size: 0.9rem` y `min-height: 44px`
+- Resultado: todos los buscadores de filtros (Clientes, Equipos, OT) con el mismo alto en mobile
 
 **Verificación (Playwright, Chrome):** dropdown muestra contacto principal y adicional de "DIEGO LUNA"; clickear el adicional autocompleta `contacto=DIEGO LUNA`, `emailC=diego@gmail.com`, `fonoC=6494960`; ancho del buscador 268px igual al campo Email.
