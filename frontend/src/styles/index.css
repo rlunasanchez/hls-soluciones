@@ -326,8 +326,8 @@ tbody tr:hover {
     grid-template-columns: 1fr;
   }
   
-  .cf-btn-p, .cf-btn-c,
-  .ef-btn-p, .ef-btn-c,
+  .cf-btn-p, .cf-btn-c, .cf-btn-s,
+  .ef-btn-p, .ef-btn-c, .ef-btn-s,
   .of-btn-p, .of-btn-c, .of-btn-s,
   .uf-btn-p, .uf-btn-c,
   .main-btn, .btn-nuevo-cliente, .btn-limpiar-equipos {
@@ -768,8 +768,8 @@ table tr:last-child td {
     grid-template-columns: 1fr;
   }
   
-  .cf-btn-p, .cf-btn-c,
-  .ef-btn-p, .ef-btn-c,
+  .cf-btn-p, .cf-btn-c, .cf-btn-s,
+  .ef-btn-p, .ef-btn-c, .ef-btn-s,
   .of-btn-p, .of-btn-c, .of-btn-s,
   .uf-btn-p, .uf-btn-c,
   .main-btn, .btn-nuevo-cliente, .btn-limpiar-equipos {

@@ -27,6 +27,9 @@
 .cf-sub{display:flex;gap:12px;justify-content:flex-end;margin-top:6px;flex-wrap:wrap}
 .cf-btn-p{padding:6px 14px;font-size:.82rem;background:#0C4A8C;color:#fff;border:none;border-radius:7px;cursor:pointer;font-weight:600;transition:all .2s}.cf-btn-p:disabled{opacity:.6;cursor:not-allowed}
 .cf-btn-p:hover{background:#0a3d75}
+.cf-btn-s{padding:6px 14px;font-size:.82rem;background:var(--success);color:#fff;border:none;border-radius:7px;cursor:pointer;font-weight:600;transition:all .2s}
+.cf-btn-s:hover{filter:brightness(.92)}
+.cf-btn-s:disabled{opacity:.6;cursor:not-allowed}
 .cf-btn-c{padding:6px 14px;font-size:.82rem;background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;border-radius:7px;cursor:pointer;font-weight:600;transition:all .2s}
 .cf-btn-c:hover{background:#e2e8f0}
 .cf-btn-a{padding:5px 10px;font-size:.78rem;background:#0C4A8C;color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:500;transition:all .2s}

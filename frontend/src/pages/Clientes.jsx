@@ -55,20 +55,29 @@ function Clientes() {
   const indiceInicio = (paginaActual - 1) * clientesPorPagina;
   const clientesPagina = clientesFiltrados.slice(indiceInicio, indiceInicio + clientesPorPagina);
 
-  const guardarCliente = async (clienteData, resetFormulario) => {
+  const guardarCliente = async (clienteData, resetFormulario, mantener = false) => {
     try {
+      let clienteId = clienteEditando?.id;
       if (clienteEditando) {
         await api.put(`/api/clientes/${clienteEditando.id}`, clienteData);
         alert("Cliente actualizado");
       } else {
-        await api.post("/api/clientes", clienteData);
+        const res = await api.post("/api/clientes", clienteData);
+        clienteId = res.data?.id;
         alert("Cliente creado");
       }
-      resetFormulario();
-      setClienteEditando(null);
-      setSoloLectura(false);
-      setMostrarFormulario(false);
-      fetchClientes();
+      if (mantener && clienteId) {
+        // "Guardar Cambios": guarda y se mantiene en el form para seguir editando
+        const res = await api.get(`/api/clientes/${clienteId}`);
+        setClienteEditando(res.data);
+        fetchClientes();
+      } else {
+        resetFormulario();
+        setClienteEditando(null);
+        setSoloLectura(false);
+        setMostrarFormulario(false);
+        fetchClientes();
+      }
     } catch (err) {
       alert(err.response?.data?.msg || "Error al guardar");
     }

@@ -32,12 +32,12 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, readOnly 
     }
   }, [equipoEditando]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e, mantener = false) => {
     e.preventDefault();
     if (guardandoRef.current) return;
     guardandoRef.current = true;
     setGuardando(true);
-    Promise.resolve(onSave({ ...nuevoEquipo }, equipoEditando?.id)).finally(() => {
+    Promise.resolve(onSave({ ...nuevoEquipo }, equipoEditando?.id, mantener)).finally(() => {
       guardandoRef.current = false;
       setGuardando(false);
     });
@@ -95,7 +95,10 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, readOnly 
               ) : (
                 <>
                   <button type="button" className="ef-btn-c" onClick={onCancel}><X size={18} /> Cancelar</button>
-                  <button type="submit" className="ef-btn-p" disabled={guardando}><Save size={18} /> {guardando ? "Guardando..." : (equipoEditando ? "Guardar Cambios" : "Guardar Equipo")}</button>
+                  {equipoEditando && (
+                    <button type="button" className="ef-btn-s" onClick={(e) => handleSubmit(e, true)} disabled={guardando}><Save size={18} /> {guardando ? "Guardando..." : "Guardar Cambios"}</button>
+                  )}
+                  <button type="submit" className="ef-btn-p" disabled={guardando}><Save size={18} /> {guardando ? "Guardando..." : (equipoEditando ? "Cerrar" : "Guardar Equipo")}</button>
                 </>
               )}
             </div>

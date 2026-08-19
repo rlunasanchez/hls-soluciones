@@ -59,6 +59,30 @@ router.get("/:id/equipos", authMiddleware, async (req, res) => {
   }
 });
 
+router.get("/:id", authMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT c.*,
+        COALESCE(STRING_AGG(
+          DISTINCT CONCAT(COALESCE(cd.tipo_direccion, ''), '|', COALESCE(cd.direccion, ''), '|', COALESCE(cd.fono, ''), '|', COALESCE(cd.ciudad, ''), '|', COALESCE(cd.comuna, ''))
+        , ';;') FILTER (WHERE cd.id IS NOT NULL), '') as direcciones,
+        COALESCE(STRING_AGG(
+          DISTINCT CONCAT(COALESCE(co.nombre, ''), '|', COALESCE(co.email, ''), '|', COALESCE(co.fono, ''), '|', COALESCE(co.cargo, ''), '|', COALESCE(co.direccion, ''))
+        , ';;') FILTER (WHERE co.id IS NOT NULL), '') as contactos
+      FROM clientes c
+      LEFT JOIN clientes_direcciones cd ON c.id = cd.cliente_id
+      LEFT JOIN clientes_contactos co ON c.id = co.cliente_id
+      WHERE c.id = $1
+      GROUP BY c.id
+    `, [req.params.id]);
+    if (result.rows.length === 0) return res.status(404).json({ msg: "Cliente no encontrado" });
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Error del servidor" });
+  }
+});
+
 router.post("/", authMiddleware, async (req, res) => {
   const {
     razon_social, giro, rut, direccion, ciudad, comuna, telefono, email,
@@ -67,6 +91,14 @@ router.post("/", authMiddleware, async (req, res) => {
   } = req.body;
   const codigo = await generarCodigo();
   try {
+    // RUT único: verificar que no exista otro cliente con el mismo RUT
+    if (rut && rut.trim()) {
+      const rutLimpio = rut.replace(/[.\s]/g, "").toUpperCase();
+      const resultDup = await pool.query("SELECT id FROM clientes WHERE REPLACE(REPLACE(rut, '.', ''), ' ', '') = $1", [rutLimpio]);
+      if (resultDup.rows.length > 0) {
+        return res.status(400).json({ msg: "El RUT ya existe para otro cliente" });
+      }
+    }
     const result = await pool.query(
       `INSERT INTO clientes (codigo, razon_social, giro, rut, direccion, ciudad, comuna, telefono, email, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id`,
@@ -96,7 +128,7 @@ router.post("/", authMiddleware, async (req, res) => {
       }
     }
 
-    res.status(201).json({ msg: "Cliente creado", codigo });
+    res.status(201).json({ msg: "Cliente creado", codigo, id: clienteId });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
@@ -111,6 +143,17 @@ router.put("/:id", authMiddleware, async (req, res) => {
     direcciones, contactos
   } = req.body;
   try {
+    // RUT único: verificar que no exista otro cliente con el mismo RUT (excluyendo este)
+    if (rut && rut.trim()) {
+      const rutLimpio = rut.replace(/[.\s]/g, "").toUpperCase();
+      const resultDup = await pool.query(
+        "SELECT id FROM clientes WHERE REPLACE(REPLACE(rut, '.', ''), ' ', '') = $1 AND id != $2",
+        [rutLimpio, id]
+      );
+      if (resultDup.rows.length > 0) {
+        return res.status(400).json({ msg: "El RUT ya existe para otro cliente" });
+      }
+    }
     const result = await pool.query("SELECT codigo FROM clientes WHERE id = $1", [id]);
     let codigo = result.rows[0]?.codigo;
     if (!codigo) codigo = await generarCodigo();
