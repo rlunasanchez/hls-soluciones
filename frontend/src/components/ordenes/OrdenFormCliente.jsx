@@ -842,6 +842,10 @@ function OrdenFormCliente({
                 setNuevaOrden({ ...nuevaOrden, contactosExtra: arr });
               };
 
+              // Contactos del cliente aún no agregados (sin duplicados)
+              const contactosYaAgregados = nuevaOrden.contactosExtra.map(c => (c.nombre || "").toUpperCase().trim());
+              const contactosExtraDisponibles = contactosCliente.filter(c => !contactosYaAgregados.includes(c.nombre.toUpperCase().trim()));
+
               return (
                 <>
                   {contactosCliente.length >= 1 && (
@@ -850,12 +854,12 @@ function OrdenFormCliente({
                         Agregar contacto del cliente
                       </label>
                       <select
-                        disabled={readOnly}
+                        disabled={readOnly || contactosExtraDisponibles.length === 0}
                         defaultValue=""
                         onChange={(e) => {
                           const i = parseInt(e.target.value, 10);
-                          if (isNaN(i) || !contactosCliente[i]) return;
-                          agregarContacto(contactosCliente[i]);
+                          if (isNaN(i) || !contactosExtraDisponibles[i]) return;
+                          agregarContacto(contactosExtraDisponibles[i]);
                         }}
                         style={{
                           width: '100%',
@@ -867,7 +871,7 @@ function OrdenFormCliente({
                         }}
                       >
                         <option value="">-- Elegir contacto --</option>
-                        {contactosCliente.map((c, idx) => (
+                        {contactosExtraDisponibles.map((c, idx) => (
                           <option key={idx} value={idx}>
                             {c.nombre}{c.fono ? ` | ${c.fono}` : ''}{c.email ? ` | ${c.email}` : ''}
                           </option>
