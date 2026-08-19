@@ -123,12 +123,23 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
     setRutError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e, mantener = false) => {
     e.preventDefault();
     if (guardandoRef.current) return;
     if (nuevoCliente.rut && !validarRUT(nuevoCliente.rut)) {
       alert("RUT inválido. Ejemplo: 12.345.678-9");
       return;
+    }
+    if (nuevoCliente.rut) {
+      const rutNormalizado = nuevoCliente.rut.replace(/[.\s]/g, "").toUpperCase();
+      const existeRut = (clientes || []).some((c) => {
+        if (clienteEditando && c.id === clienteEditando.id) return false;
+        return (c.rut || "").replace(/[.\s]/g, "").toUpperCase() === rutNormalizado;
+      });
+      if (existeRut) {
+        alert(`El RUT ${nuevoCliente.rut} ya existe para otro cliente.`);
+        return;
+      }
     }
     const dirs = sucursales.filter((s) => s.direccion.trim() !== "");
     const primerContacto = {
@@ -149,7 +160,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
       ...nuevoCliente,
       direcciones: dirs,
       contactos: todosContactos
-    }, resetFormulario)).finally(() => {
+    }, resetFormulario, mantener)).finally(() => {
       guardandoRef.current = false;
       setGuardando(false);
     });
@@ -419,7 +430,10 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
             ) : (
               <>
                 <button type="button" className="cf-btn-c" onClick={() => { resetFormulario(); onCancel(); }}><X size={18} /> Cancelar</button>
-                <button type="button" className="cf-btn-p" onClick={handleSubmit} disabled={guardando}><Save size={18} /> {guardando ? "Guardando..." : (clienteEditando ? "Guardar Cambios" : "Guardar Cliente")}</button>
+                {clienteEditando && (
+                  <button type="button" className="cf-btn-s" onClick={(e) => handleSubmit(e, true)} disabled={guardando}><Save size={18} /> {guardando ? "Guardando..." : "Guardar Cambios"}</button>
+                )}
+                <button type="button" className="cf-btn-p" onClick={(e) => handleSubmit(e, false)} disabled={guardando}><Save size={18} /> {guardando ? "Guardando..." : (clienteEditando ? "Cerrar" : "Guardar Cliente")}</button>
               </>
             )}
           </div>

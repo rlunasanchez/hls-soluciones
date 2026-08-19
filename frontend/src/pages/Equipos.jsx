@@ -80,19 +80,27 @@ function Equipos() {
     }
   };
 
-  const guardarEquipo = async (payload, id) => {
+  const guardarEquipo = async (payload, id, mantener = false) => {
     try {
       if (id) {
         await api.put(`/api/equipos/${id}`, payload);
       } else {
         await api.post("/api/equipos", payload);
       }
-      setMostrarFormulario(false);
-      setEquipoEditando(null);
-      setSoloLectura(false);
-      navigate('/equipos', { replace: true });
-      const res = await api.get("/api/equipos");
-      setEquipos(res.data);
+      if (mantener && id) {
+        // "Guardar Cambios": guarda y se mantiene en el form para seguir editando
+        const res = await api.get(`/api/equipos/${id}`);
+        setEquipoEditando(res.data);
+        const lista = await api.get("/api/equipos");
+        setEquipos(lista.data);
+      } else {
+        setMostrarFormulario(false);
+        setEquipoEditando(null);
+        setSoloLectura(false);
+        navigate('/equipos', { replace: true });
+        const res = await api.get("/api/equipos");
+        setEquipos(res.data);
+      }
     } catch (err) {
       alert("Error al guardar");
     }
