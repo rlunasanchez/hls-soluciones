@@ -673,7 +673,7 @@ function OrdenTrabajo() {
   // Modelos únicos (sin duplicar por serie) para el buscador de modelo
   const equiposModeloFiltrados = [...new Map(equiposModeloSugeridos.map(eq => [eq.modelo, eq])).values()];
 
-  const guardarOrden = async (e) => {
+  const guardarOrden = async (e, mantener = false) => {
     e.preventDefault();
     if (guardandoRef.current) return;
     
@@ -706,17 +706,24 @@ function OrdenTrabajo() {
       } else {
         await api.post("/api/ordenes", payload);
       }
-      alert(editingId ? "Orden actualizada exitosamente" : "Orden guardada exitosamente");
-      const navState = window.history.state?.usr;
-      const vinoDeCliente = navState?.cliente || navState?.orden;
-      setMostrarFormulario(false);
-      resetFormulario();
-      setSoloLectura(false);
-      window.history.replaceState({}, document.title);
-      if (vinoDeCliente) {
-        navigate("/clientes");
+      
+      if (mantener && editingId) {
+        // "Guardar Cambios": guarda y se mantiene en la OT para seguir editando
+        const res = await api.get(`/api/ordenes/${editingId}`);
+        await editarOrden(res.data);
       } else {
-        fetchOrdenes();
+        alert(editingId ? "Orden actualizada exitosamente" : "Orden guardada exitosamente");
+        const navState = window.history.state?.usr;
+        const vinoDeCliente = navState?.cliente || navState?.orden;
+        setMostrarFormulario(false);
+        resetFormulario();
+        setSoloLectura(false);
+        window.history.replaceState({}, document.title);
+        if (vinoDeCliente) {
+          navigate("/clientes");
+        } else {
+          fetchOrdenes();
+        }
       }
     } catch (err) {
       console.error("Error al guardar orden:", err);
@@ -943,9 +950,14 @@ function OrdenTrabajo() {
     }}>
                   <X size={16} /> {soloLectura ? "Cerrar" : "Cancelar"}
                 </button>
+                {!soloLectura && editingId && (
+                  <button type="button" className="of-btn-s" onClick={(e) => guardarOrden(e, true)} disabled={guardando}>
+                    <Save size={16} /> {guardando ? "Guardando..." : "Guardar Cambios"}
+                  </button>
+                )}
                 {!soloLectura && (
                   <button type="submit" className="of-btn-p" disabled={guardando}>
-                    <Save size={16} /> {guardando ? "Guardando..." : (editingId ? "Guardar Cambios" : "Guardar Orden")}
+                    <Save size={16} /> {guardando ? "Guardando..." : (editingId ? "Cerrar" : "Guardar Orden")}
                   </button>
                 )}
               </div>
