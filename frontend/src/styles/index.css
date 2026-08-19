@@ -326,6 +326,16 @@ tbody tr:hover {
     grid-template-columns: 1fr;
   }
   
+  .cf-btn-p, .cf-btn-c, .cf-btn-a, .cf-btn-d,
+  .ef-btn-p, .ef-btn-c,
+  .of-btn-p, .of-btn-c,
+  .uf-btn-p, .uf-btn-c,
+  .main-btn, .btn-nuevo-cliente, .btn-limpiar-equipos {
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+  }
+  
   table {
     font-size: 0.875rem;
   }
@@ -756,6 +766,16 @@ table tr:last-child td {
 @media (max-width: 768px) {
   .form-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .cf-btn-p, .cf-btn-c, .cf-btn-a, .cf-btn-d,
+  .ef-btn-p, .ef-btn-c,
+  .of-btn-p, .of-btn-c,
+  .uf-btn-p, .uf-btn-c,
+  .main-btn, .btn-nuevo-cliente, .btn-limpiar-equipos {
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
   }
   
   table {
