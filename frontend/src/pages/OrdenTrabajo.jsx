@@ -676,6 +676,19 @@ function OrdenTrabajo() {
   const guardarOrden = async (e, mantener = false) => {
     e.preventDefault();
     if (guardandoRef.current) return;
+
+    // RUT único: si se escribe un RUT que ya existe para otro cliente del mantenedor → alerta
+    if (nuevaOrden.rut && nuevaOrden.rut.trim()) {
+      const rutNormalizado = nuevaOrden.rut.replace(/[.\s]/g, "").toUpperCase();
+      const existeRut = (clientes || []).some((c) => {
+        if (clienteSeleccionado && c.id === clienteSeleccionado.id) return false;
+        return (c.rut || "").replace(/[.\s]/g, "").toUpperCase() === rutNormalizado;
+      });
+      if (existeRut) {
+        alert(`El RUT ${nuevaOrden.rut} ya existe para otro cliente.`);
+        return;
+      }
+    }
     
     // Preparar insumos
     const ins = insumos.filter(i => i.nombre.trim() !== "").map(i => i.nombre);
