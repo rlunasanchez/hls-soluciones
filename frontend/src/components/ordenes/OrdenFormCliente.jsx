@@ -471,6 +471,10 @@ function OrdenFormCliente({
                 });
               };
 
+              // Direcciones del cliente aún no agregadas (sin duplicados)
+              const direccionesYaAgregadas = nuevaOrden.direccionesExtra.map(d => d.direccion.toUpperCase().trim());
+              const direccionesDisponibles = direccionesCliente.filter(d => !direccionesYaAgregadas.includes(d.direccion.toUpperCase().trim()));
+
               const actualizarDireccion = (idx, campo, valor) => {
                 const arr = [...nuevaOrden.direccionesExtra];
                 arr[idx] = { ...arr[idx], [campo]: valor };
@@ -485,12 +489,12 @@ function OrdenFormCliente({
                         Agregar dirección del cliente
                       </label>
                       <select
-                        disabled={readOnly}
+                        disabled={readOnly || direccionesDisponibles.length === 0}
                         defaultValue=""
                         onChange={(e) => {
                           const i = parseInt(e.target.value, 10);
-                          if (isNaN(i) || !direccionesCliente[i]) return;
-                          agregarDireccion(direccionesCliente[i]);
+                          if (isNaN(i) || !direccionesDisponibles[i]) return;
+                          agregarDireccion(direccionesDisponibles[i]);
                         }}
                         style={{
                           width: '100%',
@@ -502,7 +506,7 @@ function OrdenFormCliente({
                         }}
                       >
                         <option value="">-- Elegir dirección --</option>
-                        {direccionesCliente.map((d, idx) => (
+                        {direccionesDisponibles.map((d, idx) => (
                           <option key={idx} value={idx}>
                             {d.tipo_direccion ? `${d.tipo_direccion} | ` : ''}{d.direccion}{d.ciudad ? ` | ${d.ciudad}` : ''}{d.comuna ? ` | ${d.comuna}` : ''}{d.fono ? ` | F:${d.fono}` : ''}
                           </option>
