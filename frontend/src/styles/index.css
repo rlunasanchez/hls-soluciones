@@ -328,7 +328,7 @@ tbody tr:hover {
   
   .cf-btn-p, .cf-btn-c,
   .ef-btn-p, .ef-btn-c,
-  .of-btn-p, .of-btn-c,
+  .of-btn-p, .of-btn-c, .of-btn-s,
   .uf-btn-p, .uf-btn-c,
   .main-btn, .btn-nuevo-cliente, .btn-limpiar-equipos {
     min-height: 40px;
@@ -770,7 +770,7 @@ table tr:last-child td {
   
   .cf-btn-p, .cf-btn-c,
   .ef-btn-p, .ef-btn-c,
-  .of-btn-p, .of-btn-c,
+  .of-btn-p, .of-btn-c, .of-btn-s,
   .uf-btn-p, .uf-btn-c,
   .main-btn, .btn-nuevo-cliente, .btn-limpiar-equipos {
     min-height: 40px;
