@@ -74,6 +74,12 @@ router.post("/", authMiddleware, async (req, res) => {
     insumo1, insumo2, insumo3, insumo4, insumo5, insumo6,
     insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia, actividad, observaciones } = req.body;
   try {
+    if (serie && serie.trim()) {
+      const result = await pool.query("SELECT id FROM equipos WHERE serie = $1", [serie.trim()]);
+      if (result.rows.length > 0) {
+        return res.status(400).json({ msg: `La serie ${serie} ya existe para otro equipo` });
+      }
+    }
     const codigo = await generarCodigo();
     await pool.query(
       `INSERT INTO equipos (codigo, cliente_id, equipo, modelo, marca, serie, contador_pag, nivel_tintas,
@@ -99,6 +105,12 @@ router.put("/:id", authMiddleware, async (req, res) => {
     insumo1, insumo2, insumo3, insumo4, insumo5, insumo6,
     insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia, actividad, observaciones } = req.body;
   try {
+    if (serie && serie.trim()) {
+      const result = await pool.query("SELECT id FROM equipos WHERE serie = $1 AND id != $2", [serie.trim(), id]);
+      if (result.rows.length > 0) {
+        return res.status(400).json({ msg: `La serie ${serie} ya existe para otro equipo` });
+      }
+    }
     const result = await pool.query("SELECT codigo FROM equipos WHERE id = $1", [id]);
     let codigo = result.rows[0]?.codigo;
     if (!codigo) {

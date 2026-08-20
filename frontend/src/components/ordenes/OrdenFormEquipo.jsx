@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Eye } from "lucide-react";
+import { Search, Eye, PackagePlus } from "lucide-react";
 import EquipoFormulario from "../equipos/EquipoFormulario";
 import "../../styles/Equipos.css";
 import { upperInput } from "../../utils/helpers";
@@ -20,7 +20,9 @@ function OrdenFormEquipo({
   equiposModeloFiltrados,
   equipoModeloDropdownRef,
   equipos = [],
-  equipoFijo = false
+  equipoFijo = false,
+  editingId = null,
+  onRegistrarEquipo = null
 }) {
   const [mostrarDetalleEquipo, setMostrarDetalleEquipo] = useState(false);
 
@@ -279,6 +281,24 @@ function OrdenFormEquipo({
             style={inputStyle} />
         </div>
       </div>
+
+      {!readOnly && !editingId && onRegistrarEquipo && (
+        <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'flex-end' }}>
+          <button
+            type="button"
+            onClick={() => onRegistrarEquipo()}
+            title="Registrar este equipo en el mantenedor de Equipos si no existe"
+            style={{
+              display: 'flex', alignItems: 'center', gap: '6px',
+              background: 'var(--success)', color: 'white', border: 'none',
+              padding: '4px 12px', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
+              fontWeight: 600, fontSize: '0.8rem', whiteSpace: 'nowrap'
+            }}
+          >
+            <PackagePlus size={15} /> Registrar en Equipos
+          </button>
+        </div>
+      )}
 
       {/* Modal Detalle Equipo (solo lectura) */}
       {mostrarDetalleEquipo && (equipoSeleccionado || hayDatosEquipo) && (

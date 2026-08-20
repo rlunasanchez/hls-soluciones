@@ -669,6 +669,25 @@ function OrdenTrabajo() {
   // Modelos únicos (sin duplicar por serie) para el buscador de modelo
   const equiposModeloFiltrados = [...new Map(equiposModeloSugeridos.map(eq => [eq.modelo, eq])).values()];
 
+  // Registra el equipo del form OT en el mantenedor (solo si la serie no existe).
+  // Se usa desde el botón "+ Registrar en Equipos" al crear una OT nueva.
+  const registrarEquipoEnMantenedor = async () => {
+    const { equipo, marca, modelo, serie } = nuevaOrden;
+    if (!equipo.trim() || !marca.trim() || !modelo.trim() || !serie.trim()) {
+      alert("Complete Equipo, Marca, Modelo y Serie antes de registrar en Equipos.");
+      return;
+    }
+    try {
+      const res = await api.post("/api/equipos", { equipo, marca, modelo, serie });
+      alert(`Equipo creado en el mantenedor con código ${res.data.codigo}.`);
+      const lista = await api.get("/api/equipos");
+      setEquipos(lista.data);
+    } catch (err) {
+      const msg = err.response?.data?.msg;
+      alert(msg || "Error al registrar el equipo en el mantenedor.");
+    }
+  };
+
   const guardarOrden = async (e, mantener = false) => {
     e.preventDefault();
     if (guardandoRef.current) return;
@@ -934,6 +953,8 @@ function OrdenTrabajo() {
                   readOnly={soloLectura}
                   equipos={equipos}
                   equipoFijo={equipoFijo}
+                  editingId={editingId}
+                  onRegistrarEquipo={registrarEquipoEnMantenedor}
                 />
 
                 <OrdenFormInsumos
