@@ -13,21 +13,6 @@ const toDateMySQL = (val) => {
   return d.toISOString().split('T')[0];
 };
 
-// Registra el equipo en el mantenedor solo si su serie no existe aún.
-// La serie identifica la máquina física: una máquina = un registro en inventario.
-// Sin serie no se puede identificar la máquina → no se crea (evita duplicados).
-async function registrarEquipoSiNoExiste(connection, { equipo, modelo, marca, serie }) {
-  if (!equipo || !modelo || !marca) return;
-  if (!serie || !serie.trim()) return;
-  const [existe] = await connection.query("SELECT id FROM equipos WHERE serie = ?", [serie.trim()]);
-  if (existe.length > 0) return;
-  const [rows] = await connection.query("SELECT MAX(CAST(SUBSTRING(codigo, 4) AS UNSIGNED)) AS num FROM equipos WHERE codigo LIKE 'EQ-%'");
-  const num = rows[0].num || 0;
-  const codigo = `EQ-${String(num + 1).padStart(4, "0")}`;
-  await connection.query("INSERT INTO equipos (codigo, equipo, modelo, marca, serie) VALUES (?, ?, ?, ?, ?)",
-    [codigo, equipo, modelo, marca, serie.trim()]);
-}
-
 router.get("/", authMiddleware, async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
@@ -93,12 +78,10 @@ router.post("/", authMiddleware, async (req, res) => {
     // (no se crea ni se busca ningún cliente en el mantenedor).
     const finalClienteId = clienteId || null;
 
-    // La OT NO se vincula a un equipo (equipo_id = NULL), pero si el equipo
-    // escrito en la OT (identificado por su serie) no existe en el mantenedor,
-    // se registra automáticamente en la tabla equipos para tener el inventario.
+    // Las OT NO se vinculan a equipos ni los registran: solo copian los datos
+    // (equipo/marca/modelo/serie). El inventario de equipos se gestiona a mano
+    // desde el mantenedor de Equipos.
     const finalEquipoId = null;
-
-    await registrarEquipoSiNoExiste(connection, { equipo, modelo, marca, serie });
 
     await connection.query(`INSERT INTO ordenes_trabajo (numero_orden, fecha, es_garantia, fecha_ingreso, fecha_ingreso_check, fecha_termino, fecha_termino_check, fecha_entrega, fecha_entrega_check, fecha_compra, fecha_compra_check, cliente, direccion, comuna, rut, contacto, fono_contacto, email_contacto, fono_principal, email, tecnico_asignado, equipo, modelo, marca, serie, contador_pag_out, nivel_tinta, insumo1, insumo2, insumo3, insumo4, insumo5, insumo6, insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia, actividad, observaciones, info_interna, adjunto, contactos_extra, direcciones_extra, cliente_id, equipo_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [numeroOrden, toDateMySQL(fecha), esGarantia || false, toDateMySQL(fechaIngreso), fechaIngresoCheck || false, toDateMySQL(fechaTermino), fechaTerminoCheck || false, toDateMySQL(fechaEntrega), fechaEntregaCheck || false, toDateMySQL(fechaCompra), fechaCompraCheck || false, cliente, direccion || null, comuna || null, rut || null, contacto || null, fonoContacto || null, emailContacto || null, fonoPrincipal || null, email || null, tecnicoAsignado, equipo, modelo, marca, serie || null, contadorPagOut || null, nivelTinta || null, insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null, insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null, insumo9 || null, insumo10 || null, insumo11 || null, insumo12 || null, averia || null, actividad || null, observaciones || null, infoInterna || null, adjuntos && adjuntos.length ? JSON.stringify(adjuntos) : null, contactosExtra ? JSON.stringify(contactosExtra) : null, direccionesExtra ? JSON.stringify(direccionesExtra) : null, finalClienteId, finalEquipoId]);
@@ -127,12 +110,10 @@ router.put("/:id", authMiddleware, async (req, res) => {
     // (no se crea ni se busca ningún cliente en el mantenedor).
     const finalClienteId = clienteId || null;
 
-    // La OT NO se vincula a un equipo (equipo_id = NULL), pero si el equipo
-    // escrito en la OT (identificado por su serie) no existe en el mantenedor,
-    // se registra automáticamente en la tabla equipos para tener el inventario.
+    // Las OT NO se vinculan a equipos ni los registran: solo copian los datos
+    // (equipo/marca/modelo/serie). El inventario de equipos se gestiona a mano
+    // desde el mantenedor de Equipos.
     const finalEquipoId = null;
-
-    await registrarEquipoSiNoExiste(connection, { equipo, modelo, marca, serie });
 
     await connection.query(`UPDATE ordenes_trabajo SET fecha = ?, es_garantia = ?, fecha_ingreso = ?, fecha_ingreso_check = ?, fecha_termino = ?, fecha_termino_check = ?, fecha_entrega = ?, fecha_entrega_check = ?, fecha_compra = ?, fecha_compra_check = ?, cliente = ?, direccion = ?, comuna = ?, rut = ?, contacto = ?, fono_contacto = ?, email_contacto = ?, fono_principal = ?, email = ?, tecnico_asignado = ?, equipo = ?, modelo = ?, marca = ?, serie = ?, contador_pag_out = ?, nivel_tinta = ?, insumo1 = ?, insumo2 = ?, insumo3 = ?, insumo4 = ?, insumo5 = ?, insumo6 = ?, insumo7 = ?, insumo8 = ?, insumo9 = ?, insumo10 = ?, insumo11 = ?, insumo12 = ?, averia = ?, actividad = ?, observaciones = ?, info_interna = ?, adjunto = ?, contactos_extra = ?, direcciones_extra = ?, cliente_id = ?, equipo_id = ? WHERE id = ?`,
       [toDateMySQL(fecha), esGarantia || false, toDateMySQL(fechaIngreso), fechaIngresoCheck || false, toDateMySQL(fechaTermino), fechaTerminoCheck || false, toDateMySQL(fechaEntrega), fechaEntregaCheck || false, toDateMySQL(fechaCompra), fechaCompraCheck || false, cliente, direccion || null, comuna || null, rut || null, contacto || null, fonoContacto || null, emailContacto || null, fonoPrincipal || null, email || null, tecnicoAsignado, equipo, modelo, marca, serie || null, contadorPagOut || null, nivelTinta || null, insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null, insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null, insumo9 || null, insumo10 || null, insumo11 || null, insumo12 || null, averia || null, actividad || null, observaciones || null, infoInterna || null, adjuntos && adjuntos.length ? JSON.stringify(adjuntos) : null, contactosExtra ? JSON.stringify(contactosExtra) : null, direccionesExtra ? JSON.stringify(direccionesExtra) : null, finalClienteId, finalEquipoId, id]);
