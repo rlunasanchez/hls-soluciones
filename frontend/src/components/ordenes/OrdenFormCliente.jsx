@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Search, Users, ChevronDown, ChevronUp, Eye, UserPlus, MapPin, Paperclip, MoreVertical, Download, Trash2 } from "lucide-react";
+import { Search, Users, ChevronDown, ChevronUp, Eye, UserPlus, MapPin, Paperclip, MoreVertical, Download, Trash2, FileText } from "lucide-react";
 import ClienteFormulario from "../clientes/ClienteFormulario";
 import "../../styles/Clientes.css";
 import { upperInput, validarRUT } from "../../utils/helpers";
@@ -45,25 +45,25 @@ function OrdenFormCliente({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const TIPOS_PERMITIDOS = ["image/"];
+  const TIPOS_PERMITIDOS = ["image/", "application/pdf"];
 
   const handleAdjuntoChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const actuales = nuevaOrden.adjuntos || [];
     if (actuales.length >= 2) {
-      alert("Máximo 2 imágenes adjuntas por orden.");
+      alert("Máximo 2 archivos adjuntos por orden.");
       e.target.value = "";
       return;
     }
-    const permitido = TIPOS_PERMITIDOS.some((t) => file.type.startsWith(t));
+    const permitido = TIPOS_PERMITIDOS.some((t) => file.type.startsWith(t)) || file.type === "application/pdf";
     if (!permitido) {
-      alert("Solo se permiten imágenes (JPG, PNG, etc.).");
+      alert("Solo se permiten imágenes (JPG, PNG, etc.) o PDF.");
       e.target.value = "";
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      alert("La imagen supera el máximo de 5MB.");
+      alert("El archivo supera el máximo de 5MB.");
       e.target.value = "";
       return;
     }
@@ -1084,12 +1084,18 @@ function OrdenFormCliente({
         <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {(nuevaOrden.adjuntos || []).map((adj, idx) => (
             <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#fff', border: '1px solid var(--border)', borderRadius: '8px', padding: '6px 10px' }}>
-              {adj.tipo.startsWith("image/") && (
-                <img
-                  src={adj.data}
-                  alt={adj.nombre}
-                  style={{ width: '44px', height: '44px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border)', flexShrink: 0 }}
-                />
+              {adj.tipo === "application/pdf" ? (
+                <div style={{ width: '44px', height: '44px', borderRadius: '6px', border: '1px solid var(--border)', background: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <FileText size={22} style={{ color: '#DC2626' }} />
+                </div>
+              ) : (
+                adj.tipo.startsWith("image/") && (
+                  <img
+                    src={adj.data}
+                    alt={adj.nombre}
+                    style={{ width: '44px', height: '44px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border)', flexShrink: 0 }}
+                  />
+                )
               )}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontWeight: '600', fontSize: '.75rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -1134,11 +1140,11 @@ function OrdenFormCliente({
               >
                 <Paperclip size={14} style={{ color: 'var(--primary)', flexShrink: 0 }} />
                 <span style={{ flex: 1, fontSize: '.78rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {readOnly ? "Sin imagen" : (nuevaOrden.adjuntos || []).length === 0 ? "Seleccionar imagen..." : "Agregar segunda imagen..."}
+                  {readOnly ? "Sin archivo" : "Agregar archivo"}
                 </span>
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/*,.pdf"
                   onChange={handleAdjuntoChange}
                   disabled={readOnly}
                   style={{ display: 'none' }}
@@ -1180,12 +1186,20 @@ function OrdenFormCliente({
 
       {adjuntoParaVer && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(0,0,0,.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }} onClick={() => setAdjuntoParaVer(null)}>
-          <div style={{ background: '#fff', borderRadius: '10px', padding: '12px', maxWidth: '90vw', maxHeight: '90vh', display: 'flex', flexDirection: 'column', gap: '10px', position: 'relative' }} onClick={(e) => e.stopPropagation()}>
+          <div style={{ background: '#fff', borderRadius: '10px', padding: '12px', width: '90vw', maxWidth: '1000px', height: '88vh', display: 'flex', flexDirection: 'column', gap: '10px', position: 'relative' }} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
               <span style={{ fontWeight: 600, fontSize: '.85rem', color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{adjuntoParaVer.nombre}</span>
               <button type="button" onClick={() => setAdjuntoParaVer(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: 'var(--muted)', lineHeight: 1 }} aria-label="Cerrar">×</button>
             </div>
-            <img src={adjuntoParaVer.data} alt={adjuntoParaVer.nombre} style={{ maxWidth: '100%', maxHeight: '75vh', objectFit: 'contain', borderRadius: '6px' }} />
+            {adjuntoParaVer.tipo === "application/pdf" ? (
+              <iframe
+                src={adjuntoParaVer.data}
+                title={adjuntoParaVer.nombre}
+                style={{ width: '100%', height: '100%', flex: 1, border: 'none', borderRadius: '6px', background: '#fff' }}
+              />
+            ) : (
+              <img src={adjuntoParaVer.data} alt={adjuntoParaVer.nombre} style={{ maxWidth: '100%', maxHeight: '75vh', objectFit: 'contain', borderRadius: '6px' }} />
+            )}
             <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
               <button type="button" onClick={() => descargarAdjunto()} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', border: 'none', borderRadius: '6px', background: 'var(--primary)', color: '#fff', cursor: 'pointer', fontSize: '.78rem', fontWeight: 600 }}>
                 <Download size={14} /> Descargar
