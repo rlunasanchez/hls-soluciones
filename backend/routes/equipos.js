@@ -56,6 +56,12 @@ router.get("/:id", authMiddleware, async (req, res) => {
 router.post("/", authMiddleware, async (req, res) => {
   const { equipo, modelo, marca, serie } = req.body;
   try {
+    if (serie && serie.trim()) {
+      const [dups] = await pool.query("SELECT id FROM equipos WHERE serie = ?", [serie.trim()]);
+      if (dups.length > 0) {
+        return res.status(400).json({ msg: `La serie ${serie} ya existe para otro equipo` });
+      }
+    }
     const codigo = await generarCodigo();
     await pool.query(
       `INSERT INTO equipos (codigo, equipo, modelo, marca, serie)
@@ -73,6 +79,12 @@ router.put("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
   const { equipo, modelo, marca, serie } = req.body;
   try {
+    if (serie && serie.trim()) {
+      const [dups] = await pool.query("SELECT id FROM equipos WHERE serie = ? AND id != ?", [serie.trim(), id]);
+      if (dups.length > 0) {
+        return res.status(400).json({ msg: `La serie ${serie} ya existe para otro equipo` });
+      }
+    }
     const [existing] = await pool.query("SELECT codigo FROM equipos WHERE id = ?", [id]);
     let codigo = existing[0]?.codigo;
     if (!codigo) {

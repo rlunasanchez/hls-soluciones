@@ -102,7 +102,8 @@ function Equipos() {
         setEquipos(res.data);
       }
     } catch (err) {
-      alert("Error al guardar");
+      const msg = err.response?.data?.msg;
+      alert(msg || "Error al guardar");
     }
   };
 
