@@ -108,6 +108,7 @@ function Equipos() {
 
   if (mostrarFormulario) {
     return (
+      <div className="container">
       <EquipoFormulario
         equipoEditando={equipoEditando}
         equipos={equipos}
@@ -120,6 +121,7 @@ function Equipos() {
         onSave={guardarEquipo}
         readOnly={soloLectura}
       />
+      </div>
     );
   }
 

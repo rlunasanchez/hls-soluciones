@@ -1602,6 +1602,8 @@ Estas columnas faltaban y causaban error 500 al editar/guardar equipos desde OT.
 | 1.88 | 18 Agosto 2026 | **Botones de acción con 3 opciones en Clientes y Equipos** (mismo patrón que v1.85 en OT): al **editar** un cliente o equipo ahora hay **"Guardar Cambios"** (nuevo, botón verde `.cf-btn-s`/`.ef-btn-s` con `var(--success)`) que guarda y **se mantiene en el form** recargando datos frescos del API (GET `/:id`), **"Cerrar"** (azul, guarda y cierra) y **"Cancelar"** (gris, cierra sin guardar). Al **crear** nuevo se mantiene "Guardar Cliente"/"Guardar Equipo" + "Cancelar". `handleSubmit(e, mantener=false)` y `guardarCliente/guardarEquipo(..., mantener=false)` aceptan el parámetro. Backend: agregado **GET `/api/clientes/:id`** (no existía; devuelve el mismo formato que el GET `/` filtrado por id) y el **POST `/api/clientes` ahora devuelve `id`** además de `codigo`. `.cf-btn-s`/`.ef-btn-s` incluidos en la regla global de alto 40px en mobile (`index.css`). Backend + frontend |
 | 1.89 | 18 Agosto 2026 | **RUT único en Clientes**: validación doble para evitar duplicados. **Frontend** (`ClienteFormulario.jsx`): en `handleSubmit`, si el RUT ya existe para otro cliente → `alert("El RUT X ya existe para otro cliente.")` y no guarda (compara normalizado: sin puntos ni espacios, mayúsculas; excluye al cliente en edición por `id`). **Backend** (`clientes.js`): `POST` y `PUT /:id` verifican con `REPLACE(REPLACE(rut, '.', ''), ' ', '')` (excluyendo el propio `id` en PUT) y responden 400 `"El RUT ya existe para otro cliente"` como respaldo. Backend + frontend |
 | 1.90 | 18 Agosto 2026 | **RUT único en el form OT** (`OrdenTrabajo.jsx`): al guardar una orden nueva o editar, si el campo RUT coincide con el RUT de otro cliente del mantenedor → `alert("El RUT X ya existe para otro cliente.")` y no guarda (compara normalizado sin puntos ni espacios en mayúsculas; excluye al `clienteSeleccionado` si es el dueño de ese RUT). Solo frontend, sin migración |
+| 1.91 | 19 Agosto 2026 | **Modo "Ver" de OT igualado a "Editar" + botón "Ver" en Datos del Equipo + fix scroll modal Ver Equipo** (`OrdenTrabajo.jsx`, `OrdenFormCliente.jsx`, `OrdenFormEquipo.jsx`, `EquipoFormulario.jsx`, `Equipos.jsx`): (1) `verOrden()` usa `clienteFijo`/`equipoFijo = false`, ya no setea `equipoSeleccionado` ni llama `cargarEquipoFresco()` → el form Ver muestra los mismos buscadores/campos que Editar (solo deshabilitados). (2) Botón "Ver" del buscador de cliente bajado a `height: 24px`/`padding: 2px 8px` para no desplazar "Datos del Cliente" y desalinearlo con "Datos del Equipo". (3) Nuevo botón "Ver" en "Datos del Equipo" (solo en readOnly y si la OT tiene datos de equipo) que abre `EquipoFormulario` en solo lectura desde un snapshot de la OT. (4) `EquipoFormulario` ya no usa `.container` interno (min-height 100vh causaba scroll en el modal); `Equipos.jsx` lo envuelve en `.container` como página, mismo patrón que `Clientes.jsx`. Solo frontend, sin migración |
+| 1.92 | 19 Agosto 2026 | **Fix lista OT no reflejaba cambios al cerrar el form con X/Cancelar** (`OrdenTrabajo.jsx`): al guardar con "Guardar Cambios" y cerrar el formulario con la X (o el botón gris Cancelar/Cerrar) la lista seguía mostrando los datos viejos, porque esos botones no refrescaban la lista (solo el botón azul "Cerrar" la refrescaba). Los cambios sí se guardaban en la BD. Solución: nuevo helper `cerrarFormulario()` usado por la X del header y el botón gris — cierra el form y, si no se viene de Clientes, llama `fetchOrdenes()`. Eliminados los dos handlers inline duplicados. Solo frontend |
 
 ---
 
@@ -1843,3 +1845,44 @@ ALTER TABLE ordenes_trabajo DROP COLUMN IF EXISTS contacto2, DROP COLUMN IF EXIS
 **Verificación (Chrome headless, CDP):**
 - Nueva/Editar: centro del checkbox = centro del input (check 450-465 / 457-472, input 446-469 / 453-476) — perfecto
 - Ver: checkbox 461-476 vs input 453-476 — 4px de desfase aceptado (el badge "Cliente Asignado" desplaza la columna izquierda 4px respecto a la derecha)
+
+---
+
+## Cambios Recientes (19 Agosto 2026)
+
+### 65. Modo "Ver" de OT igualado a "Editar" + botón "Ver" en Datos del Equipo + fix scroll modal Ver Equipo
+**Fecha:** 19 Agosto 2026
+**Ramás afectadas:** `main` (MySQL) — solo frontend, idéntico en `deploy/cloud` (PostgreSQL)
+**Archivos modificados (solo frontend):**
+- `frontend/src/pages/OrdenTrabajo.jsx`
+- `frontend/src/components/ordenes/OrdenFormCliente.jsx`
+- `frontend/src/components/ordenes/OrdenFormEquipo.jsx`
+- `frontend/src/components/equipos/EquipoFormulario.jsx`
+- `frontend/src/pages/Equipos.jsx`
+
+**Problemas:**
+1. En "Ver" (solo lectura) la OT mostraba las tarjetas "Cliente Asignado"/"Equipo Asignado" (`clienteFijo`/`equipoFijo = true`) en vez de los buscadores, por lo que los campos se veían y movían distinto a "Editar".
+2. El botón "Ver" del buscador de cliente medía `height: 32px` (input ~24px), haciendo la fila del cliente más alta y desplazando "Datos del Cliente" hacia abajo, desalineándolo con "Datos del Equipo".
+3. "Datos del Equipo" no tenía botón "Ver" en modo lectura.
+4. El modal "Ver Equipo" (`EquipoFormulario`) siempre mostraba scroll porque su raíz era `.container` (`min-height: 100vh`), mientras que el modal "Ver Cliente" (`ClienteFormulario`) no scrolleaba porque usa `.cf-wrap`.
+
+**Soluciones:**
+1. `verOrden()` ahora usa `setClienteFijo(false)` y `setEquipoFijo(false)`, ya no setea `equipoSeleccionado` ni llama `cargarEquipoFresco()` → el form "Ver" muestra los mismos buscadores y campos que "Editar" (solo con inputs deshabilitados). `editarOrden()` también limpia `equipoSeleccionado` para consistencia total Ver/Editar.
+2. Botón "Ver" del buscador de cliente reducido a `height: 24px` / `padding: 2px 8px` (igual al input) para no añadir altura extra ni desalinear las columnas.
+3. Nuevo botón "Ver" en "Datos del Equipo" (`OrdenFormEquipo.jsx`), visible solo en `readOnly` y solo si la OT tiene datos de equipo (`hayDatosEquipo`), alineado con los inputs (`alignSelf: flex-end`). Al hacer clic abre un modal con `EquipoFormulario` en solo lectura usando un snapshot de la OT (`equipoSnapshot`: equipo/marca/modelo/serie), ya que las OT no se vinculan a equipos (v1.34).
+4. `EquipoFormulario.jsx` ya no usa `.container` interno (mismo patrón que `ClienteFormulario`), así que el modal no fuerza `min-height: 100vh` y no muestra scroll. `Equipos.jsx` ahora envuelve `EquipoFormulario` en `<div className="container">` cuando se usa como página (mismo patrón que `Clientes.jsx`).
+
+**Verificación:** `npm run build` OK en `frontend/`.
+
+### 66. Fix lista OT no reflejaba cambios al cerrar el form con X/Cancelar
+**Fecha:** 19 Agosto 2026
+**Ramás afectadas:** `main` (MySQL) — solo frontend, idéntico en `deploy/cloud` (PostgreSQL)
+**Archivo modificado (solo frontend):** `frontend/src/pages/OrdenTrabajo.jsx`
+
+**Problema:** Al editar una OT, modificar un campo y guardar con "Guardar Cambios" (`guardarOrden(e, true)`), los cambios sí se guardaban en la base de datos, pero al cerrar el formulario con la **X** del header (o el botón gris **Cancelar/Cerrar**) la lista de órdenes seguía mostrando los datos viejos.
+
+**Causa:** Los botones X y Cancelar/Cerrar tenían handlers inline que solo cerraban el formulario (`setMostrarFormulario(false)` + `resetFormulario()`) sin refrescar la lista. Solo el botón azul "Cerrar" (submit → `guardarOrden(e, false)`) llamaba `fetchOrdenes()`. El estado `ordenes` en memoria quedaba desactualizado hasta recargar la página.
+
+**Solución:** Nuevo helper `cerrarFormulario()` usado por la X del header y el botón gris — cierra el form y, si no se viene de Clientes (`navState`), llama `fetchOrdenes()` para reflejar los cambios guardados. Eliminados los dos handlers inline duplicados.
+
+**Verificación:** `npm run build` OK en `frontend/`.

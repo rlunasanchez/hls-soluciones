@@ -44,7 +44,6 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, readOnly 
   };
 
   return (
-    <div className="container">
       <div style={{ maxWidth: '740px', margin: '0 auto', padding: '20px' }}>
         <div className="ef-wrap">
           <div className="ef-head">
@@ -105,7 +104,6 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, readOnly 
           </form>
         </div>
       </div>
-    </div>
   );
 }
 

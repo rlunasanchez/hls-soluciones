@@ -29,6 +29,15 @@ function OrdenFormEquipo({
     border: '1.5px solid var(--border)', borderRadius: '6px', fontSize: '.82rem'
   };
 
+  const equipoSnapshot = {
+    codigo: "",
+    equipo: nuevaOrden.equipo || "",
+    marca: nuevaOrden.marca || "",
+    modelo: nuevaOrden.modelo || "",
+    serie: nuevaOrden.serie || ""
+  };
+  const hayDatosEquipo = !!(nuevaOrden.equipo || nuevaOrden.marca || nuevaOrden.modelo || nuevaOrden.serie);
+
   return (
     <div className="of-sec primary">
       <div className="of-st muted">Datos del Equipo</div>
@@ -87,8 +96,8 @@ function OrdenFormEquipo({
       )}
 
       {equipoFijo && equipoSeleccionado ? null : (
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px',marginBottom:'8px'}}>
-        <div>
+      <div style={{display:'flex',gap:'10px',marginBottom:'8px',alignItems:'flex-start'}}>
+        <div style={{flex:'1 1 0',minWidth:0}}>
           <div ref={equipoDropdownRef} style={{ position: 'relative' }}>
             <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)' }}>
               <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
@@ -146,7 +155,7 @@ function OrdenFormEquipo({
           </div>
         </div>
 
-        <div>
+        <div style={{flex:'1 1 0',minWidth:0}}>
           <div ref={equipoModeloDropdownRef} style={{ position: 'relative' }}>
             <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)' }}>
               <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
@@ -200,6 +209,22 @@ function OrdenFormEquipo({
             )}
           </div>
         </div>
+        {readOnly && hayDatosEquipo && (
+          <button
+            type="button"
+            onClick={() => setMostrarDetalleEquipo(true)}
+            title="Ver datos del equipo"
+            style={{
+              display: 'flex', alignItems: 'center', gap: '4px',
+              background: '#0D9488', color: 'white', border: 'none',
+              padding: '2px 8px', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
+              fontWeight: 500, fontSize: '0.75rem', whiteSpace: 'nowrap',
+              flexShrink: 0, height: '24px', alignSelf: 'flex-end'
+            }}
+          >
+            <Eye size={14} /> Ver
+          </button>
+        )}
       </div>
       )}
 
@@ -256,7 +281,7 @@ function OrdenFormEquipo({
       </div>
 
       {/* Modal Detalle Equipo (solo lectura) */}
-      {mostrarDetalleEquipo && equipoSeleccionado && (
+      {mostrarDetalleEquipo && (equipoSeleccionado || hayDatosEquipo) && (
         <div style={{
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999,
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
@@ -265,7 +290,7 @@ function OrdenFormEquipo({
         >
           <div style={{ maxHeight: '90vh', overflow: 'auto', width: '100%', maxWidth: '900px' }}>
             <EquipoFormulario
-              equipoEditando={equipoSeleccionado}
+              equipoEditando={equipoSeleccionado || equipoSnapshot}
               equipos={equipos}
               onSave={() => {}}
               onCancel={() => setMostrarDetalleEquipo(false)}
