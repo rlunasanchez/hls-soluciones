@@ -1140,7 +1140,7 @@ function OrdenFormCliente({
               >
                 <Paperclip size={14} style={{ color: 'var(--primary)', flexShrink: 0 }} />
                 <span style={{ flex: 1, fontSize: '.78rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {readOnly ? "Sin archivo" : "Agregar archivo"}
+                  {readOnly ? "Sin archivo" : "Seleccionar archivo"}
                 </span>
                 <input
                   type="file"
