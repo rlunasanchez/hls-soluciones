@@ -340,6 +340,7 @@ function OrdenTrabajo() {
     setEditingId(orden.id);
     setClienteFijo(false);
     setEquipoFijo(false);
+    setEquipoSeleccionado(null);
     setMostrarFormulario(true);
     
     // Cargar datos de la orden en el formulario
@@ -431,8 +432,9 @@ function OrdenTrabajo() {
 
   const verOrden = async (orden) => {
     setSoloLectura(true);
-    setClienteFijo(true);
-    setEquipoFijo(true);
+    setClienteFijo(false);
+    setEquipoFijo(false);
+    setEquipoSeleccionado(null);
     setEditingId(null);
     setMostrarFormulario(true);
     
@@ -472,31 +474,8 @@ function OrdenTrabajo() {
       direccionesExtra: parseExtra(orden.direcciones_extra)
     });
 
-    // Buscar equipo asociado - solo para estado, NO sobreescribir datos de la OT
-    const cargarEquipoFresco = async () => {
-      try {
-        if (orden.equipo_id) {
-          const res = await api.get(`/api/equipos/${orden.equipo_id}`);
-          const eq = res.data;
-          setEquipoSeleccionado(eq);
-          setBusquedaSerie((eq.serie || "").toUpperCase());
-          setBusquedaModelo((eq.modelo || "").toUpperCase());
-          return;
-        }
-      } catch (err) {
-        console.error("Error al cargar equipo fresco:", err);
-      }
-      const eq = equipos.find(e => 
-        (orden.equipo_id && e.id === orden.equipo_id) || 
-        (orden.serie && e.serie === orden.serie)
-      );
-      if (eq) {
-        setEquipoSeleccionado(eq);
-        setBusquedaSerie((eq.serie || "").toUpperCase());
-        setBusquedaModelo((eq.modelo || "").toUpperCase());
-      }
-    };
-    cargarEquipoFresco();
+    // Las OT no se vinculan a equipos: los datos ya vienen del snapshot de la OT
+    // (sin badge de vinculación ni equipoSeleccionado), igual que en edición
 
     const cl = clientes.find(c => 
       (orden.cliente_id && c.id === orden.cliente_id) || 
@@ -802,6 +781,23 @@ function OrdenTrabajo() {
     setClienteInactivo(false);
     setEditingId(null);
   };
+
+  // Cerrar el formulario (X o Cancelar/Cerrar): si no se viene de Clientes,
+  // refresca la lista para reflejar los cambios guardados con "Guardar Cambios"
+  const cerrarFormulario = () => {
+    const navState = window.history.state?.usr;
+    const vinoDeCliente = navState?.cliente || navState?.orden;
+    setMostrarFormulario(false);
+    resetFormulario();
+    setEditingId(null);
+    setSoloLectura(false);
+    window.history.replaceState({}, document.title);
+    if (vinoDeCliente) {
+      navigate("/clientes");
+    } else {
+      fetchOrdenes();
+    }
+  };
   // Funciones de navegación eliminadas (accesos desde el menú)
 
   const navItems = [
@@ -856,16 +852,7 @@ function OrdenTrabajo() {
             <div className="of-wrap">
               <div className="of-head">
                 <h2><Wrench size={20} /> {soloLectura ? "Ver Orden" : editingId ? "Editar Orden" : "Nueva Orden"}</h2>
-                <button type="button" className="of-head-close" onClick={() => { 
-      const navState = window.history.state?.usr;
-      const vinoDeCliente = navState?.cliente || navState?.orden;
-      setMostrarFormulario(false); 
-      resetFormulario(); 
-      setEditingId(null);
-      setSoloLectura(false);
-      window.history.replaceState({}, document.title); 
-      if (vinoDeCliente) navigate("/clientes");
-    }}><X size={18} /></button>
+                <button type="button" className="of-head-close" onClick={cerrarFormulario}><X size={18} /></button>
               </div>
             <form onSubmit={guardarOrden} className="of-form">
               <div className="of-col-full">
@@ -951,16 +938,7 @@ function OrdenTrabajo() {
 
               {/* Botones de acción del formulario */}
               <div className="of-sub">
-                <button type="button" className="of-btn-c" onClick={() => { 
-      const navState = window.history.state?.usr;
-      const vinoDeCliente = navState?.cliente || navState?.orden;
-      setMostrarFormulario(false); 
-      resetFormulario(); 
-      setEditingId(null);
-      setSoloLectura(false);
-      window.history.replaceState({}, document.title); 
-      if (vinoDeCliente) navigate("/clientes");
-    }}>
+                <button type="button" className="of-btn-c" onClick={cerrarFormulario}>
                   <X size={16} /> {soloLectura ? "Cerrar" : "Cancelar"}
                 </button>
                 {!soloLectura && editingId && (

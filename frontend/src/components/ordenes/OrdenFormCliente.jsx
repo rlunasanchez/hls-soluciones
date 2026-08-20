@@ -319,14 +319,14 @@ function OrdenFormCliente({
                 background: '#0D9488',
                 color: 'white',
                 border: 'none',
-                padding: '6px 12px',
-                borderRadius: '6px',
+                padding: '2px 8px',
+                borderRadius: 'var(--radius-sm)',
                 cursor: 'pointer',
                 fontWeight: 500,
-                fontSize: '0.8rem',
+                fontSize: '0.75rem',
                 whiteSpace: 'nowrap',
                 flexShrink: 0,
-                height: '32px'
+                height: '24px'
               }}
             >
                 <Eye size={14} /> Ver
