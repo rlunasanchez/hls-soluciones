@@ -673,10 +673,6 @@ function OrdenTrabajo() {
   // Se usa desde el botón "+ Registrar en Equipos" al crear una OT nueva.
   const registrarEquipoEnMantenedor = async () => {
     const { equipo, marca, modelo, serie } = nuevaOrden;
-    if (!equipo.trim() || !marca.trim() || !modelo.trim()) {
-      alert("Complete Equipo, Marca y Modelo antes de registrar en Equipos.");
-      return;
-    }
     try {
       const res = await api.post("/api/equipos", { equipo, marca, modelo, serie });
       alert(`Equipo creado en el mantenedor con código ${res.data.codigo}.`);
