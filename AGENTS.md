@@ -1604,6 +1604,7 @@ Estas columnas faltaban y causaban error 500 al editar/guardar equipos desde OT.
 | 1.90 | 18 Agosto 2026 | **RUT único en el form OT** (`OrdenTrabajo.jsx`): al guardar una orden nueva o editar, si el campo RUT coincide con el RUT de otro cliente del mantenedor → `alert("El RUT X ya existe para otro cliente.")` y no guarda (compara normalizado sin puntos ni espacios en mayúsculas; excluye al `clienteSeleccionado` si es el dueño de ese RUT). Solo frontend, sin migración |
 | 1.91 | 19 Agosto 2026 | **Modo "Ver" de OT igualado a "Editar" + botón "Ver" en Datos del Equipo + fix scroll modal Ver Equipo** (`OrdenTrabajo.jsx`, `OrdenFormCliente.jsx`, `OrdenFormEquipo.jsx`, `EquipoFormulario.jsx`, `Equipos.jsx`): (1) `verOrden()` usa `clienteFijo`/`equipoFijo = false`, ya no setea `equipoSeleccionado` ni llama `cargarEquipoFresco()` → el form Ver muestra los mismos buscadores/campos que Editar (solo deshabilitados). (2) Botón "Ver" del buscador de cliente bajado a `height: 24px`/`padding: 2px 8px` para no desplazar "Datos del Cliente" y desalinearlo con "Datos del Equipo". (3) Nuevo botón "Ver" en "Datos del Equipo" (solo en readOnly y si la OT tiene datos de equipo) que abre `EquipoFormulario` en solo lectura desde un snapshot de la OT. (4) `EquipoFormulario` ya no usa `.container` interno (min-height 100vh causaba scroll en el modal); `Equipos.jsx` lo envuelve en `.container` como página, mismo patrón que `Clientes.jsx`. Solo frontend, sin migración |
 | 1.92 | 19 Agosto 2026 | **Fix lista OT no reflejaba cambios al cerrar el form con X/Cancelar** (`OrdenTrabajo.jsx`): al guardar con "Guardar Cambios" y cerrar el formulario con la X (o el botón gris Cancelar/Cerrar) la lista seguía mostrando los datos viejos, porque esos botones no refrescaban la lista (solo el botón azul "Cerrar" la refrescaba). Los cambios sí se guardaban en la BD. Solución: nuevo helper `cerrarFormulario()` usado por la X del header y el botón gris — cierra el form y, si no se viene de Clientes, llama `fetchOrdenes()`. Eliminados los dos handlers inline duplicados. Solo frontend |
+| 1.93 | 19 Agosto 2026 | **Fix no se podía escribir en el formulario de Equipos (editar/nuevo)** (`EquipoFormulario.jsx`): los `onChange` de los 4 campos usaban `upperInput(e)` pero el import solo traía `toUpper` → al escribir se lanzaba un error y el estado nunca se actualizaba (inputs "congelados"). Solución: `import { toUpper, upperInput }`. Bug preexistente (el import faltaba antes del v1.91); verificado que el resto de archivos que usan `upperInput` sí lo importan. Solo frontend |
 
 ---
 
@@ -1884,5 +1885,18 @@ ALTER TABLE ordenes_trabajo DROP COLUMN IF EXISTS contacto2, DROP COLUMN IF EXIS
 **Causa:** Los botones X y Cancelar/Cerrar tenían handlers inline que solo cerraban el formulario (`setMostrarFormulario(false)` + `resetFormulario()`) sin refrescar la lista. Solo el botón azul "Cerrar" (submit → `guardarOrden(e, false)`) llamaba `fetchOrdenes()`. El estado `ordenes` en memoria quedaba desactualizado hasta recargar la página.
 
 **Solución:** Nuevo helper `cerrarFormulario()` usado por la X del header y el botón gris — cierra el form y, si no se viene de Clientes (`navState`), llama `fetchOrdenes()` para reflejar los cambios guardados. Eliminados los dos handlers inline duplicados.
+
+**Verificación:** `npm run build` OK en `frontend/`.
+
+### 67. Fix no se podía escribir en el formulario de Equipos (editar/nuevo)
+**Fecha:** 19 Agosto 2026
+**Ramás afectadas:** `main` (MySQL) — solo frontend, idéntico en `deploy/cloud` (PostgreSQL)
+**Archivo modificado (solo frontend):** `frontend/src/components/equipos/EquipoFormulario.jsx`
+
+**Problema:** Al abrir el formulario de Equipos (nuevo o editar) los campos no dejaban escribir: al teclear se lanzaba un error y el valor no se actualizaba (inputs "congelados").
+
+**Causa:** Los `onChange` de los 4 campos (Equipo, Marca, Modelo, Serie) usaban `upperInput(e)` pero el import solo traía `toUpper` → `upperInput` era `undefined`, el handler tiraba una excepción y `setNuevoEquipo` nunca se ejecutaba (el input es controlado, así que no mostraba lo escrito). Bug preexistente (el import faltaba antes del v1.91).
+
+**Solución:** `import { toUpper, upperInput } from "../../utils/helpers"`. Verificado que el resto de archivos que usan `upperInput` (`ClienteFormulario`, `ModalContactos`, `FiltrosEquipo`, `OrdenFormAveria`, `OrdenFormCliente`, `OrdenFormEquipo`, `OrdenTrabajo`) sí lo importan.
 
 **Verificación:** `npm run build` OK en `frontend/`.
