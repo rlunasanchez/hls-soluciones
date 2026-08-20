@@ -35,16 +35,9 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, readOnly 
   const handleSubmit = (e, mantener = false) => {
     e.preventDefault();
     if (guardandoRef.current) return;
-    const serieNormalizada = (nuevoEquipo.serie || "").trim().toUpperCase();
-    if (serieNormalizada) {
-      const duplicado = (equipos || []).find((eq) => {
-        if (equipoEditando && eq.id === equipoEditando.id) return false;
-        return (eq.serie || "").trim().toUpperCase() === serieNormalizada;
-      });
-      if (duplicado) {
-        alert(`La serie ${nuevoEquipo.serie} ya existe para otro equipo.`);
-        return;
-      }
+    if (!nuevoEquipo.equipo.trim() || !nuevoEquipo.marca.trim() || !nuevoEquipo.modelo.trim()) {
+      alert("Complete Equipo, Marca y Modelo antes de guardar.");
+      return;
     }
     guardandoRef.current = true;
     setGuardando(true);
