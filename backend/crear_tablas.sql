@@ -110,6 +110,7 @@ CREATE TABLE IF NOT EXISTS ordenes_trabajo (
   averia TEXT,
   observaciones TEXT,
   info_interna TEXT,
+  adjunto LONGTEXT,
 
   -- Relaciones
   cliente_id INT,

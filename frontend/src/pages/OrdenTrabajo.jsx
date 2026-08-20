@@ -107,7 +107,8 @@ function OrdenTrabajo() {
     averia: "",
     actividad: "",
     observaciones: "",
-    infoInterna: ""
+    infoInterna: "",
+    adjuntos: []
   });
 
   // Cargar clientes, equipos y órdenes al montar el componente
@@ -194,6 +195,7 @@ function OrdenTrabajo() {
         actividad: "",
         observaciones: "",
         infoInterna: "",
+        adjuntos: [],
         contactosExtra: [],
         direccionesExtra: []
       });
@@ -336,6 +338,19 @@ function OrdenTrabajo() {
     }
   };
 
+  // Adjuntos: la columna guarda JSON array [{nombre, tipo, data}] o null.
+  // Compatibilidad con datos viejos guardados como data URL suelto (v1.94 previa).
+  const parseAdjuntos = (val) => {
+    if (!val) return [];
+    if (Array.isArray(val)) return val;
+    try {
+      const arr = JSON.parse(val);
+      return Array.isArray(arr) ? arr : [];
+    } catch {
+      return [];
+    }
+  };
+
   const editarOrden = async (orden) => {
     setEditingId(orden.id);
     setClienteFijo(false);
@@ -376,6 +391,7 @@ function OrdenTrabajo() {
       actividad: toUpper(orden.actividad),
       observaciones: toUpper(orden.observaciones),
       infoInterna: toUpper(orden.info_interna),
+      adjuntos: parseAdjuntos(orden.adjunto),
       contactosExtra: parseExtra(orden.contactos_extra),
       direccionesExtra: parseExtra(orden.direcciones_extra)
     });
@@ -470,6 +486,7 @@ function OrdenTrabajo() {
       actividad: toUpper(orden.actividad),
       observaciones: toUpper(orden.observaciones),
       infoInterna: toUpper(orden.info_interna),
+      adjuntos: parseAdjuntos(orden.adjunto),
       contactosExtra: parseExtra(orden.contactos_extra),
       direccionesExtra: parseExtra(orden.direcciones_extra)
     });
@@ -759,6 +776,7 @@ function OrdenTrabajo() {
       actividad: "",
       observaciones: "",
       infoInterna: "",
+      adjuntos: [],
       contactosExtra: [],
       direccionesExtra: []
     });

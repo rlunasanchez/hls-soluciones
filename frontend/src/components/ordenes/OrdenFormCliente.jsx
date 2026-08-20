@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Search, Users, ChevronDown, ChevronUp, Eye, UserPlus, MapPin } from "lucide-react";
+import { Search, Users, ChevronDown, ChevronUp, Eye, UserPlus, MapPin, Paperclip, MoreVertical, Download, Trash2 } from "lucide-react";
 import ClienteFormulario from "../clientes/ClienteFormulario";
 import "../../styles/Clientes.css";
 import { upperInput, validarRUT } from "../../utils/helpers";
@@ -28,6 +28,98 @@ function OrdenFormCliente({
   const [mostrarDropdownContacto, setMostrarDropdownContacto] = useState(false);
   const contactoDropdownRef = useRef(null);
   const [mostrarInfoInterna, setMostrarInfoInterna] = useState(false);
+  const [mostrarAdjunto, setMostrarAdjunto] = useState(false);
+  const [mostrarMenuAdjunto, setMostrarMenuAdjunto] = useState(false);
+  const [adjuntoParaVer, setAdjuntoParaVer] = useState(null);
+  const [posAdjunto, setPosAdjunto] = useState({ top: 0, left: 0 });
+  const adjuntoDropdownRef = useRef(null);
+  const adjuntoIdxRef = useRef(-1);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (adjuntoDropdownRef.current && adjuntoDropdownRef.current.contains(event.target)) return;
+      if (event.target.closest(".acciones-menu-btn")) return;
+      setMostrarMenuAdjunto(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const TIPOS_PERMITIDOS = ["image/"];
+
+  const handleAdjuntoChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const actuales = nuevaOrden.adjuntos || [];
+    if (actuales.length >= 2) {
+      alert("Máximo 2 imágenes adjuntas por orden.");
+      e.target.value = "";
+      return;
+    }
+    const permitido = TIPOS_PERMITIDOS.some((t) => file.type.startsWith(t));
+    if (!permitido) {
+      alert("Solo se permiten imágenes (JPG, PNG, etc.).");
+      e.target.value = "";
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert("La imagen supera el máximo de 5MB.");
+      e.target.value = "";
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setNuevaOrden({ ...nuevaOrden, adjuntos: [...actuales, { nombre: file.name, tipo: file.type, data: reader.result }] });
+      e.target.value = "";
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const abrirMenuAdjunto = (e, idx) => {
+    e.stopPropagation();
+    if (mostrarMenuAdjunto && adjuntoIdxRef.current === idx) {
+      setMostrarMenuAdjunto(false);
+      return;
+    }
+    adjuntoIdxRef.current = idx;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const menuWidth = 140;
+    const left = Math.min(Math.max(rect.right - menuWidth, 4), window.innerWidth - menuWidth);
+    let top = rect.bottom + 4;
+    if (top + 100 > window.innerHeight) {
+      top = Math.max(rect.top - 100 - 4, 4);
+    }
+    setPosAdjunto({ top, left });
+    setMostrarMenuAdjunto(true);
+  };
+
+  const descargarAdjunto = (idx = adjuntoIdxRef.current) => {
+    const adj = (nuevaOrden.adjuntos || [])[idx];
+    if (!adj) return;
+    const a = document.createElement("a");
+    a.href = adj.data;
+    a.download = adj.nombre || `adjunto-ot-${(nuevaOrden.numeroOrden || "").replace(/\s+/g, "-") || "archivo"}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setMostrarMenuAdjunto(false);
+  };
+
+  const verAdjunto = (idx = adjuntoIdxRef.current) => {
+    const adj = (nuevaOrden.adjuntos || [])[idx];
+    if (!adj) return;
+    setAdjuntoParaVer(adj);
+    setMostrarMenuAdjunto(false);
+  };
+
+  const eliminarAdjunto = (idx = adjuntoIdxRef.current) => {
+    const adj = (nuevaOrden.adjuntos || [])[idx];
+    if (!adj) return;
+    if (confirm(`¿Eliminar el archivo "${adj.nombre}"?`)) {
+      setNuevaOrden({ ...nuevaOrden, adjuntos: (nuevaOrden.adjuntos || []).filter((_, i) => i !== idx) });
+      setMostrarMenuAdjunto(false);
+    }
+  };
 
   const handleRutChange = (e) => {
     let val = upperInput(e, /[^0-9K-]/g);
@@ -1002,6 +1094,106 @@ function OrdenFormCliente({
           </div>
         )}
       </div>
+
+      <div style={{ marginTop: '10px', padding: '4px 10px', background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '8px', lineHeight: '1.2' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer', fontSize: '0.8rem', width: 'fit-content', maxWidth: '100%' }}>
+          <button
+            type="button"
+            onClick={() => setMostrarAdjunto(!mostrarAdjunto)}
+            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text)', fontWeight: 600, fontSize: '0.8rem', fontFamily: 'inherit' }}
+          >
+            {mostrarAdjunto ? <ChevronUp size={14} style={{ color: 'var(--primary)', flexShrink: 0 }} /> : <ChevronDown size={14} style={{ color: 'var(--primary)', flexShrink: 0 }} />}
+            <Paperclip size={14} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+            Adjunto
+          </button>
+        </label>
+
+        {mostrarAdjunto && (
+        <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {(nuevaOrden.adjuntos || []).map((adj, idx) => (
+            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#fff', border: '1px solid var(--border)', borderRadius: '8px', padding: '6px 10px' }}>
+              {adj.tipo.startsWith("image/") && (
+                <img
+                  src={adj.data}
+                  alt={adj.nombre}
+                  style={{ width: '44px', height: '44px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border)', flexShrink: 0 }}
+                />
+              )}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: '600', fontSize: '.75rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {adj.nombre || "Archivo adjunto"}
+                </div>
+                <div style={{ fontSize: '.68rem', color: 'var(--muted)' }}>{idx === 0 ? "Adjunto 1" : "Adjunto 2"}</div>
+              </div>
+              {!readOnly && (
+                <div className="acciones-menu" style={{ position: 'relative' }}>
+                  <button
+                    type="button"
+                    className="acciones-menu-btn"
+                    onClick={(e) => abrirMenuAdjunto(e, idx)}
+                    aria-label={`Opciones de ${adj.nombre}`}
+                  >
+                    <MoreVertical size={16} />
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+
+          {mostrarMenuAdjunto && (
+            <div className="acciones-dropdown" ref={adjuntoDropdownRef} style={{ position: 'fixed', top: posAdjunto.top, left: posAdjunto.left, zIndex: 9999 }}>
+              <button className="acciones-item ver" type="button" onClick={() => verAdjunto()}>
+                <Eye size={14} /> Ver
+              </button>
+              <button className="acciones-item edit" type="button" onClick={() => descargarAdjunto()}>
+                <Download size={14} /> Descargar
+              </button>
+              <button className="acciones-item delete" type="button" onClick={() => eliminarAdjunto()}>
+                <Trash2 size={14} /> Eliminar
+              </button>
+            </div>
+          )}
+
+          {(nuevaOrden.adjuntos || []).length < 2 && (
+            <div className="of-f">
+              <label
+                className="ot-search"
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: readOnly ? 'not-allowed' : 'pointer', color: 'var(--muted)', minHeight: '26px', margin: 0 }}
+              >
+                <Paperclip size={14} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+                <span style={{ flex: 1, fontSize: '.78rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {readOnly ? "Sin imagen" : (nuevaOrden.adjuntos || []).length === 0 ? "Seleccionar imagen..." : "Agregar segunda imagen..."}
+                </span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAdjuntoChange}
+                  disabled={readOnly}
+                  style={{ display: 'none' }}
+                />
+              </label>
+            </div>
+          )}
+        </div>
+        )}
+      </div>
+
+      {adjuntoParaVer && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(0,0,0,.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }} onClick={() => setAdjuntoParaVer(null)}>
+          <div style={{ background: '#fff', borderRadius: '10px', padding: '12px', maxWidth: '90vw', maxHeight: '90vh', display: 'flex', flexDirection: 'column', gap: '10px', position: 'relative' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+              <span style={{ fontWeight: 600, fontSize: '.85rem', color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{adjuntoParaVer.nombre}</span>
+              <button type="button" onClick={() => setAdjuntoParaVer(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: 'var(--muted)', lineHeight: 1 }} aria-label="Cerrar">×</button>
+            </div>
+            <img src={adjuntoParaVer.data} alt={adjuntoParaVer.nombre} style={{ maxWidth: '100%', maxHeight: '75vh', objectFit: 'contain', borderRadius: '6px' }} />
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+              <button type="button" onClick={() => descargarAdjunto()} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', border: 'none', borderRadius: '6px', background: 'var(--primary)', color: '#fff', cursor: 'pointer', fontSize: '.78rem', fontWeight: 600 }}>
+                <Download size={14} /> Descargar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
