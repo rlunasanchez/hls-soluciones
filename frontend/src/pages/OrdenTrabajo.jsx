@@ -669,7 +669,7 @@ function OrdenTrabajo() {
   // Modelos únicos (sin duplicar por serie) para el buscador de modelo
   const equiposModeloFiltrados = [...new Map(equiposModeloSugeridos.map(eq => [eq.modelo, eq])).values()];
 
-  // Registra el equipo del form OT en el mantenedor (solo si la serie no existe).
+  // Registra el equipo del form OT en el mantenedor (la serie es opcional).
   // Se usa desde el botón "+ Registrar en Equipos" al crear una OT nueva.
   const registrarEquipoEnMantenedor = async () => {
     const { equipo, marca, modelo, serie } = nuevaOrden;
