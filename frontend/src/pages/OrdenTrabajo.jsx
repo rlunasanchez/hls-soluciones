@@ -686,6 +686,17 @@ function OrdenTrabajo() {
       }
     }
     
+    // Validar peso total de adjuntos: data URL base64 ≈ 33% más pesada que el archivo original
+    const adjuntos = nuevaOrden.adjuntos || [];
+    if (adjuntos.length > 0) {
+      const bytesTotal = adjuntos.reduce((acc, a) => acc + (a.data?.length || 0), 0);
+      const mbTotal = (bytesTotal * 0.75) / (1024 * 1024);
+      if (mbTotal > 18) {
+        alert(`Las imágenes adjuntas suman aproximadamente ${mbTotal.toFixed(1)} MB.\nEl límite es 20 MB. Reducí el tamaño de las imágenes o eliminá algunas antes de guardar.`);
+        return;
+      }
+    }
+    
     // Preparar insumos
     const ins = insumos.filter(i => i.nombre.trim() !== "").map(i => i.nombre);
     
