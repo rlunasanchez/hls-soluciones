@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Package, Save, X } from "lucide-react";
-import { toUpper } from "../../utils/helpers";
+import { toUpper, upperInput } from "../../utils/helpers";
 
 function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, readOnly = false }) {
   const [nuevoEquipo, setNuevoEquipo] = useState({
