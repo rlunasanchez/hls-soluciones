@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import pool from "../config/db.js";
-import { authMiddleware } from "../middleware/authMiddleware.js";
+import { authMiddleware, adminOnly } from "../middleware/authMiddleware.js";
 
 dotenv.config();
 const router = express.Router();
@@ -223,7 +223,7 @@ router.put("/:id/desactivar", authMiddleware, async (req, res) => {
   }
 });
 
-router.delete("/:id", authMiddleware, async (req, res) => {
+router.delete("/:id", authMiddleware, adminOnly, async (req, res) => {
   const { id } = req.params;
   try {
     await pool.query("DELETE FROM clientes WHERE id = $1", [id]);
