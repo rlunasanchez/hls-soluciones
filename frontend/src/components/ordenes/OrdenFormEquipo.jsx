@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Search, Eye, PackagePlus } from "lucide-react";
+import { Search, Eye, PackagePlus, Pencil } from "lucide-react";
 import EquipoFormulario from "../equipos/EquipoFormulario";
+import { createPortal } from "react-dom";
+import api from "../../services/api";
 import "../../styles/Equipos.css";
-import { upperInput } from "../../utils/helpers";
+import { upperInput, toUpper } from "../../utils/helpers";
 
 function OrdenFormEquipo({
   children,
@@ -22,9 +24,12 @@ function OrdenFormEquipo({
   equipos = [],
   equipoFijo = false,
   editingId = null,
-  onRegistrarEquipo = null
+  onRegistrarEquipo = null,
+  onEquiposRefresh = null
 }) {
   const [mostrarDetalleEquipo, setMostrarDetalleEquipo] = useState(false);
+  const [mostrarEditarEquipo, setMostrarEditarEquipo] = useState(false);
+  const [equipoEnEdicion, setEquipoEnEdicion] = useState(null);
 
   const inputStyle = {
     width: '100%', padding: '2px 8px',
@@ -39,6 +44,42 @@ function OrdenFormEquipo({
     serie: nuevaOrden.serie || ""
   };
   const hayDatosEquipo = !!(nuevaOrden.equipo || nuevaOrden.marca || nuevaOrden.modelo || nuevaOrden.serie);
+  const normEq = (v) => (v || "").trim().toLowerCase();
+  const equipoExistente = (equipos || []).find(eq =>
+    normEq(eq.equipo) === normEq(nuevaOrden.equipo) &&
+    normEq(eq.marca) === normEq(nuevaOrden.marca) &&
+    normEq(eq.modelo) === normEq(nuevaOrden.modelo)
+  );
+
+  const abrirEditarEquipo = () => {
+    if (!equipoExistente) return;
+    setEquipoEnEdicion(equipoExistente);
+    setMostrarEditarEquipo(true);
+  };
+
+  const handleGuardarEdicionEquipo = async (payload, id, mantener = false) => {
+    try {
+      await api.put(`/api/equipos/${id}`, payload);
+      const lista = await api.get("/api/equipos");
+      if (onEquiposRefresh) onEquiposRefresh(lista.data);
+      const res = await api.get(`/api/equipos/${id}`);
+      setNuevaOrden(prev => ({
+        ...prev,
+        equipo: toUpper(res.data.equipo),
+        marca: toUpper(res.data.marca),
+        modelo: toUpper(res.data.modelo),
+        serie: res.data.serie ? toUpper(res.data.serie) : ""
+      }));
+      if (mantener && id) {
+        setEquipoEnEdicion(res.data);
+      } else {
+        setMostrarEditarEquipo(false);
+        setEquipoEnEdicion(null);
+      }
+    } catch (err) {
+      alert(err.response?.data?.msg || "Error al guardar el equipo.");
+    }
+  };
 
   return (
     <div className="of-sec primary">
@@ -103,7 +144,7 @@ function OrdenFormEquipo({
           <div ref={equipoDropdownRef} style={{ position: 'relative' }}>
             <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)' }}>
               <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
-              Buscar Equipo por Serie
+              Buscar por Serie
             </label>
             <input
               type="text"
@@ -229,6 +270,22 @@ function OrdenFormEquipo({
             <PackagePlus size={14} /> Registrar en Equipos
           </button>
         )}
+        {!readOnly && equipoExistente && (
+          <button
+            type="button"
+            onClick={abrirEditarEquipo}
+            title="Editar en el mantenedor el equipo con estos datos"
+            style={{
+              display: 'flex', alignItems: 'center', gap: '4px',
+              background: 'var(--warning)', color: 'white', border: 'none',
+              padding: '2px 10px', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
+              fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap',
+              flexShrink: 0, height: '24px', alignSelf: 'flex-end'
+            }}
+          >
+            <Pencil size={14} /> Editar
+          </button>
+        )}
         {readOnly && hayDatosEquipo && (
           <button
             type="button"
@@ -300,8 +357,8 @@ function OrdenFormEquipo({
         </div>
       </div>
 
-      {/* Modal Detalle Equipo (solo lectura) */}
-      {mostrarDetalleEquipo && (equipoSeleccionado || hayDatosEquipo) && (
+      {/* Modal Detalle Equipo (solo lectura) — portal fuera del form de la OT */}
+      {mostrarDetalleEquipo && (equipoSeleccionado || hayDatosEquipo) && createPortal(
         <div style={{
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999,
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
@@ -317,7 +374,28 @@ function OrdenFormEquipo({
               readOnly
             />
           </div>
-        </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Modal Editar Equipo (mantenedor desde la OT) — portal fuera del form de la OT */}
+      {mostrarEditarEquipo && equipoEnEdicion && createPortal(
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
+        }}
+          onClick={(e) => { if (e.target === e.currentTarget) { setMostrarEditarEquipo(false); setEquipoEnEdicion(null); } }}
+        >
+          <div style={{ maxHeight: '90vh', overflow: 'auto', width: '100%', maxWidth: '900px' }}>
+            <EquipoFormulario
+              equipoEditando={equipoEnEdicion}
+              equipos={equipos}
+              onSave={handleGuardarEdicionEquipo}
+              onCancel={() => { setMostrarEditarEquipo(false); setEquipoEnEdicion(null); }}
+            />
+          </div>
+        </div>,
+        document.body
       )}
 
       {/* Modal Nuevo Equipo (registrar en inventario desde la OT) */}

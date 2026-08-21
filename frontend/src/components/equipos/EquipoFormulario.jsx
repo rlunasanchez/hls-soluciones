@@ -34,6 +34,7 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, readOnly 
 
   const handleSubmit = (e, mantener = false) => {
     e.preventDefault();
+    e.stopPropagation();
     if (guardandoRef.current) return;
     if (!nuevoEquipo.equipo.trim() || !nuevoEquipo.marca.trim() || !nuevoEquipo.modelo.trim()) {
       alert("Complete Equipo, Marca y Modelo antes de guardar.");

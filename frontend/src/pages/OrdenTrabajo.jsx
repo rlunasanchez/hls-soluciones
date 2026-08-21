@@ -951,6 +951,7 @@ function OrdenTrabajo() {
                   equipoFijo={equipoFijo}
                   editingId={editingId}
                   onRegistrarEquipo={registrarEquipoEnMantenedor}
+                  onEquiposRefresh={(lista) => setEquipos(lista)}
                 />
 
                 <OrdenFormInsumos
