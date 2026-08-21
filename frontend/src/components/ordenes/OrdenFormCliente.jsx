@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { Search, Users, ChevronDown, ChevronUp, Eye, UserPlus, MapPin, Paperclip, MoreVertical, Download, Trash2, FileText, Printer } from "lucide-react";
 import ClienteFormulario from "../clientes/ClienteFormulario";
 import "../../styles/Clientes.css";
@@ -34,6 +34,7 @@ function OrdenFormCliente({
   const [posAdjunto, setPosAdjunto] = useState({ top: 0, left: 0 });
   const adjuntoDropdownRef = useRef(null);
   const adjuntoIdxRef = useRef(-1);
+  const btnAdjuntoRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -44,6 +45,19 @@ function OrdenFormCliente({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useLayoutEffect(() => {
+    if (!mostrarMenuAdjunto || !btnAdjuntoRef.current || !adjuntoDropdownRef.current) return;
+    const rect = btnAdjuntoRef.current.getBoundingClientRect();
+    const menuHeight = adjuntoDropdownRef.current.offsetHeight;
+    const menuWidth = 140;
+    const left = Math.min(Math.max(rect.right - menuWidth, 4), window.innerWidth - menuWidth);
+    let top = rect.bottom + 4;
+    if (top + menuHeight > window.innerHeight) {
+      top = Math.max(rect.top - menuHeight - 4, 4);
+    }
+    setPosAdjunto({ top, left });
+  }, [mostrarMenuAdjunto]);
 
   const TIPOS_PERMITIDOS = ["image/", "application/pdf"];
 
@@ -82,14 +96,7 @@ function OrdenFormCliente({
       return;
     }
     adjuntoIdxRef.current = idx;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const menuWidth = 140;
-    const left = Math.min(Math.max(rect.right - menuWidth, 4), window.innerWidth - menuWidth);
-    let top = rect.bottom + 4;
-    if (top + 100 > window.innerHeight) {
-      top = Math.max(rect.top - 100 - 4, 4);
-    }
-    setPosAdjunto({ top, left });
+    btnAdjuntoRef.current = e.currentTarget;
     setMostrarMenuAdjunto(true);
   };
 
@@ -1124,18 +1131,16 @@ function OrdenFormCliente({
                 </div>
                 <div style={{ fontSize: '.68rem', color: 'var(--muted)' }}>{idx === 0 ? "Adjunto 1" : "Adjunto 2"}</div>
               </div>
-              {!readOnly && (
-                <div className="acciones-menu" style={{ position: 'relative' }}>
-                  <button
-                    type="button"
-                    className="acciones-menu-btn"
-                    onClick={(e) => abrirMenuAdjunto(e, idx)}
-                    aria-label={`Opciones de ${adj.nombre}`}
-                  >
-                    <MoreVertical size={16} />
-                  </button>
-                </div>
-              )}
+              <div className="acciones-menu" style={{ position: 'relative' }}>
+                <button
+                  type="button"
+                  className="acciones-menu-btn"
+                  onClick={(e) => abrirMenuAdjunto(e, idx)}
+                  aria-label={`Opciones de ${adj.nombre}`}
+                >
+                  <MoreVertical size={16} />
+                </button>
+              </div>
             </div>
           ))}
 
@@ -1144,12 +1149,16 @@ function OrdenFormCliente({
               <button className="acciones-item ver" type="button" onClick={() => verAdjunto()}>
                 <Eye size={14} /> Ver
               </button>
-              <button className="acciones-item edit" type="button" onClick={() => descargarAdjunto()}>
-                <Download size={14} /> Descargar
-              </button>
-              <button className="acciones-item delete" type="button" onClick={() => eliminarAdjunto()}>
-                <Trash2 size={14} /> Eliminar
-              </button>
+              {!readOnly && (
+                <>
+                  <button className="acciones-item edit" type="button" onClick={() => descargarAdjunto()}>
+                    <Download size={14} /> Descargar
+                  </button>
+                  <button className="acciones-item delete" type="button" onClick={() => eliminarAdjunto()}>
+                    <Trash2 size={14} /> Eliminar
+                  </button>
+                </>
+              )}
             </div>
           )}
 
