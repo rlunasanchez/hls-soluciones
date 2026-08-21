@@ -670,7 +670,7 @@ function OrdenTrabajo() {
   const equiposModeloFiltrados = [...new Map(equiposModeloSugeridos.map(eq => [eq.modelo, eq])).values()];
 
   // Registra el equipo del form OT en el mantenedor (la serie es opcional).
-  // Se usa desde el botón "+ Registrar en Equipos" al crear una OT nueva.
+  // Se usa desde el botón "+ Registrar en Equipos" al crear o editar una OT.
   const registrarEquipoEnMantenedor = async () => {
     const { equipo, marca, modelo, serie } = nuevaOrden;
     try {
