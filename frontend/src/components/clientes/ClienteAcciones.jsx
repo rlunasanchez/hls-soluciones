@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { MoreHorizontal, ClipboardList, FileSpreadsheet, Eye, Edit, Trash2 } from "lucide-react";
+import { parseToken } from "../../utils/helpers";
 
 function ClienteAcciones({ cliente, onVer, onEditar, onEliminar, onOT, onCotizacion }) {
+  const { rol } = parseToken();
   const [abierto, setAbierto] = useState(false);
   const [pos, setPos] = useState({ top: 0, left: 0 });
   const btnRef = useRef(null);
@@ -59,9 +61,11 @@ function ClienteAcciones({ cliente, onVer, onEditar, onEliminar, onOT, onCotizac
           <button className="acciones-item edit" onClick={() => { setAbierto(false); onEditar(cliente); }}>
             <Edit size={14} /> Editar
           </button>
-          <button className="acciones-item delete" onClick={() => { setAbierto(false); onEliminar(cliente.id); }}>
-            <Trash2 size={14} /> Eliminar
-          </button>
+          {rol === 'admin' && (
+            <button className="acciones-item delete" onClick={() => { setAbierto(false); onEliminar(cliente.id); }}>
+              <Trash2 size={14} /> Eliminar
+            </button>
+          )}
         </div>
       )}
     </div>
