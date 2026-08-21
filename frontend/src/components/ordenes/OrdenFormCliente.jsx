@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Search, Users, ChevronDown, ChevronUp, Eye, UserPlus, MapPin, Paperclip, MoreVertical, Download, Trash2, FileText } from "lucide-react";
+import { Search, Users, ChevronDown, ChevronUp, Eye, UserPlus, MapPin, Paperclip, MoreVertical, Download, Trash2, FileText, Printer } from "lucide-react";
 import ClienteFormulario from "../clientes/ClienteFormulario";
 import "../../styles/Clientes.css";
 import { upperInput, validarRUT } from "../../utils/helpers";
@@ -110,6 +110,27 @@ function OrdenFormCliente({
     if (!adj) return;
     setAdjuntoParaVer(adj);
     setMostrarMenuAdjunto(false);
+  };
+
+  const imprimirAdjunto = () => {
+    if (!adjuntoParaVer || adjuntoParaVer.tipo === "application/pdf") return;
+    const frame = document.createElement("iframe");
+    frame.style.position = "fixed";
+    frame.style.width = "0";
+    frame.style.height = "0";
+    frame.style.border = "0";
+    frame.style.visibility = "hidden";
+    document.body.appendChild(frame);
+    const doc = frame.contentWindow?.document;
+    if (!doc) return;
+    doc.open();
+    doc.write(
+      `<html><head><title>${adjuntoParaVer.nombre || "Adjunto"}</title></head>` +
+      `<body style="margin:0;text-align:center;"><img src="${adjuntoParaVer.data}" style="max-width:100%;" ` +
+      `onload="window.focus();window.print();" /></body></html>`
+    );
+    doc.close();
+    setTimeout(() => { if (frame.parentNode) frame.parentNode.removeChild(frame); }, 60000);
   };
 
   const eliminarAdjunto = (idx = adjuntoIdxRef.current) => {
@@ -1201,6 +1222,11 @@ function OrdenFormCliente({
               <img src={adjuntoParaVer.data} alt={adjuntoParaVer.nombre} style={{ maxWidth: '100%', maxHeight: '75vh', objectFit: 'contain', borderRadius: '6px' }} />
             )}
             <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+              {adjuntoParaVer.tipo !== "application/pdf" && (
+                <button type="button" onClick={imprimirAdjunto} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', border: 'none', borderRadius: '6px', background: '#0D9488', color: '#fff', cursor: 'pointer', fontSize: '.78rem', fontWeight: 600 }}>
+                  <Printer size={14} /> Imprimir
+                </button>
+              )}
               <button type="button" onClick={() => descargarAdjunto()} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', border: 'none', borderRadius: '6px', background: 'var(--primary)', color: '#fff', cursor: 'pointer', fontSize: '.78rem', fontWeight: 600 }}>
                 <Download size={14} /> Descargar
               </button>
