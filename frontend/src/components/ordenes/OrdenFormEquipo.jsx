@@ -213,7 +213,7 @@ function OrdenFormEquipo({
             )}
           </div>
         </div>
-        {!readOnly && !editingId && onRegistrarEquipo && (
+        {!readOnly && onRegistrarEquipo && (
           <button
             type="button"
             onClick={() => onRegistrarEquipo()}
