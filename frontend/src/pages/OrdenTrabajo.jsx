@@ -45,18 +45,14 @@ function OrdenTrabajo() {
   const [equipoSeleccionado, setEquipoSeleccionado] = useState(null);
   const [equipoFijo, setEquipoFijo] = useState(false);
   const [busquedaCliente, setBusquedaCliente] = useState("");
-  const [busquedaSerie, setBusquedaSerie] = useState("");
   const [busquedaModelo, setBusquedaModelo] = useState("");
   const [mostrarDropdownClientes, setMostrarDropdownClientes] = useState(false);
-  const [mostrarDropdownEquipos, setMostrarDropdownEquipos] = useState(false);
   const [mostrarDropdownModelo, setMostrarDropdownModelo] = useState(false);
-  const [equiposSugeridos, setEquiposSugeridos] = useState([]);
   const [equiposModeloSugeridos, setEquiposModeloSugeridos] = useState([]);
   const [clienteInactivo, setClienteInactivo] = useState(false);
   const [soloLectura, setSoloLectura] = useState(false);
   
   // Refs para detectar clics fuera de los dropdowns
-  const equipoDropdownRef = useRef(null);
   const equipoModeloDropdownRef = useRef(null);
   const clienteDropdownRef = useRef(null);
   
@@ -153,9 +149,7 @@ function OrdenTrabajo() {
         setEquipoSeleccionado(null);
         setEquipoFijo(false);
         setBusquedaCliente((clienteFromNav.razon_social || "").toUpperCase());
-        setBusquedaSerie("");
     setBusquedaModelo("");
-    setEquiposSugeridos([]);
     setEquiposModeloSugeridos([]);
         setInsumos([
           { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
@@ -234,9 +228,7 @@ function OrdenTrabajo() {
     setEquipoFijo(false);
     setClienteInactivo(false);
     setBusquedaCliente("");
-    setBusquedaSerie("");
     setBusquedaModelo("");
-    setEquiposSugeridos([]);
     setEquiposModeloSugeridos([]);
     setInsumos([
       { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
@@ -249,18 +241,6 @@ function OrdenTrabajo() {
 
   // Resetear paginación al filtrar
   useEffect(() => { setPaginaActual(1); }, [filtroNumeroOrden, filtroCliente, filtroSerie, filtroEstado, filtroGarantia, filtroFechaDesde, filtroFechaHasta]);
-
-  // Buscar equipos por serie via API (datos siempre frescos)
-  useEffect(() => {
-    if (busquedaSerie.length < 2) { setEquiposSugeridos([]); return; }
-    const timer = setTimeout(async () => {
-      try {
-        const res = await api.get(`/api/equipos?q=${encodeURIComponent(busquedaSerie)}`);
-        setEquiposSugeridos(res.data);
-      } catch { setEquiposSugeridos([]); }
-    }, 250);
-    return () => clearTimeout(timer);
-  }, [busquedaSerie]);
 
   // Buscar equipos por modelo via API
   useEffect(() => {
@@ -277,9 +257,6 @@ function OrdenTrabajo() {
   // Cierra los dropdowns al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (equipoDropdownRef.current && !equipoDropdownRef.current.contains(event.target)) {
-        setMostrarDropdownEquipos(false);
-      }
       if (equipoModeloDropdownRef.current && !equipoModeloDropdownRef.current.contains(event.target)) {
         setMostrarDropdownModelo(false);
       }
@@ -597,7 +574,6 @@ function OrdenTrabajo() {
     }
 
     setEquipoSeleccionado(null);
-    setBusquedaSerie("");
     setBusquedaModelo("");
     setNuevaOrden(prev => ({
       ...prev,
@@ -623,23 +599,6 @@ function OrdenTrabajo() {
     }));
   };
 
-  // Seleccionar equipo por serie - NO vincula equipo ni carga avería (solo los datos de esa serie)
-  const seleccionarEquipo = (equipo) => {
-    setNuevaOrden(prev => ({
-      ...prev,
-      equipo: toUpper(equipo.equipo),
-      modelo: toUpper(equipo.modelo),
-      marca: toUpper(equipo.marca),
-      serie: toUpper(equipo.serie)
-      // NOTA: No vincula equipo (equipoId = null), solo trae los datos de la serie
-    }));
-
-     setBusquedaSerie((equipo.serie || "").toUpperCase());
-     setBusquedaModelo((equipo.modelo || "").toUpperCase());
-     setMostrarDropdownEquipos(false);
-     setMostrarDropdownModelo(false);
-  };
-
   // Seleccionar solo el modelo - NO vincula serie ni equipo (solo rellena los datos del modelo)
   const seleccionarEquipoPorModelo = (equipo) => {
     setNuevaOrden(prev => ({
@@ -651,9 +610,7 @@ function OrdenTrabajo() {
       // NOTA: No vincula equipo (equipoId = null) ni serie, solo los datos del modelo
     }));
 
-     setBusquedaSerie("");
      setBusquedaModelo((equipo.modelo || "").toUpperCase());
-     setMostrarDropdownEquipos(false);
      setMostrarDropdownModelo(false);
   };
 
@@ -664,8 +621,6 @@ function OrdenTrabajo() {
     c.codigo?.toLowerCase().includes(busquedaCliente.toLowerCase())
   ).slice(0, 10) : [];
 
-  // Equipos filtrados por API (siempre frescos)
-  const equiposFiltrados = equiposSugeridos;
   // Modelos únicos (sin duplicar por serie) para el buscador de modelo
   const equiposModeloFiltrados = [...new Map(equiposModeloSugeridos.map(eq => [eq.modelo, eq])).values()];
 
@@ -817,9 +772,7 @@ function OrdenTrabajo() {
     setEquipoSeleccionado(null);
     setEquipoFijo(false);
     setBusquedaCliente("");
-    setBusquedaSerie("");
     setBusquedaModelo("");
-    setEquiposSugeridos([]);
     setEquiposModeloSugeridos([]);
     setMostrarDropdownModelo(false);
     setClienteInactivo(false);
@@ -935,13 +888,6 @@ function OrdenTrabajo() {
                   setMostrarDropdownModelo={setMostrarDropdownModelo}
                   equiposModeloFiltrados={equiposModeloFiltrados}
                   equipoModeloDropdownRef={equipoModeloDropdownRef}
-                  busquedaSerie={busquedaSerie}
-                  setBusquedaSerie={setBusquedaSerie}
-                  mostrarDropdownEquipos={mostrarDropdownEquipos}
-                  setMostrarDropdownEquipos={setMostrarDropdownEquipos}
-                  equiposFiltrados={equiposFiltrados}
-                  equipoDropdownRef={equipoDropdownRef}
-                  seleccionarEquipo={seleccionarEquipo}
                   seleccionarEquipoPorModelo={seleccionarEquipoPorModelo}
                   equipoSeleccionado={equipoSeleccionado}
                   nuevaOrden={nuevaOrden}

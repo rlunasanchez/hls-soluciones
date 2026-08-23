@@ -8,11 +8,6 @@ import { upperInput, toUpper } from "../../utils/helpers";
 
 function OrdenFormEquipo({
   children,
-  busquedaSerie, setBusquedaSerie,
-  mostrarDropdownEquipos, setMostrarDropdownEquipos,
-  equiposFiltrados,
-  equipoDropdownRef,
-  seleccionarEquipo,
   seleccionarEquipoPorModelo,
   equipoSeleccionado,
   nuevaOrden, setNuevaOrden,
@@ -139,66 +134,8 @@ function OrdenFormEquipo({
       )}
 
       {equipoFijo && equipoSeleccionado ? null : (
-      <div style={{display:'flex',gap:'10px',marginBottom:'8px',alignItems:'flex-start'}}>
-        <div style={{flex:'1 1 0',minWidth:0}}>
-          <div ref={equipoDropdownRef} style={{ position: 'relative' }}>
-            <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)' }}>
-              <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
-              Buscar por Serie
-            </label>
-            <input
-              type="text"
-              className="ot-search"
-              placeholder="Ingrese número de serie..."
-              value={busquedaSerie}
-              onChange={(e) => {
-                setBusquedaSerie(upperInput(e));
-                setMostrarDropdownEquipos(e.target.value.length >= 2);
-              }}
-              onFocus={() => {
-                if (busquedaSerie.length >= 2) setMostrarDropdownEquipos(true);
-              }}
-              disabled={readOnly}
-              style={{
-                width: '100%', padding: '2px 8px',
-                border: '1.5px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '.82rem',
-                background: equipoSeleccionado ? '#DCFCE7' : 'white'
-              }}
-            />
-
-            {mostrarDropdownEquipos && busquedaSerie.length >= 2 && (
-              <div style={{
-                position: 'absolute', top: '100%', left: 0, right: 0,
-                background: 'white', border: '2px solid var(--border)', borderTop: 'none',
-                borderRadius: '0 0 8px 8px', maxHeight: '250px', overflow: 'auto',
-                zIndex: 1000, boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-              }}>
-                {equiposFiltrados.length > 0 ? (
-                  equiposFiltrados.map((equipo) => (
-                    <div key={equipo.id} onClick={() => seleccionarEquipo(equipo)}
-                      style={{ padding: '2px 8px', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--success-light)'}
-                      onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
-                    >
-                      <div style={{ fontWeight: '600', color: 'var(--text)' }}>
-                        {equipo.equipo} {equipo.marca} {equipo.modelo}
-                      </div>
-                      <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                        Serie: {equipo.serie || 'N/A'}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                    No se encontraron equipos con serie "{busquedaSerie}"
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div style={{flex:'1 1 0',minWidth:0}}>
+      <div className="of-r3" style={{ gap: '20px', marginBottom: '8px' }}>
+        <div>
           <div ref={equipoModeloDropdownRef} style={{ position: 'relative' }}>
             <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)' }}>
               <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
@@ -264,7 +201,7 @@ function OrdenFormEquipo({
               background: 'var(--success)', color: 'white', border: 'none',
               padding: '2px 10px', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
               fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap',
-              flexShrink: 0, height: '24px', alignSelf: 'flex-end'
+              flexShrink: 0, height: '24px', alignSelf: 'end'
             }}
           >
             <PackagePlus size={14} /> Registrar en Equipos
@@ -280,7 +217,7 @@ function OrdenFormEquipo({
               background: 'var(--warning)', color: 'white', border: 'none',
               padding: '2px 10px', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
               fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap',
-              flexShrink: 0, height: '24px', alignSelf: 'flex-end'
+              flexShrink: 0, height: '24px', alignSelf: 'end'
             }}
           >
             <Pencil size={14} /> Editar
@@ -296,7 +233,7 @@ function OrdenFormEquipo({
               background: '#0D9488', color: 'white', border: 'none',
               padding: '2px 8px', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
               fontWeight: 500, fontSize: '0.75rem', whiteSpace: 'nowrap',
-              flexShrink: 0, height: '24px', alignSelf: 'flex-end'
+              flexShrink: 0, height: '24px', alignSelf: 'end'
             }}
           >
             <Eye size={14} /> Ver
