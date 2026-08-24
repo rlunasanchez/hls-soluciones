@@ -8,6 +8,11 @@ import { authMiddleware, adminOnly } from "../middleware/authMiddleware.js";
 dotenv.config();
 const router = express.Router();
 
+// Valida formato básico de email: texto@texto.texto (vacío es válido)
+function validarEmail(v) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || "").trim());
+}
+
 router.post("/setup-admin", async (req, res) => {
   const { key } = req.body;
   if (key !== process.env.SETUP_ADMIN_KEY) {
@@ -58,6 +63,9 @@ router.post("/login", async (req, res) => {
 router.post("/registrar", authMiddleware, adminOnly, async (req, res) => {
   const { usuario, password, rol, email } = req.body;
   try {
+    if (email && !validarEmail(email)) {
+      return res.status(400).json({ msg: "Email inválido" });
+    }
     const passwordEncriptada = await bcrypt.hash(password, 10);
     await pool.query(
       "INSERT INTO usuarios (usuario, password, rol, email, activo) VALUES (?, ?, ?, ?, true)",
@@ -158,6 +166,9 @@ router.put("/actualizar-usuario/:id", authMiddleware, adminOnly, async (req, res
   const { id } = req.params;
   const { usuario, rol, email } = req.body;
   try {
+    if (email && !validarEmail(email)) {
+      return res.status(400).json({ msg: "Email inválido" });
+    }
     await pool.query("UPDATE usuarios SET usuario = ?, rol = ?, email = ? WHERE id = ?", [usuario, rol, email || null, id]);
     res.json({ msg: "Usuario actualizado correctamente" });
   } catch (err) {

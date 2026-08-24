@@ -32,6 +32,10 @@ export const calcularDV = (cuerpo) => {
 export const normalizarRut = (v) =>
   String(v || "").toUpperCase().replace(/[^0-9K]/g, "");
 
+// Valida formato básico de email: texto@texto.texto (vacío es válido, se valida aparte)
+export const validarEmail = (v) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || "").trim());
+
 export const validarRUT = (rut) => {
   if (!rut) return false;
   const limpio = rut.replace(/\./g, "").toUpperCase();

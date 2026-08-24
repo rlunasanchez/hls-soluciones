@@ -5,7 +5,7 @@ import {
   Save, X, Wrench
 } from "lucide-react";
 import api from "../services/api";
-import { toUpper, cerrarSesion, upperInput, validarRUT, normalizarRut } from "../utils/helpers";
+import { toUpper, cerrarSesion, upperInput, validarRUT, normalizarRut, validarEmail } from "../utils/helpers";
 import '../styles/OrdenTrabajo.css';
 import "../styles/ordenes-componentes.css";
 import HeaderOrdenTrabajo from "../components/ordenes/HeaderOrdenTrabajo";
@@ -677,6 +677,19 @@ function OrdenTrabajo() {
     if (rutNormOT !== "19" && (!nuevaOrden.rut || !nuevaOrden.rut.trim() || !validarRUT(nuevaOrden.rut))) {
       alert("Complete el RUT del cliente (con guion y dígito verificador) antes de guardar la orden.");
       return;
+    }
+
+    // Emails con formato válido: cliente, contacto y contactos adicionales
+    const emailsOT = [
+      ["Email", nuevaOrden.email],
+      ["Email Contacto", nuevaOrden.emailContacto],
+      ...(nuevaOrden.contactosExtra || []).map((c, i) => [`Email contacto ${i + 1}`, c.email]),
+    ];
+    for (const [campo, valor] of emailsOT) {
+      if (String(valor || "").trim() && !validarEmail(valor)) {
+        alert(`Email inválido (${campo}).`);
+        return;
+      }
     }
 
     // El cliente debe existir en el mantenedor de Clientes
