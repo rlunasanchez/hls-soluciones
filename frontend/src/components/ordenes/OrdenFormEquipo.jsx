@@ -80,57 +80,24 @@ function OrdenFormEquipo({
     <div className="of-sec primary">
       <div className="of-st muted">Datos del Equipo</div>
 
-      {equipoSeleccionado && (
-      <div style={{ marginBottom: '10px' }}>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '10px' }}>
-          {equipoFijo && equipoSeleccionado && (
-            <div style={{
-              flex: 1,
-              background: '#DCFCE7', border: '1.5px solid var(--success)',
-              padding: '2px 8px', borderRadius: 'var(--radius-sm)',
-              display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap'
-            }}>
-              <span style={{ background: 'var(--success)', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' }}>
-                {equipoSeleccionado.codigo || 'EQ-XXXX'}
-              </span>
-              <span style={{ fontWeight: '600', color: 'var(--text)', fontSize: '0.85rem' }}>
-                {equipoSeleccionado.equipo} {equipoSeleccionado.marca} {equipoSeleccionado.modelo}
-              </span>
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                Serie: {equipoSeleccionado.serie || 'N/A'}
-              </span>
-              <span style={{ background: 'var(--success)', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>
-                ✓ Seleccionado
-              </span>
-            </div>
-          )}
-          {equipoSeleccionado && !equipoFijo && (
-            <div style={{
-              background: 'var(--success-light)', padding: '6px 12px',
-              borderRadius: '6px', fontSize: '0.85rem', color: 'var(--success)',
-              display: 'flex', alignItems: 'center', gap: '6px'
-            }}>
-              ✓ Seleccionado: {equipoSeleccionado.equipo} - {equipoSeleccionado.marca} {equipoSeleccionado.modelo}
-            </div>
-          )}
-          {equipoSeleccionado && readOnly && (
-            <button
-              type="button"
-              onClick={() => setMostrarDetalleEquipo(true)}
-              title="Ver datos del equipo"
-              style={{
-                display: 'flex', alignItems: 'center', gap: '4px',
-                background: '#0D9488', color: 'white', border: 'none',
-                padding: '2px 8px', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
-                fontWeight: 500, fontSize: '0.75rem', whiteSpace: 'nowrap',
-                flexShrink: 0, height: '24px', marginLeft: 'auto'
-              }}
-            >
-              <Eye size={14} /> Ver
-            </button>
-          )}
+      {equipoFijo && equipoSeleccionado && (
+        <div style={{
+          flex: 1,
+          background: '#DCFCE7', border: '1.5px solid var(--success)',
+          padding: '2px 8px', borderRadius: 'var(--radius-sm)',
+          display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap',
+          marginBottom: '10px'
+        }}>
+          <span style={{ background: 'var(--success)', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' }}>
+            {equipoSeleccionado.codigo || 'EQ-XXXX'}
+          </span>
+          <span style={{ fontWeight: '600', color: 'var(--text)', fontSize: '0.85rem' }}>
+            {equipoSeleccionado.equipo} {equipoSeleccionado.marca} {equipoSeleccionado.modelo}
+          </span>
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+            Serie: {equipoSeleccionado.serie || 'N/A'}
+          </span>
         </div>
-      </div>
       )}
 
       {equipoFijo && equipoSeleccionado ? null : (
@@ -158,7 +125,7 @@ function OrdenFormEquipo({
                 style={{
                   width: '100%', padding: '2px 8px',
                   border: '1.5px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '.82rem',
-                  background: equipoSeleccionado ? '#DCFCE7' : 'white'
+                  background: equipoSeleccionado ? '#E0F2FE' : 'white'
                 }}
               />
             </div>
@@ -232,7 +199,7 @@ function OrdenFormEquipo({
               display: 'flex', alignItems: 'center', gap: '4px',
               background: '#0D9488', color: 'white', border: 'none',
               padding: '2px 8px', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
-              fontWeight: 500, fontSize: '0.75rem', whiteSpace: 'nowrap',
+              fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap',
               flexShrink: 0, height: '24px', alignSelf: 'end'
             }}
           >
