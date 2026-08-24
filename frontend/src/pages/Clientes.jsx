@@ -61,7 +61,9 @@ function Clientes() {
     const texto = busqueda.toLowerCase();
     const razon = (c.razon_social || "").toLowerCase();
     const matchBusqueda = !texto || razon.startsWith(texto) || razon.includes(" " + texto);
-    const matchRut = !filtroRut || (c.rut || "").toLowerCase().startsWith(filtroRut.toLowerCase());
+    // RUT comparado por dígitos (ignora puntos, guion y DV): "14900" encuentra "14.900.665-6"
+    const digRut = (v) => (v || "").replace(/[^0-9]/g, "");
+    const matchRut = !filtroRut || digRut(c.rut).startsWith(digRut(filtroRut));
     return matchBusqueda && matchRut;
   });
 

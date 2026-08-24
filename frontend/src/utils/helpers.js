@@ -14,6 +14,18 @@ export const upperInput = (e, regex) => {
   return val;
 };
 
+// Calcula el dígito verificador (módulo 11) de un RUT chileno
+export const calcularDV = (cuerpo) => {
+  let suma = 0, mul = 2;
+  const digitos = String(cuerpo).split("").reverse().join("");
+  for (let i = 0; i < digitos.length; i++) {
+    suma += parseInt(digitos[i], 10) * mul;
+    mul = mul === 7 ? 2 : mul + 1;
+  }
+  const res = 11 - (suma % 11);
+  return res === 11 ? "0" : res === 10 ? "K" : String(res);
+};
+
 export const validarRUT = (rut) => {
   if (!rut) return false;
   const limpio = rut.replace(/\./g, "").toUpperCase();
@@ -21,16 +33,23 @@ export const validarRUT = (rut) => {
   if (!match) return false;
   const num = parseInt(match[1], 10);
   if (num < 100000) return false;
-  const dv = match[2];
-  let suma = 0, mul = 2;
-  const digits = String(num).split("").reverse().join("");
-  for (let i = 0; i < digits.length; i++) {
-    suma += parseInt(digits[i], 10) * mul;
-    mul = mul === 7 ? 2 : mul + 1;
+  return match[2] === calcularDV(num);
+};
+
+// Formatea progresivamente un RUT con puntos mientras se escribe (igual que el formulario
+// de nuevo cliente): el usuario escribe números/K/guion y los puntos se agregan solos
+export const formatearRutInput = (valor) => {
+  let v = (valor || "").toUpperCase().replace(/[^0-9K-]/g, "");
+  if (v.length > 12) v = v.slice(0, 12);
+  const partes = v.split("-");
+  if (partes.length === 2) {
+    if (partes[1].length > 1) partes[1] = partes[1][0];
+    if (partes[0].length > 0)
+      partes[0] = partes[0].replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+  } else if (partes.length === 1 && partes[0].length > 0) {
+    partes[0] = partes[0].replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
   }
-  const res = 11 - (suma % 11);
-  const esperado = res === 11 ? "0" : res === 10 ? "K" : String(res);
-  return dv === esperado;
+  return partes.join("-");
 };
 
 export const parseToken = () => {

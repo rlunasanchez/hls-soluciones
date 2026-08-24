@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { Search, Users, ChevronDown, ChevronUp, Eye, UserPlus, MapPin, Paperclip, MoreVertical, Download, Trash2, FileText, Printer } from "lucide-react";
 import ClienteFormulario from "../clientes/ClienteFormulario";
 import "../../styles/Clientes.css";
-import { upperInput, validarRUT } from "../../utils/helpers";
+import { upperInput, validarRUT, formatearRutInput } from "../../utils/helpers";
 
 function OrdenFormCliente({
   busquedaCliente, setBusquedaCliente,
@@ -323,8 +323,14 @@ function OrdenFormCliente({
               placeholder="Escriba para buscar cliente por nombre o RUT..."
               value={busquedaCliente}
               onChange={(e) => {
-                setBusquedaCliente(upperInput(e));
-                setMostrarDropdownClientes(e.target.value.length >= 2);
+                // Si lo escrito parece RUT (puro número/K/guion/puntos) agrega los puntos;
+                // si es texto (razón social o código CL/EQ) deja pasar normal
+                const crudo = e.target.value;
+                const val = /^[0-9][0-9Kk.-]*$/.test(crudo)
+                  ? formatearRutInput(crudo)
+                  : upperInput(e);
+                setBusquedaCliente(val);
+                setMostrarDropdownClientes(val.length >= 2);
               }}
               onFocus={() => {
                 if (busquedaCliente.length >= 2) setMostrarDropdownClientes(true);

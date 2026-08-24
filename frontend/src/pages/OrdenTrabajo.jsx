@@ -615,10 +615,15 @@ function OrdenTrabajo() {
   };
 
   // Filtrar clientes para la búsqueda (local)
+  // El RUT se compara por dígitos (ignora puntos, guion y DV): buscar "14900" encuentra "14.900.665-6"
+  const digRut = (v) => (v || "").replace(/[^0-9]/g, "");
+  const qCliente = busquedaCliente.toLowerCase();
+  const qDig = digRut(busquedaCliente);
+  const esNumerico = /^[0-9]/.test(busquedaCliente.trim());
   const clientesFiltrados = busquedaCliente.length >= 2 ? clientes.filter(c => 
-    c.razon_social?.toLowerCase().includes(busquedaCliente.toLowerCase()) ||
-    c.rut?.toLowerCase().includes(busquedaCliente.toLowerCase()) ||
-    c.codigo?.toLowerCase().includes(busquedaCliente.toLowerCase())
+    c.razon_social?.toLowerCase().includes(qCliente) ||
+    (esNumerico && qDig && digRut(c.rut).includes(qDig)) ||
+    c.codigo?.toLowerCase().includes(qCliente)
   ).slice(0, 10) : [];
 
   // Modelos únicos (sin duplicar por serie) para el buscador de modelo
