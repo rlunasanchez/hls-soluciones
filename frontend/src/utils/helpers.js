@@ -26,6 +26,12 @@ export const calcularDV = (cuerpo) => {
   return res === 11 ? "0" : res === 10 ? "K" : String(res);
 };
 
+// Normaliza un RUT para comparaciones de unicidad: solo dígitos + K en mayúscula.
+// Ignora puntos, guiones, espacios y el caso del DV: "12.345.678-k", "12345678-K" y
+// "12345678k" quedan como "12345678K"
+export const normalizarRut = (v) =>
+  String(v || "").toUpperCase().replace(/[^0-9K]/g, "");
+
 export const validarRUT = (rut) => {
   if (!rut) return false;
   const limpio = rut.replace(/\./g, "").toUpperCase();

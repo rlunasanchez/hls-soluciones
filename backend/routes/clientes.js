@@ -13,6 +13,38 @@ async function generarCodigo() {
   return `CL-${String(num + 1).padStart(4, "0")}`;
 }
 
+// Normaliza un RUT para comparar unicidad: solo dígitos y K en mayúscula.
+// "12.345.678-k", "12345678-K" y "12345678k" quedan como "12345678K"
+function normalizarRut(v) {
+  return String(v || "").toUpperCase().replace(/[^0-9K]/g, "");
+}
+
+// Valida formato y dígito verificador (módulo 11) de un RUT chileno
+function validarRutChileno(rut) {
+  const norm = normalizarRut(rut);
+  const m = norm.match(/^(\d{6,8})([0-9K])$/);
+  if (!m) return false;
+  const cuerpo = parseInt(m[1], 10);
+  if (cuerpo < 100000) return false;
+  let suma = 0, mul = 2;
+  for (const d of m[1].split("").reverse()) {
+    suma += parseInt(d, 10) * mul;
+    mul = mul === 7 ? 2 : mul + 1;
+  }
+  const res = 11 - (suma % 11);
+  const dv = res === 11 ? "0" : res === 10 ? "K" : String(res);
+  return m[2] === dv;
+}
+
+// Busca otro cliente con el mismo RUT normalizado (compara en JS para que
+// cualquier formato guardado en la BD matchee: sin guion, k minúscula, etc.)
+async function buscarDuplicadoRut(rut, excluirId = null) {
+  const objetivo = normalizarRut(rut);
+  if (!objetivo) return null;
+  const result = await pool.query("SELECT id, codigo, rut FROM clientes");
+  return result.rows.find((c) => c.id !== excluirId && normalizarRut(c.rut) === objetivo) || null;
+}
+
 router.get("/next-codigo", authMiddleware, async (req, res) => {
   try {
     const codigo = await generarCodigo();
@@ -91,12 +123,22 @@ router.post("/", authMiddleware, async (req, res) => {
   } = req.body;
   const codigo = await generarCodigo();
   try {
-    // RUT único: verificar que no exista otro cliente con el mismo RUT
-    if (rut && rut.trim()) {
-      const rutLimpio = rut.replace(/[.\s]/g, "").toUpperCase();
-      const resultDup = await pool.query("SELECT id, codigo FROM clientes WHERE REPLACE(REPLACE(rut, '.', ''), ' ', '') = $1", [rutLimpio]);
-      if (resultDup.rows.length > 0) {
-        return res.status(400).json({ msg: `El cliente ya existe en el mantenedor con el código ${resultDup.rows[0].codigo || "CL-????"}. No se creó un nuevo registro.` });
+    // Datos mínimos obligatorios: Razón Social + RUT
+    if (!razon_social || !razon_social.trim()) {
+      return res.status(400).json({ msg: "Ingrese la Razón Social" });
+    }
+    if (!rut || !rut.trim()) {
+      return res.status(400).json({ msg: "Ingrese el RUT" });
+    }
+    // RUT "19" = comodín para clientes sin RUT conocido: se permite repetir sin validación
+    if (normalizarRut(rut) !== "19") {
+      if (!validarRutChileno(rut)) {
+        return res.status(400).json({ msg: "RUT inválido" });
+      }
+      // RUT único: comparación normalizada (solo dígitos + K, ignora formato guardado)
+      const dup = await buscarDuplicadoRut(rut);
+      if (dup) {
+        return res.status(400).json({ msg: `El cliente ya existe (${dup.codigo || "CL-????"})` });
       }
     }
     const result = await pool.query(
@@ -143,15 +185,22 @@ router.put("/:id", authMiddleware, async (req, res) => {
     direcciones, contactos
   } = req.body;
   try {
-    // RUT único: verificar que no exista otro cliente con el mismo RUT (excluyendo este)
-    if (rut && rut.trim()) {
-      const rutLimpio = rut.replace(/[.\s]/g, "").toUpperCase();
-      const resultDup = await pool.query(
-        "SELECT id, codigo FROM clientes WHERE REPLACE(REPLACE(rut, '.', ''), ' ', '') = $1 AND id != $2",
-        [rutLimpio, id]
-      );
-      if (resultDup.rows.length > 0) {
-        return res.status(400).json({ msg: `El RUT ya existe en el mantenedor con el código ${resultDup.rows[0].codigo || "CL-????"}` });
+    // Datos mínimos obligatorios: Razón Social + RUT
+    if (!razon_social || !razon_social.trim()) {
+      return res.status(400).json({ msg: "Ingrese la Razón Social" });
+    }
+    if (!rut || !rut.trim()) {
+      return res.status(400).json({ msg: "Ingrese el RUT" });
+    }
+    // RUT "19" = comodín para clientes sin RUT conocido: se permite repetir sin validación
+    if (normalizarRut(rut) !== "19") {
+      if (!validarRutChileno(rut)) {
+        return res.status(400).json({ msg: "RUT inválido" });
+      }
+      // RUT único: comparación normalizada (excluyendo este cliente)
+      const dup = await buscarDuplicadoRut(rut, Number(id));
+      if (dup) {
+        return res.status(400).json({ msg: `El RUT ya existe (${dup.codigo || "CL-????"})` });
       }
     }
     const result = await pool.query("SELECT codigo FROM clientes WHERE id = $1", [id]);

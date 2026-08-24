@@ -5,7 +5,7 @@ import {
   Save, X, Wrench
 } from "lucide-react";
 import api from "../services/api";
-import { toUpper, cerrarSesion, upperInput, validarRUT } from "../utils/helpers";
+import { toUpper, cerrarSesion, upperInput, validarRUT, normalizarRut } from "../utils/helpers";
 import '../styles/OrdenTrabajo.css';
 import "../styles/ordenes-componentes.css";
 import HeaderOrdenTrabajo from "../components/ordenes/HeaderOrdenTrabajo";
@@ -672,18 +672,18 @@ function OrdenTrabajo() {
       alert("Complete el Cliente antes de guardar la orden.");
       return;
     }
-    if (!nuevaOrden.rut || !nuevaOrden.rut.trim() || !validarRUT(nuevaOrden.rut)) {
+    // RUT "19" = comodín (cliente sin RUT conocido): se permite sin validar formato
+    const rutNormOT = normalizarRut(nuevaOrden.rut);
+    if (rutNormOT !== "19" && (!nuevaOrden.rut || !nuevaOrden.rut.trim() || !validarRUT(nuevaOrden.rut))) {
       alert("Complete el RUT del cliente (con guion y dígito verificador) antes de guardar la orden.");
       return;
     }
 
     // El cliente debe existir en el mantenedor de Clientes
     const normTxtOT = (s) => String(s || "").toUpperCase().trim();
-    const digOT = (s) => String(s || "").replace(/[^0-9]/g, "");
-    const rutDigitsOT = digOT(nuevaOrden.rut);
     const clienteEncontrado =
       (clientes || []).find((c) => normTxtOT(c.razon_social) === normTxtOT(nuevaOrden.cliente)) ||
-      (clientes || []).find((c) => rutDigitsOT && digOT(c.rut) === rutDigitsOT) ||
+      (clientes || []).find((c) => rutNormOT && normalizarRut(c.rut) === rutNormOT) ||
       null;
     if (!clienteEncontrado) {
       alert(`El cliente no está registrado. Use "Registrar en Clientes".`);
@@ -697,8 +697,9 @@ function OrdenTrabajo() {
     }
 
     // El RUT escrito no puede pertenecer a otro cliente distinto del seleccionado
-    if (rutDigitsOT) {
-      const duenoRut = (clientes || []).find((c) => digOT(c.rut) === rutDigitsOT);
+    // (el comodín "19" se excluye porque lo comparten varios clientes)
+    if (rutNormOT && rutNormOT !== "19") {
+      const duenoRut = (clientes || []).find((c) => normalizarRut(c.rut) === rutNormOT);
       if (duenoRut && duenoRut.id !== clienteSeleccionado.id) {
         alert(`El RUT ${nuevaOrden.rut} pertenece al cliente ${duenoRut.codigo || "CL-????"}.`);
         return;
