@@ -46,7 +46,7 @@ function UsuarioFormulario({ usuarioEditando, onSave, onCancel }) {
             <h2><Plus size={20} /> {usuarioEditando ? "Editar Usuario" : "Crear Usuario"}</h2>
             <button type="button" className="uf-head-close" onClick={onCancel}><X size={18} /></button>
           </div>
-          <form onSubmit={handleSubmit} className="uf-form">
+          <form onSubmit={handleSubmit} className="uf-form" noValidate>
             <div className="uf-s">
               <div className="uf-st">Datos del Usuario</div>
               <div className="uf-r2">

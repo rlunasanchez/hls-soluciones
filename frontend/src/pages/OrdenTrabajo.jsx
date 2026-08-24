@@ -914,7 +914,7 @@ function OrdenTrabajo() {
                 <h2><Wrench size={20} /> {soloLectura ? "Ver Orden" : editingId ? "Editar Orden" : "Nueva Orden"}</h2>
                 <button type="button" className="of-head-close" onClick={cerrarFormulario}><X size={18} /></button>
               </div>
-            <form onSubmit={guardarOrden} className="of-form">
+            <form onSubmit={guardarOrden} className="of-form" noValidate>
               <div className="of-col-full">
                 <OrdenFormDatos
                   nuevaOrden={nuevaOrden}

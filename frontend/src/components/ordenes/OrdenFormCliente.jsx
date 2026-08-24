@@ -388,7 +388,7 @@ function OrdenFormCliente({
         }));
         setBusquedaCliente(toUpper(fresh.razon_social || ""));
       }
-      alert(`Cliente registrado${res.data?.codigo ? ` con código ${res.data.codigo}` : ""}.\nYa puede guardar la orden.`);
+      alert(`Cliente registrado (${res.data?.codigo || "CL-????"}). Ya puede guardar la orden.`);
       setMostrarRegistrarCliente(false);
       setPrefillCliente(null);
     } catch (err) {
