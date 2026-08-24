@@ -1,5 +1,37 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-08-24
+
+### RUT obligatorio + Razón Social obligatoria + RUT único robusto (fix web aceptaba duplicados/vacíos)
+
+**Problema:** En la web se podían crear clientes con el mismo RUT o con RUT vacío.
+
+**Causas:**
+1. Frontend y backend solo validaban duplicado/formato **si el RUT venía con texto** (`if (rut && ...)`) — vacío pasaba siempre.
+2. La comparación de duplicados solo quitaba puntos y espacios pero exigía guion+DV idénticos: un RUT guardado en BD con otro formato (sin guion, `k` minúscula) no matcheaba y el duplicado pasaba.
+3. Bug en los chequeos de la OT: `dig()` usaba `[^0-9]` y **borraba la K** del dígito verificador.
+4. El backend no validaba formato ni dígito verificador.
+
+**Reglas nuevas (datos mínimos para crear/editar cliente):**
+- **Razón Social**: obligatoria.
+- **RUT**: obligatorio, válido (módulo 11) y único. Nombre de contacto queda opcional.
+- **Comodín "19"**: escribir `19` en el campo RUT cuando no se conoce el RUT del cliente. Se puede usar en **todos los clientes que se quiera** (no es único ni se valida formato) y **permite repetir la Razón Social** (ej: varios clientes "SIN NOMBRE" con rut 19). Exento también del chequeo "el RUT pertenece a otro cliente" al guardar OT y de los avisos de duplicado, incluido el botón "+ Registrar en Clientes" desde la OT (crea directo sin chequear nada).
+
+**Cambios frontend:**
+- `frontend/src/utils/helpers.js` — nueva función compartida `normalizarRut(v)`: solo dígitos + K en mayúscula (`12.345.678-k` → `12345678K`). Ignora cualquier formato guardado.
+- `frontend/src/components/clientes/ClienteFormulario.jsx` — en `handleSubmit`: valida Razón Social obligatoria, RUT obligatorio, RUT válido y duplicado comparando con `normalizarRut()` (excluye al cliente en edición).
+- `frontend/src/pages/OrdenTrabajo.jsx` — chequeos de `guardarOrden` (existencia del cliente, dueño del RUT) ahora comparan con `normalizarRut()` (la K ya no se pierde). El filtro de búsqueda por dígitos del buscador no se tocó.
+- `frontend/src/components/ordenes/OrdenFormCliente.jsx` — chequeo local de duplicado en "Registrar en Clientes" desde OT usa `normalizarRut()`.
+
+**Cambios backend (`backend/routes/clientes.js`, ambas ramas):**
+- Nuevos helpers: `normalizarRut()`, `validarRutChileno()` (formato + módulo 11), `buscarDuplicadoRut(rut, excluirId)` — trae los clientes y compara normalizado en JS, así matchea cualquier formato viejo guardado en la BD (MySQL y PostgreSQL comparten la misma lógica).
+- `POST /api/clientes` y `PUT /api/:id`: rechazan 400 si falta Razón Social ("Complete la Razón Social del cliente"), si falta RUT ("Complete el RUT del cliente") o si el RUT es inválido; rechazan duplicado con el código CL-XXXX existente.
+- La comparación incluye también clientes desactivados (activo=0).
+
+**Nota:** Los clientes viejos sin RUT o con RUT inválido quedarán bloqueados al EDITAR hasta completarles un RUT válido y único. Sin migración de BD.
+
+---
+
 ## Fecha: 2026-08-11
 
 ### Ocultar campo Garantía en el listado de Orden de Trabajo

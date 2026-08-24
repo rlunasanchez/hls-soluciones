@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { Search, Users, ChevronDown, ChevronUp, Eye, UserPlus, MapPin, Paperclip, MoreVertical, Download, Trash2, FileText, Printer, Pencil } from "lucide-react";
 import ClienteFormulario from "../clientes/ClienteFormulario";
 import "../../styles/Clientes.css";
-import { upperInput, validarRUT, formatearRutInput, toUpper } from "../../utils/helpers";
+import { upperInput, validarRUT, formatearRutInput, toUpper, normalizarRut } from "../../utils/helpers";
 import api from "../../services/api";
 
 function OrdenFormCliente({
@@ -308,15 +308,30 @@ function OrdenFormCliente({
   };
 
   const abrirRegistrarCliente = () => {
+    // Con el comodín "19" se permite crear aunque el RUT o la razón social ya existan
+    if (normalizarRut(nuevaOrden.rut) === "19") {
+      setPrefillCliente({
+        razon_social: nuevaOrden.cliente || "",
+        rut: nuevaOrden.rut || "",
+        direccion: nuevaOrden.direccion || "",
+        comuna: nuevaOrden.comuna || "",
+        telefono: nuevaOrden.fonoPrincipal || "",
+        email: nuevaOrden.email || "",
+        contacto_nombre: nuevaOrden.contacto || "",
+        contacto_email: nuevaOrden.emailContacto || "",
+        contacto_fono: nuevaOrden.fonoContacto || ""
+      });
+      setMostrarRegistrarCliente(true);
+      return;
+    }
     // Si el RUT o la razón social ya existen en el mantenedor → solo avisar con el código
-    const dig = (s) => String(s || "").replace(/[^0-9]/g, "");
-    const rutOT = nuevaOrden.rut || "";
+    const rutOT = normalizarRut(nuevaOrden.rut);
     const existente =
-      (rutOT && dig(rutOT) && (clientes || []).find((c) => dig(c.rut) === dig(rutOT))) ||
+      (rutOT && (clientes || []).find((c) => normalizarRut(c.rut) === rutOT)) ||
       (clientes || []).find((c) => normTxt(c.razon_social) === normTxt(nuevaOrden.cliente)) ||
       null;
     if (existente) {
-      alert(`El cliente ya existe en el mantenedor con el código ${existente.codigo || "CL-????"}.`);
+      alert(`El cliente ya existe (${existente.codigo || "CL-????"}).`);
       setNuevaOrden((prev) => ({ ...prev, rut: "" }));
       return;
     }
@@ -336,14 +351,15 @@ function OrdenFormCliente({
 
   const guardarNuevoClienteDesdeOT = async (payload) => {
     try {
+      // Con el comodín "19" se crea directo sin chequear duplicados
       // Si ya existe un cliente con ese RUT o razón social → avisar con su código y vincularlo sin crear duplicado
-      const dig = (s) => String(s || "").replace(/[^0-9]/g, "");
-      const existente =
-        (payload.rut && dig(payload.rut) && (clientes || []).find((c) => dig(c.rut) === dig(payload.rut))) ||
+      const esComodin = normalizarRut(payload.rut) === "19";
+      const existente = esComodin ? null :
+        ((payload.rut && normalizarRut(payload.rut) && (clientes || []).find((c) => normalizarRut(c.rut) === normalizarRut(payload.rut))) ||
         (clientes || []).find((c) => normTxt(c.razon_social) === normTxt(payload.razon_social)) ||
-        null;
+        null);
       if (existente) {
-        alert(`El cliente ya existe en el mantenedor con el código ${existente.codigo || "CL-????"}. No se creó un nuevo registro.`);
+        alert(`El cliente ya existe (${existente.codigo || "CL-????"}).`);
         return;
       }
       const res = await api.post("/api/clientes", payload);

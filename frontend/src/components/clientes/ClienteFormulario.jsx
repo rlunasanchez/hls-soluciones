@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Save, X, Trash2, Users } from "lucide-react";
-import { toUpper, validarRUT, upperInput } from "../../utils/helpers";
+import { toUpper, validarRUT, upperInput, normalizarRut } from "../../utils/helpers";
 import ModalContactos from "./ModalContactos";
 
 const crearSucursalVacia = () => ({ tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" });
@@ -126,18 +126,27 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
   const handleSubmit = (e, mantener = false) => {
     e.preventDefault();
     if (guardandoRef.current) return;
-    if (nuevoCliente.rut && !validarRUT(nuevoCliente.rut)) {
-      alert("RUT inválido. Ejemplo: 12.345.678-9");
+    if (!nuevoCliente.razon_social || !nuevoCliente.razon_social.trim()) {
+      alert("Ingrese la Razón Social.");
       return;
     }
-    if (nuevoCliente.rut) {
-      const rutNormalizado = nuevoCliente.rut.replace(/[.\s]/g, "").toUpperCase();
+    if (!nuevoCliente.rut || !nuevoCliente.rut.trim()) {
+      alert("Ingrese el RUT.");
+      return;
+    }
+    // RUT "19" = comodín para clientes sin RUT conocido: se puede repetir sin validación
+    const rutNormalizado = normalizarRut(nuevoCliente.rut);
+    if (rutNormalizado !== "19") {
+      if (!validarRUT(nuevoCliente.rut)) {
+        alert("RUT inválido.");
+        return;
+      }
       const clienteConRut = (clientes || []).find((c) => {
         if (clienteEditando && c.id === clienteEditando.id) return false;
-        return (c.rut || "").replace(/[.\s]/g, "").toUpperCase() === rutNormalizado;
+        return normalizarRut(c.rut) === rutNormalizado;
       });
       if (clienteConRut) {
-        alert(`El RUT ${nuevoCliente.rut} ya existe en el mantenedor con el código ${clienteConRut.codigo || "CL-????"}. No se creó un nuevo registro.`);
+        alert(`El RUT ya existe (${clienteConRut.codigo || "CL-????"}).`);
         return;
       }
     }
