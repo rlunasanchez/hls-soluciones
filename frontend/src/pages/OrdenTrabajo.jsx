@@ -5,7 +5,7 @@ import {
   Save, X, Wrench
 } from "lucide-react";
 import api from "../services/api";
-import { toUpper, cerrarSesion, upperInput } from "../utils/helpers";
+import { toUpper, cerrarSesion, upperInput, validarRUT } from "../utils/helpers";
 import '../styles/OrdenTrabajo.css';
 import "../styles/ordenes-componentes.css";
 import HeaderOrdenTrabajo from "../components/ordenes/HeaderOrdenTrabajo";
@@ -373,8 +373,17 @@ function OrdenTrabajo() {
       direccionesExtra: parseExtra(orden.direcciones_extra)
     });
 
-    // Las OT no se vinculan a equipos: los datos ya vienen del snapshot de la OT
-    // (sin badge de vinculación ni equipoSeleccionado)
+    // Igual que con el cliente: si los datos del equipo coinciden con un registro
+    // del mantenedor, se marca como seleccionado (badge ✓ y botón Editar disponibles)
+    const normEqOT = (v) => String(v || "").trim().toUpperCase();
+    if (orden.equipo && orden.marca && orden.modelo) {
+      const eq = (equipos || []).find(e =>
+        normEqOT(e.equipo) === normEqOT(orden.equipo) &&
+        normEqOT(e.marca) === normEqOT(orden.marca) &&
+        normEqOT(e.modelo) === normEqOT(orden.modelo)
+      );
+      setEquipoSeleccionado(eq || null);
+    }
 
     // Buscar cliente asociado - solo para badge/estado, NO sobreescribir datos de la OT
     const cl = clientes.find(c => 
@@ -468,8 +477,17 @@ function OrdenTrabajo() {
       direccionesExtra: parseExtra(orden.direcciones_extra)
     });
 
-    // Las OT no se vinculan a equipos: los datos ya vienen del snapshot de la OT
-    // (sin badge de vinculación ni equipoSeleccionado), igual que en edición
+    // Igual que en edición: si el equipo coincide con un registro del mantenedor
+    // se marca como seleccionado (habilita botones Ver/Editar)
+    const normEqOT = (v) => String(v || "").trim().toUpperCase();
+    if (orden.equipo && orden.marca && orden.modelo) {
+      const eq = (equipos || []).find(e =>
+        normEqOT(e.equipo) === normEqOT(orden.equipo) &&
+        normEqOT(e.marca) === normEqOT(orden.marca) &&
+        normEqOT(e.modelo) === normEqOT(orden.modelo)
+      );
+      setEquipoSeleccionado(eq || null);
+    }
 
     const cl = clientes.find(c => 
       (orden.cliente_id && c.id === orden.cliente_id) || 
@@ -649,19 +667,44 @@ function OrdenTrabajo() {
     e.preventDefault();
     if (guardandoRef.current) return;
 
-    // RUT único: si se escribe un RUT que ya existe para otro cliente del mantenedor → alerta
-    if (nuevaOrden.rut && nuevaOrden.rut.trim()) {
-      const rutNormalizado = nuevaOrden.rut.replace(/[.\s]/g, "").toUpperCase();
-      const existeRut = (clientes || []).some((c) => {
-        if (clienteSeleccionado && c.id === clienteSeleccionado.id) return false;
-        return (c.rut || "").replace(/[.\s]/g, "").toUpperCase() === rutNormalizado;
-      });
-      if (existeRut) {
-        alert(`El RUT ${nuevaOrden.rut} ya existe para otro cliente.`);
+    // Cliente y RUT obligatorios y completos
+    if (!nuevaOrden.cliente || !nuevaOrden.cliente.trim()) {
+      alert("Complete el Cliente antes de guardar la orden.");
+      return;
+    }
+    if (!nuevaOrden.rut || !nuevaOrden.rut.trim() || !validarRUT(nuevaOrden.rut)) {
+      alert("Complete el RUT del cliente (con guion y dígito verificador) antes de guardar la orden.");
+      return;
+    }
+
+    // El cliente debe existir en el mantenedor de Clientes
+    const normTxtOT = (s) => String(s || "").toUpperCase().trim();
+    const digOT = (s) => String(s || "").replace(/[^0-9]/g, "");
+    const rutDigitsOT = digOT(nuevaOrden.rut);
+    const clienteEncontrado =
+      (clientes || []).find((c) => normTxtOT(c.razon_social) === normTxtOT(nuevaOrden.cliente)) ||
+      (clientes || []).find((c) => rutDigitsOT && digOT(c.rut) === rutDigitsOT) ||
+      null;
+    if (!clienteEncontrado) {
+      alert(`El cliente no está registrado. Use "Registrar en Clientes".`);
+      return;
+    }
+
+    // El cliente debe estar seleccionado explícitamente en el buscador para poder guardar
+    if (!clienteSeleccionado) {
+      alert("Seleccione un cliente del buscador antes de guardar.");
+      return;
+    }
+
+    // El RUT escrito no puede pertenecer a otro cliente distinto del seleccionado
+    if (rutDigitsOT) {
+      const duenoRut = (clientes || []).find((c) => digOT(c.rut) === rutDigitsOT);
+      if (duenoRut && duenoRut.id !== clienteSeleccionado.id) {
+        alert(`El RUT ${nuevaOrden.rut} pertenece al cliente ${duenoRut.codigo || "CL-????"}.`);
         return;
       }
     }
-    
+
     // Validar peso total de adjuntos: data URL base64 ≈ 33% más pesada que el archivo original
     const adjuntos = nuevaOrden.adjuntos || [];
     if (adjuntos.length > 0) {
@@ -883,6 +926,8 @@ function OrdenTrabajo() {
                   clienteInactivo={clienteInactivo}
                   clienteFijo={clienteFijo}
                   readOnly={soloLectura}
+                  setClienteSeleccionado={setClienteSeleccionado}
+                  onClientesRefresh={(lista) => setClientes(lista)}
                 />
                 </div>
 

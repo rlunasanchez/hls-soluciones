@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
-import { Search, Users, ChevronDown, ChevronUp, Eye, UserPlus, MapPin, Paperclip, MoreVertical, Download, Trash2, FileText, Printer } from "lucide-react";
+import { createPortal } from "react-dom";
+import { Search, Users, ChevronDown, ChevronUp, Eye, UserPlus, MapPin, Paperclip, MoreVertical, Download, Trash2, FileText, Printer, Pencil } from "lucide-react";
 import ClienteFormulario from "../clientes/ClienteFormulario";
 import "../../styles/Clientes.css";
-import { upperInput, validarRUT, formatearRutInput } from "../../utils/helpers";
+import { upperInput, validarRUT, formatearRutInput, toUpper } from "../../utils/helpers";
+import api from "../../services/api";
 
 function OrdenFormCliente({
   busquedaCliente, setBusquedaCliente,
@@ -15,7 +17,9 @@ function OrdenFormCliente({
   clientes = [],
   clienteInactivo = false,
   clienteFijo = false,
-  readOnly = false
+  readOnly = false,
+  setClienteSeleccionado,
+  onClientesRefresh
 }) {
   const [mostrarDetalleCliente, setMostrarDetalleCliente] = useState(false);
   const [rutError, setRutError] = useState("");
@@ -27,6 +31,10 @@ function OrdenFormCliente({
   const [busquedaContacto, setBusquedaContacto] = useState("");
   const [mostrarDropdownContacto, setMostrarDropdownContacto] = useState(false);
   const contactoDropdownRef = useRef(null);
+  const [mostrarEditarClienteModal, setMostrarEditarClienteModal] = useState(false);
+  const [clienteAEditar, setClienteAEditar] = useState(null);
+  const [mostrarRegistrarCliente, setMostrarRegistrarCliente] = useState(false);
+  const [prefillCliente, setPrefillCliente] = useState(null);
   const [mostrarInfoInterna, setMostrarInfoInterna] = useState(false);
   const [mostrarAdjunto, setMostrarAdjunto] = useState(false);
   const [mostrarMenuAdjunto, setMostrarMenuAdjunto] = useState(false);
@@ -239,6 +247,139 @@ function OrdenFormCliente({
     setMostrarDropdownContacto(false);
   };
 
+  const normTxt = (s) => String(s || "").toUpperCase().trim();
+
+  const abrirEditarCliente = async () => {
+    let fresh = clienteSeleccionado;
+    try {
+      const res = await api.get(`/api/clientes/${clienteSeleccionado.id}`);
+      if (res.data) fresh = res.data;
+    } catch { /* fallback: datos locales */ }
+    setClienteAEditar(fresh);
+    setMostrarEditarClienteModal(true);
+  };
+
+  const guardarEdicionCliente = async (payload, _resetFn, mantener = false) => {
+    if (!clienteAEditar?.id) return;
+    try {
+      await api.put(`/api/clientes/${clienteAEditar.id}`, payload);
+      const lista = await api.get("/api/clientes");
+      if (onClientesRefresh) onClientesRefresh(lista.data);
+      const freshRes = await api.get(`/api/clientes/${clienteAEditar.id}`);
+      const fresh = freshRes.data;
+      if (setClienteSeleccionado) setClienteSeleccionado(fresh);
+
+      // Sincronizar en la OT los datos derivados del cliente recién editado
+      const principalC = { nombre: normTxt(fresh.contacto_nombre), email: fresh.contacto_email || "", fono: fresh.contacto_fono || "" };
+      const extras = String(fresh.contactos || "").split(";;").map((s) => {
+        const p = s.split("|");
+        return { nombre: (p[0] || "").toUpperCase().trim(), email: p[1] || "", fono: p[2] || "" };
+      }).filter((c) => c.nombre && c.nombre !== principalC.nombre);
+      const todosContactos = [...(principalC.nombre ? [principalC] : []), ...extras];
+
+      setNuevaOrden((prev) => {
+        const base = {
+          ...prev,
+          cliente: toUpper(fresh.razon_social || ""),
+          rut: fresh.rut || "",
+          direccion: toUpper(fresh.direccion || ""),
+          comuna: toUpper(fresh.comuna || ""),
+          email: fresh.email || "",
+          fonoPrincipal: fresh.telefono || ""
+        };
+        // Si el contacto escrito en la OT sigue existiendo, refresca su email/fono
+        const contactoOT = normTxt(prev.contacto);
+        if (contactoOT) {
+          const match = todosContactos.find((c) => c.nombre === contactoOT);
+          if (match) {
+            base.emailContacto = match.email;
+            base.fonoContacto = match.fono;
+          }
+        }
+        return base;
+      });
+
+      alert("Cliente actualizado");
+      if (mantener) setClienteAEditar(fresh);
+      else setMostrarEditarClienteModal(false);
+    } catch (err) {
+      alert(err.response?.data?.msg || "Error al actualizar el cliente");
+    }
+  };
+
+  const abrirRegistrarCliente = () => {
+    // Si el RUT o la razón social ya existen en el mantenedor → solo avisar con el código
+    const dig = (s) => String(s || "").replace(/[^0-9]/g, "");
+    const rutOT = nuevaOrden.rut || "";
+    const existente =
+      (rutOT && dig(rutOT) && (clientes || []).find((c) => dig(c.rut) === dig(rutOT))) ||
+      (clientes || []).find((c) => normTxt(c.razon_social) === normTxt(nuevaOrden.cliente)) ||
+      null;
+    if (existente) {
+      alert(`El cliente ya existe en el mantenedor con el código ${existente.codigo || "CL-????"}.`);
+      setNuevaOrden((prev) => ({ ...prev, rut: "" }));
+      return;
+    }
+    setPrefillCliente({
+      razon_social: nuevaOrden.cliente || "",
+      rut: nuevaOrden.rut || "",
+      direccion: nuevaOrden.direccion || "",
+      comuna: nuevaOrden.comuna || "",
+      telefono: nuevaOrden.fonoPrincipal || "",
+      email: nuevaOrden.email || "",
+      contacto_nombre: nuevaOrden.contacto || "",
+      contacto_email: nuevaOrden.emailContacto || "",
+      contacto_fono: nuevaOrden.fonoContacto || ""
+    });
+    setMostrarRegistrarCliente(true);
+  };
+
+  const guardarNuevoClienteDesdeOT = async (payload) => {
+    try {
+      // Si ya existe un cliente con ese RUT o razón social → avisar con su código y vincularlo sin crear duplicado
+      const dig = (s) => String(s || "").replace(/[^0-9]/g, "");
+      const existente =
+        (payload.rut && dig(payload.rut) && (clientes || []).find((c) => dig(c.rut) === dig(payload.rut))) ||
+        (clientes || []).find((c) => normTxt(c.razon_social) === normTxt(payload.razon_social)) ||
+        null;
+      if (existente) {
+        alert(`El cliente ya existe en el mantenedor con el código ${existente.codigo || "CL-????"}. No se creó un nuevo registro.`);
+        return;
+      }
+      const res = await api.post("/api/clientes", payload);
+      const lista = await api.get("/api/clientes");
+      if (onClientesRefresh) onClientesRefresh(lista.data);
+      let fresh = null;
+      if (res.data?.id) {
+        const freshRes = await api.get(`/api/clientes/${res.data.id}`);
+        fresh = freshRes.data;
+      } else {
+        fresh = (lista.data || []).find((c) => normTxt(c.razon_social) === normTxt(payload.razon_social)) || null;
+      }
+      if (fresh && setClienteSeleccionado) setClienteSeleccionado(fresh);
+      if (fresh) {
+        setNuevaOrden((prev) => ({
+          ...prev,
+          cliente: toUpper(fresh.razon_social || "") || prev.cliente,
+          rut: fresh.rut || prev.rut,
+          direccion: toUpper(fresh.direccion || "") || prev.direccion,
+          comuna: toUpper(fresh.comuna || "") || prev.comuna,
+          email: fresh.email || prev.email,
+          fonoPrincipal: fresh.telefono || prev.fonoPrincipal,
+          contacto: toUpper(fresh.contacto_nombre || "") || prev.contacto,
+          emailContacto: fresh.contacto_email || prev.emailContacto,
+          fonoContacto: fresh.contacto_fono || prev.fonoContacto
+        }));
+        setBusquedaCliente(toUpper(fresh.razon_social || ""));
+      }
+      alert(`Cliente registrado${res.data?.codigo ? ` con código ${res.data.codigo}` : ""}.\nYa puede guardar la orden.`);
+      setMostrarRegistrarCliente(false);
+      setPrefillCliente(null);
+    } catch (err) {
+      alert(err.response?.data?.msg || "Error al registrar el cliente");
+    }
+  };
+
   return (
     <>
     <div className="of-sec primary">
@@ -303,7 +444,7 @@ function OrdenFormCliente({
                   padding: '2px 8px',
                   borderRadius: 'var(--radius-sm)',
                   cursor: 'pointer',
-                  fontWeight: 500,
+                  fontWeight: 600,
                   fontSize: '0.75rem',
                   whiteSpace: 'nowrap',
                   flexShrink: 0,
@@ -448,7 +589,7 @@ function OrdenFormCliente({
                 padding: '2px 8px',
                 borderRadius: 'var(--radius-sm)',
                 cursor: 'pointer',
-                fontWeight: 500,
+                fontWeight: 600,
                 fontSize: '0.75rem',
                 whiteSpace: 'nowrap',
                 flexShrink: 0,
@@ -456,6 +597,38 @@ function OrdenFormCliente({
               }}
             >
                 <Eye size={14} /> Ver
+            </button>
+          )}
+          {!readOnly && clienteSeleccionado && (
+            <button
+              type="button"
+              onClick={abrirEditarCliente}
+              title="Editar todos los datos de este cliente"
+              style={{
+                display: 'flex', alignItems: 'center', gap: '4px',
+                background: 'var(--warning)', color: 'white', border: 'none',
+                padding: '2px 10px', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
+                fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap',
+                flexShrink: 0, height: '24px'
+              }}
+            >
+              <Pencil size={14} /> Editar
+            </button>
+          )}
+          {!readOnly && !clienteSeleccionado && ((nuevaOrden.cliente || "").trim() || (nuevaOrden.rut || "").trim()) && (
+            <button
+              type="button"
+              onClick={abrirRegistrarCliente}
+              title="Registrar este cliente en el mantenedor de Clientes"
+              style={{
+                display: 'flex', alignItems: 'center', gap: '4px',
+                background: 'var(--success)', color: 'white', border: 'none',
+                padding: '2px 10px', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
+                fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap',
+                flexShrink: 0, height: '24px'
+              }}
+            >
+              <UserPlus size={14} /> Registrar en Clientes
             </button>
           )}
           </div>
@@ -480,6 +653,48 @@ function OrdenFormCliente({
             />
           </div>
         </div>
+      )}
+
+      {/* Modal Editar Cliente completo desde la OT (portal fuera del form) */}
+      {mostrarEditarClienteModal && clienteAEditar && createPortal(
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
+        }}
+          onClick={(e) => { if (e.target === e.currentTarget) setMostrarEditarClienteModal(false); }}
+        >
+          <div style={{ maxHeight: '90vh', overflow: 'auto', width: '100%', maxWidth: '900px' }}>
+            <ClienteFormulario
+              clienteEditando={clienteAEditar}
+              clientes={clientes}
+              onSave={guardarEdicionCliente}
+              onCancel={() => setMostrarEditarClienteModal(false)}
+            />
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Modal Registrar Cliente desde la OT (portal fuera del form) */}
+      {mostrarRegistrarCliente && createPortal(
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
+        }}
+          onClick={(e) => { if (e.target === e.currentTarget) { setMostrarRegistrarCliente(false); setPrefillCliente(null); } }}
+        >
+          <div style={{ maxHeight: '90vh', overflow: 'auto', width: '100%', maxWidth: '900px' }}>
+            <ClienteFormulario
+              clienteEditando={prefillCliente}
+              clientes={clientes}
+              titulo="Registrar Cliente"
+              modoRegistro
+              onSave={guardarNuevoClienteDesdeOT}
+              onCancel={() => { setMostrarRegistrarCliente(false); setPrefillCliente(null); }}
+            />
+          </div>
+        </div>,
+        document.body
       )}
 
       <div className="of-form-grid" style={{ gridTemplateColumns: '2fr 1fr', marginBottom: '15px' }}>

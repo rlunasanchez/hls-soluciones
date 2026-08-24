@@ -66,9 +66,9 @@ router.post("/", authMiddleware, async (req, res) => {
     // RUT único: verificar que no exista otro cliente con el mismo RUT
     if (rut && rut.trim()) {
       const rutLimpio = rut.replace(/[.\s]/g, "").toUpperCase();
-      const [dup] = await pool.query("SELECT id FROM clientes WHERE REPLACE(REPLACE(rut, '.', ''), ' ', '') = ?", [rutLimpio]);
+      const [dup] = await pool.query("SELECT id, codigo FROM clientes WHERE REPLACE(REPLACE(rut, '.', ''), ' ', '') = ?", [rutLimpio]);
       if (dup.length > 0) {
-        return res.status(400).json({ msg: "El RUT ya existe para otro cliente" });
+        return res.status(400).json({ msg: `El cliente ya existe en el mantenedor con el código ${dup[0].codigo || "CL-????"}. No se creó un nuevo registro.` });
       }
     }
     const [result] = await pool.query(
@@ -120,12 +120,12 @@ router.put("/:id", authMiddleware, async (req, res) => {
     if (rut && rut.trim()) {
       const rutLimpio = rut.replace(/[.\s]/g, "").toUpperCase();
       const [dup] = await pool.query(
-        "SELECT id FROM clientes WHERE REPLACE(REPLACE(rut, '.', ''), ' ', '') = ? AND id != ?",
+        "SELECT id, codigo FROM clientes WHERE REPLACE(REPLACE(rut, '.', ''), ' ', '') = ? AND id != ?",
         [rutLimpio, id]
       );
       if (dup.length > 0) {
         connection.release();
-        return res.status(400).json({ msg: "El RUT ya existe para otro cliente" });
+        return res.status(400).json({ msg: `El RUT ya existe en el mantenedor con el código ${dup[0].codigo || "CL-????"}` });
       }
     }
     const [existing] = await connection.query("SELECT codigo FROM clientes WHERE id = ?", [id]);
