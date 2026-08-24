@@ -1040,7 +1040,7 @@ function OrdenFormCliente({
             type="email"
             placeholder="Email del cliente"
             value={nuevaOrden.email}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, email: upperInput(e)})}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, email: e.target.value})}
             disabled={readOnly}
             style={{
               width: '100%',
@@ -1096,7 +1096,7 @@ function OrdenFormCliente({
             type="email"
             placeholder="Email del contacto"
             value={nuevaOrden.emailContacto}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, emailContacto: upperInput(e)})}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, emailContacto: e.target.value})}
             disabled={readOnly}
             style={{
               width: '100%',
@@ -1246,7 +1246,7 @@ function OrdenFormCliente({
                         </div>
                         <div className="of-f">
                           <label>Email</label>
-                          <input type="email" placeholder="Email" value={c.email} onChange={(e) => actualizarContacto(idx, 'email', upperInput(e))} disabled={readOnly} />
+                          <input type="email" placeholder="Email" value={c.email} onChange={(e) => actualizarContacto(idx, 'email', e.target.value)} disabled={readOnly} />
                         </div>
                         <div className="of-f">
                           <label>Fono</label>
