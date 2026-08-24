@@ -580,6 +580,7 @@ function OrdenTrabajo() {
       cliente: toUpper(cliente.razon_social),
       direccion: toUpper(cliente.direccion),
       comuna: toUpper(cliente.comuna),
+      rut: cliente.rut || "",
       email: cliente.email || "",
       fonoPrincipal: cliente.telefono || "",
       contacto: toUpper(cliente.contacto_nombre),
