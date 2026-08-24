@@ -19,6 +19,20 @@
 - `backend/routes/clientes.js` — POST/PUT rechazan 400 "Email inválido" si `email`, `contacto_email` o algún contacto adicional tiene formato inválido.
 - `backend/routes/auth.js` — `/registrar` y `/actualizar-usuario/:id` rechazan 400 si el correo del usuario es inválido.
 
+### Fix no se podía escribir en Email/Email Contacto de la OT + mensaje de cliente registrado
+
+**Problema:** En Nueva/Editar Orden no se podía escribir en los campos Email y Email Contacto (ni en el email de contactos extra): cada tecla se revertía. En el formulario de Cliente sí funcionaba.
+
+**Causa:** El helper compartido `upperInput()` llama a `el.setSelectionRange()`, que **lanza error en inputs `type="email"`** (la API de selección no existe para ese tipo). El onChange crasheaba antes de actualizar el estado y el input controlado volvía al valor anterior. Los emails del Cliente nunca usaron `upperInput`, por eso ahí funcionaba.
+
+**Solución (v2.21):**
+- `frontend/src/components/ordenes/OrdenFormCliente.jsx` — los 3 campos email de la OT usan `e.target.value` directo (igual que Clientes; respetan mayúsculas/minúsculas tal como se escriben).
+- `frontend/src/utils/helpers.js` — `upperInput()` blindado con try/catch alrededor de la selección para que nunca más congele un input.
+
+**Mejoras acompañantes (v2.20):**
+- Mensaje tras "+ Registrar en Clientes" desde la OT en una sola línea: `Cliente registrado (CL-0019). Ya puede guardar la orden.`
+- `noValidate` agregado a los `<form>` de OT, Cliente y Usuarios: el navegador ya no intercepta el guardado con su globo nativo de email — solo mandan nuestros avisos cortos ("Email inválido (...)", solo exige la @).
+
 ---
 
 ## Fecha: 2026-08-24
