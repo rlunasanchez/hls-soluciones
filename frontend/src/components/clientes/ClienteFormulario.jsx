@@ -221,7 +221,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
           <h2>{titulo || (readOnly ? "Ver Cliente" : clienteEditando ? "Editar Cliente" : "Nuevo Cliente")}</h2>
           <button type="button" onClick={() => { resetFormulario(); onCancel(); }}><X size={20} /></button>
         </div>
-        <form onSubmit={handleSubmit} className="cf">
+        <form onSubmit={handleSubmit} className="cf" noValidate>
           <div className="cf-grid">
             <div className="cf-sec cf-sec-empresa">
               <h3>Datos del Cliente</h3>
