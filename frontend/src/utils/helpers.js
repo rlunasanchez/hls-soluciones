@@ -4,12 +4,16 @@ export const toUpper = (v) => (v || "").toUpperCase();
 // y restaura el caret para evitar que React lo mueva al final.
 export const upperInput = (e, regex) => {
   const el = e.target;
-  const pos = el.selectionStart;
-  let val = el.value.toUpperCase();
+  let val = String(el.value || "").toUpperCase();
   if (regex) val = val.replace(regex, "");
   if (el.value !== val) {
     el.value = val;
-    el.setSelectionRange(Math.min(pos, val.length), Math.min(pos, val.length));
+    // selection API no existe en inputs type="email"/number/date: sin try/catch el
+    // onChange lanzaría y el input controlado congelaría lo tecleado
+    try {
+      const pos = el.selectionStart;
+      el.setSelectionRange(Math.min(pos ?? val.length, val.length), Math.min(pos ?? val.length, val.length));
+    } catch { /* tipos sin selección */ }
   }
   return val;
 };
