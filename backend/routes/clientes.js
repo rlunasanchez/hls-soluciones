@@ -45,6 +45,16 @@ async function buscarDuplicadoRut(rut, excluirId = null) {
   return result.rows.find((c) => c.id !== excluirId && normalizarRut(c.rut) === objetivo) || null;
 }
 
+// Valida formato básico de email: texto@texto.texto (vacío es válido, se valida aparte)
+function validarEmail(v) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || "").trim());
+}
+
+// Emails con formato válido (ignora los vacíos)
+function hayEmailInvalido(...valores) {
+  return valores.some((v) => String(v || "").trim() && !validarEmail(v));
+}
+
 router.get("/next-codigo", authMiddleware, async (req, res) => {
   try {
     const codigo = await generarCodigo();
@@ -141,6 +151,10 @@ router.post("/", authMiddleware, async (req, res) => {
         return res.status(400).json({ msg: `El cliente ya existe (${dup.codigo || "CL-????"})` });
       }
     }
+    // Emails con formato válido: empresa, contacto principal y contactos adicionales
+    if (hayEmailInvalido(email, contacto_email, ...(Array.isArray(contactos) ? contactos.map((c) => c?.email) : []))) {
+      return res.status(400).json({ msg: "Email inválido" });
+    }
     const result = await pool.query(
       `INSERT INTO clientes (codigo, razon_social, giro, rut, direccion, ciudad, comuna, telefono, email, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id`,
@@ -202,6 +216,10 @@ router.put("/:id", authMiddleware, async (req, res) => {
       if (dup) {
         return res.status(400).json({ msg: `El RUT ya existe (${dup.codigo || "CL-????"})` });
       }
+    }
+    // Emails con formato válido: empresa, contacto principal y contactos adicionales
+    if (hayEmailInvalido(email, contacto_email, ...(Array.isArray(contactos) ? contactos.map((c) => c?.email) : []))) {
+      return res.status(400).json({ msg: "Email inválido" });
     }
     const result = await pool.query("SELECT codigo FROM clientes WHERE id = $1", [id]);
     let codigo = result.rows[0]?.codigo;

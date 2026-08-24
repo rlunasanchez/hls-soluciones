@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Save, X, Trash2, Users } from "lucide-react";
-import { toUpper, validarRUT, upperInput, normalizarRut } from "../../utils/helpers";
+import { toUpper, validarRUT, upperInput, normalizarRut, validarEmail } from "../../utils/helpers";
 import ModalContactos from "./ModalContactos";
 
 const crearSucursalVacia = () => ({ tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" });
@@ -147,6 +147,18 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
       });
       if (clienteConRut) {
         alert(`El RUT ya existe (${clienteConRut.codigo || "CL-????"}).`);
+        return;
+      }
+    }
+    // Emails con formato válido: empresa, contacto principal y contactos adicionales
+    const emailsAValidar = [
+      ["Email", nuevoCliente.email],
+      ["Email de contacto", nuevoCliente.contacto_email],
+      ...contactos.map((c, i) => [`Email contacto ${i + 2}`, c.email]),
+    ];
+    for (const [campo, valor] of emailsAValidar) {
+      if (String(valor || "").trim() && !validarEmail(valor)) {
+        alert(`Email inválido (${campo}).`);
         return;
       }
     }

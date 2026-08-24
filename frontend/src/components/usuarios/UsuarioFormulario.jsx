@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Plus, Save, X } from "lucide-react";
+import { validarEmail } from "../../utils/helpers";
 
 const ufCss = `.uf-wrap{background:white;border-radius:16px;box-shadow:var(--shadow-lg);overflow:hidden}
 .uf-head{background:var(--gradient);padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
@@ -29,6 +30,10 @@ function UsuarioFormulario({ usuarioEditando, onSave, onCancel }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (nuevoUsuario.email && !validarEmail(nuevoUsuario.email)) {
+      alert("Email inválido.");
+      return;
+    }
     onSave(nuevoUsuario, usuarioEditando?.id);
   };
 

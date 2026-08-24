@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, Trash2, UserPlus } from "lucide-react";
-import { upperInput } from "../../utils/helpers";
+import { upperInput, validarEmail } from "../../utils/helpers";
 
 const crearContactoVacio = () => ({ nombre: "", email: "", fono: "", cargo: "", direccion: "" });
 
@@ -29,6 +29,12 @@ function ModalContactos({ contactos = [], onChange, onClose, readOnly = false })
   };
 
   const guardar = () => {
+    for (const c of lista) {
+      if (c.nombre && c.nombre.trim() && String(c.email || "").trim() && !validarEmail(c.email)) {
+        alert(`Email inválido (${c.nombre}).`);
+        return;
+      }
+    }
     const filtrados = lista.filter(c => c.nombre && c.nombre.trim());
     onChange(filtrados.length > 0 ? filtrados : []);
     onClose();

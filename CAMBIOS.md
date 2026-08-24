@@ -1,5 +1,26 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-08-24 (2)
+
+### Validación de formato de email en todos los ingresos de correo del sistema
+
+**Problema:** Al editar un cliente se podía guardar un correo sin @ (y lo mismo podía pasar en cualquier otro formulario con email).
+
+**Regla:** todo email **escrito a mano** se valida con formato básico `texto@texto.texto`. Los emails vacíos siguen siendo válidos (el campo es opcional). Mensaje corto: `Email inválido (...).`
+
+**Cambios frontend:**
+- `frontend/src/utils/helpers.js` — nueva función compartida `validarEmail(v)`.
+- `frontend/src/components/clientes/ClienteFormulario.jsx` — valida Email empresa, Email contacto y contactos adicionales.
+- `frontend/src/components/clientes/ModalContactos.jsx` — valida al guardar el modal de contactos adicionales.
+- `frontend/src/pages/OrdenTrabajo.jsx` — `guardarOrden` valida Email, Email Contacto y contactos extra de la OT.
+- `frontend/src/components/usuarios/UsuarioFormulario.jsx` — valida Correo del usuario.
+
+**Cambios backend (ambas ramas):**
+- `backend/routes/clientes.js` — POST/PUT rechazan 400 "Email inválido" si `email`, `contacto_email` o algún contacto adicional tiene formato inválido.
+- `backend/routes/auth.js` — `/registrar` y `/actualizar-usuario/:id` rechazan 400 si el correo del usuario es inválido.
+
+---
+
 ## Fecha: 2026-08-24
 
 ### RUT obligatorio + Razón Social obligatoria + RUT único robusto (fix web aceptaba duplicados/vacíos)
