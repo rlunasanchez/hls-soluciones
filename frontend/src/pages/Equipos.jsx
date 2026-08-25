@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Package, Plus } from "lucide-react";
 import api from "../services/api";
+import { getCached } from "../services/cache";
 import '../styles/Equipos.css';
 import { cerrarSesion } from "../utils/helpers";
 import HeaderEquipo from "../components/equipos/HeaderEquipo";
@@ -21,13 +22,17 @@ function Equipos() {
   const [paginaActual, setPaginaActual] = usePaginaPersistente("pagEquipos", [filtroModelo]);
   const equiposPorPagina = 4;
   const [soloLectura, setSoloLectura] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const fetchEquipos = async (signal) => {
+    setLoading(true);
     try {
-      const res = await api.get("/api/equipos", { signal });
+      const res = await getCached("/api/equipos", { signal });
       setEquipos(res.data);
     } catch (err) {
       if (err.name !== "CanceledError") console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -89,14 +94,14 @@ function Equipos() {
         // "Guardar Cambios": guarda y se mantiene en el form para seguir editando
         const res = await api.get(`/api/equipos/${id}`);
         setEquipoEditando(res.data);
-        const lista = await api.get("/api/equipos");
+        const lista = await getCached("/api/equipos");
         setEquipos(lista.data);
       } else {
         setMostrarFormulario(false);
         setEquipoEditando(null);
         setSoloLectura(false);
         navigate('/equipos', { replace: true });
-        const res = await api.get("/api/equipos");
+        const res = await getCached("/api/equipos");
         setEquipos(res.data);
       }
     } catch (err) {
@@ -140,27 +145,36 @@ function Equipos() {
         </button>
       </div>
 
-      <EquipoTabla
-        equipos={equiposPagina}
-        onVer={verEquipo}
-        onEditar={editarEquipo}
-        onEliminar={eliminarEquipo}
-      />
-
-      <div className="cards-table">
-        {equiposPagina.map((eq) => (
-          <EquipoCard key={eq.id} equipo={eq} onVer={verEquipo} onEditar={editarEquipo} onEliminar={eliminarEquipo} />
-        ))}
-      </div>
-
-      {equiposFiltrados.length === 0 && (
+      {loading ? (
         <div className="empty-state">
           <Package size={48} />
-          <p>No hay equipos que coincidan con la búsqueda</p>
+          <p>Cargando equipos...</p>
         </div>
-      )}
+      ) : (
+        <>
+          <EquipoTabla
+            equipos={equiposPagina}
+            onVer={verEquipo}
+            onEditar={editarEquipo}
+            onEliminar={eliminarEquipo}
+          />
 
-      <Pagination currentPage={paginaActual} totalPages={totalPaginas} onPageChange={setPaginaActual} />
+          <div className="cards-table">
+            {equiposPagina.map((eq) => (
+              <EquipoCard key={eq.id} equipo={eq} onVer={verEquipo} onEditar={editarEquipo} onEliminar={eliminarEquipo} />
+            ))}
+          </div>
+
+          {equiposFiltrados.length === 0 && (
+            <div className="empty-state">
+              <Package size={48} />
+              <p>No hay equipos que coincidan con la búsqueda</p>
+            </div>
+          )}
+
+          <Pagination currentPage={paginaActual} totalPages={totalPaginas} onPageChange={setPaginaActual} />
+        </>
+      )}
     </div>
   );
 }

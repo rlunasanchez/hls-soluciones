@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import compression from "compression";
 import dotenv from "dotenv";
 import rateLimit from "express-rate-limit";
 import path from "path";
@@ -38,6 +39,7 @@ app.use(cors({
   origin: allowedOrigins,
   credentials: true
 }));
+app.use(compression());
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ limit: '20mb', extended: true }));
 app.use(limiter);

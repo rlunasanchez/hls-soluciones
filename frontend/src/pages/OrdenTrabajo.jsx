@@ -5,6 +5,7 @@ import {
   Save, X, Wrench
 } from "lucide-react";
 import api from "../services/api";
+import { getCached } from "../services/cache";
 import { toUpper, cerrarSesion, upperInput, validarRUT, normalizarRut, validarEmail } from "../utils/helpers";
 import '../styles/OrdenTrabajo.css';
 import "../styles/ordenes-componentes.css";
@@ -273,7 +274,7 @@ function OrdenTrabajo() {
   const fetchOrdenes = async (signal) => {
     setLoading(true);
     try {
-      const res = await api.get("/api/ordenes?page=1&limit=10000", { signal });
+      const res = await getCached("/api/ordenes?page=1&limit=10000", { signal });
       setOrdenes(res.data.ordenes);
     } catch (err) {
       if (err.name !== "CanceledError") console.error("Error al cargar órdenes:", err);
@@ -402,7 +403,7 @@ function OrdenTrabajo() {
       setBusquedaCliente((cl.razon_social || orden.cliente || "").toUpperCase());
     } else if (orden.cliente_id) {
       try {
-        const resCli = await api.get(`/api/clientes`);
+        const resCli = await getCached(`/api/clientes`);
         const clFresco = resCli.data.find(c => c.id === orden.cliente_id);
         if (clFresco) {
           setClienteSeleccionado(clFresco);
@@ -509,7 +510,7 @@ function OrdenTrabajo() {
       setBusquedaCliente((cl.razon_social || orden.cliente || "").toUpperCase());
     } else if (orden.cliente_id) {
       try {
-        const resCli = await api.get(`/api/clientes`);
+        const resCli = await getCached(`/api/clientes`);
         const clFresco = resCli.data.find(c => c.id === orden.cliente_id);
         if (clFresco) {
           setClienteSeleccionado(clFresco);
@@ -557,7 +558,7 @@ function OrdenTrabajo() {
 
   const fetchClientes = async (signal) => {
     try {
-      const res = await api.get("/api/clientes", { signal });
+      const res = await getCached("/api/clientes", { signal });
       setClientes(res.data);
     } catch (err) {
       if (err.name !== "CanceledError") console.error("Error al cargar clientes:", err);
@@ -566,7 +567,7 @@ function OrdenTrabajo() {
 
   const fetchEquipos = async (signal) => {
     try {
-      const res = await api.get("/api/equipos", { signal });
+      const res = await getCached("/api/equipos", { signal });
       setEquipos(res.data);
     } catch (err) {
       if (err.name !== "CanceledError") console.error("Error al cargar equipos:", err);
