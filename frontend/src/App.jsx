@@ -9,7 +9,6 @@ import Informes from "./pages/Informes";
 import Cotizaciones from "./pages/Cotizaciones";
 import OrdenTrabajo from "./pages/OrdenTrabajo";
 import OrdenCompra from "./pages/OrdenCompra";
-import "./styles/index.css";
 
 function App() {
   const [authenticated, setAuthenticated] = useState(false);
