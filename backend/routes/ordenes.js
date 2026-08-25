@@ -30,7 +30,22 @@ router.get("/", authMiddleware, async (req, res) => {
   const offset = (page - 1) * limit;
 
   try {
-    const ordenesResult = await pool.query("SELECT * FROM ordenes_trabajo ORDER BY id DESC LIMIT $1 OFFSET $2", [limit, offset]);
+    // Sin "adjunto": es base64 de hasta ~13MB por orden y el listado nunca lo muestra.
+    // Se pide completo en GET /:id al abrir una orden puntual (editarOrden/verOrden).
+    const ordenesResult = await pool.query(
+      `SELECT id, numero_orden, fecha, es_garantia,
+        fecha_ingreso, fecha_ingreso_check, fecha_termino, fecha_termino_check,
+        fecha_entrega, fecha_entrega_check, fecha_compra, fecha_compra_check,
+        cliente, direccion, comuna, rut, contacto, fono_contacto, email_contacto,
+        contactos_extra, direcciones_extra, fono_principal, email, tecnico_asignado, actividad,
+        equipo, modelo, marca, serie, contador_pag_out, nivel_tinta,
+        insumo1, insumo2, insumo3, insumo4, insumo5, insumo6,
+        insumo7, insumo8, insumo9, insumo10, insumo11, insumo12,
+        averia, observaciones, info_interna,
+        cliente_id, equipo_id, fecha_creacion, fecha_actualizacion
+       FROM ordenes_trabajo ORDER BY id DESC LIMIT $1 OFFSET $2`,
+      [limit, offset]
+    );
     const totalResult = await pool.query("SELECT COUNT(*) as total FROM ordenes_trabajo");
     res.json({ ordenes: ordenesResult.rows, pagination: { currentPage: page, totalPages: Math.ceil(parseInt(totalResult.rows[0].total) / limit), totalItems: parseInt(totalResult.rows[0].total), itemsPerPage: limit } });
   } catch (err) {
