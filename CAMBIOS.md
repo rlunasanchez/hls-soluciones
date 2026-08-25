@@ -1,8 +1,24 @@
 # Registro de Cambios - HLS Soluciones
 
-## Fecha: 2026-08-25
+## Fecha: 2026-08-25 (4)
 
-### Limpieza de código muerto (frontend)
+### v2.25: Rendimiento — el listado de Órdenes de Trabajo ya no trae los adjuntos
+
+**Problema:** cargar datos en producción (Vercel/Render) era lento, sobre todo Órdenes de Trabajo.
+
+**Causa:** el listado pide hasta 10.000 órdenes en un solo request (`GET /api/ordenes?page=1&limit=10000`) y el backend hacía `SELECT *`, que incluye la columna `adjunto`: hasta 2 archivos de 5MB en base64 por orden (~13MB por fila). La tabla de listado nunca muestra el adjunto, solo se necesita al abrir una orden puntual.
+
+**Solución:**
+- `backend/routes/ordenes.js` (ambas ramas, `GET /`) — `SELECT *` reemplazado por la lista explícita de columnas sin `adjunto`. `GET /:id` no se toca, sigue trayendo la fila completa.
+- `frontend/src/pages/OrdenTrabajo.jsx` — `editarOrden` y `verOrden` tomaban la fila directo del listado y leían `orden.adjunto` ahí mismo; sin el cambio de backend, guardar cualquier orden abierta así habría **borrado su adjunto** (el PUT manda `adjuntos: []`, que el backend interpreta como `null`). Ahora ambas funciones piden la orden completa por `id` (`GET /api/ordenes/:id`, endpoint que ya existía) antes de abrir el formulario.
+
+**Verificación:** probado extremo a extremo contra MySQL local — creada una orden con adjunto real, confirmado que no aparece en el listado pero sí en el detalle, reenviado el mismo adjunto vía PUT (simulando `editarOrden` ya arreglado) y verificado que persiste. Reproducido también el bug que se evita: un PUT con `adjuntos: []` deja el adjunto en `null`. `npm run build` OK en ambas ramas.
+
+---
+
+## Fecha: 2026-08-25 (3)
+
+### v2.24: Limpieza de código muerto (frontend)
 
 **Motivo:** chequeo general del proyecto encontró componentes y CSS sin ningún importador ni uso real. No cambia comportamiento ni apariencia — nada de lo borrado se renderizaba.
 
@@ -15,6 +31,42 @@
 - `frontend/src/App.jsx` — quitado el import duplicado de `./styles/index.css` (ya se importaba en `main.jsx`).
 
 **Verificación:** `npm run build` OK (CSS del bundle: 45.41 kB → 41.87 kB). Sin referencias colgantes (`grep` de las clases y del componente sin resultados).
+
+---
+
+## Fecha: 2026-08-25 (2)
+
+### v2.23: la paginación ya sobrevive a F5 en los 4 listados
+
+**Problema:** estando en una página distinta de la 1 en Clientes, Órdenes, Equipos o Usuarios, al recargar con F5 la lista volvía a la página 1.
+
+**Causa:** el `useEffect` que resetea la paginación al cambiar un filtro también corre en el montaje del componente (`useEffect` siempre se ejecuta después del primer render; el array de dependencias solo controla las corridas *siguientes*). Ese efecto pisaba con un `1` el valor recién restaurado desde `sessionStorage`. Por esto la persistencia de Clientes (v2.11) nunca funcionó de verdad, y el fix de Órdenes de más abajo (v2.22) tenía el mismo defecto de nacimiento. Equipos y Usuarios directamente no tenían persistencia.
+
+**Solución:** nuevo hook compartido `frontend/src/hooks/usePaginacion.js`:
+- `usePaginaPersistente(clave, filtros)` — restaura y guarda la página en `sessionStorage`, con una guarda `useRef` que omite el reset-por-filtro en el montaje (la corrección de fondo).
+- `useClampPagina(pagina, setPagina, totalPaginas)` — evita quedar en una página vacía al eliminar el último registro de la última página.
+
+Aplicado en `pages/Clientes.jsx`, `pages/OrdenTrabajo.jsx`, `pages/Equipos.jsx` y `pages/GestionUsuarios.jsx`, cada uno con su propia clave (`pagClientes`, `pagOrdenes`, `pagEquipos`, `pagUsuarios`). Equipos y Usuarios ganan persistencia y clamp que no tenían.
+
+**Verificación:** confirmado en el navegador por el usuario — página 3 + F5 se mantiene en la página 3; escribir en un filtro sí vuelve a la página 1 (comportamiento intencional, evita quedar en una página que el resultado filtrado ya no tiene). `npm run build` OK.
+
+---
+
+## Fecha: 2026-08-25
+
+### v2.22: la paginación de Órdenes de Trabajo ya no vuelve a la página 1 al editar/cancelar
+
+**Problema:** estando en la página 2 o superior del listado de Órdenes de Trabajo, al abrir una orden con Editar y dar Cancelar (o la X del header) la lista volvía a la página 1. Lo mismo pasaba al Guardar Cambios de una orden existente y al Eliminar una orden.
+
+**Causa:** `fetchOrdenes()` hacía `setPaginaActual(1)` de forma incondicional, y `cerrarFormulario()`, `guardarOrden()` y `eliminarOrden()` la llaman para refrescar la lista tras cada acción.
+
+**Solución** (`frontend/src/pages/OrdenTrabajo.jsx`, mismo patrón que Clientes v2.11):
+- Quitado el reset incondicional de `fetchOrdenes()`.
+- `paginaActual` se inicializa desde `sessionStorage` y se persiste en cada cambio.
+- Clamp para no quedar en una página vacía si se elimina el último registro de la última página.
+- Al crear una orden **nueva** sí se salta a la página 1: el backend ordena por `id DESC`, así que la orden nueva queda primera y hay que verla.
+
+**Verificación:** `npm run build` OK.
 
 ---
 

@@ -38,6 +38,12 @@ Sistema de gestión de soporte técnico con módulos para:
 | `HeaderEquipo` | `components/equipos/HeaderEquipo.jsx` | Header del módulo Equipos |
 | `HeaderOrdenTrabajo` | `components/ordenes/HeaderOrdenTrabajo.jsx` | Header del módulo OT |
 
+### Hooks Compartidos (`frontend/src/hooks/usePaginacion.js`)
+- `usePaginaPersistente(clave, filtros)` — reemplazo directo de `useState(1)` para la página actual. Restaura y guarda la página en `sessionStorage` bajo `clave` (una por módulo: `pagClientes`, `pagOrdenes`, `pagEquipos`, `pagUsuarios`), así se mantiene entre F5 y al abrir/cerrar formularios. `filtros` es el array de dependencias que dispara el reset a página 1 (mismos filtros que antes se pasaban al `useEffect` manual). Usa una guarda `useRef` para no resetear la página en el montaje — sin eso, el `useEffect` de filtros pisaría con un `1` el valor recién restaurado (`useEffect` siempre corre tras el primer render).
+- `useClampPagina(paginaActual, setPaginaActual, totalPaginas)` — llamar después de calcular `totalPaginas`; evita quedar en una página vacía cuando se elimina el último registro de la última página.
+
+Usados en las 4 páginas con paginación (`Clientes.jsx`, `OrdenTrabajo.jsx`, `Equipos.jsx`, `GestionUsuarios.jsx`). Para cualquier listado nuevo con paginación, usar estos hooks en vez de reimplementar el patrón a mano.
+
 ## Convenciones de Código
 
 ### Códigos Auto-generados
