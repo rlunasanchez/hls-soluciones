@@ -24,7 +24,10 @@ function OrdenTrabajo() {
   // Estados para listar órdenes con paginación
   const [ordenes, setOrdenes] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [paginaActual, setPaginaActual] = useState(1);
+  const [paginaActual, setPaginaActual] = useState(() => {
+    const guardada = Number(sessionStorage.getItem("pagOrdenes"));
+    return guardada >= 1 ? guardada : 1;
+  });
   const ITEMS_POR_PAG = 4;
   const [editingId, setEditingId] = useState(null);
   const [guardando, setGuardando] = useState(false);
@@ -242,6 +245,11 @@ function OrdenTrabajo() {
   // Resetear paginación al filtrar
   useEffect(() => { setPaginaActual(1); }, [filtroNumeroOrden, filtroCliente, filtroSerie, filtroEstado, filtroGarantia, filtroFechaDesde, filtroFechaHasta]);
 
+  // Persistir la página actual (mantiene la página al editar/cancelar o recargar)
+  useEffect(() => {
+    sessionStorage.setItem("pagOrdenes", String(paginaActual));
+  }, [paginaActual]);
+
   // Buscar equipos por modelo via API
   useEffect(() => {
     if (busquedaModelo.length < 2) { setEquiposModeloSugeridos([]); return; }
@@ -275,7 +283,6 @@ function OrdenTrabajo() {
     try {
       const res = await api.get("/api/ordenes?page=1&limit=10000", { signal });
       setOrdenes(res.data.ordenes);
-      setPaginaActual(1);
     } catch (err) {
       if (err.name !== "CanceledError") console.error("Error al cargar órdenes:", err);
     } finally {
@@ -298,6 +305,11 @@ function OrdenTrabajo() {
 
   const totalPaginas = Math.ceil(ordenesFiltradas.length / ITEMS_POR_PAG);
   const ordenesPag = ordenesFiltradas.slice((paginaActual - 1) * ITEMS_POR_PAG, paginaActual * ITEMS_POR_PAG);
+
+  // Evitar quedarse en una página fuera de rango si cambian los datos (ej: eliminar la última orden de la página)
+  useEffect(() => {
+    if (totalPaginas > 0 && paginaActual > totalPaginas) setPaginaActual(totalPaginas);
+  }, [totalPaginas, paginaActual]);
 
   const fmtDate = (d) => {
     if (!d) return "";
@@ -775,6 +787,9 @@ function OrdenTrabajo() {
         if (vinoDeCliente) {
           navigate("/clientes");
         } else {
+          // Una orden nueva queda primera (backend ordena por id DESC): saltar a la página 1 para verla.
+          // Al editar se conserva la página en la que estaba el usuario.
+          if (!editingId) setPaginaActual(1);
           fetchOrdenes();
         }
       }
