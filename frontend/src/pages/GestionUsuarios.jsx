@@ -4,6 +4,7 @@ import {
   Plus, Key, ToggleLeft, ToggleRight, RotateCcw
 } from "lucide-react";
 import api from "../services/api";
+import { getCached } from "../services/cache";
 import { parseToken, cerrarSesion } from "../utils/helpers";
 import HeaderUsuario from "../components/usuarios/HeaderUsuario";
 import UsuarioFormulario from "../components/usuarios/UsuarioFormulario";
@@ -37,7 +38,7 @@ function GestionUsuarios() {
 
   const fetchUsuarios = async () => {
     try {
-      const res = await api.get("/api/auth/usuarios");
+      const res = await getCached("/api/auth/usuarios");
       setUsuarios(res.data);
     } catch (err) {
       console.error(err);

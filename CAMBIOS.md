@@ -1,5 +1,24 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-08-25 (5)
+
+### v2.26: Rendimiento — cache en el frontend y gzip en el backend para el cambio entre mantenedores
+
+**Problema:** en producción (Vercel/Render, backend en plan free), cambiar de mantenedor (Clientes → Equipos → Órdenes de Trabajo) tardaba en mostrar los datos en cada cambio, no solo en la primera carga del día.
+
+**Causa:** dos cosas independientes se sumaban:
+- El backend no comprimía las respuestas (sin `compression`), así que todo el JSON viajaba entero — el listado de OT trae ~50 columnas y el de clientes concatena direcciones y contactos por fila.
+- El frontend no tenía cache entre páginas: cada `useEffect` de montaje (`Clientes.jsx`, `Equipos.jsx`, `OrdenTrabajo.jsx`) volvía a pedir el dataset completo, incluso volviendo a un mantenedor visitado segundos antes. OT además siempre pedía clientes y equipos completos al montar, aunque solo se usan al abrir el formulario.
+
+**Solución:**
+- `backend/server.js` (ambas ramas) — `app.use(compression())` antes de las rutas. `backend/package.json` — agregada la dependencia `compression`.
+- `frontend/src/services/cache.js` (nuevo) — cache en memoria de listados con TTL de 60s y deduplicación de requests en vuelo (`getCached`), más `invalidar(prefijo)`.
+- `frontend/src/services/api.js` — el interceptor de respuesta invalida automáticamente el cache del recurso ante cualquier escritura (POST/PUT/DELETE), así ninguna pantalla necesita invalidar a mano.
+- Migrados a `getCached` los listados de `Clientes.jsx`, `Equipos.jsx`, `OrdenTrabajo.jsx` (órdenes, clientes, equipos) y `GestionUsuarios.jsx`. Los `GET /:id` y el correlativo de OT siguen siendo requests directos, siempre frescos.
+- `Clientes.jsx` y `Equipos.jsx` ganan estado de carga (`loading`), igual al que ya tenía OT, para no mostrar la tabla vacía mientras llega la primera respuesta.
+
+**Verificación:** `npm run build` OK en frontend. Backend levanta sin errores con `compression` cargado. Revisado a mano que ningún `GET /:id` ni el correlativo de OT quedaron cacheados (evita repetir el bug de adjuntos de v2.25) y que las mutaciones de Usuarios (rutas bajo `/api/auth/...`) invalidan el listado `/api/auth/usuarios` por prefijo compartido. Pendiente: confirmar en el navegador contra producción que el segundo cambio de mantenedor ya no dispara request nueva.
+
 ## Fecha: 2026-08-25 (4)
 
 ### v2.25: Rendimiento — el listado de Órdenes de Trabajo ya no trae los adjuntos

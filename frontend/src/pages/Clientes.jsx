@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Users, Plus } from "lucide-react";
 import api from "../services/api";
+import { getCached } from "../services/cache";
 import { parseToken } from "../utils/helpers";
 import "../styles/Clientes.css";
 import "../styles/clientes-componentes.css";
@@ -22,15 +23,19 @@ function Clientes() {
   const [paginaActual, setPaginaActual] = usePaginaPersistente("pagClientes", [busqueda, filtroRut]);
   const clientesPorPagina = 4;
   const [soloLectura, setSoloLectura] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const { usuarioActual } = parseToken();
 
   const fetchClientes = async (signal) => {
+    setLoading(true);
     try {
-      const res = await api.get("/api/clientes", { signal });
+      const res = await getCached("/api/clientes", { signal });
       setClientes(res.data);
     } catch (err) {
       if (err.name !== "CanceledError") console.error("Error al cargar clientes:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -141,23 +146,32 @@ function Clientes() {
         </button>
       </div>
 
-      <ClienteLista
-        clientes={clientesPagina}
-        onNuevaOT={(c) => navigate("/orden-trabajo", { state: { cliente: c } })}
-        onCotizacion={(c) => navigate("/cotizaciones", { state: { cliente: c } })}
-        onVer={verCliente}
-        onEditar={editarCliente}
-        onEliminar={eliminarCliente}
-      />
-
-      {clientesFiltrados.length === 0 && (
+      {loading ? (
         <div className="empty-state">
           <Users size={48} />
-          <p>No hay clientes que coincidan con la búsqueda</p>
+          <p>Cargando clientes...</p>
         </div>
-      )}
+      ) : (
+        <>
+          <ClienteLista
+            clientes={clientesPagina}
+            onNuevaOT={(c) => navigate("/orden-trabajo", { state: { cliente: c } })}
+            onCotizacion={(c) => navigate("/cotizaciones", { state: { cliente: c } })}
+            onVer={verCliente}
+            onEditar={editarCliente}
+            onEliminar={eliminarCliente}
+          />
 
-      <Pagination currentPage={paginaActual} totalPages={totalPaginas} onPageChange={setPaginaActual} />
+          {clientesFiltrados.length === 0 && (
+            <div className="empty-state">
+              <Users size={48} />
+              <p>No hay clientes que coincidan con la búsqueda</p>
+            </div>
+          )}
+
+          <Pagination currentPage={paginaActual} totalPages={totalPaginas} onPageChange={setPaginaActual} />
+        </>
+      )}
     </div>
   );
 }
