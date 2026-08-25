@@ -10,6 +10,7 @@ import Pagination from "../components/Pagination";
 import FiltrosCliente from "../components/clientes/FiltrosCliente";
 import ClienteLista from "../components/clientes/ClienteLista";
 import ClienteFormulario from "../components/clientes/ClienteFormulario";
+import { usePaginaPersistente, useClampPagina } from "../hooks/usePaginacion";
 
 function Clientes() {
   const navigate = useNavigate();
@@ -18,10 +19,7 @@ function Clientes() {
   const [clienteEditando, setClienteEditando] = useState(null);
   const [busqueda, setBusqueda] = useState("");
   const [filtroRut, setFiltroRut] = useState("");
-  const [paginaActual, setPaginaActual] = useState(() => {
-    const guardada = Number(sessionStorage.getItem("pagClientes"));
-    return guardada >= 1 ? guardada : 1;
-  });
+  const [paginaActual, setPaginaActual] = usePaginaPersistente("pagClientes", [busqueda, filtroRut]);
   const clientesPorPagina = 4;
   const [soloLectura, setSoloLectura] = useState(false);
 
@@ -42,21 +40,6 @@ function Clientes() {
     return () => controller.abort();
   }, []);
 
-  useEffect(() => {
-    setPaginaActual(1);
-  }, [busqueda, filtroRut]);
-
-  // Persistir la página actual (mantiene la página al editar/cancelar o recargar)
-  useEffect(() => {
-    sessionStorage.setItem("pagClientes", String(paginaActual));
-  }, [paginaActual]);
-
-  // Evitar quedarse en una página fuera de rango si cambian los datos
-  useEffect(() => {
-    const total = Math.ceil(clientes.length / clientesPorPagina);
-    if (total > 0 && paginaActual > total) setPaginaActual(total);
-  }, [clientes.length, paginaActual]);
-
   const clientesFiltrados = clientes.filter((c) => {
     const texto = busqueda.toLowerCase();
     const razon = (c.razon_social || "").toLowerCase();
@@ -68,6 +51,7 @@ function Clientes() {
   });
 
   const totalPaginas = Math.ceil(clientesFiltrados.length / clientesPorPagina);
+  useClampPagina(paginaActual, setPaginaActual, totalPaginas);
   const indiceInicio = (paginaActual - 1) * clientesPorPagina;
   const clientesPagina = clientesFiltrados.slice(indiceInicio, indiceInicio + clientesPorPagina);
 

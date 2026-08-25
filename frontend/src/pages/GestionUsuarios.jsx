@@ -10,6 +10,7 @@ import UsuarioFormulario from "../components/usuarios/UsuarioFormulario";
 import CambioPasswordForm from "../components/usuarios/CambioPasswordForm";
 import UsuarioAcciones from "../components/usuarios/UsuarioAcciones";
 import Pagination from "../components/Pagination";
+import { usePaginaPersistente, useClampPagina } from "../hooks/usePaginacion";
 
 function GestionUsuarios() {
   const navigate = useNavigate();
@@ -18,12 +19,8 @@ function GestionUsuarios() {
   const [mostrarCambioPassword, setMostrarCambioPassword] = useState(false);
   const [usuarioEditando, setUsuarioEditando] = useState(null);
   const [filtroBusqueda, setFiltroBusqueda] = useState("");
-  const [paginaActual, setPaginaActual] = useState(1);
+  const [paginaActual, setPaginaActual] = usePaginaPersistente("pagUsuarios", [filtroBusqueda]);
   const usuariosPorPagina = 4;
-
-  useEffect(() => {
-    setPaginaActual(1);
-  }, [filtroBusqueda]);
 
   const usuariosFiltrados = usuarios.filter(u => {
     if (!filtroBusqueda) return true;
@@ -32,6 +29,7 @@ function GestionUsuarios() {
   });
 
   const totalPaginas = Math.ceil(usuariosFiltrados.length / usuariosPorPagina);
+  useClampPagina(paginaActual, setPaginaActual, totalPaginas);
   const indiceInicio = (paginaActual - 1) * usuariosPorPagina;
   const usuariosPagina = usuariosFiltrados.slice(indiceInicio, indiceInicio + usuariosPorPagina);
 
