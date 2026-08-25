@@ -1,5 +1,23 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-08-25
+
+### Limpieza de código muerto (frontend)
+
+**Motivo:** chequeo general del proyecto encontró componentes y CSS sin ningún importador ni uso real. No cambia comportamiento ni apariencia — nada de lo borrado se renderizaba.
+
+**Archivos eliminados:**
+- `frontend/src/components/clientes/ClienteExpandido.jsx` (149 líneas) — sin importadores; `Clientes.jsx` usa `ClienteLista` → `ClienteAcciones`, no este componente.
+- `frontend/src/components/clientes/ClienteExpandidoAcciones.jsx` (59 líneas) — muerto por arrastre, su único importador era `ClienteExpandido.jsx`.
+
+**Archivos modificados:**
+- `frontend/src/styles/clientes-componentes.css` — eliminadas ~263 líneas de reglas exclusivas de `ClienteExpandido` (incluye restos de `OTAsociadas.jsx`, ya borrado en julio: `.btn-nueva-ot-header`, `.btn-editar-header`, `.btn-eliminar-header`, `.ots-asociadas`). Se conservaron las clases `acciones-*` (viven en `index.css` y las comparten `ClienteAcciones`, `EquipoAcciones`, `OrdenAcciones`, `UsuarioAcciones`, `OrdenFormCliente`).
+- `frontend/src/App.jsx` — quitado el import duplicado de `./styles/index.css` (ya se importaba en `main.jsx`).
+
+**Verificación:** `npm run build` OK (CSS del bundle: 45.41 kB → 41.87 kB). Sin referencias colgantes (`grep` de las clases y del componente sin resultados).
+
+---
+
 ## Fecha: 2026-08-24 (2)
 
 ### Validación de formato de email en todos los ingresos de correo del sistema
