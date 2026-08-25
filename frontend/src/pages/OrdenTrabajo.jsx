@@ -15,6 +15,7 @@ import OrdenFormCliente from "../components/ordenes/OrdenFormCliente";
 import OrdenFormEquipo from "../components/ordenes/OrdenFormEquipo";
 import OrdenFormInsumos from "../components/ordenes/OrdenFormInsumos";
 import OrdenFormAveria from "../components/ordenes/OrdenFormAveria";
+import { usePaginaPersistente, useClampPagina } from "../hooks/usePaginacion";
 
 
 function OrdenTrabajo() {
@@ -24,10 +25,6 @@ function OrdenTrabajo() {
   // Estados para listar órdenes con paginación
   const [ordenes, setOrdenes] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [paginaActual, setPaginaActual] = useState(() => {
-    const guardada = Number(sessionStorage.getItem("pagOrdenes"));
-    return guardada >= 1 ? guardada : 1;
-  });
   const ITEMS_POR_PAG = 4;
   const [editingId, setEditingId] = useState(null);
   const [guardando, setGuardando] = useState(false);
@@ -39,6 +36,9 @@ function OrdenTrabajo() {
   const [filtroGarantia, setFiltroGarantia] = useState("todos");
   const [filtroFechaDesde, setFiltroFechaDesde] = useState("");
   const [filtroFechaHasta, setFiltroFechaHasta] = useState("");
+  const [paginaActual, setPaginaActual] = usePaginaPersistente("pagOrdenes", [
+    filtroNumeroOrden, filtroCliente, filtroSerie, filtroEstado, filtroGarantia, filtroFechaDesde, filtroFechaHasta
+  ]);
   
   // Estados para autocompletar clientes y equipos
   const [clientes, setClientes] = useState([]);
@@ -242,14 +242,6 @@ function OrdenTrabajo() {
     setMostrarFormulario(true);
   };
 
-  // Resetear paginación al filtrar
-  useEffect(() => { setPaginaActual(1); }, [filtroNumeroOrden, filtroCliente, filtroSerie, filtroEstado, filtroGarantia, filtroFechaDesde, filtroFechaHasta]);
-
-  // Persistir la página actual (mantiene la página al editar/cancelar o recargar)
-  useEffect(() => {
-    sessionStorage.setItem("pagOrdenes", String(paginaActual));
-  }, [paginaActual]);
-
   // Buscar equipos por modelo via API
   useEffect(() => {
     if (busquedaModelo.length < 2) { setEquiposModeloSugeridos([]); return; }
@@ -306,10 +298,7 @@ function OrdenTrabajo() {
   const totalPaginas = Math.ceil(ordenesFiltradas.length / ITEMS_POR_PAG);
   const ordenesPag = ordenesFiltradas.slice((paginaActual - 1) * ITEMS_POR_PAG, paginaActual * ITEMS_POR_PAG);
 
-  // Evitar quedarse en una página fuera de rango si cambian los datos (ej: eliminar la última orden de la página)
-  useEffect(() => {
-    if (totalPaginas > 0 && paginaActual > totalPaginas) setPaginaActual(totalPaginas);
-  }, [totalPaginas, paginaActual]);
+  useClampPagina(paginaActual, setPaginaActual, totalPaginas);
 
   const fmtDate = (d) => {
     if (!d) return "";

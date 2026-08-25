@@ -10,6 +10,7 @@ import EquipoFormulario from "../components/equipos/EquipoFormulario";
 import EquipoTabla from "../components/equipos/EquipoTabla";
 import EquipoCard from "../components/equipos/EquipoCard";
 import Pagination from "../components/Pagination";
+import { usePaginaPersistente, useClampPagina } from "../hooks/usePaginacion";
 
 function Equipos() {
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ function Equipos() {
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [equipoEditando, setEquipoEditando] = useState(null);
   const [filtroModelo, setFiltroModelo] = useState("");
-  const [paginaActual, setPaginaActual] = useState(1);
+  const [paginaActual, setPaginaActual] = usePaginaPersistente("pagEquipos", [filtroModelo]);
   const equiposPorPagina = 4;
   const [soloLectura, setSoloLectura] = useState(false);
 
@@ -36,10 +37,6 @@ function Equipos() {
     return () => controller.abort();
   }, []);
 
-  useEffect(() => {
-    setPaginaActual(1);
-  }, [filtroModelo]);
-
   const equiposFiltrados = equipos.filter(eq => {
     if (filtroModelo) {
       const m = filtroModelo.toLowerCase();
@@ -49,6 +46,7 @@ function Equipos() {
   });
 
   const totalPaginas = Math.ceil(equiposFiltrados.length / equiposPorPagina);
+  useClampPagina(paginaActual, setPaginaActual, totalPaginas);
   const indiceInicio = (paginaActual - 1) * equiposPorPagina;
   const equiposPagina = equiposFiltrados.slice(indiceInicio, indiceInicio + equiposPorPagina);
 
