@@ -330,6 +330,11 @@ function OrdenTrabajo() {
   };
 
   const editarOrden = async (orden) => {
+    // El listado ya no trae "adjunto" (es pesado y no se muestra ahí): se pide
+    // la orden completa recién al abrirla, para no perder el archivo al guardar.
+    const res = await api.get(`/api/ordenes/${orden.id}`);
+    orden = res.data;
+
     setEditingId(orden.id);
     setClienteFijo(false);
     setEquipoFijo(false);
@@ -434,6 +439,10 @@ function OrdenTrabajo() {
   };
 
   const verOrden = async (orden) => {
+    // Mismo motivo que en editarOrden: el listado no trae "adjunto".
+    const res = await api.get(`/api/ordenes/${orden.id}`);
+    orden = res.data;
+
     setSoloLectura(true);
     setClienteFijo(false);
     setEquipoFijo(false);
