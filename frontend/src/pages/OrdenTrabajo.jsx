@@ -16,6 +16,7 @@ import OrdenFormCliente from "../components/ordenes/OrdenFormCliente";
 import OrdenFormEquipo from "../components/ordenes/OrdenFormEquipo";
 import OrdenFormInsumos from "../components/ordenes/OrdenFormInsumos";
 import OrdenFormAveria from "../components/ordenes/OrdenFormAveria";
+import ModalOpcionesPDF from "../components/ordenes/ModalOpcionesPDF";
 import { usePaginaPersistente, useClampPagina } from "../hooks/usePaginacion";
 
 
@@ -55,6 +56,7 @@ function OrdenTrabajo() {
   const [equiposModeloSugeridos, setEquiposModeloSugeridos] = useState([]);
   const [clienteInactivo, setClienteInactivo] = useState(false);
   const [soloLectura, setSoloLectura] = useState(false);
+  const [ordenParaPDF, setOrdenParaPDF] = useState(null);
   
   // Refs para detectar clics fuera de los dropdowns
   const equipoModeloDropdownRef = useRef(null);
@@ -932,6 +934,7 @@ function OrdenTrabajo() {
             onEliminar={eliminarOrden}
             onInforme={(orden) => navigate('/informes', { state: { orden } })}
             onCotizacion={(orden) => navigate('/cotizaciones', { state: { orden } })}
+            onPDF={setOrdenParaPDF}
           />
           </div>
         ) : (
@@ -1043,6 +1046,10 @@ function OrdenTrabajo() {
             </div>
           </div></>
         )}
+
+      {ordenParaPDF && (
+        <ModalOpcionesPDF orden={ordenParaPDF} onClose={() => setOrdenParaPDF(null)} />
+      )}
     </div>
   );
 }

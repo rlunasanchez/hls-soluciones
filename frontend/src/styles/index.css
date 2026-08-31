@@ -488,6 +488,8 @@ table tr:last-child td {
 .acciones-item.reset:hover { background: var(--warning); color: #fff; }
 .acciones-item.ver { color: #0D9488; }
 .acciones-item.ver:hover { background: #0D9488; color: #fff; }
+.acciones-item.pdf { color: #7C3AED; }
+.acciones-item.pdf:hover { background: #7C3AED; color: #fff; }
 .acciones-item.edit { color: #b45309; }
 .acciones-item.edit:hover { background: var(--warning); color: #fff; }
 .acciones-item.delete { color: var(--danger); }
