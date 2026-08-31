@@ -113,67 +113,67 @@ function piePagina(orden) {
 // barra de acento en vez de línea completa, folio como badge, chips
 // rellenos. Mismo orden de datos que antes, solo cambia la piel visual.
 const ESTILOS = `
-@page { size: A4 portrait; margin: 12mm 13mm 14mm; }
+@page { size: A4 portrait; margin: 9mm 12mm 8mm; }
 * { box-sizing: border-box; }
 body {
   margin: 0;
   font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: #1F2937;
-  font-size: 9.5pt;
-  line-height: 1.4;
+  font-size: 9pt;
+  line-height: 1.28;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
 
-.enc { display: grid; grid-template-columns: 28mm 1fr auto; align-items: center; gap: 6mm; break-inside: avoid; }
+.enc { display: grid; grid-template-columns: 24mm 1fr auto; align-items: center; gap: 5mm; break-inside: avoid; }
 .logo { display: flex; align-items: center; justify-content: center; }
 .logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
-.logo-hls { width: 28mm; height: 14mm; }
-.logo-brother { width: 24mm; height: 10mm; }
+.logo-hls { width: 24mm; height: 11mm; }
+.logo-brother { width: 20mm; height: 8mm; }
 .logo--ph { border: .5pt dashed #CBD5E1; border-radius: 6pt; color: #94A3B8; font-size: 6pt; text-align: center; padding: 2pt; }
-.emp-datos h1 { margin: 0; font-size: 11.5pt; font-weight: 800; letter-spacing: -.01em; color: #0C4A8C; }
-.emp-datos p { margin: 1pt 0 0; font-size: 7.5pt; color: #6B7280; }
+.emp-datos h1 { margin: 0; font-size: 11pt; font-weight: 800; letter-spacing: -.01em; color: #0C4A8C; }
+.emp-datos p { margin: 1pt 0 0; font-size: 7pt; color: #6B7280; }
 .brother-box { text-align: center; }
 .brother-leyenda { margin-top: 2pt; font-size: 6pt; text-transform: uppercase; letter-spacing: .1em; color: #6B7280; }
 
-.filete-1 { margin-top: 5pt; height: 2.5pt; border-radius: 2pt; background: linear-gradient(90deg, #0C4A8C, #2E8BE6); }
-.filete-2 { height: .5pt; background: #E5E7EB; margin-top: 1mm; }
+.filete-1 { margin-top: 4pt; height: 2pt; border-radius: 2pt; background: linear-gradient(90deg, #0C4A8C, #2E8BE6); }
+.filete-2 { height: .5pt; background: #E5E7EB; margin-top: .8mm; }
 
-.titulo-barra { display: flex; justify-content: space-between; align-items: center; margin-top: 6.5mm; break-inside: avoid; }
-.titulo-barra h1 { margin: 0; font-size: 14pt; font-weight: 800; letter-spacing: .03em; color: #0C4A8C; }
-.emitida { margin: 2pt 0 0; font-size: 7.5pt; color: #6B7280; }
+.titulo-barra { display: flex; justify-content: space-between; align-items: center; margin-top: 4mm; break-inside: avoid; }
+.titulo-barra h1 { margin: 0; font-size: 13pt; font-weight: 800; letter-spacing: .03em; color: #0C4A8C; }
+.emitida { margin: 2pt 0 0; font-size: 7pt; color: #6B7280; }
 .garantia-chip { display: inline-block; margin-left: 8pt; background: #0C4A8C; border-radius: 10pt; padding: 2pt 9pt; font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #fff; vertical-align: middle; }
-.folio { text-align: center; background: linear-gradient(135deg, #0C4A8C, #1D6FC4); border-radius: 8pt; padding: 3pt 14pt; }
-.folio .l { display: block; font-size: 6.5pt; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,.75); }
-.folio .v { font-size: 16pt; font-weight: 800; font-variant-numeric: tabular-nums; color: #fff; }
+.folio { text-align: center; background: linear-gradient(135deg, #0C4A8C, #1D6FC4); border-radius: 7pt; padding: 2pt 12pt; }
+.folio .l { display: block; font-size: 6pt; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,.75); }
+.folio .v { font-size: 14pt; font-weight: 800; font-variant-numeric: tabular-nums; color: #fff; }
 
-.sec { margin-top: 4.5mm; break-inside: avoid; background: #F8FAFC; border: .5pt solid #E5E7EB; border-radius: 8pt; padding: 3.5mm 5mm; }
-.sec h2 { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 3mm; padding-left: 7pt; border-left: 3pt solid #0C4A8C; font-size: 7.5pt; font-weight: 800; text-transform: uppercase; letter-spacing: .09em; color: #0C4A8C; break-after: avoid; }
-.h2-extra { color: #6B7280; font-weight: 600; letter-spacing: 0; text-transform: none; font-size: 7.5pt; }
+.sec { margin-top: 2.8mm; break-inside: avoid; background: #F8FAFC; border: .5pt solid #E5E7EB; border-radius: 7pt; padding: 2.2mm 4mm; }
+.sec h2 { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 1.8mm; padding-left: 6pt; border-left: 3pt solid #0C4A8C; font-size: 7pt; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #0C4A8C; break-after: avoid; }
+.h2-extra { color: #6B7280; font-weight: 600; letter-spacing: 0; text-transform: none; font-size: 7pt; }
 .h2-extra b { color: #111827; }
 
-.grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 10mm; row-gap: 3mm; }
-.f .l { display: block; font-size: 6.5pt; text-transform: uppercase; letter-spacing: .07em; color: #6B7280; }
-.f .v { display: block; padding-bottom: 1.5mm; border-bottom: .5pt solid #E2E8F0; font-size: 9.5pt; font-weight: 600; color: #111827; overflow-wrap: anywhere; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 8mm; row-gap: 2mm; }
+.f .l { display: block; font-size: 6pt; text-transform: uppercase; letter-spacing: .07em; color: #6B7280; }
+.f .v { display: block; padding-bottom: 1mm; border-bottom: .5pt solid #E2E8F0; font-size: 9pt; font-weight: 600; color: #111827; overflow-wrap: anywhere; }
 
-.sub { margin-top: 4mm; font-size: 6.5pt; text-transform: uppercase; letter-spacing: .06em; color: #6B7280; }
-.extra-item { margin-top: 2mm; }
-.extra-item .nom { font-size: 8.5pt; font-weight: 700; }
-.extra-item .det { font-size: 7.5pt; color: #6B7280; }
+.sub { margin-top: 2.5mm; font-size: 6pt; text-transform: uppercase; letter-spacing: .06em; color: #6B7280; }
+.extra-item { margin-top: 1.2mm; }
+.extra-item .nom { font-size: 8pt; font-weight: 700; }
+.extra-item .det { font-size: 7pt; color: #6B7280; }
 
-.chips { margin-top: 1mm; }
-.chip { display: inline-block; background: #E8F1FB; border-radius: 9pt; padding: 2pt 8pt; font-size: 8pt; font-weight: 600; color: #0C4A8C; margin: 0 4pt 3pt 0; }
+.chips { margin-top: .8mm; }
+.chip { display: inline-block; background: #E8F1FB; border-radius: 9pt; padding: 1.5pt 7pt; font-size: 7.5pt; font-weight: 600; color: #0C4A8C; margin: 0 3pt 2pt 0; }
 
-.txt { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 14mm; font-size: 9pt; orphans: 3; widows: 3; }
+.txt { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 0; font-size: 8.5pt; orphans: 3; widows: 3; }
 
-.pie { margin-top: 6.5mm; break-inside: avoid; }
+.pie { margin-top: 3.5mm; break-inside: avoid; }
 .firmas { display: grid; grid-template-columns: 1fr 1fr; column-gap: 14mm; }
-.firma-linea { border-top: .5pt solid #9CA3AF; width: 62mm; margin-top: 14mm; padding-top: 2mm; }
-.firma-linea .t { font-size: 6.5pt; text-transform: uppercase; letter-spacing: .06em; color: #6B7280; }
-.firma-linea .n { font-size: 8.5pt; font-weight: 600; margin-top: 1mm; }
+.firma-linea { border-top: .5pt solid #9CA3AF; width: 60mm; margin-top: 7mm; padding-top: 1.5mm; }
+.firma-linea .t { font-size: 6pt; text-transform: uppercase; letter-spacing: .06em; color: #6B7280; }
+.firma-linea .n { font-size: 8pt; font-weight: 600; margin-top: .8mm; }
 
-.legales { margin-top: 6mm; font-size: 6.5pt; color: #6B7280; }
-.legales p { margin: 0 0 2mm; padding-left: 8pt; text-indent: -8pt; }
+.legales { margin-top: 3mm; font-size: 6pt; color: #6B7280; }
+.legales p { margin: 0 0 1.2mm; padding-left: 8pt; text-indent: -8pt; }
 `;
 
 // ── Generación ────────────────────────────────────────────────────────────

@@ -1,5 +1,15 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-08-31 (4)
+
+### v2.30: PDF de Orden de Servicio — layout más compacto para entrar en una sola hoja
+
+**Problema:** el documento generado en v2.29 solía ocupar 2 hojas incluso con contenido moderado: cada sección era una tarjeta con bastante padding/margen, los cuadros de texto (Falla/Informe Técnico/Observaciones) reservaban 14mm de alto mínimo aunque tuvieran poco texto, y el bloque de firma dejaba 14mm de aire arriba de la línea.
+
+**Solución:** `frontend/src/utils/ordenServicioDoc.js` — márgenes de página, tipografía, padding de secciones y separación entre bloques más chicos; se saca el alto mínimo fijo de los cuadros de texto (ahora ocupan solo lo que su contenido necesita); espacio de firma reducido de 14mm a 7mm. Mismo contenido y orden de datos, solo se aprieta la maquetación.
+
+**Verificación:** `npm run build` OK en frontend. Nota: si una orden tiene mucho texto cargado en Falla/Informe/Observaciones, puede seguir necesitando una segunda hoja — eso es volumen real de contenido, no diseño.
+
 ## Fecha: 2026-08-31 (3)
 
 ### v2.29: PDF de Orden de Servicio (implementación real, reemplaza el placeholder de v2.27) + limpieza en el visor de adjuntos
