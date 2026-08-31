@@ -1,5 +1,15 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-08-31
+
+### v2.27: Ajustes UI en Órdenes de Trabajo — buscador de contacto y botón PDF
+
+**Cambios:**
+- `frontend/src/components/ordenes/OrdenFormCliente.jsx` — el campo "Buscar Contacto" (antes "Buscar Contacto (por nombre o correo)", ahora solo "Buscar Contacto") ya no usa un `maxWidth` fijo de 268px: se envuelve en un grid con la misma fórmula (`repeat(auto-fill, minmax(200px, 1fr))`, gap 20px) que usa `.of-form-grid` en la fila de Email/Fono/Contacto de abajo, así queda con el mismo ancho que el campo Email en cualquier tamaño de pantalla.
+- `frontend/src/components/ordenes/OrdenAcciones.jsx` — nuevo botón "PDF" (ícono `FileDown`) en el menú de acciones de cada orden, junto a Informe/Cotización. Todavía no genera nada: el `onClick` solo muestra `alert("Próximamente")` como placeholder hasta que se implemente la generación del PDF de la OT.
+
+**Verificación:** `npm run build` OK en frontend.
+
 ## Fecha: 2026-08-25 (5)
 
 ### v2.26: Rendimiento — cache en el frontend y gzip en el backend para el cambio entre mantenedores

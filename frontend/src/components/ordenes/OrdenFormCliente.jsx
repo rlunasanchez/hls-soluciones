@@ -971,10 +971,11 @@ function OrdenFormCliente({
       </div>
 
       {clienteSeleccionado && (
-        <div ref={contactoDropdownRef} style={{ position: 'relative', marginTop: '14px', maxWidth: '268px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px', marginTop: '14px' }}>
+        <div ref={contactoDropdownRef} style={{ position: 'relative' }}>
           <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: 'var(--text)', fontSize: '0.8rem' }}>
             <Search size={14} style={{ display: 'inline', marginRight: '6px' }} />
-            Buscar Contacto (por nombre o correo)
+            Buscar Contacto
           </label>
           <input
             type="text"
@@ -1030,6 +1031,7 @@ function OrdenFormCliente({
               )}
             </div>
           )}
+        </div>
         </div>
       )}
 
