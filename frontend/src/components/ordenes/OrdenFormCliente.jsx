@@ -1519,16 +1519,16 @@ function OrdenFormCliente({
             ) : (
               <img src={adjuntoParaVer.data} alt={adjuntoParaVer.nombre} style={{ maxWidth: '100%', maxHeight: '75vh', objectFit: 'contain', borderRadius: '6px' }} />
             )}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
-              {adjuntoParaVer.tipo !== "application/pdf" && (
+            {adjuntoParaVer.tipo !== "application/pdf" && (
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
                 <button type="button" onClick={imprimirAdjunto} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', border: 'none', borderRadius: '6px', background: '#0D9488', color: '#fff', cursor: 'pointer', fontSize: '.78rem', fontWeight: 600 }}>
                   <Printer size={14} /> Imprimir
                 </button>
-              )}
-              <button type="button" onClick={() => descargarAdjunto()} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', border: 'none', borderRadius: '6px', background: 'var(--primary)', color: '#fff', cursor: 'pointer', fontSize: '.78rem', fontWeight: 600 }}>
-                <Download size={14} /> Descargar
-              </button>
-            </div>
+                <button type="button" onClick={() => descargarAdjunto()} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', border: 'none', borderRadius: '6px', background: 'var(--primary)', color: '#fff', cursor: 'pointer', fontSize: '.78rem', fontWeight: 600 }}>
+                  <Download size={14} /> Descargar
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -2,7 +2,7 @@ import { ClipboardList, Plus, RotateCcw } from "lucide-react";
 import Pagination from "../Pagination";
 import OrdenAcciones from "./OrdenAcciones";
 
-function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtroCliente, onFiltroClienteChange, filtroSerie, onFiltroSerieChange, filtroEstado, onFiltroEstadoChange, filtroGarantia, onFiltroGarantiaChange, filtroFechaDesde, onFiltroFechaDesdeChange, filtroFechaHasta, onFiltroFechaHastaChange, onLimpiar, onNueva, paginaActual, totalPaginas, onPageChange, onVer, onEditar, onEliminar, onInforme, onCotizacion }) {
+function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtroCliente, onFiltroClienteChange, filtroSerie, onFiltroSerieChange, filtroEstado, onFiltroEstadoChange, filtroGarantia, onFiltroGarantiaChange, filtroFechaDesde, onFiltroFechaDesdeChange, filtroFechaHasta, onFiltroFechaHastaChange, onLimpiar, onNueva, paginaActual, totalPaginas, onPageChange, onVer, onEditar, onEliminar, onInforme, onCotizacion, onPDF }) {
 
   return (
     <>
@@ -147,6 +147,7 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                         onEliminar={onEliminar}
                         onInforme={onInforme}
                         onCotizacion={onCotizacion}
+                        onPDF={onPDF}
                       />
                     </td>
                   </tr>
@@ -199,6 +200,7 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                     onEliminar={onEliminar}
                     onInforme={onInforme}
                     onCotizacion={onCotizacion}
+                    onPDF={onPDF}
                   />
                 </div>
               </div>

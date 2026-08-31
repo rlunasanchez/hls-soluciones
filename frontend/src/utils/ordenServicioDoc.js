@@ -1,0 +1,280 @@
+// Generador del documento "Orden de Servicio" (HTML listo para imprimir/guardar como PDF).
+// Función pura: no toca el DOM ni React. La impresión la dispara utils/imprimir.js.
+import { EMPRESA, LOGO_HLS, LOGO_BROTHER, CONDICIONES_ORDEN_SERVICIO } from "./empresa";
+
+// ── Helpers de escape y formato ──────────────────────────────────────────
+// Los valores son texto libre escrito por el usuario y se inyectan con
+// doc.write(): un "&", "<" o '"' sin escapar rompe el documento.
+const esc = (v) => String(v ?? "").replace(/[&<>"]/g, (c) => (
+  { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]
+));
+
+// Recorta el string ISO en vez de pasar por new Date()/toLocaleDateString()
+// para no arriesgar un corrimiento de día por huso horario.
+const fecha = (v) => {
+  const [y, m, d] = String(v ?? "").substring(0, 10).split("-");
+  return y && m && d ? `${d}/${m}/${y}` : "";
+};
+
+// Campo de la grilla "label arriba, valor abajo". Si no hay valor, no se
+// imprime nada: así los campos vacíos desaparecen solos y la grilla se recompone.
+const campo = (label, valor) => (
+  valor ? `<div class="f"><span class="l">${esc(label)}</span><span class="v">${esc(valor)}</span></div>` : ""
+);
+
+const h2 = (titulo, extraHtml = "") => (
+  `<h2><span>${esc(titulo)}</span>${extraHtml ? `<span class="h2-extra">${extraHtml}</span>` : ""}</h2>`
+);
+
+const slotLogo = (src, alt, cls) => (
+  src
+    ? `<img class="logo ${cls}" src="${src}" alt="${esc(alt)}">`
+    : `<div class="logo ${cls} logo--ph">${esc(alt)}</div>`
+);
+
+const parseJsonArray = (val) => {
+  try {
+    const arr = JSON.parse(val || "[]");
+    return Array.isArray(arr) ? arr : [];
+  } catch {
+    return [];
+  }
+};
+
+// ── Derivación de listas desde la orden cruda (snake_case) ──────────────
+// Exportada para que el modal de opciones use exactamente el mismo orden/
+// filtro que el generador: así no hay dos verdades sobre qué índice es qué.
+export function derivarListas(orden) {
+  const insumos = [];
+  for (let i = 1; i <= 12; i++) {
+    const nombre = String(orden[`insumo${i}`] || "").trim();
+    if (nombre) insumos.push({ n: i, nombre });
+  }
+  const contactosExtra = parseJsonArray(orden.contactos_extra).filter((c) => String(c?.nombre || "").trim());
+  const direccionesExtra = parseJsonArray(orden.direcciones_extra).filter((d) => String(d?.direccion || "").trim());
+  return { insumos, contactosExtra, direccionesExtra };
+}
+
+// No existe columna "ciudad" a nivel de OT: se toma de la dirección Matriz
+// si tiene ciudad cargada, si no de la primera dirección extra que la tenga.
+// Nunca se deriva de la comuna.
+function resolverCiudad(direccionesExtra) {
+  const matriz = direccionesExtra.find((d) => d.tipo === "Matriz" && String(d.ciudad || "").trim());
+  if (matriz) return matriz.ciudad;
+  const conCiudad = direccionesExtra.find((d) => String(d.ciudad || "").trim());
+  return conCiudad ? conCiudad.ciudad : "";
+}
+
+function contactoExtraHtml(c) {
+  const detalle = [c.cargo, c.fono, c.email].filter((v) => String(v || "").trim()).map(esc).join(" · ");
+  return `<div class="extra-item"><span class="nom">${esc(c.nombre)}</span>${detalle ? ` <span class="det">${detalle}</span>` : ""}</div>`;
+}
+
+function direccionExtraHtml(d) {
+  const tipo = String(d.tipo || "").trim();
+  const linea = [d.direccion, d.ciudad || d.comuna].filter((v) => String(v || "").trim()).join(", ");
+  const nom = tipo ? `${tipo} — ${linea}` : linea;
+  const fono = String(d.fono || "").trim();
+  return `<div class="extra-item"><span class="nom">${esc(nom)}</span>${fono ? ` <span class="det">${esc(fono)}</span>` : ""}</div>`;
+}
+
+function seccionTexto(titulo, valor) {
+  return `<section class="sec">${h2(titulo)}<div class="txt">${esc(valor)}</div></section>`;
+}
+
+function seccionObservaciones(orden) {
+  const fc = fecha(orden.fecha_compra);
+  const extra = fc ? `F/COMPRA <b>${esc(fc)}</b>` : "";
+  return `<section class="sec">${h2("Observaciones", extra)}<div class="txt">${esc(orden.observaciones)}</div></section>`;
+}
+
+function piePagina(orden) {
+  return `
+  <div class="pie">
+    <div class="firmas">
+      <div class="firma-linea">
+        <div class="t">Recibido conforme — Cliente</div>
+        <div class="n">Nombre · RUT · Fecha</div>
+      </div>
+      <div class="firma-linea">
+        <div class="t">Técnico</div>
+        <div class="n">${esc(orden.tecnico_asignado || "")}</div>
+      </div>
+    </div>
+    <div class="legales">
+      ${CONDICIONES_ORDEN_SERVICIO.map((t) => `<p>* ${esc(t)}</p>`).join("")}
+    </div>
+  </div>`;
+}
+
+// ── Estilos de impresión ─────────────────────────────────────────────────
+// Un solo acento (#0C4A8C, el --primary de la app). La modernización
+// respecto al informe en papel: secciones como tarjetas con tinte suave,
+// barra de acento en vez de línea completa, folio como badge, chips
+// rellenos. Mismo orden de datos que antes, solo cambia la piel visual.
+const ESTILOS = `
+@page { size: A4 portrait; margin: 12mm 13mm 14mm; }
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1F2937;
+  font-size: 9.5pt;
+  line-height: 1.4;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.enc { display: grid; grid-template-columns: 28mm 1fr auto; align-items: center; gap: 6mm; break-inside: avoid; }
+.logo { display: flex; align-items: center; justify-content: center; }
+.logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.logo-hls { width: 28mm; height: 14mm; }
+.logo-brother { width: 24mm; height: 10mm; }
+.logo--ph { border: .5pt dashed #CBD5E1; border-radius: 6pt; color: #94A3B8; font-size: 6pt; text-align: center; padding: 2pt; }
+.emp-datos h1 { margin: 0; font-size: 11.5pt; font-weight: 800; letter-spacing: -.01em; color: #0C4A8C; }
+.emp-datos p { margin: 1pt 0 0; font-size: 7.5pt; color: #6B7280; }
+.brother-box { text-align: center; }
+.brother-leyenda { margin-top: 2pt; font-size: 6pt; text-transform: uppercase; letter-spacing: .1em; color: #6B7280; }
+
+.filete-1 { margin-top: 5pt; height: 2.5pt; border-radius: 2pt; background: linear-gradient(90deg, #0C4A8C, #2E8BE6); }
+.filete-2 { height: .5pt; background: #E5E7EB; margin-top: 1mm; }
+
+.titulo-barra { display: flex; justify-content: space-between; align-items: center; margin-top: 6.5mm; break-inside: avoid; }
+.titulo-barra h1 { margin: 0; font-size: 14pt; font-weight: 800; letter-spacing: .03em; color: #0C4A8C; }
+.emitida { margin: 2pt 0 0; font-size: 7.5pt; color: #6B7280; }
+.garantia-chip { display: inline-block; margin-left: 8pt; background: #0C4A8C; border-radius: 10pt; padding: 2pt 9pt; font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #fff; vertical-align: middle; }
+.folio { text-align: center; background: linear-gradient(135deg, #0C4A8C, #1D6FC4); border-radius: 8pt; padding: 3pt 14pt; }
+.folio .l { display: block; font-size: 6.5pt; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,.75); }
+.folio .v { font-size: 16pt; font-weight: 800; font-variant-numeric: tabular-nums; color: #fff; }
+
+.sec { margin-top: 4.5mm; break-inside: avoid; background: #F8FAFC; border: .5pt solid #E5E7EB; border-radius: 8pt; padding: 3.5mm 5mm; }
+.sec h2 { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 3mm; padding-left: 7pt; border-left: 3pt solid #0C4A8C; font-size: 7.5pt; font-weight: 800; text-transform: uppercase; letter-spacing: .09em; color: #0C4A8C; break-after: avoid; }
+.h2-extra { color: #6B7280; font-weight: 600; letter-spacing: 0; text-transform: none; font-size: 7.5pt; }
+.h2-extra b { color: #111827; }
+
+.grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 10mm; row-gap: 3mm; }
+.f .l { display: block; font-size: 6.5pt; text-transform: uppercase; letter-spacing: .07em; color: #6B7280; }
+.f .v { display: block; padding-bottom: 1.5mm; border-bottom: .5pt solid #E2E8F0; font-size: 9.5pt; font-weight: 600; color: #111827; overflow-wrap: anywhere; }
+
+.sub { margin-top: 4mm; font-size: 6.5pt; text-transform: uppercase; letter-spacing: .06em; color: #6B7280; }
+.extra-item { margin-top: 2mm; }
+.extra-item .nom { font-size: 8.5pt; font-weight: 700; }
+.extra-item .det { font-size: 7.5pt; color: #6B7280; }
+
+.chips { margin-top: 1mm; }
+.chip { display: inline-block; background: #E8F1FB; border-radius: 9pt; padding: 2pt 8pt; font-size: 8pt; font-weight: 600; color: #0C4A8C; margin: 0 4pt 3pt 0; }
+
+.txt { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 14mm; font-size: 9pt; orphans: 3; widows: 3; }
+
+.pie { margin-top: 6.5mm; break-inside: avoid; }
+.firmas { display: grid; grid-template-columns: 1fr 1fr; column-gap: 14mm; }
+.firma-linea { border-top: .5pt solid #9CA3AF; width: 62mm; margin-top: 14mm; padding-top: 2mm; }
+.firma-linea .t { font-size: 6.5pt; text-transform: uppercase; letter-spacing: .06em; color: #6B7280; }
+.firma-linea .n { font-size: 8.5pt; font-weight: 600; margin-top: 1mm; }
+
+.legales { margin-top: 6mm; font-size: 6.5pt; color: #6B7280; }
+.legales p { margin: 0 0 2mm; padding-left: 8pt; text-indent: -8pt; }
+`;
+
+// ── Generación ────────────────────────────────────────────────────────────
+// orden: fila cruda de la OT (snake_case, tal como llega del listado GET /api/ordenes).
+// opciones: booleanos por sección + arrays de booleanos alineados 1:1 con
+// derivarListas(orden).insumos / .contactosExtra / .direccionesExtra.
+export function generarHtmlOrdenServicio(orden, opciones) {
+  const { insumos, contactosExtra, direccionesExtra } = derivarListas(orden);
+  const numero = String(orden.numero_orden || "").split("-").pop() || "—";
+  const ciudad = resolverCiudad(direccionesExtra);
+
+  const insumosSel = insumos.filter((_, i) => opciones.insumos?.[i]);
+  const contactosSel = contactosExtra.filter((_, i) => opciones.contactosExtra?.[i]);
+  const direccionesSel = direccionesExtra.filter((_, i) => opciones.direccionesExtra?.[i]);
+
+  const marcaModelo = [orden.marca, orden.modelo].filter((v) => String(v || "").trim()).join(" ");
+
+  const seccionCliente = `
+    <section class="sec">
+      ${h2("Datos de Cliente — Contacto")}
+      <div class="grid">
+        ${campo("Cliente", orden.cliente)}
+        ${campo("Fecha", fecha(orden.fecha))}
+        ${campo("Dirección", orden.direccion)}
+        ${campo("Teléfono", orden.fono_principal)}
+        ${campo("Comuna", orden.comuna)}
+        ${campo("Ciudad", ciudad)}
+        ${opciones.contactoPrincipal ? campo("Contacto", orden.contacto) : ""}
+        ${opciones.contactoPrincipal ? campo("Email Contacto", orden.email_contacto) : ""}
+        ${opciones.contactoPrincipal ? campo("Fono Contacto", orden.fono_contacto) : ""}
+        ${campo("Email", orden.email)}
+      </div>
+      ${contactosSel.length ? `<div class="sub">› Contactos adicionales</div>${contactosSel.map(contactoExtraHtml).join("")}` : ""}
+      ${direccionesSel.length ? `<div class="sub">› Direcciones adicionales</div>${direccionesSel.map(direccionExtraHtml).join("")}` : ""}
+    </section>`;
+
+  const seccionEquipo = `
+    <section class="sec">
+      ${h2("Datos de Equipo — Técnico Asignado")}
+      <div class="grid">
+        ${campo("Equipo", orden.equipo)}
+        ${campo("Serie", orden.serie)}
+        ${campo("Marca / Modelo", marcaModelo)}
+        ${campo("Contador Pág.", orden.contador_pag_out)}
+        ${campo("Nivel de Tinta", orden.nivel_tinta)}
+        ${campo("Técnico Asignado", orden.tecnico_asignado)}
+      </div>
+      ${insumosSel.length ? `<div class="sub">› Insumos</div><div class="chips">${insumosSel.map((i) => `<span class="chip">${esc(i.nombre)}</span>`).join("")}</div>` : ""}
+    </section>`;
+
+  const seccionAveria = opciones.averia && orden.averia ? seccionTexto("Falla — Incidencia", orden.averia) : "";
+  const seccionActividad = opciones.actividad && orden.actividad ? seccionTexto("Informe Técnico", orden.actividad) : "";
+  const seccionObs = opciones.observaciones && orden.observaciones ? seccionObservaciones(orden) : "";
+  const pie = opciones.firma ? piePagina(orden) : "";
+
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>${esc(tituloDocumento(orden))}</title>
+<style>${ESTILOS}</style>
+</head>
+<body>
+  <div class="enc">
+    ${slotLogo(LOGO_HLS, "HLS", "logo-hls")}
+    <div class="emp-datos">
+      <h1>${esc(EMPRESA.nombre)}</h1>
+      <p>${esc(EMPRESA.direccion)}</p>
+      <p>Fono: ${esc(EMPRESA.fono)} · ${esc(EMPRESA.email)} · ${esc(EMPRESA.web)}</p>
+    </div>
+    <div class="brother-box">
+      ${slotLogo(LOGO_BROTHER, "BROTHER", "logo-brother")}
+      <div class="brother-leyenda">${esc(EMPRESA.leyendaBrother)}</div>
+    </div>
+  </div>
+  <div class="filete-1"></div>
+  <div class="filete-2"></div>
+
+  <div class="titulo-barra">
+    <div>
+      <h1>Orden de Servicio${orden.es_garantia ? '<span class="garantia-chip">Garantía</span>' : ""}</h1>
+      <p class="emitida">Emitida el ${esc(fecha(orden.fecha))}</p>
+    </div>
+    <div class="folio">
+      <span class="l">N°</span>
+      <span class="v">${esc(numero)}</span>
+    </div>
+  </div>
+
+  ${seccionCliente}
+  ${seccionEquipo}
+  ${seccionAveria}
+  ${seccionActividad}
+  ${seccionObs}
+  ${pie}
+</body>
+</html>`;
+}
+
+export function tituloDocumento(orden) {
+  const numero = String(orden.numero_orden || "").split("-").pop() || "SIN-NUMERO";
+  const cliente = String(orden.cliente || "").trim();
+  return `ORDEN DE SERVICIO ${numero}${cliente ? " - " + cliente : ""}`;
+}

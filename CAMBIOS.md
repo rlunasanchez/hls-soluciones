@@ -1,5 +1,19 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-08-31 (3)
+
+### v2.29: PDF de Orden de Servicio (implementación real, reemplaza el placeholder de v2.27) + limpieza en el visor de adjuntos
+
+**Cambios:**
+- Botón "PDF" del menú de acciones de la OT: en vez de `alert("Próximamente")`, abre `ModalOpcionesPDF` (nuevo) — deja elegir qué insumos, contactos adicionales, direcciones adicionales y secciones (falla/incidencia, informe técnico, observaciones, firma) entran en el documento, con "Todos/Ninguno" por grupo. Por defecto reproduce el informe en papel: contacto principal + insumos cargados; los extras son opt-in.
+- `frontend/src/utils/ordenServicioDoc.js` (nuevo) — genera el HTML imprimible de la Orden de Servicio (membrete de empresa, datos de cliente/contacto, datos de equipo/técnico, insumos como chips, secciones de texto, pie con firma y condiciones legales). Diseño con tarjetas de fondo tenue por sección, barra de acento en vez de línea completa en los títulos, folio como badge con degradé y chips rellenos — mismo orden de datos que el informe en papel, solo cambia la piel visual.
+- `frontend/src/utils/empresa.js` (nuevo) — datos de la empresa y texto legal del pie, centralizados para reusar en otros documentos a futuro.
+- `frontend/src/utils/imprimir.js` (nuevo) — `imprimirHtml()`, genérico: imprime cualquier HTML armado en un iframe oculto (mismo patrón que ya usaba `imprimirAdjunto()` en `OrdenFormCliente.jsx`, ahora reutilizable).
+- El PDF se genera con el diálogo de impresión del navegador ("Guardar como PDF"); el modal indica que en "Más ajustes" se puede desmarcar "Encabezados y pies de página" para sacar el título/URL que Chrome agrega arriba y abajo de cada hoja — es una preferencia del navegador, no controlable desde la página.
+- `OrdenFormCliente.jsx` — en el visor de adjuntos, el botón "Descargar" de abajo ya no se muestra para adjuntos PDF: el visor nativo del navegador (el `<iframe>` que renderiza el PDF) ya trae su propia barra con impresión/descarga, así que el botón de la app era redundante. Para imágenes se mantienen "Imprimir" y "Descargar" igual que antes.
+
+**Verificación:** `npm run build` OK en frontend.
+
 ## Fecha: 2026-08-31 (2)
 
 ### v2.28: Órdenes de Trabajo — la edición y el cambio de cliente ya no arrastran contacto/direcciones obsoletos

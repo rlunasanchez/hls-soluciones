@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { MoreHorizontal, FileText, FileSpreadsheet, FileDown, Eye, Edit, Trash2 } from "lucide-react";
 
-function OrdenAcciones({ orden, onVer, onEditar, onEliminar, onInforme, onCotizacion }) {
+function OrdenAcciones({ orden, onVer, onEditar, onEliminar, onInforme, onCotizacion, onPDF }) {
   const [abierto, setAbierto] = useState(false);
   const [pos, setPos] = useState({ top: 0, left: 0 });
   const btnRef = useRef(null);
@@ -53,7 +53,7 @@ function OrdenAcciones({ orden, onVer, onEditar, onEliminar, onInforme, onCotiza
           <button className="acciones-item cotizacion" onClick={() => { setAbierto(false); onCotizacion(orden); }}>
             <FileSpreadsheet size={14} /> Cotización
           </button>
-          <button className="acciones-item pdf" onClick={() => { setAbierto(false); alert("Próximamente"); }}>
+          <button className="acciones-item pdf" onClick={() => { setAbierto(false); onPDF(orden); }}>
             <FileDown size={14} /> PDF
           </button>
           <button className="acciones-item ver" onClick={() => { setAbierto(false); onVer(orden); }}>
