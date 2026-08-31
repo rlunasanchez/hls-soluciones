@@ -1,5 +1,20 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-08-31 (2)
+
+### v2.28: Órdenes de Trabajo — la edición y el cambio de cliente ya no arrastran contacto/direcciones obsoletos
+
+**Problema:**
+- Al editar un cliente desde dentro del formulario de OT, si se le cambiaba el nombre al contacto principal (o a una dirección/contacto extra ya cargados en la OT), la resincronización los perdía: buscaba la coincidencia por nombre/dirección exacto y, al no encontrarlo, dejaba los datos viejos en la OT.
+- Al reseleccionar en la OT el mismo cliente que ya estaba cargado (modo edición), el código cortaba con un `return` temprano y no reflejaba cambios que se le hubieran hecho al cliente por fuera de la OT (razón social, dirección, rut, email, fono).
+- Al elegir un cliente nuevo o distinto en la OT, se autocompletaba `contacto`/`fonoContacto`/`emailContacto` con el contacto principal registrado del cliente, asumiendo que siempre es el correcto.
+
+**Solución:**
+- `frontend/src/components/ordenes/OrdenFormCliente.jsx` — al guardar la edición de un cliente, además de buscar el contacto/dirección/contacto-extra por nombre, si no hay coincidencia se lo sigue por la posición que ocupaba en la lista del cliente antes del guardado (se arma `todosContactos`/`direcciones`/`contactosExtra` "antes" y "después" con los mismos parsers). Así un renombrado no rompe el vínculo con la OT.
+- `frontend/src/pages/OrdenTrabajo.jsx` — al seleccionar el mismo cliente en modo edición, ahora sí se refrescan sus datos propios (razón social, dirección, comuna, rut, email, fono) sin tocar equipo, contacto ni direcciones/contactos extra. Al elegir un cliente nuevo o distinto, `contacto`/`fonoContacto`/`emailContacto` quedan vacíos en vez de autocompletarse con el contacto principal del cliente.
+
+**Verificación:** `npm run build` OK en frontend.
+
 ## Fecha: 2026-08-31
 
 ### v2.27: Ajustes UI en Órdenes de Trabajo — buscador de contacto y botón PDF
