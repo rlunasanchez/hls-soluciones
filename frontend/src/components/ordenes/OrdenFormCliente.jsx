@@ -270,12 +270,33 @@ function OrdenFormCliente({
       if (setClienteSeleccionado) setClienteSeleccionado(fresh);
 
       // Sincronizar en la OT los datos derivados del cliente recién editado
-      const principalC = { nombre: normTxt(fresh.contacto_nombre), email: fresh.contacto_email || "", fono: fresh.contacto_fono || "" };
-      const extras = String(fresh.contactos || "").split(";;").map((s) => {
-        const p = s.split("|");
-        return { nombre: (p[0] || "").toUpperCase().trim(), email: p[1] || "", fono: p[2] || "" };
-      }).filter((c) => c.nombre && c.nombre !== principalC.nombre);
-      const todosContactos = [...(principalC.nombre ? [principalC] : []), ...extras];
+      const armarContactos = (cli) => {
+        const principal = { nombre: normTxt(cli.contacto_nombre), email: cli.contacto_email || "", fono: cli.contacto_fono || "" };
+        const extras = String(cli.contactos || "").split(";;").map((s) => {
+          const p = s.split("|");
+          return { nombre: (p[0] || "").toUpperCase().trim(), email: p[1] || "", fono: p[2] || "" };
+        }).filter((c) => c.nombre && c.nombre !== principal.nombre);
+        return [...(principal.nombre ? [principal] : []), ...extras];
+      };
+      const todosContactos = armarContactos(fresh);
+      // Estado del cliente antes de este guardado (para poder seguir el contacto
+      // por posición aunque le hayan cambiado el nombre, ej. renombrar el principal)
+      const todosContactosAntes = armarContactos(clienteAEditar);
+
+      // Mismo criterio para las direcciones y contactos "extra" ya agregados a la OT
+      const armarDirecciones = (cli) => String(cli.direcciones || "").split(";;").map((d) => {
+        const p = d.split("|");
+        return { tipo: (p[0] || "").trim(), direccion: (p[1] || "").toUpperCase().trim(), fono: p[2] || "", ciudad: (p[3] || "").toUpperCase().trim(), comuna: (p[4] || "").toUpperCase().trim() };
+      }).filter((d) => d.direccion);
+      const direccionesDespues = armarDirecciones(fresh);
+      const direccionesAntes = armarDirecciones(clienteAEditar);
+
+      const armarContactosExtra = (cli) => String(cli.contactos || "").split(";;").map((c) => {
+        const p = c.split("|");
+        return { nombre: (p[0] || "").toUpperCase().trim(), email: p[1] || "", fono: p[2] || "", cargo: p[3] || "", direccion: (p[4] || "").toUpperCase().trim() };
+      }).filter((c) => c.nombre);
+      const contactosExtraDespues = armarContactosExtra(fresh);
+      const contactosExtraAntes = armarContactosExtra(clienteAEditar);
 
       setNuevaOrden((prev) => {
         const base = {
@@ -287,15 +308,44 @@ function OrdenFormCliente({
           email: fresh.email || "",
           fonoPrincipal: fresh.telefono || ""
         };
-        // Si el contacto escrito en la OT sigue existiendo, refresca su email/fono
+        // Si el contacto cargado en la OT sigue existiendo, refresca nombre/email/fono.
+        // Si le cambiaron el nombre, se lo sigue por la misma posición que ocupaba antes.
         const contactoOT = normTxt(prev.contacto);
         if (contactoOT) {
-          const match = todosContactos.find((c) => c.nombre === contactoOT);
+          let match = todosContactos.find((c) => c.nombre === contactoOT);
+          if (!match) {
+            const idxAntes = todosContactosAntes.findIndex((c) => c.nombre === contactoOT);
+            if (idxAntes !== -1) match = todosContactos[idxAntes];
+          }
           if (match) {
+            base.contacto = match.nombre;
             base.emailContacto = match.email;
             base.fonoContacto = match.fono;
           }
         }
+
+        // Refresca las direcciones extra ya agregadas que sigan existiendo en el cliente
+        base.direccionesExtra = prev.direccionesExtra.map((d) => {
+          const dirOT = normTxt(d.direccion);
+          let match = direccionesDespues.find((x) => x.direccion === dirOT);
+          if (!match) {
+            const idxAntes = direccionesAntes.findIndex((x) => x.direccion === dirOT);
+            if (idxAntes !== -1) match = direccionesDespues[idxAntes];
+          }
+          return match ? { tipo: match.tipo, direccion: match.direccion, ciudad: match.ciudad, fono: match.fono, comuna: match.comuna } : d;
+        });
+
+        // Refresca los contactos extra ya agregados que sigan existiendo en el cliente
+        base.contactosExtra = prev.contactosExtra.map((c) => {
+          const nomOT = normTxt(c.nombre);
+          let match = contactosExtraDespues.find((x) => x.nombre === nomOT);
+          if (!match) {
+            const idxAntes = contactosExtraAntes.findIndex((x) => x.nombre === nomOT);
+            if (idxAntes !== -1) match = contactosExtraDespues[idxAntes];
+          }
+          return match ? { nombre: match.nombre, email: match.email, fono: match.fono, cargo: match.cargo, direccion: match.direccion } : c;
+        });
+
         return base;
       });
 
