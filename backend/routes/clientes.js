@@ -69,16 +69,13 @@ router.get("/", authMiddleware, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT c.*,
-        COALESCE(STRING_AGG(
-          DISTINCT CONCAT(COALESCE(cd.tipo_direccion, ''), '|', COALESCE(cd.direccion, ''), '|', COALESCE(cd.fono, ''), '|', COALESCE(cd.ciudad, ''), '|', COALESCE(cd.comuna, ''))
-        , ';;') FILTER (WHERE cd.id IS NOT NULL), '') as direcciones,
-        COALESCE(STRING_AGG(
-          DISTINCT CONCAT(COALESCE(co.nombre, ''), '|', COALESCE(co.email, ''), '|', COALESCE(co.fono, ''), '|', COALESCE(co.cargo, ''), '|', COALESCE(co.direccion, ''))
-        , ';;') FILTER (WHERE co.id IS NOT NULL), '') as contactos
+        (SELECT COALESCE(STRING_AGG(
+          CONCAT(COALESCE(cd.tipo_direccion, ''), '|', COALESCE(cd.direccion, ''), '|', COALESCE(cd.fono, ''), '|', COALESCE(cd.ciudad, ''), '|', COALESCE(cd.comuna, ''))
+        , ';;' ORDER BY cd.id), '') FROM clientes_direcciones cd WHERE cd.cliente_id = c.id) as direcciones,
+        (SELECT COALESCE(STRING_AGG(
+          CONCAT(COALESCE(co.nombre, ''), '|', COALESCE(co.email, ''), '|', COALESCE(co.fono, ''), '|', COALESCE(co.cargo, ''), '|', COALESCE(co.direccion, ''))
+        , ';;' ORDER BY co.id), '') FROM clientes_contactos co WHERE co.cliente_id = c.id) as contactos
       FROM clientes c
-      LEFT JOIN clientes_direcciones cd ON c.id = cd.cliente_id
-      LEFT JOIN clientes_contactos co ON c.id = co.cliente_id
-      GROUP BY c.id
       ORDER BY c.id DESC
     `);
     res.json(result.rows);
@@ -105,17 +102,14 @@ router.get("/:id", authMiddleware, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT c.*,
-        COALESCE(STRING_AGG(
-          DISTINCT CONCAT(COALESCE(cd.tipo_direccion, ''), '|', COALESCE(cd.direccion, ''), '|', COALESCE(cd.fono, ''), '|', COALESCE(cd.ciudad, ''), '|', COALESCE(cd.comuna, ''))
-        , ';;') FILTER (WHERE cd.id IS NOT NULL), '') as direcciones,
-        COALESCE(STRING_AGG(
-          DISTINCT CONCAT(COALESCE(co.nombre, ''), '|', COALESCE(co.email, ''), '|', COALESCE(co.fono, ''), '|', COALESCE(co.cargo, ''), '|', COALESCE(co.direccion, ''))
-        , ';;') FILTER (WHERE co.id IS NOT NULL), '') as contactos
+        (SELECT COALESCE(STRING_AGG(
+          CONCAT(COALESCE(cd.tipo_direccion, ''), '|', COALESCE(cd.direccion, ''), '|', COALESCE(cd.fono, ''), '|', COALESCE(cd.ciudad, ''), '|', COALESCE(cd.comuna, ''))
+        , ';;' ORDER BY cd.id), '') FROM clientes_direcciones cd WHERE cd.cliente_id = c.id) as direcciones,
+        (SELECT COALESCE(STRING_AGG(
+          CONCAT(COALESCE(co.nombre, ''), '|', COALESCE(co.email, ''), '|', COALESCE(co.fono, ''), '|', COALESCE(co.cargo, ''), '|', COALESCE(co.direccion, ''))
+        , ';;' ORDER BY co.id), '') FROM clientes_contactos co WHERE co.cliente_id = c.id) as contactos
       FROM clientes c
-      LEFT JOIN clientes_direcciones cd ON c.id = cd.cliente_id
-      LEFT JOIN clientes_contactos co ON c.id = co.cliente_id
       WHERE c.id = $1
-      GROUP BY c.id
     `, [req.params.id]);
     if (result.rows.length === 0) return res.status(404).json({ msg: "Cliente no encontrado" });
     res.json(result.rows[0]);
