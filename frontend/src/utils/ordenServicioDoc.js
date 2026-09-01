@@ -117,18 +117,19 @@ const ESTILOS = `
 * { box-sizing: border-box; }
 body {
   margin: 0;
-  padding: 9mm 12mm 8mm;
   font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: #1F2937;
   font-size: 9pt;
   line-height: 1.28;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
-  background: #EEF2F7;
-  background-clip: content-box;
 }
 
-.header-card { background: #FFFFFF; border: .5pt solid #E2E8F0; border-radius: 7pt; padding: 3mm 4mm 2.2mm; box-shadow: 0 2px 8px rgba(15,23,42,.10), 0 1px 2px rgba(15,23,42,.06); break-inside: avoid; }
+/* Fondo de página como caja propia (no background-clip) para que se vea
+   igual en cualquier visor de PDF, incluidos los de celular. */
+.page { width: 210mm; min-height: 297mm; padding: 9mm 12mm 8mm; background: #EEF2F7; }
+
+.header-card { background: #FFFFFF; border: .5pt solid #E2E8F0; border-radius: 7pt; padding: 3mm 4mm 2.2mm; box-shadow: 0 1px 4px rgba(15,23,42,.15); break-inside: avoid; }
 .enc { display: grid; grid-template-columns: 24mm 1fr auto; align-items: center; gap: 5mm; break-inside: avoid; }
 .logo { display: flex; align-items: center; justify-content: center; }
 .logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
@@ -140,18 +141,18 @@ body {
 .brother-box { text-align: center; }
 .brother-leyenda { margin-top: 2pt; font-size: 6pt; text-transform: uppercase; letter-spacing: .1em; color: #6B7280; }
 
-.filete-1 { margin-top: 4pt; height: 2pt; border-radius: 2pt; background: linear-gradient(90deg, #0C4A8C, #2E8BE6); }
+.filete-1 { margin-top: 4pt; height: 2pt; border-radius: 2pt; background: #0C4A8C; }
 .filete-2 { height: .5pt; background: #E5E7EB; margin-top: .8mm; }
 
 .titulo-barra { display: flex; justify-content: space-between; align-items: center; margin-top: 4mm; break-inside: avoid; }
 .titulo-barra h1 { margin: 0; font-size: 15pt; font-weight: 800; letter-spacing: .015em; color: #0C4A8C; }
 .emitida { margin: 2pt 0 0; font-size: 7pt; color: #6B7280; }
 .garantia-chip { display: inline-block; margin-left: 8pt; background: #0C4A8C; border-radius: 999px; padding: 2pt 9pt; font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #fff; vertical-align: middle; }
-.folio { text-align: center; background: linear-gradient(135deg, #0C4A8C, #1D6FC4); border-radius: 7pt; padding: 2pt 12pt; }
+.folio { text-align: center; background: #0C4A8C; border-radius: 7pt; padding: 2pt 12pt; }
 .folio .l { display: block; font-size: 6pt; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,.75); }
 .folio .v { font-size: 14pt; font-weight: 800; font-variant-numeric: tabular-nums; color: #fff; }
 
-.sec { margin-top: 2.8mm; break-inside: avoid; background: #FFFFFF; border: .5pt solid #E2E8F0; border-radius: 7pt; padding: 2.2mm 4mm; box-shadow: 0 2px 8px rgba(15,23,42,.10), 0 1px 2px rgba(15,23,42,.06); }
+.sec { margin-top: 2.8mm; break-inside: avoid; background: #FFFFFF; border: .5pt solid #E2E8F0; border-radius: 7pt; padding: 2.2mm 4mm; box-shadow: 0 1px 4px rgba(15,23,42,.15); }
 .sec h2 { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 1.8mm; padding-left: 6pt; border-left: 5pt solid #0C4A8C; border-radius: 2pt; font-size: 7pt; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #0C4A8C; break-after: avoid; }
 .h2-extra { color: #6B7280; font-weight: 600; letter-spacing: 0; text-transform: none; font-size: 7pt; }
 .h2-extra b { color: #111827; }
@@ -243,6 +244,7 @@ export function generarHtmlOrdenServicio(orden, opciones) {
 <style>${ESTILOS}</style>
 </head>
 <body>
+  <div class="page">
   <div class="header-card">
     <div class="enc">
       ${slotLogo(LOGO_HLS, "HLS", "logo-hls")}
@@ -277,6 +279,7 @@ export function generarHtmlOrdenServicio(orden, opciones) {
   ${seccionActividad}
   ${seccionObs}
   ${pie}
+  </div>
 </body>
 </html>`;
 }

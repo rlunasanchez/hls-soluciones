@@ -1,6 +1,17 @@
 # Registro de Cambios - HLS Soluciones
 
-## Fecha: 2026-09-01
+## Fecha: 2026-09-01 (2)
+
+### v2.35: PDF de Orden de Servicio — quitar degradés y truco de fondo, más compatible con celular
+
+**Problema:** al probar el PDF de v2.34 desde el celular, el fondo se veía parchado (más claro en unas zonas, más oscuro en otras, distinto a la vista en computador) y el número de folio salió de otro color. Causa: los degradés (`linear-gradient` en el folio y en la barra de acento del encabezado) y el truco `background-clip: content-box` para recortar el fondo gris no se respetan igual en todos los motores de impresión/lectura de PDF — funcionan bien en Chrome desktop pero no están garantizados en todos los visores móviles.
+
+**Solución** (`frontend/src/utils/ordenServicioDoc.js`):
+- Folio y barra de acento del encabezado: de degradé a color sólido (`#0C4A8C`). Los colores sólidos se preservan de forma consistente entre motores; los degradés no.
+- Fondo de página: en vez de `background-clip: content-box` sobre `body`, ahora es una caja propia (`.page`, con su padding y fondo) — más simple y sin depender de que el visor interprete igual ese modo de recorte.
+- Sombras de las tarjetas: de dos capas suaves a una sola más nítida, para evitar que se rasterice distinto (parchado) según el motor.
+
+**Verificación:** `npm run build` OK. Probado en Chrome desktop (igual que antes). Pendiente de confirmar en celular tras el deploy — es el caso que reportó el problema.
 
 ### v2.34: PDF de Orden de Servicio — segunda pasada visual (fondo, tarjetas, logo Brother)
 
