@@ -18,8 +18,8 @@ const fecha = (v) => {
 
 // Campo de la grilla "label arriba, valor abajo". Si no hay valor, no se
 // imprime nada: así los campos vacíos desaparecen solos y la grilla se recompone.
-const campo = (label, valor) => (
-  valor ? `<div class="f"><span class="l">${esc(label)}</span><span class="v">${esc(valor)}</span></div>` : ""
+const campo = (label, valor, numerico = false) => (
+  valor ? `<div class="f"><span class="l">${esc(label)}</span><span class="v${numerico ? " num" : ""}">${esc(valor)}</span></div>` : ""
 );
 
 const h2 = (titulo, extraHtml = "") => (
@@ -140,14 +140,14 @@ body {
 .filete-2 { height: .5pt; background: #E5E7EB; margin-top: .8mm; }
 
 .titulo-barra { display: flex; justify-content: space-between; align-items: center; margin-top: 4mm; break-inside: avoid; }
-.titulo-barra h1 { margin: 0; font-size: 13pt; font-weight: 800; letter-spacing: .03em; color: #0C4A8C; }
+.titulo-barra h1 { margin: 0; font-size: 15pt; font-weight: 800; letter-spacing: .015em; color: #0C4A8C; }
 .emitida { margin: 2pt 0 0; font-size: 7pt; color: #6B7280; }
-.garantia-chip { display: inline-block; margin-left: 8pt; background: #0C4A8C; border-radius: 10pt; padding: 2pt 9pt; font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #fff; vertical-align: middle; }
+.garantia-chip { display: inline-block; margin-left: 8pt; background: #0C4A8C; border-radius: 999px; padding: 2pt 9pt; font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #fff; vertical-align: middle; }
 .folio { text-align: center; background: linear-gradient(135deg, #0C4A8C, #1D6FC4); border-radius: 7pt; padding: 2pt 12pt; }
 .folio .l { display: block; font-size: 6pt; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,.75); }
 .folio .v { font-size: 14pt; font-weight: 800; font-variant-numeric: tabular-nums; color: #fff; }
 
-.sec { margin-top: 2.8mm; break-inside: avoid; background: #F8FAFC; border: .5pt solid #E5E7EB; border-radius: 7pt; padding: 2.2mm 4mm; }
+.sec { margin-top: 2.8mm; break-inside: avoid; background: #F8FAFC; border: .5pt solid #E5E7EB; border-radius: 7pt; padding: 2.2mm 4mm; box-shadow: 0 1px 2px rgba(15,23,42,.04); }
 .sec h2 { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 1.8mm; padding-left: 6pt; border-left: 3pt solid #0C4A8C; font-size: 7pt; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #0C4A8C; break-after: avoid; }
 .h2-extra { color: #6B7280; font-weight: 600; letter-spacing: 0; text-transform: none; font-size: 7pt; }
 .h2-extra b { color: #111827; }
@@ -155,6 +155,7 @@ body {
 .grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 8mm; row-gap: 2mm; }
 .f .l { display: block; font-size: 6pt; text-transform: uppercase; letter-spacing: .07em; color: #6B7280; }
 .f .v { display: block; padding-bottom: 1mm; border-bottom: .5pt solid #E2E8F0; font-size: 9pt; font-weight: 600; color: #111827; overflow-wrap: anywhere; }
+.f .v.num { font-variant-numeric: tabular-nums; }
 
 .sub { margin-top: 2.5mm; font-size: 6pt; text-transform: uppercase; letter-spacing: .06em; color: #6B7280; }
 .extra-item { margin-top: 1.2mm; }
@@ -162,11 +163,11 @@ body {
 .extra-item .det { font-size: 7pt; color: #6B7280; }
 
 .chips { margin-top: .8mm; }
-.chip { display: inline-block; background: #E8F1FB; border-radius: 9pt; padding: 1.5pt 7pt; font-size: 7.5pt; font-weight: 600; color: #0C4A8C; margin: 0 3pt 2pt 0; }
+.chip { display: inline-block; background: #E8F1FB; border: .5pt solid rgba(12,74,140,.15); border-radius: 999px; padding: 1.5pt 7pt; font-size: 7.5pt; font-weight: 600; color: #0C4A8C; margin: 0 3pt 2pt 0; }
 
 .txt { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 0; font-size: 8.5pt; orphans: 3; widows: 3; }
 
-.pie { margin-top: 3.5mm; break-inside: avoid; }
+.pie { margin-top: 3mm; break-inside: avoid; border-top: .5pt solid #E5E7EB; padding-top: 2.5mm; }
 .firmas { display: grid; grid-template-columns: 1fr 1fr; column-gap: 14mm; }
 .firma-linea { border-top: .5pt solid #9CA3AF; width: 60mm; margin-top: 7mm; padding-top: 1.5mm; }
 .firma-linea .t { font-size: 6pt; text-transform: uppercase; letter-spacing: .06em; color: #6B7280; }
@@ -196,15 +197,15 @@ export function generarHtmlOrdenServicio(orden, opciones) {
       ${h2("Datos de Cliente — Contacto")}
       <div class="grid">
         ${campo("Cliente", orden.cliente)}
-        ${campo("RUT", orden.rut)}
+        ${campo("RUT", orden.rut, true)}
         ${campo("Fecha", fecha(orden.fecha))}
         ${campo("Dirección", orden.direccion)}
-        ${campo("Teléfono", orden.fono_principal)}
+        ${campo("Teléfono", orden.fono_principal, true)}
         ${campo("Comuna", orden.comuna)}
         ${campo("Ciudad", ciudad)}
         ${opciones.contactoPrincipal ? campo("Contacto", orden.contacto) : ""}
         ${opciones.contactoPrincipal ? campo("Email Contacto", orden.email_contacto) : ""}
-        ${opciones.contactoPrincipal ? campo("Fono Contacto", orden.fono_contacto) : ""}
+        ${opciones.contactoPrincipal ? campo("Fono Contacto", orden.fono_contacto, true) : ""}
         ${campo("Email", orden.email)}
       </div>
       ${contactosSel.length ? `<div class="sub">› Contactos adicionales</div>${contactosSel.map(contactoExtraHtml).join("")}` : ""}
@@ -216,9 +217,9 @@ export function generarHtmlOrdenServicio(orden, opciones) {
       ${h2("Datos de Equipo — Técnico Asignado")}
       <div class="grid">
         ${campo("Equipo", orden.equipo)}
-        ${campo("Serie", orden.serie)}
+        ${campo("Serie", orden.serie, true)}
         ${campo("Marca / Modelo", marcaModelo)}
-        ${campo("Contador Pág.", orden.contador_pag_out)}
+        ${campo("Contador Pág.", orden.contador_pag_out, true)}
         ${campo("Nivel de Tinta", orden.nivel_tinta)}
         ${campo("Técnico Asignado", orden.tecnico_asignado)}
       </div>
