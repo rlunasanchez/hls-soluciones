@@ -113,18 +113,22 @@ function piePagina(orden) {
 // barra de acento en vez de línea completa, folio como badge, chips
 // rellenos. Mismo orden de datos que antes, solo cambia la piel visual.
 const ESTILOS = `
-@page { size: A4 portrait; margin: 9mm 12mm 8mm; }
+@page { size: A4 portrait; margin: 0; }
 * { box-sizing: border-box; }
 body {
   margin: 0;
+  padding: 9mm 12mm 8mm;
   font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: #1F2937;
   font-size: 9pt;
   line-height: 1.28;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
+  background: #EEF2F7;
+  background-clip: content-box;
 }
 
+.header-card { background: #FFFFFF; border: .5pt solid #E2E8F0; border-radius: 7pt; padding: 3mm 4mm 2.2mm; box-shadow: 0 2px 8px rgba(15,23,42,.10), 0 1px 2px rgba(15,23,42,.06); break-inside: avoid; }
 .enc { display: grid; grid-template-columns: 24mm 1fr auto; align-items: center; gap: 5mm; break-inside: avoid; }
 .logo { display: flex; align-items: center; justify-content: center; }
 .logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
@@ -147,8 +151,8 @@ body {
 .folio .l { display: block; font-size: 6pt; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,.75); }
 .folio .v { font-size: 14pt; font-weight: 800; font-variant-numeric: tabular-nums; color: #fff; }
 
-.sec { margin-top: 2.8mm; break-inside: avoid; background: #F8FAFC; border: .5pt solid #E5E7EB; border-radius: 7pt; padding: 2.2mm 4mm; box-shadow: 0 1px 2px rgba(15,23,42,.04); }
-.sec h2 { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 1.8mm; padding-left: 6pt; border-left: 3pt solid #0C4A8C; font-size: 7pt; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #0C4A8C; break-after: avoid; }
+.sec { margin-top: 2.8mm; break-inside: avoid; background: #FFFFFF; border: .5pt solid #E2E8F0; border-radius: 7pt; padding: 2.2mm 4mm; box-shadow: 0 2px 8px rgba(15,23,42,.10), 0 1px 2px rgba(15,23,42,.06); }
+.sec h2 { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 1.8mm; padding-left: 6pt; border-left: 5pt solid #0C4A8C; border-radius: 2pt; font-size: 7pt; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #0C4A8C; break-after: avoid; }
 .h2-extra { color: #6B7280; font-weight: 600; letter-spacing: 0; text-transform: none; font-size: 7pt; }
 .h2-extra b { color: #111827; }
 
@@ -167,7 +171,7 @@ body {
 
 .txt { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 0; font-size: 8.5pt; orphans: 3; widows: 3; }
 
-.pie { margin-top: 3mm; break-inside: avoid; border-top: .5pt solid #E5E7EB; padding-top: 2.5mm; }
+.pie { margin-top: 3mm; break-inside: avoid; border-top: .5pt solid #CBD5E1; padding-top: 2.5mm; }
 .firmas { display: grid; grid-template-columns: 1fr 1fr; column-gap: 14mm; }
 .firma-linea { border-top: .5pt solid #9CA3AF; width: 60mm; margin-top: 7mm; padding-top: 1.5mm; }
 .firma-linea .t { font-size: 6pt; text-transform: uppercase; letter-spacing: .06em; color: #6B7280; }
@@ -239,20 +243,22 @@ export function generarHtmlOrdenServicio(orden, opciones) {
 <style>${ESTILOS}</style>
 </head>
 <body>
-  <div class="enc">
-    ${slotLogo(LOGO_HLS, "HLS", "logo-hls")}
-    <div class="emp-datos">
-      <h1>${esc(EMPRESA.nombre)}</h1>
-      <p>${esc(EMPRESA.direccion)}</p>
-      <p>Fono: ${esc(EMPRESA.fono)} · ${esc(EMPRESA.email)} · ${esc(EMPRESA.web)}</p>
+  <div class="header-card">
+    <div class="enc">
+      ${slotLogo(LOGO_HLS, "HLS", "logo-hls")}
+      <div class="emp-datos">
+        <h1>${esc(EMPRESA.nombre)}</h1>
+        <p>${esc(EMPRESA.direccion)}</p>
+        <p>Fono: ${esc(EMPRESA.fono)} · ${esc(EMPRESA.email)} · ${esc(EMPRESA.web)}</p>
+      </div>
+      <div class="brother-box">
+        ${slotLogo(LOGO_BROTHER, "BROTHER", "logo-brother")}
+        <div class="brother-leyenda">${esc(EMPRESA.leyendaBrother)}</div>
+      </div>
     </div>
-    <div class="brother-box">
-      ${slotLogo(LOGO_BROTHER, "BROTHER", "logo-brother")}
-      <div class="brother-leyenda">${esc(EMPRESA.leyendaBrother)}</div>
-    </div>
+    <div class="filete-1"></div>
+    <div class="filete-2"></div>
   </div>
-  <div class="filete-1"></div>
-  <div class="filete-2"></div>
 
   <div class="titulo-barra">
     <div>
