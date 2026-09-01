@@ -196,6 +196,7 @@ export function generarHtmlOrdenServicio(orden, opciones) {
       ${h2("Datos de Cliente — Contacto")}
       <div class="grid">
         ${campo("Cliente", orden.cliente)}
+        ${campo("RUT", orden.rut)}
         ${campo("Fecha", fecha(orden.fecha))}
         ${campo("Dirección", orden.direccion)}
         ${campo("Teléfono", orden.fono_principal)}
