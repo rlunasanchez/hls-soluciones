@@ -1251,9 +1251,12 @@ function OrdenFormCliente({
                 setNuevaOrden({ ...nuevaOrden, contactosExtra: arr });
               };
 
-              // Contactos del cliente aún no agregados (sin duplicados)
-              const contactosYaAgregados = nuevaOrden.contactosExtra.map(c => (c.nombre || "").toUpperCase().trim());
-              const contactosExtraDisponibles = contactosCliente.filter(c => !contactosYaAgregados.includes(c.nombre.toUpperCase().trim()));
+              // Contactos del cliente aún no agregados: ni el elegido arriba en la orden ni los ya sumados como extra
+              const contactosYaUsados = [
+                normTxt(nuevaOrden.contacto),
+                ...nuevaOrden.contactosExtra.map(c => normTxt(c.nombre))
+              ].filter(Boolean);
+              const contactosExtraDisponibles = contactosCliente.filter(c => !contactosYaUsados.includes(normTxt(c.nombre)));
 
               return (
                 <>

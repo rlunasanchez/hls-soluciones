@@ -162,6 +162,10 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
         return;
       }
     }
+    if (contactos.length > 0 && !String(nuevoCliente.contacto_nombre || "").trim()) {
+      alert("Ingrese el nombre del contacto principal.");
+      return;
+    }
     const dirs = sucursales.filter((s) => s.direccion.trim() !== "");
     const primerContacto = {
       nombre: nuevoCliente.contacto_nombre,
