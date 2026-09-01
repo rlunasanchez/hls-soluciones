@@ -1,5 +1,46 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-01
+
+### v2.34: PDF de Orden de Servicio — segunda pasada visual (fondo, tarjetas, logo Brother)
+
+**Problema:** después de v2.33 el documento seguía viéndose "muy plano" (feedback directo probando el PDF) — la sombra de las tarjetas era casi imperceptible (4% de opacidad) y todo el documento usaba el mismo celeste pálido sobre página blanca, sin contraste de valor real en ningún lado.
+
+**Solución** (`frontend/src/utils/ordenServicioDoc.js`, `frontend/src/utils/empresa.js`):
+- Fondo de página gris-azulado (`#EEF2F7`) y tarjetas de sección pasadas a blanco puro, con sombra real de dos capas (antes 4%, ahora 10%+6%) — las tarjetas "flotan" en vez de mezclarse con la página.
+- El encabezado (logo + datos de empresa + Brother) pasa a tener su propia tarjeta blanca (`.header-card`), igual que el resto de las secciones — antes quedaba flotando directo sobre el fondo, sin borde propio.
+- Rail de acento de los títulos de sección más grueso (3pt → 5pt).
+- Márgenes de página movidos de `@page margin` a `padding` del body con `background-clip: content-box`, para que el fondo gris quede como un marco parejo en los 4 lados (arriba, abajo y costados) en vez de depender de que el motor de impresión respete `@page` de forma pareja en todos los ejes.
+- Logo de Brother real (`LOGO_BROTHER` en `empresa.js`), SVG oficial descargado de Wikimedia Commons, en vez del marcador punteado. El logo de HLS sigue pendiente (no se agregó ningún archivo propio).
+
+**Verificación:** `npm run build` OK. Probado generando el PDF real con Chrome headless y datos de cliente ficticios — una sola hoja, sombra y marco visibles, logo Brother nítido en su caja de 20mm×8mm.
+
+### v2.33: PDF de Orden de Servicio — pulido visual manteniendo el mismo estilo
+
+**Cambios** (`frontend/src/utils/ordenServicioDoc.js`), sin tocar estructura ni datos:
+- Chip de "Garantía" y chips de insumos unificados a píldora (antes radios distintos, 10pt y 9pt).
+- Título "Orden de Servicio" con más peso (13pt → 15pt) para no competir en tamaño con el nombre de la empresa.
+- RUT, teléfonos, serie y contador de páginas con cifras tabulares (`font-variant-numeric: tabular-nums`) para que las columnas de números alineen.
+- Hairline antes de las firmas, igual al que ya tenía el encabezado.
+- Chips con borde propio para no fundirse con el fondo de la tarjeta.
+
+**Verificación:** `npm run build` OK.
+
+### v2.32: PDF de Orden de Servicio — agregar RUT del cliente
+
+Campo "RUT" agregado en la sección "Datos de Cliente — Contacto" del PDF, debajo de "Cliente" (`frontend/src/utils/ordenServicioDoc.js`). El dato ya llegaba en `orden.rut` desde el backend, solo faltaba mostrarlo.
+
+### v2.31: el primer contacto de un cliente siempre es el principal
+
+**Problema:** "contacto principal" no tenía respaldo en la base de datos — ninguna columna `orden`/`principal` en `clientes_contactos`. Era una convención que se sostenía solo porque el `GROUP_CONCAT` no tenía `ORDER BY` y MySQL devolvía las filas por `id` de casualidad. En `deploy/cloud` (Postgres) esa casualidad no se daba: `STRING_AGG(DISTINCT ...)` ordena alfabéticamente, así que en producción el "primer contacto" ya no era el principal.
+
+**Solución:**
+- `backend/routes/clientes.js` — `ORDER BY co.id` / `d.id` dentro de los `GROUP_CONCAT`/`STRING_AGG` de contactos y direcciones (GET `/` y GET `/:id`), en ambas ramas. En `deploy/cloud` se reescribió con subqueries correlacionadas en vez de `LEFT JOIN` + `GROUP BY` + `DISTINCT`, que además colapsaba contactos con datos idénticos.
+- `ClienteFormulario.jsx` — si hay contactos adicionales, exige nombre en el contacto principal antes de guardar (evita que se vacíe y el siguiente contacto pase a ser principal sin darse cuenta).
+- `OrdenFormCliente.jsx` — en "Otros Contactos" de la OT, ya no se puede volver a agregar el contacto elegido arriba en la orden (antes solo se filtraban los ya agregados como extra).
+
+**Verificación:** `npm run build` OK en ambas ramas. Probado contra MySQL local: cliente con principal alfabéticamente posterior a un extra mantiene el orden correcto tras guardar y recargar.
+
 ## Fecha: 2026-08-31 (4)
 
 ### v2.30: PDF de Orden de Servicio — layout más compacto para entrar en una sola hoja
