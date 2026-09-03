@@ -170,6 +170,7 @@ input[type="checkbox"].of-check--pdf { --check-color: #7C3AED; }
 .mop-items.mop-una-col { grid-template-columns: 1fr; }
 .mop-item { display: flex; align-items: center; gap: 8px; font-size: .8rem; cursor: pointer; padding: 3px 0; }
 .mop-item.mop-off { opacity: .55; cursor: not-allowed; }
+.mop-item.mop-fijo { cursor: default; }
 .mop-sub { color: var(--text-muted); font-size: .72rem; }
 .mop-nota { font-size: .72rem; color: var(--text-muted); line-height: 1.35; margin: 4px 0 0; }
 
