@@ -12,7 +12,6 @@ function ModalOpcionesPDF({ orden, onClose }) {
 
   const [opciones, setOpciones] = useState(() => ({
     insumos: insumos.map(() => true),
-    contactoPrincipal: !!String(orden.contacto || "").trim(),
     contactosExtra: contactosExtra.map(() => false),
     direccionesExtra: direccionesExtra.map(() => false),
     averia: !!String(orden.averia || "").trim(),
@@ -90,12 +89,9 @@ function ModalOpcionesPDF({ orden, onClose }) {
               </div>
               <div className="mop-items mop-una-col">
                 {hayContacto && (
-                  <label className="mop-item">
-                    <input type="checkbox" className="of-check of-check--pdf"
-                      checked={opciones.contactoPrincipal}
-                      onChange={() => setOpciones((o) => ({ ...o, contactoPrincipal: !o.contactoPrincipal }))} />
-                    {orden.contacto} <span className="mop-sub">— principal</span>
-                  </label>
+                  <div className="mop-item mop-fijo">
+                    {orden.contacto} <span className="mop-sub">— principal, siempre incluido</span>
+                  </div>
                 )}
                 {contactosExtra.map((c, i) => (
                   <label key={i} className="mop-item">

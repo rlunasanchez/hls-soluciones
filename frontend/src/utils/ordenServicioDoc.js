@@ -66,7 +66,7 @@ function resolverCiudad(direccionesExtra) {
 }
 
 function contactoExtraHtml(c) {
-  const detalle = [c.cargo, c.fono, c.email].filter((v) => String(v || "").trim()).map(esc).join(" · ");
+  const detalle = [c.cargo, c.fono, c.email, c.direccion].filter((v) => String(v || "").trim()).map(esc).join(" · ");
   return `<div class="extra-item"><span class="nom">${esc(c.nombre)}</span>${detalle ? ` <span class="det">${detalle}</span>` : ""}</div>`;
 }
 
@@ -133,10 +133,11 @@ body {
 .enc { display: grid; grid-template-columns: 24mm 1fr auto; align-items: center; gap: 5mm; break-inside: avoid; }
 .logo { display: flex; align-items: center; justify-content: center; }
 .logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
-.logo-hls { width: 24mm; height: 11mm; }
+.logo-hls { width: 24mm; height: 24mm; }
 .logo-brother { width: 20mm; height: 8mm; }
 .logo--ph { border: .5pt dashed #CBD5E1; border-radius: 6pt; color: #94A3B8; font-size: 6pt; text-align: center; padding: 2pt; }
-.emp-datos h1 { margin: 0; font-size: 11pt; font-weight: 800; letter-spacing: -.01em; color: #0C4A8C; }
+.emp-datos { text-align: center; }
+.emp-datos h1 { margin: 0; font-size: 13pt; font-weight: 800; letter-spacing: -.01em; color: #0C4A8C; }
 .emp-datos p { margin: 1pt 0 0; font-size: 7pt; color: #6B7280; }
 .brother-box { text-align: center; }
 .brother-leyenda { margin-top: 2pt; font-size: 6pt; text-transform: uppercase; letter-spacing: .1em; color: #6B7280; }
@@ -148,6 +149,7 @@ body {
 .titulo-barra h1 { margin: 0; font-size: 15pt; font-weight: 800; letter-spacing: .015em; color: #0C4A8C; }
 .emitida { margin: 2pt 0 0; font-size: 7pt; color: #6B7280; }
 .garantia-chip { display: inline-block; margin-left: 8pt; background: #0C4A8C; border-radius: 999px; padding: 2pt 9pt; font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #fff; vertical-align: middle; }
+.folio-numero { margin-left: 8pt; font-size: 10pt; font-weight: 700; color: #6B7280; font-variant-numeric: tabular-nums; vertical-align: middle; }
 .folio { text-align: center; background: #0C4A8C; border-radius: 7pt; padding: 2pt 12pt; }
 .folio .l { display: block; font-size: 6pt; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,.75); }
 .folio .v { font-size: 14pt; font-weight: 800; font-variant-numeric: tabular-nums; color: #fff; }
@@ -174,7 +176,7 @@ body {
 
 .pie { margin-top: 3mm; break-inside: avoid; border-top: .5pt solid #CBD5E1; padding-top: 2.5mm; }
 .firmas { display: grid; grid-template-columns: 1fr 1fr; column-gap: 14mm; }
-.firma-linea { border-top: .5pt solid #9CA3AF; width: 60mm; margin-top: 7mm; padding-top: 1.5mm; }
+.firma-linea { border-top: .5pt solid #9CA3AF; width: 60mm; margin-top: 7mm; padding-top: 1.5mm; text-align: center; }
 .firma-linea .t { font-size: 6pt; text-transform: uppercase; letter-spacing: .06em; color: #6B7280; }
 .firma-linea .n { font-size: 8pt; font-weight: 600; margin-top: .8mm; }
 
@@ -203,15 +205,13 @@ export function generarHtmlOrdenServicio(orden, opciones) {
       <div class="grid">
         ${campo("Cliente", orden.cliente)}
         ${campo("RUT", orden.rut, true)}
-        ${campo("Fecha", fecha(orden.fecha))}
         ${campo("Dirección", orden.direccion)}
-        ${campo("Teléfono", orden.fono_principal, true)}
-        ${campo("Comuna", orden.comuna)}
-        ${campo("Ciudad", ciudad)}
-        ${opciones.contactoPrincipal ? campo("Contacto", orden.contacto) : ""}
-        ${opciones.contactoPrincipal ? campo("Email Contacto", orden.email_contacto) : ""}
-        ${opciones.contactoPrincipal ? campo("Fono Contacto", orden.fono_contacto, true) : ""}
+        ${campo("Ciudad - Comuna", [ciudad, orden.comuna].filter((v) => String(v || "").trim()).join(" - "))}
         ${campo("Email Cliente", orden.email)}
+        ${campo("Teléfono", orden.fono_principal, true)}
+        ${campo("Contacto", orden.contacto)}
+        ${campo("Email Contacto", orden.email_contacto)}
+        ${campo("Fono Contacto", orden.fono_contacto, true)}
       </div>
       ${contactosSel.length ? `<div class="sub">› Contactos adicionales</div>${contactosSel.map(contactoExtraHtml).join("")}` : ""}
       ${direccionesSel.length ? `<div class="sub">› Direcciones adicionales</div>${direccionesSel.map(direccionExtraHtml).join("")}` : ""}
@@ -264,11 +264,11 @@ export function generarHtmlOrdenServicio(orden, opciones) {
 
   <div class="titulo-barra">
     <div>
-      <h1>Orden de Servicio${orden.es_garantia ? '<span class="garantia-chip">Garantía</span>' : ""}</h1>
+      <h1>Orden de Servicio <span class="folio-numero">N° ${esc(numero)}</span>${orden.es_garantia ? '<span class="garantia-chip">Garantía</span>' : ""}</h1>
     </div>
     <div class="folio">
-      <span class="l">N°</span>
-      <span class="v">${esc(numero)}</span>
+      <span class="l">Fecha</span>
+      <span class="v">${esc(fecha(orden.fecha))}</span>
     </div>
   </div>
 

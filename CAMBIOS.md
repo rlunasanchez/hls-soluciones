@@ -1,5 +1,21 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-03 (5)
+
+### v2.40: logo real y ajustes de layout en el PDF de Orden de Servicio
+
+**Logo:** `LOGO_HLS` (antes vacío, mostraba un placeholder punteado) ahora es el logo real de HLS, reconstruido como SVG a partir de la imagen provista por el usuario — no es una copia rasterizada: cada rectángulo del ícono se extrajo por coordenadas exactas y el texto ("HLS Soluciones Informáticas", corregido desde "Servicios Informáticos") es texto SVG real, nítido a cualquier tamaño. Agregado en `frontend/src/utils/empresa.js`.
+
+**Ajustes de layout** (`frontend/src/utils/ordenServicioDoc.js`):
+- Encabezado: datos de la empresa centrados, nombre "HLS Soluciones informaticas" agrandado (11pt → 13pt); recuadro del logo agrandado de 24×11mm a 24×24mm cuadrado para que el texto del logo no quede achicado.
+- Título: el N° de OT pasa a estar junto a "Orden de Servicio" (antes en el recuadro de la derecha); ese recuadro ahora muestra la Fecha.
+- Sección "Datos de Cliente — Contacto": reordenada — Dirección, luego Ciudad-Comuna (unificados en un solo campo separados por guion), Email Cliente arriba de Teléfono, Contacto/Email Contacto/Fono Contacto al final.
+- Firma: "Nombre · RUT · Fecha" y el nombre del técnico centrados respecto al título de la línea de firma.
+- Contactos adicionales: ahora también muestra la dirección del contacto (antes solo cargo/fono/email).
+- Contacto principal: dejó de ser opt-in (checkbox en el modal de opciones) — ahora se incluye siempre en el PDF si la orden tiene datos de contacto (`ModalOpcionesPDF.jsx` muestra el nombre como texto fijo, sin checkbox).
+
+**Verificación:** `npm run build` OK. Renderizado real con datos de prueba vía Chrome headless para cada cambio (no solo build).
+
 ## Fecha: 2026-09-03 (4)
 
 ### v2.39: menú "Más" (PDF / Cotización) en el formulario de OT, reemplaza el botón PDF suelto
