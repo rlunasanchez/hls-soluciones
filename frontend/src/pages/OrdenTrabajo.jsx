@@ -700,6 +700,10 @@ function OrdenTrabajo() {
       alert("Complete el Cliente antes de guardar la orden.");
       return;
     }
+    if (!nuevaOrden.tecnicoAsignado || !nuevaOrden.tecnicoAsignado.trim()) {
+      alert("Complete el Técnico Asignado antes de guardar la orden.");
+      return;
+    }
     // RUT "19" = comodín (cliente sin RUT conocido): se permite sin validar formato
     const rutNormOT = normalizarRut(nuevaOrden.rut);
     if (rutNormOT !== "19" && (!nuevaOrden.rut || !nuevaOrden.rut.trim() || !validarRUT(nuevaOrden.rut))) {

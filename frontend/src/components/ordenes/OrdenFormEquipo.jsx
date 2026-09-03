@@ -267,7 +267,6 @@ function OrdenFormEquipo({
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999,
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
         }}
-          onClick={(e) => { if (e.target === e.currentTarget) setMostrarDetalleEquipo(false); }}
         >
           <div style={{ maxHeight: '90vh', overflow: 'auto', width: '100%', maxWidth: '900px' }}>
             <EquipoFormulario
@@ -288,7 +287,6 @@ function OrdenFormEquipo({
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999,
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
         }}
-          onClick={(e) => { if (e.target === e.currentTarget) { setMostrarEditarEquipo(false); setEquipoEnEdicion(null); } }}
         >
           <div style={{ maxHeight: '90vh', overflow: 'auto', width: '100%', maxWidth: '900px' }}>
             <EquipoFormulario

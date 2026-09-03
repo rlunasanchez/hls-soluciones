@@ -473,7 +473,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
         />
       )}
       {contactoSeleccionado && (
-        <div className="modal-overlay" onClick={() => setContactoSeleccionado(null)}>
+        <div className="modal-overlay">
           <div className="modal-contacto-detalle" onClick={e => e.stopPropagation()}>
             <div className="modal-contacto-detalle-head">
               <h3><Users size={16} /> {contactoSeleccionado.nombre}</h3>

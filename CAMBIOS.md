@@ -1,5 +1,18 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-03
+
+### v2.36: Modales sin cierre accidental, técnico asignado obligatorio, ajustes en el PDF
+
+**Problema:** al hacer clic afuera de una ventana emergente por error, se cerraba y se perdían los datos que se estaban completando. Además, la Orden de Trabajo se podía guardar sin técnico asignado pese a que el campo mostraba `*` como obligatorio — el `<form noValidate>` y el botón "Guardar Cambios" (`type="button"`, no dispara validación nativa) desactivaban el `required` HTML.
+
+**Solución:**
+- Modales: eliminado el cierre por clic en el fondo oscuro en los 8 popups que lo tenían — `ModalContactos.jsx`, `ModalOpcionesPDF.jsx`, `ClienteFormulario.jsx` (detalle de contacto), `OrdenFormCliente.jsx` (detalle/editar/registrar cliente, ver adjunto) y `OrdenFormEquipo.jsx` (detalle/editar equipo). Ahora solo cierran con su botón X/Cancelar.
+- `OrdenTrabajo.jsx`: validación explícita de Técnico Asignado antes de guardar (mismo patrón ya usado para Cliente/RUT).
+- PDF de Orden de Servicio (`ordenServicioDoc.js`): eliminada la línea "Emitida el [fecha]" bajo el título; campo "Email" en "Datos de Cliente" renombrado a "Email Cliente" para no confundirse con "Email Contacto".
+
+**Verificación:** `npm run build` OK en frontend tras cada cambio. Cambios solo en frontend, sin tocar backend ni base de datos.
+
 ## Fecha: 2026-09-01 (2)
 
 ### v2.35: PDF de Orden de Servicio — quitar degradés y truco de fondo, más compatible con celular
