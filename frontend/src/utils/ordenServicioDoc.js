@@ -211,7 +211,7 @@ export function generarHtmlOrdenServicio(orden, opciones) {
         ${opciones.contactoPrincipal ? campo("Contacto", orden.contacto) : ""}
         ${opciones.contactoPrincipal ? campo("Email Contacto", orden.email_contacto) : ""}
         ${opciones.contactoPrincipal ? campo("Fono Contacto", orden.fono_contacto, true) : ""}
-        ${campo("Email", orden.email)}
+        ${campo("Email Cliente", orden.email)}
       </div>
       ${contactosSel.length ? `<div class="sub">› Contactos adicionales</div>${contactosSel.map(contactoExtraHtml).join("")}` : ""}
       ${direccionesSel.length ? `<div class="sub">› Direcciones adicionales</div>${direccionesSel.map(direccionExtraHtml).join("")}` : ""}
@@ -265,7 +265,6 @@ export function generarHtmlOrdenServicio(orden, opciones) {
   <div class="titulo-barra">
     <div>
       <h1>Orden de Servicio${orden.es_garantia ? '<span class="garantia-chip">Garantía</span>' : ""}</h1>
-      <p class="emitida">Emitida el ${esc(fecha(orden.fecha))}</p>
     </div>
     <div class="folio">
       <span class="l">N°</span>

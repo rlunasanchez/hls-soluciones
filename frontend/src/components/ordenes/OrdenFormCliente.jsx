@@ -707,7 +707,6 @@ function OrdenFormCliente({
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999,
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
         }}
-          onClick={(e) => { if (e.target === e.currentTarget) setMostrarDetalleCliente(false); }}
         >
           <div style={{ maxHeight: '90vh', overflow: 'auto', width: '100%', maxWidth: '900px' }}>
             <ClienteFormulario
@@ -727,7 +726,6 @@ function OrdenFormCliente({
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999,
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
         }}
-          onClick={(e) => { if (e.target === e.currentTarget) setMostrarEditarClienteModal(false); }}
         >
           <div style={{ maxHeight: '90vh', overflow: 'auto', width: '100%', maxWidth: '900px' }}>
             <ClienteFormulario
@@ -747,7 +745,6 @@ function OrdenFormCliente({
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999,
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
         }}
-          onClick={(e) => { if (e.target === e.currentTarget) { setMostrarRegistrarCliente(false); setPrefillCliente(null); } }}
         >
           <div style={{ maxHeight: '90vh', overflow: 'auto', width: '100%', maxWidth: '900px' }}>
             <ClienteFormulario
@@ -1507,7 +1504,7 @@ function OrdenFormCliente({
       </div>
 
       {adjuntoParaVer && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(0,0,0,.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }} onClick={() => setAdjuntoParaVer(null)}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(0,0,0,.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
           <div style={{ background: '#fff', borderRadius: '10px', padding: '12px', width: '90vw', maxWidth: '1000px', height: '88vh', display: 'flex', flexDirection: 'column', gap: '10px', position: 'relative' }} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
               <span style={{ fontWeight: 600, fontSize: '.85rem', color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{adjuntoParaVer.nombre}</span>

@@ -43,7 +43,7 @@ function ModalOpcionesPDF({ orden, onClose }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay">
       <div className="modal-contactos modal-pdf" onClick={(e) => e.stopPropagation()}>
         <div className="modal-contactos-head">
           <h3>

@@ -43,7 +43,7 @@ function ModalContactos({ contactos = [], onChange, onClose, readOnly = false })
   const total = lista.filter(c => c.nombre && c.nombre.trim()).length;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay">
       <div className="modal-contactos" onClick={e => e.stopPropagation()}>
         <div className="modal-contactos-head">
           <h3>
