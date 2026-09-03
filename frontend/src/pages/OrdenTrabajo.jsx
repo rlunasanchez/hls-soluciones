@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Home, Users, Package, FileText, FileSpreadsheet, ShoppingCart, UserCog,
-  Save, X, Wrench
+  Save, X, Wrench, FileDown
 } from "lucide-react";
 import api from "../services/api";
 import { getCached } from "../services/cache";
@@ -691,6 +691,15 @@ function OrdenTrabajo() {
     }
   };
 
+  // Genera el PDF de la orden que está abierta en el formulario (ya guardada
+  // al menos una vez, con editingId). Trae los datos frescos de la orden
+  // para que el modal de opciones tenga exactamente lo último guardado.
+  const generarPDFOrdenActual = async () => {
+    if (!editingId) return;
+    const res = await api.get(`/api/ordenes/${editingId}`);
+    setOrdenParaPDF(res.data);
+  };
+
   const guardarOrden = async (e, mantener = false) => {
     e.preventDefault();
     if (guardandoRef.current) return;
@@ -783,21 +792,25 @@ function OrdenTrabajo() {
       insumo12: ins[11] || ""
     };
     
+    const eraOrdenNueva = !editingId;
     guardandoRef.current = true;
     setGuardando(true);
     try {
+      let idActual = editingId;
       if (editingId) {
         await api.put(`/api/ordenes/${editingId}`, payload);
       } else {
-        await api.post("/api/ordenes", payload);
+        const res = await api.post("/api/ordenes", payload);
+        idActual = res.data.id;
+        setEditingId(idActual);
       }
-      
-      if (mantener && editingId) {
-        // "Guardar Cambios": guarda y se mantiene en la OT para seguir editando
-        const res = await api.get(`/api/ordenes/${editingId}`);
+
+      if (mantener) {
+        // "Guardar Cambios"/"Guardar": guarda y se mantiene en la OT para seguir editando o generar el PDF
+        const res = await api.get(`/api/ordenes/${idActual}`);
         await editarOrden(res.data);
       } else {
-        alert(editingId ? "Orden actualizada exitosamente" : "Orden guardada exitosamente");
+        alert(eraOrdenNueva ? "Orden guardada exitosamente" : "Orden actualizada exitosamente");
         const navState = window.history.state?.usr;
         const vinoDeCliente = navState?.cliente || navState?.orden;
         setMostrarFormulario(false);
@@ -809,7 +822,7 @@ function OrdenTrabajo() {
         } else {
           // Una orden nueva queda primera (backend ordena por id DESC): saltar a la página 1 para verla.
           // Al editar se conserva la página en la que estaba el usuario.
-          if (!editingId) setPaginaActual(1);
+          if (eraOrdenNueva) setPaginaActual(1);
           fetchOrdenes();
         }
       }
@@ -1035,9 +1048,14 @@ function OrdenTrabajo() {
                 <button type="button" className="of-btn-c" onClick={cerrarFormulario}>
                   <X size={16} /> {soloLectura ? "Cerrar" : "Cancelar"}
                 </button>
-                {!soloLectura && editingId && (
+                {editingId && (
+                  <button type="button" className="of-btn-c" onClick={generarPDFOrdenActual}>
+                    <FileDown size={16} /> PDF
+                  </button>
+                )}
+                {!soloLectura && (
                   <button type="button" className="of-btn-s" onClick={(e) => guardarOrden(e, true)} disabled={guardando}>
-                    <Save size={16} /> {guardando ? "Guardando..." : "Guardar Cambios"}
+                    <Save size={16} /> {guardando ? "Guardando..." : (editingId ? "Guardar Cambios" : "Guardar")}
                   </button>
                 )}
                 {!soloLectura && (

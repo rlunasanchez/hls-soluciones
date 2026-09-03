@@ -1,5 +1,20 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-03 (3)
+
+### v2.38: "Guardar" en OT nueva ya no obliga a salir + botón PDF en el formulario
+
+**Problema:** al crear una orden nueva, el único botón disponible ("Guardar Orden") guardaba y siempre volvía al mantenedor de órdenes. Para generar el PDF había que salir, volver a entrar al listado y usar el menú "..." → PDF. En edición ya existía "Guardar Cambios" (se queda en la orden), pero no en creación.
+
+**Solución:**
+- `backend/routes/ordenes.js` (POST `/`): ahora devuelve `id` y `numeroOrden` de la orden recién creada (antes solo `{ msg }`), necesario para poder seguir editándola sin recargar el listado.
+- `OrdenTrabajo.jsx`:
+  - El botón "Guardar" (guarda sin salir) ahora aparece también al crear una orden nueva, no solo al editar. Si la orden es nueva, guarda, toma el `id` devuelto por el backend y deja el formulario en modo edición (mismo comportamiento que ya tenía "Guardar Cambios").
+  - Botón "PDF" nuevo en el formulario (junto a Cancelar), visible apenas la orden tiene `id` (se guardó al menos una vez). Trae los datos frescos de la orden y abre el mismo modal de opciones de PDF que ya se usaba desde el listado.
+  - El botón grande inferior sigue guardando y saliendo de un solo clic ("Guardar Orden" / "Cerrar" en edición), para quien prefiera ese flujo.
+
+**Verificación:** `npm run build` OK en frontend, `node --check` OK en el backend modificado.
+
 ## Fecha: 2026-09-03 (2)
 
 ### v2.37: flecha de despliegue en "Otros Contactos" y "Otras Direcciones / Sucursales"
