@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Home, Users, Package, FileText, FileSpreadsheet, ShoppingCart, UserCog,
-  Save, X, Wrench, FileDown
+  Save, X, Wrench
 } from "lucide-react";
 import api from "../services/api";
 import { getCached } from "../services/cache";
@@ -17,6 +17,7 @@ import OrdenFormEquipo from "../components/ordenes/OrdenFormEquipo";
 import OrdenFormInsumos from "../components/ordenes/OrdenFormInsumos";
 import OrdenFormAveria from "../components/ordenes/OrdenFormAveria";
 import ModalOpcionesPDF from "../components/ordenes/ModalOpcionesPDF";
+import OrdenFormAcciones from "../components/ordenes/OrdenFormAcciones";
 import { usePaginaPersistente, useClampPagina } from "../hooks/usePaginacion";
 
 
@@ -691,13 +692,19 @@ function OrdenTrabajo() {
     }
   };
 
-  // Genera el PDF de la orden que está abierta en el formulario (ya guardada
-  // al menos una vez, con editingId). Trae los datos frescos de la orden
-  // para que el modal de opciones tenga exactamente lo último guardado.
+  // PDF y Cotización de la orden que está abierta en el formulario (ya
+  // guardada al menos una vez, con editingId). Traen los datos frescos de
+  // la orden para no trabajar con lo que quedó en el estado del formulario.
   const generarPDFOrdenActual = async () => {
     if (!editingId) return;
     const res = await api.get(`/api/ordenes/${editingId}`);
     setOrdenParaPDF(res.data);
+  };
+
+  const irACotizacionOrdenActual = async () => {
+    if (!editingId) return;
+    const res = await api.get(`/api/ordenes/${editingId}`);
+    navigate('/cotizaciones', { state: { orden: res.data } });
   };
 
   const guardarOrden = async (e, mantener = false) => {
@@ -1048,11 +1055,6 @@ function OrdenTrabajo() {
                 <button type="button" className="of-btn-c" onClick={cerrarFormulario}>
                   <X size={16} /> {soloLectura ? "Cerrar" : "Cancelar"}
                 </button>
-                {editingId && (
-                  <button type="button" className="of-btn-c" onClick={generarPDFOrdenActual}>
-                    <FileDown size={16} /> PDF
-                  </button>
-                )}
                 {!soloLectura && (
                   <button type="button" className="of-btn-s" onClick={(e) => guardarOrden(e, true)} disabled={guardando}>
                     <Save size={16} /> {guardando ? "Guardando..." : (editingId ? "Guardar Cambios" : "Guardar")}
@@ -1062,6 +1064,9 @@ function OrdenTrabajo() {
                   <button type="submit" className="of-btn-p" disabled={guardando}>
                     <Save size={16} /> {guardando ? "Guardando..." : (editingId ? "Cerrar" : "Guardar Orden")}
                   </button>
+                )}
+                {editingId && (
+                  <OrdenFormAcciones onPDF={generarPDFOrdenActual} onCotizacion={irACotizacionOrdenActual} />
                 )}
               </div>
             </form>

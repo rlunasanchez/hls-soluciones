@@ -1,5 +1,16 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-03 (4)
+
+### v2.39: menú "Más" (PDF / Cotización) en el formulario de OT, reemplaza el botón PDF suelto
+
+El botón "PDF" agregado en v2.38 al formulario de la OT se reemplazó por un menú desplegable "Más" (mismo patrón visual `···` que ya usan Clientes/Equipos/Ordenes en el listado), con dos opciones: **Cotización** y **PDF**. Ambas traen los datos frescos de la orden (`GET /api/ordenes/:id`) antes de abrir el modal de PDF o navegar a `/cotizaciones`.
+
+- Nuevo componente `frontend/src/components/ordenes/OrdenFormAcciones.jsx`: botón "..." + dropdown con `position: fixed` via `getBoundingClientRect` (igual que `OrdenAcciones.jsx`), pero reducido a los 2 ítems que tienen sentido dentro del formulario (no incluye Ver/Editar/Eliminar/Informe, que ya están cubiertos por el propio formulario o no aplican).
+- `OrdenTrabajo.jsx`: botón "Más" movido al final de la fila de acciones (Cancelar → Guardar Cambios → Guardar/Cerrar → Más), visible solo cuando la orden ya tiene `id` (se guardó al menos una vez).
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-03 (3)
 
 ### v2.38: "Guardar" en OT nueva ya no obliga a salir + botón PDF en el formulario
