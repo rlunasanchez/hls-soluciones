@@ -139,7 +139,7 @@ body {
 .emp-datos { text-align: center; }
 .emp-datos h1 { margin: 0; font-size: 13pt; font-weight: 800; letter-spacing: -.01em; color: #0C4A8C; }
 .emp-datos p { margin: 1pt 0 0; font-size: 7pt; color: #6B7280; }
-.brother-box { text-align: center; }
+.brother-box { text-align: center; align-self: flex-end; }
 .brother-leyenda { margin-top: 2pt; font-size: 6pt; text-transform: uppercase; letter-spacing: .1em; color: #6B7280; }
 
 .filete-1 { margin-top: 4pt; height: 2pt; border-radius: 2pt; background: #0C4A8C; }

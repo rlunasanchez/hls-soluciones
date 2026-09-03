@@ -1,5 +1,15 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-03 (6)
+
+### v2.41: logo HLS más grande y bloque Brother alineado abajo en el PDF de OT
+
+**Logo HLS** (`empresa.js`): el texto "Soluciones Informáticas" dentro del logo SVG se agranda automáticamente hasta ocupar el mismo ancho que el ícono (antes se veía chico respecto a "HLS").
+
+**Encabezado** (`ordenServicioDoc.js`): el bloque del logo Brother + "Servicio Técnico Autorizado" pasa de centrado verticalmente a alineado al fondo de la fila (`align-self: flex-end`), quedando a tope con la línea azul del encabezado — a la misma altura que "Soluciones Informáticas" del logo HLS, en vez de centrado y descolgado del resto.
+
+**Verificación:** `npm run build` OK. Iterado con capturas reales vía Chrome headless hasta encontrar la alineación pedida.
+
 ## Fecha: 2026-09-03 (5)
 
 ### v2.40: logo real y ajustes de layout en el PDF de Orden de Servicio
