@@ -825,6 +825,7 @@ function OrdenFormCliente({
       {/* Direcciones Extra / Sucursales (dinámicas) */}
       <div style={{ marginTop: '34px', padding: '4px 10px', background: '#E0F2FE', border: '1px solid #7CD0F0', borderRadius: '8px', lineHeight: '1.2' }}>
         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer', fontSize: '0.8rem', width: 'fit-content', maxWidth: '100%' }}>
+          {mostrarDireccionesExtra ? <ChevronUp size={14} style={{ color: '#0284C7', flexShrink: 0 }} /> : <ChevronDown size={14} style={{ color: '#0284C7', flexShrink: 0 }} />}
           <input
             type="checkbox"
             className="of-check of-check--direcciones"
@@ -1198,6 +1199,7 @@ function OrdenFormCliente({
       {/* Contactos Extra (dinámicos) */}
       <div style={{ marginTop: '10px', padding: '4px 10px', background: '#F0FDF4', border: '1px solid #7AD6EC', borderRadius: '8px', lineHeight: '1.2' }}>
         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer', fontSize: '0.8rem', width: 'fit-content', maxWidth: '100%' }}>
+          {mostrarContactosExtra ? <ChevronUp size={14} style={{ color: 'var(--success)', flexShrink: 0 }} /> : <ChevronDown size={14} style={{ color: 'var(--success)', flexShrink: 0 }} />}
           <input
             type="checkbox"
             className="of-check of-check--contactos"

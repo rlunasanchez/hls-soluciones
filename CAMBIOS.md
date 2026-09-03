@@ -1,5 +1,13 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-03 (2)
+
+### v2.37: flecha de despliegue en "Otros Contactos" y "Otras Direcciones / Sucursales"
+
+Agregado ícono `ChevronDown`/`ChevronUp` (rota según el estado desplegado/colapsado) en el encabezado de ambas secciones del formulario de OT (`OrdenFormCliente.jsx`), mismo patrón visual que ya usaban "Adjunto" e "Información Interna". Orden dentro del label: flecha → checkbox → ícono de sección → texto. El checkbox sigue siendo el que controla mostrar/ocultar la sección.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-03
 
 ### v2.36: Modales sin cierre accidental, técnico asignado obligatorio, ajustes en el PDF
