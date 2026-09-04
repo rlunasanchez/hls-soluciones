@@ -1,5 +1,15 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-04
+
+### v2.44: contacto principal del cliente ya no pide dirección propia
+
+**Problema:** en "Nuevo Cliente"/editar cliente, el contacto principal tenía su propio campo "Dirección Contacto" para completar a mano, casi siempre igual a la dirección del cliente.
+
+**Solución** (`ClienteFormulario.jsx`): se eliminó el campo del formulario. El contacto principal usa automáticamente la dirección del cliente (`nuevoCliente.direccion`) al guardar — ya no hay nada que ingresar para ese dato. Los contactos adicionales (agregados aparte) mantienen su propio campo de dirección, sin cambios. Se limpió también el estado ahora muerto (`contacto_direccion` en `ESTADO_INICIAL_CLIENTE` y en la carga de un cliente existente).
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-03 (7)
 
 ### v2.43: unificar tamaño de botones "Nuevo X" y Cancelar/Guardar en Clientes, Equipos y Usuarios
