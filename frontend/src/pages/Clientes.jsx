@@ -141,7 +141,7 @@ function Clientes() {
       />
 
       <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 16 }}>
-        <button className="btn-nuevo-cliente" onClick={() => { setClienteEditando(null); setSoloLectura(false); setMostrarFormulario(true); }}>
+        <button className="main-btn" onClick={() => { setClienteEditando(null); setSoloLectura(false); setMostrarFormulario(true); }}>
           <Plus size={16} /> Nuevo Cliente
         </button>
       </div>

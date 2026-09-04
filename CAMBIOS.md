@@ -1,5 +1,23 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-03 (7)
+
+### v2.43: unificar tamaño de botones "Nuevo X" y Cancelar/Guardar en Clientes, Equipos y Usuarios
+
+Los botones "Nuevo Cliente", "Nuevo Equipo", "Nuevo Usuario" y "Cambiar Password" usaban la clase `btn-nuevo-cliente`, con padding y tipografía distintos al botón "Nueva Orden" del listado de OT. Ahora usan `main-btn`, igual que "Nueva Orden" (`Clientes.jsx`, `Equipos.jsx`, `GestionUsuarios.jsx`).
+
+Los botones "Cancelar" / "Guardar" dentro de los formularios de Cliente (`cf-btn-*` en `Clientes.css`), Equipo (`ef-btn-*` en `Equipos.css`) y Usuario (`uf-btn-*` en `UsuarioFormulario.jsx` / `CambioPasswordForm.jsx`) eran visiblemente más altos que los del formulario de OT (`of-btn-*`). Se igualó su padding, tamaño de fuente y border-radius a los de `of-btn-*` (`padding: 4px 12px; font-size: .78rem; border-radius: 6px`).
+
+**Verificación:** `npm run build` OK. Comparación visual lado a lado de los botones (OT vs Cliente vs Equipo vs Usuario) renderizando las clases CSS reales vía Chrome headless.
+
+### v2.42: logo HLS realmente centrado en el PDF (fix de `object-fit` + `viewBox`)
+
+**CSS:** el selector `.logo img` en `ordenServicioDoc.js` nunca aplicaba — el `<img>` ya tiene la clase `.logo` (no es un contenedor con un `<img>` hijo), así que `object-fit: contain` nunca se activaba y el navegador estiraba el SVG para llenar el cuadro de 24×24mm, deformándolo. Corregido el selector a `img.logo`.
+
+**SVG:** el `viewBox` de `LOGO_HLS` (`empresa.js`) no estaba centrado respecto a la cruz naranja del ícono — dos cuadrados decorativos existen solo del lado izquierdo, así que el centro geométrico del `viewBox` (donde estaba anclado el texto "HLS") no coincidía con el centro visual de la cruz. Se amplió el `viewBox` de forma simétrica alrededor de la cruz y se recentró ahí el texto "HLS" / "Soluciones Informáticas".
+
+**Verificación:** renderizado real del SVG y del encabezado completo vía Chrome headless (`--headless --screenshot`) antes y después del cambio, no solo inspección de código.
+
 ## Fecha: 2026-09-03 (6)
 
 ### v2.41: logo HLS más grande y bloque Brother alineado abajo en el PDF de OT

@@ -14,8 +14,8 @@ const ufCss = `.uf-wrap{background:white;border-radius:16px;box-shadow:var(--sha
 .uf-f input{padding:2px 8px;font-size:.82rem;border:1.5px solid var(--border);border-radius:6px;background:white}
 .uf-f input:focus{outline:none;border-color:#0C4A8C;box-shadow:0 0 0 2px rgba(12,74,140,.15)}
 .uf-sub{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:2px}
-.uf-btn-p{padding:7px 16px;font-size:.8rem;background:var(--primary);color:white;border:none;border-radius:7px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px}
-.uf-btn-c{padding:7px 16px;font-size:.8rem;background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;border-radius:7px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px;transition:all .2s}
+.uf-btn-p{padding:4px 12px;font-size:.78rem;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px}
+.uf-btn-c{padding:4px 12px;font-size:.78rem;background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px;transition:all .2s}
 .uf-btn-c:hover{background:#e2e8f0}
 @media(max-width:768px){.uf-r2{grid-template-columns:1fr}.uf-form{padding:12px;gap:10px}.uf-f input{padding:10px 12px;font-size:.9rem;min-height:44px}.uf-sub{flex-direction:column}.uf-sub button{width:100%;justify-content:center}}`;
 

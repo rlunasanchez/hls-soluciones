@@ -144,10 +144,10 @@ function GestionUsuarios() {
 
       {rol === 'admin' && (
         <div className="actions-bar" style={{ marginBottom: '16px', display: 'flex', gap: '10px' }}>
-          <button onClick={() => setMostrarFormulario(true)} className="btn-nuevo-cliente">
+          <button onClick={() => setMostrarFormulario(true)} className="main-btn">
             <Plus size={16} /> Nuevo Usuario
           </button>
-          <button onClick={() => setMostrarCambioPassword(true)} className="btn-nuevo-cliente">
+          <button onClick={() => setMostrarCambioPassword(true)} className="main-btn">
             <Key size={16} /> Cambiar Password
           </button>
         </div>
