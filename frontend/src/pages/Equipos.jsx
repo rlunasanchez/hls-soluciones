@@ -140,7 +140,7 @@ function Equipos() {
         />
 
       <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 16 }}>
-        <button className="btn-nuevo-cliente" onClick={nuevaEquipo}>
+        <button className="main-btn" onClick={nuevaEquipo}>
           <Plus size={16} /> Nuevo Equipo
         </button>
       </div>
