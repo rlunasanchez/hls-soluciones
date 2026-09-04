@@ -550,13 +550,13 @@ function Cotizaciones() {
                     </div>
                     <div className="of-f">
                       <label style={{ display: 'flex', alignItems: 'center' }}>Fono Contacto</label>
-                      <input type="tel" value={cotizacion.contactoFono} onChange={(e) => setCotizacion({ ...cotizacion, contactoFono: e.target.value.replace(/[^0-9+]/g, '') })} disabled={soloLectura} />
+                      <input type="tel" placeholder="Teléfono del contacto" value={cotizacion.contactoFono} onChange={(e) => setCotizacion({ ...cotizacion, contactoFono: e.target.value.replace(/[^0-9+]/g, '') })} disabled={soloLectura} />
                     </div>
                   </div>
                   <div className="of-form-grid" style={{ marginTop: 10, marginBottom: 0 }}>
                     <div className="of-f">
                       <label style={{ display: 'flex', alignItems: 'center' }}>Email Contacto</label>
-                      <input type="email" value={cotizacion.contactoEmail} onChange={(e) => setCotizacion({ ...cotizacion, contactoEmail: e.target.value })} disabled={soloLectura} />
+                      <input type="email" placeholder="Email del contacto" value={cotizacion.contactoEmail} onChange={(e) => setCotizacion({ ...cotizacion, contactoEmail: e.target.value })} disabled={soloLectura} />
                     </div>
                   </div>
                 </div>
@@ -570,21 +570,21 @@ function Cotizaciones() {
                     </div>
                     <div className="of-f">
                       <label>Fono Ejecutivo</label>
-                      <input type="tel" value={cotizacion.ejecutivoFono} onChange={(e) => setCotizacion({ ...cotizacion, ejecutivoFono: e.target.value.replace(/[^0-9+]/g, '') })} disabled={soloLectura} />
+                      <input type="tel" placeholder="Teléfono del ejecutivo" value={cotizacion.ejecutivoFono} onChange={(e) => setCotizacion({ ...cotizacion, ejecutivoFono: e.target.value.replace(/[^0-9+]/g, '') })} disabled={soloLectura} />
                     </div>
                     <div className="of-f">
                       <label>Email Ejecutivo</label>
-                      <input type="email" value={cotizacion.ejecutivoEmail} onChange={(e) => setCotizacion({ ...cotizacion, ejecutivoEmail: e.target.value })} disabled={soloLectura} />
+                      <input type="email" placeholder="Email del ejecutivo" value={cotizacion.ejecutivoEmail} onChange={(e) => setCotizacion({ ...cotizacion, ejecutivoEmail: e.target.value })} disabled={soloLectura} />
                     </div>
                   </div>
                   <div className="of-form-grid" style={{ marginTop: 10 }}>
                     <div className="of-f">
                       <label>Condición</label>
-                      <input type="text" value={cotizacion.condicion} onChange={(e) => setCotizacion({ ...cotizacion, condicion: e.target.value })} disabled={soloLectura} />
+                      <input type="text" placeholder="Condición de pago" value={cotizacion.condicion} onChange={(e) => setCotizacion({ ...cotizacion, condicion: e.target.value })} disabled={soloLectura} />
                     </div>
                     <div className="of-f">
                       <label>País</label>
-                      <input type="text" value={cotizacion.pais} onChange={(e) => setCotizacion({ ...cotizacion, pais: upperInput(e) })} disabled={soloLectura} />
+                      <input type="text" placeholder="País del cliente" value={cotizacion.pais} onChange={(e) => setCotizacion({ ...cotizacion, pais: upperInput(e) })} disabled={soloLectura} />
                     </div>
                     <div className="of-f">
                       <label>Emisión</label>
@@ -597,7 +597,14 @@ function Cotizaciones() {
                   </div>
                   <div className="of-f" style={{ marginTop: 10 }}>
                     <label>Glosa</label>
-                    <input type="text" value={cotizacion.glosa} onChange={(e) => setCotizacion({ ...cotizacion, glosa: e.target.value })} disabled={soloLectura} />
+                    <textarea
+                      placeholder="Información adicional de la cotización..."
+                      value={cotizacion.glosa}
+                      onChange={(e) => setCotizacion({ ...cotizacion, glosa: e.target.value })}
+                      rows={3}
+                      disabled={soloLectura}
+                      style={{ resize: 'vertical', fontFamily: 'inherit' }}
+                    />
                   </div>
                 </div>
                 </div>
