@@ -417,12 +417,12 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                     <input placeholder="Ciudad" value={suc.ciudad} disabled={readOnly} onChange={(e) => actualizarSucursal(idx, "ciudad", upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ""))} />
                   </div>
                   <div className="cf-field cf-m0">
-                    <label>Fono</label>
-                    <input placeholder="Fono" value={suc.fono} disabled={readOnly} onChange={(e) => actualizarSucursal(idx, "fono", e.target.value.replace(/[^0-9+]/g, ""))} />
-                  </div>
-                  <div className="cf-field cf-m0">
                     <label>Comuna</label>
                     <input placeholder="Comuna" value={suc.comuna} disabled={readOnly} onChange={(e) => actualizarSucursal(idx, "comuna", upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ""))} />
+                  </div>
+                  <div className="cf-field cf-m0">
+                    <label>Fono</label>
+                    <input placeholder="Fono" value={suc.fono} disabled={readOnly} onChange={(e) => actualizarSucursal(idx, "fono", e.target.value.replace(/[^0-9+]/g, ""))} />
                   </div>
                 </div>
                 {!readOnly && (
