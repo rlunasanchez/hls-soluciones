@@ -1,5 +1,17 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-04 (4)
+
+### v2.47: fix — "Otros Contactos"/"Otras Direcciones" de la OT no dejaban elegir el segundo ítem
+
+**Problema:** en la OT, al agregar más de un contacto o dirección extra del cliente desde el `<select>` "Agregar contacto/dirección del cliente", el primero se agregaba bien pero el segundo clic no hacía nada — había que destildar y volver a tildar el checkbox "Otros Contactos"/"Otras Direcciones" para que volviera a funcionar.
+
+**Causa:** el `<select>` no controlado (`defaultValue=""`) usaba el índice del array como `value` de cada `<option>`. Al agregar el primer contacto, la lista de disponibles se filtra y el segundo contacto pasa a ocupar el índice 0 — el mismo `value` que ya estaba "seleccionado" en el DOM. El navegador no dispara `onChange` porque, desde su perspectiva, el valor no cambió.
+
+**Solución** (`OrdenFormCliente.jsx`): ambos `<select>` pasan a ser controlados (`value=""` fijo) y usan un valor estable por ítem (nombre normalizado para contactos, dirección normalizada para direcciones) en vez del índice — al agregarse, el ítem desaparece de las opciones y el select vuelve a quedar en blanco, listo para el siguiente.
+
+**Verificación:** `npm run build` OK. Confirmado por el usuario en la app real: ahora se pueden agregar varios contactos/direcciones seguidos sin tener que destildar el checkbox.
+
 ## Fecha: 2026-09-04 (3)
 
 ### v2.46: módulo de Cotizaciones
