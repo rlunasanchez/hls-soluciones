@@ -9,6 +9,7 @@ import authRoutes from "./routes/auth.js";
 import equiposRoutes from "./routes/equipos.js";
 import clientesRoutes from "./routes/clientes.js";
 import ordenesRoutes from "./routes/ordenes.js";
+import cotizacionesRoutes from "./routes/cotizaciones.js";
 
 dotenv.config();
 
@@ -52,6 +53,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/equipos", equiposRoutes);
 app.use("/api/clientes", clientesRoutes);
 app.use("/api/ordenes", ordenesRoutes);
+app.use("/api/cotizaciones", cotizacionesRoutes);
 
 app.get("*", (req, res) => {
   res.sendFile(path.join(frontendPath, "index.html"));

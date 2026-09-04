@@ -134,3 +134,45 @@ CREATE TABLE IF NOT EXISTS usuarios (
   activo TINYINT(1) DEFAULT 1,
   fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================
+-- TABLA DE COTIZACIONES
+-- ============================================
+-- Puede o no estar asociada a una Orden de Trabajo (orden_id nulo = cotización
+-- independiente). "items" guarda el detalle (SKU/detalle/cant/uni/neto) como
+-- JSON, mismo patrón que contactos_extra/direcciones_extra en ordenes_trabajo.
+CREATE TABLE IF NOT EXISTS cotizaciones (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  folio INT NOT NULL UNIQUE,
+  fecha_emision DATE NOT NULL,
+  fecha_valido_hasta DATE,
+  condicion VARCHAR(100),
+  pais VARCHAR(100) DEFAULT 'Chile',
+  glosa TEXT,
+
+  cliente_id INT,
+  cliente_rut VARCHAR(20),
+  cliente_razon_social VARCHAR(255) NOT NULL,
+
+  contacto_nombre VARCHAR(100),
+  contacto_fono VARCHAR(20),
+  contacto_email VARCHAR(100),
+
+  ejecutivo VARCHAR(100),
+  ejecutivo_fono VARCHAR(20),
+  ejecutivo_email VARCHAR(100),
+
+  items TEXT,
+
+  orden_id INT,
+  orden_numero VARCHAR(50),
+
+  fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  INDEX idx_folio (folio),
+  INDEX idx_cliente_id (cliente_id),
+  INDEX idx_orden_id (orden_id),
+  FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE SET NULL,
+  FOREIGN KEY (orden_id) REFERENCES ordenes_trabajo(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
