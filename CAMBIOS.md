@@ -1,5 +1,15 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-04 (5)
+
+### v2.48: avisar si un contacto/dirección creado a mano en la OT ya existe
+
+**Problema:** en "Otros Contactos" y "Otras Direcciones / Sucursales" de la OT, al agregar una fila en blanco ("+ Agregar contacto"/"+ Agregar dirección") y tipear a mano un nombre o dirección que ya existía (como Contacto principal de la orden, en la ficha del cliente, o en otra fila ya agregada), no había ningún aviso — quedaba duplicado.
+
+**Solución** (`OrdenFormCliente.jsx`): al salir del campo Nombre (contactos) o Dirección (direcciones), si el valor coincide con uno ya existente se muestra un `alert` pidiendo elegirlo desde el selector "Agregar contacto/dirección del cliente" y se limpia la fila — Nombre + Email en contactos, Dirección + Tipo en direcciones — en vez de dejar el duplicado a medio cargar.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-04 (4)
 
 ### v2.47: fix — "Otros Contactos"/"Otras Direcciones" de la OT no dejaban elegir el segundo ítem

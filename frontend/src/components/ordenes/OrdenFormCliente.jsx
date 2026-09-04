@@ -886,6 +886,16 @@ function OrdenFormCliente({
                 setNuevaOrden({ ...nuevaOrden, direccionesExtra: arr });
               };
 
+              // Evita crear a mano una dirección que ya existe: en la ficha del
+              // cliente o en otra fila de Otras Direcciones / Sucursales.
+              const direccionDuplicada = (idx, valor) => {
+                const v = normTxt(valor);
+                if (!v) return false;
+                if (direccionesCliente.some((d) => normTxt(d.direccion) === v)) return true;
+                if (nuevaOrden.direccionesExtra.some((d, i) => i !== idx && normTxt(d.direccion) === v)) return true;
+                return false;
+              };
+
               // Da de alta en clientes_direcciones una dirección tipeada a mano en la OT
               // que todavía no existe en la ficha del cliente. Mismo patrón que
               // "+ Registrar en Equipos"/"+ Registrar en Contactos".
@@ -975,7 +985,21 @@ function OrdenFormCliente({
                         </div>
                         <div className="of-f" style={{ flex: '1 1 0' }}>
                           <label>Dirección {idx + 1}</label>
-                          <input type="text" placeholder="Dirección" value={dir.direccion} onChange={(e) => actualizarDireccion(idx, 'direccion', upperInput(e))} disabled={readOnly} />
+                          <input
+                            type="text"
+                            placeholder="Dirección"
+                            value={dir.direccion}
+                            onChange={(e) => actualizarDireccion(idx, 'direccion', upperInput(e))}
+                            onBlur={(e) => {
+                              if (direccionDuplicada(idx, e.target.value)) {
+                                alert(`La dirección "${e.target.value.trim()}" ya existe. Elíjala desde "Agregar dirección del cliente" en vez de crearla de nuevo.`);
+                                const arr = [...nuevaOrden.direccionesExtra];
+                                arr[idx] = { ...arr[idx], direccion: '', tipo: '' };
+                                setNuevaOrden({ ...nuevaOrden, direccionesExtra: arr });
+                              }
+                            }}
+                            disabled={readOnly}
+                          />
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-end', marginTop: '4px' }}>
@@ -1303,6 +1327,17 @@ function OrdenFormCliente({
                 setNuevaOrden({ ...nuevaOrden, contactosExtra: arr });
               };
 
+              // Evita crear a mano un contacto que ya existe: como Contacto principal
+              // de la orden, en la ficha del cliente, o en otra fila de Otros Contactos.
+              const nombreContactoDuplicado = (idx, valor) => {
+                const v = normTxt(valor);
+                if (!v) return false;
+                if (normTxt(nuevaOrden.contacto) === v) return true;
+                if (contactosCliente.some((cc) => normTxt(cc.nombre) === v)) return true;
+                if (nuevaOrden.contactosExtra.some((c, i) => i !== idx && normTxt(c.nombre) === v)) return true;
+                return false;
+              };
+
               // Contactos del cliente aún no agregados: ni el elegido arriba en la orden ni los ya sumados como extra
               const contactosYaUsados = [
                 normTxt(nuevaOrden.contacto),
@@ -1396,7 +1431,21 @@ function OrdenFormCliente({
                         </div>
                         <div className="of-f">
                           <label>Contacto {idx + 1}</label>
-                          <input type="text" placeholder="Nombre" value={c.nombre} onChange={(e) => actualizarContacto(idx, 'nombre', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={readOnly} />
+                          <input
+                            type="text"
+                            placeholder="Nombre"
+                            value={c.nombre}
+                            onChange={(e) => actualizarContacto(idx, 'nombre', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))}
+                            onBlur={(e) => {
+                              if (nombreContactoDuplicado(idx, e.target.value)) {
+                                alert(`El contacto "${e.target.value.trim()}" ya existe. Elíjalo desde "Agregar contacto del cliente" en vez de crearlo de nuevo.`);
+                                const arr = [...nuevaOrden.contactosExtra];
+                                arr[idx] = { ...arr[idx], nombre: '', email: '' };
+                                setNuevaOrden({ ...nuevaOrden, contactosExtra: arr });
+                              }
+                            }}
+                            disabled={readOnly}
+                          />
                         </div>
                         <div className="of-f">
                           <label>Fono</label>
