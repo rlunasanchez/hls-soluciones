@@ -17,7 +17,7 @@ router.get("/", authMiddleware, async (req, res) => {
 
   try {
     const [cotizaciones] = await pool.query(
-      `SELECT id, folio, fecha_emision, fecha_valido_hasta, condicion, pais,
+      `SELECT id, folio, fecha_emision, fecha_valido_hasta, condicion, pais, glosa,
         cliente_id, cliente_rut, cliente_razon_social,
         contacto_nombre, contacto_fono, contacto_email,
         ejecutivo, ejecutivo_fono, ejecutivo_email,

@@ -1,5 +1,19 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-04 (7)
+
+### v2.50: fix — Glosa no salía en el PDF + Cancelar no volvía a la OT tras Guardar
+
+**Problema 1:** la Glosa se veía y se guardaba bien en el formulario, pero no aparecía en el PDF generado desde el botón "PDF" del listado.
+
+**Causa 1** (`backend/routes/cotizaciones.js`): el `SELECT` del listado (`GET /api/cotizaciones`) nunca pedía la columna `glosa` — el botón "PDF" del listado usa esos datos directamente sin volver a pedirlos, así que siempre llegaba vacía. Al editar sí se veía porque `GET /api/cotizaciones/:id` usa `SELECT *`. Se agregó `glosa` a la lista de columnas.
+
+**Problema 2:** al crear una cotización desde una OT, guardar con "Guardar Cambios" (sin cerrar) y después "Cancelar", no volvía a la vista de la OT — se quedaba en el listado de Cotizaciones.
+
+**Causa 2** (`Cotizaciones.jsx`): `cargarCotizacion` (usada para refrescar el formulario después de "Guardar Cambios") siempre resetea `origenOT` a `false`, sin distinguir si se llamó para eso o para abrir una cotización del listado — así se perdía la marca de "vino desde la OT". Se preserva el valor de `origenOT` antes y después de ese refresco.
+
+**Verificación:** `npm run build` OK en frontend, `node --check` OK en backend. Smoke test contra el backend real: la glosa ahora aparece en la fila del listado (antes llegaba `undefined`).
+
 ## Fecha: 2026-09-04 (6)
 
 ### v2.49: Glosa como textarea + placeholders en Cotizaciones
