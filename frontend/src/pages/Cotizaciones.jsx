@@ -405,7 +405,9 @@ function Cotizaciones() {
       }
 
       if (mantener) {
+        const origenOTAntes = origenOT;
         await cargarCotizacion({ id: idActual }, false);
+        setOrigenOT(origenOTAntes);
       } else {
         alert(eraNueva ? "Cotización guardada exitosamente" : "Cotización actualizada exitosamente");
         const vuelveAOT = origenOT;
