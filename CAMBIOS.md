@@ -1,5 +1,19 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-04 (2)
+
+### v2.45: orden de campos Ciudad/Comuna/Fono + "Registrar" para contactos y direcciones desde la OT
+
+**Orden de campos** (`ClienteFormulario.jsx`, `OrdenFormCliente.jsx`): en "Sucursales/Direcciones" (mantenedor de Clientes) y en "Otras Direcciones / Sucursales" (OT) el orden pasa a ser Ciudad → Comuna → Fono (antes Ciudad → Fono → Comuna). En "Otros Contactos" de la OT, Email pasa a ir antes que el nombre del Contacto.
+
+**Nuevo — "+ Registrar" en la OT** (`OrdenFormCliente.jsx`): mismo patrón que "+ Registrar en Equipos", ahora también para:
+- **Otros Contactos**: si un contacto tipeado a mano en la OT todavía no existe en la ficha del cliente seleccionado, aparece un botón para darlo de alta en `clientes_contactos` sin salir de la OT.
+- **Otras Direcciones / Sucursales**: mismo botón para dar de alta la dirección en `clientes_direcciones`.
+
+Ambos requieren que el cliente ya esté seleccionado del buscador (con `id` real) y arman el `PUT /api/clientes/:id` completo preservando el resto de los datos del cliente (no pisan otras sucursales/contactos ya cargados).
+
+**Verificación:** `npm run build` OK. Probado extremo a extremo contra el backend real (crear cliente con sucursal+contacto existentes, registrar uno nuevo de cada tipo desde la simulación de la OT, confirmar que lo existente no se pierde).
+
 ## Fecha: 2026-09-04
 
 ### v2.44: contacto principal del cliente ya no pide dirección propia

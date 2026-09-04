@@ -886,6 +886,48 @@ function OrdenFormCliente({
                 setNuevaOrden({ ...nuevaOrden, direccionesExtra: arr });
               };
 
+              // Da de alta en clientes_direcciones una dirección tipeada a mano en la OT
+              // que todavía no existe en la ficha del cliente. Mismo patrón que
+              // "+ Registrar en Equipos"/"+ Registrar en Contactos".
+              const registrarDireccionEnCliente = async (dir) => {
+                if (!clienteSeleccionado?.id) return;
+                try {
+                  const contactosClienteActuales = String(clienteSeleccionado.contactos || "").split(";;")
+                    .map(c => {
+                      const p = c.split("|");
+                      return { nombre: p[0] || "", email: p[1] || "", fono: p[2] || "", cargo: p[3] || "", direccion: p[4] || "" };
+                    })
+                    .filter(c => c.nombre.trim());
+                  const payload = {
+                    razon_social: clienteSeleccionado.razon_social,
+                    giro: clienteSeleccionado.giro,
+                    rut: clienteSeleccionado.rut,
+                    direccion: clienteSeleccionado.direccion,
+                    ciudad: clienteSeleccionado.ciudad,
+                    comuna: clienteSeleccionado.comuna,
+                    telefono: clienteSeleccionado.telefono,
+                    email: clienteSeleccionado.email,
+                    contacto_nombre: clienteSeleccionado.contacto_nombre,
+                    contacto_email: clienteSeleccionado.contacto_email,
+                    contacto_fono: clienteSeleccionado.contacto_fono,
+                    contacto_cargo: clienteSeleccionado.contacto_cargo,
+                    contactos: contactosClienteActuales,
+                    direcciones: [...direccionesCliente, {
+                      tipo_direccion: dir.tipo || "", direccion: dir.direccion,
+                      fono: dir.fono || "", ciudad: dir.ciudad || "", comuna: dir.comuna || ""
+                    }]
+                  };
+                  await api.put(`/api/clientes/${clienteSeleccionado.id}`, payload);
+                  alert(`Dirección registrada en el cliente.`);
+                  const lista = await api.get("/api/clientes");
+                  if (onClientesRefresh) onClientesRefresh(lista.data);
+                  const actualizado = lista.data.find((c) => c.id === clienteSeleccionado.id);
+                  if (actualizado && setClienteSeleccionado) setClienteSeleccionado(actualizado);
+                } catch (err) {
+                  alert(err.response?.data?.msg || "Error al registrar la dirección en el cliente.");
+                }
+              };
+
               return (
                 <>
                   {direccionesCliente.length >= 1 && (
@@ -941,14 +983,25 @@ function OrdenFormCliente({
                           <label>Ciudad</label>
                           <input type="text" placeholder="Ciudad" value={dir.ciudad} onChange={(e) => actualizarDireccion(idx, 'ciudad', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={readOnly} />
                         </div>
-                        <div className="of-f" style={{ flex: '0 0 130px' }}>
-                          <label>Fono</label>
-                          <input type="tel" placeholder="Fono" value={dir.fono} onChange={(e) => actualizarDireccion(idx, 'fono', e.target.value.replace(/[^0-9+]/g, ''))} disabled={readOnly} />
-                        </div>
                         <div className="of-f" style={{ flex: '0 0 140px' }}>
                           <label>Comuna</label>
                           <input type="text" placeholder="Comuna" value={dir.comuna} onChange={(e) => actualizarDireccion(idx, 'comuna', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={readOnly} />
                         </div>
+                        <div className="of-f" style={{ flex: '0 0 130px' }}>
+                          <label>Fono</label>
+                          <input type="tel" placeholder="Fono" value={dir.fono} onChange={(e) => actualizarDireccion(idx, 'fono', e.target.value.replace(/[^0-9+]/g, ''))} disabled={readOnly} />
+                        </div>
+                        {!readOnly && clienteSeleccionado?.id && dir.direccion.trim() &&
+                          !direccionesCliente.some((dc) => dc.direccion.toUpperCase().trim() === dir.direccion.toUpperCase().trim()) && (
+                          <button
+                            type="button"
+                            onClick={() => registrarDireccionEnCliente(dir)}
+                            title="Registrar esta dirección en la ficha del cliente si no existe"
+                            style={{ background: '#E0F2FE', color: '#0284C7', border: '1px solid #7CD0F0', borderRadius: '6px', padding: '2px 8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.75rem' }}
+                          >
+                            <MapPin size={12} style={{ verticalAlign: 'text-bottom' }} /> Registrar
+                          </button>
+                        )}
                         {!readOnly && (
                           <button
                             type="button"
@@ -1257,6 +1310,49 @@ function OrdenFormCliente({
               ].filter(Boolean);
               const contactosExtraDisponibles = contactosCliente.filter(c => !contactosYaUsados.includes(normTxt(c.nombre)));
 
+              // Da de alta en clientes_contactos un contacto tipeado a mano en la OT que
+              // todavía no existe en la ficha del cliente. Mismo patrón que
+              // "+ Registrar en Equipos": solo disponible si el cliente ya está en el
+              // mantenedor (tiene id), porque clientes_contactos necesita cliente_id.
+              const registrarContactoEnCliente = async (contacto) => {
+                if (!clienteSeleccionado?.id) return;
+                try {
+                  const direccionesCliente = String(clienteSeleccionado.direcciones || "").split(";;")
+                    .map(d => {
+                      const p = d.split("|");
+                      return { tipo_direccion: p[0] || "", direccion: p[1] || "", fono: p[2] || "", ciudad: p[3] || "", comuna: p[4] || "" };
+                    })
+                    .filter(d => d.direccion.trim());
+                  const payload = {
+                    razon_social: clienteSeleccionado.razon_social,
+                    giro: clienteSeleccionado.giro,
+                    rut: clienteSeleccionado.rut,
+                    direccion: clienteSeleccionado.direccion,
+                    ciudad: clienteSeleccionado.ciudad,
+                    comuna: clienteSeleccionado.comuna,
+                    telefono: clienteSeleccionado.telefono,
+                    email: clienteSeleccionado.email,
+                    contacto_nombre: clienteSeleccionado.contacto_nombre,
+                    contacto_email: clienteSeleccionado.contacto_email,
+                    contacto_fono: clienteSeleccionado.contacto_fono,
+                    contacto_cargo: clienteSeleccionado.contacto_cargo,
+                    direcciones: direccionesCliente,
+                    contactos: [...contactosCliente, {
+                      nombre: contacto.nombre, email: contacto.email, fono: contacto.fono,
+                      cargo: contacto.cargo, direccion: contacto.direccion
+                    }]
+                  };
+                  await api.put(`/api/clientes/${clienteSeleccionado.id}`, payload);
+                  alert(`Contacto "${contacto.nombre}" registrado en el cliente.`);
+                  const lista = await api.get("/api/clientes");
+                  if (onClientesRefresh) onClientesRefresh(lista.data);
+                  const actualizado = lista.data.find((c) => c.id === clienteSeleccionado.id);
+                  if (actualizado && setClienteSeleccionado) setClienteSeleccionado(actualizado);
+                } catch (err) {
+                  alert(err.response?.data?.msg || "Error al registrar el contacto en el cliente.");
+                }
+              };
+
               return (
                 <>
                   {contactosCliente.length >= 1 && (
@@ -1295,12 +1391,12 @@ function OrdenFormCliente({
                     <div key={idx} style={{ marginBottom: '6px', border: '1px solid var(--border)', borderRadius: '6px', padding: '4px' }}>
                       <div className="of-form-grid" style={{ gap: '8px' }}>
                         <div className="of-f">
-                          <label>Contacto {idx + 1}</label>
-                          <input type="text" placeholder="Nombre" value={c.nombre} onChange={(e) => actualizarContacto(idx, 'nombre', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={readOnly} />
-                        </div>
-                        <div className="of-f">
                           <label>Email</label>
                           <input type="email" placeholder="Email" value={c.email} onChange={(e) => actualizarContacto(idx, 'email', e.target.value)} disabled={readOnly} />
+                        </div>
+                        <div className="of-f">
+                          <label>Contacto {idx + 1}</label>
+                          <input type="text" placeholder="Nombre" value={c.nombre} onChange={(e) => actualizarContacto(idx, 'nombre', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={readOnly} />
                         </div>
                         <div className="of-f">
                           <label>Fono</label>
@@ -1314,6 +1410,17 @@ function OrdenFormCliente({
                           <label>Cargo</label>
                           <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                             <input type="text" placeholder="Cargo" value={c.cargo} onChange={(e) => actualizarContacto(idx, 'cargo', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={readOnly} style={{ flex: '1 1 auto', width: 'auto' }} />
+                            {!readOnly && clienteSeleccionado?.id && c.nombre.trim() &&
+                              !contactosCliente.some((cc) => normTxt(cc.nombre) === normTxt(c.nombre)) && (
+                              <button
+                                type="button"
+                                onClick={() => registrarContactoEnCliente(c)}
+                                title="Registrar este contacto en la ficha del cliente si no existe"
+                                style={{ background: '#F0FDF4', color: 'var(--success)', border: '1px solid #7AD6EC', borderRadius: '6px', padding: '2px 8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.75rem', lineHeight: '1.3', flexShrink: 0 }}
+                              >
+                                <UserPlus size={12} style={{ verticalAlign: 'text-bottom' }} /> Registrar
+                              </button>
+                            )}
                             {!readOnly && (
                               <button
                                 type="button"
