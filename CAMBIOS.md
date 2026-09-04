@@ -1,5 +1,15 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-04 (6)
+
+### v2.49: Glosa como textarea + placeholders en Cotizaciones
+
+**Glosa** (`Cotizaciones.jsx`): pasa de `<input>` de una línea a `<textarea>` (3 filas), con placeholder "Información adicional de la cotización...", mismo patrón que Observaciones/Avería en la OT.
+
+**Placeholders:** se agregaron a Fono Contacto, Email Contacto, Fono Ejecutivo, Email Ejecutivo, Condición y País — mismo estilo que la OT (ej. "Email del contacto", "Teléfono del contacto"), antes esos campos no tenían ningún texto guía dentro del input.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-04 (5)
 
 ### v2.48: avisar si un contacto/dirección creado a mano en la OT ya existe
