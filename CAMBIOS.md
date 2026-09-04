@@ -1,5 +1,22 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-04 (3)
+
+### v2.46: módulo de Cotizaciones
+
+Nuevo módulo completo de Cotizaciones (`/cotizaciones`), con el mismo lenguaje visual y patrones que Órdenes de Trabajo:
+
+- **Listado** (`CotizacionLista.jsx`, `CotizacionAcciones.jsx`): folio correlativo (desde 2800), filtro por folio/cliente, paginación, menú de acciones (Ver/Editar/Eliminar/PDF).
+- **Formulario** (`Cotizaciones.jsx`): dos columnas igual que la OT — Cliente/Contacto y Ejecutivo/Condiciones a la izquierda, Ítems a la derecha. Los ítems muestran SKU/Cant./Uni./Neto/Total con Detalle en un textarea debajo, y se colapsan mostrando solo los dos primeros ("Ver todos/Ver menos") igual que en otras pantallas.
+- **Asociación opcional a una OT**: se puede crear una cotización desde el menú "..." de una OT (queda asociada, con badge "· asociada a OT N°...") o desde el menú de Clientes (prefill sin asociar). Al crear desde la OT, guardar/cancelar vuelve a la vista de la OT; si se crea desde el propio módulo de Cotizaciones, se queda ahí.
+- **Cotización sin cliente identificado**: el formulario ya no pide ni muestra Buscar Cliente, Razón Social ni RUT en ningún caso (venga de una OT o sea nueva) — la cotización es solo un documento, la asociación a una OT (si existe) alcanza. El buscador de Contacto sigue funcionando: si hay un cliente detrás (por la OT o al editar una ya guardada) busca entre sus contactos; si es una cotización suelta, busca entre los contactos de todos los clientes, mostrando a qué cliente pertenece cada uno.
+- **PDF** (`cotizacionDoc.js`): mismo estilo que el PDF de OT (encabezado centrado, logo real), con datos bancarios y condiciones de la empresa (`empresa.js`).
+- **Backend** (`routes/cotizaciones.js`, tabla `cotizaciones` en `crear_tablas.sql`): CRUD completo, folio autocalculado, `ejecutivo` siempre tomado del usuario autenticado (no editable a mano), cliente y OT opcionales.
+
+**Fix de guardado:** al guardar se descartaban ítems que no tuvieran el campo "Detalle" completado, aunque tuvieran SKU/Cantidad/Unidad/Neto cargados — se perdían los montos ya ingresados. Ahora se conserva cualquier ítem con datos en al menos uno de esos campos.
+
+**Verificación:** `npm run build` OK. Smoke test contra el backend real (crear/editar/eliminar cotización sin cliente, folio y totales correctos).
+
 ## Fecha: 2026-09-04 (2)
 
 ### v2.45: orden de campos Ciudad/Comuna/Fono + "Registrar" para contactos y direcciones desde la OT
