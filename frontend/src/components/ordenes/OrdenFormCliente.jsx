@@ -937,11 +937,11 @@ function OrdenFormCliente({
                       </label>
                       <select
                         disabled={readOnly || direccionesDisponibles.length === 0}
-                        defaultValue=""
+                        value=""
                         onChange={(e) => {
-                          const i = parseInt(e.target.value, 10);
-                          if (isNaN(i) || !direccionesDisponibles[i]) return;
-                          agregarDireccion(direccionesDisponibles[i]);
+                          const elegida = direccionesDisponibles.find((d) => d.direccion.toUpperCase().trim() === e.target.value);
+                          if (!elegida) return;
+                          agregarDireccion(elegida);
                         }}
                         style={{
                           width: '100%',
@@ -954,7 +954,7 @@ function OrdenFormCliente({
                       >
                         <option value="">-- Elegir dirección --</option>
                         {direccionesDisponibles.map((d, idx) => (
-                          <option key={idx} value={idx}>
+                          <option key={idx} value={d.direccion.toUpperCase().trim()}>
                             {d.tipo_direccion ? `${d.tipo_direccion} | ` : ''}{d.direccion}{d.ciudad ? ` | ${d.ciudad}` : ''}{d.comuna ? ` | ${d.comuna}` : ''}{d.fono ? ` | F:${d.fono}` : ''}
                           </option>
                         ))}
@@ -1362,11 +1362,11 @@ function OrdenFormCliente({
                       </label>
                       <select
                         disabled={readOnly || contactosExtraDisponibles.length === 0}
-                        defaultValue=""
+                        value=""
                         onChange={(e) => {
-                          const i = parseInt(e.target.value, 10);
-                          if (isNaN(i) || !contactosExtraDisponibles[i]) return;
-                          agregarContacto(contactosExtraDisponibles[i]);
+                          const elegido = contactosExtraDisponibles.find((c) => normTxt(c.nombre) === e.target.value);
+                          if (!elegido) return;
+                          agregarContacto(elegido);
                         }}
                         style={{
                           width: '100%',
@@ -1379,7 +1379,7 @@ function OrdenFormCliente({
                       >
                         <option value="">-- Elegir contacto --</option>
                         {contactosExtraDisponibles.map((c, idx) => (
-                          <option key={idx} value={idx}>
+                          <option key={idx} value={normTxt(c.nombre)}>
                             {c.nombre}{c.fono ? ` | ${c.fono}` : ''}{c.email ? ` | ${c.email}` : ''}
                           </option>
                         ))}
