@@ -83,7 +83,7 @@ body {
 .logo--ph { border: .5pt dashed #CBD5E1; border-radius: 999px; color: #94A3B8; font-size: 6pt; text-align: center; padding: 2pt; }
 .emp-datos { text-align: center; }
 .emp-datos h1 { margin: 0; font-size: 13pt; font-weight: 800; letter-spacing: -.01em; color: #0C4A8C; }
-.emp-datos p { margin: 1pt 0 0; font-size: 7pt; color: #6B7280; }
+.emp-datos p { margin: 1pt 0 0; font-size: 8.5pt; color: #6B7280; }
 
 .folio-box { text-align: center; background: #FFFFFF; border: 1pt solid #0C4A8C; border-radius: 7pt; padding: 3mm 6mm; }
 .folio-box h1 { margin: 0 0 1mm; font-size: 13pt; font-weight: 800; letter-spacing: .04em; color: #0C4A8C; }

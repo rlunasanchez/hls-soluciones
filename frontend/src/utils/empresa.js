@@ -11,7 +11,7 @@ export const EMPRESA = {
   fono: "+56 226816368",
   email: "contacto@hls.cl",
   web: "www.hls.cl",
-  leyendaBrother: "Servicio Técnico Autorizado"
+  leyendaBrother: "Autorizado"
 };
 
 // Texto legal del pie de la Orden de Servicio, literal.
