@@ -1,5 +1,13 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-07 (2)
+
+### v2.52: caja azul del encabezado del PDF de OT pasa a mostrar el N° de Orden
+
+En el encabezado del PDF de Orden de Servicio (`ordenServicioDoc.js`) se invierte cuál dato va destacado: antes la caja con fondo azul sólido del costado mostraba "Fecha", y el N° de OT iba en gris junto al título "Orden de Servicio". Ahora es al revés — la caja azul muestra "N° Orden", y la Fecha va en gris simple junto al título.
+
+**Verificación:** `npm run build` OK. Renderizado real del PDF vía Chrome headless para confirmar el resultado visual.
+
 ## Fecha: 2026-09-07
 
 ### v2.51: fix responsive en Ítems de Cotizaciones
