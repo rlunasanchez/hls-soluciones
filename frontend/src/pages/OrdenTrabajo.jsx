@@ -832,20 +832,16 @@ function OrdenTrabajo() {
         await editarOrden(res.data);
       } else {
         alert(eraOrdenNueva ? "Orden guardada exitosamente" : "Orden actualizada exitosamente");
-        const navState = window.history.state?.usr;
-        const vinoDeCliente = navState?.cliente || navState?.orden;
         setMostrarFormulario(false);
         resetFormulario();
         setSoloLectura(false);
         window.history.replaceState({}, document.title);
-        if (vinoDeCliente) {
-          navigate("/clientes");
-        } else {
-          // Una orden nueva queda primera (backend ordena por id DESC): saltar a la página 1 para verla.
-          // Al editar se conserva la página en la que estaba el usuario.
-          if (eraOrdenNueva) setPaginaActual(1);
-          fetchOrdenes();
-        }
+        // Guardar (a diferencia de Cancelar/X) siempre deja en el mantenedor de OT,
+        // aunque se haya creado desde Clientes — para eso está el listado de OT.
+        // Una orden nueva queda primera (backend ordena por id DESC): saltar a la página 1 para verla.
+        // Al editar se conserva la página en la que estaba el usuario.
+        if (eraOrdenNueva) setPaginaActual(1);
+        fetchOrdenes();
       }
     } catch (err) {
       console.error("Error al guardar orden:", err);
