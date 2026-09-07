@@ -26,6 +26,7 @@ function OrdenFormCliente({
   const [mostrarDireccionesExtra, setMostrarDireccionesExtra] = useState(false);
   const [mostrarContactosExtra, setMostrarContactosExtra] = useState(false);
   const [contactosExpandidos, setContactosExpandidos] = useState(false);
+  const [direccionesResumenAbierto, setDireccionesResumenAbierto] = useState(false);
   // Índices de direccionesExtra agregados a mano (+ Agregar dirección) que deben
   // verse aunque la lista esté colapsada, sin desplegar las demás ya cargadas.
   const [direccionesManualVisibles, setDireccionesManualVisibles] = useState(() => new Set());
@@ -837,7 +838,10 @@ function OrdenFormCliente({
             className="of-check of-check--direcciones"
             checked={mostrarDireccionesExtra}
             disabled={readOnly && nuevaOrden.direccionesExtra.length === 0}
-            onChange={(e) => setMostrarDireccionesExtra(e.target.checked)}
+            onChange={(e) => {
+              setMostrarDireccionesExtra(e.target.checked);
+              if (!e.target.checked) setDireccionesResumenAbierto(false);
+            }}
           />
           <MapPin size={14} style={{ color: '#0284C7', flexShrink: 0 }} />
           Otras Direcciones / Sucursales
@@ -905,6 +909,7 @@ function OrdenFormCliente({
                   });
                   return next;
                 });
+                if (arr.length === 0) setDireccionesResumenAbierto(false);
               };
 
               // Evita crear a mano una dirección que ya existe: en la ficha del
@@ -993,7 +998,21 @@ function OrdenFormCliente({
                     </div>
                   )}
 
-                  {nuevaOrden.direccionesExtra.length > 0 && (
+                  {nuevaOrden.direccionesExtra.length > 0 && !direccionesResumenAbierto && (
+                    <button
+                      type="button"
+                      onClick={() => setDireccionesResumenAbierto(true)}
+                      style={{
+                        background: 'none', color: '#0284C7', border: '1px solid #7CD0F0',
+                        borderRadius: '6px', padding: '2px 10px', cursor: 'pointer',
+                        fontWeight: 600, fontSize: '0.75rem', marginRight: '8px'
+                      }}
+                    >
+                      {nuevaOrden.direccionesExtra.length} dirección{nuevaOrden.direccionesExtra.length > 1 ? 'es' : ''} agregada{nuevaOrden.direccionesExtra.length > 1 ? 's' : ''} — Ver
+                    </button>
+                  )}
+
+                  {nuevaOrden.direccionesExtra.length > 0 && direccionesResumenAbierto && (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
                       {nuevaOrden.direccionesExtra.map((dir, idx) => (
                         <span key={idx} style={{

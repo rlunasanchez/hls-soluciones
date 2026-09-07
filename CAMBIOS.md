@@ -1,5 +1,15 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-07 (8)
+
+### v2.58: resumen colapsable de direcciones agregadas + ajuste de espaciado
+
+**Resumen colapsable** (`OrdenFormCliente.jsx`): al abrir "Otras Direcciones / Sucursales", ya no se muestran directo los chips de las direcciones ya agregadas — solo el selector "Agregar dirección del cliente". Si hay direcciones cargadas, aparece un botón chico "N dirección(es) agregada(s) — Ver" que las despliega recién al hacer click. Al destildar el checkbox de toda la sección, ese resumen vuelve a quedar colapsado (para que la próxima vez que se abra arranque igual). Una fila agregada a mano con "+ Agregar dirección" se sigue mostrando directo, sin depender de este resumen.
+
+**Espaciado:** el botón "N direcciones agregadas — Ver" quedaba pegado al botón "+ Agregar dirección" de al lado — se agregó separación entre ambos sin romper que sigan uno junto al otro.
+
+**Verificación:** `npm run build` OK. Confirmado por el usuario en la app real.
+
 ## Fecha: 2026-09-07 (7)
 
 ### v2.57: chips para agregar/editar/quitar direcciones + fix aviso de duplicado
