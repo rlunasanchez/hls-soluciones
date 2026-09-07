@@ -1,5 +1,15 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-07 (6)
+
+### v2.56: "Otras Direcciones / Sucursales" no se despliega sola al agregar
+
+**Problema:** en la OT, al elegir una dirección desde "Agregar dirección del cliente" (selector), la lista se desplegaba mostrando todas las direcciones ya agregadas, en vez de solo sumarla sin mostrar nada — para eso ya estaba el botón "Ver todas".
+
+**Solución** (`OrdenFormCliente.jsx`): por defecto no se muestra ninguna dirección agregada (antes se mostraba la primera). El selector "Agregar dirección del cliente" solo agrega, sin desplegar nada. El botón "+ Agregar dirección" (fila en blanco para tipear a mano) sigue mostrando *solo esa fila nueva* — no las demás ya cargadas y ocultas — mediante un set de índices "visibles a mano" que se reajusta al eliminar filas. Al borrar la última dirección, el estado vuelve a colapsado ("Ver menos") en vez de quedar pegado en "expandido".
+
+**Verificación:** `npm run build` OK. Confirmado por el usuario en la app real.
+
 ## Fecha: 2026-09-07 (5)
 
 ### v2.55: contacto principal al seleccionar cliente en la OT + reordenar Contacto/Técnico Asignado
