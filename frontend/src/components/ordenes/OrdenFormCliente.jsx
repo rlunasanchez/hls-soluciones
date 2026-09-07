@@ -27,6 +27,9 @@ function OrdenFormCliente({
   const [mostrarContactosExtra, setMostrarContactosExtra] = useState(false);
   const [direccionesExpandidas, setDireccionesExpandidas] = useState(false);
   const [contactosExpandidos, setContactosExpandidos] = useState(false);
+  // Índices de direccionesExtra agregados a mano (+ Agregar dirección) que deben
+  // verse aunque la lista esté colapsada, sin desplegar las demás ya cargadas.
+  const [direccionesManualVisibles, setDireccionesManualVisibles] = useState(() => new Set());
   const LIMITE_EXTRAS = 1;
   const [busquedaContacto, setBusquedaContacto] = useState("");
   const [mostrarDropdownContacto, setMostrarDropdownContacto] = useState(false);
@@ -972,7 +975,9 @@ function OrdenFormCliente({
                     </div>
                   )}
 
-                  {nuevaOrden.direccionesExtra.slice(0, direccionesExpandidas ? nuevaOrden.direccionesExtra.length : LIMITE_EXTRAS).map((dir, idx) => (
+                  {nuevaOrden.direccionesExtra.map((dir, idx) => {
+                    if (!direccionesExpandidas && !direccionesManualVisibles.has(idx)) return null;
+                    return (
                     <div key={idx} style={{ marginBottom: '6px', border: '1px solid var(--border)', borderRadius: '6px', padding: '4px' }}>
                       <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-end', marginBottom: '4px' }}>
                         <div className="of-f" style={{ flex: '0 0 120px' }}>
@@ -1033,6 +1038,15 @@ function OrdenFormCliente({
                               if (!confirm("¿Seguro que desea eliminar esta dirección?")) return;
                               const arr = nuevaOrden.direccionesExtra.filter((_, i) => i !== idx);
                               setNuevaOrden({ ...nuevaOrden, direccionesExtra: arr });
+                              setDireccionesManualVisibles(prev => {
+                                const next = new Set();
+                                prev.forEach(i => {
+                                  if (i < idx) next.add(i);
+                                  else if (i > idx) next.add(i - 1);
+                                });
+                                return next;
+                              });
+                              if (arr.length === 0) setDireccionesExpandidas(false);
                             }}
                             style={{ background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA', borderRadius: '6px', padding: '2px 8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.75rem' }}
                           >
@@ -1041,9 +1055,10 @@ function OrdenFormCliente({
                         )}
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
 
-                  {nuevaOrden.direccionesExtra.length > LIMITE_EXTRAS && (
+                  {nuevaOrden.direccionesExtra.length > 0 && (
                     <div style={{ marginTop: '4px' }}>
                       <button
                         type="button"
@@ -1068,10 +1083,12 @@ function OrdenFormCliente({
                     <button
                       type="button"
                       onClick={() => {
+                        const nuevoIdx = nuevaOrden.direccionesExtra.length;
                         setNuevaOrden({
                           ...nuevaOrden,
                           direccionesExtra: [...nuevaOrden.direccionesExtra, { tipo: "", direccion: "", ciudad: "", fono: "", comuna: "" }]
                         });
+                        setDireccionesManualVisibles(prev => new Set(prev).add(nuevoIdx));
                       }}
                       style={{
                         marginTop: '6px',
