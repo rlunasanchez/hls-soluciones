@@ -152,7 +152,7 @@ img.logo { max-width: 100%; max-height: 100%; object-fit: contain; }
 .folio-numero { margin-left: 8pt; font-size: 11pt; font-weight: 800; color: #0C4A8C; font-variant-numeric: tabular-nums; vertical-align: middle; }
 .folio { text-align: center; background: #F1F5F9; border: .75pt solid #E2E8F0; border-radius: 7pt; padding: 2pt 12pt; }
 .folio .l { display: block; font-size: 6pt; text-transform: uppercase; letter-spacing: .1em; color: #6B7280; }
-.folio .v { font-size: 14pt; font-weight: 800; font-variant-numeric: tabular-nums; color: #0C4A8C; }
+.folio .v { font-size: 9pt; font-weight: 600; font-variant-numeric: tabular-nums; color: #111827; }
 
 .sec { margin-top: 2.8mm; break-inside: avoid; background: #FFFFFF; border: .5pt solid #E2E8F0; border-radius: 7pt; padding: 2.2mm 4mm; box-shadow: 0 1px 4px rgba(15,23,42,.15); }
 .sec h2 { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 1.8mm; padding-left: 6pt; border-left: 5pt solid #0C4A8C; border-radius: 2pt; font-size: 7pt; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #0C4A8C; break-after: avoid; }
