@@ -832,12 +832,12 @@ function OrdenFormCliente({
 
       <div className="of-form-grid" style={{ marginTop: '14px', gridTemplateColumns: 'repeat(3, minmax(200px, 1fr))' }}>
         <div className="of-f">
-          <label>Email</label>
+          <label>Fono Principal</label>
           <input
-            type="email"
-            placeholder="Email del cliente"
-            value={nuevaOrden.email}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, email: e.target.value})}
+            type="tel"
+            placeholder="Teléfono principal del cliente"
+            value={nuevaOrden.fonoPrincipal}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, fonoPrincipal: e.target.value.replace(/[^0-9+]/g, '')})}
             disabled={readOnly}
             style={{
               width: '100%',
@@ -850,12 +850,12 @@ function OrdenFormCliente({
         </div>
 
         <div className="of-f">
-          <label>Fono Principal</label>
+          <label>Email</label>
           <input
-            type="tel"
-            placeholder="Teléfono principal del cliente"
-            value={nuevaOrden.fonoPrincipal}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, fonoPrincipal: e.target.value.replace(/[^0-9+]/g, '')})}
+            type="email"
+            placeholder="Email del cliente"
+            value={nuevaOrden.email}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, email: e.target.value})}
             disabled={readOnly}
             style={{
               width: '100%',
