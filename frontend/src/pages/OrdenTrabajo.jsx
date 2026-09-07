@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import api from "../services/api";
 import { getCached } from "../services/cache";
-import { toUpper, cerrarSesion, upperInput, validarRUT, normalizarRut, validarEmail } from "../utils/helpers";
+import { toUpper, cerrarSesion, upperInput, validarRUT, normalizarRut, validarEmail, parseToken } from "../utils/helpers";
 import '../styles/OrdenTrabajo.css';
 import "../styles/ordenes-componentes.css";
 import HeaderOrdenTrabajo from "../components/ordenes/HeaderOrdenTrabajo";
@@ -20,6 +20,16 @@ import ModalOpcionesPDF from "../components/ordenes/ModalOpcionesPDF";
 import OrdenFormAcciones from "../components/ordenes/OrdenFormAcciones";
 import { usePaginaPersistente, useClampPagina } from "../hooks/usePaginacion";
 
+
+// Nombre y apellido de la sesión actual, para precargar el Técnico Asignado
+// en una OT nueva (mismo formato que el resto del campo: mayúsculas, sin
+// caracteres que no sean letras/espacios). El campo ya no es editable en el
+// formulario, así que si todavía no se cargó el Nombre del usuario, se usa
+// el nombre de usuario de login como respaldo (nunca debe quedar vacío).
+const tecnicoDeSesion = () => {
+  const { nombre, usuario } = parseToken();
+  return toUpper(nombre || usuario || "").replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '');
+};
 
 function OrdenTrabajo() {
   const navigate = useNavigate();
@@ -96,7 +106,7 @@ function OrdenTrabajo() {
     contacto: "",
     fonoContacto: "",
     emailContacto: "",
-    tecnicoAsignado: "",
+    tecnicoAsignado: tecnicoDeSesion(),
     contactosExtra: [],
     direccionesExtra: [],
     // Datos del Equipo
@@ -185,7 +195,7 @@ function OrdenTrabajo() {
         contacto: (clienteFromNav.contacto_nombre || "").toUpperCase(),
         fonoContacto: clienteFromNav.contacto_fono || "",
         emailContacto: clienteFromNav.contacto_email || "",
-        tecnicoAsignado: "",
+        tecnicoAsignado: tecnicoDeSesion(),
         equipo: "",
         modelo: "",
         marca: "",
@@ -868,7 +878,7 @@ function OrdenTrabajo() {
       contacto: "",
       fonoContacto: "",
       emailContacto: "",
-      tecnicoAsignado: "",
+      tecnicoAsignado: tecnicoDeSesion(),
       equipo: "",
       modelo: "",
       marca: "",
@@ -972,7 +982,14 @@ function OrdenTrabajo() {
             <div className="of-wrap">
               <div className="of-head">
                 <h2><Wrench size={20} /> {soloLectura ? "Ver Orden" : editingId ? "Editar Orden" : "Nueva Orden"}</h2>
-                <button type="button" className="of-head-close" onClick={cerrarFormulario}><X size={18} /></button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  {tecnicoDeSesion() && (
+                    <span style={{ fontWeight: 600, fontSize: '0.75rem', color: '#fff', background: 'rgba(255,255,255,0.22)', padding: '2px 8px', borderRadius: 999 }}>
+                      Técnico: {tecnicoDeSesion()}
+                    </span>
+                  )}
+                  <button type="button" className="of-head-close" onClick={cerrarFormulario}><X size={18} /></button>
+                </div>
               </div>
             <form onSubmit={guardarOrden} className="of-form" noValidate>
               <div className="of-col-full">

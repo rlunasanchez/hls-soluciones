@@ -47,7 +47,7 @@ router.post("/login", async (req, res) => {
     const passwordValido = await bcrypt.compare(password, user.password);
     if (passwordValido) {
       const token = jwt.sign(
-        { usuario: user.usuario, rol: user.rol },
+        { usuario: user.usuario, nombre: user.nombre || "", rol: user.rol },
         process.env.JWT_SECRET,
         { expiresIn: "8h" }
       );
@@ -61,15 +61,15 @@ router.post("/login", async (req, res) => {
 });
 
 router.post("/registrar", authMiddleware, adminOnly, async (req, res) => {
-  const { usuario, password, rol, email } = req.body;
+  const { usuario, nombre, password, rol, email } = req.body;
   try {
     if (email && !validarEmail(email)) {
       return res.status(400).json({ msg: "Email inválido" });
     }
     const passwordEncriptada = await bcrypt.hash(password, 10);
     await pool.query(
-      "INSERT INTO usuarios (usuario, password, rol, email, activo) VALUES ($1, $2, $3, $4, true)",
-      [usuario, passwordEncriptada, rol || "tecnico", email || null]
+      "INSERT INTO usuarios (usuario, nombre, password, rol, email, activo) VALUES ($1, $2, $3, $4, $5, true)",
+      [usuario, nombre || null, passwordEncriptada, rol || "tecnico", email || null]
     );
     res.status(201).json({ msg: "Usuario creado correctamente" });
   } catch (err) {
@@ -105,7 +105,7 @@ router.put("/cambiar-password", authMiddleware, async (req, res) => {
 
 router.get("/usuarios", authMiddleware, adminOnly, async (req, res) => {
   try {
-    const result = await pool.query("SELECT id, usuario, email, rol, activo, fecha_creacion FROM usuarios ORDER BY id DESC");
+    const result = await pool.query("SELECT id, usuario, nombre, email, rol, activo, fecha_creacion FROM usuarios ORDER BY id DESC");
     res.json(result.rows);
   } catch (err) {
     console.error(err);
@@ -164,12 +164,12 @@ router.delete("/eliminar-usuario/:id", authMiddleware, adminOnly, async (req, re
 
 router.put("/actualizar-usuario/:id", authMiddleware, adminOnly, async (req, res) => {
   const { id } = req.params;
-  const { usuario, rol, email } = req.body;
+  const { usuario, nombre, rol, email } = req.body;
   try {
     if (email && !validarEmail(email)) {
       return res.status(400).json({ msg: "Email inválido" });
     }
-    await pool.query("UPDATE usuarios SET usuario = $1, rol = $2, email = $3 WHERE id = $4", [usuario, rol, email || null, id]);
+    await pool.query("UPDATE usuarios SET usuario = $1, nombre = $2, rol = $3, email = $4 WHERE id = $5", [usuario, nombre || null, rol, email || null, id]);
     res.json({ msg: "Usuario actualizado correctamente" });
   } catch (err) {
     if (err.code === "23505") {

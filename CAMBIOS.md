@@ -1,5 +1,15 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-07 (9)
+
+### v2.59: campo Nombre en Usuarios + Técnico Asignado toma el nombre de la sesión
+
+**Nombre en Usuarios** (`backend/routes/auth.js`, `crear_tablas.sql`, `UsuarioFormulario.jsx`, `GestionUsuarios.jsx`): se agrega columna `nombre` a la tabla `usuarios`, separada de `usuario` (que sigue siendo el login). Se puede cargar/editar desde el formulario de Usuarios, aparece en el listado (tabla y tarjetas) y se puede buscar por él. El login sigue siendo usuario + contraseña, sin cambios — `nombre` es solo un dato adicional. Se agrega también al payload del JWT (`nombre`), disponible vía `parseToken()` sin pedirlo aparte.
+
+**Técnico Asignado en la OT** (`OrdenTrabajo.jsx`, `OrdenFormCliente.jsx`): deja de ser un campo editable en el formulario — se saca de ahí. En el encabezado de la OT (junto al botón de cerrar) aparece un badge "Técnico: {nombre}" que siempre muestra el nombre de la sesión actual (quien está viendo/editando en ese momento), tanto en una OT nueva como en una ya creada. Si el usuario todavía no tiene `nombre` cargado, se usa su `usuario` de login como respaldo (nunca queda vacío). Se ajustó el grid de Email/Fono Principal para que no se estiren al haber sacado el tercer campo de esa fila.
+
+**Verificación:** `npm run build` OK, `node --check` OK en backend. Probado extremo a extremo contra el backend real (crear/editar/listar usuario con nombre).
+
 ## Fecha: 2026-09-07 (8)
 
 ### v2.58: resumen colapsable de direcciones agregadas + ajuste de espaciado

@@ -23,6 +23,7 @@ const ufCss = `.uf-wrap{background:white;border-radius:16px;box-shadow:var(--sha
 function UsuarioFormulario({ usuarioEditando, onSave, onCancel }) {
   const [nuevoUsuario, setNuevoUsuario] = useState({
     usuario: usuarioEditando?.usuario || "",
+    nombre: usuarioEditando?.nombre || "",
     password: "",
     rol: usuarioEditando?.rol || "tecnico",
     email: usuarioEditando?.email || ""
@@ -49,7 +50,12 @@ function UsuarioFormulario({ usuarioEditando, onSave, onCancel }) {
           <form onSubmit={handleSubmit} className="uf-form" noValidate>
             <div className="uf-s">
               <div className="uf-st">Datos del Usuario</div>
-              <div className="uf-r2">
+              <div className="uf-f">
+                <label>Nombre</label>
+                <input placeholder="Nombre y apellido" value={nuevoUsuario.nombre}
+                  onChange={e => setNuevoUsuario({...nuevoUsuario, nombre: e.target.value})} required />
+              </div>
+              <div className="uf-r2" style={{ marginTop: '8px' }}>
                 <div className="uf-f">
                   <label>Usuario</label>
                   <input placeholder="Nombre de usuario" value={nuevoUsuario.usuario}

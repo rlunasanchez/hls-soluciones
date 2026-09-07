@@ -26,7 +26,9 @@ function GestionUsuarios() {
   const usuariosFiltrados = usuarios.filter(u => {
     if (!filtroBusqueda) return true;
     const termino = filtroBusqueda.toLowerCase();
-    return (u.usuario || "").toLowerCase().includes(termino) || (u.email || "").toLowerCase().includes(termino);
+    return (u.usuario || "").toLowerCase().includes(termino) ||
+      (u.nombre || "").toLowerCase().includes(termino) ||
+      (u.email || "").toLowerCase().includes(termino);
   });
 
   const totalPaginas = Math.ceil(usuariosFiltrados.length / usuariosPorPagina);
@@ -54,6 +56,7 @@ function GestionUsuarios() {
       if (id) {
         await api.put(`/api/auth/actualizar-usuario/${id}`, {
           usuario: nuevoUsuario.usuario,
+          nombre: nuevoUsuario.nombre,
           rol: nuevoUsuario.rol,
           email: nuevoUsuario.email
         });
@@ -179,6 +182,7 @@ function GestionUsuarios() {
               <thead>
                 <tr>
                   <th>ID</th>
+                  <th>Nombre</th>
                   <th>Usuario</th>
                   <th>Correo</th>
                   <th>Rol</th>
@@ -191,6 +195,7 @@ function GestionUsuarios() {
                 {usuariosPagina.map((u) => (
                   <tr key={u.id}>
                     <td data-label="ID">{u.id}</td>
+                    <td data-label="Nombre">{u.nombre || '-'}</td>
                     <td data-label="Usuario"><strong>{u.usuario}</strong></td>
                     <td data-label="Correo">{u.email || '-'}</td>
                     <td data-label="Rol">
@@ -228,6 +233,10 @@ function GestionUsuarios() {
                 <div className="data-card-header">
                   <strong>{u.usuario}</strong>
                   <span className={`badge ${u.rol === 'admin' ? 'badge-primary' : 'badge-info'}`}>{u.rol}</span>
+                </div>
+                <div className="data-card-row">
+                  <span className="data-card-label">Nombre</span>
+                  <span className="data-card-value">{u.nombre || '-'}</span>
                 </div>
                 <div className="data-card-row">
                   <span className="data-card-label">Correo</span>
