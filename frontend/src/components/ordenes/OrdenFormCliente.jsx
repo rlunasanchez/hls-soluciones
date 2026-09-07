@@ -1222,7 +1222,7 @@ function OrdenFormCliente({
         </div>
       )}
 
-      <div className="of-form-grid" style={{ marginTop: '14px' }}>
+      <div className="of-form-grid" style={{ marginTop: '14px', gridTemplateColumns: 'repeat(3, minmax(200px, 1fr))' }}>
         <div className="of-f">
           <label>Email</label>
           <input
@@ -1249,25 +1249,6 @@ function OrdenFormCliente({
             value={nuevaOrden.fonoPrincipal}
             onChange={(e) => setNuevaOrden({...nuevaOrden, fonoPrincipal: e.target.value.replace(/[^0-9+]/g, '')})}
             disabled={readOnly}
-            style={{
-              width: '100%',
-              padding: '2px 8px',
-              border: '1.5px solid var(--border)',
-              borderRadius: '6px',
-              fontSize: '.82rem'
-            }}
-          />
-        </div>
-
-        <div className="of-f" style={{ gap: '4px' }}>
-          <label style={{ fontSize: '10px' }}>Técnico Asignado *</label>
-          <input
-            type="text"
-            placeholder="Nombre y apellido del técnico"
-            value={nuevaOrden.tecnicoAsignado}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, tecnicoAsignado: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
-            disabled={readOnly}
-            required
             style={{
               width: '100%',
               padding: '2px 8px',
