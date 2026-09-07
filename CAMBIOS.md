@@ -1,5 +1,15 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-07 (10)
+
+### v2.60: fix — fila de dirección no se colapsaba tras "Registrar"
+
+**Problema:** en "Otras Direcciones / Sucursales" de la OT, al crear una dirección a mano con "+ Agregar dirección" y usar el botón "Registrar" (para darla de alta en la ficha del cliente), la operación funcionaba bien pero la fila con los campos editables se quedaba desplegada — no volvía a colapsarse como chip.
+
+**Solución** (`OrdenFormCliente.jsx`): al confirmar el registro exitoso, esa fila se saca del set de "visibles a mano" (`direccionesManualVisibles`), igual que si se hubiera cerrado manualmente.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-07 (9)
 
 ### v2.59: campo Nombre en Usuarios + Técnico Asignado toma el nombre de la sesión
