@@ -25,12 +25,13 @@ function OrdenFormCliente({
   const [rutError, setRutError] = useState("");
   const [mostrarDireccionesExtra, setMostrarDireccionesExtra] = useState(false);
   const [mostrarContactosExtra, setMostrarContactosExtra] = useState(false);
-  const [contactosExpandidos, setContactosExpandidos] = useState(false);
   const [direccionesResumenAbierto, setDireccionesResumenAbierto] = useState(false);
   // Índices de direccionesExtra agregados a mano (+ Agregar dirección) que deben
   // verse aunque la lista esté colapsada, sin desplegar las demás ya cargadas.
   const [direccionesManualVisibles, setDireccionesManualVisibles] = useState(() => new Set());
-  const LIMITE_EXTRAS = 1;
+  const [contactosResumenAbierto, setContactosResumenAbierto] = useState(false);
+  // Mismo patrón que direccionesManualVisibles pero para Otros Contactos.
+  const [contactosManualVisibles, setContactosManualVisibles] = useState(() => new Set());
   const [busquedaContacto, setBusquedaContacto] = useState("");
   const [mostrarDropdownContacto, setMostrarDropdownContacto] = useState(false);
   const contactoDropdownRef = useRef(null);
@@ -829,6 +830,44 @@ function OrdenFormCliente({
         </div>
       </div>
 
+      <div className="of-form-grid" style={{ marginTop: '14px', gridTemplateColumns: 'repeat(3, minmax(200px, 1fr))' }}>
+        <div className="of-f">
+          <label>Email</label>
+          <input
+            type="email"
+            placeholder="Email del cliente"
+            value={nuevaOrden.email}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, email: e.target.value})}
+            disabled={readOnly}
+            style={{
+              width: '100%',
+              padding: '2px 8px',
+              border: '1.5px solid var(--border)',
+              borderRadius: '6px',
+              fontSize: '.82rem'
+            }}
+          />
+        </div>
+
+        <div className="of-f">
+          <label>Fono Principal</label>
+          <input
+            type="tel"
+            placeholder="Teléfono principal del cliente"
+            value={nuevaOrden.fonoPrincipal}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, fonoPrincipal: e.target.value.replace(/[^0-9+]/g, '')})}
+            disabled={readOnly}
+            style={{
+              width: '100%',
+              padding: '2px 8px',
+              border: '1.5px solid var(--border)',
+              borderRadius: '6px',
+              fontSize: '.82rem'
+            }}
+          />
+        </div>
+      </div>
+
       {/* Direcciones Extra / Sucursales (dinámicas) */}
       <div style={{ marginTop: '34px', padding: '4px 10px', background: '#E0F2FE', border: '1px solid #7CD0F0', borderRadius: '8px', lineHeight: '1.2' }}>
         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer', fontSize: '0.8rem', width: 'fit-content', maxWidth: '100%' }}>
@@ -1227,44 +1266,6 @@ function OrdenFormCliente({
         </div>
       )}
 
-      <div className="of-form-grid" style={{ marginTop: '14px', gridTemplateColumns: 'repeat(3, minmax(200px, 1fr))' }}>
-        <div className="of-f">
-          <label>Email</label>
-          <input
-            type="email"
-            placeholder="Email del cliente"
-            value={nuevaOrden.email}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, email: e.target.value})}
-            disabled={readOnly}
-            style={{
-              width: '100%',
-              padding: '2px 8px',
-              border: '1.5px solid var(--border)',
-              borderRadius: '6px',
-              fontSize: '.82rem'
-            }}
-          />
-        </div>
-
-        <div className="of-f" style={{ gap: '4px' }}>
-          <label style={{ fontSize: '10px' }}>Fono Principal</label>
-          <input
-            type="tel"
-            placeholder="Teléfono principal del cliente"
-            value={nuevaOrden.fonoPrincipal}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, fonoPrincipal: e.target.value.replace(/[^0-9+]/g, '')})}
-            disabled={readOnly}
-            style={{
-              width: '100%',
-              padding: '2px 8px',
-              border: '1.5px solid var(--border)',
-              borderRadius: '6px',
-              fontSize: '.82rem'
-            }}
-          />
-        </div>
-      </div>
-
       <div className="of-form-grid">
         <div className="of-f">
           <label>Contacto</label>
@@ -1330,7 +1331,10 @@ function OrdenFormCliente({
             className="of-check of-check--contactos"
             checked={mostrarContactosExtra}
             disabled={readOnly && nuevaOrden.contactosExtra.length === 0}
-            onChange={(e) => setMostrarContactosExtra(e.target.checked)}
+            onChange={(e) => {
+              setMostrarContactosExtra(e.target.checked);
+              if (!e.target.checked) setContactosResumenAbierto(false);
+            }}
           />
           <UserPlus size={14} style={{ color: 'var(--success)', flexShrink: 0 }} />
           Otros Contactos
@@ -1375,6 +1379,21 @@ function OrdenFormCliente({
                 setNuevaOrden({ ...nuevaOrden, contactosExtra: arr });
               };
 
+              // Compartida por el botón "Quitar" de cada fila y por el chip de
+              // eliminación rápida (sin tener que abrir el resumen).
+              const eliminarContacto = (idx) => {
+                const arr = nuevaOrden.contactosExtra.filter((_, i) => i !== idx);
+                setNuevaOrden({ ...nuevaOrden, contactosExtra: arr });
+                setContactosManualVisibles(prev => {
+                  const next = new Set();
+                  prev.forEach(i => {
+                    if (i < idx) next.add(i);
+                    else if (i > idx) next.add(i - 1);
+                  });
+                  return next;
+                });
+              };
+
               // Evita crear a mano un contacto que ya existe: como Contacto principal
               // de la orden, en la ficha del cliente, o en otra fila de Otros Contactos.
               const nombreContactoDuplicado = (idx, valor) => {
@@ -1397,7 +1416,7 @@ function OrdenFormCliente({
               // todavía no existe en la ficha del cliente. Mismo patrón que
               // "+ Registrar en Equipos": solo disponible si el cliente ya está en el
               // mantenedor (tiene id), porque clientes_contactos necesita cliente_id.
-              const registrarContactoEnCliente = async (contacto) => {
+              const registrarContactoEnCliente = async (contacto, idx) => {
                 if (!clienteSeleccionado?.id) return;
                 try {
                   const direccionesCliente = String(clienteSeleccionado.direcciones || "").split(";;")
@@ -1431,6 +1450,11 @@ function OrdenFormCliente({
                   if (onClientesRefresh) onClientesRefresh(lista.data);
                   const actualizado = lista.data.find((c) => c.id === clienteSeleccionado.id);
                   if (actualizado && setClienteSeleccionado) setClienteSeleccionado(actualizado);
+                  setContactosManualVisibles(prev => {
+                    const next = new Set(prev);
+                    next.delete(idx);
+                    return next;
+                  });
                 } catch (err) {
                   alert(err.response?.data?.msg || "Error al registrar el contacto en el cliente.");
                 }
@@ -1470,13 +1494,62 @@ function OrdenFormCliente({
                     </div>
                   )}
 
-                  {nuevaOrden.contactosExtra.slice(0, contactosExpandidos ? nuevaOrden.contactosExtra.length : LIMITE_EXTRAS).map((c, idx) => (
+                  {nuevaOrden.contactosExtra.length > 0 && !contactosResumenAbierto && (
+                    <button
+                      type="button"
+                      onClick={() => setContactosResumenAbierto(true)}
+                      style={{
+                        background: 'none', color: 'var(--success)', border: '1px solid #7AD6EC',
+                        borderRadius: '6px', padding: '2px 10px', cursor: 'pointer',
+                        fontWeight: 600, fontSize: '0.75rem', marginRight: '8px'
+                      }}
+                    >
+                      {nuevaOrden.contactosExtra.length} contacto{nuevaOrden.contactosExtra.length > 1 ? 's' : ''} agregado{nuevaOrden.contactosExtra.length > 1 ? 's' : ''} — Ver
+                    </button>
+                  )}
+
+                  {nuevaOrden.contactosExtra.length > 0 && contactosResumenAbierto && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
+                      {nuevaOrden.contactosExtra.map((c, idx) => (
+                        <span key={idx} style={{
+                          display: 'inline-flex', alignItems: 'center', gap: '6px',
+                          background: '#F0FDF4', color: 'var(--success)', border: '1px solid #7AD6EC',
+                          borderRadius: '999px', padding: '2px 6px 2px 10px', fontSize: '0.75rem', fontWeight: 600
+                        }}>
+                          <span
+                            onClick={() => setContactosManualVisibles(prev => {
+                              const next = new Set(prev);
+                              if (next.has(idx)) next.delete(idx); else next.add(idx);
+                              return next;
+                            })}
+                            title="Editar contacto"
+                            style={{ cursor: 'pointer' }}
+                          >
+                            {c.nombre ? c.nombre : `Contacto ${idx + 1}`}
+                          </span>
+                          {!readOnly && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (!confirm("¿Seguro que desea eliminar este contacto?")) return;
+                                eliminarContacto(idx);
+                              }}
+                              title="Quitar contacto"
+                              style={{ background: 'none', border: 'none', color: 'var(--success)', cursor: 'pointer', display: 'flex', padding: 0 }}
+                            >
+                              <X size={12} />
+                            </button>
+                          )}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {nuevaOrden.contactosExtra.map((c, idx) => {
+                    if (!contactosManualVisibles.has(idx)) return null;
+                    return (
                     <div key={idx} style={{ marginBottom: '6px', border: '1px solid var(--border)', borderRadius: '6px', padding: '4px' }}>
                       <div className="of-form-grid" style={{ gap: '8px' }}>
-                        <div className="of-f">
-                          <label>Email</label>
-                          <input type="email" placeholder="Email" value={c.email} onChange={(e) => actualizarContacto(idx, 'email', e.target.value)} disabled={readOnly} />
-                        </div>
                         <div className="of-f">
                           <label>Contacto {idx + 1}</label>
                           <input
@@ -1498,6 +1571,10 @@ function OrdenFormCliente({
                           />
                         </div>
                         <div className="of-f">
+                          <label>Email</label>
+                          <input type="email" placeholder="Email" value={c.email} onChange={(e) => actualizarContacto(idx, 'email', e.target.value)} disabled={readOnly} />
+                        </div>
+                        <div className="of-f">
                           <label>Fono</label>
                           <input type="tel" placeholder="Fono" value={c.fono} onChange={(e) => actualizarContacto(idx, 'fono', e.target.value.replace(/[^0-9+]/g, ''))} disabled={readOnly} />
                         </div>
@@ -1513,7 +1590,7 @@ function OrdenFormCliente({
                               !contactosCliente.some((cc) => normTxt(cc.nombre) === normTxt(c.nombre)) && (
                               <button
                                 type="button"
-                                onClick={() => registrarContactoEnCliente(c)}
+                                onClick={() => registrarContactoEnCliente(c, idx)}
                                 title="Registrar este contacto en la ficha del cliente si no existe"
                                 style={{ background: '#F0FDF4', color: 'var(--success)', border: '1px solid #7AD6EC', borderRadius: '6px', padding: '2px 8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.75rem', lineHeight: '1.3', flexShrink: 0 }}
                               >
@@ -1525,8 +1602,7 @@ function OrdenFormCliente({
                                 type="button"
                                 onClick={() => {
                                   if (!confirm("¿Seguro que desea eliminar este contacto?")) return;
-                                  const arr = nuevaOrden.contactosExtra.filter((_, i) => i !== idx);
-                                  setNuevaOrden({ ...nuevaOrden, contactosExtra: arr });
+                                  eliminarContacto(idx);
                                 }}
                                 style={{ background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA', borderRadius: '6px', padding: '2px 8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.75rem', lineHeight: '1.3', flexShrink: 0 }}
                               >
@@ -1537,37 +1613,19 @@ function OrdenFormCliente({
                         </div>
                       </div>
                     </div>
-                  ))}
-
-                  {nuevaOrden.contactosExtra.length > LIMITE_EXTRAS && (
-                    <div style={{ marginTop: '4px' }}>
-                      <button
-                        type="button"
-                        onClick={() => setContactosExpandidos(!contactosExpandidos)}
-                        style={{
-                          background: 'none',
-                          color: 'var(--success)',
-                          border: '1px solid #7AD6EC',
-                          borderRadius: '6px',
-                          padding: '2px 10px',
-                          cursor: 'pointer',
-                          fontWeight: 600,
-                          fontSize: '0.75rem'
-                        }}
-                      >
-                        {contactosExpandidos ? 'Ver menos' : `Ver todos (${nuevaOrden.contactosExtra.length})`}
-                      </button>
-                    </div>
-                  )}
+                    );
+                  })}
 
                   {!readOnly && (
                     <button
                       type="button"
                       onClick={() => {
+                        const nuevoIdx = nuevaOrden.contactosExtra.length;
                         setNuevaOrden({
                           ...nuevaOrden,
                           contactosExtra: [...nuevaOrden.contactosExtra, { nombre: "", email: "", fono: "", direccion: "", cargo: "" }]
                         });
+                        setContactosManualVisibles(prev => new Set(prev).add(nuevoIdx));
                       }}
                       style={{
                         marginTop: '6px',
