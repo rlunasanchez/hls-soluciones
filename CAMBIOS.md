@@ -1,5 +1,23 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-07 (13)
+
+### v2.63: reorganización de "Otros Contactos"/"Otras Direcciones" en la OT + orden de campos
+
+**Email y Fono Principal** (`OrdenFormCliente.jsx`): se movieron de más abajo en el formulario a justo debajo de RUT/Dirección/Comuna, arriba de "Otras Direcciones / Sucursales". Se corrigió además un desalineamiento entre ambos campos (Fono Principal tenía un `gap`/tamaño de label distinto al de Email).
+
+**Otros Contactos** ahora funciona igual que "Otras Direcciones / Sucursales" (v2.57/58): selector "Agregar contacto del cliente" que solo agrega sin desplegar nada; resumen colapsado por defecto con botón "N contactos agregados — Ver"; cada contacto agregado se ve como chip (click en el nombre despliega sus campos para editar, ✕ lo elimina al instante); "+ Agregar contacto" (fila en blanco) muestra solo esa fila nueva. Se quita el botón "Ver todos/Ver menos" que usaba antes. Dentro de cada fila, el orden de campos queda Contacto → Email → Fono → Dirección Contacto → Cargo (antes Email iba primero).
+
+**Verificación:** `npm run build` OK.
+
+## Fecha: 2026-09-07 (12)
+
+### v2.62: encabezado del PDF — texto más grande + leyenda Brother simplificada
+
+Se agranda el texto de dirección/teléfono/email de la empresa en el encabezado (de 7pt a 8.5pt) en ambos PDF (OT y Cotización). La leyenda debajo del logo Brother pasa de "Servicio Técnico Autorizado" a solo "Autorizado".
+
+**Verificación:** `npm run build` OK. Renderizado real vía Chrome headless.
+
 ## Fecha: 2026-09-07 (11)
 
 ### v2.61: "Guardar Orden" siempre deja en el mantenedor de OT

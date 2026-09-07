@@ -138,7 +138,7 @@ img.logo { max-width: 100%; max-height: 100%; object-fit: contain; }
 .logo--ph { border: .5pt dashed #CBD5E1; border-radius: 6pt; color: #94A3B8; font-size: 6pt; text-align: center; padding: 2pt; }
 .emp-datos { text-align: center; }
 .emp-datos h1 { margin: 0; font-size: 13pt; font-weight: 800; letter-spacing: -.01em; color: #0C4A8C; }
-.emp-datos p { margin: 1pt 0 0; font-size: 7pt; color: #6B7280; }
+.emp-datos p { margin: 1pt 0 0; font-size: 8.5pt; color: #6B7280; }
 .brother-box { text-align: center; align-self: flex-end; }
 .brother-leyenda { margin-top: 2pt; font-size: 6pt; text-transform: uppercase; letter-spacing: .1em; color: #6B7280; }
 
