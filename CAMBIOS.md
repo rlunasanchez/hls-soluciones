@@ -1,5 +1,15 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-07 (11)
+
+### v2.61: "Guardar Orden" siempre deja en el mantenedor de OT
+
+**Problema:** si se creaba una OT desde el mantenedor de Clientes (menú "..." → Nueva OT) y se guardaba con "Guardar Orden", volvía a la pantalla de Clientes en vez de quedarse en Órdenes de Trabajo viendo la orden recién creada.
+
+**Solución** (`OrdenTrabajo.jsx`): al guardar (crear o editar) siempre se refresca el listado de OT y se queda ahí, sin importar desde dónde se haya abierto el formulario. "Cancelar"/X sigue volviendo a Clientes si se vino de ahí, ya que en ese caso no se guardó nada.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-07 (10)
 
 ### v2.60: fix — fila de dirección no se colapsaba tras "Registrar"
