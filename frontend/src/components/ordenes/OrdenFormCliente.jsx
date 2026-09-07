@@ -925,7 +925,7 @@ function OrdenFormCliente({
               // Da de alta en clientes_direcciones una dirección tipeada a mano en la OT
               // que todavía no existe en la ficha del cliente. Mismo patrón que
               // "+ Registrar en Equipos"/"+ Registrar en Contactos".
-              const registrarDireccionEnCliente = async (dir) => {
+              const registrarDireccionEnCliente = async (dir, idx) => {
                 if (!clienteSeleccionado?.id) return;
                 try {
                   const contactosClienteActuales = String(clienteSeleccionado.contactos || "").split(";;")
@@ -959,6 +959,11 @@ function OrdenFormCliente({
                   if (onClientesRefresh) onClientesRefresh(lista.data);
                   const actualizado = lista.data.find((c) => c.id === clienteSeleccionado.id);
                   if (actualizado && setClienteSeleccionado) setClienteSeleccionado(actualizado);
+                  setDireccionesManualVisibles(prev => {
+                    const next = new Set(prev);
+                    next.delete(idx);
+                    return next;
+                  });
                 } catch (err) {
                   alert(err.response?.data?.msg || "Error al registrar la dirección en el cliente.");
                 }
@@ -1100,7 +1105,7 @@ function OrdenFormCliente({
                           !direccionesCliente.some((dc) => dc.direccion.toUpperCase().trim() === dir.direccion.toUpperCase().trim()) && (
                           <button
                             type="button"
-                            onClick={() => registrarDireccionEnCliente(dir)}
+                            onClick={() => registrarDireccionEnCliente(dir, idx)}
                             title="Registrar esta dirección en la ficha del cliente si no existe"
                             style={{ background: '#E0F2FE', color: '#0284C7', border: '1px solid #7CD0F0', borderRadius: '6px', padding: '2px 8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.75rem' }}
                           >
