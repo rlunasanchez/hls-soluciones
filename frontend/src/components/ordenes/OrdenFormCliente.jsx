@@ -1198,13 +1198,14 @@ function OrdenFormCliente({
         </div>
 
         <div className="of-f" style={{ gap: '4px' }}>
-          <label style={{ fontSize: '10px' }}>Contacto</label>
+          <label style={{ fontSize: '10px' }}>Técnico Asignado *</label>
           <input
             type="text"
-            placeholder="Nombre del contacto"
-            value={nuevaOrden.contacto}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, contacto: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
+            placeholder="Nombre y apellido del técnico"
+            value={nuevaOrden.tecnicoAsignado}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, tecnicoAsignado: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
             disabled={readOnly}
+            required
             style={{
               width: '100%',
               padding: '2px 8px',
@@ -1218,12 +1219,12 @@ function OrdenFormCliente({
 
       <div className="of-form-grid">
         <div className="of-f">
-          <label>Email Contacto</label>
+          <label>Contacto</label>
           <input
-            type="email"
-            placeholder="Email del contacto"
-            value={nuevaOrden.emailContacto}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, emailContacto: e.target.value})}
+            type="text"
+            placeholder="Nombre del contacto"
+            value={nuevaOrden.contacto}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, contacto: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
             disabled={readOnly}
             style={{
               width: '100%',
@@ -1254,14 +1255,13 @@ function OrdenFormCliente({
         </div>
 
         <div className="of-f">
-          <label>Técnico Asignado *</label>
+          <label>Email Contacto</label>
           <input
-            type="text"
-            placeholder="Nombre y apellido del técnico"
-            value={nuevaOrden.tecnicoAsignado}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, tecnicoAsignado: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
+            type="email"
+            placeholder="Email del contacto"
+            value={nuevaOrden.emailContacto}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, emailContacto: e.target.value})}
             disabled={readOnly}
-            required
             style={{
               width: '100%',
               padding: '2px 8px',

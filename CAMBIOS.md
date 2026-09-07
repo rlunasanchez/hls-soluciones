@@ -1,5 +1,17 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-07 (5)
+
+### v2.55: contacto principal al seleccionar cliente en la OT + reordenar Contacto/Técnico Asignado
+
+**Completar contacto principal** (`OrdenTrabajo.jsx`): al seleccionar un cliente en la OT ya se completaban Contacto/Fono Contacto/Email Contacto con el contacto principal del cliente — pero solo si era un cliente nuevo o distinto al de la orden. Si en una OT ya creada se re-seleccionaba el **mismo** cliente que ya tenía asociado, esos tres campos no se tocaban (a propósito, para no pisar un contacto editado a mano) y quedaban vacíos si nunca se habían cargado. Ahora, en ese caso, se completan solo si están vacíos — no pisa nada si ya hay algo cargado.
+
+**Reordenar campos** (`OrdenFormCliente.jsx`): se intercambiaron las posiciones de "Contacto" y "Técnico Asignado", y se reordenó la fila de datos del contacto. Queda:
+- Fila 1: Email (cliente) → Fono Principal → Técnico Asignado
+- Fila 2: Contacto → Fono Contacto → Email Contacto
+
+**Verificación:** `npm run build` OK. Confirmado por el usuario en la app real.
+
 ## Fecha: 2026-09-07 (4)
 
 ### v2.54: Fecha del encabezado del PDF de OT en texto normal

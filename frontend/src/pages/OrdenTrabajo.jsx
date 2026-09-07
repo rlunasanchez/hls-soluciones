@@ -587,7 +587,8 @@ function OrdenTrabajo() {
 
     // Mismo cliente re-seleccionado en modo edicion: solo re-sincroniza sus
     // datos propios con lo registrado (por si se editaron a mano en la OT),
-    // sin tocar equipo, contacto ni direcciones/contactos extra.
+    // sin tocar equipo ni direcciones/contactos extra. El contacto principal
+    // se completa solo si todavia esta vacio, para no pisar uno ya editado.
     if (mismoCliente && editingId) {
       setNuevaOrden(prev => ({
         ...prev,
@@ -596,7 +597,10 @@ function OrdenTrabajo() {
         comuna: toUpper(cliente.comuna),
         rut: cliente.rut || "",
         email: cliente.email || "",
-        fonoPrincipal: cliente.telefono || ""
+        fonoPrincipal: cliente.telefono || "",
+        contacto: prev.contacto || toUpper(cliente.contacto_nombre || ""),
+        fonoContacto: prev.fonoContacto || cliente.contacto_fono || "",
+        emailContacto: prev.emailContacto || cliente.contacto_email || ""
       }));
       return;
     }
@@ -611,9 +615,9 @@ function OrdenTrabajo() {
         rut: cliente.rut || "",
         email: cliente.email || "",
         fonoPrincipal: cliente.telefono || "",
-        contacto: "",
-        fonoContacto: "",
-        emailContacto: "",
+        contacto: toUpper(cliente.contacto_nombre || ""),
+        fonoContacto: cliente.contacto_fono || "",
+        emailContacto: cliente.contacto_email || "",
         contactosExtra: [],
         direccionesExtra: []
       }));
@@ -630,9 +634,9 @@ function OrdenTrabajo() {
       rut: cliente.rut || "",
       email: cliente.email || "",
       fonoPrincipal: cliente.telefono || "",
-      contacto: "",
-      fonoContacto: "",
-      emailContacto: "",
+      contacto: toUpper(cliente.contacto_nombre || ""),
+      fonoContacto: cliente.contacto_fono || "",
+      emailContacto: cliente.contacto_email || "",
       contactosExtra: [],
       direccionesExtra: [],
       equipo: "",
