@@ -1,5 +1,15 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-07
+
+### v2.51: fix responsive en Ítems de Cotizaciones
+
+**Problema:** el resto del formulario de Cotizaciones ya era responsive (comparte `of-cols`/`of-form-grid` con la OT, con sus `@media` en 1100px y 768px), pero la fila de campos de cada Ítem (SKU/Cant./Uni./Neto/Total) usaba un `display:flex` armado a mano con anchos fijos y sin `flex-wrap` — en pantallas angostas se desbordaba en vez de acomodarse como el resto de las pantallas.
+
+**Solución** (`Cotizaciones.jsx`): se agregó `flexWrap: 'wrap'` a esa fila, sin tocar los anchos de cada campo — en vez de desbordar, ahora los campos pasan a la siguiente línea cuando no entran.
+
+**Verificación:** `npm run build` OK. Comparado visualmente vía Chrome headless a 375px (mobile) y 800px (tablet): a 800px entran los 5 campos en una fila, a 375px se acomodan en varias filas sin desbordar.
+
 ## Fecha: 2026-09-04 (7)
 
 ### v2.50: fix — Glosa no salía en el PDF + Cancelar no volvía a la OT tras Guardar
