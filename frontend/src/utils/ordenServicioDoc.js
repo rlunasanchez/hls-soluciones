@@ -264,11 +264,11 @@ export function generarHtmlOrdenServicio(orden, opciones) {
 
   <div class="titulo-barra">
     <div>
-      <h1>Orden de Servicio <span class="folio-numero">N° ${esc(numero)}</span>${orden.es_garantia ? '<span class="garantia-chip">Garantía</span>' : ""}</h1>
+      <h1>Orden de Servicio <span class="folio-numero">${esc(fecha(orden.fecha))}</span>${orden.es_garantia ? '<span class="garantia-chip">Garantía</span>' : ""}</h1>
     </div>
     <div class="folio">
-      <span class="l">Fecha</span>
-      <span class="v">${esc(fecha(orden.fecha))}</span>
+      <span class="l">N° Orden</span>
+      <span class="v">${esc(numero)}</span>
     </div>
   </div>
 
