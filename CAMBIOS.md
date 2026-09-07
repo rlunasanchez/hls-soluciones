@@ -1,5 +1,13 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-07 (3)
+
+### v2.53: ajuste — N° de Orden y Fecha mantienen su posición, solo cambia el color destacado
+
+v2.52 movió el N° de Orden y la Fecha de lugar (número a la caja del costado, fecha al título) además de cambiar cuál iba destacado. La posición correcta era mantener cada uno donde estaba — N° de Orden junto al título "Orden de Servicio" (izquierda), Fecha en la caja del costado (derecha) — y solo invertir cuál va destacado en azul: ahora el N° de Orden se ve en azul bold junto al título, y la caja de Fecha pierde el fondo azul sólido (queda neutra, con borde).
+
+**Verificación:** `npm run build` OK. Renderizado real del PDF vía Chrome headless.
+
 ## Fecha: 2026-09-07 (2)
 
 ### v2.52: caja azul del encabezado del PDF de OT pasa a mostrar el N° de Orden
