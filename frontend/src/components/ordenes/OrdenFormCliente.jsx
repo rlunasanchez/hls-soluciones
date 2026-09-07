@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
-import { Search, Users, ChevronDown, ChevronUp, Eye, UserPlus, MapPin, Paperclip, MoreVertical, Download, Trash2, FileText, Printer, Pencil } from "lucide-react";
+import { Search, Users, ChevronDown, ChevronUp, Eye, UserPlus, MapPin, Paperclip, MoreVertical, Download, Trash2, FileText, Printer, Pencil, X } from "lucide-react";
 import ClienteFormulario from "../clientes/ClienteFormulario";
 import "../../styles/Clientes.css";
 import { upperInput, validarRUT, formatearRutInput, toUpper, normalizarRut } from "../../utils/helpers";
@@ -25,7 +25,6 @@ function OrdenFormCliente({
   const [rutError, setRutError] = useState("");
   const [mostrarDireccionesExtra, setMostrarDireccionesExtra] = useState(false);
   const [mostrarContactosExtra, setMostrarContactosExtra] = useState(false);
-  const [direccionesExpandidas, setDireccionesExpandidas] = useState(false);
   const [contactosExpandidos, setContactosExpandidos] = useState(false);
   // Índices de direccionesExtra agregados a mano (+ Agregar dirección) que deben
   // verse aunque la lista esté colapsada, sin desplegar las demás ya cargadas.
@@ -34,6 +33,10 @@ function OrdenFormCliente({
   const [busquedaContacto, setBusquedaContacto] = useState("");
   const [mostrarDropdownContacto, setMostrarDropdownContacto] = useState(false);
   const contactoDropdownRef = useRef(null);
+  // Valor que tenía el campo al enfocarlo, para no disparar el aviso de
+  // "ya existe" si al final se dejó igual a como estaba (sin cambios reales).
+  const direccionEnFocoRef = useRef("");
+  const nombreContactoEnFocoRef = useRef("");
   const [mostrarEditarClienteModal, setMostrarEditarClienteModal] = useState(false);
   const [clienteAEditar, setClienteAEditar] = useState(null);
   const [mostrarRegistrarCliente, setMostrarRegistrarCliente] = useState(false);
@@ -889,6 +892,21 @@ function OrdenFormCliente({
                 setNuevaOrden({ ...nuevaOrden, direccionesExtra: arr });
               };
 
+              // Compartida por el botón "Quitar" de cada fila y por el chip de
+              // eliminación rápida (sin tener que abrir "Ver todas").
+              const eliminarDireccion = (idx) => {
+                const arr = nuevaOrden.direccionesExtra.filter((_, i) => i !== idx);
+                setNuevaOrden({ ...nuevaOrden, direccionesExtra: arr });
+                setDireccionesManualVisibles(prev => {
+                  const next = new Set();
+                  prev.forEach(i => {
+                    if (i < idx) next.add(i);
+                    else if (i > idx) next.add(i - 1);
+                  });
+                  return next;
+                });
+              };
+
               // Evita crear a mano una dirección que ya existe: en la ficha del
               // cliente o en otra fila de Otras Direcciones / Sucursales.
               const direccionDuplicada = (idx, valor) => {
@@ -975,8 +993,45 @@ function OrdenFormCliente({
                     </div>
                   )}
 
+                  {nuevaOrden.direccionesExtra.length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
+                      {nuevaOrden.direccionesExtra.map((dir, idx) => (
+                        <span key={idx} style={{
+                          display: 'inline-flex', alignItems: 'center', gap: '6px',
+                          background: '#E0F2FE', color: '#0284C7', border: '1px solid #7CD0F0',
+                          borderRadius: '999px', padding: '2px 6px 2px 10px', fontSize: '0.75rem', fontWeight: 600
+                        }}>
+                          <span
+                            onClick={() => setDireccionesManualVisibles(prev => {
+                              const next = new Set(prev);
+                              if (next.has(idx)) next.delete(idx); else next.add(idx);
+                              return next;
+                            })}
+                            title="Editar dirección"
+                            style={{ cursor: 'pointer' }}
+                          >
+                            {dir.direccion ? dir.direccion : `Dirección ${idx + 1}`}
+                          </span>
+                          {!readOnly && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (!confirm("¿Seguro que desea eliminar esta dirección?")) return;
+                                eliminarDireccion(idx);
+                              }}
+                              title="Quitar dirección"
+                              style={{ background: 'none', border: 'none', color: '#0284C7', cursor: 'pointer', display: 'flex', padding: 0 }}
+                            >
+                              <X size={12} />
+                            </button>
+                          )}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
                   {nuevaOrden.direccionesExtra.map((dir, idx) => {
-                    if (!direccionesExpandidas && !direccionesManualVisibles.has(idx)) return null;
+                    if (!direccionesManualVisibles.has(idx)) return null;
                     return (
                     <div key={idx} style={{ marginBottom: '6px', border: '1px solid var(--border)', borderRadius: '6px', padding: '4px' }}>
                       <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-end', marginBottom: '4px' }}>
@@ -995,7 +1050,9 @@ function OrdenFormCliente({
                             placeholder="Dirección"
                             value={dir.direccion}
                             onChange={(e) => actualizarDireccion(idx, 'direccion', upperInput(e))}
+                            onFocus={(e) => { direccionEnFocoRef.current = e.target.value; }}
                             onBlur={(e) => {
+                              if (e.target.value === direccionEnFocoRef.current) return;
                               if (direccionDuplicada(idx, e.target.value)) {
                                 alert(`La dirección "${e.target.value.trim()}" ya existe. Elíjala desde "Agregar dirección del cliente" en vez de crearla de nuevo.`);
                                 const arr = [...nuevaOrden.direccionesExtra];
@@ -1036,17 +1093,7 @@ function OrdenFormCliente({
                             type="button"
                             onClick={() => {
                               if (!confirm("¿Seguro que desea eliminar esta dirección?")) return;
-                              const arr = nuevaOrden.direccionesExtra.filter((_, i) => i !== idx);
-                              setNuevaOrden({ ...nuevaOrden, direccionesExtra: arr });
-                              setDireccionesManualVisibles(prev => {
-                                const next = new Set();
-                                prev.forEach(i => {
-                                  if (i < idx) next.add(i);
-                                  else if (i > idx) next.add(i - 1);
-                                });
-                                return next;
-                              });
-                              if (arr.length === 0) setDireccionesExpandidas(false);
+                              eliminarDireccion(idx);
                             }}
                             style={{ background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA', borderRadius: '6px', padding: '2px 8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.75rem' }}
                           >
@@ -1057,27 +1104,6 @@ function OrdenFormCliente({
                     </div>
                     );
                   })}
-
-                  {nuevaOrden.direccionesExtra.length > 0 && (
-                    <div style={{ marginTop: '4px' }}>
-                      <button
-                        type="button"
-                        onClick={() => setDireccionesExpandidas(!direccionesExpandidas)}
-                        style={{
-                          background: 'none',
-                          color: '#0284C7',
-                          border: '1px solid #7CD0F0',
-                          borderRadius: '6px',
-                          padding: '2px 10px',
-                          cursor: 'pointer',
-                          fontWeight: 600,
-                          fontSize: '0.75rem'
-                        }}
-                      >
-                        {direccionesExpandidas ? 'Ver menos' : `Ver todas (${nuevaOrden.direccionesExtra.length})`}
-                      </button>
-                    </div>
-                  )}
 
                   {!readOnly && (
                     <button
@@ -1453,7 +1479,9 @@ function OrdenFormCliente({
                             placeholder="Nombre"
                             value={c.nombre}
                             onChange={(e) => actualizarContacto(idx, 'nombre', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))}
+                            onFocus={(e) => { nombreContactoEnFocoRef.current = e.target.value; }}
                             onBlur={(e) => {
+                              if (e.target.value === nombreContactoEnFocoRef.current) return;
                               if (nombreContactoDuplicado(idx, e.target.value)) {
                                 alert(`El contacto "${e.target.value.trim()}" ya existe. Elíjalo desde "Agregar contacto del cliente" en vez de crearlo de nuevo.`);
                                 const arr = [...nuevaOrden.contactosExtra];

@@ -1,5 +1,15 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-07 (7)
+
+### v2.57: chips para agregar/editar/quitar direcciones + fix aviso de duplicado
+
+**Chips en "Otras Direcciones / Sucursales"** (`OrdenFormCliente.jsx`): cada dirección agregada se muestra como una etiqueta compacta con su dirección y una ✕. Click en el texto despliega/oculta los campos completos de esa dirección (Tipo, Ciudad, Comuna, Fono) para editarla; click en la ✕ la elimina al instante. Se eliminó el botón "Ver todas/Ver menos" (y el estado `direccionesExpandidas`) — ya no hace falta, cada fila se controla individualmente desde su chip.
+
+**Fix — aviso de "dirección/contacto ya existe" con falso positivo** (v2.48): el aviso se disparaba en el `onBlur` comparando el valor final contra las direcciones/contactos del cliente, sin importar si realmente se había cambiado algo. Si se editaba un campo y se dejaba igual a como estaba (coincidiendo con una dirección/contacto ya registrado del cliente), igual se disparaba el aviso y se borraba el campo. Ahora se compara contra el valor que tenía al enfocar el campo — si no cambió, no se revisa duplicado. Aplicado tanto a Dirección (Otras Direcciones) como a Nombre (Otros Contactos).
+
+**Verificación:** `npm run build` OK. Confirmado por el usuario en la app real.
+
 ## Fecha: 2026-09-07 (6)
 
 ### v2.56: "Otras Direcciones / Sucursales" no se despliega sola al agregar
