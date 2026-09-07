@@ -1,5 +1,13 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-07 (14)
+
+### v2.64: orden Fono Principal / Email en la OT
+
+Se invierte el orden de la fila agregada en v2.63: ahora es Fono Principal primero, Email al lado (antes era al revés).
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-07 (13)
 
 ### v2.63: reorganización de "Otros Contactos"/"Otras Direcciones" en la OT + orden de campos
