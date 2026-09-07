@@ -1,5 +1,13 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-07 (4)
+
+### v2.54: Fecha del encabezado del PDF de OT en texto normal
+
+La caja de Fecha ya no tenía fondo azul (v2.53), pero el valor seguía en 14pt/800/azul — se veía igual de destacado que antes. Se cambia a texto normal (9pt/600/negro, mismo estilo que el resto de los valores del documento).
+
+**Verificación:** `npm run build` OK. Renderizado real del PDF vía Chrome headless.
+
 ## Fecha: 2026-09-07 (3)
 
 ### v2.53: ajuste — N° de Orden y Fecha mantienen su posición, solo cambia el color destacado
