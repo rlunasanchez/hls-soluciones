@@ -632,7 +632,7 @@ function Cotizaciones() {
                           </button>
                         )}
                       </div>
-                      <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
                         <div className="of-f" style={{ flex: '0 0 120px' }}>
                           <label>SKU</label>
                           <input type="text" value={item.sku} onChange={(e) => actualizarItem(idx, 'sku', e.target.value)} disabled={soloLectura} />
