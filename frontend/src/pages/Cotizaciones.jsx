@@ -23,7 +23,6 @@ const cotizacionVacia = () => ({
   fechaEmision: new Date().toISOString().split("T")[0],
   fechaValidoHasta: "",
   condicion: "Contado - CLP",
-  pais: "Chile",
   glosa: "",
   clienteId: null,
   clienteRut: "",
@@ -31,7 +30,7 @@ const cotizacionVacia = () => ({
   contactoNombre: "",
   contactoFono: "",
   contactoEmail: "",
-  ejecutivo: parseToken().usuario || "",
+  ejecutivo: parseToken().nombre || parseToken().usuario || "",
   ejecutivoFono: EMPRESA.fono,
   ejecutivoEmail: "",
   items: [itemVacio(), itemVacio()],
@@ -227,7 +226,6 @@ function Cotizaciones() {
       fechaEmision: (c.fecha_emision || "").substring(0, 10),
       fechaValidoHasta: (c.fecha_valido_hasta || "").substring(0, 10),
       condicion: c.condicion || "",
-      pais: c.pais || "",
       glosa: c.glosa || "",
       clienteId: c.cliente_id || null,
       clienteRut: c.cliente_rut || "",
@@ -578,16 +576,17 @@ function Cotizaciones() {
                       <label>Email Ejecutivo</label>
                       <input type="email" placeholder="Email del ejecutivo" value={cotizacion.ejecutivoEmail} onChange={(e) => setCotizacion({ ...cotizacion, ejecutivoEmail: e.target.value })} disabled={soloLectura} />
                     </div>
-                  </div>
-                  <div className="of-form-grid" style={{ marginTop: 10 }}>
                     <div className="of-f">
                       <label>Condición</label>
-                      <input type="text" placeholder="Condición de pago" value={cotizacion.condicion} onChange={(e) => setCotizacion({ ...cotizacion, condicion: e.target.value })} disabled={soloLectura} />
+                      <select value={cotizacion.condicion} onChange={(e) => setCotizacion({ ...cotizacion, condicion: e.target.value })} disabled={soloLectura}>
+                        <option value="Contado - CLP">Contado - CLP</option>
+                        <option value="Crédito 30 días">Crédito 30 días</option>
+                        <option value="Crédito 60 días">Crédito 60 días</option>
+                        <option value="Transferencia Bancaria">Transferencia Bancaria</option>
+                      </select>
                     </div>
-                    <div className="of-f">
-                      <label>País</label>
-                      <input type="text" placeholder="País del cliente" value={cotizacion.pais} onChange={(e) => setCotizacion({ ...cotizacion, pais: upperInput(e) })} disabled={soloLectura} />
-                    </div>
+                  </div>
+                  <div className="of-form-grid" style={{ marginTop: 10 }}>
                     <div className="of-f">
                       <label>Emisión</label>
                       <input type="date" value={cotizacion.fechaEmision} onChange={(e) => setCotizacion({ ...cotizacion, fechaEmision: e.target.value })} disabled={soloLectura} required />

@@ -17,7 +17,7 @@ router.get("/", authMiddleware, async (req, res) => {
 
   try {
     const [cotizaciones] = await pool.query(
-      `SELECT id, folio, fecha_emision, fecha_valido_hasta, condicion, pais, glosa,
+      `SELECT id, folio, fecha_emision, fecha_valido_hasta, condicion, glosa,
         cliente_id, cliente_rut, cliente_razon_social,
         contacto_nombre, contacto_fono, contacto_email,
         ejecutivo, ejecutivo_fono, ejecutivo_email,
@@ -63,7 +63,7 @@ router.get("/:id", authMiddleware, async (req, res) => {
 
 router.post("/", authMiddleware, async (req, res) => {
   const {
-    fechaEmision, fechaValidoHasta, condicion, pais, glosa,
+    fechaEmision, fechaValidoHasta, condicion, glosa,
     clienteId, clienteRut, clienteRazonSocial,
     contactoNombre, contactoFono, contactoEmail,
     ejecutivoFono, ejecutivoEmail,
@@ -81,17 +81,19 @@ router.post("/", authMiddleware, async (req, res) => {
     // El ejecutivo se toma del usuario autenticado, no de lo que mande el
     // cliente HTTP: es quien está usando la app en ese momento, no un dato
     // editable a mano (evita que alguien se atribuya la cotización de otro).
-    const ejecutivo = req.user.usuario;
+    // Se prioriza el Nombre cargado en Usuarios; si todavía no lo tiene,
+    // se usa el usuario de login como respaldo (nunca queda vacío).
+    const ejecutivo = req.user.nombre || req.user.usuario;
 
     const [resultado] = await connection.query(
-      `INSERT INTO cotizaciones (folio, fecha_emision, fecha_valido_hasta, condicion, pais, glosa,
+      `INSERT INTO cotizaciones (folio, fecha_emision, fecha_valido_hasta, condicion, glosa,
         cliente_id, cliente_rut, cliente_razon_social,
         contacto_nombre, contacto_fono, contacto_email,
         ejecutivo, ejecutivo_fono, ejecutivo_email,
         items, orden_id, orden_numero)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        folio, fechaEmision, fechaValidoHasta || null, condicion || null, pais || null, glosa || null,
+        folio, fechaEmision, fechaValidoHasta || null, condicion || null, glosa || null,
         clienteId || null, clienteRut || null, clienteRazonSocial || '',
         contactoNombre || null, contactoFono || null, contactoEmail || null,
         ejecutivo, ejecutivoFono || null, ejecutivoEmail || null,
@@ -113,7 +115,7 @@ router.post("/", authMiddleware, async (req, res) => {
 router.put("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
   const {
-    fechaEmision, fechaValidoHasta, condicion, pais, glosa,
+    fechaEmision, fechaValidoHasta, condicion, glosa,
     clienteId, clienteRut, clienteRazonSocial,
     contactoNombre, contactoFono, contactoEmail,
     ejecutivo, ejecutivoFono, ejecutivoEmail,
@@ -125,14 +127,14 @@ router.put("/:id", authMiddleware, async (req, res) => {
 
   try {
     await pool.query(
-      `UPDATE cotizaciones SET fecha_emision = ?, fecha_valido_hasta = ?, condicion = ?, pais = ?, glosa = ?,
+      `UPDATE cotizaciones SET fecha_emision = ?, fecha_valido_hasta = ?, condicion = ?, glosa = ?,
         cliente_id = ?, cliente_rut = ?, cliente_razon_social = ?,
         contacto_nombre = ?, contacto_fono = ?, contacto_email = ?,
         ejecutivo = ?, ejecutivo_fono = ?, ejecutivo_email = ?,
         items = ?, orden_id = ?, orden_numero = ?
        WHERE id = ?`,
       [
-        fechaEmision, fechaValidoHasta || null, condicion || null, pais || null, glosa || null,
+        fechaEmision, fechaValidoHasta || null, condicion || null, glosa || null,
         clienteId || null, clienteRut || null, clienteRazonSocial || '',
         contactoNombre || null, contactoFono || null, contactoEmail || null,
         ejecutivo || null, ejecutivoFono || null, ejecutivoEmail || null,

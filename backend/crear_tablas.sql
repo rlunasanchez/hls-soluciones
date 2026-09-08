@@ -148,7 +148,6 @@ CREATE TABLE IF NOT EXISTS cotizaciones (
   fecha_emision DATE NOT NULL,
   fecha_valido_hasta DATE,
   condicion VARCHAR(100),
-  pais VARCHAR(100) DEFAULT 'Chile',
   glosa TEXT,
 
   cliente_id INT,

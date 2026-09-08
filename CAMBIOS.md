@@ -1,5 +1,17 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-08
+
+### v2.65: sacar campo País + Condición como select + Ejecutivo toma el Nombre de la sesión
+
+**Sacar País** (`Cotizaciones.jsx`, `cotizacionDoc.js`, `routes/cotizaciones.js`, `crear_tablas.sql`): se quita por completo — formulario, PDF, backend (SELECT/INSERT/UPDATE) y columna de la tabla `cotizaciones` (`ALTER TABLE cotizaciones DROP COLUMN pais`, aplicado en local y en Neon producción).
+
+**Condición como select**: pasa de texto libre a un desplegable con el método de pago (Contado - CLP, Crédito 30 días, Crédito 60 días, Transferencia Bancaria). Se reubica junto a "Email Ejecutivo", en la misma fila que Ejecutivo/Fono Ejecutivo. La fila de Emisión/Válido hasta queda debajo, sola.
+
+**Ejecutivo toma el Nombre de la sesión** (`routes/cotizaciones.js`, `Cotizaciones.jsx`): al crear una cotización, `ejecutivo` se sigue fijando server-side desde el usuario autenticado, pero ahora prioriza el campo `Nombre` (agregado en v2.59) sobre el `usuario` de login — con `usuario` como respaldo si el `Nombre` todavía no está cargado. Se corrigió también el valor de vista previa en el formulario (antes de guardar), que seguía mostrando el `usuario` de login en vez del `Nombre`. Cotizaciones ya creadas antes de este cambio mantienen el valor viejo (no se actualizan solas).
+
+**Verificación:** `npm run build` OK, `node --check` OK en backend. Probado extremo a extremo contra el backend real (crear/editar/listar sin `pais`, `ejecutivo` con Nombre de sesión).
+
 ## Fecha: 2026-09-07 (14)
 
 ### v2.64: orden Fono Principal / Email en la OT

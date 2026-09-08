@@ -162,7 +162,6 @@ export function generarHtmlCotizacion(cot) {
       ${campo("Email Contacto", cot.contacto_email)}
       ${campo("Email Ejecutivo", cot.ejecutivo_email)}
       ${campo("Condición", cot.condicion)}
-      ${campo("País", cot.pais)}
       ${campo("Emisión", fecha(cot.fecha_emision))}
       ${campo("Válido hasta", fecha(cot.fecha_valido_hasta))}
     </div>
