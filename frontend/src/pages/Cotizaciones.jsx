@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   FileSpreadsheet, Package, Users, UserCog, LogOut, FileText, ClipboardList, ShoppingCart, Home,
-  Search, Save, X, Plus, Trash2, FileDown
+  Search, Save, X, Plus, Trash2, FileDown, ChevronUp, ChevronDown
 } from "lucide-react";
 import api from "../services/api";
 import { getCached } from "../services/cache";
@@ -33,7 +33,7 @@ const cotizacionVacia = () => ({
   ejecutivo: parseToken().nombre || parseToken().usuario || "",
   ejecutivoFono: EMPRESA.fono,
   ejecutivoEmail: parseToken().email || "",
-  items: [itemVacio(), itemVacio()],
+  items: [itemVacio()],
   ordenId: null,
   ordenNumero: ""
 });
@@ -61,9 +61,9 @@ function Cotizaciones() {
   const [mostrarDropdownClientes, setMostrarDropdownClientes] = useState(false);
   const clienteDropdownRef = useRef(null);
 
-  // Los primeros 2 ítems siempre se ven completos; del 3° en adelante siguen
+  // El primer ítem siempre se ve completo; del 2° en adelante siguen
   // el mismo patrón de chips + resumen colapsable que Sucursales/Direcciones.
-  const LIMITE_ITEMS = 2;
+  const LIMITE_ITEMS = 1;
   const [itemsResumenAbierto, setItemsResumenAbierto] = useState(false);
   const [itemsManualVisibles, setItemsManualVisibles] = useState(() => new Set());
 
@@ -196,9 +196,9 @@ function Cotizaciones() {
   const parseItems = (val) => {
     try {
       const arr = JSON.parse(val || "[]");
-      return Array.isArray(arr) && arr.length ? arr : [itemVacio(), itemVacio()];
+      return Array.isArray(arr) && arr.length ? arr : [itemVacio()];
     } catch {
-      return [itemVacio(), itemVacio()];
+      return [itemVacio()];
     }
   };
 
@@ -377,11 +377,9 @@ function Cotizaciones() {
   };
 
   const agregarItem = () => {
-    const nuevoIdx = cotizacion.items.length;
+    // El nuevo ítem se agrega colapsado, detrás del resumen "Ver" —no se
+    // despliega solo, a diferencia de Sucursales/Contactos.
     setCotizacion((prev) => ({ ...prev, items: [...prev.items, itemVacio()] }));
-    // Solo el ítem recién agregado queda abierto (si no es de los 2 base),
-    // para no estirar la pantalla con todos los extras desplegados.
-    setItemsManualVisibles(new Set([nuevoIdx]));
   };
   const quitarItem = (idx) => {
     setCotizacion((prev) => {
@@ -687,18 +685,26 @@ function Cotizaciones() {
                   <div className="of-st muted">Ítems</div>
                   {cotizacion.items.slice(0, LIMITE_ITEMS).map((item, idx) => renderItemCard(item, idx))}
 
-                  {cotizacion.items.length > LIMITE_ITEMS && !itemsResumenAbierto &&
-                    cotizacion.items.some((_, i) => i >= LIMITE_ITEMS && !itemsManualVisibles.has(i)) && (
+                  {cotizacion.items.length > LIMITE_ITEMS &&
+                    (itemsResumenAbierto || cotizacion.items.some((_, i) => i >= LIMITE_ITEMS && !itemsManualVisibles.has(i))) && (
                     <button
                       type="button"
-                      onClick={() => setItemsResumenAbierto(true)}
+                      onClick={() => {
+                        const abrir = !itemsResumenAbierto;
+                        setItemsResumenAbierto(abrir);
+                        if (!abrir) setItemsManualVisibles(new Set());
+                      }}
                       style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 4,
                         background: 'none', color: 'var(--primary)', border: '1px solid var(--primary)',
                         borderRadius: '6px', padding: '2px 10px', cursor: 'pointer',
                         fontWeight: 600, fontSize: '0.75rem', marginBottom: 8
                       }}
                     >
-                      {cotizacion.items.length - LIMITE_ITEMS} ítem{cotizacion.items.length - LIMITE_ITEMS > 1 ? 's' : ''} más — Ver
+                      {itemsResumenAbierto ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                      {itemsResumenAbierto
+                        ? 'Ver menos'
+                        : `${cotizacion.items.length - LIMITE_ITEMS} ítem${cotizacion.items.length - LIMITE_ITEMS > 1 ? 's' : ''} más — Ver`}
                     </button>
                   )}
 

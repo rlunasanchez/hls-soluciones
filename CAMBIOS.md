@@ -1,5 +1,17 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-08 (4)
+
+### v2.68: resumen "Ver"/"Ver menos" con flechita + ajustes en Ítems
+
+**Fix de ancho/color** (`ModalContactos.jsx`): el botón "N contactos — Ver" se estiraba a todo el ancho del popup (el contenedor es un flex-column con `align-items: stretch` por defecto) y quedaba con los colores de Sucursales (celeste) en vez del verde propio de Contactos.
+
+**"Ver"/"Ver menos" bidireccional con flechita** (`ClienteFormulario.jsx`, `ModalContactos.jsx`, `Cotizaciones.jsx`): en v2.67 el resumen colapsable era de una sola vía (abrir nada más) porque en la OT ese rol lo cumple el checkbox de la sección — pero Sucursales, Contactos Adicionales e Ítems no tienen ese checkbox envolvente, así que no había forma de volver a colapsar. Ahora el mismo botón alterna "Ver"/"Ver menos" (con ChevronDown/ChevronUp, mismo lenguaje visual que la OT), y al cerrar también colapsa cualquier fila que se hubiera abierto individualmente.
+
+**Ítems de Cotización:** el primer ítem se ve siempre completo (antes eran los primeros 2); una cotización nueva arranca con 1 ítem en vez de 2. Al agregar un ítem nuevo (2°, 3°, etc.) ya no se despliega solo — queda colapsado detrás del resumen "Ver", a diferencia de Sucursales/Contactos donde sí se abre la fila recién agregada.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-08 (3)
 
 ### v2.67: chips + resumen colapsable en Sucursales, Contactos Adicionales e Ítems

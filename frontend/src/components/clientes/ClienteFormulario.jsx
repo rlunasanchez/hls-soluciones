@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Save, X, Trash2, Users } from "lucide-react";
+import { Save, X, Trash2, Users, ChevronUp, ChevronDown } from "lucide-react";
 import { toUpper, validarRUT, upperInput, normalizarRut, validarEmail } from "../../utils/helpers";
 import ModalContactos from "./ModalContactos";
 
@@ -405,9 +405,21 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
             <div className="cf-sh">
               <h3>Sucursales/Direcciones</h3>
               <div className="cf-sh-actions">
-                {sucursales.length > 0 && !sucursalesResumenAbierto && sucursales.some((_, i) => !sucursalesManualVisibles.has(i)) && (
-                  <button type="button" className="cf-btn-toggle-suc" onClick={() => setSucursalesResumenAbierto(true)}>
-                    {sucursales.length} sucursal{sucursales.length > 1 ? "es" : ""} agregada{sucursales.length > 1 ? "s" : ""} — Ver
+                {sucursales.length > 0 && (sucursalesResumenAbierto || sucursales.some((_, i) => !sucursalesManualVisibles.has(i))) && (
+                  <button
+                    type="button"
+                    className="cf-btn-toggle-suc"
+                    onClick={() => {
+                      const abrir = !sucursalesResumenAbierto;
+                      setSucursalesResumenAbierto(abrir);
+                      if (!abrir) setSucursalesManualVisibles(new Set());
+                    }}
+                    style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
+                  >
+                    {sucursalesResumenAbierto ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                    {sucursalesResumenAbierto
+                      ? "Ver menos"
+                      : `${sucursales.length} sucursal${sucursales.length > 1 ? "es" : ""} agregada${sucursales.length > 1 ? "s" : ""} — Ver`}
                   </button>
                 )}
                 {!readOnly && (

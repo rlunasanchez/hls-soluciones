@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Trash2, UserPlus } from "lucide-react";
+import { X, Trash2, UserPlus, ChevronUp, ChevronDown } from "lucide-react";
 import { upperInput, validarEmail } from "../../utils/helpers";
 
 const crearContactoVacio = () => ({ nombre: "", email: "", fono: "", cargo: "", direccion: "" });
@@ -87,9 +87,22 @@ function ModalContactos({ contactos = [], onChange, onClose, readOnly = false })
         </div>
 
         <div className="modal-contactos-body">
-          {lista.length > 0 && !resumenAbierto && hayOcultos && (
-            <button type="button" className="contacto-chip-toggle" onClick={() => setResumenAbierto(true)}>
-              {lista.length} contacto{lista.length > 1 ? "s" : ""} — Ver
+          {lista.length > 0 && (resumenAbierto || hayOcultos) && (
+            <button
+              type="button"
+              className="contacto-chip-toggle"
+              onClick={() => {
+                const abrir = !resumenAbierto;
+                setResumenAbierto(abrir);
+                if (!abrir) setManualVisibles(new Set());
+              }}
+              style={{
+                alignSelf: "flex-start", display: "inline-flex", alignItems: "center", gap: 4,
+                background: "#dcfce7", color: "#166534", border: "1px solid #86efac"
+              }}
+            >
+              {resumenAbierto ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+              {resumenAbierto ? "Ver menos" : `${lista.length} contacto${lista.length > 1 ? "s" : ""} — Ver`}
             </button>
           )}
 
