@@ -17,7 +17,7 @@ router.get("/", authMiddleware, async (req, res) => {
 
   try {
     const cotizacionesResult = await pool.query(
-      `SELECT id, folio, fecha_emision, fecha_valido_hasta, condicion, pais, glosa,
+      `SELECT id, folio, fecha_emision, fecha_valido_hasta, condicion, glosa,
         cliente_id, cliente_rut, cliente_razon_social,
         contacto_nombre, contacto_fono, contacto_email,
         ejecutivo, ejecutivo_fono, ejecutivo_email,
@@ -63,7 +63,7 @@ router.get("/:id", authMiddleware, async (req, res) => {
 
 router.post("/", authMiddleware, async (req, res) => {
   const {
-    fechaEmision, fechaValidoHasta, condicion, pais, glosa,
+    fechaEmision, fechaValidoHasta, condicion, glosa,
     clienteId, clienteRut, clienteRazonSocial,
     contactoNombre, contactoFono, contactoEmail,
     ejecutivoFono, ejecutivoEmail,
@@ -81,18 +81,20 @@ router.post("/", authMiddleware, async (req, res) => {
     // El ejecutivo se toma del usuario autenticado, no de lo que mande el
     // cliente HTTP: es quien está usando la app en ese momento, no un dato
     // editable a mano (evita que alguien se atribuya la cotización de otro).
-    const ejecutivo = req.user.usuario;
+    // Se prioriza el Nombre cargado en Usuarios; si todavía no lo tiene,
+    // se usa el usuario de login como respaldo (nunca queda vacío).
+    const ejecutivo = req.user.nombre || req.user.usuario;
 
     const resultado = await client.query(
-      `INSERT INTO cotizaciones (folio, fecha_emision, fecha_valido_hasta, condicion, pais, glosa,
+      `INSERT INTO cotizaciones (folio, fecha_emision, fecha_valido_hasta, condicion, glosa,
         cliente_id, cliente_rut, cliente_razon_social,
         contacto_nombre, contacto_fono, contacto_email,
         ejecutivo, ejecutivo_fono, ejecutivo_email,
         items, orden_id, orden_numero)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
        RETURNING id`,
       [
-        folio, fechaEmision, fechaValidoHasta || null, condicion || null, pais || null, glosa || null,
+        folio, fechaEmision, fechaValidoHasta || null, condicion || null, glosa || null,
         clienteId || null, clienteRut || null, clienteRazonSocial || '',
         contactoNombre || null, contactoFono || null, contactoEmail || null,
         ejecutivo, ejecutivoFono || null, ejecutivoEmail || null,
@@ -114,7 +116,7 @@ router.post("/", authMiddleware, async (req, res) => {
 router.put("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
   const {
-    fechaEmision, fechaValidoHasta, condicion, pais, glosa,
+    fechaEmision, fechaValidoHasta, condicion, glosa,
     clienteId, clienteRut, clienteRazonSocial,
     contactoNombre, contactoFono, contactoEmail,
     ejecutivo, ejecutivoFono, ejecutivoEmail,
@@ -126,14 +128,14 @@ router.put("/:id", authMiddleware, async (req, res) => {
 
   try {
     await pool.query(
-      `UPDATE cotizaciones SET fecha_emision = $1, fecha_valido_hasta = $2, condicion = $3, pais = $4, glosa = $5,
-        cliente_id = $6, cliente_rut = $7, cliente_razon_social = $8,
-        contacto_nombre = $9, contacto_fono = $10, contacto_email = $11,
-        ejecutivo = $12, ejecutivo_fono = $13, ejecutivo_email = $14,
-        items = $15, orden_id = $16, orden_numero = $17
-       WHERE id = $18`,
+      `UPDATE cotizaciones SET fecha_emision = $1, fecha_valido_hasta = $2, condicion = $3, glosa = $4,
+        cliente_id = $5, cliente_rut = $6, cliente_razon_social = $7,
+        contacto_nombre = $8, contacto_fono = $9, contacto_email = $10,
+        ejecutivo = $11, ejecutivo_fono = $12, ejecutivo_email = $13,
+        items = $14, orden_id = $15, orden_numero = $16
+       WHERE id = $17`,
       [
-        fechaEmision, fechaValidoHasta || null, condicion || null, pais || null, glosa || null,
+        fechaEmision, fechaValidoHasta || null, condicion || null, glosa || null,
         clienteId || null, clienteRut || null, clienteRazonSocial || '',
         contactoNombre || null, contactoFono || null, contactoEmail || null,
         ejecutivo || null, ejecutivoFono || null, ejecutivoEmail || null,
