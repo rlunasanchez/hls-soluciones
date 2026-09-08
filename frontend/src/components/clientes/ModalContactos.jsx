@@ -6,22 +6,54 @@ const crearContactoVacio = () => ({ nombre: "", email: "", fono: "", cargo: "", 
 
 function ModalContactos({ contactos = [], onChange, onClose, readOnly = false }) {
   const [lista, setLista] = useState([]);
+  // Mismo patrón que Sucursales/Direcciones: resumen colapsado por defecto,
+  // cada chip se abre/cierra individualmente (varias pueden estar abiertas
+  // a la vez), "+ Agregar" solo despliega la fila nueva.
+  const [resumenAbierto, setResumenAbierto] = useState(false);
+  const [manualVisibles, setManualVisibles] = useState(() => new Set());
 
   useEffect(() => {
     if (contactos && contactos.length > 0) {
       const cargados = contactos.filter(c => c.nombre && c.nombre.trim());
-      setLista(cargados.length > 0 ? [...cargados] : [crearContactoVacio()]);
+      if (cargados.length > 0) {
+        setLista([...cargados]);
+        setResumenAbierto(false);
+        setManualVisibles(new Set());
+      } else {
+        setLista([crearContactoVacio()]);
+        setManualVisibles(new Set([0]));
+      }
     } else {
       setLista([crearContactoVacio()]);
+      setManualVisibles(new Set([0]));
     }
   }, [contactos]);
 
-  const agregar = () => setLista([...lista, crearContactoVacio()]);
+  const agregar = () => {
+    const nuevoIdx = lista.length;
+    setLista([...lista, crearContactoVacio()]);
+    // Solo la recién agregada queda abierta, para no estirar la ventana.
+    setManualVisibles(new Set([nuevoIdx]));
+  };
 
   const eliminar = (idx) => {
     if (!window.confirm(`¿Eliminar contacto ${idx + 1}?`)) return;
     const nueva = lista.filter((_, i) => i !== idx);
-    setLista(nueva.length > 0 ? nueva : [crearContactoVacio()]);
+    if (nueva.length === 0) {
+      setLista([crearContactoVacio()]);
+      setManualVisibles(new Set([0]));
+      setResumenAbierto(false);
+      return;
+    }
+    setLista(nueva);
+    setManualVisibles(prev => {
+      const next = new Set();
+      prev.forEach(i => {
+        if (i < idx) next.add(i);
+        else if (i > idx) next.add(i - 1);
+      });
+      return next;
+    });
   };
 
   const actualizar = (idx, campo, valor) => {
@@ -41,6 +73,7 @@ function ModalContactos({ contactos = [], onChange, onClose, readOnly = false })
   };
 
   const total = lista.filter(c => c.nombre && c.nombre.trim()).length;
+  const hayOcultos = lista.some((_, i) => !manualVisibles.has(i));
 
   return (
     <div className="modal-overlay">
@@ -54,7 +87,44 @@ function ModalContactos({ contactos = [], onChange, onClose, readOnly = false })
         </div>
 
         <div className="modal-contactos-body">
-          {lista.map((contacto, idx) => (
+          {lista.length > 0 && !resumenAbierto && hayOcultos && (
+            <button type="button" className="contacto-chip-toggle" onClick={() => setResumenAbierto(true)}>
+              {lista.length} contacto{lista.length > 1 ? "s" : ""} — Ver
+            </button>
+          )}
+
+          {lista.length > 0 && resumenAbierto && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "8px" }}>
+              {lista.map((c, idx) => (
+                <span key={idx} className="contacto-chip" style={{ cursor: "default" }}>
+                  <span
+                    onClick={() => setManualVisibles(prev => {
+                      const next = new Set(prev);
+                      if (next.has(idx)) next.delete(idx); else next.add(idx);
+                      return next;
+                    })}
+                    style={{ cursor: "pointer" }}
+                  >
+                    {c.nombre ? c.nombre : `Contacto ${idx + 1}`}
+                  </span>
+                  {!readOnly && lista.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => eliminar(idx)}
+                      title="Quitar contacto"
+                      style={{ background: "none", border: "none", color: "#166534", cursor: "pointer", display: "flex", padding: 0 }}
+                    >
+                      <X size={12} />
+                    </button>
+                  )}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {lista.map((contacto, idx) => {
+            if (!manualVisibles.has(idx)) return null;
+            return (
             <div key={idx} className="modal-contacto-card">
               <div className="modal-contacto-header">
                 <span className="modal-contacto-num">Contacto {idx + 1}</span>
@@ -101,7 +171,8 @@ function ModalContactos({ contactos = [], onChange, onClose, readOnly = false })
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="modal-contactos-foot">
