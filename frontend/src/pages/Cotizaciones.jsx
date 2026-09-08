@@ -61,8 +61,11 @@ function Cotizaciones() {
   const [mostrarDropdownClientes, setMostrarDropdownClientes] = useState(false);
   const clienteDropdownRef = useRef(null);
 
+  // Los primeros 2 ítems siempre se ven completos; del 3° en adelante siguen
+  // el mismo patrón de chips + resumen colapsable que Sucursales/Direcciones.
   const LIMITE_ITEMS = 2;
-  const [itemsExpandidos, setItemsExpandidos] = useState(false);
+  const [itemsResumenAbierto, setItemsResumenAbierto] = useState(false);
+  const [itemsManualVisibles, setItemsManualVisibles] = useState(() => new Set());
 
   const [busquedaContacto, setBusquedaContacto] = useState("");
   const [mostrarDropdownContacto, setMostrarDropdownContacto] = useState(false);
@@ -205,7 +208,8 @@ function Cotizaciones() {
     setClienteSeleccionado(null);
     setBusquedaCliente("");
     setBusquedaContacto("");
-    setItemsExpandidos(false);
+    setItemsResumenAbierto(false);
+    setItemsManualVisibles(new Set());
     setOrigenOT(false);
     setCotizacion(cotizacionVacia());
     setMostrarFormulario(true);
@@ -221,7 +225,8 @@ function Cotizaciones() {
     setClienteSeleccionado(cl || null);
     setBusquedaCliente(c.cliente_razon_social || "");
     setBusquedaContacto(c.contacto_nombre || "");
-    setItemsExpandidos(false);
+    setItemsResumenAbierto(false);
+    setItemsManualVisibles(new Set());
     setCotizacion({
       fechaEmision: (c.fecha_emision || "").substring(0, 10),
       fechaValidoHasta: (c.fecha_valido_hasta || "").substring(0, 10),
@@ -279,7 +284,8 @@ function Cotizaciones() {
     setClienteSeleccionado(null);
     setBusquedaCliente("");
     setBusquedaContacto("");
-    setItemsExpandidos(false);
+    setItemsResumenAbierto(false);
+    setItemsManualVisibles(new Set());
     setOrigenOT(false);
     if (vuelveAOT) navigate("/orden-trabajo");
   };
@@ -371,10 +377,76 @@ function Cotizaciones() {
   };
 
   const agregarItem = () => {
+    const nuevoIdx = cotizacion.items.length;
     setCotizacion((prev) => ({ ...prev, items: [...prev.items, itemVacio()] }));
-    setItemsExpandidos(true);
+    // Solo el ítem recién agregado queda abierto (si no es de los 2 base),
+    // para no estirar la pantalla con todos los extras desplegados.
+    setItemsManualVisibles(new Set([nuevoIdx]));
   };
-  const quitarItem = (idx) => setCotizacion((prev) => ({ ...prev, items: prev.items.filter((_, i) => i !== idx) }));
+  const quitarItem = (idx) => {
+    setCotizacion((prev) => {
+      const items = prev.items.filter((_, i) => i !== idx);
+      if (items.length <= LIMITE_ITEMS) setItemsResumenAbierto(false);
+      return { ...prev, items };
+    });
+    setItemsManualVisibles(prev => {
+      const next = new Set();
+      prev.forEach(i => {
+        if (i < idx) next.add(i);
+        else if (i > idx) next.add(i - 1);
+      });
+      return next;
+    });
+  };
+
+  const renderItemCard = (item, idx) => {
+    const totalFila = (Number(item.cantidad) || 0) * (Number(item.neto) || 0);
+    return (
+      <div key={idx} style={{
+        border: '1px solid var(--border)', borderRadius: 6, padding: '6px 8px 8px',
+        marginBottom: 8, background: '#fff'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+          <span style={{ fontSize: '.72rem', fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '.05em' }}>
+            Ítem {idx + 1}
+          </span>
+          {!soloLectura && (
+            <button type="button" onClick={() => quitarItem(idx)} title="Quitar ítem"
+              style={{ background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA', borderRadius: 6, padding: '4px 7px', cursor: 'pointer', display: 'flex' }}>
+              <Trash2 size={13} />
+            </button>
+          )}
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
+          <div className="of-f" style={{ flex: '0 0 120px' }}>
+            <label>SKU</label>
+            <input type="text" value={item.sku} onChange={(e) => actualizarItem(idx, 'sku', e.target.value)} disabled={soloLectura} />
+          </div>
+          <div className="of-f" style={{ flex: '0 0 90px' }}>
+            <label>Cant.</label>
+            <input type="number" min="0" value={item.cantidad} onChange={(e) => actualizarItem(idx, 'cantidad', e.target.value)} disabled={soloLectura} />
+          </div>
+          <div className="of-f" style={{ flex: '0 0 90px' }}>
+            <label>Uni.</label>
+            <input type="text" value={item.unidad} onChange={(e) => actualizarItem(idx, 'unidad', e.target.value)} disabled={soloLectura} />
+          </div>
+          <div className="of-f" style={{ flex: '0 0 120px' }}>
+            <label>Neto</label>
+            <input type="number" min="0" value={item.neto} onChange={(e) => actualizarItem(idx, 'neto', e.target.value)} disabled={soloLectura} />
+          </div>
+          <div className="of-f" style={{ flex: '0 0 110px' }}>
+            <label>Total</label>
+            <input type="text" value={`${clp(totalFila)} CLP`} disabled />
+          </div>
+        </div>
+        <div className="of-f">
+          <label>Detalle</label>
+          <textarea rows={2} placeholder="Ej: Visita técnica" value={item.detalle} onChange={(e) => actualizarItem(idx, 'detalle', upperInput(e))} disabled={soloLectura}
+            style={{ resize: 'vertical', fontFamily: 'inherit' }} />
+        </div>
+      </div>
+    );
+  };
 
   const totales = calcularTotales(cotizacion.items);
 
@@ -613,74 +685,65 @@ function Cotizaciones() {
                 <div className="of-col-right">
                 <div className="of-sec primary">
                   <div className="of-st muted">Ítems</div>
-                  {cotizacion.items.slice(0, itemsExpandidos ? cotizacion.items.length : LIMITE_ITEMS).map((item, idx) => {
-                    const totalFila = (Number(item.cantidad) || 0) * (Number(item.neto) || 0);
-                    return (
-                    <div key={idx} style={{
-                      border: '1px solid var(--border)', borderRadius: 6, padding: '6px 8px 8px',
-                      marginBottom: 8, background: '#fff'
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                        <span style={{ fontSize: '.72rem', fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '.05em' }}>
-                          Ítem {idx + 1}
-                        </span>
-                        {!soloLectura && (
-                          <button type="button" onClick={() => quitarItem(idx)} title="Quitar ítem"
-                            style={{ background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA', borderRadius: 6, padding: '4px 7px', cursor: 'pointer', display: 'flex' }}>
-                            <Trash2 size={13} />
-                          </button>
-                        )}
-                      </div>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
-                        <div className="of-f" style={{ flex: '0 0 120px' }}>
-                          <label>SKU</label>
-                          <input type="text" value={item.sku} onChange={(e) => actualizarItem(idx, 'sku', e.target.value)} disabled={soloLectura} />
-                        </div>
-                        <div className="of-f" style={{ flex: '0 0 90px' }}>
-                          <label>Cant.</label>
-                          <input type="number" min="0" value={item.cantidad} onChange={(e) => actualizarItem(idx, 'cantidad', e.target.value)} disabled={soloLectura} />
-                        </div>
-                        <div className="of-f" style={{ flex: '0 0 90px' }}>
-                          <label>Uni.</label>
-                          <input type="text" value={item.unidad} onChange={(e) => actualizarItem(idx, 'unidad', e.target.value)} disabled={soloLectura} />
-                        </div>
-                        <div className="of-f" style={{ flex: '0 0 120px' }}>
-                          <label>Neto</label>
-                          <input type="number" min="0" value={item.neto} onChange={(e) => actualizarItem(idx, 'neto', e.target.value)} disabled={soloLectura} />
-                        </div>
-                        <div className="of-f" style={{ flex: '0 0 110px' }}>
-                          <label>Total</label>
-                          <input type="text" value={`${clp(totalFila)} CLP`} disabled />
-                        </div>
-                      </div>
-                      <div className="of-f">
-                        <label>Detalle</label>
-                        <textarea rows={2} placeholder="Ej: Visita técnica" value={item.detalle} onChange={(e) => actualizarItem(idx, 'detalle', upperInput(e))} disabled={soloLectura}
-                          style={{ resize: 'vertical', fontFamily: 'inherit' }} />
-                      </div>
-                    </div>
-                    );
-                  })}
-                  {cotizacion.items.length > LIMITE_ITEMS && (
-                    <div style={{ marginTop: '4px', marginBottom: '4px' }}>
-                      <button
-                        type="button"
-                        onClick={() => setItemsExpandidos(!itemsExpandidos)}
-                        style={{
-                          background: 'none',
-                          color: 'var(--primary)',
-                          border: '1px solid var(--primary)',
-                          borderRadius: '6px',
-                          padding: '2px 10px',
-                          cursor: 'pointer',
-                          fontWeight: 600,
-                          fontSize: '0.75rem'
-                        }}
-                      >
-                        {itemsExpandidos ? 'Ver menos' : `Ver todos (${cotizacion.items.length})`}
-                      </button>
+                  {cotizacion.items.slice(0, LIMITE_ITEMS).map((item, idx) => renderItemCard(item, idx))}
+
+                  {cotizacion.items.length > LIMITE_ITEMS && !itemsResumenAbierto &&
+                    cotizacion.items.some((_, i) => i >= LIMITE_ITEMS && !itemsManualVisibles.has(i)) && (
+                    <button
+                      type="button"
+                      onClick={() => setItemsResumenAbierto(true)}
+                      style={{
+                        background: 'none', color: 'var(--primary)', border: '1px solid var(--primary)',
+                        borderRadius: '6px', padding: '2px 10px', cursor: 'pointer',
+                        fontWeight: 600, fontSize: '0.75rem', marginBottom: 8
+                      }}
+                    >
+                      {cotizacion.items.length - LIMITE_ITEMS} ítem{cotizacion.items.length - LIMITE_ITEMS > 1 ? 's' : ''} más — Ver
+                    </button>
+                  )}
+
+                  {cotizacion.items.length > LIMITE_ITEMS && itemsResumenAbierto && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+                      {cotizacion.items.slice(LIMITE_ITEMS).map((item, i) => {
+                        const idx = i + LIMITE_ITEMS;
+                        return (
+                          <span key={idx} style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 6,
+                            background: 'var(--primary-light)', color: 'var(--primary)', border: '1px solid var(--primary)',
+                            borderRadius: 999, padding: '2px 6px 2px 10px', fontSize: '.75rem', fontWeight: 600
+                          }}>
+                            <span
+                              onClick={() => setItemsManualVisibles(prev => {
+                                const next = new Set(prev);
+                                if (next.has(idx)) next.delete(idx); else next.add(idx);
+                                return next;
+                              })}
+                              title="Editar ítem"
+                              style={{ cursor: 'pointer' }}
+                            >
+                              {item.detalle || item.sku || `Ítem ${idx + 1}`}
+                            </span>
+                            {!soloLectura && (
+                              <button
+                                type="button"
+                                onClick={() => quitarItem(idx)}
+                                title="Quitar ítem"
+                                style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', display: 'flex', padding: 0 }}
+                              >
+                                <X size={12} />
+                              </button>
+                            )}
+                          </span>
+                        );
+                      })}
                     </div>
                   )}
+
+                  {cotizacion.items.map((item, idx) => {
+                    if (idx < LIMITE_ITEMS || !itemsManualVisibles.has(idx)) return null;
+                    return renderItemCard(item, idx);
+                  })}
+
                   {!soloLectura && (
                     <button type="button" className="of-btn-a" onClick={agregarItem} style={{ marginTop: 4 }}>
                       <Plus size={14} /> Agregar ítem

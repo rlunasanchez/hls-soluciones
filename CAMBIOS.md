@@ -1,5 +1,21 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-08 (3)
+
+### v2.67: chips + resumen colapsable en Sucursales, Contactos Adicionales e Ítems
+
+Mismo patrón que "Otras Direcciones/Sucursales" de la OT (v2.57/58), aplicado a tres lugares más:
+
+**Sucursales/Direcciones** (`ClienteFormulario.jsx`, mantenedor de Clientes): pasa de un esquema de 5 slots fijos a un array dinámico. Un cliente nuevo arranca con una sucursal ya lista para completar; al editar uno existente, las sucursales quedan colapsadas como chips por defecto (resumen "N sucursales agregadas — Ver"). Click en un chip abre/cierra esa sucursal (varias pueden estar abiertas a la vez), ✕ la elimina directo. "+ Agregar" solo despliega la fila nueva, colapsando las demás.
+
+**Contactos Adicionales** (`ModalContactos.jsx`): mismo patrón adentro del popup — arranca con un contacto listo si es nuevo, colapsa a chips verdes los ya cargados, "+ Agregar Contacto" solo despliega el nuevo.
+
+**Ítems de Cotización** (`Cotizaciones.jsx`): los primeros 2 ítems siguen viéndose siempre completos (como antes); del 3° en adelante funcionan con chips + resumen colapsable ("N ítems más — Ver"), reemplazando el viejo "Ver todos/Ver menos" que desplegaba todo junto.
+
+**Fix de paso:** se corrigieron 3 referencias a `setItemsExpandidos` (estado eliminado en este cambio) que habían quedado sueltas en `abrirNueva`/`cargarCotizacion`/`cerrarFormulario` de Cotizaciones — hubieran roto la pantalla al abrir cualquier cotización.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-08 (2)
 
 ### v2.66: Email Ejecutivo se precarga con el email del usuario

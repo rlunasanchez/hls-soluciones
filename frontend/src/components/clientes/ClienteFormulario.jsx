@@ -13,11 +13,15 @@ const ESTADO_INICIAL_CLIENTE = {
 
 function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, titulo, readOnly = false, modoRegistro = false }) {
   const [nuevoCliente, setNuevoCliente] = useState(ESTADO_INICIAL_CLIENTE);
-  const [sucursales, setSucursales] = useState([
-    crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia()
-  ]);
-  const [sucursalesVisibles, setSucursalesVisibles] = useState(1);
-  const [sucursalesExpandidos, setSucursalesExpandidos] = useState(false);
+  // Un cliente nuevo arranca con una sucursal ya lista para completar (la
+  // "Matriz", lo más común); al editar uno existente todas quedan
+  // colapsadas por defecto (ver el useEffect de carga más abajo).
+  const [sucursales, setSucursales] = useState([crearSucursalVacia()]);
+  // Resumen colapsado por defecto (mismo patrón que "Otras Direcciones" de la
+  // OT): el botón "N agregadas — Ver" despliega los chips; cada chip se abre
+  // a mano para editar sus campos, sin depender del resumen general.
+  const [sucursalesResumenAbierto, setSucursalesResumenAbierto] = useState(false);
+  const [sucursalesManualVisibles, setSucursalesManualVisibles] = useState(() => new Set([0]));
   const [contactos, setContactos] = useState([]);
   const [mostrarModalContactos, setMostrarModalContactos] = useState(false);
   const [contactoSeleccionado, setContactoSeleccionado] = useState(null);
@@ -28,9 +32,6 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
 
   useEffect(() => {
     if (clienteEditando) {
-      setSucursales([
-        crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia()
-      ]);
       let dirs = [];
       if (clienteEditando.direcciones) {
         dirs = clienteEditando.direcciones.split(";;").map((d) => {
@@ -40,12 +41,10 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
             fono: parts[2] || "", ciudad: toUpper(parts[3] || ""), comuna: toUpper(parts[4] || "")
           };
         }).filter((d) => d.direccion);
-        if (dirs.length > 0) {
-          while (dirs.length < 5) dirs.push(crearSucursalVacia());
-          setSucursales(dirs);
-        }
       }
-      setSucursalesVisibles(dirs.filter((s) => s.direccion).length || 1);
+      setSucursales(dirs);
+      setSucursalesResumenAbierto(false);
+      setSucursalesManualVisibles(new Set());
 
       let contacts = [];
       if (clienteEditando.contactos) {
@@ -109,13 +108,34 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
     setSucursales(nuevas);
   };
 
+  const agregarSucursal = () => {
+    const nuevoIdx = sucursales.length;
+    setSucursales([...sucursales, crearSucursalVacia()]);
+    // Solo la recién agregada queda abierta; las anteriores vuelven a
+    // colapsarse (se ven de nuevo con "Ver") para no estirar la pantalla.
+    setSucursalesManualVisibles(new Set([nuevoIdx]));
+  };
+
+  // Compartida por el botón "Eliminar" de cada fila y por la ✕ del chip.
+  const eliminarSucursal = (idx) => {
+    const nuevas = sucursales.filter((_, i) => i !== idx);
+    setSucursales(nuevas);
+    setSucursalesManualVisibles(prev => {
+      const next = new Set();
+      prev.forEach(i => {
+        if (i < idx) next.add(i);
+        else if (i > idx) next.add(i - 1);
+      });
+      return next;
+    });
+    if (nuevas.length === 0) setSucursalesResumenAbierto(false);
+  };
+
   const resetFormulario = () => {
     setNuevoCliente(ESTADO_INICIAL_CLIENTE);
-    setSucursales([
-      crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia(), crearSucursalVacia()
-    ]);
-    setSucursalesVisibles(1);
-    setSucursalesExpandidos(false);
+    setSucursales([crearSucursalVacia()]);
+    setSucursalesResumenAbierto(false);
+    setSucursalesManualVisibles(new Set([0]));
     setContactos([]);
     setMostrarModalContactos(false);
     setContactosExpandidos(false);
@@ -385,17 +405,57 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
             <div className="cf-sh">
               <h3>Sucursales/Direcciones</h3>
               <div className="cf-sh-actions">
-                {sucursalesVisibles > 1 && (
-                  <button type="button" className="cf-btn-toggle-suc" onClick={() => setSucursalesExpandidos(!sucursalesExpandidos)}>
-                    {sucursalesExpandidos ? "Ver menos" : `Ver todas (${sucursalesVisibles})`}
+                {sucursales.length > 0 && !sucursalesResumenAbierto && sucursales.some((_, i) => !sucursalesManualVisibles.has(i)) && (
+                  <button type="button" className="cf-btn-toggle-suc" onClick={() => setSucursalesResumenAbierto(true)}>
+                    {sucursales.length} sucursal{sucursales.length > 1 ? "es" : ""} agregada{sucursales.length > 1 ? "s" : ""} — Ver
                   </button>
                 )}
-                {sucursalesVisibles < 5 && !readOnly && (
-                  <button type="button" className="cf-btn-a" onClick={() => { setSucursalesVisibles(sucursalesVisibles + 1); setSucursalesExpandidos(true); }}>+ Agregar</button>
+                {!readOnly && (
+                  <button type="button" className="cf-btn-a" onClick={agregarSucursal}>+ Agregar</button>
                 )}
               </div>
             </div>
-            {sucursales.slice(0, sucursalesExpandidos ? sucursalesVisibles : 1).map((suc, idx) => (
+
+            {sucursales.length > 0 && sucursalesResumenAbierto && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "8px" }}>
+                {sucursales.map((suc, idx) => (
+                  <span key={idx} style={{
+                    display: "inline-flex", alignItems: "center", gap: "6px",
+                    background: "#e0f2fe", color: "#0369a1", border: "1px solid #0ea5e9",
+                    borderRadius: "999px", padding: "2px 6px 2px 10px", fontSize: "0.75rem", fontWeight: 600
+                  }}>
+                    <span
+                      onClick={() => setSucursalesManualVisibles(prev => {
+                        const next = new Set(prev);
+                        if (next.has(idx)) next.delete(idx); else next.add(idx);
+                        return next;
+                      })}
+                      title="Editar sucursal"
+                      style={{ cursor: "pointer" }}
+                    >
+                      {suc.direccion ? suc.direccion : `Sucursal ${idx + 1}`}
+                    </span>
+                    {!readOnly && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!window.confirm(`¿Eliminar sucursal ${idx + 1}?`)) return;
+                          eliminarSucursal(idx);
+                        }}
+                        title="Quitar sucursal"
+                        style={{ background: "none", border: "none", color: "#0369a1", cursor: "pointer", display: "flex", padding: 0 }}
+                      >
+                        <X size={12} />
+                      </button>
+                    )}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {sucursales.map((suc, idx) => {
+              if (!sucursalesManualVisibles.has(idx)) return null;
+              return (
               <div key={idx} className="cf-sc">
                 <div className="cf-r2 cf-mb">
                   <div className="cf-field cf-m0">
@@ -429,17 +489,15 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                 <div className="cf-sc-del">
                   <button type="button" className="cf-btn-d" onClick={() => {
                     if (!window.confirm(`¿Eliminar sucursal ${idx + 1}?`)) return;
-                    const nuevas = sucursales.filter((_, i) => i !== idx);
-                    while (nuevas.length < 5) nuevas.push(crearSucursalVacia());
-                    setSucursales(nuevas);
-                    setSucursalesVisibles(Math.max(1, sucursalesVisibles - 1));
+                    eliminarSucursal(idx);
                   }}>
                     <Trash2 size={14} /> Eliminar
                   </button>
                 </div>
                 )}
               </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="cf-sub">
