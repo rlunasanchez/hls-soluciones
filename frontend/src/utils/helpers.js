@@ -68,12 +68,12 @@ export const formatearRutInput = (valor) => {
 
 export const parseToken = () => {
   const token = localStorage.getItem("token");
-  if (!token) return { usuario: "Usuario", nombre: "", rol: "tecnico" };
+  if (!token) return { usuario: "Usuario", nombre: "", email: "", rol: "tecnico" };
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
-    return { usuario: payload.usuario, nombre: payload.nombre || "", rol: payload.rol || "tecnico" };
+    return { usuario: payload.usuario, nombre: payload.nombre || "", email: payload.email || "", rol: payload.rol || "tecnico" };
   } catch {
-    return { usuario: "Usuario", nombre: "", rol: "tecnico" };
+    return { usuario: "Usuario", nombre: "", email: "", rol: "tecnico" };
   }
 };
 
