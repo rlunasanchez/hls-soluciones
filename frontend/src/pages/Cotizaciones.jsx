@@ -32,7 +32,7 @@ const cotizacionVacia = () => ({
   contactoEmail: "",
   ejecutivo: parseToken().nombre || parseToken().usuario || "",
   ejecutivoFono: EMPRESA.fono,
-  ejecutivoEmail: "",
+  ejecutivoEmail: parseToken().email || "",
   items: [itemVacio(), itemVacio()],
   ordenId: null,
   ordenNumero: ""

@@ -1,5 +1,13 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-08 (2)
+
+### v2.66: Email Ejecutivo se precarga con el email del usuario
+
+Se agrega `email` al payload del JWT (`routes/auth.js`) y a `parseToken()`. "Email Ejecutivo" en Cotizaciones se precarga con el email del usuario logueado (sigue siendo editable), mismo criterio que Ejecutivo con el Nombre.
+
+**Verificación:** `npm run build` OK. Confirmado el JWT incluye `email` tras reiniciar el backend.
+
 ## Fecha: 2026-09-08
 
 ### v2.65: sacar campo País + Condición como select + Ejecutivo toma el Nombre de la sesión
