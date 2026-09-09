@@ -19,6 +19,7 @@ router.get("/", authMiddleware, async (req, res) => {
     const cotizacionesResult = await pool.query(
       `SELECT id, folio, fecha_emision, fecha_valido_hasta, condicion, glosa,
         cliente_id, cliente_rut, cliente_razon_social,
+        cliente_direccion, cliente_comuna, cliente_telefono, cliente_email,
         contacto_nombre, contacto_fono, contacto_email,
         ejecutivo, ejecutivo_fono, ejecutivo_email,
         items, orden_id, orden_numero, fecha_creacion, fecha_actualizacion
@@ -65,6 +66,7 @@ router.post("/", authMiddleware, async (req, res) => {
   const {
     fechaEmision, fechaValidoHasta, condicion, glosa,
     clienteId, clienteRut, clienteRazonSocial,
+    clienteDireccion, clienteComuna, clienteTelefono, clienteEmail,
     contactoNombre, contactoFono, contactoEmail,
     ejecutivoFono, ejecutivoEmail,
     items, ordenId, ordenNumero
@@ -88,14 +90,16 @@ router.post("/", authMiddleware, async (req, res) => {
     const resultado = await client.query(
       `INSERT INTO cotizaciones (folio, fecha_emision, fecha_valido_hasta, condicion, glosa,
         cliente_id, cliente_rut, cliente_razon_social,
+        cliente_direccion, cliente_comuna, cliente_telefono, cliente_email,
         contacto_nombre, contacto_fono, contacto_email,
         ejecutivo, ejecutivo_fono, ejecutivo_email,
         items, orden_id, orden_numero)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
        RETURNING id`,
       [
         folio, fechaEmision, fechaValidoHasta || null, condicion || null, glosa || null,
         clienteId || null, clienteRut || null, clienteRazonSocial || '',
+        clienteDireccion || null, clienteComuna || null, clienteTelefono || null, clienteEmail || null,
         contactoNombre || null, contactoFono || null, contactoEmail || null,
         ejecutivo, ejecutivoFono || null, ejecutivoEmail || null,
         items ? JSON.stringify(items) : null, ordenId || null, ordenNumero || null
@@ -118,6 +122,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
   const {
     fechaEmision, fechaValidoHasta, condicion, glosa,
     clienteId, clienteRut, clienteRazonSocial,
+    clienteDireccion, clienteComuna, clienteTelefono, clienteEmail,
     contactoNombre, contactoFono, contactoEmail,
     ejecutivo, ejecutivoFono, ejecutivoEmail,
     items, ordenId, ordenNumero
@@ -130,13 +135,15 @@ router.put("/:id", authMiddleware, async (req, res) => {
     await pool.query(
       `UPDATE cotizaciones SET fecha_emision = $1, fecha_valido_hasta = $2, condicion = $3, glosa = $4,
         cliente_id = $5, cliente_rut = $6, cliente_razon_social = $7,
-        contacto_nombre = $8, contacto_fono = $9, contacto_email = $10,
-        ejecutivo = $11, ejecutivo_fono = $12, ejecutivo_email = $13,
-        items = $14, orden_id = $15, orden_numero = $16
-       WHERE id = $17`,
+        cliente_direccion = $8, cliente_comuna = $9, cliente_telefono = $10, cliente_email = $11,
+        contacto_nombre = $12, contacto_fono = $13, contacto_email = $14,
+        ejecutivo = $15, ejecutivo_fono = $16, ejecutivo_email = $17,
+        items = $18, orden_id = $19, orden_numero = $20
+       WHERE id = $21`,
       [
         fechaEmision, fechaValidoHasta || null, condicion || null, glosa || null,
         clienteId || null, clienteRut || null, clienteRazonSocial || '',
+        clienteDireccion || null, clienteComuna || null, clienteTelefono || null, clienteEmail || null,
         contactoNombre || null, contactoFono || null, contactoEmail || null,
         ejecutivo || null, ejecutivoFono || null, ejecutivoEmail || null,
         items ? JSON.stringify(items) : null, ordenId || null, ordenNumero || null,

@@ -96,9 +96,6 @@ body {
 
 .sec { margin-top: 3mm; break-inside: avoid; background: #FFFFFF; border: .5pt solid #E2E8F0; border-radius: 7pt; padding: 2.5mm 4mm; box-shadow: 0 1px 4px rgba(15,23,42,.15); }
 
-.cliente-head { text-align: center; font-weight: 800; font-size: 9pt; color: #111827; margin-bottom: 2mm; }
-.cliente-head .rut { font-weight: 700; color: #0C4A8C; margin-right: 6pt; }
-
 .grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 8mm; row-gap: 2mm; }
 .f .l { display: block; font-size: 6pt; text-transform: uppercase; letter-spacing: .07em; color: #6B7280; }
 .f .v { display: block; padding-bottom: 1mm; border-bottom: .5pt solid #E2E8F0; font-size: 9pt; font-weight: 600; color: #111827; overflow-wrap: anywhere; }
@@ -161,11 +158,13 @@ export function generarHtmlCotizacion(cot) {
   </div>
 
   <div class="sec">
-    <div class="cliente-head">
-      ${cot.cliente_rut ? `<span class="rut">${esc(cot.cliente_rut)}</span>` : ""}
-      <span>${esc(cot.cliente_razon_social)}</span>
-    </div>
     <div class="grid">
+      ${campo("Cliente", cot.cliente_razon_social)}
+      ${campo("RUT", cot.cliente_rut)}
+      ${campo("Dirección", cot.cliente_direccion)}
+      ${campo("Comuna", cot.cliente_comuna)}
+      ${campo("Teléfono", cot.cliente_telefono)}
+      ${campo("Email Cliente", cot.cliente_email)}
       ${campo("Contacto", cot.contacto_nombre)}
       ${campo("Ejecutivo", cot.ejecutivo)}
       ${campo("Fono Contacto", cot.contacto_fono)}
