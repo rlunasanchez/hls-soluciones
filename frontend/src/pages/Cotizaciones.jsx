@@ -17,7 +17,7 @@ import { usePaginaPersistente, useClampPagina } from "../hooks/usePaginacion";
 
 const clp = (n) => Math.round(Number(n) || 0).toLocaleString("es-CL");
 
-const itemVacio = () => ({ sku: "", detalle: "", cantidad: 1, unidad: "", neto: "" });
+const itemVacio = () => ({ sku: "", detalle: "", cantidad: 1, neto: "" });
 
 const cotizacionVacia = () => ({
   fechaEmision: new Date().toISOString().split("T")[0],
@@ -424,10 +424,6 @@ function Cotizaciones() {
             <label>Cant.</label>
             <input type="number" min="0" value={item.cantidad} onChange={(e) => actualizarItem(idx, 'cantidad', e.target.value)} disabled={soloLectura} />
           </div>
-          <div className="of-f" style={{ flex: '0 0 90px' }}>
-            <label>Uni.</label>
-            <input type="text" value={item.unidad} onChange={(e) => actualizarItem(idx, 'unidad', e.target.value)} disabled={soloLectura} />
-          </div>
           <div className="of-f" style={{ flex: '0 0 120px' }}>
             <label>Neto</label>
             <input type="number" min="0" value={item.neto} onChange={(e) => actualizarItem(idx, 'neto', e.target.value)} disabled={soloLectura} />
@@ -455,7 +451,7 @@ function Cotizaciones() {
     const payload = {
       ...cotizacion,
       items: cotizacion.items.filter((i) =>
-        String(i.sku || "").trim() || String(i.detalle || "").trim() || String(i.unidad || "").trim() || Number(i.neto) > 0
+        String(i.sku || "").trim() || String(i.detalle || "").trim() || Number(i.neto) > 0
       )
     };
 
