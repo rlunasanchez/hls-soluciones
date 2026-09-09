@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import api from "../services/api";
 import { getCached } from "../services/cache";
-import { toUpper, cerrarSesion, upperInput, parseToken } from "../utils/helpers";
+import { toUpper, cerrarSesion, upperInput, parseToken, formatearRutInput } from "../utils/helpers";
 import "../styles/OrdenTrabajo.css";
 import "../styles/ordenes-componentes.css";
 import { EMPRESA } from "../utils/empresa";
@@ -27,6 +27,10 @@ const cotizacionVacia = () => ({
   clienteId: null,
   clienteRut: "",
   clienteRazonSocial: "",
+  clienteDireccion: "",
+  clienteComuna: "",
+  clienteTelefono: "",
+  clienteEmail: "",
   contactoNombre: "",
   contactoFono: "",
   contactoEmail: "",
@@ -124,6 +128,10 @@ function Cotizaciones() {
           clienteId: orden.cliente_id || clienteMatch?.id || null,
           clienteRut: orden.rut || clienteMatch?.rut || "",
           clienteRazonSocial: toUpper(orden.cliente || ""),
+          clienteDireccion: toUpper(orden.direccion || clienteMatch?.direccion || ""),
+          clienteComuna: toUpper(orden.comuna || clienteMatch?.comuna || ""),
+          clienteTelefono: orden.fono_principal || clienteMatch?.telefono || "",
+          clienteEmail: orden.email || clienteMatch?.email || "",
           contactoNombre: toUpper(orden.contacto || ""),
           contactoFono: orden.fono_contacto || "",
           contactoEmail: orden.email_contacto || "",
@@ -138,6 +146,10 @@ function Cotizaciones() {
           clienteId: clienteNav.id || null,
           clienteRut: clienteNav.rut || "",
           clienteRazonSocial: toUpper(clienteNav.razon_social || ""),
+          clienteDireccion: toUpper(clienteNav.direccion || ""),
+          clienteComuna: toUpper(clienteNav.comuna || ""),
+          clienteTelefono: clienteNav.telefono || "",
+          clienteEmail: clienteNav.email || "",
           contactoNombre: toUpper(clienteNav.contacto_nombre || ""),
           contactoFono: clienteNav.contacto_fono || "",
           contactoEmail: clienteNav.contacto_email || ""
@@ -235,6 +247,10 @@ function Cotizaciones() {
       clienteId: c.cliente_id || null,
       clienteRut: c.cliente_rut || "",
       clienteRazonSocial: c.cliente_razon_social || "",
+      clienteDireccion: c.cliente_direccion || "",
+      clienteComuna: c.cliente_comuna || "",
+      clienteTelefono: c.cliente_telefono || "",
+      clienteEmail: c.cliente_email || "",
       contactoNombre: c.contacto_nombre || "",
       contactoFono: c.contacto_fono || "",
       contactoEmail: c.contacto_email || "",
@@ -300,6 +316,10 @@ function Cotizaciones() {
       clienteId: cliente.id,
       clienteRut: cliente.rut || "",
       clienteRazonSocial: toUpper(cliente.razon_social),
+      clienteDireccion: toUpper(cliente.direccion || ""),
+      clienteComuna: toUpper(cliente.comuna || ""),
+      clienteTelefono: cliente.telefono || "",
+      clienteEmail: cliente.email || "",
       contactoNombre: toUpper(cliente.contacto_nombre || ""),
       contactoFono: cliente.contacto_fono || "",
       contactoEmail: cliente.contacto_email || ""
@@ -307,8 +327,15 @@ function Cotizaciones() {
   };
 
   const qCliente = busquedaCliente.toLowerCase();
+  const digRut = (v) => (v || "").replace(/[^0-9]/g, "");
+  const qClienteDig = digRut(busquedaCliente);
+  const clienteEsNumerico = /^[0-9]/.test(busquedaCliente.trim());
   const clientesFiltrados = busquedaCliente.length >= 2 && (!clienteSeleccionado || toUpper(clienteSeleccionado.razon_social) !== busquedaCliente)
-    ? clientes.filter((c) => c.razon_social?.toLowerCase().includes(qCliente) || c.codigo?.toLowerCase().includes(qCliente)).slice(0, 10)
+    ? clientes.filter((c) =>
+        c.razon_social?.toLowerCase().includes(qCliente) ||
+        c.codigo?.toLowerCase().includes(qCliente) ||
+        (clienteEsNumerico && qClienteDig && digRut(c.rut).includes(qClienteDig))
+      ).slice(0, 10)
     : [];
 
   // Contactos disponibles para buscar: el principal (contacto_nombre/email/fono
@@ -540,8 +567,7 @@ function Cotizaciones() {
       </div>
 
       {/* Contenido principal */}
-      <div className="page-content">
-        {!mostrarFormulario ? (
+      {!mostrarFormulario ? (
           <div className="ot-list-wrap">
             <CotizacionLista
               cotizaciones={cotizacionesPag}
@@ -573,7 +599,136 @@ function Cotizaciones() {
                 <div className="of-cols">
                 <div className="of-col-left">
                 <div className="of-sec primary">
-                  <div className="of-st success">Cliente</div>
+                  <div className="of-st success">Datos del Cliente</div>
+
+                  <div style={{ marginTop: 10, marginBottom: 8 }}>
+                    <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, fontSize: '0.95rem', color: 'var(--text)' }}>
+                      <Search size={16} style={{ display: 'inline', marginRight: 6, verticalAlign: 'middle' }} />
+                      Buscar y Seleccionar Cliente
+                    </label>
+                    <div style={{ position: 'relative' }} ref={clienteDropdownRef}>
+                      <input
+                        type="text"
+                        className="ot-search"
+                        placeholder="Escriba para buscar cliente por nombre o RUT..."
+                        value={busquedaCliente}
+                        onChange={(e) => {
+                          const crudo = e.target.value;
+                          const val = /^[0-9][0-9Kk.-]*$/.test(crudo) ? formatearRutInput(crudo) : upperInput(e);
+                          setBusquedaCliente(val);
+                          setMostrarDropdownClientes(val.length >= 2);
+                        }}
+                        onFocus={() => { if (busquedaCliente.length >= 2) setMostrarDropdownClientes(true); }}
+                        disabled={soloLectura}
+                        style={{ background: clienteSeleccionado ? '#E0F2FE' : 'white' }}
+                      />
+                      <ChevronDown size={20} style={{
+                        position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
+                        color: 'var(--text-muted)', pointerEvents: 'none'
+                      }} />
+                      {clienteSeleccionado && (
+                        <span style={{
+                          position: 'absolute', right: '40px', top: '50%', transform: 'translateY(-50%)',
+                          background: 'var(--success)', color: 'white', padding: '2px 8px',
+                          borderRadius: '4px', fontSize: '0.75rem'
+                        }}>
+                          ✓ Seleccionado
+                        </span>
+                      )}
+                      {mostrarDropdownClientes && busquedaCliente.length >= 2 && (
+                        <div style={{
+                          position: 'absolute', top: '100%', left: 0, right: 0,
+                          background: 'white', border: '1px solid var(--border)', borderTop: 'none',
+                          borderRadius: '0 0 8px 8px', maxHeight: '220px', overflow: 'auto',
+                          zIndex: 1000, boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                        }}>
+                          {clientesFiltrados.length > 0 ? (
+                            clientesFiltrados.map((cliente) => (
+                              <div key={cliente.id}
+                                onClick={() => seleccionarCliente(cliente)}
+                                style={{ padding: '6px 10px', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}
+                                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--primary-light)'; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.background = 'white'; }}
+                              >
+                                <div style={{ fontWeight: 600, fontSize: '.85rem' }}>{cliente.razon_social}</div>
+                                <div style={{ fontSize: '.75rem', color: 'var(--text-muted)' }}>RUT: {cliente.rut || 'N/A'}</div>
+                              </div>
+                            ))
+                          ) : (
+                            <div style={{ padding: '10px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '.85rem' }}>
+                              No se encontraron clientes con "{busquedaCliente}"
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="of-form-grid" style={{ gridTemplateColumns: '2fr 1fr', marginTop: 10 }}>
+                    <div className="of-f">
+                      <label>Cliente</label>
+                      <input
+                        type="text"
+                        placeholder="Nombre del cliente (opcional en cotización suelta)"
+                        value={cotizacion.clienteRazonSocial}
+                        onChange={(e) => setCotizacion({ ...cotizacion, clienteRazonSocial: upperInput(e) })}
+                        disabled={soloLectura}
+                      />
+                    </div>
+                    <div className="of-f">
+                      <label>RUT</label>
+                      <input
+                        type="text"
+                        placeholder="Ej: 12.345.678-9"
+                        value={cotizacion.clienteRut}
+                        onChange={(e) => setCotizacion({ ...cotizacion, clienteRut: formatearRutInput(e.target.value) })}
+                        disabled={soloLectura}
+                      />
+                    </div>
+                    <div className="of-f">
+                      <label>Dirección</label>
+                      <input
+                        type="text"
+                        placeholder="Dirección del cliente"
+                        value={cotizacion.clienteDireccion}
+                        onChange={(e) => setCotizacion({ ...cotizacion, clienteDireccion: upperInput(e) })}
+                        disabled={soloLectura}
+                      />
+                    </div>
+                    <div className="of-f">
+                      <label>Comuna</label>
+                      <input
+                        type="text"
+                        placeholder="Comuna"
+                        value={cotizacion.clienteComuna}
+                        onChange={(e) => setCotizacion({ ...cotizacion, clienteComuna: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '') })}
+                        disabled={soloLectura}
+                      />
+                    </div>
+                  </div>
+                  <div className="of-form-grid" style={{ gridTemplateColumns: 'repeat(3, minmax(200px, 1fr))', marginTop: 10 }}>
+                    <div className="of-f">
+                      <label>Teléfono</label>
+                      <input
+                        type="tel"
+                        placeholder="Teléfono del cliente"
+                        value={cotizacion.clienteTelefono}
+                        onChange={(e) => setCotizacion({ ...cotizacion, clienteTelefono: e.target.value.replace(/[^0-9+]/g, '') })}
+                        disabled={soloLectura}
+                      />
+                    </div>
+                    <div className="of-f">
+                      <label>Email Cliente</label>
+                      <input
+                        type="email"
+                        placeholder="Email del cliente"
+                        value={cotizacion.clienteEmail}
+                        onChange={(e) => setCotizacion({ ...cotizacion, clienteEmail: e.target.value })}
+                        disabled={soloLectura}
+                      />
+                    </div>
+                  </div>
+
                   <div className="of-form-grid" style={{ marginTop: 10 }}>
                     <div className="of-f" style={{ position: 'relative' }} ref={contactoDropdownRef}>
                       <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Search size={10} />Contacto</label>
@@ -620,8 +775,6 @@ function Cotizaciones() {
                       <label style={{ display: 'flex', alignItems: 'center' }}>Fono Contacto</label>
                       <input type="tel" placeholder="Teléfono del contacto" value={cotizacion.contactoFono} onChange={(e) => setCotizacion({ ...cotizacion, contactoFono: e.target.value.replace(/[^0-9+]/g, '') })} disabled={soloLectura} />
                     </div>
-                  </div>
-                  <div className="of-form-grid" style={{ marginTop: 10, marginBottom: 0 }}>
                     <div className="of-f">
                       <label style={{ display: 'flex', alignItems: 'center' }}>Email Contacto</label>
                       <input type="email" placeholder="Email del contacto" value={cotizacion.contactoEmail} onChange={(e) => setCotizacion({ ...cotizacion, contactoEmail: e.target.value })} disabled={soloLectura} />
@@ -644,15 +797,6 @@ function Cotizaciones() {
                       <label>Email Ejecutivo</label>
                       <input type="email" placeholder="Email del ejecutivo" value={cotizacion.ejecutivoEmail} onChange={(e) => setCotizacion({ ...cotizacion, ejecutivoEmail: e.target.value })} disabled={soloLectura} />
                     </div>
-                    <div className="of-f">
-                      <label>Condición</label>
-                      <select value={cotizacion.condicion} onChange={(e) => setCotizacion({ ...cotizacion, condicion: e.target.value })} disabled={soloLectura}>
-                        <option value="Contado - CLP">Contado - CLP</option>
-                        <option value="Crédito 30 días">Crédito 30 días</option>
-                        <option value="Crédito 60 días">Crédito 60 días</option>
-                        <option value="Transferencia Bancaria">Transferencia Bancaria</option>
-                      </select>
-                    </div>
                   </div>
                   <div className="of-form-grid" style={{ marginTop: 10 }}>
                     <div className="of-f">
@@ -662,6 +806,15 @@ function Cotizaciones() {
                     <div className="of-f">
                       <label>Válido hasta</label>
                       <input type="date" value={cotizacion.fechaValidoHasta} onChange={(e) => setCotizacion({ ...cotizacion, fechaValidoHasta: e.target.value })} disabled={soloLectura} />
+                    </div>
+                    <div className="of-f">
+                      <label>Condición</label>
+                      <select value={cotizacion.condicion} onChange={(e) => setCotizacion({ ...cotizacion, condicion: e.target.value })} disabled={soloLectura}>
+                        <option value="Contado - CLP">Contado - CLP</option>
+                        <option value="Crédito 30 días">Crédito 30 días</option>
+                        <option value="Crédito 60 días">Crédito 60 días</option>
+                        <option value="Transferencia Bancaria">Transferencia Bancaria</option>
+                      </select>
                     </div>
                   </div>
                   <div className="of-f" style={{ marginTop: 10 }}>
@@ -682,15 +835,15 @@ function Cotizaciones() {
                 <div className="of-sec primary">
                   <div className="of-st muted">Ítems</div>
                   {(() => {
-                    // Un solo espacio visible a la vez: por defecto el Ítem 1;
-                    // si hay un ítem elegido desde los chips, se muestra ese
-                    // en su lugar (no se agrega una segunda tarjeta aparte).
-                    const idxActivo = itemsManualVisibles.size > 0 ? [...itemsManualVisibles][0] : 0;
-                    return renderItemCard(cotizacion.items[idxActivo], idxActivo);
+                    // Por defecto un solo espacio visible (el Ítem 1). Si se elige
+                    // un ítem puntual desde los chips, se muestra ese en su lugar;
+                    // si se pincha "Ver todos", se muestran todas las tarjetas.
+                    const visibles = itemsManualVisibles.size > 0 ? [...itemsManualVisibles].sort((a, b) => a - b) : [0];
+                    return visibles.map((idx) => renderItemCard(cotizacion.items[idx], idx));
                   })()}
 
                   {cotizacion.items.length > LIMITE_ITEMS &&
-                    (itemsResumenAbierto || cotizacion.items.some((_, i) => i >= LIMITE_ITEMS && !itemsManualVisibles.has(i))) && (
+                    (itemsResumenAbierto || cotizacion.items.some((_, i) => !itemsManualVisibles.has(i))) && (
                     <button
                       type="button"
                       onClick={() => {
@@ -714,6 +867,24 @@ function Cotizaciones() {
 
                   {cotizacion.items.length > LIMITE_ITEMS && itemsResumenAbierto && (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+                      {(() => {
+                        const todosActivos = itemsManualVisibles.size === cotizacion.items.length;
+                        return (
+                          <span
+                            onClick={() => setItemsManualVisibles(todosActivos ? new Set() : new Set(cotizacion.items.map((_, i) => i)))}
+                            title={todosActivos ? "Ver solo un ítem a la vez" : "Ver todos los ítems"}
+                            style={{
+                              display: 'inline-flex', alignItems: 'center', cursor: 'pointer',
+                              background: todosActivos ? 'var(--primary)' : 'var(--primary-light)',
+                              color: todosActivos ? '#ffffff' : 'var(--primary)',
+                              border: '1px solid var(--primary)',
+                              borderRadius: 999, padding: '2px 10px', fontSize: '.75rem', fontWeight: 700
+                            }}
+                          >
+                            Ver todos
+                          </span>
+                        );
+                      })()}
                       {cotizacion.items.map((item, idx) => {
                         const activo = itemsManualVisibles.size > 0 ? itemsManualVisibles.has(idx) : idx === 0;
                         return (
@@ -798,7 +969,6 @@ function Cotizaciones() {
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 }

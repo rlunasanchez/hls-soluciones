@@ -153,6 +153,10 @@ CREATE TABLE IF NOT EXISTS cotizaciones (
   cliente_id INT,
   cliente_rut VARCHAR(20),
   cliente_razon_social VARCHAR(255) NOT NULL,
+  cliente_direccion VARCHAR(255),
+  cliente_comuna VARCHAR(100),
+  cliente_telefono VARCHAR(20),
+  cliente_email VARCHAR(100),
 
   contacto_nombre VARCHAR(100),
   contacto_fono VARCHAR(20),

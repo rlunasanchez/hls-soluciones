@@ -1,5 +1,37 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-09 (3)
+
+### v2.78: PDF de Cotización - Cliente/RUT como campos de la grilla (igual que la OT)
+
+El encabezado del PDF mostraba la razón social y el RUT en una barra centrada aparte (`cliente-head`), distinto de cómo lo hace `ordenServicioDoc.js` (Cliente y RUT son dos campos más dentro de la misma grilla que Dirección/Comuna/etc.). Se sacó esa barra y ahora Cliente y RUT son los dos primeros campos de la grilla, mismo criterio visual que la OT.
+
+**Verificación:** `npm run build` OK.
+
+### v2.77: Ítems de Cotización - chip "Ver todos" + fix del botón "Ver más"
+
+**Chip "Ver todos":** con más de un ítem, además de poder elegir uno a la vez desde los chips, ahora hay un chip "Ver todos" que muestra todas las tarjetas de ítems al mismo tiempo (pinchándolo de nuevo vuelve a mostrar solo una).
+
+**Fix:** al agregar el segundo ítem no aparecía el botón "N ítems más — Ver" para volver a los chips. La condición que decide mostrar ese botón excluía por error el Ítem 1 de la comprobación (`i >= LIMITE_ITEMS`), a diferencia del mismo patrón en Sucursales/Contactos que sí lo considera — como el ítem recién agregado quedaba como el único "visible", el chequeo no encontraba nada oculto y ocultaba el botón.
+
+**Verificación:** `npm run build` OK.
+
+### v2.76: Cotizaciones - mismo ancho y misma distribución de campos que la OT
+
+El mantenedor de Cotizaciones quedaba más angosto que el de la OT porque todo el contenido estaba envuelto en un `<div className="page-content">` adicional (max-width 1200/1500px) que la OT no usa — se sacó, ambos quedan con el mismo ancho (1400px).
+
+En "Datos del Cliente", Cliente/RUT/Dirección/Comuna estaban repartidos en tres grillas separadas con anchos por defecto (auto-fit, todas parejas); ahora los cuatro van en una sola grilla `2fr 1fr` (2 filas: Cliente|RUT, Dirección|Comuna) igual que en `OrdenFormCliente.jsx`. Teléfono/Email Cliente pasan a una grilla de 3 columnas, mismo criterio que Fono Principal/Email de la OT.
+
+En "Ejecutivo y Condiciones", Condición se movió de la fila de Ejecutivo a la fila de Emisión/Válido hasta, para que quede junto a esos dos campos.
+
+**Verificación:** `npm run build` OK.
+
+### v2.75: Datos completos del cliente en Cotizaciones (dirección, comuna, teléfono, email)
+
+La Cotización solo guardaba razón social y RUT del cliente; el resto (dirección, comuna, teléfono, email) había que buscarlo en la ficha del Cliente aparte. Se agregaron los 4 campos: columnas nuevas en `cotizaciones` (`cliente_direccion`, `cliente_comuna`, `cliente_telefono`, `cliente_email`), se precargan al elegir cliente/vincular desde una OT igual que el resto de los datos, y se muestran en el PDF junto a Contacto/Ejecutivo.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-09 (2)
 
 ### v2.74: Ítems de Cotización en un solo espacio (mismo criterio que Sucursales/Contactos)
