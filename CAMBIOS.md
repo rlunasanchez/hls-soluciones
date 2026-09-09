@@ -1,5 +1,19 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-09
+
+### v2.70: header del PDF de Cotización igual al de la OT
+
+El encabezado del PDF de Cotización no tenía el mismo estilo que el de la Orden de Servicio (tarjeta blanca envuelta, línea azul y línea gris debajo). Se le aplicó el mismo `.header-card`/`.filete-1`/`.filete-2` que ya usa `ordenServicioDoc.js`. De paso se unificó el texto de contacto en una sola línea: "Fono: +56 226816368 · contacto@hls.cl · www.hls.cl" (antes solo mostraba el fono, en línea aparte).
+
+**Verificación:** `npm run build` OK.
+
+### v2.69: sacar campo Uni. (Unidad) de Ítems en Cotización
+
+Se quita el campo Uni. de los ítems de la cotización (formulario, `itemVacio()`, filtro de guardado, tabla del PDF). A diferencia de País, no requirió ningún cambio en la base de datos ni en Neon: los ítems se guardan como JSON dentro de la columna `items` (TEXT) de la tabla `cotizaciones`, no como columnas individuales.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-08 (4)
 
 ### v2.68: resumen "Ver"/"Ver menos" con flechita + ajustes en Ítems

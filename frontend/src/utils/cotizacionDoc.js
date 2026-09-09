@@ -55,7 +55,6 @@ function filaItem(item) {
       <td class="sku">${item.sku ? esc(item.sku) : "-"}</td>
       <td class="detalle">${esc(item.detalle)}</td>
       <td class="num">${cantidad || ""}</td>
-      <td class="num">${item.unidad ? esc(item.unidad) : ""}</td>
       <td class="num">${clp(neto)}</td>
       <td class="num">${clp(total)}</td>
     </tr>`;
@@ -76,6 +75,7 @@ body {
 
 .page { width: 210mm; min-height: 297mm; padding: 9mm 12mm 8mm; background: #EEF2F7; }
 
+.header-card { background: #FFFFFF; border: .5pt solid #E2E8F0; border-radius: 7pt; padding: 3mm 4mm 2.2mm; box-shadow: 0 1px 4px rgba(15,23,42,.15); break-inside: avoid; }
 .enc { display: grid; grid-template-columns: 24mm 1fr auto; align-items: center; gap: 5mm; break-inside: avoid; }
 .logo { display: flex; align-items: center; justify-content: center; }
 .logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
@@ -84,6 +84,9 @@ body {
 .emp-datos { text-align: center; }
 .emp-datos h1 { margin: 0; font-size: 13pt; font-weight: 800; letter-spacing: -.01em; color: #0C4A8C; }
 .emp-datos p { margin: 1pt 0 0; font-size: 8.5pt; color: #6B7280; }
+
+.filete-1 { margin-top: 4pt; height: 2pt; border-radius: 2pt; background: #0C4A8C; }
+.filete-2 { height: .5pt; background: #E5E7EB; margin-top: .8mm; }
 
 .folio-box { text-align: center; background: #FFFFFF; border: 1pt solid #0C4A8C; border-radius: 7pt; padding: 3mm 6mm; }
 .folio-box h1 { margin: 0 0 1mm; font-size: 13pt; font-weight: 800; letter-spacing: .04em; color: #0C4A8C; }
@@ -134,19 +137,23 @@ export function generarHtmlCotizacion(cot) {
 <body>
   <div class="page">
 
-  <div class="enc">
-    ${slotLogo(LOGO_HLS, "HLS", "logo-hls")}
-    <div class="emp-datos">
-      <h1>${esc(EMPRESA.nombre)}</h1>
-      <p>${esc(EMPRESA.direccion)}</p>
-      <p>${esc(EMPRESA.fono)}</p>
+  <div class="header-card">
+    <div class="enc">
+      ${slotLogo(LOGO_HLS, "HLS", "logo-hls")}
+      <div class="emp-datos">
+        <h1>${esc(EMPRESA.nombre)}</h1>
+        <p>${esc(EMPRESA.direccion)}</p>
+        <p>Fono: ${esc(EMPRESA.fono)} · ${esc(EMPRESA.email)} · ${esc(EMPRESA.web)}</p>
+      </div>
+      <div class="folio-box">
+        <h1>COTIZACIÓN</h1>
+        <div class="folio-n">Folio N° ${esc(cot.folio)}</div>
+        <div class="rut-emp">${esc(EMPRESA_RUT)}</div>
+        <div class="razon-emp">${esc(EMPRESA_RAZON_SOCIAL)}</div>
+      </div>
     </div>
-    <div class="folio-box">
-      <h1>COTIZACIÓN</h1>
-      <div class="folio-n">Folio N° ${esc(cot.folio)}</div>
-      <div class="rut-emp">${esc(EMPRESA_RUT)}</div>
-      <div class="razon-emp">${esc(EMPRESA_RAZON_SOCIAL)}</div>
-    </div>
+    <div class="filete-1"></div>
+    <div class="filete-2"></div>
   </div>
 
   <div class="sec">
@@ -175,7 +182,6 @@ export function generarHtmlCotizacion(cot) {
           <th>SKU</th>
           <th>Detalle</th>
           <th class="num">Cant.</th>
-          <th class="num">Uni.</th>
           <th class="num">Neto</th>
           <th class="num">Total</th>
         </tr>
