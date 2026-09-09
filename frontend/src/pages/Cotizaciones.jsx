@@ -377,9 +377,11 @@ function Cotizaciones() {
   };
 
   const agregarItem = () => {
-    // El nuevo ítem se agrega colapsado, detrás del resumen "Ver" —no se
-    // despliega solo, a diferencia de Sucursales/Contactos.
+    // Mismo criterio que Sucursales/Contactos: el nuevo ítem pasa a ser
+    // el que se muestra en el espacio único, reemplazando al que estaba.
+    const nuevoIdx = cotizacion.items.length;
     setCotizacion((prev) => ({ ...prev, items: [...prev.items, itemVacio()] }));
+    setItemsManualVisibles(new Set([nuevoIdx]));
   };
   const quitarItem = (idx) => {
     setCotizacion((prev) => {
@@ -679,7 +681,13 @@ function Cotizaciones() {
                 <div className="of-col-right">
                 <div className="of-sec primary">
                   <div className="of-st muted">Ítems</div>
-                  {cotizacion.items.slice(0, LIMITE_ITEMS).map((item, idx) => renderItemCard(item, idx))}
+                  {(() => {
+                    // Un solo espacio visible a la vez: por defecto el Ítem 1;
+                    // si hay un ítem elegido desde los chips, se muestra ese
+                    // en su lugar (no se agrega una segunda tarjeta aparte).
+                    const idxActivo = itemsManualVisibles.size > 0 ? [...itemsManualVisibles][0] : 0;
+                    return renderItemCard(cotizacion.items[idxActivo], idxActivo);
+                  })()}
 
                   {cotizacion.items.length > LIMITE_ITEMS &&
                     (itemsResumenAbierto || cotizacion.items.some((_, i) => i >= LIMITE_ITEMS && !itemsManualVisibles.has(i))) && (
@@ -706,20 +714,22 @@ function Cotizaciones() {
 
                   {cotizacion.items.length > LIMITE_ITEMS && itemsResumenAbierto && (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
-                      {cotizacion.items.slice(LIMITE_ITEMS).map((item, i) => {
-                        const idx = i + LIMITE_ITEMS;
+                      {cotizacion.items.map((item, idx) => {
+                        const activo = itemsManualVisibles.size > 0 ? itemsManualVisibles.has(idx) : idx === 0;
                         return (
                           <span key={idx} style={{
                             display: 'inline-flex', alignItems: 'center', gap: 6,
-                            background: 'var(--primary-light)', color: 'var(--primary)', border: '1px solid var(--primary)',
+                            background: activo ? 'var(--primary)' : 'var(--primary-light)',
+                            color: activo ? '#ffffff' : 'var(--primary)',
+                            border: '1px solid var(--primary)',
                             borderRadius: 999, padding: '2px 6px 2px 10px', fontSize: '.75rem', fontWeight: 600
                           }}>
                             <span
-                              onClick={() => setItemsManualVisibles(prev => {
-                                const next = new Set(prev);
-                                if (next.has(idx)) next.delete(idx); else next.add(idx);
-                                return next;
-                              })}
+                              onClick={() => setItemsManualVisibles(prev => (
+                                // Exclusivo: pinchar un ítem muestra solo ese (no se
+                                // van acumulando hacia abajo). Pinchar el mismo lo cierra.
+                                prev.has(idx) && prev.size === 1 ? new Set() : new Set([idx])
+                              ))}
                               title="Editar ítem"
                               style={{ cursor: 'pointer' }}
                             >
@@ -730,7 +740,7 @@ function Cotizaciones() {
                                 type="button"
                                 onClick={() => quitarItem(idx)}
                                 title="Quitar ítem"
-                                style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', display: 'flex', padding: 0 }}
+                                style={{ background: 'none', border: 'none', color: activo ? '#ffffff' : 'var(--primary)', cursor: 'pointer', display: 'flex', padding: 0 }}
                               >
                                 <X size={12} />
                               </button>
@@ -740,11 +750,6 @@ function Cotizaciones() {
                       })}
                     </div>
                   )}
-
-                  {cotizacion.items.map((item, idx) => {
-                    if (idx < LIMITE_ITEMS || !itemsManualVisibles.has(idx)) return null;
-                    return renderItemCard(item, idx);
-                  })}
 
                   {!soloLectura && (
                     <button type="button" className="of-btn-a" onClick={agregarItem} style={{ marginTop: 4 }}>

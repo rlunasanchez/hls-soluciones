@@ -103,12 +103,16 @@ body {
 .f .l { display: block; font-size: 6pt; text-transform: uppercase; letter-spacing: .07em; color: #6B7280; }
 .f .v { display: block; padding-bottom: 1mm; border-bottom: .5pt solid #E2E8F0; font-size: 9pt; font-weight: 600; color: #111827; overflow-wrap: anywhere; }
 
-table.items { width: 100%; border-collapse: collapse; margin-top: 1mm; }
+table.items { width: 100%; table-layout: fixed; border-collapse: collapse; margin-top: 1mm; }
 table.items thead th { text-align: left; font-size: 7pt; text-transform: uppercase; letter-spacing: .06em; color: #6B7280; border-bottom: 1pt solid #0C4A8C; padding: 2mm 2mm 1.5mm; }
 table.items thead th.num { text-align: right; }
-table.items td { padding: 2mm; border-bottom: .5pt solid #E2E8F0; vertical-align: top; }
+table.items th:nth-child(1), table.items td:nth-child(1) { width: 20mm; }
+table.items th:nth-child(3), table.items td:nth-child(3) { width: 14mm; }
+table.items th:nth-child(4), table.items td:nth-child(4) { width: 20mm; }
+table.items th:nth-child(5), table.items td:nth-child(5) { width: 22mm; }
+table.items td { padding: 2mm; border-bottom: .5pt solid #E2E8F0; vertical-align: top; overflow-wrap: anywhere; }
 table.items td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-table.items td.sku { color: #6B7280; white-space: nowrap; }
+table.items td.sku { color: #6B7280; }
 table.items td.detalle { font-weight: 600; color: #111827; white-space: pre-wrap; }
 
 .pie-tabla { display: flex; gap: 6mm; margin-top: 3mm; }
