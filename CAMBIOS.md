@@ -1,5 +1,35 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-09 (2)
+
+### v2.74: Ítems de Cotización en un solo espacio (mismo criterio que Sucursales/Contactos)
+
+Antes el Ítem 1 quedaba siempre fijo arriba y, al elegir otro ítem desde los chips, se agregaba una segunda tarjeta más abajo (dos tarjetas visibles a la vez, más scroll). Ahora hay un solo espacio: por defecto muestra el Ítem 1, y al pinchar el chip de otro ítem lo reemplaza ahí mismo — pinchar el mismo chip de nuevo vuelve al Ítem 1. El chip del Ítem 1 también aparece en el resumen (antes solo se listaban los ítems 2 en adelante). "+ Agregar ítem" ahora muestra directo el nuevo (reemplazando al que estaba), igual que en Sucursales/Contactos — se revierte el criterio de v2.68 de dejarlo colapsado, porque ya no aplica el motivo original (evitar que crezca la pantalla): al ser un solo espacio que se reemplaza, no hay problema en mostrarlo altiro.
+
+**Verificación:** `npm run build` OK.
+
+### v2.73: selección exclusiva + chip activo resaltado en Sucursales/Contactos/Direcciones
+
+**Selección exclusiva:** en Sucursales/Direcciones (`ClienteFormulario.jsx`), Contactos Adicionales (`ModalContactos.jsx`) y Otras Direcciones/Otros Contactos de la OT (`OrdenFormCliente.jsx`), pinchar un chip ya no acumula (podían quedar varias tarjetas abiertas a la vez) — ahora muestra solo esa, reemplazando cualquier otra que estuviera abierta. Pinchar el mismo chip la cierra.
+
+**Chip activo resaltado:** el chip de la sucursal/contacto/dirección actualmente abierta cambia a color sólido (antes no había forma de saber, a simple vista, cuál de todas se estaba viendo).
+
+**Fix de paso:** el botón "+ Agregar" en Sucursales, Contactos y en Otras Direcciones/Otros Contactos de la OT acumulaba (`.add(nuevoIdx)`) en vez de reemplazar — al agregar una tercera, cuarta, etc., seguían mostrándose todas las anteriores. Ahora reemplaza, mostrando solo la recién agregada. También se corrigió `agregarDireccion`/`agregarContacto` (cuando se elige una dirección/contacto ya cargado del cliente desde el desplegable de la OT) para que abra directo la fila agregada.
+
+**Verificación:** `npm run build` OK.
+
+### v2.72: overflow-wrap en el PDF de la OT (mismo riesgo que en Cotización)
+
+Mismo problema que v2.71 pero en `ordenServicioDoc.js`: un texto largo sin espacios en Contactos/Direcciones adicionales, chips de insumos o el nombre del técnico en la firma también podía salirse de la tarjeta. Se agregó `overflow-wrap: anywhere` en esos mismos puntos.
+
+**Verificación:** `npm run build` OK.
+
+### v2.71: PDF de Cotización se rompía con texto largo sin espacios en Detalle
+
+Un texto largo sin espacios en el campo Detalle de un ítem (ej. una tira de caracteres pegada) no tenía dónde cortar dentro de la celda y se salía de la tabla, rompiendo el PDF. La tabla de ítems pasa a `table-layout: fixed` con anchos definidos por columna, y las celdas ahora cortan cualquier texto largo aunque no tenga espacios (`overflow-wrap: anywhere`).
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-09
 
 ### v2.70: header del PDF de Cotización igual al de la OT

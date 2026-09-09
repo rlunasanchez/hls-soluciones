@@ -108,14 +108,20 @@ function ModalContactos({ contactos = [], onChange, onClose, readOnly = false })
 
           {lista.length > 0 && resumenAbierto && (
             <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "8px" }}>
-              {lista.map((c, idx) => (
-                <span key={idx} className="contacto-chip" style={{ cursor: "default" }}>
+              {lista.map((c, idx) => {
+                const activo = manualVisibles.has(idx);
+                return (
+                <span key={idx} className="contacto-chip" style={{
+                  cursor: "default",
+                  background: activo ? "#16a34a" : undefined,
+                  color: activo ? "#ffffff" : undefined
+                }}>
                   <span
-                    onClick={() => setManualVisibles(prev => {
-                      const next = new Set(prev);
-                      if (next.has(idx)) next.delete(idx); else next.add(idx);
-                      return next;
-                    })}
+                    onClick={() => setManualVisibles(prev => (
+                      // Exclusivo: pinchar un contacto muestra solo ese (no se
+                      // van acumulando hacia abajo). Pinchar el mismo lo cierra.
+                      prev.has(idx) && prev.size === 1 ? new Set() : new Set([idx])
+                    ))}
                     style={{ cursor: "pointer" }}
                   >
                     {c.nombre ? c.nombre : `Contacto ${idx + 1}`}
@@ -125,13 +131,14 @@ function ModalContactos({ contactos = [], onChange, onClose, readOnly = false })
                       type="button"
                       onClick={() => eliminar(idx)}
                       title="Quitar contacto"
-                      style={{ background: "none", border: "none", color: "#166534", cursor: "pointer", display: "flex", padding: 0 }}
+                      style={{ background: "none", border: "none", color: activo ? "#ffffff" : "#166534", cursor: "pointer", display: "flex", padding: 0 }}
                     >
                       <X size={12} />
                     </button>
                   )}
                 </span>
-              ))}
+                );
+              })}
             </div>
           )}
 

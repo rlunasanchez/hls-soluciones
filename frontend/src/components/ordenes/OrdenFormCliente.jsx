@@ -913,6 +913,7 @@ function OrdenFormCliente({
                 : [];
 
               const agregarDireccion = (dir) => {
+                const nuevoIdx = nuevaOrden.direccionesExtra.length;
                 setNuevaOrden({
                   ...nuevaOrden,
                   direccionesExtra: [...nuevaOrden.direccionesExtra, {
@@ -923,6 +924,7 @@ function OrdenFormCliente({
                     comuna: dir.comuna
                   }]
                 });
+                setDireccionesManualVisibles(new Set([nuevoIdx]));
               };
 
               // Direcciones del cliente aún no agregadas (sin duplicados)
@@ -1058,18 +1060,22 @@ function OrdenFormCliente({
 
                   {nuevaOrden.direccionesExtra.length > 0 && direccionesResumenAbierto && (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
-                      {nuevaOrden.direccionesExtra.map((dir, idx) => (
+                      {nuevaOrden.direccionesExtra.map((dir, idx) => {
+                        const activa = direccionesManualVisibles.has(idx);
+                        return (
                         <span key={idx} style={{
                           display: 'inline-flex', alignItems: 'center', gap: '6px',
-                          background: '#E0F2FE', color: '#0284C7', border: '1px solid #7CD0F0',
+                          background: activa ? '#0284C7' : '#E0F2FE',
+                          color: activa ? '#ffffff' : '#0284C7',
+                          border: '1px solid #7CD0F0',
                           borderRadius: '999px', padding: '2px 6px 2px 10px', fontSize: '0.75rem', fontWeight: 600
                         }}>
                           <span
-                            onClick={() => setDireccionesManualVisibles(prev => {
-                              const next = new Set(prev);
-                              if (next.has(idx)) next.delete(idx); else next.add(idx);
-                              return next;
-                            })}
+                            onClick={() => setDireccionesManualVisibles(prev => (
+                              // Exclusivo: pinchar una dirección muestra solo esa (no
+                              // se van acumulando hacia abajo). Pinchar la misma la cierra.
+                              prev.has(idx) && prev.size === 1 ? new Set() : new Set([idx])
+                            ))}
                             title="Editar dirección"
                             style={{ cursor: 'pointer' }}
                           >
@@ -1083,13 +1089,14 @@ function OrdenFormCliente({
                                 eliminarDireccion(idx);
                               }}
                               title="Quitar dirección"
-                              style={{ background: 'none', border: 'none', color: '#0284C7', cursor: 'pointer', display: 'flex', padding: 0 }}
+                              style={{ background: 'none', border: 'none', color: activa ? '#ffffff' : '#0284C7', cursor: 'pointer', display: 'flex', padding: 0 }}
                             >
                               <X size={12} />
                             </button>
                           )}
                         </span>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
 
@@ -1177,7 +1184,7 @@ function OrdenFormCliente({
                           ...nuevaOrden,
                           direccionesExtra: [...nuevaOrden.direccionesExtra, { tipo: "", direccion: "", ciudad: "", fono: "", comuna: "" }]
                         });
-                        setDireccionesManualVisibles(prev => new Set(prev).add(nuevoIdx));
+                        setDireccionesManualVisibles(new Set([nuevoIdx]));
                       }}
                       style={{
                         marginTop: '6px',
@@ -1361,6 +1368,7 @@ function OrdenFormCliente({
                 : [];
 
               const agregarContacto = (c) => {
+                const nuevoIdx = nuevaOrden.contactosExtra.length;
                 setNuevaOrden({
                   ...nuevaOrden,
                   contactosExtra: [...nuevaOrden.contactosExtra, {
@@ -1371,6 +1379,7 @@ function OrdenFormCliente({
                     direccion: c.direccion || ""
                   }]
                 });
+                setContactosManualVisibles(new Set([nuevoIdx]));
               };
 
               const actualizarContacto = (idx, campo, valor) => {
@@ -1510,18 +1519,22 @@ function OrdenFormCliente({
 
                   {nuevaOrden.contactosExtra.length > 0 && contactosResumenAbierto && (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
-                      {nuevaOrden.contactosExtra.map((c, idx) => (
+                      {nuevaOrden.contactosExtra.map((c, idx) => {
+                        const activo = contactosManualVisibles.has(idx);
+                        return (
                         <span key={idx} style={{
                           display: 'inline-flex', alignItems: 'center', gap: '6px',
-                          background: '#F0FDF4', color: 'var(--success)', border: '1px solid #7AD6EC',
+                          background: activo ? 'var(--success)' : '#F0FDF4',
+                          color: activo ? '#ffffff' : 'var(--success)',
+                          border: '1px solid #7AD6EC',
                           borderRadius: '999px', padding: '2px 6px 2px 10px', fontSize: '0.75rem', fontWeight: 600
                         }}>
                           <span
-                            onClick={() => setContactosManualVisibles(prev => {
-                              const next = new Set(prev);
-                              if (next.has(idx)) next.delete(idx); else next.add(idx);
-                              return next;
-                            })}
+                            onClick={() => setContactosManualVisibles(prev => (
+                              // Exclusivo: pinchar un contacto muestra solo ese (no se
+                              // van acumulando hacia abajo). Pinchar el mismo lo cierra.
+                              prev.has(idx) && prev.size === 1 ? new Set() : new Set([idx])
+                            ))}
                             title="Editar contacto"
                             style={{ cursor: 'pointer' }}
                           >
@@ -1535,13 +1548,14 @@ function OrdenFormCliente({
                                 eliminarContacto(idx);
                               }}
                               title="Quitar contacto"
-                              style={{ background: 'none', border: 'none', color: 'var(--success)', cursor: 'pointer', display: 'flex', padding: 0 }}
+                              style={{ background: 'none', border: 'none', color: activo ? '#ffffff' : 'var(--success)', cursor: 'pointer', display: 'flex', padding: 0 }}
                             >
                               <X size={12} />
                             </button>
                           )}
                         </span>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
 
@@ -1625,7 +1639,7 @@ function OrdenFormCliente({
                           ...nuevaOrden,
                           contactosExtra: [...nuevaOrden.contactosExtra, { nombre: "", email: "", fono: "", direccion: "", cargo: "" }]
                         });
-                        setContactosManualVisibles(prev => new Set(prev).add(nuevoIdx));
+                        setContactosManualVisibles(new Set([nuevoIdx]));
                       }}
                       style={{
                         marginTop: '6px',

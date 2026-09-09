@@ -430,18 +430,23 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
 
             {sucursales.length > 0 && sucursalesResumenAbierto && (
               <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "8px" }}>
-                {sucursales.map((suc, idx) => (
+                {sucursales.map((suc, idx) => {
+                  const activa = sucursalesManualVisibles.has(idx);
+                  return (
                   <span key={idx} style={{
                     display: "inline-flex", alignItems: "center", gap: "6px",
-                    background: "#e0f2fe", color: "#0369a1", border: "1px solid #0ea5e9",
+                    background: activa ? "#0ea5e9" : "#e0f2fe",
+                    color: activa ? "#ffffff" : "#0369a1",
+                    border: "1px solid #0ea5e9",
                     borderRadius: "999px", padding: "2px 6px 2px 10px", fontSize: "0.75rem", fontWeight: 600
                   }}>
                     <span
-                      onClick={() => setSucursalesManualVisibles(prev => {
-                        const next = new Set(prev);
-                        if (next.has(idx)) next.delete(idx); else next.add(idx);
-                        return next;
-                      })}
+                      onClick={() => setSucursalesManualVisibles(prev => (
+                        // Exclusivo: pinchar una sucursal muestra solo esa (no se
+                        // van acumulando hacia abajo). Pinchar la misma que ya
+                        // está abierta la cierra.
+                        prev.has(idx) && prev.size === 1 ? new Set() : new Set([idx])
+                      ))}
                       title="Editar sucursal"
                       style={{ cursor: "pointer" }}
                     >
@@ -455,13 +460,14 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                           eliminarSucursal(idx);
                         }}
                         title="Quitar sucursal"
-                        style={{ background: "none", border: "none", color: "#0369a1", cursor: "pointer", display: "flex", padding: 0 }}
+                        style={{ background: "none", border: "none", color: activa ? "#ffffff" : "#0369a1", cursor: "pointer", display: "flex", padding: 0 }}
                       >
                         <X size={12} />
                       </button>
                     )}
                   </span>
-                ))}
+                  );
+                })}
               </div>
             )}
 
@@ -469,6 +475,9 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
               if (!sucursalesManualVisibles.has(idx)) return null;
               return (
               <div key={idx} className="cf-sc">
+                <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#0369a1", marginBottom: "4px" }}>
+                  Sucursal {idx + 1}
+                </div>
                 <div className="cf-r2 cf-mb">
                   <div className="cf-field cf-m0">
                     <label>Tipo</label>

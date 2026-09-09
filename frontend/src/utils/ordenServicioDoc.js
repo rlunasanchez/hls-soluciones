@@ -165,12 +165,12 @@ img.logo { max-width: 100%; max-height: 100%; object-fit: contain; }
 .f .v.num { font-variant-numeric: tabular-nums; }
 
 .sub { margin-top: 2.5mm; font-size: 6pt; text-transform: uppercase; letter-spacing: .06em; color: #6B7280; }
-.extra-item { margin-top: 1.2mm; }
+.extra-item { margin-top: 1.2mm; overflow-wrap: anywhere; }
 .extra-item .nom { font-size: 8pt; font-weight: 700; }
 .extra-item .det { font-size: 7pt; color: #6B7280; }
 
 .chips { margin-top: .8mm; }
-.chip { display: inline-block; background: #E8F1FB; border: .5pt solid rgba(12,74,140,.15); border-radius: 999px; padding: 1.5pt 7pt; font-size: 7.5pt; font-weight: 600; color: #0C4A8C; margin: 0 3pt 2pt 0; }
+.chip { display: inline-block; max-width: 100%; overflow-wrap: anywhere; background: #E8F1FB; border: .5pt solid rgba(12,74,140,.15); border-radius: 999px; padding: 1.5pt 7pt; font-size: 7.5pt; font-weight: 600; color: #0C4A8C; margin: 0 3pt 2pt 0; }
 
 .txt { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 0; font-size: 8.5pt; orphans: 3; widows: 3; }
 
@@ -178,7 +178,7 @@ img.logo { max-width: 100%; max-height: 100%; object-fit: contain; }
 .firmas { display: grid; grid-template-columns: 1fr 1fr; column-gap: 14mm; }
 .firma-linea { border-top: .5pt solid #9CA3AF; width: 60mm; margin-top: 7mm; padding-top: 1.5mm; text-align: center; }
 .firma-linea .t { font-size: 6pt; text-transform: uppercase; letter-spacing: .06em; color: #6B7280; }
-.firma-linea .n { font-size: 8pt; font-weight: 600; margin-top: .8mm; }
+.firma-linea .n { font-size: 8pt; font-weight: 600; margin-top: .8mm; overflow-wrap: anywhere; }
 
 .legales { margin-top: 3mm; font-size: 6pt; color: #6B7280; }
 .legales p { margin: 0 0 1.2mm; padding-left: 8pt; text-indent: -8pt; }
