@@ -16,8 +16,13 @@ import CotizacionLista from "../components/cotizaciones/CotizacionLista";
 import { usePaginaPersistente, useClampPagina } from "../hooks/usePaginacion";
 
 const clp = (n) => Math.round(Number(n) || 0).toLocaleString("es-CL");
+const soloDigitos = (v) => String(v || "").replace(/[^0-9]/g, "");
+const clpInput = (v) => {
+  const digitos = soloDigitos(v);
+  return digitos ? Number(digitos).toLocaleString("es-CL") : "";
+};
 
-const itemVacio = () => ({ sku: "", detalle: "", cantidad: 1, neto: "" });
+const itemVacio = () => ({ sku: "", detalle: "", cantidad: 1, neto: "", descuento: "" });
 
 const cotizacionVacia = () => ({
   fechaEmision: new Date().toISOString().split("T")[0],
@@ -83,12 +88,36 @@ function Cotizaciones() {
   // una OT igual se puede abrir desde el propio listado de Cotizaciones (Ver/
   // Editar), y en ese caso Cancelar/cerrar debe quedarse en Cotizaciones.
   const [origenOT, setOrigenOT] = useState(false);
+  // Datos de la OT desde la que se abrió esta cotización vía el chip
+  // "Cotizaciones Asociadas", para reabrirla en el mismo modo (Ver/Editar)
+  // al cerrar, en vez de mandar siempre al listado de OT.
+  const [ordenOrigen, setOrdenOrigen] = useState(null);
 
   useEffect(() => {
     const controller = new AbortController();
     fetchClientes(controller.signal);
     fetchCotizaciones(controller.signal);
     return () => controller.abort();
+  }, []);
+
+  // Abrir una cotización puntual desde el chip "Cotizaciones Asociadas" de una
+  // OT: navigate('/cotizaciones', { state: { cotizacionId } }). Se abre en el
+  // mismo modo que tenía la OT (Ver → solo lectura, Editar → editable).
+  useEffect(() => {
+    const cotizacionId = location.state?.cotizacionId;
+    if (!cotizacionId) return;
+    const cotizacionSoloLectura = location.state?.cotizacionSoloLectura;
+    const volverOrdenId = location.state?.volverOrdenId;
+    const volverOrdenSoloLectura = location.state?.volverOrdenSoloLectura;
+    window.history.replaceState({}, document.title);
+    (async () => {
+      // cargarCotizacion resetea origenOT a false (Ver/Editar desde el propio
+      // listado de Cotizaciones no debe volver a la OT) — acá sí venimos de
+      // la OT, así que se pisa después para que Cancelar/Cerrar vuelva ahí.
+      await cargarCotizacion({ id: cotizacionId }, !!cotizacionSoloLectura);
+      setOrigenOT(true);
+      if (volverOrdenId) setOrdenOrigen({ id: volverOrdenId, soloLectura: !!volverOrdenSoloLectura });
+    })();
   }, []);
 
   // Cotización nueva pre-rellenada, llega por navigate('/cotizaciones', { state }) desde:
@@ -239,7 +268,17 @@ function Cotizaciones() {
     setEditingId(c.id);
     setSoloLectura(readOnly);
     setOrigenOT(false);
-    const cl = clientes.find((x) => x.id === c.cliente_id);
+    // clientes puede no estar cargado todavía si se entra directo por acá
+    // (ej. desde el chip "Cotizaciones asociadas" de una OT recién montada).
+    let listaClientes = clientes;
+    if (listaClientes.length === 0) {
+      try {
+        const resCli = await api.get("/api/clientes");
+        listaClientes = resCli.data;
+        setClientes(resCli.data);
+      } catch { /* sigue con clienteSeleccionado en null */ }
+    }
+    const cl = listaClientes.find((x) => x.id === c.cliente_id);
     setClienteSeleccionado(cl || null);
     setBusquedaCliente(c.cliente_razon_social || "");
     setBusquedaContacto(c.contacto_nombre || "");
@@ -301,6 +340,7 @@ function Cotizaciones() {
     // (origenOT). Si la cotización tiene ordenId pero se abrió para Ver/Editar
     // desde el propio listado de Cotizaciones, se queda en Cotizaciones.
     const vuelveAOT = origenOT;
+    const destinoOrden = ordenOrigen;
     setMostrarFormulario(false);
     setEditingId(null);
     setSoloLectura(false);
@@ -311,7 +351,16 @@ function Cotizaciones() {
     setItemsResumenAbierto(false);
     setItemsManualVisibles(new Set());
     setOrigenOT(false);
-    if (vuelveAOT) navigate("/orden-trabajo");
+    setOrdenOrigen(null);
+    if (vuelveAOT) {
+      // Si se entró desde el chip "Cotizaciones Asociadas" de una OT puntual,
+      // reabrirla en el mismo modo (Ver/Editar) en vez de mandar al listado.
+      if (destinoOrden) {
+        navigate("/orden-trabajo", { state: { verOrdenId: destinoOrden.id, verOrdenSoloLectura: destinoOrden.soloLectura } });
+      } else {
+        navigate("/orden-trabajo");
+      }
+    }
   };
 
   const seleccionarCliente = (cliente) => {
@@ -438,7 +487,7 @@ function Cotizaciones() {
   };
 
   const renderItemCard = (item, idx) => {
-    const totalFila = (Number(item.cantidad) || 0) * (Number(item.neto) || 0);
+    const totalFila = Math.max(0, (Number(item.cantidad) || 0) * (Number(item.neto) || 0) - (Number(item.descuento) || 0));
     return (
       <div key={idx} style={{
         border: '1px solid var(--border)', borderRadius: 6, padding: '6px 8px 8px',
@@ -456,21 +505,25 @@ function Cotizaciones() {
           )}
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
-          <div className="of-f" style={{ flex: '0 0 120px' }}>
+          <div className="of-f" style={{ flex: '0 0 70px' }}>
             <label>SKU</label>
             <input type="text" value={item.sku} onChange={(e) => actualizarItem(idx, 'sku', e.target.value)} disabled={soloLectura} />
           </div>
-          <div className="of-f" style={{ flex: '0 0 90px' }}>
+          <div className="of-f" style={{ flex: '0 0 55px' }}>
             <label>Cant.</label>
             <input type="number" min="0" value={item.cantidad} onChange={(e) => actualizarItem(idx, 'cantidad', e.target.value)} disabled={soloLectura} />
           </div>
-          <div className="of-f" style={{ flex: '0 0 120px' }}>
+          <div className="of-f" style={{ flex: '0 0 78px' }}>
             <label>Neto</label>
-            <input type="number" min="0" value={item.neto} onChange={(e) => actualizarItem(idx, 'neto', e.target.value)} disabled={soloLectura} />
+            <input type="text" inputMode="numeric" value={clpInput(item.neto)} onChange={(e) => actualizarItem(idx, 'neto', soloDigitos(e.target.value))} disabled={soloLectura} />
           </div>
-          <div className="of-f" style={{ flex: '0 0 110px' }}>
+          <div className="of-f" style={{ flex: '0 0 78px' }}>
+            <label>Descuento</label>
+            <input type="text" inputMode="numeric" value={clpInput(item.descuento)} onChange={(e) => actualizarItem(idx, 'descuento', soloDigitos(e.target.value))} disabled={soloLectura} />
+          </div>
+          <div className="of-f" style={{ flex: '0 0 78px' }}>
             <label>Total</label>
-            <input type="text" value={`${clp(totalFila)} CLP`} disabled />
+            <input type="text" value={clp(totalFila)} disabled />
           </div>
         </div>
         <div className="of-f">

@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Home, Users, Package, FileText, FileSpreadsheet, ShoppingCart, UserCog,
-  Save, X, Wrench
+  Save, X, Wrench, ChevronDown, ChevronUp
 } from "lucide-react";
 import api from "../services/api";
 import { getCached } from "../services/cache";
@@ -33,6 +33,7 @@ const tecnicoDeSesion = () => {
 
 function OrdenTrabajo() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   
   // Estados para listar órdenes con paginación
@@ -42,6 +43,13 @@ function OrdenTrabajo() {
   const [editingId, setEditingId] = useState(null);
   const [guardando, setGuardando] = useState(false);
   const guardandoRef = useRef(false);
+
+  // Id de la orden abierta en el formulario, tanto en modo Editar como en modo
+  // Ver (a diferencia de editingId, que en modo Ver queda en null). Sirve para
+  // consultar las cotizaciones asociadas sin importar el modo.
+  const [ordenIdActual, setOrdenIdActual] = useState(null);
+  const [cotizacionesDeOrden, setCotizacionesDeOrden] = useState([]);
+  const [mostrarCotizacionesAsociadas, setMostrarCotizacionesAsociadas] = useState(false);
   const [filtroNumeroOrden, setFiltroNumeroOrden] = useState("");
   const [filtroCliente, setFiltroCliente] = useState("");
   const [filtroSerie, setFiltroSerie] = useState("");
@@ -144,12 +152,14 @@ function OrdenTrabajo() {
       setMostrarFormulario(false);
       setEditingId(null);
       
-      // Solo procesar si hay datos de cliente u orden
-      if (!navState || (!navState?.cliente && !navState?.orden)) return;
-      
+      // Solo procesar si hay datos de cliente, orden, o una orden puntual a reabrir
+      if (!navState || (!navState?.cliente && !navState?.orden && !navState?.verOrdenId)) return;
+
       const ordenFromNav = navState?.orden;
       const clienteFromNav = navState?.cliente;
-      
+      const verOrdenId = navState?.verOrdenId;
+      const verOrdenSoloLectura = navState?.verOrdenSoloLectura;
+
       if (ordenFromNav) {
         // Cargar clientes frescos antes de editar la orden
         await fetchClientes();
@@ -157,7 +167,21 @@ function OrdenTrabajo() {
         editarOrden(ordenFromNav);
         window.history.replaceState({}, document.title);
       }
-      
+
+      // Volver a la OT desde la que se abrió una cotización asociada (chip
+      // "Cotizaciones Asociadas" → Cancelar/Cerrar en la Cotización), en el
+      // mismo modo en que estaba: Ver o Editar.
+      if (verOrdenId) {
+        await fetchClientes();
+        await fetchEquipos();
+        if (verOrdenSoloLectura) {
+          verOrden({ id: verOrdenId });
+        } else {
+          editarOrden({ id: verOrdenId });
+        }
+        window.history.replaceState({}, document.title);
+      }
+
       if (clienteFromNav) {
         const fechaActual = new Date().toISOString().split("T")[0];
         const numeroOt = await calcularSiguienteNumeroOrden();
@@ -242,6 +266,7 @@ function OrdenTrabajo() {
       fecha: fechaActual
     }));
     setEditingId(null);
+    setOrdenIdActual(null);
     setSoloLectura(false);
     setClienteSeleccionado(null);
     setClienteFijo(false);
@@ -259,6 +284,17 @@ function OrdenTrabajo() {
     setInsumosVisibles(2);
     setMostrarFormulario(true);
   };
+
+  // Cotizaciones asociadas a la orden abierta (solo lectura, para el badge y
+  // los chips del header). Se re-consulta cada vez que cambia la orden abierta.
+  useEffect(() => {
+    if (!ordenIdActual) { setCotizacionesDeOrden([]); return; }
+    const controller = new AbortController();
+    api.get(`/api/cotizaciones?orden_id=${ordenIdActual}&limit=100`, { signal: controller.signal })
+      .then((res) => setCotizacionesDeOrden(res.data.cotizaciones || []))
+      .catch((err) => { if (err.name !== "CanceledError") setCotizacionesDeOrden([]); });
+    return () => controller.abort();
+  }, [ordenIdActual]);
 
   // Buscar equipos por modelo via API
   useEffect(() => {
@@ -354,11 +390,12 @@ function OrdenTrabajo() {
     orden = res.data;
 
     setEditingId(orden.id);
+    setOrdenIdActual(orden.id);
     setClienteFijo(false);
     setEquipoFijo(false);
     setEquipoSeleccionado(null);
     setMostrarFormulario(true);
-    
+
     // Cargar datos de la orden en el formulario
     setNuevaOrden({
       numeroOrden: orden.numero_orden || "",
@@ -468,6 +505,7 @@ function OrdenTrabajo() {
     setEquipoFijo(false);
     setEquipoSeleccionado(null);
     setEditingId(null);
+    setOrdenIdActual(orden.id);
     setMostrarFormulario(true);
     
     setNuevaOrden({
@@ -931,6 +969,8 @@ function OrdenTrabajo() {
     setMostrarFormulario(false);
     resetFormulario();
     setEditingId(null);
+    setOrdenIdActual(null);
+    setMostrarCotizacionesAsociadas(false);
     setSoloLectura(false);
     window.history.replaceState({}, document.title);
     if (vinoDeCliente) {
@@ -1000,6 +1040,11 @@ function OrdenTrabajo() {
                       Técnico: {tecnicoDeSesion()}
                     </span>
                   )}
+                  {cotizacionesDeOrden.length > 0 && (
+                    <span style={{ fontWeight: 600, fontSize: '0.75rem', color: '#fff', background: 'rgba(255,255,255,0.22)', padding: '2px 8px', borderRadius: 999 }}>
+                      Cotizaciones: {cotizacionesDeOrden.length}
+                    </span>
+                  )}
                   <button type="button" className="of-head-close" onClick={cerrarFormulario}><X size={18} /></button>
                 </div>
               </div>
@@ -1032,6 +1077,44 @@ function OrdenTrabajo() {
                   setClienteSeleccionado={setClienteSeleccionado}
                   onClientesRefresh={(lista) => setClientes(lista)}
                 />
+
+                {cotizacionesDeOrden.length > 0 && (
+                  <div style={{ marginTop: '10px', padding: '4px 10px', background: '#FEF9E7', border: '1px solid #F5D48C', borderRadius: '8px', lineHeight: '1.2' }}>
+                    <button
+                      type="button"
+                      onClick={() => setMostrarCotizacionesAsociadas(!mostrarCotizacionesAsociadas)}
+                      style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text)', fontWeight: 600, fontSize: '0.8rem', fontFamily: 'inherit' }}
+                    >
+                      {mostrarCotizacionesAsociadas ? <ChevronUp size={14} style={{ color: '#B45309', flexShrink: 0 }} /> : <ChevronDown size={14} style={{ color: '#B45309', flexShrink: 0 }} />}
+                      Cotizaciones Asociadas
+                      <span style={{
+                        background: '#B45309', color: 'white', padding: '1px 8px', borderRadius: '10px',
+                        fontSize: '0.75rem', fontWeight: '700'
+                      }}>
+                        {cotizacionesDeOrden.length}
+                      </span>
+                    </button>
+
+                    {mostrarCotizacionesAsociadas && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: '8px' }}>
+                        {cotizacionesDeOrden.map((c) => (
+                          <span key={c.id}
+                            onClick={() => navigate('/cotizaciones', { state: { cotizacionId: c.id, cotizacionSoloLectura: soloLectura, volverOrdenId: ordenIdActual, volverOrdenSoloLectura: soloLectura } })}
+                            title="Ver esta cotización"
+                            style={{
+                              display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer',
+                              background: 'var(--primary-light)', color: 'var(--primary)',
+                              border: '1px solid var(--primary)', borderRadius: 999,
+                              padding: '3px 10px', fontSize: '.75rem', fontWeight: 600
+                            }}
+                          >
+                            N° {c.folio}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
                 </div>
 
                 <div className="of-col-right">

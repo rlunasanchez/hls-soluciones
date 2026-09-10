@@ -40,7 +40,10 @@ const parseJsonArray = (val) => {
 // detalle (se está completando el formulario de arriba hacia abajo).
 export function calcularTotales(items) {
   const lista = parseJsonArray(items);
-  const neto = lista.reduce((acc, i) => acc + (Number(i.cantidad) || 0) * (Number(i.neto) || 0), 0);
+  const neto = lista.reduce((acc, i) => {
+    const totalFila = (Number(i.cantidad) || 0) * (Number(i.neto) || 0) - (Number(i.descuento) || 0);
+    return acc + Math.max(0, totalFila);
+  }, 0);
   const iva = Math.round(neto * 0.19);
   const total = neto + iva;
   return { neto, iva, total };
@@ -49,13 +52,15 @@ export function calcularTotales(items) {
 function filaItem(item) {
   const cantidad = Number(item.cantidad) || 0;
   const neto = Number(item.neto) || 0;
-  const total = cantidad * neto;
+  const descuento = Number(item.descuento) || 0;
+  const total = Math.max(0, cantidad * neto - descuento);
   return `
     <tr>
       <td class="sku">${item.sku ? esc(item.sku) : "-"}</td>
       <td class="detalle">${esc(item.detalle)}</td>
       <td class="num">${cantidad || ""}</td>
       <td class="num">${clp(neto)}</td>
+      <td class="num">${descuento ? clp(descuento) : ""}</td>
       <td class="num">${clp(total)}</td>
     </tr>`;
 }
@@ -103,10 +108,11 @@ body {
 table.items { width: 100%; table-layout: fixed; border-collapse: collapse; margin-top: 1mm; }
 table.items thead th { text-align: left; font-size: 7pt; text-transform: uppercase; letter-spacing: .06em; color: #6B7280; border-bottom: 1pt solid #0C4A8C; padding: 2mm 2mm 1.5mm; }
 table.items thead th.num { text-align: right; }
-table.items th:nth-child(1), table.items td:nth-child(1) { width: 20mm; }
-table.items th:nth-child(3), table.items td:nth-child(3) { width: 14mm; }
-table.items th:nth-child(4), table.items td:nth-child(4) { width: 20mm; }
-table.items th:nth-child(5), table.items td:nth-child(5) { width: 22mm; }
+table.items th:nth-child(1), table.items td:nth-child(1) { width: 18mm; }
+table.items th:nth-child(3), table.items td:nth-child(3) { width: 12mm; }
+table.items th:nth-child(4), table.items td:nth-child(4) { width: 18mm; }
+table.items th:nth-child(5), table.items td:nth-child(5) { width: 16mm; }
+table.items th:nth-child(6), table.items td:nth-child(6) { width: 20mm; }
 table.items td { padding: 2mm; border-bottom: .5pt solid #E2E8F0; vertical-align: top; overflow-wrap: anywhere; }
 table.items td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 table.items td.sku { color: #6B7280; }
@@ -187,6 +193,7 @@ export function generarHtmlCotizacion(cot) {
           <th>Detalle</th>
           <th class="num">Cant.</th>
           <th class="num">Neto</th>
+          <th class="num">Desc.</th>
           <th class="num">Total</th>
         </tr>
       </thead>
