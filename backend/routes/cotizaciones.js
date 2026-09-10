@@ -19,8 +19,8 @@ router.get("/", authMiddleware, async (req, res) => {
     const [cotizaciones] = await pool.query(
       `SELECT id, folio, fecha_emision, fecha_valido_hasta, condicion, glosa,
         cliente_id, cliente_rut, cliente_razon_social,
-        cliente_direccion, cliente_comuna, cliente_telefono, cliente_email,
-        contacto_nombre, contacto_fono, contacto_email,
+        cliente_direccion, cliente_ciudad, cliente_comuna, cliente_telefono, cliente_email,
+        contacto_nombre, contacto_fono, contacto_email, contacto_cargo,
         ejecutivo, ejecutivo_fono, ejecutivo_email,
         items, orden_id, orden_numero, fecha_creacion, fecha_actualizacion
        FROM cotizaciones ORDER BY id DESC LIMIT ? OFFSET ?`,
@@ -66,8 +66,8 @@ router.post("/", authMiddleware, async (req, res) => {
   const {
     fechaEmision, fechaValidoHasta, condicion, glosa,
     clienteId, clienteRut, clienteRazonSocial,
-    clienteDireccion, clienteComuna, clienteTelefono, clienteEmail,
-    contactoNombre, contactoFono, contactoEmail,
+    clienteDireccion, clienteCiudad, clienteComuna, clienteTelefono, clienteEmail,
+    contactoNombre, contactoFono, contactoEmail, contactoCargo,
     ejecutivoFono, ejecutivoEmail,
     items, ordenId, ordenNumero
   } = req.body;
@@ -90,16 +90,16 @@ router.post("/", authMiddleware, async (req, res) => {
     const [resultado] = await connection.query(
       `INSERT INTO cotizaciones (folio, fecha_emision, fecha_valido_hasta, condicion, glosa,
         cliente_id, cliente_rut, cliente_razon_social,
-        cliente_direccion, cliente_comuna, cliente_telefono, cliente_email,
-        contacto_nombre, contacto_fono, contacto_email,
+        cliente_direccion, cliente_ciudad, cliente_comuna, cliente_telefono, cliente_email,
+        contacto_nombre, contacto_fono, contacto_email, contacto_cargo,
         ejecutivo, ejecutivo_fono, ejecutivo_email,
         items, orden_id, orden_numero)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         folio, fechaEmision, fechaValidoHasta || null, condicion || null, glosa || null,
         clienteId || null, clienteRut || null, clienteRazonSocial || '',
-        clienteDireccion || null, clienteComuna || null, clienteTelefono || null, clienteEmail || null,
-        contactoNombre || null, contactoFono || null, contactoEmail || null,
+        clienteDireccion || null, clienteCiudad || null, clienteComuna || null, clienteTelefono || null, clienteEmail || null,
+        contactoNombre || null, contactoFono || null, contactoEmail || null, contactoCargo || null,
         ejecutivo, ejecutivoFono || null, ejecutivoEmail || null,
         items ? JSON.stringify(items) : null, ordenId || null, ordenNumero || null
       ]
@@ -121,8 +121,8 @@ router.put("/:id", authMiddleware, async (req, res) => {
   const {
     fechaEmision, fechaValidoHasta, condicion, glosa,
     clienteId, clienteRut, clienteRazonSocial,
-    clienteDireccion, clienteComuna, clienteTelefono, clienteEmail,
-    contactoNombre, contactoFono, contactoEmail,
+    clienteDireccion, clienteCiudad, clienteComuna, clienteTelefono, clienteEmail,
+    contactoNombre, contactoFono, contactoEmail, contactoCargo,
     ejecutivo, ejecutivoFono, ejecutivoEmail,
     items, ordenId, ordenNumero
   } = req.body;
@@ -134,16 +134,16 @@ router.put("/:id", authMiddleware, async (req, res) => {
     await pool.query(
       `UPDATE cotizaciones SET fecha_emision = ?, fecha_valido_hasta = ?, condicion = ?, glosa = ?,
         cliente_id = ?, cliente_rut = ?, cliente_razon_social = ?,
-        cliente_direccion = ?, cliente_comuna = ?, cliente_telefono = ?, cliente_email = ?,
-        contacto_nombre = ?, contacto_fono = ?, contacto_email = ?,
+        cliente_direccion = ?, cliente_ciudad = ?, cliente_comuna = ?, cliente_telefono = ?, cliente_email = ?,
+        contacto_nombre = ?, contacto_fono = ?, contacto_email = ?, contacto_cargo = ?,
         ejecutivo = ?, ejecutivo_fono = ?, ejecutivo_email = ?,
         items = ?, orden_id = ?, orden_numero = ?
        WHERE id = ?`,
       [
         fechaEmision, fechaValidoHasta || null, condicion || null, glosa || null,
         clienteId || null, clienteRut || null, clienteRazonSocial || '',
-        clienteDireccion || null, clienteComuna || null, clienteTelefono || null, clienteEmail || null,
-        contactoNombre || null, contactoFono || null, contactoEmail || null,
+        clienteDireccion || null, clienteCiudad || null, clienteComuna || null, clienteTelefono || null, clienteEmail || null,
+        contactoNombre || null, contactoFono || null, contactoEmail || null, contactoCargo || null,
         ejecutivo || null, ejecutivoFono || null, ejecutivoEmail || null,
         items ? JSON.stringify(items) : null, ordenId || null, ordenNumero || null,
         id

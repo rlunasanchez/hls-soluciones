@@ -1,5 +1,47 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-09 (6)
+
+### v2.81: campos Ciudad y Cargo Contacto también en Cotizaciones
+
+Mismos dos campos agregados en v2.79/v2.80 a la OT, ahora en Cotizaciones (mismo motivo: `cotizaciones` tenía `cliente_direccion`/`cliente_comuna` pero no `cliente_ciudad`, y `contacto_nombre`/`contacto_fono`/`contacto_email` pero no `contacto_cargo`).
+
+**Nota:** de paso se detectó que la tabla `cotizaciones` no existía en la base MySQL local (el módulo, agregado en v2.46, nunca se había probado contra esta base) — se creó ahora con el esquema completo, incluyendo estos dos campos nuevos.
+
+**Solución:**
+- `backend/crear_tablas.sql`: `cliente_ciudad` (después de `cliente_direccion`) y `contacto_cargo` (después de `contacto_email`) en la tabla `cotizaciones`. Tabla creada en la base local (no existía) y columnas confirmadas.
+- `backend/routes/cotizaciones.js`: ambos campos agregados al SELECT del listado, INSERT y UPDATE.
+- `Cotizaciones.jsx`: nuevo campo Ciudad entre Dirección y Comuna (misma fila, se separó del grid de Cliente/RUT igual que en la OT); nuevo campo Cargo Contacto junto a Email Contacto. Ambos se precargan al elegir cliente/contacto, venir de una OT o desde Clientes, y al cargar una cotización ya guardada.
+- `cotizacionDoc.js`: en el PDF, "Ciudad - Comuna" ahora es un solo campo combinado (mismo criterio que en `ordenServicioDoc.js`, para no correr el resto del grid); "Cargo Contacto" se agregó junto a Contacto/Ejecutivo.
+
+**Verificación:** `npm run build` OK, `node --check` OK en backend. Tabla y columnas confirmadas en la base MySQL local.
+
+### v2.80: campo Cargo Contacto en Nueva Orden
+
+**Problema:** en "Datos del Cliente" de la OT, el contacto principal tenía Contacto/Fono Contacto/Email Contacto pero no Cargo — a diferencia de "Otros Contactos" (contactos extra), que ya tenían ese campo, y del propio cliente en el mantenedor (`contacto_cargo`). La Dirección Contacto no aplica acá a propósito (v2.44): el contacto principal usa la dirección del cliente, no una propia — ese es el único campo que falta de verdad es Cargo.
+
+**Solución:**
+- `backend/crear_tablas.sql` / `ALTER TABLE ordenes_trabajo ADD COLUMN cargo_contacto VARCHAR(100) AFTER email_contacto` (aplicado en local; falta aplicar en Neon producción).
+- `backend/routes/ordenes.js`: `cargo_contacto` agregado al SELECT, INSERT y UPDATE.
+- `OrdenFormCliente.jsx`: nuevo campo "Cargo Contacto" junto a Email Contacto. Se agregó también a `seleccionarContactoBusqueda` (al elegir un contacto del buscador), a la sincronización al editar cliente desde la OT (`armarContactos` ahora también arrastra `cargo`) y a los prefills de "Registrar en Clientes".
+- `OrdenTrabajo.jsx`: `cargoContacto` agregado al estado de la orden, a `editarOrden`/`verOrden`, a `seleccionarCliente` (las 3 variantes) y a `resetFormulario`.
+- `ordenServicioDoc.js`: nuevo campo "Cargo Contacto" en el PDF, junto a Contacto.
+
+**Verificación:** `npm run build` OK, `node --check` OK en backend. Columna agregada y confirmada en la base MySQL local. No se pudo probar en el navegador en esta sesión (sin herramientas de browser disponibles).
+
+### v2.79: campo Ciudad en Nueva Orden
+
+**Problema:** en "Datos del Cliente" de la Orden de Trabajo solo había Dirección y Comuna — no existía columna `ciudad` en `ordenes_trabajo` (a diferencia de `clientes`/`clientes_direcciones`, que sí la tienen). El PDF (`ordenServicioDoc.js`) ya tenía un workaround para esto: derivaba la ciudad desde las "Direcciones extra" tipo Matriz, pero si no se cargaba ninguna dirección extra, la ciudad del cliente se perdía.
+
+**Solución:**
+- `backend/crear_tablas.sql` / `ALTER TABLE ordenes_trabajo ADD COLUMN ciudad VARCHAR(100) AFTER direccion` (aplicado en local; falta aplicar en Neon producción al desplegar a `deploy/cloud`).
+- `backend/routes/ordenes.js`: `ciudad` agregado al SELECT del listado, al INSERT y al UPDATE.
+- `OrdenFormCliente.jsx`: nuevo campo Ciudad, entre Dirección y Comuna (misma fila, mismo criterio que en `ClienteFormulario.jsx`). Se agregó también a los prefills de "Registrar en Clientes" y a la sincronización al editar/crear cliente desde la OT.
+- `OrdenTrabajo.jsx`: `ciudad` agregado al estado de la orden, a `editarOrden`/`verOrden`, a `seleccionarCliente` (las 3 variantes) y a `resetFormulario`.
+- `ordenServicioDoc.js`: `resolverCiudad` ahora prioriza `orden.ciudad`; si una OT vieja no la tiene, sigue cayendo al criterio anterior (Matriz → primera dirección extra con ciudad).
+
+**Verificación:** `npm run build` OK, `node --check` OK en backend. Columna agregada y confirmada en la base MySQL local. No se pudo probar en el navegador en esta sesión (sin herramientas de browser disponibles) — falta probar extremo a extremo en la app real.
+
 ## Fecha: 2026-09-09 (3)
 
 ### v2.78: PDF de Cotización - Cliente/RUT como campos de la grilla (igual que la OT)

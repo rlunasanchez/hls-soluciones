@@ -162,11 +162,12 @@ export function generarHtmlCotizacion(cot) {
       ${campo("Cliente", cot.cliente_razon_social)}
       ${campo("RUT", cot.cliente_rut)}
       ${campo("Dirección", cot.cliente_direccion)}
-      ${campo("Comuna", cot.cliente_comuna)}
+      ${campo("Ciudad - Comuna", [cot.cliente_ciudad, cot.cliente_comuna].filter((v) => String(v || "").trim()).join(" - "))}
       ${campo("Teléfono", cot.cliente_telefono)}
       ${campo("Email Cliente", cot.cliente_email)}
       ${campo("Contacto", cot.contacto_nombre)}
       ${campo("Ejecutivo", cot.ejecutivo)}
+      ${campo("Cargo Contacto", cot.contacto_cargo)}
       ${campo("Fono Contacto", cot.contacto_fono)}
       ${campo("Fono Ejecutivo", cot.ejecutivo_fono)}
       ${campo("Email Contacto", cot.contacto_email)}
