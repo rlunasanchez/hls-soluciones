@@ -55,10 +55,12 @@ export function derivarListas(orden) {
   return { insumos, contactosExtra, direccionesExtra };
 }
 
-// No existe columna "ciudad" a nivel de OT: se toma de la dirección Matriz
-// si tiene ciudad cargada, si no de la primera dirección extra que la tenga.
-// Nunca se deriva de la comuna.
-function resolverCiudad(direccionesExtra) {
+// orden.ciudad es la Ciudad propia de la OT (agregada junto a Dirección/Comuna).
+// Para OT viejas guardadas antes de ese campo, se cae al criterio anterior:
+// dirección Matriz con ciudad cargada, si no la primera dirección extra que la
+// tenga. Nunca se deriva de la comuna.
+function resolverCiudad(orden, direccionesExtra) {
+  if (String(orden.ciudad || "").trim()) return orden.ciudad;
   const matriz = direccionesExtra.find((d) => d.tipo === "Matriz" && String(d.ciudad || "").trim());
   if (matriz) return matriz.ciudad;
   const conCiudad = direccionesExtra.find((d) => String(d.ciudad || "").trim());
@@ -191,7 +193,7 @@ img.logo { max-width: 100%; max-height: 100%; object-fit: contain; }
 export function generarHtmlOrdenServicio(orden, opciones) {
   const { insumos, contactosExtra, direccionesExtra } = derivarListas(orden);
   const numero = String(orden.numero_orden || "").split("-").pop() || "—";
-  const ciudad = resolverCiudad(direccionesExtra);
+  const ciudad = resolverCiudad(orden, direccionesExtra);
 
   const insumosSel = insumos.filter((_, i) => opciones.insumos?.[i]);
   const contactosSel = contactosExtra.filter((_, i) => opciones.contactosExtra?.[i]);
@@ -210,6 +212,7 @@ export function generarHtmlOrdenServicio(orden, opciones) {
         ${campo("Email Cliente", orden.email)}
         ${campo("Teléfono", orden.fono_principal, true)}
         ${campo("Contacto", orden.contacto)}
+        ${campo("Cargo Contacto", orden.cargo_contacto)}
         ${campo("Email Contacto", orden.email_contacto)}
         ${campo("Fono Contacto", orden.fono_contacto, true)}
       </div>

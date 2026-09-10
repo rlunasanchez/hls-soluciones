@@ -28,12 +28,14 @@ const cotizacionVacia = () => ({
   clienteRut: "",
   clienteRazonSocial: "",
   clienteDireccion: "",
+  clienteCiudad: "",
   clienteComuna: "",
   clienteTelefono: "",
   clienteEmail: "",
   contactoNombre: "",
   contactoFono: "",
   contactoEmail: "",
+  contactoCargo: "",
   ejecutivo: parseToken().nombre || parseToken().usuario || "",
   ejecutivoFono: EMPRESA.fono,
   ejecutivoEmail: parseToken().email || "",
@@ -129,12 +131,14 @@ function Cotizaciones() {
           clienteRut: orden.rut || clienteMatch?.rut || "",
           clienteRazonSocial: toUpper(orden.cliente || ""),
           clienteDireccion: toUpper(orden.direccion || clienteMatch?.direccion || ""),
+          clienteCiudad: toUpper(orden.ciudad || clienteMatch?.ciudad || ""),
           clienteComuna: toUpper(orden.comuna || clienteMatch?.comuna || ""),
           clienteTelefono: orden.fono_principal || clienteMatch?.telefono || "",
           clienteEmail: orden.email || clienteMatch?.email || "",
           contactoNombre: toUpper(orden.contacto || ""),
           contactoFono: orden.fono_contacto || "",
           contactoEmail: orden.email_contacto || "",
+          contactoCargo: toUpper(orden.cargo_contacto || ""),
           ordenId: orden.id,
           ordenNumero: orden.numero_orden || ""
         });
@@ -147,12 +151,14 @@ function Cotizaciones() {
           clienteRut: clienteNav.rut || "",
           clienteRazonSocial: toUpper(clienteNav.razon_social || ""),
           clienteDireccion: toUpper(clienteNav.direccion || ""),
+          clienteCiudad: toUpper(clienteNav.ciudad || ""),
           clienteComuna: toUpper(clienteNav.comuna || ""),
           clienteTelefono: clienteNav.telefono || "",
           clienteEmail: clienteNav.email || "",
           contactoNombre: toUpper(clienteNav.contacto_nombre || ""),
           contactoFono: clienteNav.contacto_fono || "",
-          contactoEmail: clienteNav.contacto_email || ""
+          contactoEmail: clienteNav.contacto_email || "",
+          contactoCargo: toUpper(clienteNav.contacto_cargo || "")
         });
       }
       setMostrarFormulario(true);
@@ -248,12 +254,14 @@ function Cotizaciones() {
       clienteRut: c.cliente_rut || "",
       clienteRazonSocial: c.cliente_razon_social || "",
       clienteDireccion: c.cliente_direccion || "",
+      clienteCiudad: c.cliente_ciudad || "",
       clienteComuna: c.cliente_comuna || "",
       clienteTelefono: c.cliente_telefono || "",
       clienteEmail: c.cliente_email || "",
       contactoNombre: c.contacto_nombre || "",
       contactoFono: c.contacto_fono || "",
       contactoEmail: c.contacto_email || "",
+      contactoCargo: c.contacto_cargo || "",
       ejecutivo: c.ejecutivo || "",
       ejecutivoFono: c.ejecutivo_fono || "",
       ejecutivoEmail: c.ejecutivo_email || "",
@@ -317,12 +325,14 @@ function Cotizaciones() {
       clienteRut: cliente.rut || "",
       clienteRazonSocial: toUpper(cliente.razon_social),
       clienteDireccion: toUpper(cliente.direccion || ""),
+      clienteCiudad: toUpper(cliente.ciudad || ""),
       clienteComuna: toUpper(cliente.comuna || ""),
       clienteTelefono: cliente.telefono || "",
       clienteEmail: cliente.email || "",
       contactoNombre: toUpper(cliente.contacto_nombre || ""),
       contactoFono: cliente.contacto_fono || "",
-      contactoEmail: cliente.contacto_email || ""
+      contactoEmail: cliente.contacto_email || "",
+      contactoCargo: toUpper(cliente.contacto_cargo || "")
     }));
   };
 
@@ -389,7 +399,8 @@ function Cotizaciones() {
       ...prev,
       contactoNombre: c.nombre,
       contactoEmail: c.email || "",
-      contactoFono: c.fono || ""
+      contactoFono: c.fono || "",
+      contactoCargo: c.cargo || ""
     }));
     setBusquedaContacto(c.nombre);
     setMostrarDropdownContacto(false);
@@ -685,6 +696,8 @@ function Cotizaciones() {
                         disabled={soloLectura}
                       />
                     </div>
+                  </div>
+                  <div className="of-form-grid" style={{ gridTemplateColumns: '1.4fr 1fr 1fr', marginTop: 10 }}>
                     <div className="of-f">
                       <label>Dirección</label>
                       <input
@@ -692,6 +705,16 @@ function Cotizaciones() {
                         placeholder="Dirección del cliente"
                         value={cotizacion.clienteDireccion}
                         onChange={(e) => setCotizacion({ ...cotizacion, clienteDireccion: upperInput(e) })}
+                        disabled={soloLectura}
+                      />
+                    </div>
+                    <div className="of-f">
+                      <label>Ciudad</label>
+                      <input
+                        type="text"
+                        placeholder="Ciudad"
+                        value={cotizacion.clienteCiudad}
+                        onChange={(e) => setCotizacion({ ...cotizacion, clienteCiudad: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '') })}
                         disabled={soloLectura}
                       />
                     </div>
@@ -778,6 +801,10 @@ function Cotizaciones() {
                     <div className="of-f">
                       <label style={{ display: 'flex', alignItems: 'center' }}>Email Contacto</label>
                       <input type="email" placeholder="Email del contacto" value={cotizacion.contactoEmail} onChange={(e) => setCotizacion({ ...cotizacion, contactoEmail: e.target.value })} disabled={soloLectura} />
+                    </div>
+                    <div className="of-f">
+                      <label style={{ display: 'flex', alignItems: 'center' }}>Cargo Contacto</label>
+                      <input type="text" placeholder="Cargo del contacto" value={cotizacion.contactoCargo} onChange={(e) => setCotizacion({ ...cotizacion, contactoCargo: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '') })} disabled={soloLectura} />
                     </div>
                   </div>
                 </div>

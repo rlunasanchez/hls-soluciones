@@ -249,7 +249,8 @@ function OrdenFormCliente({
       ...nuevaOrden,
       contacto: c.nombre,
       emailContacto: c.email || "",
-      fonoContacto: c.fono || ""
+      fonoContacto: c.fono || "",
+      cargoContacto: c.cargo || ""
     });
     setBusquedaContacto(c.nombre);
     setMostrarDropdownContacto(false);
@@ -279,10 +280,10 @@ function OrdenFormCliente({
 
       // Sincronizar en la OT los datos derivados del cliente recién editado
       const armarContactos = (cli) => {
-        const principal = { nombre: normTxt(cli.contacto_nombre), email: cli.contacto_email || "", fono: cli.contacto_fono || "" };
+        const principal = { nombre: normTxt(cli.contacto_nombre), email: cli.contacto_email || "", fono: cli.contacto_fono || "", cargo: cli.contacto_cargo || "" };
         const extras = String(cli.contactos || "").split(";;").map((s) => {
           const p = s.split("|");
-          return { nombre: (p[0] || "").toUpperCase().trim(), email: p[1] || "", fono: p[2] || "" };
+          return { nombre: (p[0] || "").toUpperCase().trim(), email: p[1] || "", fono: p[2] || "", cargo: p[3] || "" };
         }).filter((c) => c.nombre && c.nombre !== principal.nombre);
         return [...(principal.nombre ? [principal] : []), ...extras];
       };
@@ -312,6 +313,7 @@ function OrdenFormCliente({
           cliente: toUpper(fresh.razon_social || ""),
           rut: fresh.rut || "",
           direccion: toUpper(fresh.direccion || ""),
+          ciudad: toUpper(fresh.ciudad || ""),
           comuna: toUpper(fresh.comuna || ""),
           email: fresh.email || "",
           fonoPrincipal: fresh.telefono || ""
@@ -329,6 +331,7 @@ function OrdenFormCliente({
             base.contacto = match.nombre;
             base.emailContacto = match.email;
             base.fonoContacto = match.fono;
+            base.cargoContacto = match.cargo;
           }
         }
 
@@ -372,12 +375,14 @@ function OrdenFormCliente({
         razon_social: nuevaOrden.cliente || "",
         rut: nuevaOrden.rut || "",
         direccion: nuevaOrden.direccion || "",
+        ciudad: nuevaOrden.ciudad || "",
         comuna: nuevaOrden.comuna || "",
         telefono: nuevaOrden.fonoPrincipal || "",
         email: nuevaOrden.email || "",
         contacto_nombre: nuevaOrden.contacto || "",
         contacto_email: nuevaOrden.emailContacto || "",
-        contacto_fono: nuevaOrden.fonoContacto || ""
+        contacto_fono: nuevaOrden.fonoContacto || "",
+        contacto_cargo: nuevaOrden.cargoContacto || ""
       });
       setMostrarRegistrarCliente(true);
       return;
@@ -397,12 +402,14 @@ function OrdenFormCliente({
       razon_social: nuevaOrden.cliente || "",
       rut: nuevaOrden.rut || "",
       direccion: nuevaOrden.direccion || "",
+      ciudad: nuevaOrden.ciudad || "",
       comuna: nuevaOrden.comuna || "",
       telefono: nuevaOrden.fonoPrincipal || "",
       email: nuevaOrden.email || "",
       contacto_nombre: nuevaOrden.contacto || "",
       contacto_email: nuevaOrden.emailContacto || "",
-      contacto_fono: nuevaOrden.fonoContacto || ""
+      contacto_fono: nuevaOrden.fonoContacto || "",
+      contacto_cargo: nuevaOrden.cargoContacto || ""
     });
     setMostrarRegistrarCliente(true);
   };
@@ -437,12 +444,14 @@ function OrdenFormCliente({
           cliente: toUpper(fresh.razon_social || "") || prev.cliente,
           rut: fresh.rut || prev.rut,
           direccion: toUpper(fresh.direccion || "") || prev.direccion,
+          ciudad: toUpper(fresh.ciudad || "") || prev.ciudad,
           comuna: toUpper(fresh.comuna || "") || prev.comuna,
           email: fresh.email || prev.email,
           fonoPrincipal: fresh.telefono || prev.fonoPrincipal,
           contacto: toUpper(fresh.contacto_nombre || "") || prev.contacto,
           emailContacto: fresh.contacto_email || prev.emailContacto,
-          fonoContacto: fresh.contacto_fono || prev.fonoContacto
+          fonoContacto: fresh.contacto_fono || prev.fonoContacto,
+          cargoContacto: toUpper(fresh.contacto_cargo || "") || prev.cargoContacto
         }));
         setBusquedaCliente(toUpper(fresh.razon_social || ""));
       }
@@ -804,7 +813,9 @@ function OrdenFormCliente({
             }}
           />
         </div>
+      </div>
 
+      <div className="of-form-grid" style={{ gridTemplateColumns: '1.4fr 1fr 1fr', marginBottom: '15px' }}>
         <div className="of-f">
           <label>Dirección</label>
           <input
@@ -812,6 +823,18 @@ function OrdenFormCliente({
             placeholder="Dirección del cliente"
             value={nuevaOrden.direccion}
             onChange={(e) => setNuevaOrden({...nuevaOrden, direccion: upperInput(e)})}
+            disabled={readOnly}
+            style={{ width: '100%' }}
+          />
+        </div>
+
+        <div className="of-f">
+          <label>Ciudad</label>
+          <input
+            type="text"
+            placeholder="Ciudad"
+            value={nuevaOrden.ciudad}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, ciudad: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
             disabled={readOnly}
             style={{ width: '100%' }}
           />
@@ -1317,6 +1340,24 @@ function OrdenFormCliente({
             placeholder="Email del contacto"
             value={nuevaOrden.emailContacto}
             onChange={(e) => setNuevaOrden({...nuevaOrden, emailContacto: e.target.value})}
+            disabled={readOnly}
+            style={{
+              width: '100%',
+              padding: '2px 8px',
+              border: '1.5px solid var(--border)',
+              borderRadius: '6px',
+              fontSize: '.82rem'
+            }}
+          />
+        </div>
+
+        <div className="of-f">
+          <label>Cargo Contacto</label>
+          <input
+            type="text"
+            placeholder="Cargo del contacto"
+            value={nuevaOrden.cargoContacto}
+            onChange={(e) => setNuevaOrden({...nuevaOrden, cargoContacto: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
             disabled={readOnly}
             style={{
               width: '100%',
