@@ -220,6 +220,8 @@ export function generarHtmlOrdenServicio(orden, opciones) {
       ${direccionesSel.length ? `<div class="sub">› Direcciones adicionales</div>${direccionesSel.map(direccionExtraHtml).join("")}` : ""}
     </section>`;
 
+  // Técnico Asignado se saca del PDF a pedido del usuario (de momento no se
+  // muestra ahí); el campo sigue existiendo en el formulario y en la BD.
   const seccionEquipo = `
     <section class="sec">
       ${h2("Datos de Equipo — Técnico Asignado")}
@@ -229,7 +231,6 @@ export function generarHtmlOrdenServicio(orden, opciones) {
         ${campo("Marca / Modelo", marcaModelo)}
         ${campo("Contador Pág.", orden.contador_pag_out, true)}
         ${campo("Nivel de Tinta", orden.nivel_tinta)}
-        ${campo("Técnico Asignado", orden.tecnico_asignado)}
       </div>
       ${insumosSel.length ? `<div class="sub">› Insumos</div><div class="chips">${insumosSel.map((i) => `<span class="chip">${esc(i.nombre)}</span>`).join("")}</div>` : ""}
     </section>`;

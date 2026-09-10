@@ -487,7 +487,9 @@ function Cotizaciones() {
   };
 
   const renderItemCard = (item, idx) => {
-    const totalFila = Math.max(0, (Number(item.cantidad) || 0) * (Number(item.neto) || 0) - (Number(item.descuento) || 0));
+    const bruto = (Number(item.cantidad) || 0) * (Number(item.neto) || 0);
+    const descuentoPct = Math.min(100, Math.max(0, Number(item.descuento) || 0));
+    const totalFila = Math.max(0, bruto * (1 - descuentoPct / 100));
     return (
       <div key={idx} style={{
         border: '1px solid var(--border)', borderRadius: 6, padding: '6px 8px 8px',
@@ -517,9 +519,23 @@ function Cotizaciones() {
             <label>Neto</label>
             <input type="text" inputMode="numeric" value={clpInput(item.neto)} onChange={(e) => actualizarItem(idx, 'neto', soloDigitos(e.target.value))} disabled={soloLectura} />
           </div>
-          <div className="of-f" style={{ flex: '0 0 78px' }}>
+          <div className="of-f" style={{ flex: '0 0 78px', position: 'relative' }}>
             <label>Descuento</label>
-            <input type="text" inputMode="numeric" value={clpInput(item.descuento)} onChange={(e) => actualizarItem(idx, 'descuento', soloDigitos(e.target.value))} disabled={soloLectura} />
+            <input
+              type="text"
+              inputMode="numeric"
+              value={item.descuento}
+              onChange={(e) => {
+                let d = soloDigitos(e.target.value);
+                if (d && Number(d) > 100) d = "100";
+                actualizarItem(idx, 'descuento', d);
+              }}
+              disabled={soloLectura}
+              style={{ paddingRight: 16 }}
+            />
+            {item.descuento && (
+              <span style={{ position: 'absolute', right: 6, bottom: 5, fontSize: '.75rem', color: 'var(--text-muted)', pointerEvents: 'none' }}>%</span>
+            )}
           </div>
           <div className="of-f" style={{ flex: '0 0 78px' }}>
             <label>Total</label>
@@ -805,7 +821,7 @@ function Cotizaciones() {
                     </div>
                   </div>
 
-                  <div className="of-form-grid" style={{ marginTop: 10 }}>
+                  <div className="of-form-grid" style={{ marginTop: 16, paddingTop: 10, borderTop: '2px solid #cbd5e1' }}>
                     <div className="of-f" style={{ position: 'relative' }} ref={contactoDropdownRef}>
                       <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Search size={10} />Contacto</label>
                       <input

@@ -41,8 +41,9 @@ const parseJsonArray = (val) => {
 export function calcularTotales(items) {
   const lista = parseJsonArray(items);
   const neto = lista.reduce((acc, i) => {
-    const totalFila = (Number(i.cantidad) || 0) * (Number(i.neto) || 0) - (Number(i.descuento) || 0);
-    return acc + Math.max(0, totalFila);
+    const bruto = (Number(i.cantidad) || 0) * (Number(i.neto) || 0);
+    const descuentoPct = Math.min(100, Math.max(0, Number(i.descuento) || 0));
+    return acc + Math.max(0, bruto * (1 - descuentoPct / 100));
   }, 0);
   const iva = Math.round(neto * 0.19);
   const total = neto + iva;
@@ -52,15 +53,15 @@ export function calcularTotales(items) {
 function filaItem(item) {
   const cantidad = Number(item.cantidad) || 0;
   const neto = Number(item.neto) || 0;
-  const descuento = Number(item.descuento) || 0;
-  const total = Math.max(0, cantidad * neto - descuento);
+  const descuentoPct = Math.min(100, Math.max(0, Number(item.descuento) || 0));
+  const total = Math.max(0, cantidad * neto * (1 - descuentoPct / 100));
   return `
     <tr>
       <td class="sku">${item.sku ? esc(item.sku) : "-"}</td>
       <td class="detalle">${esc(item.detalle)}</td>
       <td class="num">${cantidad || ""}</td>
       <td class="num">${clp(neto)}</td>
-      <td class="num">${descuento ? clp(descuento) : ""}</td>
+      <td class="num">${descuentoPct ? descuentoPct + "%" : ""}</td>
       <td class="num">${clp(total)}</td>
     </tr>`;
 }
@@ -172,11 +173,11 @@ export function generarHtmlCotizacion(cot) {
       ${campo("Teléfono", cot.cliente_telefono)}
       ${campo("Email Cliente", cot.cliente_email)}
       ${campo("Contacto", cot.contacto_nombre)}
-      ${campo("Ejecutivo", cot.ejecutivo)}
       ${campo("Cargo Contacto", cot.contacto_cargo)}
       ${campo("Fono Contacto", cot.contacto_fono)}
-      ${campo("Fono Ejecutivo", cot.ejecutivo_fono)}
       ${campo("Email Contacto", cot.contacto_email)}
+      ${campo("Ejecutivo", cot.ejecutivo)}
+      ${campo("Fono Ejecutivo", cot.ejecutivo_fono)}
       ${campo("Email Ejecutivo", cot.ejecutivo_email)}
       ${campo("Condición", cot.condicion)}
       ${campo("Emisión", fecha(cot.fecha_emision))}

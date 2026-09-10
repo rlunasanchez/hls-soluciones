@@ -1,5 +1,27 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-10 (2)
+
+### v2.88: Descuento por ítem pasa a ser porcentaje
+
+El campo Descuento de v2.83 restaba un monto fijo en pesos; se cambió a porcentaje (se escribe "5" y se resta el 5% de Cantidad × Neto de esa fila, con tope de 100%). Se refleja en la tarjeta del ítem, en el resumen final y en la columna "Desc." del PDF. Fix de paso: al mostrar el "%" pegado al número dentro del mismo input, el backspace no dejaba borrar (el primer backspace sacaba el "%" pero el dígito no cambiaba, así que no se notaba nada) — el "%" pasó a ser un texto fijo al lado del input, que ahora solo edita el número.
+
+**Verificación:** `npm run build` OK.
+
+### v2.87: ajustes en los PDF de Cotización y Orden de Servicio
+
+**Cotización:** los campos del encabezado se reordenaron para que primero vayan todos los de Cliente, después Contacto y por último Ejecutivo/Condición — antes Contacto y Ejecutivo quedaban intercalados columna por columna.
+
+**Orden de Servicio:** se sacó "Técnico Asignado" del PDF a pedido del usuario (de momento no se muestra ahí); el campo sigue en el formulario y en la base, no se tocó.
+
+**Verificación:** `npm run build` OK.
+
+### v2.86: línea divisoria entre Datos del Cliente y Contacto
+
+En el formulario de Cotización y en el de OT (`OrdenFormCliente.jsx`), los campos de Contacto (Contacto, Fono/Email/Cargo Contacto) quedaban pegados sin separación visual justo debajo de los datos del cliente, dentro de la misma sección "Datos del Cliente". Se agregó una línea divisoria antes de que empiecen esos campos, marcando que es una sub-sección.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-10
 
 ### v2.85: al volver de una cotización asociada, vuelve a la OT puntual y en el mismo modo
