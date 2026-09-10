@@ -1,5 +1,25 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-10
+
+### v2.85: al volver de una cotización asociada, vuelve a la OT puntual y en el mismo modo
+
+Cerrar/Cancelar una cotización abierta desde el chip "Cotizaciones Asociadas" de una OT mandaba siempre al listado de Órdenes de Trabajo, no a la orden puntual que se estaba viendo/editando (`Cotizaciones.jsx` solo sabía "volver a la OT", no a cuál). Ahora el chip manda también el id de la OT de origen y su modo (Ver/Editar); al Cerrar, `OrdenTrabajo.jsx` reabre esa misma orden en el mismo modo. De paso, el chip también abre la cotización en el modo de la OT: si la OT estaba en Editar, la cotización se abre editable; si estaba en Ver, solo lectura (antes siempre abría solo lectura).
+
+**Verificación:** `npm run build` OK.
+
+### v2.84: ver desde la OT las cotizaciones asociadas
+
+La relación OT↔Cotización ya existía en el modelo (`cotizaciones.orden_id`) pero era de una sola vía: solo se veía al abrir la cotización (badge "asociada a OT N°..."). Ahora la OT también muestra las suyas: bloque colapsado "Cotizaciones Asociadas" (mismo estilo que "Información Interna", oculto por defecto) con un chip por cada folio, más un badge "Cotizaciones: N" en el header. Cada chip abre esa cotización. Backend: filtro opcional `?orden_id=` en `GET /api/cotizaciones`.
+
+**Verificación:** `npm run build` OK.
+
+### v2.83: descuento por ítem en Cotizaciones
+
+Los ítems de una cotización no tenían forma de aplicar un descuento — solo Cantidad × Neto. Se agregó un campo Descuento entre Neto y Total (se resta del total de esa fila, tanto en el formulario como en el resumen final y en el PDF, que ahora tiene una columna "Desc." en la tabla de ítems). De paso: los campos SKU/Cant./Neto/Descuento/Total se achicaron para que entren todos en una fila, Neto y Descuento muestran los puntos de miles mientras se escribe (antes eran `input type="number"` sin formato), y el campo Total del ítem dejó de mostrar "CLP" para ahorrar espacio.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-09 (7)
 
 ### v2.82: fix — el cascade Cliente→OT no sincronizaba Ciudad, Cargo Contacto, Fono/Email Contacto ni Email

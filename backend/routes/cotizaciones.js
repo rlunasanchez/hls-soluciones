@@ -14,6 +14,11 @@ router.get("/", authMiddleware, async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const offset = (page - 1) * limit;
+  const ordenId = req.query.orden_id ? parseInt(req.query.orden_id) : null;
+  const where = ordenId ? "WHERE orden_id = $1" : "";
+  const whereParams = ordenId ? [ordenId] : [];
+  const limitParamNum = whereParams.length + 1;
+  const offsetParamNum = whereParams.length + 2;
 
   try {
     const cotizacionesResult = await pool.query(
@@ -23,10 +28,10 @@ router.get("/", authMiddleware, async (req, res) => {
         contacto_nombre, contacto_fono, contacto_email, contacto_cargo,
         ejecutivo, ejecutivo_fono, ejecutivo_email,
         items, orden_id, orden_numero, fecha_creacion, fecha_actualizacion
-       FROM cotizaciones ORDER BY id DESC LIMIT $1 OFFSET $2`,
-      [limit, offset]
+       FROM cotizaciones ${where} ORDER BY id DESC LIMIT $${limitParamNum} OFFSET $${offsetParamNum}`,
+      [...whereParams, limit, offset]
     );
-    const totalResult = await pool.query("SELECT COUNT(*) as total FROM cotizaciones");
+    const totalResult = await pool.query(`SELECT COUNT(*) as total FROM cotizaciones ${where}`, whereParams);
     res.json({
       cotizaciones: cotizacionesResult.rows,
       pagination: {
