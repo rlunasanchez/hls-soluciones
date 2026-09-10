@@ -1,6 +1,18 @@
 # Registro de Cambios - HLS Soluciones
 
-## Fecha: 2026-09-09 (6)
+## Fecha: 2026-09-09 (7)
+
+### v2.82: fix — el cascade Cliente→OT no sincronizaba Ciudad, Cargo Contacto, Fono/Email Contacto ni Email
+
+**Contexto:** pedí una auditoría completa del proyecto para descartar que el mismo problema de v2.79/v2.80 (un dato existente en `clientes` que se "disimulaba" en vez de guardarse/sincronizarse bien) se repitiera en otro lado. La encontró: en `PUT /api/clientes/:id`, cuando se edita un cliente, hay un `UPDATE ordenes_trabajo ... WHERE cliente_id = ?` que sincroniza el snapshot de todas las OT ya creadas de ese cliente — pero solo actualizaba `cliente`, `direccion`, `comuna`, `rut`, `contacto` y `fono_principal`. Le faltaban `ciudad`, `email`, `fono_contacto`, `email_contacto` y `cargo_contacto` (los dos últimos recién agregados, pero los otros tres ya existían de antes y tampoco se sincronizaban).
+
+**Efecto:** al editar la Ciudad, el Email del cliente o los datos del contacto principal (Fono/Email/Cargo) desde el mantenedor de Clientes, esos 5 campos quedaban desactualizados ("stale") en cualquier OT ya creada y vinculada a ese cliente — aunque sí se actualizaban correctamente al crear una OT nueva.
+
+**Solución** (`backend/routes/clientes.js`): el `UPDATE ordenes_trabajo` del cascade ahora incluye los 5 campos faltantes.
+
+**Nota de diseño (no es un bug, queda para decidir):** Cotizaciones no tiene ningún cascade de este tipo — editar un cliente nunca actualiza cotizaciones ya emitidas. Podría ser intencional (una cotización es un documento congelado al momento de emitirse, a diferencia de una OT que sigue viva), pero no está confirmado como decisión de diseño.
+
+**Verificación:** `node --check` OK en backend.
 
 ### v2.81: campos Ciudad y Cargo Contacto también en Cotizaciones
 

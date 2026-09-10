@@ -249,8 +249,8 @@ router.put("/:id", authMiddleware, async (req, res) => {
         }
       }
       await client.query(
-        `UPDATE ordenes_trabajo SET cliente = $1, direccion = $2, comuna = $3, rut = $4, contacto = $5, fono_principal = $6 WHERE cliente_id = $7`,
-        [razon_social, direccion || null, comuna || null, rut || null, contacto_nombre || null, telefono || null, id]
+        `UPDATE ordenes_trabajo SET cliente = $1, direccion = $2, ciudad = $3, comuna = $4, rut = $5, contacto = $6, fono_contacto = $7, email_contacto = $8, cargo_contacto = $9, fono_principal = $10, email = $11 WHERE cliente_id = $12`,
+        [razon_social, direccion || null, ciudad || null, comuna || null, rut || null, contacto_nombre || null, contacto_fono || null, contacto_email || null, contacto_cargo || null, telefono || null, email || null, id]
       );
       await client.query("COMMIT");
       res.json({ msg: "Cliente actualizado", codigo });
