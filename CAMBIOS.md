@@ -1,5 +1,17 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-10 (3)
+
+### v2.89: el Ejecutivo de una cotización nueva se toma de la BD, no del token
+
+Al crear una cotización, los campos "Ejecutivo" y "Email Ejecutivo" se pre-rellenaban desde el JWT de sesión (`parseToken()`). El JWT solo se regenera al iniciar sesión, así que si se corregía el Nombre o el Email del usuario en Gestión de Usuarios, la cotización seguía mostrando los datos viejos (p. ej. `admin@test.com` y sin nombre) hasta cerrar sesión y volver a entrar.
+
+Ahora el frontend consulta un endpoint nuevo `GET /api/auth/perfil` (protegido con `authMiddleware`, devuelve `usuario/nombre/email/rol` leídos de la tabla `usuarios`) y con eso pre-rellena el ejecutivo en cada cotización nueva — desde "Nueva Cotización" y desde las que se abren pre-cargadas desde una OT o un Cliente. Si la consulta falla, cae al token como antes. Las cotizaciones ya guardadas no cambian: siguen mostrando el ejecutivo con el que se crearon.
+
+Nota: el formulario de OT (`tecnicoAsignado`) mantiene el comportamiento anterior (se toma del token); no se tocó.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-10 (2)
 
 ### v2.88: Descuento por ítem pasa a ser porcentaje
