@@ -60,6 +60,26 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Datos actuales del usuario logueado, tomados de la BD (no del token).
+// Sirve para pre-rellenar el ejecutivo en Cotizaciones sin tener que
+// cerrar sesión cada vez que se corrige el Nombre/Email en Gestión de Usuarios.
+router.get("/perfil", authMiddleware, async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      "SELECT usuario, nombre, email, rol FROM usuarios WHERE usuario = ? AND activo = true",
+      [req.user.usuario]
+    );
+    if (rows.length === 0) {
+      return res.status(404).json({ msg: "Usuario no encontrado" });
+    }
+    const u = rows[0];
+    res.json({ usuario: u.usuario, nombre: u.nombre || "", email: u.email || "", rol: u.rol });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Error del servidor" });
+  }
+});
+
 router.post("/registrar", authMiddleware, adminOnly, async (req, res) => {
   const { usuario, nombre, password, rol, email } = req.body;
   try {

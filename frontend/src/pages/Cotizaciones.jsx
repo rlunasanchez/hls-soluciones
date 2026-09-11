@@ -93,8 +93,36 @@ function Cotizaciones() {
   // al cerrar, en vez de mandar siempre al listado de OT.
   const [ordenOrigen, setOrdenOrigen] = useState(null);
 
+  // Nombre/Email del ejecutivo se toman de la BD (endpoint /perfil), no del
+  // token, para que reflejen los cambios hechos en Gestión de Usuarios sin
+  // tener que cerrar sesión. Si falla, se cae al token.
+  const perfilRef = useRef(null);
+  const cargarPerfil = async () => {
+    if (perfilRef.current) return perfilRef.current;
+    try {
+      const res = await api.get("/api/auth/perfil");
+      perfilRef.current = res.data;
+    } catch {
+      const t = parseToken();
+      perfilRef.current = { usuario: t.usuario, nombre: t.nombre, email: t.email };
+    }
+    return perfilRef.current;
+  };
+
+  // Cotización vacía con el ejecutivo ya pre-rellenado desde el perfil de la BD.
+  const nuevaCotizacion = () => {
+    const base = cotizacionVacia();
+    const p = perfilRef.current;
+    if (p) {
+      base.ejecutivo = p.nombre || p.usuario || base.ejecutivo;
+      base.ejecutivoEmail = p.email || base.ejecutivoEmail;
+    }
+    return base;
+  };
+
   useEffect(() => {
     const controller = new AbortController();
+    cargarPerfil();
     fetchClientes(controller.signal);
     fetchCotizaciones(controller.signal);
     return () => controller.abort();
@@ -133,6 +161,7 @@ function Cotizaciones() {
     const init = async () => {
       setEditingId(null);
       setSoloLectura(false);
+      await cargarPerfil();
 
       // El cliente debe quedar "seleccionado" (no solo el texto de la búsqueda)
       // para poder buscar entre sus otros contactos, igual que en la OT.
@@ -155,7 +184,7 @@ function Cotizaciones() {
         setBusquedaCliente(toUpper(orden.cliente || ""));
         setBusquedaContacto(toUpper(orden.contacto || ""));
         setCotizacion({
-          ...cotizacionVacia(),
+          ...nuevaCotizacion(),
           clienteId: orden.cliente_id || clienteMatch?.id || null,
           clienteRut: orden.rut || clienteMatch?.rut || "",
           clienteRazonSocial: toUpper(orden.cliente || ""),
@@ -175,7 +204,7 @@ function Cotizaciones() {
         setBusquedaCliente(toUpper(clienteNav.razon_social || ""));
         setBusquedaContacto(toUpper(clienteNav.contacto_nombre || ""));
         setCotizacion({
-          ...cotizacionVacia(),
+          ...nuevaCotizacion(),
           clienteId: clienteNav.id || null,
           clienteRut: clienteNav.rut || "",
           clienteRazonSocial: toUpper(clienteNav.razon_social || ""),
@@ -249,7 +278,8 @@ function Cotizaciones() {
     }
   };
 
-  const abrirNueva = () => {
+  const abrirNueva = async () => {
+    await cargarPerfil();
     setEditingId(null);
     setSoloLectura(false);
     setClienteSeleccionado(null);
@@ -258,7 +288,7 @@ function Cotizaciones() {
     setItemsResumenAbierto(false);
     setItemsManualVisibles(new Set());
     setOrigenOT(false);
-    setCotizacion(cotizacionVacia());
+    setCotizacion(nuevaCotizacion());
     setMostrarFormulario(true);
   };
 
