@@ -368,8 +368,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                     <div className="contactos-lista-preview">
                       {(contactosExpandidos ? contactos : contactos.slice(0, 4)).map((c, i) => (
                         <div key={i} className="contacto-chip" style={{ cursor: "pointer" }} onClick={() => setContactoSeleccionado(c)}>
-                          <span className="contacto-chip-nombre">{c.nombre}</span>
-                          {c.cargo && <span className="contacto-chip-cargo">{c.cargo}</span>}
+                          <span className="contacto-chip-nombre">{`Contacto ${i + 1}`}</span>
                         </div>
                       ))}
                       {contactos.length > 4 && (
@@ -386,8 +385,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                   <div className="contactos-lista-preview">
                     {(contactosExpandidos ? contactos : contactos.slice(0, 4)).map((c, i) => (
                       <div key={i} className="contacto-chip" style={{ cursor: "pointer" }} onClick={() => setContactoSeleccionado(c)}>
-                        <span className="contacto-chip-nombre">{c.nombre}</span>
-                        {c.cargo && <span className="contacto-chip-cargo">{c.cargo}</span>}
+                        <span className="contacto-chip-nombre">{`Contacto ${i + 1}`}</span>
                       </div>
                     ))}
                     {contactos.length > 4 && (
@@ -430,7 +428,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
 
             {sucursales.length > 0 && sucursalesResumenAbierto && (
               <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "8px" }}>
-                {sucursales.map((suc, idx) => {
+                {sucursales.map((_, idx) => {
                   const activa = sucursalesManualVisibles.has(idx);
                   return (
                   <span key={idx} style={{
@@ -450,7 +448,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                       title="Editar sucursal"
                       style={{ cursor: "pointer" }}
                     >
-                      {suc.direccion ? suc.direccion : `Sucursal ${idx + 1}`}
+                      {`Sucursal ${idx + 1}`}
                     </span>
                     {!readOnly && (
                       <button

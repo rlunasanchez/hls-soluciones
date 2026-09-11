@@ -115,6 +115,7 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                   <th>Equipo</th>
                   <th>Técnico</th>
                   <th>Estado</th>
+                  <th className="col-cot-dot" title="Tiene cotizaciones asociadas"></th>
                   <th>Acciones</th>
                 </tr>
               </thead>
@@ -139,6 +140,14 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                         <span className="badge-estado-pendiente">Pendiente</span>
                       )}
                     </td>
+                    <td className="col-cot-dot" data-label="Cotización">
+                      {orden.cotizaciones_count > 0 && (
+                        <span
+                          className="cot-dot"
+                          title={`${orden.cotizaciones_count} cotización(es) asociada(s)`}
+                        />
+                      )}
+                    </td>
                     <td data-label="Acciones">
                       <OrdenAcciones
                         orden={orden}
@@ -160,7 +169,15 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
             {ordenes.map((orden) => (
               <div key={orden.id} className="data-card">
                 <div className="data-card-header">
-                  <strong>{orden.numero_orden?.split("-").pop()}</strong>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                    <strong>{orden.numero_orden?.split("-").pop()}</strong>
+                    {orden.cotizaciones_count > 0 && (
+                      <span
+                        className="cot-dot"
+                        title={`${orden.cotizaciones_count} cotización(es) asociada(s)`}
+                      />
+                    )}
+                  </span>
                 </div>
                 <div className="data-card-row">
                   <span className="label">Fecha</span>
