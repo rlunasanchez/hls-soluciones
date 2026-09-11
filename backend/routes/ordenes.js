@@ -31,7 +31,8 @@ router.get("/", authMiddleware, async (req, res) => {
         insumo1, insumo2, insumo3, insumo4, insumo5, insumo6,
         insumo7, insumo8, insumo9, insumo10, insumo11, insumo12,
         averia, observaciones, info_interna,
-        cliente_id, equipo_id, fecha_creacion, fecha_actualizacion
+        cliente_id, equipo_id, fecha_creacion, fecha_actualizacion,
+        (SELECT COUNT(*) FROM cotizaciones c WHERE c.orden_id = ordenes_trabajo.id) AS cotizaciones_count
        FROM ordenes_trabajo ORDER BY id DESC LIMIT ? OFFSET ?`,
       [limit, offset]
     );

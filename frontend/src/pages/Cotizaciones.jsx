@@ -5,7 +5,7 @@ import {
   Search, Save, X, Plus, Trash2, FileDown, ChevronUp, ChevronDown
 } from "lucide-react";
 import api from "../services/api";
-import { getCached } from "../services/cache";
+import { getCached, invalidar } from "../services/cache";
 import { toUpper, cerrarSesion, upperInput, parseToken, formatearRutInput } from "../utils/helpers";
 import "../styles/OrdenTrabajo.css";
 import "../styles/ordenes-componentes.css";
@@ -348,6 +348,7 @@ function Cotizaciones() {
     if (!confirm("¿Seguro que desea eliminar esta cotización?")) return;
     try {
       await api.delete(`/api/cotizaciones/${id}`);
+      invalidar("/api/ordenes");
       fetchCotizaciones();
     } catch (err) {
       console.error("Error al eliminar cotización:", err);
@@ -501,8 +502,11 @@ function Cotizaciones() {
     setItemsManualVisibles(new Set([nuevoIdx]));
   };
   const quitarItem = (idx) => {
+    if (!window.confirm(`¿Eliminar el Ítem ${idx + 1}?`)) return;
     setCotizacion((prev) => {
-      const items = prev.items.filter((_, i) => i !== idx);
+      const restantes = prev.items.filter((_, i) => i !== idx);
+      // Nunca dejar la lista vacía: el formulario siempre muestra el Ítem 1.
+      const items = restantes.length ? restantes : [itemVacio()];
       if (items.length <= LIMITE_ITEMS) setItemsResumenAbierto(false);
       return { ...prev, items };
     });
@@ -517,6 +521,7 @@ function Cotizaciones() {
   };
 
   const renderItemCard = (item, idx) => {
+    if (!item) return null;
     const bruto = (Number(item.cantidad) || 0) * (Number(item.neto) || 0);
     const descuentoPct = Math.min(100, Math.max(0, Number(item.descuento) || 0));
     const totalFila = Math.max(0, bruto * (1 - descuentoPct / 100));
@@ -606,6 +611,10 @@ function Cotizaciones() {
         idActual = res.data.id;
         setEditingId(idActual);
       }
+
+      // El mantenedor de OT muestra un punto si la orden tiene cotizaciones;
+      // ese listado está cacheado, así que hay que invalidarlo tras guardar.
+      invalidar("/api/ordenes");
 
       if (mantener) {
         const origenOTAntes = origenOT;
@@ -960,58 +969,83 @@ function Cotizaciones() {
                 <div className="of-col-right">
                 <div className="of-sec primary">
                   <div className="of-st muted">Ítems</div>
-                  {(() => {
-                    // Por defecto un solo espacio visible (el Ítem 1). Si se elige
-                    // un ítem puntual desde los chips, se muestra ese en su lugar;
-                    // si se pincha "Ver todos", se muestran todas las tarjetas.
-                    const visibles = itemsManualVisibles.size > 0 ? [...itemsManualVisibles].sort((a, b) => a - b) : [0];
-                    return visibles.map((idx) => renderItemCard(cotizacion.items[idx], idx));
-                  })()}
+                  <div style={{
+                    display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center',
+                    marginTop: 6, marginBottom: 10, padding: '8px 10px',
+                    background: '#f8fafc', border: '1px solid var(--border)', borderRadius: '8px'
+                  }}>
+                    {!soloLectura && (
+                      <button
+                        type="button"
+                        onClick={agregarItem}
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 4,
+                          background: 'none', color: 'var(--success)', border: '1px solid var(--success)',
+                          borderRadius: '6px', padding: '3px 12px', cursor: 'pointer',
+                          fontWeight: 600, fontSize: '0.75rem'
+                        }}
+                      >
+                        <Plus size={14} /> Agregar ítem
+                      </button>
+                    )}
 
-                  {cotizacion.items.length > LIMITE_ITEMS &&
-                    (itemsResumenAbierto || cotizacion.items.some((_, i) => !itemsManualVisibles.has(i))) && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const abrir = !itemsResumenAbierto;
-                        setItemsResumenAbierto(abrir);
-                        if (!abrir) setItemsManualVisibles(new Set());
-                      }}
-                      style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 4,
-                        background: 'none', color: 'var(--primary)', border: '1px solid var(--primary)',
-                        borderRadius: '6px', padding: '2px 10px', cursor: 'pointer',
-                        fontWeight: 600, fontSize: '0.75rem', marginBottom: 8
-                      }}
-                    >
-                      {itemsResumenAbierto ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-                      {itemsResumenAbierto
-                        ? 'Ver menos'
-                        : `${cotizacion.items.length - LIMITE_ITEMS} ítem${cotizacion.items.length - LIMITE_ITEMS > 1 ? 's' : ''} más — Ver`}
-                    </button>
-                  )}
+                    {cotizacion.items.length > LIMITE_ITEMS &&
+                      (itemsResumenAbierto || cotizacion.items.some((_, i) => !itemsManualVisibles.has(i))) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const abrir = !itemsResumenAbierto;
+                          setItemsResumenAbierto(abrir);
+                          if (!abrir) setItemsManualVisibles(new Set());
+                        }}
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 4,
+                          background: 'none', color: 'var(--primary)', border: '1px solid var(--primary)',
+                          borderRadius: '6px', padding: '3px 12px', cursor: 'pointer',
+                          fontWeight: 600, fontSize: '0.75rem'
+                        }}
+                      >
+                        {itemsResumenAbierto ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                        {itemsResumenAbierto
+                          ? 'Ver menos'
+                          : `${cotizacion.items.length - LIMITE_ITEMS} ítem${cotizacion.items.length - LIMITE_ITEMS > 1 ? 's' : ''} más — Ver`}
+                      </button>
+                    )}
+
+                    {cotizacion.items.length > LIMITE_ITEMS && (() => {
+                      const todosActivos = itemsManualVisibles.size === cotizacion.items.length;
+                      return (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (todosActivos) {
+                              setItemsManualVisibles(new Set());
+                            } else {
+                              // Al activar "Ver todos" sin haber tocado "Ver más" antes,
+                              // conviene abrir el resumen también para que se vea la
+                              // fila de chips por ítem debajo.
+                              setItemsManualVisibles(new Set(cotizacion.items.map((_, i) => i)));
+                              setItemsResumenAbierto(true);
+                            }
+                          }}
+                          title={todosActivos ? "Ver solo un ítem a la vez" : "Ver todos los ítems"}
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', cursor: 'pointer',
+                            background: todosActivos ? 'var(--secondary)' : 'none',
+                            color: todosActivos ? '#ffffff' : 'var(--secondary)',
+                            border: '1px solid var(--secondary)',
+                            borderRadius: '6px', padding: '3px 12px', fontSize: '0.75rem', fontWeight: 600
+                          }}
+                        >
+                          Ver todos
+                        </button>
+                      );
+                    })()}
+                  </div>
 
                   {cotizacion.items.length > LIMITE_ITEMS && itemsResumenAbierto && (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
-                      {(() => {
-                        const todosActivos = itemsManualVisibles.size === cotizacion.items.length;
-                        return (
-                          <span
-                            onClick={() => setItemsManualVisibles(todosActivos ? new Set() : new Set(cotizacion.items.map((_, i) => i)))}
-                            title={todosActivos ? "Ver solo un ítem a la vez" : "Ver todos los ítems"}
-                            style={{
-                              display: 'inline-flex', alignItems: 'center', cursor: 'pointer',
-                              background: todosActivos ? 'var(--primary)' : 'var(--primary-light)',
-                              color: todosActivos ? '#ffffff' : 'var(--primary)',
-                              border: '1px solid var(--primary)',
-                              borderRadius: 999, padding: '2px 10px', fontSize: '.75rem', fontWeight: 700
-                            }}
-                          >
-                            Ver todos
-                          </span>
-                        );
-                      })()}
-                      {cotizacion.items.map((item, idx) => {
+                      {cotizacion.items.map((_, idx) => {
                         const activo = itemsManualVisibles.size > 0 ? itemsManualVisibles.has(idx) : idx === 0;
                         return (
                           <span key={idx} style={{
@@ -1030,7 +1064,7 @@ function Cotizaciones() {
                               title="Editar ítem"
                               style={{ cursor: 'pointer' }}
                             >
-                              {item.detalle || item.sku || `Ítem ${idx + 1}`}
+                              {`Ítem ${idx + 1}`}
                             </span>
                             {!soloLectura && (
                               <button
@@ -1048,11 +1082,15 @@ function Cotizaciones() {
                     </div>
                   )}
 
-                  {!soloLectura && (
-                    <button type="button" className="of-btn-a" onClick={agregarItem} style={{ marginTop: 4 }}>
-                      <Plus size={14} /> Agregar ítem
-                    </button>
-                  )}
+                  {(() => {
+                    // Por defecto un solo espacio visible (el Ítem 1). Si se elige
+                    // un ítem puntual desde los chips, se muestra ese en su lugar;
+                    // si se pincha "Ver todos", se muestran todas las tarjetas.
+                    const pedidos = itemsManualVisibles.size > 0 ? [...itemsManualVisibles].sort((a, b) => a - b) : [0];
+                    const visibles = pedidos.filter((idx) => idx >= 0 && idx < cotizacion.items.length);
+                    if (visibles.length === 0) visibles.push(0);
+                    return visibles.map((idx) => renderItemCard(cotizacion.items[idx], idx));
+                  })()}
 
                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 14 }}>
                     <div style={{ minWidth: 220 }}>

@@ -2,6 +2,24 @@
    COMPONENTES - ORDENES DE TRABAJO
    ========================= */
 
+/* Punto indicador: la OT tiene cotizaciones asociadas (color del modulo Cotizaciones) */
+.cot-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #DB2777;
+  flex-shrink: 0;
+}
+
+th.col-cot-dot,
+td.col-cot-dot {
+  width: 26px;
+  text-align: center;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
 /* Tabla header actions */
 .table-header-actions {
   display: flex;

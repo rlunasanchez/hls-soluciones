@@ -50,6 +50,10 @@ function OrdenTrabajo() {
   const [ordenIdActual, setOrdenIdActual] = useState(null);
   const [cotizacionesDeOrden, setCotizacionesDeOrden] = useState([]);
   const [mostrarCotizacionesAsociadas, setMostrarCotizacionesAsociadas] = useState(false);
+  // Dentro del bloque expandido se muestran como máximo COTIZ_VISIBLES chips;
+  // el resto queda tras un "Ver N más".
+  const [verTodasCotizaciones, setVerTodasCotizaciones] = useState(false);
+  const COTIZ_VISIBLES = 3;
   const [filtroNumeroOrden, setFiltroNumeroOrden] = useState("");
   const [filtroCliente, setFiltroCliente] = useState("");
   const [filtroSerie, setFiltroSerie] = useState("");
@@ -288,6 +292,7 @@ function OrdenTrabajo() {
   // Cotizaciones asociadas a la orden abierta (solo lectura, para el badge y
   // los chips del header). Se re-consulta cada vez que cambia la orden abierta.
   useEffect(() => {
+    setVerTodasCotizaciones(false);
     if (!ordenIdActual) { setCotizacionesDeOrden([]); return; }
     const controller = new AbortController();
     api.get(`/api/cotizaciones?orden_id=${ordenIdActual}&limit=100`, { signal: controller.signal })
@@ -1082,7 +1087,7 @@ function OrdenTrabajo() {
                   <div style={{ marginTop: '10px', padding: '4px 10px', background: '#FEF9E7', border: '1px solid #F5D48C', borderRadius: '8px', lineHeight: '1.2' }}>
                     <button
                       type="button"
-                      onClick={() => setMostrarCotizacionesAsociadas(!mostrarCotizacionesAsociadas)}
+                      onClick={() => { setMostrarCotizacionesAsociadas(!mostrarCotizacionesAsociadas); setVerTodasCotizaciones(false); }}
                       style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text)', fontWeight: 600, fontSize: '0.8rem', fontFamily: 'inherit' }}
                     >
                       {mostrarCotizacionesAsociadas ? <ChevronUp size={14} style={{ color: '#B45309', flexShrink: 0 }} /> : <ChevronDown size={14} style={{ color: '#B45309', flexShrink: 0 }} />}
@@ -1096,8 +1101,8 @@ function OrdenTrabajo() {
                     </button>
 
                     {mostrarCotizacionesAsociadas && (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: '8px' }}>
-                        {cotizacionesDeOrden.map((c) => (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: '8px', alignItems: 'center' }}>
+                        {(verTodasCotizaciones ? cotizacionesDeOrden : cotizacionesDeOrden.slice(0, COTIZ_VISIBLES)).map((c) => (
                           <span key={c.id}
                             onClick={() => navigate('/cotizaciones', { state: { cotizacionId: c.id, cotizacionSoloLectura: soloLectura, volverOrdenId: ordenIdActual, volverOrdenSoloLectura: soloLectura } })}
                             title="Ver esta cotización"
@@ -1111,6 +1116,18 @@ function OrdenTrabajo() {
                             N° {c.folio}
                           </span>
                         ))}
+                        {cotizacionesDeOrden.length > COTIZ_VISIBLES && (
+                          <button
+                            type="button"
+                            onClick={() => setVerTodasCotizaciones(!verTodasCotizaciones)}
+                            style={{
+                              background: 'none', border: 'none', padding: '3px 4px', cursor: 'pointer',
+                              color: '#B45309', fontSize: '.75rem', fontWeight: 700, fontFamily: 'inherit'
+                            }}
+                          >
+                            {verTodasCotizaciones ? 'Ver menos' : `Ver ${cotizacionesDeOrden.length - COTIZ_VISIBLES} más`}
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>

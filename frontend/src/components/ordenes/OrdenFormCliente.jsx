@@ -1083,7 +1083,7 @@ function OrdenFormCliente({
 
                   {nuevaOrden.direccionesExtra.length > 0 && direccionesResumenAbierto && (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
-                      {nuevaOrden.direccionesExtra.map((dir, idx) => {
+                      {nuevaOrden.direccionesExtra.map((_, idx) => {
                         const activa = direccionesManualVisibles.has(idx);
                         return (
                         <span key={idx} style={{
@@ -1102,7 +1102,7 @@ function OrdenFormCliente({
                             title="Editar dirección"
                             style={{ cursor: 'pointer' }}
                           >
-                            {dir.direccion ? dir.direccion : `Dirección ${idx + 1}`}
+                            {`Dirección ${idx + 1}`}
                           </span>
                           {!readOnly && (
                             <button
@@ -1562,7 +1562,7 @@ function OrdenFormCliente({
 
                   {nuevaOrden.contactosExtra.length > 0 && contactosResumenAbierto && (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
-                      {nuevaOrden.contactosExtra.map((c, idx) => {
+                      {nuevaOrden.contactosExtra.map((_, idx) => {
                         const activo = contactosManualVisibles.has(idx);
                         return (
                         <span key={idx} style={{
@@ -1581,7 +1581,7 @@ function OrdenFormCliente({
                             title="Editar contacto"
                             style={{ cursor: 'pointer' }}
                           >
-                            {c.nombre ? c.nombre : `Contacto ${idx + 1}`}
+                            {`Contacto ${idx + 1}`}
                           </span>
                           {!readOnly && (
                             <button

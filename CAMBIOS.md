@@ -2,6 +2,56 @@
 
 ## Fecha: 2026-09-10 (3)
 
+### v2.95: reorden y estilo de la fila de botones de "Ítems" en Cotizaciones
+
+Varios ajustes seguidos sobre la sección "Ítems" del formulario de Cotización:
+
+- **Orden**: antes se veía primero la tarjeta del Ítem 1 y recién abajo los botones ("N ítems más — Ver", "Ver todos", chips) y "Agregar ítem" quedaba al final de todo. Ahora arriba de todo va una sola fila con **Agregar ítem, Ver más/Ver menos y Ver todos**; debajo, si el resumen está abierto, la fila de chips por ítem; y al final la tarjeta del ítem abierto.
+- **"Ver todos"** pasó de chip (`<span>`, píldora) a `<button>` con el mismo estilo cuadrado-redondeado que "Ver más" (antes, al ponerle el mismo `style`, seguía viéndose distinto por ser una etiqueta distinta — cada tag trae su propio default del navegador). Ahora es visible siempre que haya más de un ítem (antes solo aparecía después de tocar "Ver más"); si se activa sin haber abierto el resumen, lo abre también para mostrar la fila de chips.
+- Se probó limitar "Ver todos" a abrir como máximo 3 tarjetas a la vez (mismo criterio que "Cotizaciones Asociadas" de la OT, para no empujar los botones de Guardar/Cancelar fuera de pantalla) — **revertido a pedido**: sigue abriendo todas las tarjetas, sin tope.
+- La fila de botones quedó dentro de una caja (fondo gris claro `#f8fafc`, borde y esquinas redondeadas) para que se vea más ordenada, con más separación entre botones y respecto del título "Ítems".
+- Cada botón tiene su color: **Agregar ítem** verde (`--success`), **Ver más/menos** azul (`--primary`), **Ver todos** verde azulado (`--secondary`) — misma forma, tamaño y tipografía en los tres.
+- Fix de paso: borrar un ítem (✕ del chip o tacho de la tarjeta) no pedía confirmación, a diferencia de Sucursales/Direcciones/Contactos/Cotización que sí. Ahora `quitarItem` pregunta "¿Eliminar el Ítem N?" antes de borrar, en los dos puntos de entrada.
+
+**Verificación:** `npm run build` OK.
+
+### v2.94: los chips de Direcciones/Sucursales y de "Otros Contactos" (OT) muestran "Sucursal N" / "Dirección N" / "Contacto N"
+
+Mismo criterio que v2.92 en los ítems de la Cotización: los chips del resumen colapsable mostraban el texto de la dirección o el nombre del contacto, lo que llenaba la pantalla. Ahora muestran solo "Sucursal 1", "Dirección 1", "Contacto 1", etc.; el contenido se ve al abrir la tarjeta. Afecta:
+
+- **Ficha de Cliente** (`ClienteFormulario.jsx`): chips de Sucursales.
+- **Formulario de OT** (`OrdenFormCliente.jsx`): chips de "Otras Direcciones / Sucursales" y de "Otros Contactos".
+
+En "Contactos Adicionales" del Cliente (`ModalContactos.jsx` y la lista preview de `ClienteFormulario.jsx`) se probaron más cambios (botón Eliminar, confirm) que terminaron revertidos a pedido; de ahí solo queda la etiqueta, igual que en los demás: el chip dice "Contacto 1", "Contacto 2"… en vez del nombre/cargo. El resto del comportamiento (Eliminar solo con más de un contacto, Guardar/Cancelar) sigue exactamente como estaba antes de esta sesión.
+
+**Verificación:** `npm run build` OK.
+
+### v2.93: fix - borrar el último ítem de la Cotización rompía el formulario
+
+`quitarItem` podía dejar `items` vacío (al borrar el único ítem, o el Ítem 1 cuando era el último visible); el render siempre intenta mostrar `items[0]`, así que quedaba `undefined` y `renderItemCard` tiraba error. Ahora: al borrar el último ítem se repone uno vacío, `renderItemCard` ignora un ítem `undefined`, y la lista de tarjetas visibles descarta índices fuera de rango.
+
+**Verificación:** `npm run build` OK.
+
+### v2.92: los chips de ítems de la Cotización muestran "Ítem N", no el detalle
+
+En el resumen de ítems de la Cotización, cada chip mostraba el texto del Detalle (o el SKU), que con detalles largos llenaba la pantalla. Ahora el chip siempre dice "Ítem 1", "Ítem 2", etc.; el contenido se ve al abrir la tarjeta del ítem.
+
+**Verificación:** `npm run build` OK.
+
+### v2.91: "Cotizaciones Asociadas" de la OT muestra máx. 3 chips + "Ver N más"
+
+El bloque expandido listaba todas las cotizaciones de la OT de una vez (con 50 asociadas, 50 chips). Ahora muestra como máximo 3 y, si hay más, un botón "Ver N más" / "Ver menos" para el resto. Se colapsa solo al cerrar el bloque o al cambiar de orden.
+
+**Verificación:** `npm run build` OK.
+
+### v2.90: punto indicador en el mantenedor de OT cuando la orden tiene cotizaciones
+
+En el listado de Órdenes de Trabajo ahora aparece un punto del color del módulo Cotizaciones (`#DB2777`) en una columna angosta justo antes de "Acciones" (y al lado del N° en las tarjetas de móvil) cuando esa OT tiene al menos una cotización asociada. Así se ve de un vistazo, sin entrar a la orden. El `title` del punto muestra la cantidad.
+
+Backend: `GET /api/ordenes` agrega `cotizaciones_count` por fila (subconsulta `COUNT(*)` sobre `cotizaciones.orden_id`). Frontend: al guardar o eliminar una cotización se invalida el cache de `/api/ordenes` para que el punto se actualice enseguida.
+
+**Verificación:** `npm run build` OK.
+
 ### v2.89: el Ejecutivo de una cotización nueva se toma de la BD, no del token
 
 Al crear una cotización, los campos "Ejecutivo" y "Email Ejecutivo" se pre-rellenaban desde el JWT de sesión (`parseToken()`). El JWT solo se regenera al iniciar sesión, así que si se corregía el Nombre o el Email del usuario en Gestión de Usuarios, la cotización seguía mostrando los datos viejos (p. ej. `admin@test.com` y sin nombre) hasta cerrar sesión y volver a entrar.

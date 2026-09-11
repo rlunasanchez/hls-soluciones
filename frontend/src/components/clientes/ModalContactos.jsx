@@ -108,7 +108,7 @@ function ModalContactos({ contactos = [], onChange, onClose, readOnly = false })
 
           {lista.length > 0 && resumenAbierto && (
             <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "8px" }}>
-              {lista.map((c, idx) => {
+              {lista.map((_, idx) => {
                 const activo = manualVisibles.has(idx);
                 return (
                 <span key={idx} className="contacto-chip" style={{
@@ -124,7 +124,7 @@ function ModalContactos({ contactos = [], onChange, onClose, readOnly = false })
                     ))}
                     style={{ cursor: "pointer" }}
                   >
-                    {c.nombre ? c.nombre : `Contacto ${idx + 1}`}
+                    {`Contacto ${idx + 1}`}
                   </span>
                   {!readOnly && lista.length > 1 && (
                     <button
