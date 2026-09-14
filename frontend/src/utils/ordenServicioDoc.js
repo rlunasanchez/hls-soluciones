@@ -151,7 +151,7 @@ img.logo { max-width: 100%; max-height: 100%; object-fit: contain; }
 .titulo-barra h1 { margin: 0; font-size: 15pt; font-weight: 800; letter-spacing: .015em; color: #0C4A8C; }
 .emitida { margin: 2pt 0 0; font-size: 7pt; color: #6B7280; }
 .garantia-chip { display: inline-block; margin-left: 8pt; background: #0C4A8C; border-radius: 999px; padding: 2pt 9pt; font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #fff; vertical-align: middle; }
-.folio-numero { margin-left: 8pt; font-size: 11pt; font-weight: 800; color: #0C4A8C; font-variant-numeric: tabular-nums; vertical-align: middle; }
+.folio-numero { margin-left: 8pt; font-size: 14pt; font-weight: 800; color: #0C4A8C; font-variant-numeric: tabular-nums; vertical-align: middle; }
 .folio { text-align: center; background: #F1F5F9; border: .75pt solid #E2E8F0; border-radius: 7pt; padding: 2pt 12pt; }
 .folio .l { display: block; font-size: 6pt; text-transform: uppercase; letter-spacing: .1em; color: #6B7280; }
 .folio .v { font-size: 9pt; font-weight: 600; font-variant-numeric: tabular-nums; color: #111827; }
@@ -203,7 +203,7 @@ export function generarHtmlOrdenServicio(orden, opciones) {
 
   const seccionCliente = `
     <section class="sec">
-      ${h2("Datos de Cliente — Contacto")}
+      ${h2("Datos de Cliente")}
       <div class="grid">
         ${campo("Cliente", orden.cliente)}
         ${campo("RUT", orden.rut, true)}
@@ -211,13 +211,18 @@ export function generarHtmlOrdenServicio(orden, opciones) {
         ${campo("Ciudad - Comuna", [ciudad, orden.comuna].filter((v) => String(v || "").trim()).join(" - "))}
         ${campo("Email Cliente", orden.email)}
         ${campo("Teléfono", orden.fono_principal, true)}
+      </div>
+      ${direccionesSel.length ? `<div class="sub">› Direcciones adicionales</div>${direccionesSel.map(direccionExtraHtml).join("")}` : ""}
+    </section>
+    <section class="sec">
+      ${h2("Contacto")}
+      <div class="grid">
         ${campo("Contacto", orden.contacto)}
         ${campo("Cargo Contacto", orden.cargo_contacto)}
         ${campo("Email Contacto", orden.email_contacto)}
         ${campo("Fono Contacto", orden.fono_contacto, true)}
       </div>
       ${contactosSel.length ? `<div class="sub">› Contactos adicionales</div>${contactosSel.map(contactoExtraHtml).join("")}` : ""}
-      ${direccionesSel.length ? `<div class="sub">› Direcciones adicionales</div>${direccionesSel.map(direccionExtraHtml).join("")}` : ""}
     </section>`;
 
   // Técnico Asignado se saca del PDF a pedido del usuario (de momento no se
