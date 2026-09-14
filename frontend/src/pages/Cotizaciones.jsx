@@ -75,8 +75,7 @@ function Cotizaciones() {
   // El primer ítem siempre se ve completo; del 2° en adelante siguen
   // el mismo patrón de chips + resumen colapsable que Sucursales/Direcciones.
   const LIMITE_ITEMS = 1;
-  const [itemsResumenAbierto, setItemsResumenAbierto] = useState(false);
-  const [itemsManualVisibles, setItemsManualVisibles] = useState(() => new Set());
+  const [itemsColapsado, setItemsColapsado] = useState(false);
 
   const [busquedaContacto, setBusquedaContacto] = useState("");
   const [mostrarDropdownContacto, setMostrarDropdownContacto] = useState(false);
@@ -285,8 +284,7 @@ function Cotizaciones() {
     setClienteSeleccionado(null);
     setBusquedaCliente("");
     setBusquedaContacto("");
-    setItemsResumenAbierto(false);
-    setItemsManualVisibles(new Set());
+    setItemsColapsado(false);
     setOrigenOT(false);
     setCotizacion(nuevaCotizacion());
     setMostrarFormulario(true);
@@ -312,8 +310,7 @@ function Cotizaciones() {
     setClienteSeleccionado(cl || null);
     setBusquedaCliente(c.cliente_razon_social || "");
     setBusquedaContacto(c.contacto_nombre || "");
-    setItemsResumenAbierto(false);
-    setItemsManualVisibles(new Set());
+    setItemsColapsado(false);
     setCotizacion({
       fechaEmision: (c.fecha_emision || "").substring(0, 10),
       fechaValidoHasta: (c.fecha_valido_hasta || "").substring(0, 10),
@@ -495,11 +492,8 @@ function Cotizaciones() {
   };
 
   const agregarItem = () => {
-    // Mismo criterio que Sucursales/Contactos: el nuevo ítem pasa a ser
-    // el que se muestra en el espacio único, reemplazando al que estaba.
-    const nuevoIdx = cotizacion.items.length;
     setCotizacion((prev) => ({ ...prev, items: [...prev.items, itemVacio()] }));
-    setItemsManualVisibles(new Set([nuevoIdx]));
+    setItemsColapsado(false);
   };
   const quitarItem = (idx) => {
     if (!window.confirm(`¿Eliminar el Ítem ${idx + 1}?`)) return;
@@ -507,16 +501,8 @@ function Cotizaciones() {
       const restantes = prev.items.filter((_, i) => i !== idx);
       // Nunca dejar la lista vacía: el formulario siempre muestra el Ítem 1.
       const items = restantes.length ? restantes : [itemVacio()];
-      if (items.length <= LIMITE_ITEMS) setItemsResumenAbierto(false);
+      if (items.length <= LIMITE_ITEMS) setItemsColapsado(false);
       return { ...prev, items };
-    });
-    setItemsManualVisibles(prev => {
-      const next = new Set();
-      prev.forEach(i => {
-        if (i < idx) next.add(i);
-        else if (i > idx) next.add(i - 1);
-      });
-      return next;
     });
   };
 
@@ -579,7 +565,7 @@ function Cotizaciones() {
           <div className="of-f" style={{ flex: '1 1 200px' }}>
             <label>Detalle</label>
             <textarea rows={1} placeholder="Ej: Visita técnica" value={item.detalle} onChange={(e) => actualizarItem(idx, 'detalle', upperInput(e))} disabled={soloLectura}
-              style={{ resize: 'vertical', fontFamily: 'inherit', minHeight: 0, height: 26 }} />
+              style={{ resize: 'vertical', fontFamily: 'inherit', minHeight: 0, height: 40 }} />
           </div>
         </div>
       </div>
@@ -715,8 +701,8 @@ function Cotizaciones() {
                   <button type="button" className="of-head-close" onClick={cerrarFormulario}><X size={18} /></button>
                 </div>
 
-                <div className="of-cols" style={{ gridTemplateColumns: '0.65fr 1.35fr' }}>
-                <div className="of-col-left">
+                <div className="of-cols" style={{ gridTemplateColumns: '0.9fr 1.1fr' }}>
+                <div className="of-col-left" style={{ minWidth: 0 }}>
                 <div className="of-sec primary">
                   <div className="of-st success">Datos del Cliente</div>
 
@@ -949,6 +935,9 @@ function Cotizaciones() {
                         <option value="Crédito 30 días">Crédito 30 días</option>
                         <option value="Crédito 60 días">Crédito 60 días</option>
                         <option value="Transferencia Bancaria">Transferencia Bancaria</option>
+                        <option value="Contra entrega">Contra entrega</option>
+                        <option value="Transferencia previa">Transferencia previa</option>
+                        <option value="Orden de compra 30 días">Orden de compra 30 días</option>
                       </select>
                     </div>
                   </div>
@@ -966,7 +955,7 @@ function Cotizaciones() {
                 </div>
                 </div>
 
-                <div className="of-col-right">
+                <div className="of-col-right" style={{ minWidth: 0 }}>
                 <div className="of-sec primary">
                   <div className="of-st muted">Ítems</div>
                   <div style={{
@@ -989,15 +978,10 @@ function Cotizaciones() {
                       </button>
                     )}
 
-                    {cotizacion.items.length > LIMITE_ITEMS &&
-                      (itemsResumenAbierto || cotizacion.items.some((_, i) => !itemsManualVisibles.has(i))) && (
+                    {cotizacion.items.length > LIMITE_ITEMS && (
                       <button
                         type="button"
-                        onClick={() => {
-                          const abrir = !itemsResumenAbierto;
-                          setItemsResumenAbierto(abrir);
-                          if (!abrir) setItemsManualVisibles(new Set());
-                        }}
+                        onClick={() => setItemsColapsado((v) => !v)}
                         style={{
                           display: 'inline-flex', alignItems: 'center', gap: 4,
                           background: 'none', color: 'var(--primary)', border: '1px solid var(--primary)',
@@ -1005,92 +989,14 @@ function Cotizaciones() {
                           fontWeight: 600, fontSize: '0.75rem'
                         }}
                       >
-                        {itemsResumenAbierto ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-                        {itemsResumenAbierto
-                          ? 'Ver menos'
-                          : `${cotizacion.items.length - LIMITE_ITEMS} ítem${cotizacion.items.length - LIMITE_ITEMS > 1 ? 's' : ''} más — Ver`}
+                        {itemsColapsado ? <ChevronDown size={13} /> : <ChevronUp size={13} />}
+                        {itemsColapsado ? 'Ver más' : 'Ver menos'}
                       </button>
                     )}
-
-                    {cotizacion.items.length > LIMITE_ITEMS && (() => {
-                      const todosActivos = itemsManualVisibles.size === cotizacion.items.length;
-                      return (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (todosActivos) {
-                              setItemsManualVisibles(new Set());
-                            } else {
-                              // Al activar "Ver todos" sin haber tocado "Ver más" antes,
-                              // conviene abrir el resumen también para que se vea la
-                              // fila de chips por ítem debajo.
-                              setItemsManualVisibles(new Set(cotizacion.items.map((_, i) => i)));
-                              setItemsResumenAbierto(true);
-                            }
-                          }}
-                          title={todosActivos ? "Ver solo un ítem a la vez" : "Ver todos los ítems"}
-                          style={{
-                            display: 'inline-flex', alignItems: 'center', cursor: 'pointer',
-                            background: todosActivos ? 'var(--secondary)' : 'none',
-                            color: todosActivos ? '#ffffff' : 'var(--secondary)',
-                            border: '1px solid var(--secondary)',
-                            borderRadius: '6px', padding: '3px 12px', fontSize: '0.75rem', fontWeight: 600
-                          }}
-                        >
-                          Ver todos
-                        </button>
-                      );
-                    })()}
                   </div>
 
-                  {cotizacion.items.length > LIMITE_ITEMS && itemsResumenAbierto && (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
-                      {cotizacion.items.map((_, idx) => {
-                        const activo = itemsManualVisibles.size > 0 ? itemsManualVisibles.has(idx) : idx === 0;
-                        return (
-                          <span key={idx} style={{
-                            display: 'inline-flex', alignItems: 'center', gap: 6,
-                            background: activo ? 'var(--primary)' : 'var(--primary-light)',
-                            color: activo ? '#ffffff' : 'var(--primary)',
-                            border: '1px solid var(--primary)',
-                            borderRadius: 999, padding: '2px 6px 2px 10px', fontSize: '.75rem', fontWeight: 600
-                          }}>
-                            <span
-                              onClick={() => setItemsManualVisibles(prev => (
-                                // Exclusivo: pinchar un ítem muestra solo ese (no se
-                                // van acumulando hacia abajo). Pinchar el mismo lo cierra.
-                                prev.has(idx) && prev.size === 1 ? new Set() : new Set([idx])
-                              ))}
-                              title="Editar ítem"
-                              style={{ cursor: 'pointer' }}
-                            >
-                              {`Ítem ${idx + 1}`}
-                            </span>
-                            {!soloLectura && (
-                              <button
-                                type="button"
-                                onClick={() => quitarItem(idx)}
-                                title="Quitar ítem"
-                                style={{ background: 'none', border: 'none', color: activo ? '#ffffff' : 'var(--primary)', cursor: 'pointer', display: 'flex', padding: 0 }}
-                              >
-                                <X size={12} />
-                              </button>
-                            )}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {(() => {
-                    // Por defecto un solo espacio visible (el Ítem 1). Si se elige
-                    // un ítem puntual desde los chips, se muestra ese en su lugar;
-                    // si se pincha "Ver todos", se muestran todas las tarjetas.
-                    const pedidos = itemsManualVisibles.size > 0 ? [...itemsManualVisibles].sort((a, b) => a - b) : [0];
-                    const visibles = pedidos.filter((idx) => idx >= 0 && idx < cotizacion.items.length);
-                    if (visibles.length === 0) visibles.push(0);
-                    return visibles.map((idx) => renderItemCard(cotizacion.items[idx], idx));
-                  })()}
+                  {(itemsColapsado ? cotizacion.items.slice(0, 1) : cotizacion.items)
+                    .map((item, idx) => renderItemCard(item, itemsColapsado ? 0 : idx))}
 
                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 14 }}>
                     <div style={{ minWidth: 220 }}>

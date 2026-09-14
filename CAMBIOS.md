@@ -1,5 +1,27 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-14 (7)
+
+### v2.105: Cotizaciones — columna Ítems más ancha + Detalle un poco más alto
+
+Proporción entre "Datos del Cliente/Ejecutivo" e "Ítems" pasa de `0.65fr/1.35fr` a `0.9fr/1.1fr` (Ítems apenas por encima de la mitad). Se agregó `minWidth: 0` a ambas columnas para que la proporción `fr` se respete de verdad — sin eso el navegador no achicaba la columna izquierda más allá del ancho mínimo de sus campos internos. El textarea de "Detalle" del ítem sube de 26px a 40px de alto.
+
+**Verificación:** `npm run build` OK.
+
+### v2.106: Cotizaciones — 3 condiciones de pago nuevas
+
+Se agregaron "Contra entrega", "Transferencia previa" y "Orden de compra 30 días" al select de Condición, junto a las 4 que ya había.
+
+**Verificación:** `npm run build` OK.
+
+### v2.107: Cotizaciones — ítems: sacado "Ver todos" y las burbujas, ahora se ven todos por defecto
+
+El manejo de ítems múltiples usaba chips por ítem + botón "Ver todos" para elegir cuál mostrar; al agregar un ítem nuevo el criterio era mostrar solo ese (tapando los demás), lo que resultaba confuso. Se simplificó: ahora todos los ítems se muestran siempre, "Agregar ítem" agrega uno más a la lista visible, y queda un solo botón toggle "Ver menos"/"Ver más" que colapsa a mostrar solo el Ítem 1 cuando se quiere ahorrar espacio.
+
+**Fix en el mismo cambio:** el refactor dejó dos llamadas viejas a los setters eliminados (`setItemsResumenAbierto`/`setItemsManualVisibles`) en `abrirNueva` y `cargarCotizacion`, lo que rompía "Nueva Cotización" y "Editar" (no abrían el formulario). Corregido reemplazándolas por el nuevo `setItemsColapsado(false)`.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-14 (6)
 
 ### v2.104: PDF de la OT — orden Teléfono/Email Cliente invertido
