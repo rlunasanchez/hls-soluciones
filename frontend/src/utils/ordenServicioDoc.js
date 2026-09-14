@@ -74,7 +74,7 @@ function contactoExtraHtml(c) {
 
 function direccionExtraHtml(d) {
   const tipo = String(d.tipo || "").trim();
-  const linea = [d.direccion, d.ciudad || d.comuna].filter((v) => String(v || "").trim()).join(", ");
+  const linea = [d.direccion, d.ciudad, d.comuna].filter((v) => String(v || "").trim()).join(", ");
   const nom = tipo ? `${tipo} — ${linea}` : linea;
   const fono = String(d.fono || "").trim();
   return `<div class="extra-item"><span class="nom">${esc(nom)}</span>${fono ? ` <span class="det">${esc(fono)}</span>` : ""}</div>`;
@@ -169,7 +169,7 @@ img.logo { max-width: 100%; max-height: 100%; object-fit: contain; }
 .sub { margin-top: 2.5mm; font-size: 6pt; text-transform: uppercase; letter-spacing: .06em; color: #6B7280; }
 .extra-item { margin-top: 1.2mm; overflow-wrap: anywhere; }
 .extra-item .nom { font-size: 8pt; font-weight: 700; }
-.extra-item .det { font-size: 7pt; color: #6B7280; }
+.extra-item .det { font-size: 7pt; font-weight: 700; color: #6B7280; }
 
 .chips { margin-top: .8mm; }
 .chip { display: inline-block; max-width: 100%; overflow-wrap: anywhere; background: #E8F1FB; border: .5pt solid rgba(12,74,140,.15); border-radius: 999px; padding: 1.5pt 7pt; font-size: 7.5pt; font-weight: 600; color: #0C4A8C; margin: 0 3pt 2pt 0; }
