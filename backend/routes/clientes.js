@@ -73,7 +73,7 @@ router.get("/", authMiddleware, async (req, res) => {
           CONCAT(COALESCE(cd.tipo_direccion, ''), '|', COALESCE(cd.direccion, ''), '|', COALESCE(cd.fono, ''), '|', COALESCE(cd.ciudad, ''), '|', COALESCE(cd.comuna, ''))
         , ';;' ORDER BY cd.id), '') FROM clientes_direcciones cd WHERE cd.cliente_id = c.id) as direcciones,
         (SELECT COALESCE(STRING_AGG(
-          CONCAT(COALESCE(co.nombre, ''), '|', COALESCE(co.email, ''), '|', COALESCE(co.fono, ''), '|', COALESCE(co.cargo, ''), '|', COALESCE(co.direccion, ''))
+          CONCAT(COALESCE(co.nombre, ''), '|', COALESCE(co.email, ''), '|', COALESCE(co.fono, ''), '|', COALESCE(co.cargo, ''), '|', COALESCE(co.direccion, ''), '|', COALESCE(co.ciudad, ''), '|', COALESCE(co.comuna, ''))
         , ';;' ORDER BY co.id), '') FROM clientes_contactos co WHERE co.cliente_id = c.id) as contactos
       FROM clientes c
       ORDER BY c.id DESC
@@ -106,7 +106,7 @@ router.get("/:id", authMiddleware, async (req, res) => {
           CONCAT(COALESCE(cd.tipo_direccion, ''), '|', COALESCE(cd.direccion, ''), '|', COALESCE(cd.fono, ''), '|', COALESCE(cd.ciudad, ''), '|', COALESCE(cd.comuna, ''))
         , ';;' ORDER BY cd.id), '') FROM clientes_direcciones cd WHERE cd.cliente_id = c.id) as direcciones,
         (SELECT COALESCE(STRING_AGG(
-          CONCAT(COALESCE(co.nombre, ''), '|', COALESCE(co.email, ''), '|', COALESCE(co.fono, ''), '|', COALESCE(co.cargo, ''), '|', COALESCE(co.direccion, ''))
+          CONCAT(COALESCE(co.nombre, ''), '|', COALESCE(co.email, ''), '|', COALESCE(co.fono, ''), '|', COALESCE(co.cargo, ''), '|', COALESCE(co.direccion, ''), '|', COALESCE(co.ciudad, ''), '|', COALESCE(co.comuna, ''))
         , ';;' ORDER BY co.id), '') FROM clientes_contactos co WHERE co.cliente_id = c.id) as contactos
       FROM clientes c
       WHERE c.id = $1
@@ -171,8 +171,8 @@ router.post("/", authMiddleware, async (req, res) => {
       for (const c of contactos) {
         if (c.nombre && c.nombre.trim()) {
           await pool.query(
-            "INSERT INTO clientes_contactos (cliente_id, nombre, email, fono, cargo, direccion) VALUES ($1, $2, $3, $4, $5, $6)",
-            [clienteId, c.nombre, c.email || '', c.fono || '', c.cargo || '', c.direccion || '']
+            "INSERT INTO clientes_contactos (cliente_id, nombre, email, fono, cargo, direccion, ciudad, comuna) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+            [clienteId, c.nombre, c.email || '', c.fono || '', c.cargo || '', c.direccion || '', c.ciudad || '', c.comuna || '']
           );
         }
       }
@@ -242,8 +242,8 @@ router.put("/:id", authMiddleware, async (req, res) => {
         for (const c of contactos) {
           if (c.nombre && c.nombre.trim()) {
             await client.query(
-              "INSERT INTO clientes_contactos (cliente_id, nombre, email, fono, cargo, direccion) VALUES ($1, $2, $3, $4, $5, $6)",
-              [id, c.nombre, c.email || '', c.fono || '', c.cargo || '', c.direccion || '']
+              "INSERT INTO clientes_contactos (cliente_id, nombre, email, fono, cargo, direccion, ciudad, comuna) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+              [id, c.nombre, c.email || '', c.fono || '', c.cargo || '', c.direccion || '', c.ciudad || '', c.comuna || '']
             );
           }
         }

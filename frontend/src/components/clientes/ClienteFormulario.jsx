@@ -55,7 +55,9 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
             email: parts[1] || "",
             fono: parts[2] || "",
             cargo: toUpper(parts[3] || ""),
-            direccion: toUpper(parts[4] || "")
+            direccion: toUpper(parts[4] || ""),
+            ciudad: toUpper(parts[5] || ""),
+            comuna: toUpper(parts[6] || "")
           };
         }).filter((c) => c.nombre);
       }
@@ -399,6 +401,11 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
             </div>
           </div>
 
+          {/* Sucursales/Direcciones oculto de momento: con Ciudad/Comuna ya
+              disponibles en Contactos adicionales, esta sección queda redundante.
+              No borrar — la lógica (sucursales, agregarSucursal, etc.) sigue
+              intacta arriba, ver CAMBIOS.md v2.112. */}
+          {false && (
           <div className="cf-sec cf-sec-suc">
             <div className="cf-sh">
               <h3>Sucursales/Direcciones</h3>
@@ -518,6 +525,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
               );
             })}
           </div>
+          )}
 
           <div className="cf-sub">
             {readOnly ? (

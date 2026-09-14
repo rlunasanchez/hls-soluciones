@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { X, Trash2, UserPlus, ChevronUp, ChevronDown } from "lucide-react";
 import { upperInput, validarEmail } from "../../utils/helpers";
 
-const crearContactoVacio = () => ({ nombre: "", email: "", fono: "", cargo: "", direccion: "" });
+const crearContactoVacio = () => ({ nombre: "", email: "", fono: "", cargo: "", direccion: "", ciudad: "", comuna: "" });
 
 function ModalContactos({ contactos = [], onChange, onClose, readOnly = false }) {
   const [lista, setLista] = useState([]);
@@ -188,6 +188,20 @@ function ModalContactos({ contactos = [], onChange, onClose, readOnly = false })
                     <input placeholder="Dirección" value={contacto.direccion}
                       disabled={readOnly}
                       onChange={e => actualizar(idx, "direccion", upperInput(e))} />
+                  </div>
+                </div>
+                <div className="cf-r2">
+                  <div className="cf-field">
+                    <label>Ciudad</label>
+                    <input placeholder="Ciudad" value={contacto.ciudad || ""}
+                      disabled={readOnly}
+                      onChange={e => actualizar(idx, "ciudad", upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ""))} />
+                  </div>
+                  <div className="cf-field">
+                    <label>Comuna</label>
+                    <input placeholder="Comuna" value={contacto.comuna || ""}
+                      disabled={readOnly}
+                      onChange={e => actualizar(idx, "comuna", upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ""))} />
                   </div>
                 </div>
               </div>

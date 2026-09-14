@@ -302,7 +302,7 @@ function OrdenFormCliente({
 
       const armarContactosExtra = (cli) => String(cli.contactos || "").split(";;").map((c) => {
         const p = c.split("|");
-        return { nombre: (p[0] || "").toUpperCase().trim(), email: p[1] || "", fono: p[2] || "", cargo: p[3] || "", direccion: (p[4] || "").toUpperCase().trim() };
+        return { nombre: (p[0] || "").toUpperCase().trim(), email: p[1] || "", fono: p[2] || "", cargo: p[3] || "", direccion: (p[4] || "").toUpperCase().trim(), ciudad: (p[5] || "").toUpperCase().trim(), comuna: (p[6] || "").toUpperCase().trim() };
       }).filter((c) => c.nombre);
       const contactosExtraDespues = armarContactosExtra(fresh);
       const contactosExtraAntes = armarContactosExtra(clienteAEditar);
@@ -354,7 +354,7 @@ function OrdenFormCliente({
             const idxAntes = contactosExtraAntes.findIndex((x) => x.nombre === nomOT);
             if (idxAntes !== -1) match = contactosExtraDespues[idxAntes];
           }
-          return match ? { nombre: match.nombre, email: match.email, fono: match.fono, cargo: match.cargo, direccion: match.direccion } : c;
+          return match ? { nombre: match.nombre, email: match.email, fono: match.fono, cargo: match.cargo, direccion: match.direccion, ciudad: match.ciudad, comuna: match.comuna } : c;
         });
 
         return base;
@@ -891,7 +891,10 @@ function OrdenFormCliente({
         </div>
       </div>
 
-      {/* Direcciones Extra / Sucursales (dinámicas) */}
+      {/* Direcciones Extra / Sucursales oculto de momento: con Ciudad/Comuna ya
+          disponibles en Otros Contactos, esta sección queda redundante. No
+          borrar — ver CAMBIOS.md v2.112. */}
+      {false && (
       <div style={{ marginTop: '34px', padding: '4px 10px', background: '#E0F2FE', border: '1px solid #7CD0F0', borderRadius: '8px', lineHeight: '1.2' }}>
         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer', fontSize: '0.8rem', width: 'fit-content', maxWidth: '100%' }}>
           {mostrarDireccionesExtra ? <ChevronUp size={14} style={{ color: '#0284C7', flexShrink: 0 }} /> : <ChevronDown size={14} style={{ color: '#0284C7', flexShrink: 0 }} />}
@@ -995,7 +998,7 @@ function OrdenFormCliente({
                   const contactosClienteActuales = String(clienteSeleccionado.contactos || "").split(";;")
                     .map(c => {
                       const p = c.split("|");
-                      return { nombre: p[0] || "", email: p[1] || "", fono: p[2] || "", cargo: p[3] || "", direccion: p[4] || "" };
+                      return { nombre: p[0] || "", email: p[1] || "", fono: p[2] || "", cargo: p[3] || "", direccion: p[4] || "", ciudad: p[5] || "", comuna: p[6] || "" };
                     })
                     .filter(c => c.nombre.trim());
                   const payload = {
@@ -1230,6 +1233,7 @@ function OrdenFormCliente({
           </div>
         )}
       </div>
+      )}
 
       <div style={{ marginTop: 16, paddingTop: 10, borderTop: '2px solid #cbd5e1' }} />
 
@@ -1405,7 +1409,7 @@ function OrdenFormCliente({
                 ? String(clienteSeleccionado.contactos || "").split(";;")
                     .map(c => {
                       const p = c.split("|");
-                      return { nombre: (p[0] || "").toUpperCase().trim(), email: p[1] || "", fono: p[2] || "", cargo: p[3] || "", direccion: (p[4] || "").toUpperCase().trim() };
+                      return { nombre: (p[0] || "").toUpperCase().trim(), email: p[1] || "", fono: p[2] || "", cargo: p[3] || "", direccion: (p[4] || "").toUpperCase().trim(), ciudad: (p[5] || "").toUpperCase().trim(), comuna: (p[6] || "").toUpperCase().trim() };
                     })
                     .filter(c => c.nombre)
                 : [];
@@ -1419,7 +1423,9 @@ function OrdenFormCliente({
                     email: c.email,
                     fono: c.fono,
                     cargo: c.cargo,
-                    direccion: c.direccion || ""
+                    direccion: c.direccion || "",
+                    ciudad: c.ciudad || "",
+                    comuna: c.comuna || ""
                   }]
                 });
                 setContactosManualVisibles(new Set([nuevoIdx]));
@@ -1493,7 +1499,8 @@ function OrdenFormCliente({
                     direcciones: direccionesCliente,
                     contactos: [...contactosCliente, {
                       nombre: contacto.nombre, email: contacto.email, fono: contacto.fono,
-                      cargo: contacto.cargo, direccion: contacto.direccion
+                      cargo: contacto.cargo, direccion: contacto.direccion,
+                      ciudad: contacto.ciudad, comuna: contacto.comuna
                     }]
                   };
                   await api.put(`/api/clientes/${clienteSeleccionado.id}`, payload);
@@ -1641,6 +1648,14 @@ function OrdenFormCliente({
                           <input type="text" placeholder="Dirección Contacto" value={c.direccion} onChange={(e) => actualizarContacto(idx, 'direccion', upperInput(e))} disabled={readOnly} />
                         </div>
                         <div className="of-f">
+                          <label>Ciudad</label>
+                          <input type="text" placeholder="Ciudad" value={c.ciudad || ""} onChange={(e) => actualizarContacto(idx, 'ciudad', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={readOnly} />
+                        </div>
+                        <div className="of-f">
+                          <label>Comuna</label>
+                          <input type="text" placeholder="Comuna" value={c.comuna || ""} onChange={(e) => actualizarContacto(idx, 'comuna', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={readOnly} />
+                        </div>
+                        <div className="of-f">
                           <label>Cargo</label>
                           <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                             <input type="text" placeholder="Cargo" value={c.cargo} onChange={(e) => actualizarContacto(idx, 'cargo', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={readOnly} style={{ flex: '1 1 auto', width: 'auto' }} />
@@ -1681,7 +1696,7 @@ function OrdenFormCliente({
                         const nuevoIdx = nuevaOrden.contactosExtra.length;
                         setNuevaOrden({
                           ...nuevaOrden,
-                          contactosExtra: [...nuevaOrden.contactosExtra, { nombre: "", email: "", fono: "", direccion: "", cargo: "" }]
+                          contactosExtra: [...nuevaOrden.contactosExtra, { nombre: "", email: "", fono: "", direccion: "", cargo: "", ciudad: "", comuna: "" }]
                         });
                         setContactosManualVisibles(new Set([nuevoIdx]));
                       }}

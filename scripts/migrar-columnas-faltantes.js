@@ -26,6 +26,10 @@ const ESPERADAS = {
     ['actividad', "TEXT"],
     ['observaciones', "TEXT"],
   ],
+  clientes_contactos: [
+    ['ciudad', "VARCHAR(100)"],
+    ['comuna', "VARCHAR(100)"],
+  ],
 };
 
 (async () => {

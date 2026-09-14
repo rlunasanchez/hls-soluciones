@@ -29,6 +29,8 @@ CREATE TABLE IF NOT EXISTS clientes_contactos (
   fono VARCHAR(20),
   cargo VARCHAR(100),
   direccion VARCHAR(255),
+  ciudad VARCHAR(100),
+  comuna VARCHAR(100),
   FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

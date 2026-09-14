@@ -104,6 +104,9 @@ function ModalOpcionesPDF({ orden, onClose }) {
             </div>
           )}
 
+          {/* Direcciones adicionales oculto de momento: el generador del PDF ya no
+              las incluye (ver ordenServicioDoc.js), así que estos checkboxes no
+              tendrían efecto. No borrar — ver CAMBIOS.md v2.112.
           {direccionesExtra.length > 0 && (
             <div className="mop-group">
               <div className="mop-group-head">
@@ -126,6 +129,7 @@ function ModalOpcionesPDF({ orden, onClose }) {
               </div>
             </div>
           )}
+          */}
 
           <div className="mop-group">
             <div className="mop-group-head">

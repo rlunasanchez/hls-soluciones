@@ -1,5 +1,29 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-14 (11)
+
+### v2.112: Sucursales / Direcciones adicionales — ocultas de momento
+
+Con Ciudad/Comuna ya disponibles en Contactos adicionales (v2.110), "Sucursales/Direcciones" queda redundante: un contacto ya puede llevar su propia dirección completa. Se comentó (sin borrar) en los 4 lugares donde aparecía: sección "Sucursales/Direcciones" en `ClienteFormulario.jsx`, sección "Otras Direcciones / Sucursales" en `OrdenFormCliente.jsx`, el bloque "Direcciones adicionales" del PDF de la OT (`ordenServicioDoc.js`), y su checklist correspondiente en `ModalOpcionesPDF.jsx`. Toda la lógica de estado (`sucursales`, `direccionesExtra`, etc.) queda intacta, solo se ocultó el JSX visible — fácil de reactivar sacando el `{false && (...)}` que envuelve cada bloque.
+
+**Verificación:** `npm run build` OK.
+
+## Fecha: 2026-09-14 (10)
+
+### v2.110: Campos Ciudad y Comuna en Contactos adicionales
+
+Los contactos adicionales (de un Cliente y los "Otros Contactos" de una OT) no tenían Ciudad/Comuna propios — a diferencia de las Direcciones adicionales, que sí. Se agregaron ambos campos en toda la cadena: `clientes_contactos` (columnas nuevas), `ModalContactos.jsx` y `OrdenFormCliente.jsx` (inputs + todas las funciones que arman/parsean/sincronizan el contacto: `agregarContacto`, alta manual, `registrarContactoEnCliente`, el refresco automático cuando cambia la ficha del cliente), `ClienteFormulario.jsx` (parseo al editar) y el PDF de la OT (`contactoExtraHtml` en `ordenServicioDoc.js`, junto con Dirección).
+
+El contacto **principal** (el primero, fuera de "adicionales") sigue sin campo propio — usa la dirección/ciudad/comuna del cliente, como ya era.
+
+**Migración SQL (MySQL/local):** ya ejecutada vía `scripts/migrar-columnas-faltantes.js`.
+```sql
+ALTER TABLE clientes_contactos ADD COLUMN ciudad VARCHAR(100);
+ALTER TABLE clientes_contactos ADD COLUMN comuna VARCHAR(100);
+```
+
+**Verificación:** `npm run build` OK. Falta probar en el navegador (el backend local se reinició, pendiente de que el usuario lo relance).
+
 ## Fecha: 2026-09-14 (9)
 
 ### v2.109: PDF de la OT — negrita de Direcciones/Contactos adicionales no se notaba (color muy claro)
