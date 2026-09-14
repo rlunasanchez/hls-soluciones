@@ -1,5 +1,15 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-14 (14)
+
+### v2.115: Mantenedor de Clientes — cliente nuevo no se veía tras crearlo
+
+El listado de Clientes va ordenado por `id DESC` (el más nuevo siempre cae en la página 1), pero la página actual se guarda en `sessionStorage` (`usePaginaPersistente`) y solo se resetea a 1 cuando cambia un filtro — no al crear un cliente. Si el usuario estaba viendo otra página del listado al crear el cliente, el guardado funcionaba bien (el registro quedaba en la BD) pero el listado se refrescaba sin volver a la página 1, así que el cliente nuevo quedaba fuera de vista.
+
+En `Clientes.jsx`, `guardarCliente` ahora llama `setPaginaActual(1)` cuando el guardado corresponde a un cliente nuevo (no al editar uno existente).
+
+**Verificación:** `npm run build` OK. Confirmado con el usuario: el cliente sí existía en la BD (columna `fecha_creacion`) y no tenía filtros de búsqueda/RUT activos, por lo que la causa era la página persistida.
+
 ## Fecha: 2026-09-14 (13)
 
 ### v2.114: PDF de la OT — N° de orden como recuadro azul

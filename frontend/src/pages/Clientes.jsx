@@ -63,6 +63,7 @@ function Clientes() {
   const guardarCliente = async (clienteData, resetFormulario, mantener = false) => {
     try {
       let clienteId = clienteEditando?.id;
+      const esNuevo = !clienteEditando;
       if (clienteEditando) {
         await api.put(`/api/clientes/${clienteEditando.id}`, clienteData);
         alert("Cliente actualizado");
@@ -71,6 +72,10 @@ function Clientes() {
         clienteId = res.data?.id;
         alert("Cliente creado");
       }
+      // El listado va ordenado por id DESC: un cliente recién creado siempre
+      // cae en la página 1. Si el usuario venía de otra página, sin este
+      // reset el listado se refresca pero el cliente nuevo queda fuera de vista.
+      if (esNuevo) setPaginaActual(1);
       if (mantener && clienteId) {
         // "Guardar Cambios": guarda y se mantiene en el form para seguir editando
         const res = await api.get(`/api/clientes/${clienteId}`);
