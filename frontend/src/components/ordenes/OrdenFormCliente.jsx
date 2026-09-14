@@ -1581,7 +1581,8 @@ function OrdenFormCliente({
                             title="Editar contacto"
                             style={{ cursor: 'pointer' }}
                           >
-                            {`Contacto ${idx + 1}`}
+                            {/* +2: el contacto principal (fuera de esta lista) ya es "Contacto 1" */}
+                            {`Contacto ${idx + 2}`}
                           </span>
                           {!readOnly && (
                             <button
@@ -1608,7 +1609,7 @@ function OrdenFormCliente({
                     <div key={idx} style={{ marginBottom: '6px', border: '1px solid var(--border)', borderRadius: '6px', padding: '4px' }}>
                       <div className="of-form-grid" style={{ gap: '8px' }}>
                         <div className="of-f">
-                          <label>Contacto {idx + 1}</label>
+                          <label>Contacto {idx + 2}</label>
                           <input
                             type="text"
                             placeholder="Nombre"

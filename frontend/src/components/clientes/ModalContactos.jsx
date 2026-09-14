@@ -37,7 +37,7 @@ function ModalContactos({ contactos = [], onChange, onClose, readOnly = false })
   };
 
   const eliminar = (idx) => {
-    if (!window.confirm(`¿Eliminar contacto ${idx + 1}?`)) return;
+    if (!window.confirm(`¿Eliminar contacto ${idx + 2}?`)) return;
     const nueva = lista.filter((_, i) => i !== idx);
     if (nueva.length === 0) {
       setLista([crearContactoVacio()]);
@@ -124,7 +124,8 @@ function ModalContactos({ contactos = [], onChange, onClose, readOnly = false })
                     ))}
                     style={{ cursor: "pointer" }}
                   >
-                    {`Contacto ${idx + 1}`}
+                    {/* +2: el contacto principal (fuera de esta lista) ya es "Contacto 1" */}
+                    {`Contacto ${idx + 2}`}
                   </span>
                   {!readOnly && lista.length > 1 && (
                     <button
@@ -147,7 +148,7 @@ function ModalContactos({ contactos = [], onChange, onClose, readOnly = false })
             return (
             <div key={idx} className="modal-contacto-card">
               <div className="modal-contacto-header">
-                <span className="modal-contacto-num">Contacto {idx + 1}</span>
+                <span className="modal-contacto-num">Contacto {idx + 2}</span>
                 {!readOnly && lista.length > 1 && (
                   <button type="button" className="cf-btn-d" onClick={() => eliminar(idx)}>
                     <Trash2 size={13} /> Eliminar

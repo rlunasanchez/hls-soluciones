@@ -1,5 +1,27 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-14 (4)
+
+### v2.102: Cotizaciones - Detalle del ítem al lado de los demás campos + columna Ítems más ancha
+
+**Detalle:** pasa de estar en una fila propia (textarea de 2 líneas) a compartir la fila con SKU/Cant./Neto/Descuento/Total, después de Total, ocupando el espacio que sobra. La fila se alinea por abajo (`alignItems: flex-end`) y el textarea baja su alto a una sola línea para no desentonar con los demás inputs.
+
+**Columnas:** "Ítems" (derecha) pasa a ser más ancho que "Datos del Cliente/Ejecutivo" (izquierda) — antes 50/50, ahora `1.35fr/0.65fr`, solo en Cotizaciones (no toca la clase compartida con la OT).
+
+**Verificación:** `npm run build` OK.
+
+### v2.101: fix — numeración de "Contactos Adicionales" no consideraba al contacto principal
+
+En la ficha de Cliente y en "Otros Contactos" de la OT, el primer contacto de la lista de adicionales se etiquetaba "Contacto 1", igual que el contacto principal (que ya ocupa ese número en la vista). Se corrigió a "Contacto 2" en adelante, en los 4 lugares donde se muestra: chip colapsado, header de la tarjeta expandida, label del campo y el mensaje de confirmación al eliminar — tanto en `ModalContactos.jsx` (Cliente) como en `OrdenFormCliente.jsx` (OT).
+
+**Verificación:** `npm run build` OK.
+
+### v2.100: botón "Guardar" (sin salir) también para Cliente nuevo
+
+El botón que guarda y se queda en el formulario ("Guardar Cambios") ya existía en `ClienteFormulario.jsx`, pero solo se mostraba editando un cliente existente. Ahora también aparece al crear uno nuevo (etiqueta "Guardar"), reutilizando la misma lógica de `guardarCliente` que ya soportaba mantenerse abierto — mismo criterio que la OT.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-14 (3)
 
 ### v2.99: PDF de la OT — Cliente y Contacto en cuadros separados

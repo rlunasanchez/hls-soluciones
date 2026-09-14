@@ -541,7 +541,7 @@ function Cotizaciones() {
             </button>
           )}
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 8, alignItems: 'flex-end' }}>
           <div className="of-f" style={{ flex: '0 0 70px' }}>
             <label>SKU</label>
             <input type="text" value={item.sku} onChange={(e) => actualizarItem(idx, 'sku', e.target.value)} disabled={soloLectura} />
@@ -576,11 +576,11 @@ function Cotizaciones() {
             <label>Total</label>
             <input type="text" value={clp(totalFila)} disabled />
           </div>
-        </div>
-        <div className="of-f">
-          <label>Detalle</label>
-          <textarea rows={2} placeholder="Ej: Visita técnica" value={item.detalle} onChange={(e) => actualizarItem(idx, 'detalle', upperInput(e))} disabled={soloLectura}
-            style={{ resize: 'vertical', fontFamily: 'inherit' }} />
+          <div className="of-f" style={{ flex: '1 1 200px' }}>
+            <label>Detalle</label>
+            <textarea rows={1} placeholder="Ej: Visita técnica" value={item.detalle} onChange={(e) => actualizarItem(idx, 'detalle', upperInput(e))} disabled={soloLectura}
+              style={{ resize: 'vertical', fontFamily: 'inherit', minHeight: 0, height: 26 }} />
+          </div>
         </div>
       </div>
     );
@@ -715,7 +715,7 @@ function Cotizaciones() {
                   <button type="button" className="of-head-close" onClick={cerrarFormulario}><X size={18} /></button>
                 </div>
 
-                <div className="of-cols">
+                <div className="of-cols" style={{ gridTemplateColumns: '0.65fr 1.35fr' }}>
                 <div className="of-col-left">
                 <div className="of-sec primary">
                   <div className="of-st success">Datos del Cliente</div>
