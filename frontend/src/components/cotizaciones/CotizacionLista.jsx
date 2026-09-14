@@ -62,6 +62,7 @@ function CotizacionLista({ cotizaciones, loading, filtroFolio, onFiltroFolioChan
                   <th>Emisión</th>
                   <th>Ejecutivo</th>
                   <th>Total</th>
+                  <th className="col-ot-dot" title="Tiene una OT asociada"></th>
                   <th>Acciones</th>
                 </tr>
               </thead>
@@ -75,6 +76,14 @@ function CotizacionLista({ cotizaciones, loading, filtroFolio, onFiltroFolioChan
                     </td>
                     <td data-label="Ejecutivo">{cot.ejecutivo}</td>
                     <td data-label="Total">{clp(calcularTotales(cot.items).total)} CLP</td>
+                    <td className="col-ot-dot" data-label="OT">
+                      {cot.orden_id && (
+                        <span
+                          className="ot-dot"
+                          title={`Asociada a OT ${cot.orden_numero || `#${cot.orden_id}`}`}
+                        />
+                      )}
+                    </td>
                     <td data-label="Acciones">
                       <CotizacionAcciones cotizacion={cot} onVer={onVer} onEditar={onEditar} onEliminar={onEliminar} onPDF={onPDF} />
                     </td>
@@ -88,7 +97,15 @@ function CotizacionLista({ cotizaciones, loading, filtroFolio, onFiltroFolioChan
             {cotizaciones.map((cot) => (
               <div key={cot.id} className="data-card">
                 <div className="data-card-header">
-                  <strong>Folio {cot.folio}</strong>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                    <strong>Folio {cot.folio}</strong>
+                    {cot.orden_id && (
+                      <span
+                        className="ot-dot"
+                        title={`Asociada a OT ${cot.orden_numero || `#${cot.orden_id}`}`}
+                      />
+                    )}
+                  </span>
                 </div>
                 <div className="data-card-row">
                   <span className="label">Cliente</span>

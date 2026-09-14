@@ -1,5 +1,13 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-14
+
+### v2.96: punto indicador de OT asociada en el mantenedor de Cotizaciones
+
+Mismo criterio que v2.90 pero al revés: la OT ya mostraba un punto magenta (color del módulo Cotizaciones) cuando tenía cotizaciones asociadas; ahora Cotizaciones muestra un punto naranja (`#FF9800`, color del módulo Orden de Trabajo) cuando la cotización tiene una OT asociada (`orden_id`). No hizo falta tocar el backend: `orden_id`/`orden_numero` ya venían en `GET /api/cotizaciones`.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-10 (3)
 
 ### v2.95: reorden y estilo de la fila de botones de "Ítems" en Cotizaciones
