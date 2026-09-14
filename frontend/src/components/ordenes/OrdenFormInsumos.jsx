@@ -8,7 +8,7 @@ function OrdenFormInsumos({ insumos, insumosVisibles, setInsumosVisibles, setIns
   };
 
   return (
-    <div className="of-sec" style={{background:'white'}}>
+    <div className="of-sec primary">
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'6px'}}>
         <span className="of-st muted">Insumos</span>
         {!readOnly && insumos.some(i => i.nombre) && (

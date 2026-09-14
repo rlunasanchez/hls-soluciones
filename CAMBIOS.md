@@ -1,5 +1,13 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-14 (2)
+
+### v2.97: fix — Insumos en la OT con fondo blanco en vez del celeste de Datos del Equipo
+
+`OrdenFormInsumos.jsx` tenía `background:'white'` fijo en vez de la clase `of-sec primary` que usa el resto de la columna (Datos del Equipo), quedando visualmente distinto sin motivo.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-14
 
 ### v2.96: punto indicador de OT asociada en el mantenedor de Cotizaciones
