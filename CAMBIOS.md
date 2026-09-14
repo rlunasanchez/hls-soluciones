@@ -1,5 +1,13 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-14 (9)
+
+### v2.109: PDF de la OT — negrita de Direcciones/Contactos adicionales no se notaba (color muy claro)
+
+El fix anterior (v2.108) puso `font-weight: 700` en `.det`, pero el color seguía siendo el gris claro original (`#6B7280`) — a 7pt y en gris, la negrita casi no se distingue al lado del negro del resto de la línea. Se cambió el color a `#111827` (el mismo tono oscuro que usan `.f .v` y `.folio .v` para datos "fuertes"), así el teléfono y el resto de los campos de Contactos adicionales se ven claramente en negrita.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-14 (8)
 
 ### v2.108: PDF de la OT — fix comuna faltante y negrita en Direcciones/Contactos adicionales
