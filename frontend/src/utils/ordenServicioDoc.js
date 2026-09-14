@@ -152,7 +152,9 @@ img.logo { max-width: 100%; max-height: 100%; object-fit: contain; }
 .titulo-barra h1 { margin: 0; font-size: 15pt; font-weight: 800; letter-spacing: .015em; color: #0C4A8C; }
 .emitida { margin: 2pt 0 0; font-size: 7pt; color: #6B7280; }
 .garantia-chip { display: inline-block; margin-left: 8pt; background: #0C4A8C; border-radius: 999px; padding: 2pt 9pt; font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #fff; vertical-align: middle; }
-.folio-numero { margin-left: 8pt; font-size: 14pt; font-weight: 800; color: #0C4A8C; font-variant-numeric: tabular-nums; vertical-align: middle; }
+.folio-numero { margin-left: 8pt; display: inline-flex; align-items: baseline; gap: 4pt; border-radius: 4pt; padding: 2pt 11pt; vertical-align: middle; background: #0C4A8C; }
+.folio-numero .l { font-size: 8pt; font-weight: 700; color: #fff; }
+.folio-numero .v { font-size: 20pt; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; line-height: 1; }
 .folio { text-align: center; background: #F1F5F9; border: .75pt solid #E2E8F0; border-radius: 7pt; padding: 2pt 12pt; }
 .folio .l { display: block; font-size: 6pt; text-transform: uppercase; letter-spacing: .1em; color: #6B7280; }
 .folio .v { font-size: 9pt; font-weight: 600; font-variant-numeric: tabular-nums; color: #111827; }
@@ -279,7 +281,7 @@ export function generarHtmlOrdenServicio(orden, opciones) {
 
   <div class="titulo-barra">
     <div>
-      <h1>Orden de Servicio <span class="folio-numero">N° ${esc(numero)}</span>${orden.es_garantia ? '<span class="garantia-chip">Garantía</span>' : ""}</h1>
+      <h1>Orden de Servicio <span class="folio-numero"><span class="l">N°</span><span class="v">${esc(numero)}</span></span>${orden.es_garantia ? '<span class="garantia-chip">Garantía</span>' : ""}</h1>
     </div>
     <div class="folio">
       <span class="l">Fecha</span>
