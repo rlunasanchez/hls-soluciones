@@ -7,11 +7,14 @@ export const upperInput = (e, regex) => {
   let val = String(el.value || "").toUpperCase();
   if (regex) val = val.replace(regex, "");
   if (el.value !== val) {
+    // El caret hay que leerlo ANTES de reasignar el.value: asignar .value
+    // mueve el cursor al final por sí solo, así que leerlo después siempre
+    // daba el final (la "restauración" no restauraba nada).
+    const pos = el.selectionStart;
     el.value = val;
     // selection API no existe en inputs type="email"/number/date: sin try/catch el
     // onChange lanzaría y el input controlado congelaría lo tecleado
     try {
-      const pos = el.selectionStart;
       el.setSelectionRange(Math.min(pos ?? val.length, val.length), Math.min(pos ?? val.length, val.length));
     } catch { /* tipos sin selección */ }
   }

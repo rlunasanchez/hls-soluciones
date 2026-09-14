@@ -1,5 +1,13 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-14 (5)
+
+### v2.103: fix — el cursor se iba al final al editar en medio de un texto (todos los campos en mayúsculas)
+
+En `upperInput` (helpers.js), usado por todos los campos que se pasan a mayúsculas en vivo (nombre, dirección, cargo, etc. en Clientes, OT y Cotizaciones), la posición del cursor se leía **después** de reasignar `el.value` — pero asignar `.value` en un input ya mueve el cursor al final por sí solo, así que la "restauración" del caret nunca restauraba nada: siempre terminaba en el final. Se movió la lectura de `selectionStart` a **antes** de la reasignación. Se revisó el resto del proyecto (`selectionStart`, `setSelectionRange`, `caret`) y no hay otro lugar con este patrón; `formatearRutInput` (RUT) no toca el cursor directamente, es solo transformación de string.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-14 (4)
 
 ### v2.102: Cotizaciones - Detalle del ítem al lado de los demás campos + columna Ítems más ancha
