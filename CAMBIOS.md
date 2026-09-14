@@ -16,13 +16,13 @@ Los contactos adicionales (de un Cliente y los "Otros Contactos" de una OT) no t
 
 El contacto **principal** (el primero, fuera de "adicionales") sigue sin campo propio — usa la dirección/ciudad/comuna del cliente, como ya era.
 
-**Migración SQL (MySQL/local):** ya ejecutada vía `scripts/migrar-columnas-faltantes.js`.
+**Migración SQL:** MySQL/local ejecutada vía `scripts/migrar-columnas-faltantes.js`; Neon ejecutada a mano por el usuario:
 ```sql
-ALTER TABLE clientes_contactos ADD COLUMN ciudad VARCHAR(100);
-ALTER TABLE clientes_contactos ADD COLUMN comuna VARCHAR(100);
+ALTER TABLE clientes_contactos ADD COLUMN IF NOT EXISTS ciudad VARCHAR(100);
+ALTER TABLE clientes_contactos ADD COLUMN IF NOT EXISTS comuna VARCHAR(100);
 ```
 
-**Verificación:** `npm run build` OK. Falta probar en el navegador (el backend local se reinició, pendiente de que el usuario lo relance).
+**Verificación:** `npm run build` OK. Probado por API (POST y PUT) contra el backend local antes de pushear: el campo `contactos` persiste ciudad/comuna en ambos casos. Nota: al momento de este commit los campos quedaron ocultos en pantalla por v2.112 — ver esa entrada.
 
 ## Fecha: 2026-09-14 (9)
 
