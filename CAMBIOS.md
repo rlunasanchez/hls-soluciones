@@ -1,5 +1,13 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-14 (6)
+
+### v2.104: PDF de la OT — orden Teléfono/Email Cliente invertido
+
+En "Datos de Cliente" quedaban Email Cliente y Teléfono en ese orden; se invirtió a Teléfono primero, Email Cliente después.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-14 (5)
 
 ### v2.103: fix — el cursor se iba al final al editar en medio de un texto (todos los campos en mayúsculas)

@@ -209,8 +209,8 @@ export function generarHtmlOrdenServicio(orden, opciones) {
         ${campo("RUT", orden.rut, true)}
         ${campo("Dirección", orden.direccion)}
         ${campo("Ciudad - Comuna", [ciudad, orden.comuna].filter((v) => String(v || "").trim()).join(" - "))}
-        ${campo("Email Cliente", orden.email)}
         ${campo("Teléfono", orden.fono_principal, true)}
+        ${campo("Email Cliente", orden.email)}
       </div>
       ${direccionesSel.length ? `<div class="sub">› Direcciones adicionales</div>${direccionesSel.map(direccionExtraHtml).join("")}` : ""}
     </section>
