@@ -1,5 +1,19 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-14 (3)
+
+### v2.99: PDF de la OT — Cliente y Contacto en cuadros separados
+
+El bloque "Datos de Cliente — Contacto" mezclaba ambos en la misma tarjeta. Se separó en dos `<section class="sec">` (mismo estilo de cuadro con borde/sombra que ya usan las demás secciones del PDF): "Datos de Cliente" (Cliente, RUT, Dirección, Ciudad-Comuna, Email Cliente, Teléfono, + Direcciones adicionales) y "Contacto" (Contacto, Cargo Contacto, Email Contacto, Fono Contacto, + Contactos adicionales).
+
+**Verificación:** `npm run build` OK.
+
+### v2.98: PDF de la OT — número de orden más grande
+
+El "N° X" del título quedaba más chico (11pt) que el resto del encabezado "Orden de Servicio" (15pt). Se subió a 14pt.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-14 (2)
 
 ### v2.97: fix — Insumos en la OT con fondo blanco en vez del celeste de Datos del Equipo
