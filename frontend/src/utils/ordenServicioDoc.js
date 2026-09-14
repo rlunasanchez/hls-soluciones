@@ -199,6 +199,11 @@ export function generarHtmlOrdenServicio(orden, opciones) {
   const insumosSel = insumos.filter((_, i) => opciones.insumos?.[i]);
   const contactosSel = contactosExtra.filter((_, i) => opciones.contactosExtra?.[i]);
   const direccionesSel = direccionesExtra.filter((_, i) => opciones.direccionesExtra?.[i]);
+  // Direcciones adicionales ocultas de momento en el PDF: con Ciudad/Comuna ya
+  // disponibles en Contactos adicionales, esta sección queda redundante.
+  // No borrar — ver CAMBIOS.md v2.112.
+  // const htmlDireccionesAdicionales = direccionesSel.length ? `<div class="sub">› Direcciones adicionales</div>${direccionesSel.map(direccionExtraHtml).join("")}` : "";
+  const htmlDireccionesAdicionales = "";
 
   const marcaModelo = [orden.marca, orden.modelo].filter((v) => String(v || "").trim()).join(" ");
 
@@ -213,7 +218,7 @@ export function generarHtmlOrdenServicio(orden, opciones) {
         ${campo("Teléfono", orden.fono_principal, true)}
         ${campo("Email Cliente", orden.email)}
       </div>
-      ${direccionesSel.length ? `<div class="sub">› Direcciones adicionales</div>${direccionesSel.map(direccionExtraHtml).join("")}` : ""}
+      ${htmlDireccionesAdicionales}
     </section>
     <section class="sec">
       ${h2("Contacto")}

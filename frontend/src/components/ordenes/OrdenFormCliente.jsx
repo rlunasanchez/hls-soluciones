@@ -891,7 +891,10 @@ function OrdenFormCliente({
         </div>
       </div>
 
-      {/* Direcciones Extra / Sucursales (dinámicas) */}
+      {/* Direcciones Extra / Sucursales oculto de momento: con Ciudad/Comuna ya
+          disponibles en Otros Contactos, esta sección queda redundante. No
+          borrar — ver CAMBIOS.md v2.112. */}
+      {false && (
       <div style={{ marginTop: '34px', padding: '4px 10px', background: '#E0F2FE', border: '1px solid #7CD0F0', borderRadius: '8px', lineHeight: '1.2' }}>
         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer', fontSize: '0.8rem', width: 'fit-content', maxWidth: '100%' }}>
           {mostrarDireccionesExtra ? <ChevronUp size={14} style={{ color: '#0284C7', flexShrink: 0 }} /> : <ChevronDown size={14} style={{ color: '#0284C7', flexShrink: 0 }} />}
@@ -1230,6 +1233,7 @@ function OrdenFormCliente({
           </div>
         )}
       </div>
+      )}
 
       <div style={{ marginTop: 16, paddingTop: 10, borderTop: '2px solid #cbd5e1' }} />
 

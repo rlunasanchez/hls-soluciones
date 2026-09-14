@@ -1,5 +1,13 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-14 (11)
+
+### v2.112: Sucursales / Direcciones adicionales — ocultas de momento
+
+Con Ciudad/Comuna ya disponibles en Contactos adicionales (v2.110), "Sucursales/Direcciones" queda redundante: un contacto ya puede llevar su propia dirección completa. Se comentó (sin borrar) en los 4 lugares donde aparecía: sección "Sucursales/Direcciones" en `ClienteFormulario.jsx`, sección "Otras Direcciones / Sucursales" en `OrdenFormCliente.jsx`, el bloque "Direcciones adicionales" del PDF de la OT (`ordenServicioDoc.js`), y su checklist correspondiente en `ModalOpcionesPDF.jsx`. Toda la lógica de estado (`sucursales`, `direccionesExtra`, etc.) queda intacta, solo se ocultó el JSX visible — fácil de reactivar sacando el `{false && (...)}` que envuelve cada bloque.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-14 (10)
 
 ### v2.110: Campos Ciudad y Comuna en Contactos adicionales
