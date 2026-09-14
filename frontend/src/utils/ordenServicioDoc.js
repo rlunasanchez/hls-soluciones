@@ -231,11 +231,11 @@ export function generarHtmlOrdenServicio(orden, opciones) {
       ${contactosSel.length ? `<div class="sub">› Contactos adicionales</div>${contactosSel.map(contactoExtraHtml).join("")}` : ""}
     </section>`;
 
-  // Técnico Asignado se saca del PDF a pedido del usuario (de momento no se
-  // muestra ahí); el campo sigue existiendo en el formulario y en la BD.
+  // El título ya no dice "Técnico Asignado" porque ese dato se muestra abajo
+  // en el bloque "Técnico" (línea ~103); el campo sigue en formulario y BD.
   const seccionEquipo = `
     <section class="sec">
-      ${h2("Datos de Equipo — Técnico Asignado")}
+      ${h2("Datos de Equipo")}
       <div class="grid">
         ${campo("Equipo", orden.equipo)}
         ${campo("Serie", orden.serie, true)}
