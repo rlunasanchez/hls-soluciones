@@ -368,7 +368,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                     <div className="contactos-lista-preview">
                       {(contactosExpandidos ? contactos : contactos.slice(0, 4)).map((c, i) => (
                         <div key={i} className="contacto-chip" style={{ cursor: "pointer" }} onClick={() => setContactoSeleccionado(c)}>
-                          <span className="contacto-chip-nombre">{`Contacto ${i + 1}`}</span>
+                          <span className="contacto-chip-nombre">{`Contacto ${i + 2}`}</span>
                         </div>
                       ))}
                       {contactos.length > 4 && (
@@ -385,7 +385,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                   <div className="contactos-lista-preview">
                     {(contactosExpandidos ? contactos : contactos.slice(0, 4)).map((c, i) => (
                       <div key={i} className="contacto-chip" style={{ cursor: "pointer" }} onClick={() => setContactoSeleccionado(c)}>
-                        <span className="contacto-chip-nombre">{`Contacto ${i + 1}`}</span>
+                        <span className="contacto-chip-nombre">{`Contacto ${i + 2}`}</span>
                       </div>
                     ))}
                     {contactos.length > 4 && (
@@ -525,8 +525,8 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
             ) : (
               <>
                 <button type="button" className="cf-btn-c" onClick={() => { resetFormulario(); onCancel(); }}><X size={18} /> Cancelar</button>
-                {clienteEditando && !modoRegistro && (
-                  <button type="button" className="cf-btn-s" onClick={(e) => handleSubmit(e, true)} disabled={guardando}><Save size={18} /> {guardando ? "Guardando..." : "Guardar Cambios"}</button>
+                {!modoRegistro && (
+                  <button type="button" className="cf-btn-s" onClick={(e) => handleSubmit(e, true)} disabled={guardando}><Save size={18} /> {guardando ? "Guardando..." : (clienteEditando ? "Guardar Cambios" : "Guardar")}</button>
                 )}
                 <button type="button" className="cf-btn-p" onClick={(e) => handleSubmit(e, false)} disabled={guardando}><Save size={18} /> {guardando ? "Guardando..." : ((clienteEditando && !modoRegistro) ? "Cerrar" : "Guardar Cliente")}</button>
               </>
