@@ -1,5 +1,13 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-14 (13)
+
+### v2.114: PDF de la OT — N° de orden como recuadro azul
+
+El N° de orden, en el título "Orden de Servicio N° ...", era un texto simple en azul de 14pt. Ahora va dentro de un recuadro con fondo azul sólido (#0C4A8C, el mismo acento de toda la app) y letras blancas: la etiqueta "N°" chica y el número en 20pt (antes 14pt), para que resalte más al mirar el documento.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-14 (12)
 
 ### v2.113: Técnico Asignado — badge en OT y título en el PDF
