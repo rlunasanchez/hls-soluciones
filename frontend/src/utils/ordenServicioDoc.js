@@ -68,7 +68,8 @@ function resolverCiudad(orden, direccionesExtra) {
 }
 
 function contactoExtraHtml(c) {
-  const detalle = [c.cargo, c.fono, c.email, c.direccion].filter((v) => String(v || "").trim()).map(esc).join(" · ");
+  const direccion = [c.direccion, c.ciudad, c.comuna].filter((v) => String(v || "").trim()).join(", ");
+  const detalle = [c.cargo, c.fono, c.email, direccion].filter((v) => String(v || "").trim()).map(esc).join(" · ");
   return `<div class="extra-item"><span class="nom">${esc(c.nombre)}</span>${detalle ? ` <span class="det">${detalle}</span>` : ""}</div>`;
 }
 

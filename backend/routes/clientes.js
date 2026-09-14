@@ -64,7 +64,7 @@ router.get("/", authMiddleware, async (req, res) => {
           CONCAT(IFNULL(d.tipo_direccion, ''), '|', IFNULL(d.direccion, ''), '|', IFNULL(d.fono, ''), '|', IFNULL(d.ciudad, ''), '|', IFNULL(d.comuna, ''))
         ORDER BY d.id SEPARATOR ';;'), '') FROM clientes_direcciones d WHERE d.cliente_id = c.id) as direcciones,
         (SELECT IFNULL(GROUP_CONCAT(
-          CONCAT(IFNULL(co.nombre, ''), '|', IFNULL(co.email, ''), '|', IFNULL(co.fono, ''), '|', IFNULL(co.cargo, ''), '|', IFNULL(co.direccion, ''))
+          CONCAT(IFNULL(co.nombre, ''), '|', IFNULL(co.email, ''), '|', IFNULL(co.fono, ''), '|', IFNULL(co.cargo, ''), '|', IFNULL(co.direccion, ''), '|', IFNULL(co.ciudad, ''), '|', IFNULL(co.comuna, ''))
         ORDER BY co.id SEPARATOR ';;'), '') FROM clientes_contactos co WHERE co.cliente_id = c.id) as contactos
       FROM clientes c
       ORDER BY c.id DESC
@@ -84,7 +84,7 @@ router.get("/:id", authMiddleware, async (req, res) => {
           CONCAT(IFNULL(d.tipo_direccion, ''), '|', IFNULL(d.direccion, ''), '|', IFNULL(d.fono, ''), '|', IFNULL(d.ciudad, ''), '|', IFNULL(d.comuna, ''))
         ORDER BY d.id SEPARATOR ';;'), '') FROM clientes_direcciones d WHERE d.cliente_id = c.id) as direcciones,
         (SELECT IFNULL(GROUP_CONCAT(
-          CONCAT(IFNULL(co.nombre, ''), '|', IFNULL(co.email, ''), '|', IFNULL(co.fono, ''), '|', IFNULL(co.cargo, ''), '|', IFNULL(co.direccion, ''))
+          CONCAT(IFNULL(co.nombre, ''), '|', IFNULL(co.email, ''), '|', IFNULL(co.fono, ''), '|', IFNULL(co.cargo, ''), '|', IFNULL(co.direccion, ''), '|', IFNULL(co.ciudad, ''), '|', IFNULL(co.comuna, ''))
         ORDER BY co.id SEPARATOR ';;'), '') FROM clientes_contactos co WHERE co.cliente_id = c.id) as contactos
       FROM clientes c
       WHERE c.id = ?
@@ -149,8 +149,8 @@ router.post("/", authMiddleware, async (req, res) => {
       for (const c of contactos) {
         if (c.nombre && c.nombre.trim()) {
           await pool.query(
-            "INSERT INTO clientes_contactos (cliente_id, nombre, email, fono, cargo, direccion) VALUES (?, ?, ?, ?, ?, ?)",
-            [clienteId, c.nombre, c.email || '', c.fono || '', c.cargo || '', c.direccion || '']
+            "INSERT INTO clientes_contactos (cliente_id, nombre, email, fono, cargo, direccion, ciudad, comuna) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            [clienteId, c.nombre, c.email || '', c.fono || '', c.cargo || '', c.direccion || '', c.ciudad || '', c.comuna || '']
           );
         }
       }
@@ -224,8 +224,8 @@ router.put("/:id", authMiddleware, async (req, res) => {
       for (const c of contactos) {
         if (c.nombre && c.nombre.trim()) {
           await connection.query(
-            "INSERT INTO clientes_contactos (cliente_id, nombre, email, fono, cargo, direccion) VALUES (?, ?, ?, ?, ?, ?)",
-            [id, c.nombre, c.email || '', c.fono || '', c.cargo || '', c.direccion || '']
+            "INSERT INTO clientes_contactos (cliente_id, nombre, email, fono, cargo, direccion, ciudad, comuna) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            [id, c.nombre, c.email || '', c.fono || '', c.cargo || '', c.direccion || '', c.ciudad || '', c.comuna || '']
           );
         }
       }

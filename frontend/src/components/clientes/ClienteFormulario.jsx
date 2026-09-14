@@ -55,7 +55,9 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
             email: parts[1] || "",
             fono: parts[2] || "",
             cargo: toUpper(parts[3] || ""),
-            direccion: toUpper(parts[4] || "")
+            direccion: toUpper(parts[4] || ""),
+            ciudad: toUpper(parts[5] || ""),
+            comuna: toUpper(parts[6] || "")
           };
         }).filter((c) => c.nombre);
       }
