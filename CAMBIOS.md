@@ -1,5 +1,15 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-14 (12)
+
+### v2.113: Técnico Asignado — badge en OT y título en el PDF
+
+El badge "Técnico: ..." del formulario de OT mostraba siempre el nombre de la sesión actual (`tecnicoDeSesion()`), incluso al ver/editar una orden ya creada por otro técnico — el dato real (`tecnico_asignado`, cargado desde la BD en `nuevaOrden.tecnicoAsignado`) quedaba tapado. Ahora, en `OrdenTrabajo.jsx`, el badge usa `nuevaOrden.tecnicoAsignado` cuando hay una orden abierta (`ordenIdActual` seteado, modo Ver o Editar) y `tecnicoDeSesion()` solo al crear una OT nueva.
+
+Además, en el PDF (`ordenServicioDoc.js`) la sección de equipo seguía tituládose "Datos de Equipo — Técnico Asignado" pese a que ese campo ya no se muestra ahí (se sacó antes, ver comentario en el código) — ahora dice solo "Datos de Equipo", ya que el técnico se ve abajo en el bloque "Técnico: [nombre]".
+
+**Verificación:** revisión de código (badge usa `ordenIdActual`/`nuevaOrden.tecnicoAsignado`, que ya se cargan correctamente desde la BD al ver/editar; título del PDF sin el campo que ya no se muestra).
+
 ## Fecha: 2026-09-14 (11)
 
 ### v2.112: Sucursales / Direcciones adicionales — ocultas de momento

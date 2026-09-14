@@ -1040,9 +1040,9 @@ function OrdenTrabajo() {
               <div className="of-head">
                 <h2><Wrench size={20} /> {soloLectura ? "Ver Orden" : editingId ? "Editar Orden" : "Nueva Orden"}</h2>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  {tecnicoDeSesion() && (
+                  {(ordenIdActual ? nuevaOrden.tecnicoAsignado : tecnicoDeSesion()) && (
                     <span style={{ fontWeight: 600, fontSize: '0.75rem', color: '#fff', background: 'rgba(255,255,255,0.22)', padding: '2px 8px', borderRadius: 999 }}>
-                      Técnico: {tecnicoDeSesion()}
+                      Técnico: {ordenIdActual ? nuevaOrden.tecnicoAsignado : tecnicoDeSesion()}
                     </span>
                   )}
                   {cotizacionesDeOrden.length > 0 && (
