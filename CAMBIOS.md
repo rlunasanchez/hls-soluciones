@@ -1,5 +1,13 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-14 (8)
+
+### v2.108: PDF de la OT — fix comuna faltante y negrita en Direcciones/Contactos adicionales
+
+En `direccionExtraHtml` la línea se armaba con `d.ciudad || d.comuna` — mostraba una u otra, nunca las dos. Ahora se muestran ambas cuando están cargadas. Además, el teléfono (Direcciones adicionales) y todos los campos (Contactos adicionales) usaban la clase `.det`, sin negrita, a diferencia del resto de la línea (`.nom`, negrita). Se agregó `font-weight: 700` a `.det` para que quede consistente.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-14 (7)
 
 ### v2.105: Cotizaciones — columna Ítems más ancha + Detalle un poco más alto
