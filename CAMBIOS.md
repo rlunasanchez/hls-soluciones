@@ -1,5 +1,15 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-15 (3)
+
+### v2.121: PDF de la OT y Cotización — logo HLS nuevo, alineado con el de Brother
+
+Se reemplazó el logo placeholder (SVG genérico) por el logo real de HLS que mandó el usuario. El archivo original traía mucho margen blanco invisible alrededor del isotipo (35% arriba, 28% abajo, asimétrico) — eso hacía que, aunque la caja del logo estuviera alineada abajo (`align-self: flex-end`, igual que `.brother-box` en la OT), el logo visualmente quedara más arriba que el de Brother. Se recortó el margen blanco de la imagen (queda el isotipo + texto "Soluciones Informáticas" ajustado al borde) y se achicó la caja del logo (OT: 38mm→28mm de ancho; Cotización: 32mm→24mm) para que el tamaño visual quede similar al anterior.
+
+**Archivos:** `empresa.js` (`LOGO_HLS` nuevo, base64 embebido), `ordenServicioDoc.js` y `cotizacionDoc.js` (tamaño de caja + `align-self: flex-end` en `.logo-hls`).
+
+**Verificación:** `npm run build` OK. Verificado visualmente con captura headless (Edge) antes de subir — logo nítido, mismo alto que el de Brother en la OT.
+
 ## Fecha: 2026-09-15 (2)
 
 ### v2.120: PDF de Cotización — más ítems por hoja + fix SKU largo que se cortaba

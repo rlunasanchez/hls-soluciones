@@ -90,10 +90,10 @@ body {
 .page { width: 210mm; min-height: 297mm; padding: 9mm 12mm 8mm; background: #EEF2F7; }
 
 .header-card { background: #FFFFFF; border: .5pt solid #E2E8F0; border-radius: 7pt; padding: 2.2mm 4mm 1.6mm; box-shadow: 0 1px 4px rgba(15,23,42,.15); break-inside: avoid; }
-.enc { display: grid; grid-template-columns: 19mm 1fr auto; align-items: center; gap: 5mm; break-inside: avoid; }
+.enc { display: grid; grid-template-columns: 24mm 1fr auto; align-items: center; gap: 5mm; break-inside: avoid; }
 .logo { display: flex; align-items: center; justify-content: center; }
 .logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
-.logo-hls { width: 19mm; height: 19mm; }
+.logo-hls { width: 24mm; height: 11.2mm; }
 .logo--ph { border: .5pt dashed #CBD5E1; border-radius: 999px; color: #94A3B8; font-size: 6pt; text-align: center; padding: 2pt; }
 .emp-datos { text-align: center; }
 .emp-datos h1 { margin: 0; font-size: 13pt; font-weight: 800; letter-spacing: -.01em; color: #0C4A8C; }
