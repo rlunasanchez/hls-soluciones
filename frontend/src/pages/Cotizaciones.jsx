@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   FileSpreadsheet, Package, Users, UserCog, LogOut, FileText, ClipboardList, ShoppingCart, Home,
-  Search, Save, X, Plus, Trash2, FileDown, ChevronUp, ChevronDown
+  Search, Save, X, Plus, Trash2, FileDown, ChevronUp, ChevronDown, UserPlus
 } from "lucide-react";
 import api from "../services/api";
 import { getCached, invalidar } from "../services/cache";
@@ -15,6 +15,7 @@ import { imprimirHtml } from "../utils/imprimir";
 import CotizacionLista from "../components/cotizaciones/CotizacionLista";
 import { usePaginaPersistente, useClampPagina } from "../hooks/usePaginacion";
 
+const normTxt = (s) => String(s || "").toUpperCase().trim();
 const clp = (n) => Math.round(Number(n) || 0).toLocaleString("es-CL");
 const soloDigitos = (v) => String(v || "").replace(/[^0-9]/g, "");
 const clpInput = (v) => {
@@ -41,6 +42,7 @@ const cotizacionVacia = () => ({
   contactoFono: "",
   contactoEmail: "",
   contactoCargo: "",
+  contactosExtra: [],
   ejecutivo: parseToken().nombre || parseToken().usuario || "",
   ejecutivoFono: EMPRESA.fono,
   ejecutivoEmail: parseToken().email || "",
@@ -80,6 +82,12 @@ function Cotizaciones() {
   const [busquedaContacto, setBusquedaContacto] = useState("");
   const [mostrarDropdownContacto, setMostrarDropdownContacto] = useState(false);
   const contactoDropdownRef = useRef(null);
+
+  // Otros Contactos (contactosExtra): mismo patrón que la OT (OrdenFormCliente.jsx).
+  const [mostrarContactosExtra, setMostrarContactosExtra] = useState(false);
+  const [contactosResumenAbierto, setContactosResumenAbierto] = useState(false);
+  const [contactosManualVisibles, setContactosManualVisibles] = useState(() => new Set());
+  const nombreContactoEnFocoRef = useRef("");
 
   const [cotizacion, setCotizacion] = useState(cotizacionVacia());
   // Distinto de cotizacion.ordenId: esto es "por dónde entré al formulario",
@@ -277,6 +285,16 @@ function Cotizaciones() {
     }
   };
 
+  // Igual que parseItems, pero sin el mínimo de 1: Otros Contactos parte vacío.
+  const parseExtra = (val) => {
+    try {
+      const arr = JSON.parse(val || "[]");
+      return Array.isArray(arr) ? arr : [];
+    } catch {
+      return [];
+    }
+  };
+
   const abrirNueva = async () => {
     await cargarPerfil();
     setEditingId(null);
@@ -285,6 +303,9 @@ function Cotizaciones() {
     setBusquedaCliente("");
     setBusquedaContacto("");
     setItemsColapsado(false);
+    setMostrarContactosExtra(false);
+    setContactosResumenAbierto(false);
+    setContactosManualVisibles(new Set());
     setOrigenOT(false);
     setCotizacion(nuevaCotizacion());
     setMostrarFormulario(true);
@@ -311,6 +332,9 @@ function Cotizaciones() {
     setBusquedaCliente(c.cliente_razon_social || "");
     setBusquedaContacto(c.contacto_nombre || "");
     setItemsColapsado(false);
+    setMostrarContactosExtra(false);
+    setContactosResumenAbierto(false);
+    setContactosManualVisibles(new Set());
     setCotizacion({
       fechaEmision: (c.fecha_emision || "").substring(0, 10),
       fechaValidoHasta: (c.fecha_valido_hasta || "").substring(0, 10),
@@ -328,6 +352,7 @@ function Cotizaciones() {
       contactoFono: c.contacto_fono || "",
       contactoEmail: c.contacto_email || "",
       contactoCargo: c.contacto_cargo || "",
+      contactosExtra: parseExtra(c.contactos_extra),
       ejecutivo: c.ejecutivo || "",
       ejecutivoFono: c.ejecutivo_fono || "",
       ejecutivoEmail: c.ejecutivo_email || "",
@@ -376,8 +401,10 @@ function Cotizaciones() {
     setClienteSeleccionado(null);
     setBusquedaCliente("");
     setBusquedaContacto("");
-    setItemsResumenAbierto(false);
-    setItemsManualVisibles(new Set());
+    setItemsColapsado(false);
+    setMostrarContactosExtra(false);
+    setContactosResumenAbierto(false);
+    setContactosManualVisibles(new Set());
     setOrigenOT(false);
     setOrdenOrigen(null);
     if (vuelveAOT) {
@@ -900,6 +927,346 @@ function Cotizaciones() {
                       <label style={{ display: 'flex', alignItems: 'center' }}>Cargo Contacto</label>
                       <input type="text" placeholder="Cargo del contacto" value={cotizacion.contactoCargo} onChange={(e) => setCotizacion({ ...cotizacion, contactoCargo: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '') })} disabled={soloLectura} />
                     </div>
+                  </div>
+
+                  {/* Otros Contactos (dinámicos), mismo patrón que la OT */}
+                  <div style={{ marginTop: '10px', padding: '4px 10px', background: '#F0FDF4', border: '1px solid #7AD6EC', borderRadius: '8px', lineHeight: '1.2' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer', fontSize: '0.8rem', width: 'fit-content', maxWidth: '100%' }}>
+                      {mostrarContactosExtra ? <ChevronUp size={14} style={{ color: 'var(--success)', flexShrink: 0 }} /> : <ChevronDown size={14} style={{ color: 'var(--success)', flexShrink: 0 }} />}
+                      <input
+                        type="checkbox"
+                        className="of-check of-check--contactos"
+                        checked={mostrarContactosExtra}
+                        disabled={soloLectura && cotizacion.contactosExtra.length === 0}
+                        onChange={(e) => {
+                          setMostrarContactosExtra(e.target.checked);
+                          if (!e.target.checked) setContactosResumenAbierto(false);
+                        }}
+                      />
+                      <UserPlus size={14} style={{ color: 'var(--success)', flexShrink: 0 }} />
+                      Otros Contactos
+                      {cotizacion.contactosExtra.length > 0 && (
+                        <span style={{
+                          background: 'var(--success)', color: 'white', padding: '1px 8px', borderRadius: '10px',
+                          fontSize: '0.75rem', fontWeight: '700'
+                        }}>
+                          {cotizacion.contactosExtra.length}
+                        </span>
+                      )}
+                    </label>
+
+                    {mostrarContactosExtra && (
+                      <div style={{ marginTop: '10px' }}>
+                        {(() => {
+                          const contactosCliente = clienteSeleccionado
+                            ? String(clienteSeleccionado.contactos || "").split(";;")
+                                .map(c => {
+                                  const p = c.split("|");
+                                  return { nombre: (p[0] || "").toUpperCase().trim(), email: p[1] || "", fono: p[2] || "", cargo: p[3] || "", direccion: (p[4] || "").toUpperCase().trim(), ciudad: (p[5] || "").toUpperCase().trim(), comuna: (p[6] || "").toUpperCase().trim() };
+                                })
+                                .filter(c => c.nombre)
+                            : [];
+
+                          const agregarContacto = (c) => {
+                            const nuevoIdx = cotizacion.contactosExtra.length;
+                            setCotizacion({
+                              ...cotizacion,
+                              contactosExtra: [...cotizacion.contactosExtra, {
+                                nombre: c.nombre,
+                                email: c.email,
+                                fono: c.fono,
+                                cargo: c.cargo,
+                                direccion: c.direccion || "",
+                                ciudad: c.ciudad || "",
+                                comuna: c.comuna || ""
+                              }]
+                            });
+                            setContactosManualVisibles(new Set([nuevoIdx]));
+                          };
+
+                          const actualizarContacto = (idx, campo, valor) => {
+                            const arr = [...cotizacion.contactosExtra];
+                            arr[idx] = { ...arr[idx], [campo]: valor };
+                            setCotizacion({ ...cotizacion, contactosExtra: arr });
+                          };
+
+                          const eliminarContacto = (idx) => {
+                            const arr = cotizacion.contactosExtra.filter((_, i) => i !== idx);
+                            setCotizacion({ ...cotizacion, contactosExtra: arr });
+                            setContactosManualVisibles(prev => {
+                              const next = new Set();
+                              prev.forEach(i => {
+                                if (i < idx) next.add(i);
+                                else if (i > idx) next.add(i - 1);
+                              });
+                              return next;
+                            });
+                          };
+
+                          // Evita crear a mano un contacto que ya existe: como Contacto principal
+                          // de la cotización, en la ficha del cliente, o en otra fila de Otros Contactos.
+                          const nombreContactoDuplicado = (idx, valor) => {
+                            const v = normTxt(valor);
+                            if (!v) return false;
+                            if (normTxt(cotizacion.contactoNombre) === v) return true;
+                            if (contactosCliente.some((cc) => normTxt(cc.nombre) === v)) return true;
+                            if (cotizacion.contactosExtra.some((c, i) => i !== idx && normTxt(c.nombre) === v)) return true;
+                            return false;
+                          };
+
+                          const contactosYaUsados = [
+                            normTxt(cotizacion.contactoNombre),
+                            ...cotizacion.contactosExtra.map(c => normTxt(c.nombre))
+                          ].filter(Boolean);
+                          const contactosExtraDisponibles = contactosCliente.filter(c => !contactosYaUsados.includes(normTxt(c.nombre)));
+
+                          // Da de alta en clientes_contactos un contacto tipeado a mano acá que
+                          // todavía no existe en la ficha del cliente. Solo disponible si el
+                          // cliente ya está en el mantenedor (tiene id).
+                          const registrarContactoEnCliente = async (contacto, idx) => {
+                            if (!clienteSeleccionado?.id) return;
+                            try {
+                              const direccionesCliente = String(clienteSeleccionado.direcciones || "").split(";;")
+                                .map(d => {
+                                  const p = d.split("|");
+                                  return { tipo_direccion: p[0] || "", direccion: p[1] || "", fono: p[2] || "", ciudad: p[3] || "", comuna: p[4] || "" };
+                                })
+                                .filter(d => d.direccion.trim());
+                              const payload = {
+                                razon_social: clienteSeleccionado.razon_social,
+                                giro: clienteSeleccionado.giro,
+                                rut: clienteSeleccionado.rut,
+                                direccion: clienteSeleccionado.direccion,
+                                ciudad: clienteSeleccionado.ciudad,
+                                comuna: clienteSeleccionado.comuna,
+                                telefono: clienteSeleccionado.telefono,
+                                email: clienteSeleccionado.email,
+                                contacto_nombre: clienteSeleccionado.contacto_nombre,
+                                contacto_email: clienteSeleccionado.contacto_email,
+                                contacto_fono: clienteSeleccionado.contacto_fono,
+                                contacto_cargo: clienteSeleccionado.contacto_cargo,
+                                direcciones: direccionesCliente,
+                                contactos: [...contactosCliente, {
+                                  nombre: contacto.nombre, email: contacto.email, fono: contacto.fono,
+                                  cargo: contacto.cargo, direccion: contacto.direccion,
+                                  ciudad: contacto.ciudad, comuna: contacto.comuna
+                                }]
+                              };
+                              await api.put(`/api/clientes/${clienteSeleccionado.id}`, payload);
+                              alert(`Contacto "${contacto.nombre}" registrado en el cliente.`);
+                              const lista = await api.get("/api/clientes");
+                              setClientes(lista.data);
+                              const actualizado = lista.data.find((c) => c.id === clienteSeleccionado.id);
+                              if (actualizado) setClienteSeleccionado(actualizado);
+                              setContactosManualVisibles(prev => {
+                                const next = new Set(prev);
+                                next.delete(idx);
+                                return next;
+                              });
+                            } catch (err) {
+                              alert(err.response?.data?.msg || "Error al registrar el contacto en el cliente.");
+                            }
+                          };
+
+                          return (
+                            <>
+                              {contactosCliente.length >= 1 && (
+                                <div style={{ marginBottom: '10px' }}>
+                                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)', fontSize: '0.8rem' }}>
+                                    Agregar contacto del cliente
+                                  </label>
+                                  <select
+                                    disabled={soloLectura || contactosExtraDisponibles.length === 0}
+                                    value=""
+                                    onChange={(e) => {
+                                      const elegido = contactosExtraDisponibles.find((c) => normTxt(c.nombre) === e.target.value);
+                                      if (!elegido) return;
+                                      agregarContacto(elegido);
+                                    }}
+                                    style={{
+                                      width: '100%',
+                                      padding: '2px 8px',
+                                      border: '1.5px solid var(--border)',
+                                      borderRadius: '6px',
+                                      fontSize: '.82rem',
+                                      background: 'white'
+                                    }}
+                                  >
+                                    <option value="">-- Elegir contacto --</option>
+                                    {contactosExtraDisponibles.map((c, idx) => (
+                                      <option key={idx} value={normTxt(c.nombre)}>
+                                        {c.nombre}{c.fono ? ` | ${c.fono}` : ''}{c.email ? ` | ${c.email}` : ''}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                              )}
+
+                              {cotizacion.contactosExtra.length > 0 && !contactosResumenAbierto && (
+                                <button
+                                  type="button"
+                                  onClick={() => setContactosResumenAbierto(true)}
+                                  style={{
+                                    background: 'none', color: 'var(--success)', border: '1px solid #7AD6EC',
+                                    borderRadius: '6px', padding: '2px 10px', cursor: 'pointer',
+                                    fontWeight: 600, fontSize: '0.75rem', marginRight: '8px'
+                                  }}
+                                >
+                                  {cotizacion.contactosExtra.length} contacto{cotizacion.contactosExtra.length > 1 ? 's' : ''} agregado{cotizacion.contactosExtra.length > 1 ? 's' : ''} — Ver
+                                </button>
+                              )}
+
+                              {cotizacion.contactosExtra.length > 0 && contactosResumenAbierto && (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
+                                  {cotizacion.contactosExtra.map((_, idx) => {
+                                    const activo = contactosManualVisibles.has(idx);
+                                    return (
+                                    <span key={idx} style={{
+                                      display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                      background: activo ? 'var(--success)' : '#F0FDF4',
+                                      color: activo ? '#ffffff' : 'var(--success)',
+                                      border: '1px solid #7AD6EC',
+                                      borderRadius: '999px', padding: '2px 6px 2px 10px', fontSize: '0.75rem', fontWeight: 600
+                                    }}>
+                                      <span
+                                        onClick={() => setContactosManualVisibles(prev => (
+                                          prev.has(idx) && prev.size === 1 ? new Set() : new Set([idx])
+                                        ))}
+                                        title="Editar contacto"
+                                        style={{ cursor: 'pointer' }}
+                                      >
+                                        {/* +2: el contacto principal (fuera de esta lista) ya es "Contacto 1" */}
+                                        {`Contacto ${idx + 2}`}
+                                      </span>
+                                      {!soloLectura && (
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            if (!confirm("¿Seguro que desea eliminar este contacto?")) return;
+                                            eliminarContacto(idx);
+                                          }}
+                                          title="Quitar contacto"
+                                          style={{ background: 'none', border: 'none', color: activo ? '#ffffff' : 'var(--success)', cursor: 'pointer', display: 'flex', padding: 0 }}
+                                        >
+                                          <X size={12} />
+                                        </button>
+                                      )}
+                                    </span>
+                                    );
+                                  })}
+                                </div>
+                              )}
+
+                              {cotizacion.contactosExtra.map((c, idx) => {
+                                if (!contactosManualVisibles.has(idx)) return null;
+                                return (
+                                <div key={idx} style={{ marginBottom: '6px', border: '1px solid var(--border)', borderRadius: '6px', padding: '4px' }}>
+                                  <div className="of-form-grid" style={{ gap: '8px' }}>
+                                    <div className="of-f">
+                                      <label>Contacto {idx + 2}</label>
+                                      <input
+                                        type="text"
+                                        placeholder="Nombre"
+                                        value={c.nombre}
+                                        onChange={(e) => actualizarContacto(idx, 'nombre', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))}
+                                        onFocus={(e) => { nombreContactoEnFocoRef.current = e.target.value; }}
+                                        onBlur={(e) => {
+                                          if (e.target.value === nombreContactoEnFocoRef.current) return;
+                                          if (nombreContactoDuplicado(idx, e.target.value)) {
+                                            alert(`El contacto "${e.target.value.trim()}" ya existe. Elíjalo desde "Agregar contacto del cliente" en vez de crearlo de nuevo.`);
+                                            const arr = [...cotizacion.contactosExtra];
+                                            arr[idx] = { ...arr[idx], nombre: '', email: '' };
+                                            setCotizacion({ ...cotizacion, contactosExtra: arr });
+                                          }
+                                        }}
+                                        disabled={soloLectura}
+                                      />
+                                    </div>
+                                    <div className="of-f">
+                                      <label>Email</label>
+                                      <input type="email" placeholder="Email" value={c.email} onChange={(e) => actualizarContacto(idx, 'email', e.target.value)} disabled={soloLectura} />
+                                    </div>
+                                    <div className="of-f">
+                                      <label>Fono</label>
+                                      <input type="tel" placeholder="Fono" value={c.fono} onChange={(e) => actualizarContacto(idx, 'fono', e.target.value.replace(/[^0-9+]/g, ''))} disabled={soloLectura} />
+                                    </div>
+                                    <div className="of-f">
+                                      <label>Dirección Contacto</label>
+                                      <input type="text" placeholder="Dirección Contacto" value={c.direccion} onChange={(e) => actualizarContacto(idx, 'direccion', upperInput(e))} disabled={soloLectura} />
+                                    </div>
+                                    <div className="of-f">
+                                      <label>Ciudad</label>
+                                      <input type="text" placeholder="Ciudad" value={c.ciudad || ""} onChange={(e) => actualizarContacto(idx, 'ciudad', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={soloLectura} />
+                                    </div>
+                                    <div className="of-f">
+                                      <label>Comuna</label>
+                                      <input type="text" placeholder="Comuna" value={c.comuna || ""} onChange={(e) => actualizarContacto(idx, 'comuna', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={soloLectura} />
+                                    </div>
+                                    <div className="of-f">
+                                      <label>Cargo</label>
+                                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                                        <input type="text" placeholder="Cargo" value={c.cargo} onChange={(e) => actualizarContacto(idx, 'cargo', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={soloLectura} style={{ flex: '1 1 auto', width: 'auto' }} />
+                                        {!soloLectura && clienteSeleccionado?.id && c.nombre.trim() &&
+                                          !contactosCliente.some((cc) => normTxt(cc.nombre) === normTxt(c.nombre)) && (
+                                          <button
+                                            type="button"
+                                            onClick={() => registrarContactoEnCliente(c, idx)}
+                                            title="Registrar este contacto en la ficha del cliente si no existe"
+                                            style={{ background: '#F0FDF4', color: 'var(--success)', border: '1px solid #7AD6EC', borderRadius: '6px', padding: '2px 8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.75rem', lineHeight: '1.3', flexShrink: 0 }}
+                                          >
+                                            <UserPlus size={12} style={{ verticalAlign: 'text-bottom' }} /> Registrar
+                                          </button>
+                                        )}
+                                        {!soloLectura && (
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              if (!confirm("¿Seguro que desea eliminar este contacto?")) return;
+                                              eliminarContacto(idx);
+                                            }}
+                                            style={{ background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA', borderRadius: '6px', padding: '2px 8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.75rem', lineHeight: '1.3', flexShrink: 0 }}
+                                          >
+                                            Quitar
+                                          </button>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                );
+                              })}
+
+                              {!soloLectura && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const nuevoIdx = cotizacion.contactosExtra.length;
+                                    setCotizacion({
+                                      ...cotizacion,
+                                      contactosExtra: [...cotizacion.contactosExtra, { nombre: "", email: "", fono: "", direccion: "", cargo: "", ciudad: "", comuna: "" }]
+                                    });
+                                    setContactosManualVisibles(new Set([nuevoIdx]));
+                                  }}
+                                  style={{
+                                    marginTop: '6px',
+                                    background: '#F0FDF4',
+                                    color: 'var(--success)',
+                                    border: '1px solid #7AD6EC',
+                                    borderRadius: '6px',
+                                    padding: '2px 8px',
+                                    cursor: 'pointer',
+                                    fontWeight: 600,
+                                    fontSize: '0.75rem'
+                                  }}
+                                >
+                                  + Agregar contacto
+                                </button>
+                              )}
+                            </>
+                          );
+                        })()}
+                      </div>
+                    )}
                   </div>
                 </div>
 

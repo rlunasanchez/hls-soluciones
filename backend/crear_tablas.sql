@@ -167,6 +167,7 @@ CREATE TABLE IF NOT EXISTS cotizaciones (
   contacto_fono VARCHAR(20),
   contacto_email VARCHAR(100),
   contacto_cargo VARCHAR(100),
+  contactos_extra TEXT,
 
   ejecutivo VARCHAR(100),
   ejecutivo_fono VARCHAR(20),

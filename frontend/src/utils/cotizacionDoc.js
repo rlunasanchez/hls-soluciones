@@ -24,6 +24,12 @@ const slotLogo = (src, alt, cls) => (
     : `<div class="logo ${cls} logo--ph">${esc(alt)}</div>`
 );
 
+function contactoExtraHtml(c) {
+  const direccion = [c.direccion, c.ciudad, c.comuna].filter((v) => String(v || "").trim()).join(", ");
+  const detalle = [c.cargo, c.fono, c.email, direccion].filter((v) => String(v || "").trim()).map(esc).join(" · ");
+  return `<div class="extra-item"><span class="nom">${esc(c.nombre)}</span>${detalle ? ` <span class="det">${detalle}</span>` : ""}</div>`;
+}
+
 const parseJsonArray = (val) => {
   if (Array.isArray(val)) return val;
   try {
@@ -106,6 +112,11 @@ body {
 .f .l { display: block; font-size: 6pt; text-transform: uppercase; letter-spacing: .07em; color: #6B7280; }
 .f .v { display: block; padding-bottom: 1mm; border-bottom: .5pt solid #E2E8F0; font-size: 9pt; font-weight: 600; color: #111827; overflow-wrap: anywhere; }
 
+.sub { margin-top: 2.5mm; font-size: 6pt; text-transform: uppercase; letter-spacing: .06em; color: #6B7280; }
+.extra-item { margin-top: 1.2mm; overflow-wrap: anywhere; }
+.extra-item .nom { font-size: 8pt; font-weight: 700; }
+.extra-item .det { font-size: 7pt; font-weight: 700; color: #111827; }
+
 table.items { width: 100%; table-layout: fixed; border-collapse: collapse; margin-top: 1mm; }
 table.items thead th { text-align: left; font-size: 7pt; text-transform: uppercase; letter-spacing: .06em; color: #6B7280; border-bottom: 1pt solid #0C4A8C; padding: 2mm 2mm 1.5mm; }
 table.items thead th.num { text-align: right; }
@@ -133,6 +144,7 @@ table.items td.detalle { font-weight: 600; color: #111827; white-space: pre-wrap
 
 export function generarHtmlCotizacion(cot) {
   const items = parseJsonArray(cot.items).filter((i) => String(i?.detalle || "").trim());
+  const contactosExtra = parseJsonArray(cot.contactos_extra).filter((c) => String(c?.nombre || "").trim());
   const { neto, iva, total } = calcularTotales(cot.items);
 
   return `<!DOCTYPE html>
@@ -184,6 +196,7 @@ export function generarHtmlCotizacion(cot) {
       ${campo("Válido hasta", fecha(cot.fecha_valido_hasta))}
     </div>
     ${cot.glosa ? `<div class="grid" style="margin-top:2mm"><div class="f" style="grid-column: 1 / -1"><span class="l">Glosa</span><span class="v">${esc(cot.glosa)}</span></div></div>` : ""}
+    ${contactosExtra.length ? `<div class="sub">› Contactos adicionales</div>${contactosExtra.map(contactoExtraHtml).join("")}` : ""}
   </div>
 
   <div class="sec">
