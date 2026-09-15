@@ -1,5 +1,13 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-14 (17)
+
+### v2.118: PDF de Cotización — Datos de Cliente / Contacto / Ejecutivo separados en tarjetas, igual que la OT
+
+El fix anterior (v2.117) solo reordenó Email/Fono Contacto, pero Cliente, Contacto y Ejecutivo/Condiciones seguían todos en una sola tarjeta sin título — a diferencia de la OT, que los muestra en tarjetas `.sec` separadas con título (`h2`). Se agregó el helper `h2()` y el CSS `.sec h2` a `cotizacionDoc.js` (mismo estilo que `ordenServicioDoc.js`: barra izquierda azul, mayúsculas) y se dividió el bloque único en tres tarjetas: "Datos de Cliente", "Contacto" (con los Contactos adicionales debajo) y "Ejecutivo y Condiciones" (incluye la Glosa).
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-14 (16)
 
 ### v2.117: PDF de Cotización — orden de Email/Fono Contacto igual que la OT

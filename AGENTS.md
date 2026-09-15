@@ -1931,3 +1931,41 @@ ALTER TABLE ordenes_trabajo DROP COLUMN IF EXISTS contacto2, DROP COLUMN IF EXIS
 **Solución:** `import { toUpper, upperInput } from "../../utils/helpers"`. Verificado que el resto de archivos que usan `upperInput` (`ClienteFormulario`, `ModalContactos`, `FiltrosEquipo`, `OrdenFormAveria`, `OrdenFormCliente`, `OrdenFormEquipo`, `OrdenTrabajo`) sí lo importan.
 
 **Verificación:** `npm run build` OK en `frontend/`.
+
+---
+
+## Cambios Recientes (14 Septiembre 2026)
+
+### 68. Conflicto real de merge en `backend/routes/cotizaciones.js` al agregar `contactos_extra` (main → deploy/cloud)
+
+**Fecha:** 14 Septiembre 2026
+**Ramas afectadas:** ambas — conflicto real, no se resolvió solo con el merge automático
+**Archivo:** `backend/routes/cotizaciones.js`
+
+**Contexto:** se agregó la columna `contactos_extra` (feature "Otros Contactos" en Cotizaciones, igual que ya existía en la OT). El cambio en `main` (MySQL, placeholders `?`) agregó la columna al `SELECT`, al `INSERT` y al `UPDATE`. Al mergear `main` → `deploy/cloud` (PostgreSQL, placeholders `$1, $2...`), git auto-mergeó bien las listas de columnas (`SELECT`/nombres de columnas del `INSERT`) porque el texto coincidía en ambas ramas, pero **no pudo** resolver solo el `VALUES(...)` del INSERT ni el `SET ...` del UPDATE: quedaron como conflicto real con marcadores `<<<<<<< HEAD` / `=======` / `>>>>>>> main`, con el lado `main` trayendo placeholders `?` que no aplican en Postgres.
+
+**Causa raíz (la misma que el incidente #10 de este documento, "$22 en vez de $21"):** los placeholders `$N` de Postgres son posicionales y hay que recontarlos a mano cada vez que se inserta una columna en medio de la lista — no hay forma de que un merge de texto lo haga bien solo, porque agregar una columna al medio corre el número de *todos* los placeholders que vienen después.
+
+**Solución:** se resolvió el conflicto a mano, recontando la posición de `contactos_extra` contra el resto de columnas/parámetros:
+- INSERT: 23 columnas → 24 con `contactos_extra` → `VALUES ($1, ..., $24) RETURNING id`
+- UPDATE: `contactos_extra` insertado como `$17` (después de `contacto_cargo`), corriendo `ejecutivo`...`orden_numero` a `$18`...`$23` y `WHERE id = $24`
+
+Verificado con `node --check backend/routes/cotizaciones.js` y `npm run build` en `frontend/` antes de pushear.
+
+**Regla general (ya estaba en la sección "🌩️ Deploy en la Nube" de este documento, pero quedó demostrado de nuevo):** cualquier cambio a una query o su lista de parámetros en `backend/routes/*.js` en `main` necesita revisión manual de los placeholders `$N` al mergear a `deploy/cloud` — un merge automático "limpio" en los archivos de alrededor NO es garantía de que el archivo de rutas haya quedado bien; hay que abrirlo y contar.
+
+### 69. Otros Contactos en Cotizaciones (paridad con la OT) + fix crash al cerrar el formulario
+
+**Fecha:** 14 Septiembre 2026
+**Ramas afectadas:** ambas (`main` MySQL y `deploy/cloud` PostgreSQL, mismo feature)
+**Archivos modificados:**
+- `backend/crear_tablas.sql`, `scripts/migrar-columnas-faltantes.js` (columna `cotizaciones.contactos_extra TEXT`, JSON — mismo formato que `ordenes_trabajo.contactos_extra`)
+- `backend/routes/cotizaciones.js` (lee/guarda `contactosExtra` en GET lista+detalle, POST y PUT — ver incidente #68 sobre el merge a `deploy/cloud`)
+- `frontend/src/pages/Cotizaciones.jsx` (bloque colapsable "Otros Contactos": selector de contactos ya registrados en el cliente, alta manual, botón "Registrar en el cliente", chips resumen — mismo patrón que `OrdenFormCliente.jsx`)
+- `frontend/src/utils/cotizacionDoc.js` (sección "› Contactos adicionales" en el PDF, igual que `ordenServicioDoc.js`; Datos de Cliente/Contacto/Ejecutivo y Condiciones separados en tarjetas propias con título — antes iba todo junto en una sola grilla — mismo patrón `.sec`/`h2` que `ordenServicioDoc.js`; Email/Fono Contacto reordenado para coincidir con la OT)
+
+**Fix de paso:** `cerrarFormulario` en `Cotizaciones.jsx` llamaba a `setItemsResumenAbierto`/`setItemsManualVisibles`, dos setters que no existen en ese archivo (`ReferenceError` en cada cierre/cancelación del formulario de cotización). Reemplazados por los setters reales.
+
+**Migración SQL en Neon:** ejecutada a mano por el usuario (`ALTER TABLE cotizaciones ADD COLUMN IF NOT EXISTS contactos_extra TEXT;`).
+
+**Verificación:** `npm run build` OK; probado en el navegador por el usuario (agregar/guardar/PDF).
