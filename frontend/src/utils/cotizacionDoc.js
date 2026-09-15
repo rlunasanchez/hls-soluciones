@@ -145,9 +145,18 @@ table.items td.detalle { font-weight: 600; color: #111827; white-space: pre-wrap
 .bancarios b { color: #111827; }
 `;
 
-export function generarHtmlCotizacion(cot) {
+// Exportado para que el modal de opciones de PDF liste los mismos contactos
+// extra que terminará mostrando el documento (una sola fuente de verdad).
+export function contactosExtraDe(cot) {
+  return parseJsonArray(cot.contactos_extra).filter((c) => String(c?.nombre || "").trim());
+}
+
+export function generarHtmlCotizacion(cot, opciones) {
   const items = parseJsonArray(cot.items).filter((i) => String(i?.detalle || "").trim());
-  const contactosExtra = parseJsonArray(cot.contactos_extra).filter((c) => String(c?.nombre || "").trim());
+  const contactosExtraTodos = contactosExtraDe(cot);
+  const contactosExtra = opciones?.contactosExtra
+    ? contactosExtraTodos.filter((_, i) => opciones.contactosExtra[i])
+    : contactosExtraTodos;
   const { neto, iva, total } = calcularTotales(cot.items);
 
   return `<!DOCTYPE html>

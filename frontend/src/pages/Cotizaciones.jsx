@@ -10,9 +10,9 @@ import { toUpper, cerrarSesion, upperInput, parseToken, formatearRutInput } from
 import "../styles/OrdenTrabajo.css";
 import "../styles/ordenes-componentes.css";
 import { EMPRESA } from "../utils/empresa";
-import { generarHtmlCotizacion, tituloDocumentoCotizacion, calcularTotales } from "../utils/cotizacionDoc";
-import { imprimirHtml } from "../utils/imprimir";
+import { calcularTotales } from "../utils/cotizacionDoc";
 import CotizacionLista from "../components/cotizaciones/CotizacionLista";
+import ModalOpcionesPDFCotizacion from "../components/cotizaciones/ModalOpcionesPDFCotizacion";
 import { usePaginaPersistente, useClampPagina } from "../hooks/usePaginacion";
 
 const normTxt = (s) => String(s || "").toUpperCase().trim();
@@ -60,6 +60,7 @@ function Cotizaciones() {
   const [loading, setLoading] = useState(false);
   const ITEMS_POR_PAG = 4;
   const [editingId, setEditingId] = useState(null);
+  const [cotParaPDF, setCotParaPDF] = useState(null);
   const [guardando, setGuardando] = useState(false);
   const guardandoRef = useRef(false);
   const [soloLectura, setSoloLectura] = useState(false);
@@ -379,13 +380,13 @@ function Cotizaciones() {
   };
 
   const generarPDF = (cot) => {
-    imprimirHtml(generarHtmlCotizacion(cot), tituloDocumentoCotizacion(cot));
+    setCotParaPDF(cot);
   };
 
   const generarPDFActual = async () => {
     if (!editingId) return;
     const res = await api.get(`/api/cotizaciones/${editingId}`);
-    generarPDF(res.data);
+    setCotParaPDF(res.data);
   };
 
   const cerrarFormulario = () => {
@@ -1406,6 +1407,10 @@ function Cotizaciones() {
             </div>
           </div>
         )}
+
+      {cotParaPDF && (
+        <ModalOpcionesPDFCotizacion cot={cotParaPDF} onClose={() => setCotParaPDF(null)} />
+      )}
     </div>
   );
 }
