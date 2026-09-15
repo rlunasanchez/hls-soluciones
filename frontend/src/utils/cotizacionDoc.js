@@ -89,11 +89,11 @@ body {
 
 .page { width: 210mm; min-height: 297mm; padding: 9mm 12mm 8mm; background: #EEF2F7; }
 
-.header-card { background: #FFFFFF; border: .5pt solid #E2E8F0; border-radius: 7pt; padding: 3mm 4mm 2.2mm; box-shadow: 0 1px 4px rgba(15,23,42,.15); break-inside: avoid; }
-.enc { display: grid; grid-template-columns: 24mm 1fr auto; align-items: center; gap: 5mm; break-inside: avoid; }
+.header-card { background: #FFFFFF; border: .5pt solid #E2E8F0; border-radius: 7pt; padding: 2.2mm 4mm 1.6mm; box-shadow: 0 1px 4px rgba(15,23,42,.15); break-inside: avoid; }
+.enc { display: grid; grid-template-columns: 19mm 1fr auto; align-items: center; gap: 5mm; break-inside: avoid; }
 .logo { display: flex; align-items: center; justify-content: center; }
 .logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
-.logo-hls { width: 24mm; height: 24mm; }
+.logo-hls { width: 19mm; height: 19mm; }
 .logo--ph { border: .5pt dashed #CBD5E1; border-radius: 999px; color: #94A3B8; font-size: 6pt; text-align: center; padding: 2pt; }
 .emp-datos { text-align: center; }
 .emp-datos h1 { margin: 0; font-size: 13pt; font-weight: 800; letter-spacing: -.01em; color: #0C4A8C; }
@@ -108,12 +108,13 @@ body {
 .folio-box .rut-emp { margin-top: 1mm; font-size: 8pt; color: #374151; }
 .folio-box .razon-emp { font-size: 8pt; font-weight: 700; color: #374151; }
 
-.sec { margin-top: 3mm; break-inside: avoid; background: #FFFFFF; border: .5pt solid #E2E8F0; border-radius: 7pt; padding: 2.5mm 4mm; box-shadow: 0 1px 4px rgba(15,23,42,.15); }
-.sec h2 { margin: 0 0 1.8mm; padding-left: 6pt; border-left: 5pt solid #0C4A8C; border-radius: 2pt; font-size: 7pt; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #0C4A8C; break-after: avoid; }
+.sec { margin-top: 2mm; break-inside: avoid; background: #FFFFFF; border: .5pt solid #E2E8F0; border-radius: 7pt; padding: 1.8mm 4mm; box-shadow: 0 1px 4px rgba(15,23,42,.15); }
+.sec h2 { margin: 0 0 1.2mm; padding-left: 6pt; border-left: 5pt solid #0C4A8C; border-radius: 2pt; font-size: 7pt; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #0C4A8C; break-after: avoid; }
 
-.grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 8mm; row-gap: 2mm; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 8mm; row-gap: 1.2mm; }
+.grid-3 { grid-template-columns: 1fr 1fr 1fr; }
 .f .l { display: block; font-size: 6pt; text-transform: uppercase; letter-spacing: .07em; color: #6B7280; }
-.f .v { display: block; padding-bottom: 1mm; border-bottom: .5pt solid #E2E8F0; font-size: 9pt; font-weight: 600; color: #111827; overflow-wrap: anywhere; }
+.f .v { display: block; padding-bottom: .5mm; border-bottom: .5pt solid #E2E8F0; font-size: 9pt; font-weight: 600; color: #111827; overflow-wrap: anywhere; }
 
 .sub { margin-top: 2.5mm; font-size: 6pt; text-transform: uppercase; letter-spacing: .06em; color: #6B7280; }
 .extra-item { margin-top: 1.2mm; overflow-wrap: anywhere; }
@@ -123,14 +124,14 @@ body {
 table.items { width: 100%; table-layout: fixed; border-collapse: collapse; margin-top: 1mm; }
 table.items thead th { text-align: left; font-size: 7pt; text-transform: uppercase; letter-spacing: .06em; color: #6B7280; border-bottom: 1pt solid #0C4A8C; padding: 2mm 2mm 1.5mm; }
 table.items thead th.num { text-align: right; }
-table.items th:nth-child(1), table.items td:nth-child(1) { width: 18mm; }
+table.items th:nth-child(1), table.items td:nth-child(1) { width: 22mm; }
 table.items th:nth-child(3), table.items td:nth-child(3) { width: 12mm; }
 table.items th:nth-child(4), table.items td:nth-child(4) { width: 18mm; }
 table.items th:nth-child(5), table.items td:nth-child(5) { width: 16mm; }
 table.items th:nth-child(6), table.items td:nth-child(6) { width: 20mm; }
 table.items td { padding: 2mm; border-bottom: .5pt solid #E2E8F0; vertical-align: top; overflow-wrap: anywhere; }
 table.items td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-table.items td.sku { color: #6B7280; }
+table.items td.sku { color: #6B7280; font-size: 7.5pt; word-break: break-all; }
 table.items td.detalle { font-weight: 600; color: #111827; white-space: pre-wrap; }
 
 .pie-tabla { display: flex; gap: 6mm; margin-top: 3mm; }
@@ -190,7 +191,7 @@ export function generarHtmlCotizacion(cot, opciones) {
 
   <div class="sec">
     ${h2("Datos de Cliente")}
-    <div class="grid">
+    <div class="grid grid-3">
       ${campo("Cliente", cot.cliente_razon_social)}
       ${campo("RUT", cot.cliente_rut)}
       ${campo("Dirección", cot.cliente_direccion)}
@@ -211,7 +212,7 @@ export function generarHtmlCotizacion(cot, opciones) {
   </div>
   <div class="sec">
     ${h2("Ejecutivo y Condiciones")}
-    <div class="grid">
+    <div class="grid grid-3">
       ${campo("Ejecutivo", cot.ejecutivo)}
       ${campo("Fono Ejecutivo", cot.ejecutivo_fono)}
       ${campo("Email Ejecutivo", cot.ejecutivo_email)}
