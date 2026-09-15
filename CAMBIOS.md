@@ -32,12 +32,12 @@ Cotizaciones solo tenía el buscador de un único contacto (igual que el "Contac
 
 **Fix de paso:** `cerrarFormulario` en `Cotizaciones.jsx` llamaba a `setItemsResumenAbierto`/`setItemsManualVisibles`, dos setters que no existen en este archivo (quedaron de una versión anterior del patrón de ítems) — tiraban `ReferenceError` cada vez que se cerraba/cancelaba el formulario de una cotización. Se reemplazó por los setters reales (`setItemsColapsado` + los nuevos de contactos).
 
-**Migración SQL:** MySQL/local ya ejecutada vía `scripts/migrar-columnas-faltantes.js`. Falta correr en Neon:
+**Migración SQL:** ejecutada en MySQL/local vía `scripts/migrar-columnas-faltantes.js` y en Neon a mano por el usuario:
 ```sql
 ALTER TABLE cotizaciones ADD COLUMN IF NOT EXISTS contactos_extra TEXT;
 ```
 
-**Verificación:** `npm run build` OK. Pendiente probar el flujo completo en el navegador (agregar/editar/quitar contacto, guardar, PDF).
+**Verificación:** `npm run build` OK. Probado en el navegador por el usuario (agregar contacto, guardar, PDF) — funcionando.
 
 ## Fecha: 2026-09-14 (14)
 
