@@ -186,8 +186,8 @@ export function generarHtmlCotizacion(cot) {
       ${campo("Email Cliente", cot.cliente_email)}
       ${campo("Contacto", cot.contacto_nombre)}
       ${campo("Cargo Contacto", cot.contacto_cargo)}
-      ${campo("Fono Contacto", cot.contacto_fono)}
       ${campo("Email Contacto", cot.contacto_email)}
+      ${campo("Fono Contacto", cot.contacto_fono)}
       ${campo("Ejecutivo", cot.ejecutivo)}
       ${campo("Fono Ejecutivo", cot.ejecutivo_fono)}
       ${campo("Email Ejecutivo", cot.ejecutivo_email)}

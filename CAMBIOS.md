@@ -1,5 +1,15 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-14 (16)
+
+### v2.117: PDF de Cotización — orden de Email/Fono Contacto igual que la OT
+
+En el bloque de Contacto del PDF, Cotización mostraba Fono antes que Email; la OT muestra Email antes que Fono. Se reordenó en `cotizacionDoc.js` para que quede igual: Contacto, Cargo Contacto, Email Contacto, Fono Contacto.
+
+**Nota aparte (no es cambio de código, es de proceso):** al mergear `main` a `deploy/cloud` para la v2.116 hubo conflicto real en `backend/routes/cotizaciones.js` — esa rama usa Postgres/Neon (placeholders `$1, $2...`) mientras que `main` usa MySQL (`mysql2`, placeholders `?`). Git dejó auto-mergeadas las listas de columnas pero no pudo resolver solo el `VALUES(...)`/`SET ...` con los placeholders numerados; se corrigió a mano recontando la posición de cada `$N` contra la lista de columnas/parámetros. Repositorio: `main` y `deploy/cloud` mantienen versiones paralelas de `backend/routes/*.js` (MySQL vs Postgres) — cualquier cambio futuro a una query en `main` necesita revisión manual de placeholders al mergear a `deploy/cloud`, no alcanza con el merge automático.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-14 (15)
 
 ### v2.116: Otros Contactos en Cotizaciones (igual que en la OT) + fix crash al cerrar el formulario
