@@ -1,5 +1,13 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-15 (1)
+
+### v2.119: PDF de Cotización — modal de opciones para elegir qué contactos incluir, igual que la OT
+
+El botón "PDF" de Cotizaciones (listado y formulario) generaba el documento directo, siempre con todos los contactos adicionales cargados. La OT en cambio abre un modal (`ModalOpcionesPDF.jsx`) que deja elegir qué incluir antes de imprimir. Se replicó el mismo patrón para Cotizaciones: nuevo `ModalOpcionesPDFCotizacion.jsx` (solo grupo "Contactos" — es lo único opcional que tiene el documento de Cotización; el contacto principal siempre se incluye, los extra son opt-in). `cotizacionDoc.js` exporta `contactosExtraDe(cot)` y `generarHtmlCotizacion(cot, opciones)` ahora filtra los contactos extra según lo marcado en el modal.
+
+**Verificación:** `npm run build` OK. Probado en el navegador por el usuario (modal aparece desde listado y desde formulario, el PDF respeta la selección) — funcionando.
+
 ## Fecha: 2026-09-14 (17)
 
 ### v2.118: PDF de Cotización — Datos de Cliente / Contacto / Ejecutivo separados en tarjetas, igual que la OT
