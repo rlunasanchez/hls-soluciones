@@ -93,7 +93,7 @@ body {
 .enc { display: grid; grid-template-columns: 24mm 1fr auto; align-items: center; gap: 5mm; break-inside: avoid; }
 .logo { display: flex; align-items: center; justify-content: center; }
 .logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
-.logo-hls { width: 24mm; height: 11.2mm; }
+.logo-hls { width: 24mm; height: 11.2mm; align-self: flex-end; }
 .logo--ph { border: .5pt dashed #CBD5E1; border-radius: 999px; color: #94A3B8; font-size: 6pt; text-align: center; padding: 2pt; }
 .emp-datos { text-align: center; }
 .emp-datos h1 { margin: 0; font-size: 13pt; font-weight: 800; letter-spacing: -.01em; color: #0C4A8C; }
