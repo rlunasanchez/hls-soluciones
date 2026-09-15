@@ -18,6 +18,8 @@ const campo = (label, valor) => (
   valor ? `<div class="f"><span class="l">${esc(label)}</span><span class="v">${esc(valor)}</span></div>` : ""
 );
 
+const h2 = (titulo) => `<h2>${esc(titulo)}</h2>`;
+
 const slotLogo = (src, alt, cls) => (
   src
     ? `<img class="logo ${cls}" src="${src}" alt="${esc(alt)}">`
@@ -107,6 +109,7 @@ body {
 .folio-box .razon-emp { font-size: 8pt; font-weight: 700; color: #374151; }
 
 .sec { margin-top: 3mm; break-inside: avoid; background: #FFFFFF; border: .5pt solid #E2E8F0; border-radius: 7pt; padding: 2.5mm 4mm; box-shadow: 0 1px 4px rgba(15,23,42,.15); }
+.sec h2 { margin: 0 0 1.8mm; padding-left: 6pt; border-left: 5pt solid #0C4A8C; border-radius: 2pt; font-size: 7pt; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #0C4A8C; break-after: avoid; }
 
 .grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 8mm; row-gap: 2mm; }
 .f .l { display: block; font-size: 6pt; text-transform: uppercase; letter-spacing: .07em; color: #6B7280; }
@@ -177,6 +180,7 @@ export function generarHtmlCotizacion(cot) {
   </div>
 
   <div class="sec">
+    ${h2("Datos de Cliente")}
     <div class="grid">
       ${campo("Cliente", cot.cliente_razon_social)}
       ${campo("RUT", cot.cliente_rut)}
@@ -184,10 +188,21 @@ export function generarHtmlCotizacion(cot) {
       ${campo("Ciudad - Comuna", [cot.cliente_ciudad, cot.cliente_comuna].filter((v) => String(v || "").trim()).join(" - "))}
       ${campo("Teléfono", cot.cliente_telefono)}
       ${campo("Email Cliente", cot.cliente_email)}
+    </div>
+  </div>
+  <div class="sec">
+    ${h2("Contacto")}
+    <div class="grid">
       ${campo("Contacto", cot.contacto_nombre)}
       ${campo("Cargo Contacto", cot.contacto_cargo)}
       ${campo("Email Contacto", cot.contacto_email)}
       ${campo("Fono Contacto", cot.contacto_fono)}
+    </div>
+    ${contactosExtra.length ? `<div class="sub">› Contactos adicionales</div>${contactosExtra.map(contactoExtraHtml).join("")}` : ""}
+  </div>
+  <div class="sec">
+    ${h2("Ejecutivo y Condiciones")}
+    <div class="grid">
       ${campo("Ejecutivo", cot.ejecutivo)}
       ${campo("Fono Ejecutivo", cot.ejecutivo_fono)}
       ${campo("Email Ejecutivo", cot.ejecutivo_email)}
@@ -196,7 +211,6 @@ export function generarHtmlCotizacion(cot) {
       ${campo("Válido hasta", fecha(cot.fecha_valido_hasta))}
     </div>
     ${cot.glosa ? `<div class="grid" style="margin-top:2mm"><div class="f" style="grid-column: 1 / -1"><span class="l">Glosa</span><span class="v">${esc(cot.glosa)}</span></div></div>` : ""}
-    ${contactosExtra.length ? `<div class="sub">› Contactos adicionales</div>${contactosExtra.map(contactoExtraHtml).join("")}` : ""}
   </div>
 
   <div class="sec">
