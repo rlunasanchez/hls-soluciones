@@ -1,5 +1,21 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-15 (2)
+
+### v2.120: PDF de Cotización — más ítems por hoja + fix SKU largo que se cortaba
+
+Dos problemas reportados juntos:
+
+**SKU largo ocupaba 2 líneas y desperdiciaba espacio:** la columna SKU tenía 18mm con `overflow-wrap: anywhere` (corta letra por letra en cualquier punto, no siempre en el punto más compacto). Se ensanchó a 22mm y se le bajó el tamaño de fuente a 7.5pt con `word-break: break-all`, para que entre más texto por línea antes de tener que saltar.
+
+**Muy pocos ítems entraban en una sola hoja:** medido imprimiendo a PDF real (no a ojo) con distintas cantidades de ítems, antes del ajuste entraban solo 6 ítems (si el Detalle es largo y ocupa 2 líneas) u 8 ítems (Detalle corto, 1 línea) antes de pasar a la página 2. La causa: v2.118 separó Cliente/Contacto/Ejecutivo en 3 tarjetas independientes (cada una con su propio margen/padding/borde), lo que dejaba muy poco alto disponible para la tabla de ítems.
+
+Se apretó el espaciado sin cambiar el estilo visual: tarjetas de "Datos de Cliente" y "Ejecutivo y Condiciones" pasaron de 2 a 3 columnas (nueva clase `.grid-3`, 6 campos en 2 filas en vez de 3), logo del encabezado de 24mm a 19mm, menos padding/margen entre tarjetas (`.sec`, `.header-card`) y menos `row-gap` en la grilla de campos.
+
+**Resultado medido después del ajuste:** 9 ítems (Detalle largo) / 13 ítems (Detalle corto) antes de pasar a la página 2 — un 50% más de capacidad, mismo diseño.
+
+**Verificación:** `npm run build` OK. Medición de páginas hecha imprimiendo HTML real a PDF en modo headless (Edge) y contando páginas del PDF resultante, con datos de prueba variando la cantidad de ítems.
+
 ## Fecha: 2026-09-15 (1)
 
 ### v2.119: PDF de Cotización — modal de opciones para elegir qué contactos incluir, igual que la OT
