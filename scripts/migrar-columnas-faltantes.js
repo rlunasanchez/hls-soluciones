@@ -30,6 +30,9 @@ const ESPERADAS = {
     ['ciudad', "VARCHAR(100)"],
     ['comuna', "VARCHAR(100)"],
   ],
+  cotizaciones: [
+    ['contactos_extra', "TEXT"],
+  ],
 };
 
 (async () => {

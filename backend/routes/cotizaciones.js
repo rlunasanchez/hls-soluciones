@@ -25,7 +25,7 @@ router.get("/", authMiddleware, async (req, res) => {
       `SELECT id, folio, fecha_emision, fecha_valido_hasta, condicion, glosa,
         cliente_id, cliente_rut, cliente_razon_social,
         cliente_direccion, cliente_ciudad, cliente_comuna, cliente_telefono, cliente_email,
-        contacto_nombre, contacto_fono, contacto_email, contacto_cargo,
+        contacto_nombre, contacto_fono, contacto_email, contacto_cargo, contactos_extra,
         ejecutivo, ejecutivo_fono, ejecutivo_email,
         items, orden_id, orden_numero, fecha_creacion, fecha_actualizacion
        FROM cotizaciones ${where} ORDER BY id DESC LIMIT $${limitParamNum} OFFSET $${offsetParamNum}`,
@@ -72,7 +72,7 @@ router.post("/", authMiddleware, async (req, res) => {
     fechaEmision, fechaValidoHasta, condicion, glosa,
     clienteId, clienteRut, clienteRazonSocial,
     clienteDireccion, clienteCiudad, clienteComuna, clienteTelefono, clienteEmail,
-    contactoNombre, contactoFono, contactoEmail, contactoCargo,
+    contactoNombre, contactoFono, contactoEmail, contactoCargo, contactosExtra,
     ejecutivoFono, ejecutivoEmail,
     items, ordenId, ordenNumero
   } = req.body;
@@ -96,16 +96,17 @@ router.post("/", authMiddleware, async (req, res) => {
       `INSERT INTO cotizaciones (folio, fecha_emision, fecha_valido_hasta, condicion, glosa,
         cliente_id, cliente_rut, cliente_razon_social,
         cliente_direccion, cliente_ciudad, cliente_comuna, cliente_telefono, cliente_email,
-        contacto_nombre, contacto_fono, contacto_email, contacto_cargo,
+        contacto_nombre, contacto_fono, contacto_email, contacto_cargo, contactos_extra,
         ejecutivo, ejecutivo_fono, ejecutivo_email,
         items, orden_id, orden_numero)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
        RETURNING id`,
       [
         folio, fechaEmision, fechaValidoHasta || null, condicion || null, glosa || null,
         clienteId || null, clienteRut || null, clienteRazonSocial || '',
         clienteDireccion || null, clienteCiudad || null, clienteComuna || null, clienteTelefono || null, clienteEmail || null,
         contactoNombre || null, contactoFono || null, contactoEmail || null, contactoCargo || null,
+        contactosExtra ? JSON.stringify(contactosExtra) : null,
         ejecutivo, ejecutivoFono || null, ejecutivoEmail || null,
         items ? JSON.stringify(items) : null, ordenId || null, ordenNumero || null
       ]
@@ -128,7 +129,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
     fechaEmision, fechaValidoHasta, condicion, glosa,
     clienteId, clienteRut, clienteRazonSocial,
     clienteDireccion, clienteCiudad, clienteComuna, clienteTelefono, clienteEmail,
-    contactoNombre, contactoFono, contactoEmail, contactoCargo,
+    contactoNombre, contactoFono, contactoEmail, contactoCargo, contactosExtra,
     ejecutivo, ejecutivoFono, ejecutivoEmail,
     items, ordenId, ordenNumero
   } = req.body;
@@ -141,15 +142,16 @@ router.put("/:id", authMiddleware, async (req, res) => {
       `UPDATE cotizaciones SET fecha_emision = $1, fecha_valido_hasta = $2, condicion = $3, glosa = $4,
         cliente_id = $5, cliente_rut = $6, cliente_razon_social = $7,
         cliente_direccion = $8, cliente_ciudad = $9, cliente_comuna = $10, cliente_telefono = $11, cliente_email = $12,
-        contacto_nombre = $13, contacto_fono = $14, contacto_email = $15, contacto_cargo = $16,
-        ejecutivo = $17, ejecutivo_fono = $18, ejecutivo_email = $19,
-        items = $20, orden_id = $21, orden_numero = $22
-       WHERE id = $23`,
+        contacto_nombre = $13, contacto_fono = $14, contacto_email = $15, contacto_cargo = $16, contactos_extra = $17,
+        ejecutivo = $18, ejecutivo_fono = $19, ejecutivo_email = $20,
+        items = $21, orden_id = $22, orden_numero = $23
+       WHERE id = $24`,
       [
         fechaEmision, fechaValidoHasta || null, condicion || null, glosa || null,
         clienteId || null, clienteRut || null, clienteRazonSocial || '',
         clienteDireccion || null, clienteCiudad || null, clienteComuna || null, clienteTelefono || null, clienteEmail || null,
         contactoNombre || null, contactoFono || null, contactoEmail || null, contactoCargo || null,
+        contactosExtra ? JSON.stringify(contactosExtra) : null,
         ejecutivo || null, ejecutivoFono || null, ejecutivoEmail || null,
         items ? JSON.stringify(items) : null, ordenId || null, ordenNumero || null,
         id

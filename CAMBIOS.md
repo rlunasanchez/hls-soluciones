@@ -1,5 +1,26 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-14 (15)
+
+### v2.116: Otros Contactos en Cotizaciones (igual que en la OT) + fix crash al cerrar el formulario
+
+Cotizaciones solo tenía el buscador de un único contacto (igual que el "Contacto" principal de la OT); no existía el equivalente a "Otros Contactos" de la OT (lista de contactos adicionales con selector de los ya registrados en el cliente, alta manual, chips resumen y botón "Registrar en el cliente"). Se replicó ese bloque completo en `Cotizaciones.jsx`, con el mismo patrón que `OrdenFormCliente.jsx`.
+
+**Backend:** columna nueva `cotizaciones.contactos_extra` (TEXT, JSON — mismo formato que `ordenes_trabajo.contactos_extra`), agregada a `crear_tablas.sql` y a `scripts/migrar-columnas-faltantes.js`. `backend/routes/cotizaciones.js` la lee/guarda en GET (lista y detalle), POST y PUT.
+
+**Frontend:** `cotizacionVacia()` suma `contactosExtra: []`; `cargarCotizacion` la parsea (`parseExtra`); el formulario tiene el mismo bloque colapsable "Otros Contactos" (verde, con chips "Contacto N") que la OT.
+
+**PDF:** `cotizacionDoc.js` ahora también imprime "› Contactos adicionales" bajo los datos del cliente, igual que `ordenServicioDoc.js` (mismas clases `.sub`/`.extra-item`).
+
+**Fix de paso:** `cerrarFormulario` en `Cotizaciones.jsx` llamaba a `setItemsResumenAbierto`/`setItemsManualVisibles`, dos setters que no existen en este archivo (quedaron de una versión anterior del patrón de ítems) — tiraban `ReferenceError` cada vez que se cerraba/cancelaba el formulario de una cotización. Se reemplazó por los setters reales (`setItemsColapsado` + los nuevos de contactos).
+
+**Migración SQL:** MySQL/local ya ejecutada vía `scripts/migrar-columnas-faltantes.js`. Falta correr en Neon:
+```sql
+ALTER TABLE cotizaciones ADD COLUMN IF NOT EXISTS contactos_extra TEXT;
+```
+
+**Verificación:** `npm run build` OK. Pendiente probar el flujo completo en el navegador (agregar/editar/quitar contacto, guardar, PDF).
+
 ## Fecha: 2026-09-14 (14)
 
 ### v2.115: Mantenedor de Clientes — cliente nuevo no se veía tras crearlo
