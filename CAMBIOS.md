@@ -1,5 +1,17 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-16
+
+### v2.122: PDF de Cotización — logo y encabezado del mismo alto que la OT
+
+**Problema:** el logo de Cotización quedaba visiblemente más chico que el de la OT, y el cuadro "COTIZACIÓN + Folio + RUT + Razón Social" (equivalente al `brother-box` de la OT, pero con más líneas de texto) empujaba la fila del encabezado a ser más alta que la de la OT.
+
+**Solución:** `.logo-hls` de Cotización pasó a 28mm×13.1mm (igual que la OT) y la columna del logo en `.enc` de 24mm a 28mm, para que no quedara recortado. El cuadro de folio se compactó (menos padding, tipografías más chicas) y se alineó abajo con `align-self: flex-end`, igual que el logo y el `brother-box` de la OT, para no forzar el alto de la fila.
+
+**Archivo:** `cotizacionDoc.js`.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-15 (3)
 
 ### v2.121: PDF de la OT y Cotización — logo HLS nuevo, alineado con el de Brother
