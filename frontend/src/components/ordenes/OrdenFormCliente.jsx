@@ -1235,13 +1235,13 @@ function OrdenFormCliente({
       </div>
       )}
 
-      <div style={{ marginTop: 16, paddingTop: 10, borderTop: '2px solid #cbd5e1' }} />
+      <div style={{ marginTop: 6, paddingTop: 3, borderTop: '2px solid #cbd5e1' }} />
 
-      {clienteSeleccionado && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px', marginTop: '14px' }}>
-        <div ref={contactoDropdownRef} style={{ position: 'relative' }}>
-          <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: 'var(--text)', fontSize: '0.8rem' }}>
-            <Search size={14} style={{ display: 'inline', marginRight: '6px' }} />
+      <div className="of-form-grid of-contacto-grid">
+        {clienteSeleccionado && (
+        <div ref={contactoDropdownRef} className="of-f" style={{ position: 'relative' }}>
+          <label>
+            <Search size={11} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'text-bottom' }} />
             Buscar Contacto
           </label>
           <input
@@ -1299,10 +1299,8 @@ function OrdenFormCliente({
             </div>
           )}
         </div>
-        </div>
-      )}
+        )}
 
-      <div className="of-form-grid">
         <div className="of-f">
           <label>Contacto</label>
           <input
