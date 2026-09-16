@@ -209,7 +209,7 @@ function OrdenFormEquipo({
       </div>
       )}
 
-      <div className="of-r3" style={{ gap: '20px', marginBottom: '20px' }}>
+      <div className="of-r3" style={{ columnGap: '20px', rowGap: '6px', marginBottom: '20px' }}>
         <div className="of-f">
           <label>Equipo *</label>
           <input type="text" placeholder="Tipo de equipo" value={nuevaOrden.equipo}

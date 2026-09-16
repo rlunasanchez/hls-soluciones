@@ -2,6 +2,20 @@
 
 ## Fecha: 2026-09-16
 
+### v2.125: OT — grilla de Contacto reordenada + espaciado vertical de campos más compacto en toda la app
+
+**Problema 1:** en el formulario de la OT, "Buscar Contacto" vivía en su propia fila (grilla separada) por encima de los campos Contacto/Fono/Email/Cargo, cada uno en su propia fila también — 5 líneas apiladas con mucho espacio muerto entre la línea divisoria y el primer campo, y el label de "Buscar Contacto" (estilo inline distinto) no alineaba con los demás.
+
+**Solución 1:** se fusionó "Buscar Contacto" dentro de la misma grilla que los otros 4 campos (nueva clase `.of-contacto-grid`, 3 columnas fijas incluso en mobile): fila 1 = Buscar Contacto / Contacto / Fono Contacto, fila 2 = Email Contacto / Cargo Contacto. El label de "Buscar Contacto" pasó a usar la clase `.of-f` (igual que los demás) para que su altura de fila coincida y los inputs queden alineados. También se redujo el espacio antes del bloque (línea divisoria + margen superior).
+
+**Problema 2:** la grilla de "Datos de Equipo" (Equipo/Marca/Modelo/Serie/Nivel de Tinta/Contador, 2 filas de 3 campos) traía un `gap: '20px'` puesto directo en el `style` inline de `OrdenFormEquipo.jsx`, que pisaba el `gap` de la clase `.of-r3` — por eso no se veía el mismo espaciado compacto que el resto de las secciones.
+
+**Solución 2:** se separó el `gap` en `columnGap`/`rowGap` ahí, y en la clase compartida `.of-form-grid` (usada en el resto de los campos de la OT y también en Cotizaciones, que reusa la misma hoja de estilos) el `gap: 20px` uniforme pasó a `column-gap: 20px` / `row-gap: 6px` — mantiene la separación horizontal entre campos de una misma fila, pero acerca las filas entre sí. Mismo ajuste en el breakpoint mobile (`gap: 10px` → `6px`).
+
+**Archivos:** `OrdenFormCliente.jsx`, `OrdenFormEquipo.jsx`, `ordenes-componentes.css`.
+
+**Verificación:** `npm run build` OK.
+
 ### v2.124: PDF de OT — secciones "Falla — Incidencia" e "Informe Técnico" más grandes
 
 Se agrandaron específicamente estas dos secciones para que resalten más en el documento: letra de 8.5pt a 11pt, más interlineado, más padding en la tarjeta y `min-height` de 18mm en el bloque de texto (clases nuevas `.sec-grande`/`.txt-grande`, aplicadas solo en `seccionTexto()`). El resto de las secciones —incluida Observaciones, que sigue usando la clase base `.txt`— no se tocó, así que ahora se ve proporcionalmente más chica en comparación, aunque su tamaño absoluto no cambió.
