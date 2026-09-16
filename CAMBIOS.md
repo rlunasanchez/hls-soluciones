@@ -2,6 +2,14 @@
 
 ## Fecha: 2026-09-16
 
+### v2.126: PDF de OT — "Contactos adicionales" con tamaño de letra uniforme y más grande
+
+El nombre del contacto (`.extra-item .nom`, 8pt) y el detalle —cargo, fono, email, dirección— (`.extra-item .det`, 7pt) se mostraban en tamaños distintos. Ambos pasaron a 9.5pt.
+
+**Archivo:** `ordenServicioDoc.js`.
+
+**Verificación:** `npm run build` OK.
+
 ### v2.125: OT — grilla de Contacto reordenada + espaciado vertical de campos más compacto en toda la app
 
 **Problema 1:** en el formulario de la OT, "Buscar Contacto" vivía en su propia fila (grilla separada) por encima de los campos Contacto/Fono/Email/Cargo, cada uno en su propia fila también — 5 líneas apiladas con mucho espacio muerto entre la línea divisoria y el primer campo, y el label de "Buscar Contacto" (estilo inline distinto) no alineaba con los demás.
