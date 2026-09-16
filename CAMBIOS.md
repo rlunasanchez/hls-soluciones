@@ -2,6 +2,16 @@
 
 ## Fecha: 2026-09-16
 
+### v2.123: PDF de OT — el pie de página (firmas + texto legal) ahora queda al final de la hoja
+
+**Problema:** el bloque de firmas ("Recibido conforme — Cliente" / "Técnico") y el texto legal de abajo quedaban pegados justo debajo de la última sección con contenido. Si la orden tenía poco texto (sin avería/actividad/observaciones largas), sobraba un espacio en blanco grande entre ese bloque y el borde inferior de la hoja.
+
+**Solución:** `.page` pasó a `display: flex; flex-direction: column` y `.pie` a `margin-top: auto`, de modo que el bloque se empuja hasta el fondo de la hoja cuando hay espacio libre en una sola página, y sigue el flujo normal (sin superponerse) cuando el contenido ya llena o supera una página.
+
+**Archivo:** `ordenServicioDoc.js`.
+
+**Verificación:** `npm run build` OK. Probado renderizando el HTML real con datos de prueba en Edge headless.
+
 ### v2.122: PDF de Cotización — logo y encabezado del mismo alto que la OT
 
 **Problema:** el logo de Cotización quedaba visiblemente más chico que el de la OT, y el cuadro "COTIZACIÓN + Folio + RUT + Razón Social" (equivalente al `brother-box` de la OT, pero con más líneas de texto) empujaba la fila del encabezado a ser más alta que la de la OT.
