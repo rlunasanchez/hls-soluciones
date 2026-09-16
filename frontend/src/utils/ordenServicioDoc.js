@@ -82,7 +82,7 @@ function direccionExtraHtml(d) {
 }
 
 function seccionTexto(titulo, valor) {
-  return `<section class="sec">${h2(titulo)}<div class="txt">${esc(valor)}</div></section>`;
+  return `<section class="sec sec-grande">${h2(titulo)}<div class="txt txt-grande">${esc(valor)}</div></section>`;
 }
 
 function seccionObservaciones(orden) {
@@ -178,6 +178,8 @@ img.logo { max-width: 100%; max-height: 100%; object-fit: contain; }
 .chip { display: inline-block; max-width: 100%; overflow-wrap: anywhere; background: #E8F1FB; border: .5pt solid rgba(12,74,140,.15); border-radius: 999px; padding: 1.5pt 7pt; font-size: 7.5pt; font-weight: 600; color: #0C4A8C; margin: 0 3pt 2pt 0; }
 
 .txt { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 0; font-size: 8.5pt; orphans: 3; widows: 3; }
+.sec-grande { padding: 5mm 4mm 4.5mm; }
+.txt-grande { font-size: 11pt; line-height: 1.6; min-height: 18mm; }
 
 .pie { margin-top: auto; padding-top: 2.5mm; break-inside: avoid; border-top: .5pt solid #CBD5E1; }
 .firmas { display: grid; grid-template-columns: 1fr 1fr; column-gap: 14mm; }

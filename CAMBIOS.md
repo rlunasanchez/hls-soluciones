@@ -2,6 +2,14 @@
 
 ## Fecha: 2026-09-16
 
+### v2.124: PDF de OT — secciones "Falla — Incidencia" e "Informe Técnico" más grandes
+
+Se agrandaron específicamente estas dos secciones para que resalten más en el documento: letra de 8.5pt a 11pt, más interlineado, más padding en la tarjeta y `min-height` de 18mm en el bloque de texto (clases nuevas `.sec-grande`/`.txt-grande`, aplicadas solo en `seccionTexto()`). El resto de las secciones —incluida Observaciones, que sigue usando la clase base `.txt`— no se tocó, así que ahora se ve proporcionalmente más chica en comparación, aunque su tamaño absoluto no cambió.
+
+**Archivo:** `ordenServicioDoc.js`.
+
+**Verificación:** `npm run build` OK. Comparado visualmente contra el resto de secciones renderizando el HTML real con datos de prueba en Edge headless.
+
 ### v2.123: PDF de OT — el pie de página (firmas + texto legal) ahora queda al final de la hoja
 
 **Problema:** el bloque de firmas ("Recibido conforme — Cliente" / "Técnico") y el texto legal de abajo quedaban pegados justo debajo de la última sección con contenido. Si la orden tenía poco texto (sin avería/actividad/observaciones largas), sobraba un espacio en blanco grande entre ese bloque y el borde inferior de la hoja.
