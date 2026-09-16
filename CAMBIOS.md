@@ -1,5 +1,35 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-16
+
+### v2.124: PDF de OT — secciones "Falla — Incidencia" e "Informe Técnico" más grandes
+
+Se agrandaron específicamente estas dos secciones para que resalten más en el documento: letra de 8.5pt a 11pt, más interlineado, más padding en la tarjeta y `min-height` de 18mm en el bloque de texto (clases nuevas `.sec-grande`/`.txt-grande`, aplicadas solo en `seccionTexto()`). El resto de las secciones —incluida Observaciones, que sigue usando la clase base `.txt`— no se tocó, así que ahora se ve proporcionalmente más chica en comparación, aunque su tamaño absoluto no cambió.
+
+**Archivo:** `ordenServicioDoc.js`.
+
+**Verificación:** `npm run build` OK. Comparado visualmente contra el resto de secciones renderizando el HTML real con datos de prueba en Edge headless.
+
+### v2.123: PDF de OT — el pie de página (firmas + texto legal) ahora queda al final de la hoja
+
+**Problema:** el bloque de firmas ("Recibido conforme — Cliente" / "Técnico") y el texto legal de abajo quedaban pegados justo debajo de la última sección con contenido. Si la orden tenía poco texto (sin avería/actividad/observaciones largas), sobraba un espacio en blanco grande entre ese bloque y el borde inferior de la hoja.
+
+**Solución:** `.page` pasó a `display: flex; flex-direction: column` y `.pie` a `margin-top: auto`, de modo que el bloque se empuja hasta el fondo de la hoja cuando hay espacio libre en una sola página, y sigue el flujo normal (sin superponerse) cuando el contenido ya llena o supera una página.
+
+**Archivo:** `ordenServicioDoc.js`.
+
+**Verificación:** `npm run build` OK. Probado renderizando el HTML real con datos de prueba en Edge headless.
+
+### v2.122: PDF de Cotización — logo y encabezado del mismo alto que la OT
+
+**Problema:** el logo de Cotización quedaba visiblemente más chico que el de la OT, y el cuadro "COTIZACIÓN + Folio + RUT + Razón Social" (equivalente al `brother-box` de la OT, pero con más líneas de texto) empujaba la fila del encabezado a ser más alta que la de la OT.
+
+**Solución:** `.logo-hls` de Cotización pasó a 28mm×13.1mm (igual que la OT) y la columna del logo en `.enc` de 24mm a 28mm, para que no quedara recortado. El cuadro de folio se compactó (menos padding, tipografías más chicas) y se alineó abajo con `align-self: flex-end`, igual que el logo y el `brother-box` de la OT, para no forzar el alto de la fila.
+
+**Archivo:** `cotizacionDoc.js`.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-15 (3)
 
 ### v2.121: PDF de la OT y Cotización — logo HLS nuevo, alineado con el de Brother

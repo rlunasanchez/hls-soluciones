@@ -82,7 +82,7 @@ function direccionExtraHtml(d) {
 }
 
 function seccionTexto(titulo, valor) {
-  return `<section class="sec">${h2(titulo)}<div class="txt">${esc(valor)}</div></section>`;
+  return `<section class="sec sec-grande">${h2(titulo)}<div class="txt txt-grande">${esc(valor)}</div></section>`;
 }
 
 function seccionObservaciones(orden) {
@@ -130,7 +130,7 @@ body {
 
 /* Fondo de página como caja propia (no background-clip) para que se vea
    igual en cualquier visor de PDF, incluidos los de celular. */
-.page { width: 210mm; min-height: 297mm; padding: 9mm 12mm 8mm; background: #EEF2F7; }
+.page { width: 210mm; min-height: 297mm; padding: 9mm 12mm 8mm; background: #EEF2F7; display: flex; flex-direction: column; }
 
 .header-card { background: #FFFFFF; border: .5pt solid #E2E8F0; border-radius: 7pt; padding: 3mm 4mm 2.2mm; box-shadow: 0 1px 4px rgba(15,23,42,.15); break-inside: avoid; }
 .enc { display: grid; grid-template-columns: 28mm 1fr auto; align-items: center; gap: 5mm; break-inside: avoid; }
@@ -178,8 +178,10 @@ img.logo { max-width: 100%; max-height: 100%; object-fit: contain; }
 .chip { display: inline-block; max-width: 100%; overflow-wrap: anywhere; background: #E8F1FB; border: .5pt solid rgba(12,74,140,.15); border-radius: 999px; padding: 1.5pt 7pt; font-size: 7.5pt; font-weight: 600; color: #0C4A8C; margin: 0 3pt 2pt 0; }
 
 .txt { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 0; font-size: 8.5pt; orphans: 3; widows: 3; }
+.sec-grande { padding: 5mm 4mm 4.5mm; }
+.txt-grande { font-size: 11pt; line-height: 1.6; min-height: 18mm; }
 
-.pie { margin-top: 3mm; break-inside: avoid; border-top: .5pt solid #CBD5E1; padding-top: 2.5mm; }
+.pie { margin-top: auto; padding-top: 2.5mm; break-inside: avoid; border-top: .5pt solid #CBD5E1; }
 .firmas { display: grid; grid-template-columns: 1fr 1fr; column-gap: 14mm; }
 .firma-linea { border-top: .5pt solid #9CA3AF; width: 60mm; margin-top: 7mm; padding-top: 1.5mm; text-align: center; }
 .firma-linea .t { font-size: 6pt; text-transform: uppercase; letter-spacing: .06em; color: #6B7280; }
