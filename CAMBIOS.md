@@ -14,6 +14,16 @@ Si el contacto promovido tiene dirección/ciudad/comuna distinta a la del client
 
 **Verificación:** `npm run build` OK. Probado renderizando HTML real con datos de prueba en Edge headless: contacto promovido con dirección distinta (se muestra, todo en 1 página), misma dirección que el cliente (se oculta), y sin dirección (vuelve a 2 columnas).
 
+### v2.128: Mantenedor de Cliente — el contacto principal ya tiene su propia Dirección/Ciudad/Comuna
+
+**Problema:** el contacto principal (el primero, fuera de "adicionales") no tenía campos propios de dirección — el código forzaba explícitamente que usara siempre la dirección del cliente, y nunca guardaba ciudad/comuna para él.
+
+**Solución:** se agregaron los campos Dirección/Ciudad/Comuna a la sección "Datos del Contacto" de `ClienteFormulario.jsx`, igual que ya tienen los "Otros Contactos". No hizo falta ninguna migración: la tabla `clientes_contactos` ya tenía esas columnas desde v2.110 (usadas hasta ahora solo para los contactos adicionales); el contacto principal se sigue guardando como la primera fila de esa tabla, solo que ahora con su propia dirección en vez de copiar siempre la del cliente.
+
+**Archivo:** `ClienteFormulario.jsx`.
+
+**Verificación:** `npm run build` OK.
+
 ### v2.126: PDF de OT — "Contactos adicionales" con tamaño de letra uniforme y más grande
 
 El nombre del contacto (`.extra-item .nom`, 8pt) y el detalle —cargo, fono, email, dirección— (`.extra-item .det`, 7pt) se mostraban en tamaños distintos. Ambos pasaron a 9.5pt.
