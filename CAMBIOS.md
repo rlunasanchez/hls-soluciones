@@ -1,6 +1,18 @@
 # Registro de Cambios - HLS Soluciones
 
-## Fecha: 2026-09-16
+## Fecha: 2026-09-17
+
+### v2.127: PDF de OT y Cotización — elegir el contacto principal del documento (efímero) + dirección condicional + grillas de 3 columnas
+
+**Problema:** el bloque "Contacto" del PDF siempre mostraba el contacto guardado en la OT/Cotización; no había forma de que otro contacto (uno de los "adicionales") apareciera como principal en un documento puntual.
+
+**Solución:** en `ModalOpcionesPDF.jsx` y `ModalOpcionesPDFCotizacion.jsx` se agregó un grupo "Contacto principal del documento" con un radio por cada contacto (el guardado en la BD viene preseleccionado). Es **efímero**: la elección vive en el estado del modal, se arma una copia de `orden`/`cot` recién al generar (nunca se muta el prop ni se persiste nada), y al reabrir el modal vuelve siempre al contacto guardado. El contacto que no queda elegido como principal pasa a "Contactos adicionales" con su checkbox, en vez de desaparecer — incluido el contacto principal original si fue desplazado, que ahora se lista con la dirección del cliente (antes no mostraba ninguna).
+
+Si el contacto promovido tiene dirección/ciudad/comuna distinta a la del cliente, se agrega "Dirección Contacto" y "Ciudad - Comuna Contacto" al bloque "Contacto" del PDF (si es igual a la del cliente, no se repite). Para que estos campos extra no hicieran crecer el documento a una segunda hoja, "Datos de Cliente" y "Datos de Equipo" pasaron a grillas de 3 columnas (`.grid-3`, mismo patrón que ya usaba Cotización desde v2.120), y "Contacto" alterna entre 2 y 3 columnas según si se está mostrando la dirección extra o no (con 2 columnas se evita una fila casi vacía cuando no hay dirección que mostrar).
+
+**Archivos:** `ModalOpcionesPDF.jsx`, `ModalOpcionesPDFCotizacion.jsx`, `ordenServicioDoc.js` (`resolverCiudad` ahora exportado), `cotizacionDoc.js`.
+
+**Verificación:** `npm run build` OK. Probado renderizando HTML real con datos de prueba en Edge headless: contacto promovido con dirección distinta (se muestra, todo en 1 página), misma dirección que el cliente (se oculta), y sin dirección (vuelve a 2 columnas).
 
 ### v2.126: PDF de OT — "Contactos adicionales" con tamaño de letra uniforme y más grande
 

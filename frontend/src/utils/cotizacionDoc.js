@@ -160,6 +160,14 @@ export function generarHtmlCotizacion(cot, opciones) {
     : contactosExtraTodos;
   const { neto, iva, total } = calcularTotales(cot.items);
 
+  // Dirección del contacto (solo existe cuando se elige un contacto adicional
+  // como principal desde el modal de PDF — ver ModalOpcionesPDFCotizacion.jsx):
+  // se imprime únicamente si es distinta a la dirección del cliente.
+  const normDir = (...partes) => partes.filter((v) => String(v || "").trim()).map((v) => String(v).trim().toUpperCase()).join("|");
+  const direccionClienteNorm = normDir(cot.cliente_direccion, cot.cliente_ciudad, cot.cliente_comuna);
+  const direccionContactoNorm = normDir(cot.contacto_direccion, cot.contacto_ciudad, cot.contacto_comuna);
+  const mostrarDireccionContacto = !!direccionContactoNorm && direccionContactoNorm !== direccionClienteNorm;
+
   return `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -202,11 +210,13 @@ export function generarHtmlCotizacion(cot, opciones) {
   </div>
   <div class="sec">
     ${h2("Contacto")}
-    <div class="grid">
+    <div class="grid${mostrarDireccionContacto ? " grid-3" : ""}">
       ${campo("Contacto", cot.contacto_nombre)}
       ${campo("Cargo Contacto", cot.contacto_cargo)}
       ${campo("Email Contacto", cot.contacto_email)}
       ${campo("Fono Contacto", cot.contacto_fono)}
+      ${mostrarDireccionContacto ? campo("Dirección Contacto", cot.contacto_direccion) : ""}
+      ${mostrarDireccionContacto ? campo("Ciudad - Comuna Contacto", [cot.contacto_ciudad, cot.contacto_comuna].filter((v) => String(v || "").trim()).join(" - ")) : ""}
     </div>
     ${contactosExtra.length ? `<div class="sub">› Contactos adicionales</div>${contactosExtra.map(contactoExtraHtml).join("")}` : ""}
   </div>

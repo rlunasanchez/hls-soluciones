@@ -1,24 +1,52 @@
 import { useState, useEffect, useMemo } from "react";
 import { X, FileDown } from "lucide-react";
-import { derivarListas, generarHtmlOrdenServicio, tituloDocumento } from "../../utils/ordenServicioDoc";
+import { derivarListas, generarHtmlOrdenServicio, tituloDocumento, resolverCiudad } from "../../utils/ordenServicioDoc";
 import { imprimirHtml } from "../../utils/imprimir";
 
 // Modal de opciones antes de generar el PDF de la Orden de Servicio: deja
 // elegir qué insumos, contactos y direcciones extra (y qué secciones)
-// entran en el documento. Por defecto reproduce el informe en papel
-// (contacto principal + insumos cargados); los extras son opt-in.
+// entran en el documento, y cuál contacto actúa como principal — esto
+// último es efímero (solo afecta este PDF, nunca se guarda en la OT). Por
+// defecto reproduce el informe en papel (contacto principal + insumos
+// cargados); los extras son opt-in.
 function ModalOpcionesPDF({ orden, onClose }) {
   const { insumos, contactosExtra, direccionesExtra } = useMemo(() => derivarListas(orden), [orden]);
 
   const [opciones, setOpciones] = useState(() => ({
     insumos: insumos.map(() => true),
-    contactosExtra: contactosExtra.map(() => false),
     direccionesExtra: direccionesExtra.map(() => false),
     averia: !!String(orden.averia || "").trim(),
     actividad: !!String(orden.actividad || "").trim(),
     observaciones: !!String(orden.observaciones || "").trim(),
     firma: true
   }));
+
+  // Contacto principal del documento: "P" = el principal real de la OT,
+  // "e{i}" = el contacto adicional en la posición i de contactosExtra.
+  // Clave estable (no por posición) para que la elección no se desalinee
+  // con la lista de adicionales cuando cambia.
+  const [principalKey, setPrincipalKey] = useState("P");
+  const [marcados, setMarcados] = useState({});
+
+  const contactosTodos = useMemo(() => {
+    // Si "P" queda desplazado a adicional, muestra la dirección del cliente
+    // (el contacto principal de la OT nunca tuvo una propia) en vez de
+    // aparecer sin dirección en la lista de adicionales.
+    const principalDb = {
+      key: "P", nombre: orden.contacto, cargo: orden.cargo_contacto,
+      email: orden.email_contacto, fono: orden.fono_contacto,
+      direccion: orden.direccion, ciudad: resolverCiudad(orden, direccionesExtra), comuna: orden.comuna
+    };
+    return [principalDb, ...contactosExtra.map((c, i) => ({ ...c, key: `e${i}` }))];
+  }, [orden, contactosExtra, direccionesExtra]);
+
+  const { principalEfectivo, extrasEfectivos } = useMemo(() => {
+    const principalEfectivo = contactosTodos.find((c) => c.key === principalKey) ?? contactosTodos[0];
+    const extrasEfectivos = contactosTodos.filter(
+      (c) => c.key !== principalKey && String(c.nombre || "").trim()
+    );
+    return { principalEfectivo, extrasEfectivos };
+  }, [contactosTodos, principalKey]);
 
   useEffect(() => {
     const onKey = (e) => { if (e.key === "Escape") onClose(); };
@@ -32,12 +60,36 @@ function ModalOpcionesPDF({ orden, onClose }) {
   const marcarTodos = (key, len, val) =>
     setOpciones((o) => ({ ...o, [key]: Array(len).fill(val) }));
 
+  const toggleContacto = (key) => setMarcados((m) => ({ ...m, [key]: !m[key] }));
+
+  const marcarTodosContactos = (val) =>
+    setMarcados((m) => {
+      const n = { ...m };
+      extrasEfectivos.forEach((c) => { n[c.key] = val; });
+      return n;
+    });
+
   const numero = String(orden.numero_orden || "").split("-").pop() || "—";
-  const hayContacto = !!String(orden.contacto || "").trim();
-  const hayContactos = hayContacto || contactosExtra.length > 0;
+  const puedeElegirPrincipal = contactosTodos.filter((c) => String(c.nombre || "").trim()).length > 1;
+  const hayContactos = !!String(principalEfectivo?.nombre || "").trim() || extrasEfectivos.length > 0;
 
   const generar = () => {
-    imprimirHtml(generarHtmlOrdenServicio(orden, opciones), tituloDocumento(orden));
+    const opcionesPdf = {
+      ...opciones,
+      contactosExtra: extrasEfectivos.map((c) => !!marcados[c.key]),
+    };
+    const ordenPdf = principalKey === "P" ? orden : {
+      ...orden,
+      contacto: principalEfectivo.nombre || "",
+      cargo_contacto: principalEfectivo.cargo || "",
+      email_contacto: principalEfectivo.email || "",
+      fono_contacto: principalEfectivo.fono || "",
+      contacto_direccion: principalEfectivo.direccion || "",
+      contacto_ciudad: principalEfectivo.ciudad || "",
+      contacto_comuna: principalEfectivo.comuna || "",
+      contactos_extra: JSON.stringify(extrasEfectivos.map(({ key, ...c }) => c)),
+    };
+    imprimirHtml(generarHtmlOrdenServicio(ordenPdf, opcionesPdf), tituloDocumento(ordenPdf));
     onClose();
   };
 
@@ -76,27 +128,48 @@ function ModalOpcionesPDF({ orden, onClose }) {
             </div>
           )}
 
+          {puedeElegirPrincipal && (
+            <div className="mop-group">
+              <div className="mop-group-head">
+                <span className="mop-group-title">Contacto principal del documento</span>
+              </div>
+              <div className="mop-items mop-una-col">
+                {contactosTodos.filter((c) => String(c.nombre || "").trim()).map((c) => (
+                  <label key={c.key} className="mop-item">
+                    <input type="radio" name="mop-principal-ot" style={{ accentColor: "#7C3AED" }}
+                      checked={principalKey === c.key} onChange={() => setPrincipalKey(c.key)} />
+                    {c.nombre} {c.cargo && <span className="mop-sub">— {c.cargo}</span>}
+                    {c.key === "P" && <span className="mop-sub"> (guardado)</span>}
+                    {c.key !== "P" && (c.direccion || c.ciudad || c.comuna) && (
+                      <span className="mop-sub"> · si es principal, la dirección se imprime solo si es distinta a la del cliente</span>
+                    )}
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
           {hayContactos && (
             <div className="mop-group">
               <div className="mop-group-head">
-                <span className="mop-group-title">Contactos</span>
-                {contactosExtra.length > 1 && (
+                <span className="mop-group-title">Contactos adicionales</span>
+                {extrasEfectivos.length > 1 && (
                   <div style={{ display: "flex", gap: 8 }}>
-                    <button type="button" className="mop-toggle" onClick={() => marcarTodos("contactosExtra", contactosExtra.length, true)}>Todos</button>
-                    <button type="button" className="mop-toggle" onClick={() => marcarTodos("contactosExtra", contactosExtra.length, false)}>Ninguno</button>
+                    <button type="button" className="mop-toggle" onClick={() => marcarTodosContactos(true)}>Todos</button>
+                    <button type="button" className="mop-toggle" onClick={() => marcarTodosContactos(false)}>Ninguno</button>
                   </div>
                 )}
               </div>
               <div className="mop-items mop-una-col">
-                {hayContacto && (
+                {!!String(principalEfectivo?.nombre || "").trim() && (
                   <div className="mop-item mop-fijo">
-                    {orden.contacto} <span className="mop-sub">— principal, siempre incluido</span>
+                    {principalEfectivo.nombre} <span className="mop-sub">— principal de este documento, siempre incluido</span>
                   </div>
                 )}
-                {contactosExtra.map((c, i) => (
-                  <label key={i} className="mop-item">
+                {extrasEfectivos.map((c) => (
+                  <label key={c.key} className="mop-item">
                     <input type="checkbox" className="of-check of-check--pdf"
-                      checked={opciones.contactosExtra[i]} onChange={() => toggleIdx("contactosExtra", i)} />
+                      checked={!!marcados[c.key]} onChange={() => toggleContacto(c.key)} />
                     {c.nombre} {c.cargo && <span className="mop-sub">— {c.cargo}</span>}
                   </label>
                 ))}
