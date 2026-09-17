@@ -153,7 +153,11 @@ export function contactosExtraDe(cot) {
 }
 
 export function generarHtmlCotizacion(cot, opciones) {
-  const items = parseJsonArray(cot.items).filter((i) => String(i?.detalle || "").trim());
+  // Mismo criterio que el guardado (Cotizaciones.jsx): un ítem con SKU o
+  // Neto cargado se imprime aunque todavía no tenga Detalle escrito.
+  const items = parseJsonArray(cot.items).filter((i) =>
+    String(i?.sku || "").trim() || String(i?.detalle || "").trim() || Number(i?.neto) > 0
+  );
   const contactosExtraTodos = contactosExtraDe(cot);
   const contactosExtra = opciones?.contactosExtra
     ? contactosExtraTodos.filter((_, i) => opciones.contactosExtra[i])

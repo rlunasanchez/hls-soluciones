@@ -24,6 +24,16 @@ Si el contacto promovido tiene dirección/ciudad/comuna distinta a la del client
 
 **Verificación:** `npm run build` OK.
 
+### v2.129: PDF de Cotización — ítems con SKU o Neto pero sin Detalle no se imprimían
+
+**Problema:** al guardar una cotización se conserva cualquier ítem con SKU, Detalle o Neto cargado (fix de sesión anterior), pero el generador del PDF seguía filtrando solo por "Detalle" no vacío — un ítem guardado con SKU/Neto pero sin Detalle escrito quedaba invisible en el PDF aunque existiera en los datos.
+
+**Solución:** el filtro de ítems en `generarHtmlCotizacion` pasó a usar el mismo criterio que el guardado (`Cotizaciones.jsx`): SKU, Detalle o Neto > 0.
+
+**Archivo:** `cotizacionDoc.js`.
+
+**Verificación:** `npm run build` OK.
+
 ### v2.126: PDF de OT — "Contactos adicionales" con tamaño de letra uniforme y más grande
 
 El nombre del contacto (`.extra-item .nom`, 8pt) y el detalle —cargo, fono, email, dirección— (`.extra-item .det`, 7pt) se mostraban en tamaños distintos. Ambos pasaron a 9.5pt.
