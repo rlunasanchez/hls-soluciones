@@ -59,7 +59,7 @@ export function derivarListas(orden) {
 // Para OT viejas guardadas antes de ese campo, se cae al criterio anterior:
 // dirección Matriz con ciudad cargada, si no la primera dirección extra que la
 // tenga. Nunca se deriva de la comuna.
-function resolverCiudad(orden, direccionesExtra) {
+export function resolverCiudad(orden, direccionesExtra) {
   if (String(orden.ciudad || "").trim()) return orden.ciudad;
   const matriz = direccionesExtra.find((d) => d.tipo === "Matriz" && String(d.ciudad || "").trim());
   if (matriz) return matriz.ciudad;
@@ -165,6 +165,7 @@ img.logo { max-width: 100%; max-height: 100%; object-fit: contain; }
 .h2-extra b { color: #111827; }
 
 .grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 8mm; row-gap: 2mm; }
+.grid-3 { grid-template-columns: 1fr 1fr 1fr; }
 .f .l { display: block; font-size: 6pt; text-transform: uppercase; letter-spacing: .07em; color: #6B7280; }
 .f .v { display: block; padding-bottom: 1mm; border-bottom: .5pt solid #E2E8F0; font-size: 9pt; font-weight: 600; color: #111827; overflow-wrap: anywhere; }
 .f .v.num { font-variant-numeric: tabular-nums; }
@@ -211,10 +212,19 @@ export function generarHtmlOrdenServicio(orden, opciones) {
 
   const marcaModelo = [orden.marca, orden.modelo].filter((v) => String(v || "").trim()).join(" ");
 
+  // Dirección del contacto (solo existe cuando se elige un contacto adicional
+  // como principal desde el modal de PDF — ver ModalOpcionesPDF.jsx): se
+  // imprime únicamente si es distinta a la dirección del cliente, para no
+  // repetir el mismo dato que ya aparece en "Datos de Cliente".
+  const normDir = (...partes) => partes.filter((v) => String(v || "").trim()).map((v) => String(v).trim().toUpperCase()).join("|");
+  const direccionClienteNorm = normDir(orden.direccion, ciudad, orden.comuna);
+  const direccionContactoNorm = normDir(orden.contacto_direccion, orden.contacto_ciudad, orden.contacto_comuna);
+  const mostrarDireccionContacto = !!direccionContactoNorm && direccionContactoNorm !== direccionClienteNorm;
+
   const seccionCliente = `
     <section class="sec">
       ${h2("Datos de Cliente")}
-      <div class="grid">
+      <div class="grid grid-3">
         ${campo("Cliente", orden.cliente)}
         ${campo("RUT", orden.rut, true)}
         ${campo("Dirección", orden.direccion)}
@@ -226,11 +236,13 @@ export function generarHtmlOrdenServicio(orden, opciones) {
     </section>
     <section class="sec">
       ${h2("Contacto")}
-      <div class="grid">
+      <div class="grid${mostrarDireccionContacto ? " grid-3" : ""}">
         ${campo("Contacto", orden.contacto)}
         ${campo("Cargo Contacto", orden.cargo_contacto)}
         ${campo("Email Contacto", orden.email_contacto)}
         ${campo("Fono Contacto", orden.fono_contacto, true)}
+        ${mostrarDireccionContacto ? campo("Dirección Contacto", orden.contacto_direccion) : ""}
+        ${mostrarDireccionContacto ? campo("Ciudad - Comuna Contacto", [orden.contacto_ciudad, orden.contacto_comuna].filter((v) => String(v || "").trim()).join(" - ")) : ""}
       </div>
       ${contactosSel.length ? `<div class="sub">› Contactos adicionales</div>${contactosSel.map(contactoExtraHtml).join("")}` : ""}
     </section>`;
@@ -240,7 +252,7 @@ export function generarHtmlOrdenServicio(orden, opciones) {
   const seccionEquipo = `
     <section class="sec">
       ${h2("Datos de Equipo")}
-      <div class="grid">
+      <div class="grid grid-3">
         ${campo("Equipo", orden.equipo)}
         ${campo("Serie", orden.serie, true)}
         ${campo("Marca / Modelo", marcaModelo)}

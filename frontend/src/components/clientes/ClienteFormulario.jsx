@@ -8,7 +8,8 @@ const crearSucursalVacia = () => ({ tipo_direccion: "", direccion: "", fono: "",
 const ESTADO_INICIAL_CLIENTE = {
   razon_social: "", giro: "", rut: "", direccion: "", ciudad: "",
   comuna: "", telefono: "", email: "", contacto_nombre: "", contacto_email: "",
-  contacto_fono: "", contacto_cargo: ""
+  contacto_fono: "", contacto_cargo: "", contacto_direccion: "", contacto_ciudad: "",
+  contacto_comuna: ""
 };
 
 function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, titulo, readOnly = false, modoRegistro = false }) {
@@ -89,6 +90,9 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
         contacto_email: primerContacto.email || clienteEditando.contacto_email || "",
         contacto_fono: primerContacto.fono || clienteEditando.contacto_fono || "",
         contacto_cargo: primerContacto.cargo || toUpper(clienteEditando.contacto_cargo) || "",
+        contacto_direccion: primerContacto.direccion || "",
+        contacto_ciudad: primerContacto.ciudad || "",
+        contacto_comuna: primerContacto.comuna || "",
         direcciones: dirs
       });
     }
@@ -193,9 +197,9 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
       email: nuevoCliente.contacto_email,
       fono: nuevoCliente.contacto_fono,
       cargo: nuevoCliente.contacto_cargo,
-      // El contacto principal no tiene campo propio de dirección: usa
-      // siempre la dirección del cliente.
-      direccion: nuevoCliente.direccion
+      direccion: nuevoCliente.contacto_direccion,
+      ciudad: nuevoCliente.contacto_ciudad,
+      comuna: nuevoCliente.contacto_comuna
     };
     const todosContactos = [];
     if (primerContacto.nombre && primerContacto.nombre.trim()) {
@@ -354,6 +358,28 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                   <input placeholder="Cargo" value={nuevoCliente.contacto_cargo}
                     disabled={readOnly}
                     onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_cargo: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
+                </div>
+              </div>
+              <div className="cf-r1 cf-mt">
+                <div className="cf-field">
+                  <label>Dirección</label>
+                  <input placeholder="Dirección del contacto (si es distinta a la del cliente)" value={nuevoCliente.contacto_direccion}
+                    disabled={readOnly}
+                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_direccion: upperInput(e) })} />
+                </div>
+              </div>
+              <div className="cf-r2 cf-mt">
+                <div className="cf-field">
+                  <label>Ciudad</label>
+                  <input placeholder="Ciudad" value={nuevoCliente.contacto_ciudad}
+                    disabled={readOnly}
+                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_ciudad: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
+                </div>
+                <div className="cf-field">
+                  <label>Comuna</label>
+                  <input placeholder="Comuna" value={nuevoCliente.contacto_comuna}
+                    disabled={readOnly}
+                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_comuna: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
                 </div>
               </div>
               {!readOnly ? (
