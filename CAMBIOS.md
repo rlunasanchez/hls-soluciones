@@ -2,6 +2,18 @@
 
 ## Fecha: 2026-09-21
 
+### v2.134: Cotización — "Nueva Cotización" no era responsive en pantallas angostas
+
+**Problema:** a diferencia de la OT, el formulario de "Nueva Cotización" no colapsaba a una columna en tablet/celular.
+
+**Causa:** el contenedor de dos columnas (`.of-cols`, compartido con la OT) tenía un `style={{ gridTemplateColumns: '0.9fr 1.1fr' }}` puesto directo en el JSX de `Cotizaciones.jsx`, que pisaba la media query (`@media max-width:1100px`) que ya colapsa esa grilla a una columna en la OT — un inline style siempre gana por sobre una regla de CSS externa sin `!important`.
+
+**Solución:** se sacó el inline style y se agregó la clase `.of-cols-cot` (mismo ratio 0.9fr/1.1fr a escritorio) en `OrdenTrabajo.css`, incluida en la misma media query que ya resuelve `.of-cols` para que vuelva a colapsar a una columna en pantallas angostas.
+
+**Archivos:** `Cotizaciones.jsx`, `OrdenTrabajo.css`.
+
+**Verificación:** `npm run build` OK.
+
 ### v2.132: OT y Cotización — "Buscar Contacto" perdía el contacto anterior y podía duplicar el nuevo
 
 **Problema:** al elegir otro contacto como principal desde el buscador "Buscar Contacto" (OT y Cotización), solo se pisaban los 4 campos del principal — el contacto anterior se perdía en vez de bajar a "Otros Contactos", y si el elegido ya estaba en esa lista, quedaba duplicado (como principal y como adicional a la vez).
