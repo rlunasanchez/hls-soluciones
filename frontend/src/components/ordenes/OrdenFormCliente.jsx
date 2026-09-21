@@ -322,10 +322,19 @@ function OrdenFormCliente({
         // Si le cambiaron el nombre, se lo sigue por la misma posición que ocupaba antes.
         const contactoOT = normTxt(prev.contacto);
         if (contactoOT) {
-          let match = todosContactos.find((c) => c.nombre === contactoOT);
-          if (!match) {
-            const idxAntes = todosContactosAntes.findIndex((c) => c.nombre === contactoOT);
-            if (idxAntes !== -1) match = todosContactos[idxAntes];
+          let match;
+          // Si el contacto de la OT era el principal del cliente antes de este
+          // guardado, sigue al nuevo principal aunque haya cambiado de persona
+          // (ej. se usó "Hacer principal" con otro contacto) — no a esa persona
+          // en particular, que ahora es solo un contacto adicional.
+          if (todosContactosAntes[0]?.nombre === contactoOT) {
+            match = todosContactos[0];
+          } else {
+            match = todosContactos.find((c) => c.nombre === contactoOT);
+            if (!match) {
+              const idxAntes = todosContactosAntes.findIndex((c) => c.nombre === contactoOT);
+              if (idxAntes !== -1) match = todosContactos[idxAntes];
+            }
           }
           if (match) {
             base.contacto = match.nombre;

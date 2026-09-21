@@ -1,6 +1,28 @@
 # Registro de Cambios - HLS Soluciones
 
-## Fecha: 2026-09-17
+## Fecha: 2026-09-21
+
+### v2.130: Mantenedor de Cliente — botón "Hacer principal" en los contactos adicionales
+
+**Problema:** el contacto principal de un cliente solo se podía editar en el lugar (cambiar nombre/email/fono/etc.), pero no había forma de que otro contacto ya cargado (uno de los "adicionales") pasara a ser el principal.
+
+**Solución:** en el popup de detalle de cada contacto adicional (el que se abre al hacer clic en un chip "Contacto N"), se agregó el botón "Hacer principal" junto a "Editar"/"Eliminar". Al usarlo, intercambia los datos (nombre, email, fono, cargo, dirección, ciudad, comuna) entre ese contacto y el contacto principal del formulario — el principal anterior baja a la lista de adicionales. Es un cambio local del formulario, como editar cualquier campo: queda guardado recién al hacer clic en "Guardar Cambios", reusando el mismo mecanismo de guardado existente (sin backend nuevo, sin migración).
+
+**Archivo:** `ClienteFormulario.jsx`.
+
+**Verificación:** `npm run build` OK.
+
+### v2.131: OT — al reasignar el contacto principal del cliente desde la OT, la OT no se enteraba
+
+**Problema:** al editar el cliente desde dentro de la OT (botón "Editar Cliente") y usar "Hacer principal" (v2.130) para cambiar quién es el contacto principal, la OT no reflejaba el cambio — seguía mostrando el contacto anterior.
+
+**Causa:** `guardarEdicionCliente` (`OrdenFormCliente.jsx`) sincroniza el contacto de la OT buscándolo **por nombre** en la lista actualizada del cliente. Como al usar "Hacer principal" el contacto desplazado no desaparece —pasa a ser un adicional—, la búsqueda lo seguía encontrando con sus mismos datos, y la OT nunca detectaba que el *rol* de principal había cambiado de persona.
+
+**Solución:** si el contacto cargado en la OT era el principal del cliente antes del guardado, ahora sigue automáticamente al nuevo principal (aunque sea otra persona), en vez de seguir a esa persona en particular. Si la OT tenía cargado deliberadamente un contacto que no era el principal, el comportamiento no cambia.
+
+**Archivo:** `OrdenFormCliente.jsx`.
+
+**Verificación:** `npm run build` OK.
 
 ### v2.127: PDF de OT y Cotización — elegir el contacto principal del documento (efímero) + dirección condicional + grillas de 3 columnas
 
