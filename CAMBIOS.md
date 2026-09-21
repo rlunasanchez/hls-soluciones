@@ -12,6 +12,18 @@
 
 **Verificación:** `npm run build` OK.
 
+### v2.133: OT — "Editar Cliente" no reconciliaba "Otros Contactos" al cambiar el principal
+
+**Problema:** al usar "Hacer principal" (v2.130) desde "Editar Cliente" dentro de la OT, el campo "Contacto" de la OT sí cambiaba (fix v2.131), pero "Otros Contactos" no se enteraba: el contacto recién promovido quedaba duplicado ahí, y el que bajó de principal no aparecía.
+
+**Causa:** el bloque que refresca "Otros Contactos" de la OT solo actualizaba en el lugar las filas que ya tenía (`prev.contactosExtra.map(...)`), sin quitar ni agregar filas. Además tenía un fallback "por posición" (igual que el de v2.131) que podía traer los datos de otra persona cuando el orden de la lista cambiaba justo por el intercambio de principal.
+
+**Solución:** "Otros Contactos" de la OT ahora se reconcilia explícitamente: si alguno de sus contactos es el nuevo principal, se saca de la lista (ya quedó reflejado en "Contacto"); y si la OT seguía al principal del cliente y este cambió de persona, el que bajó se agrega a "Otros Contactos" (si no estaba ya ahí). Se sacó también el fallback por posición, tanto acá como en el bloque de "Contacto" (v2.131), por la misma razón. Verificado con una prueba aislada de la lógica (antes/después) reproduciendo el caso exacto reportado.
+
+**Archivo:** `OrdenFormCliente.jsx`.
+
+**Verificación:** `npm run build` OK.
+
 ### v2.130: Mantenedor de Cliente — botón "Hacer principal" en los contactos adicionales
 
 **Problema:** el contacto principal de un cliente solo se podía editar en el lugar (cambiar nombre/email/fono/etc.), pero no había forma de que otro contacto ya cargado (uno de los "adicionales") pasara a ser el principal.
