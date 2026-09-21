@@ -244,19 +244,36 @@ function OrdenFormCliente({
       })
     : [];
 
+  const normTxt = (s) => String(s || "").toUpperCase().trim();
+
+  // Al elegir otro contacto como principal, el principal anterior baja a
+  // "Otros Contactos" de la OT (en vez de perderse), y si el elegido ya
+  // estaba ahí, se saca de esa lista para no quedar duplicado.
   const seleccionarContactoBusqueda = (c) => {
+    const nombreNuevo = normTxt(c.nombre);
+    const principalActual = {
+      nombre: nuevaOrden.contacto, email: nuevaOrden.emailContacto,
+      fono: nuevaOrden.fonoContacto, cargo: nuevaOrden.cargoContacto
+    };
+    let extras = nuevaOrden.contactosExtra.filter((x) => normTxt(x.nombre) !== nombreNuevo);
+    if (normTxt(principalActual.nombre) && normTxt(principalActual.nombre) !== nombreNuevo) {
+      extras = [...extras, {
+        nombre: principalActual.nombre, email: principalActual.email,
+        fono: principalActual.fono, cargo: principalActual.cargo,
+        direccion: "", ciudad: "", comuna: ""
+      }];
+    }
     setNuevaOrden({
       ...nuevaOrden,
       contacto: c.nombre,
       emailContacto: c.email || "",
       fonoContacto: c.fono || "",
-      cargoContacto: c.cargo || ""
+      cargoContacto: c.cargo || "",
+      contactosExtra: extras
     });
     setBusquedaContacto(c.nombre);
     setMostrarDropdownContacto(false);
   };
-
-  const normTxt = (s) => String(s || "").toUpperCase().trim();
 
   const abrirEditarCliente = async () => {
     let fresh = clienteSeleccionado;
@@ -331,10 +348,6 @@ function OrdenFormCliente({
             match = todosContactos[0];
           } else {
             match = todosContactos.find((c) => c.nombre === contactoOT);
-            if (!match) {
-              const idxAntes = todosContactosAntes.findIndex((c) => c.nombre === contactoOT);
-              if (idxAntes !== -1) match = todosContactos[idxAntes];
-            }
           }
           if (match) {
             base.contacto = match.nombre;

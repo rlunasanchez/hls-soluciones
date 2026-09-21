@@ -2,6 +2,16 @@
 
 ## Fecha: 2026-09-21
 
+### v2.132: OT y Cotización — "Buscar Contacto" perdía el contacto anterior y podía duplicar el nuevo
+
+**Problema:** al elegir otro contacto como principal desde el buscador "Buscar Contacto" (OT y Cotización), solo se pisaban los 4 campos del principal — el contacto anterior se perdía en vez de bajar a "Otros Contactos", y si el elegido ya estaba en esa lista, quedaba duplicado (como principal y como adicional a la vez).
+
+**Solución:** `seleccionarContactoBusqueda` ahora, al elegir un contacto: saca al elegido de "Otros Contactos" si ya estaba ahí (evita el duplicado), y agrega ahí al contacto anterior si tenía nombre (evita perderlo).
+
+**Archivos:** `OrdenFormCliente.jsx`, `Cotizaciones.jsx`.
+
+**Verificación:** `npm run build` OK.
+
 ### v2.130: Mantenedor de Cliente — botón "Hacer principal" en los contactos adicionales
 
 **Problema:** el contacto principal de un cliente solo se podía editar en el lugar (cambiar nombre/email/fono/etc.), pero no había forma de que otro contacto ya cargado (uno de los "adicionales") pasara a ser el principal.
