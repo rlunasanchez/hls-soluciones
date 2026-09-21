@@ -12,6 +12,18 @@
 
 **Verificación:** `npm run build` OK.
 
+### v2.131: OT — al reasignar el contacto principal del cliente desde la OT, la OT no se enteraba
+
+**Problema:** al editar el cliente desde dentro de la OT (botón "Editar Cliente") y usar "Hacer principal" (v2.130) para cambiar quién es el contacto principal, la OT no reflejaba el cambio — seguía mostrando el contacto anterior.
+
+**Causa:** `guardarEdicionCliente` (`OrdenFormCliente.jsx`) sincroniza el contacto de la OT buscándolo **por nombre** en la lista actualizada del cliente. Como al usar "Hacer principal" el contacto desplazado no desaparece —pasa a ser un adicional—, la búsqueda lo seguía encontrando con sus mismos datos, y la OT nunca detectaba que el *rol* de principal había cambiado de persona.
+
+**Solución:** si el contacto cargado en la OT era el principal del cliente antes del guardado, ahora sigue automáticamente al nuevo principal (aunque sea otra persona), en vez de seguir a esa persona en particular. Si la OT tenía cargado deliberadamente un contacto que no era el principal, el comportamiento no cambia.
+
+**Archivo:** `OrdenFormCliente.jsx`.
+
+**Verificación:** `npm run build` OK.
+
 ### v2.127: PDF de OT y Cotización — elegir el contacto principal del documento (efímero) + dirección condicional + grillas de 3 columnas
 
 **Problema:** el bloque "Contacto" del PDF siempre mostraba el contacto guardado en la OT/Cotización; no había forma de que otro contacto (uno de los "adicionales") apareciera como principal en un documento puntual.
