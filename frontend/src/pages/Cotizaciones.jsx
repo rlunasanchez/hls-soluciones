@@ -499,14 +499,29 @@ function Cotizaciones() {
       })
     : [];
 
+  // Al elegir otro contacto como principal, el principal anterior baja a
+  // "Otros Contactos" (en vez de perderse), y si el elegido ya estaba ahí,
+  // se saca de esa lista para no quedar duplicado.
   const seleccionarContactoBusqueda = (c) => {
-    setCotizacion((prev) => ({
-      ...prev,
-      contactoNombre: c.nombre,
-      contactoEmail: c.email || "",
-      contactoFono: c.fono || "",
-      contactoCargo: c.cargo || ""
-    }));
+    const nombreNuevo = normTxt(c.nombre);
+    setCotizacion((prev) => {
+      let extras = prev.contactosExtra.filter((x) => normTxt(x.nombre) !== nombreNuevo);
+      if (normTxt(prev.contactoNombre) && normTxt(prev.contactoNombre) !== nombreNuevo) {
+        extras = [...extras, {
+          nombre: prev.contactoNombre, email: prev.contactoEmail,
+          fono: prev.contactoFono, cargo: prev.contactoCargo,
+          direccion: "", ciudad: "", comuna: ""
+        }];
+      }
+      return {
+        ...prev,
+        contactoNombre: c.nombre,
+        contactoEmail: c.email || "",
+        contactoFono: c.fono || "",
+        contactoCargo: c.cargo || "",
+        contactosExtra: extras
+      };
+    });
     setBusquedaContacto(c.nombre);
     setMostrarDropdownContacto(false);
   };

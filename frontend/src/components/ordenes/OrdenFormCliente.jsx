@@ -244,19 +244,36 @@ function OrdenFormCliente({
       })
     : [];
 
+  const normTxt = (s) => String(s || "").toUpperCase().trim();
+
+  // Al elegir otro contacto como principal, el principal anterior baja a
+  // "Otros Contactos" de la OT (en vez de perderse), y si el elegido ya
+  // estaba ahí, se saca de esa lista para no quedar duplicado.
   const seleccionarContactoBusqueda = (c) => {
+    const nombreNuevo = normTxt(c.nombre);
+    const principalActual = {
+      nombre: nuevaOrden.contacto, email: nuevaOrden.emailContacto,
+      fono: nuevaOrden.fonoContacto, cargo: nuevaOrden.cargoContacto
+    };
+    let extras = nuevaOrden.contactosExtra.filter((x) => normTxt(x.nombre) !== nombreNuevo);
+    if (normTxt(principalActual.nombre) && normTxt(principalActual.nombre) !== nombreNuevo) {
+      extras = [...extras, {
+        nombre: principalActual.nombre, email: principalActual.email,
+        fono: principalActual.fono, cargo: principalActual.cargo,
+        direccion: "", ciudad: "", comuna: ""
+      }];
+    }
     setNuevaOrden({
       ...nuevaOrden,
       contacto: c.nombre,
       emailContacto: c.email || "",
       fonoContacto: c.fono || "",
-      cargoContacto: c.cargo || ""
+      cargoContacto: c.cargo || "",
+      contactosExtra: extras
     });
     setBusquedaContacto(c.nombre);
     setMostrarDropdownContacto(false);
   };
-
-  const normTxt = (s) => String(s || "").toUpperCase().trim();
 
   const abrirEditarCliente = async () => {
     let fresh = clienteSeleccionado;
@@ -305,7 +322,6 @@ function OrdenFormCliente({
         return { nombre: (p[0] || "").toUpperCase().trim(), email: p[1] || "", fono: p[2] || "", cargo: p[3] || "", direccion: (p[4] || "").toUpperCase().trim(), ciudad: (p[5] || "").toUpperCase().trim(), comuna: (p[6] || "").toUpperCase().trim() };
       }).filter((c) => c.nombre);
       const contactosExtraDespues = armarContactosExtra(fresh);
-      const contactosExtraAntes = armarContactosExtra(clienteAEditar);
 
       setNuevaOrden((prev) => {
         const base = {
@@ -321,20 +337,22 @@ function OrdenFormCliente({
         // Si el contacto cargado en la OT sigue existiendo, refresca nombre/email/fono.
         // Si le cambiaron el nombre, se lo sigue por la misma posición que ocupaba antes.
         const contactoOT = normTxt(prev.contacto);
+        const nombrePrincipalAntes = todosContactosAntes[0]?.nombre || "";
+        const nombrePrincipalDespues = todosContactos[0]?.nombre || "";
+        // La OT seguía al principal del cliente (antes de este guardado) si su
+        // contacto era exactamente ese — se usa más abajo también para
+        // reconciliar "Otros Contactos" cuando hubo un cambio de principal.
+        const otSeguiaAlPrincipal = !!contactoOT && contactoOT === nombrePrincipalAntes;
         if (contactoOT) {
           let match;
           // Si el contacto de la OT era el principal del cliente antes de este
           // guardado, sigue al nuevo principal aunque haya cambiado de persona
           // (ej. se usó "Hacer principal" con otro contacto) — no a esa persona
           // en particular, que ahora es solo un contacto adicional.
-          if (todosContactosAntes[0]?.nombre === contactoOT) {
+          if (otSeguiaAlPrincipal) {
             match = todosContactos[0];
           } else {
             match = todosContactos.find((c) => c.nombre === contactoOT);
-            if (!match) {
-              const idxAntes = todosContactosAntes.findIndex((c) => c.nombre === contactoOT);
-              if (idxAntes !== -1) match = todosContactos[idxAntes];
-            }
           }
           if (match) {
             base.contacto = match.nombre;
@@ -355,16 +373,29 @@ function OrdenFormCliente({
           return match ? { tipo: match.tipo, direccion: match.direccion, ciudad: match.ciudad, fono: match.fono, comuna: match.comuna } : d;
         });
 
-        // Refresca los contactos extra ya agregados que sigan existiendo en el cliente
-        base.contactosExtra = prev.contactosExtra.map((c) => {
-          const nomOT = normTxt(c.nombre);
-          let match = contactosExtraDespues.find((x) => x.nombre === nomOT);
-          if (!match) {
-            const idxAntes = contactosExtraAntes.findIndex((x) => x.nombre === nomOT);
-            if (idxAntes !== -1) match = contactosExtraDespues[idxAntes];
-          }
-          return match ? { nombre: match.nombre, email: match.email, fono: match.fono, cargo: match.cargo, direccion: match.direccion, ciudad: match.ciudad, comuna: match.comuna } : c;
-        });
+        // Refresca los contactos extra de la OT que sigan existiendo como
+        // adicionales del cliente. Si alguno de ellos es ahora el nuevo
+        // principal, se saca de acá (ya quedó reflejado arriba, en el
+        // Contacto de la OT) para no quedar duplicado.
+        let extrasBase = prev.contactosExtra
+          .filter((c) => normTxt(c.nombre) !== nombrePrincipalDespues)
+          .map((c) => {
+            const nomOT = normTxt(c.nombre);
+            const match = contactosExtraDespues.find((x) => x.nombre === nomOT);
+            return match ? { nombre: match.nombre, email: match.email, fono: match.fono, cargo: match.cargo, direccion: match.direccion, ciudad: match.ciudad, comuna: match.comuna } : c;
+          });
+        // Si la OT seguía al principal del cliente y este cambió de persona,
+        // el que era principal baja a "Otros Contactos" de la OT (si no
+        // estaba ya ahí) — mismo criterio que ya se aplica en el Cliente.
+        if (otSeguiaAlPrincipal && nombrePrincipalAntes !== nombrePrincipalDespues &&
+            !extrasBase.some((c) => normTxt(c.nombre) === nombrePrincipalAntes)) {
+          const viejo = todosContactosAntes[0];
+          extrasBase = [...extrasBase, {
+            nombre: viejo.nombre, email: viejo.email, fono: viejo.fono, cargo: viejo.cargo,
+            direccion: "", ciudad: "", comuna: ""
+          }];
+        }
+        base.contactosExtra = extrasBase;
 
         return base;
       });
