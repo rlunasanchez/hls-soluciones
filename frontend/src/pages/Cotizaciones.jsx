@@ -744,7 +744,7 @@ function Cotizaciones() {
                   <button type="button" className="of-head-close" onClick={cerrarFormulario}><X size={18} /></button>
                 </div>
 
-                <div className="of-cols" style={{ gridTemplateColumns: '0.9fr 1.1fr' }}>
+                <div className="of-cols of-cols-cot">
                 <div className="of-col-left" style={{ minWidth: 0 }}>
                 <div className="of-sec primary">
                   <div className="of-st success">Datos del Cliente</div>
