@@ -1,6 +1,16 @@
 # Registro de Cambios - HLS Soluciones
 
-## Fecha: 2026-09-17
+## Fecha: 2026-09-21
+
+### v2.130: Mantenedor de Cliente — botón "Hacer principal" en los contactos adicionales
+
+**Problema:** el contacto principal de un cliente solo se podía editar en el lugar (cambiar nombre/email/fono/etc.), pero no había forma de que otro contacto ya cargado (uno de los "adicionales") pasara a ser el principal.
+
+**Solución:** en el popup de detalle de cada contacto adicional (el que se abre al hacer clic en un chip "Contacto N"), se agregó el botón "Hacer principal" junto a "Editar"/"Eliminar". Al usarlo, intercambia los datos (nombre, email, fono, cargo, dirección, ciudad, comuna) entre ese contacto y el contacto principal del formulario — el principal anterior baja a la lista de adicionales. Es un cambio local del formulario, como editar cualquier campo: queda guardado recién al hacer clic en "Guardar Cambios", reusando el mismo mecanismo de guardado existente (sin backend nuevo, sin migración).
+
+**Archivo:** `ClienteFormulario.jsx`.
+
+**Verificación:** `npm run build` OK.
 
 ### v2.127: PDF de OT y Cotización — elegir el contacto principal del documento (efímero) + dirección condicional + grillas de 3 columnas
 

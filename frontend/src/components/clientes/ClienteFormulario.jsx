@@ -137,6 +137,36 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
     if (nuevas.length === 0) setSucursalesResumenAbierto(false);
   };
 
+  // Intercambia el contacto adicional elegido con el contacto principal del
+  // formulario: sus datos pasan a "Datos del Contacto" (arriba) y el
+  // principal anterior baja a la lista de adicionales. Es un cambio local al
+  // formulario, como editar cualquier campo — queda guardado recién al
+  // guardar el cliente (mismo mecanismo que ya arma el payload).
+  const hacerPrincipal = (contacto) => {
+    const principalActual = {
+      nombre: nuevoCliente.contacto_nombre, email: nuevoCliente.contacto_email,
+      fono: nuevoCliente.contacto_fono, cargo: nuevoCliente.contacto_cargo,
+      direccion: nuevoCliente.contacto_direccion, ciudad: nuevoCliente.contacto_ciudad,
+      comuna: nuevoCliente.contacto_comuna
+    };
+    setNuevoCliente({
+      ...nuevoCliente,
+      contacto_nombre: contacto.nombre || "",
+      contacto_email: contacto.email || "",
+      contacto_fono: contacto.fono || "",
+      contacto_cargo: contacto.cargo || "",
+      contacto_direccion: contacto.direccion || "",
+      contacto_ciudad: contacto.ciudad || "",
+      contacto_comuna: contacto.comuna || ""
+    });
+    setContactos(
+      String(principalActual.nombre || "").trim()
+        ? contactos.map((c) => (c === contacto ? principalActual : c))
+        : contactos.filter((c) => c !== contacto)
+    );
+    setContactoSeleccionado(null);
+  };
+
   const resetFormulario = () => {
     setNuevoCliente(ESTADO_INICIAL_CLIENTE);
     setSucursales([crearSucursalVacia()]);
@@ -598,6 +628,9 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
               )}
               {!readOnly && (
                 <div className="detalle-acciones">
+                  <button type="button" className="cf-btn-p" onClick={() => hacerPrincipal(contactoSeleccionado)}>
+                    Hacer principal
+                  </button>
                   <button type="button" className="cf-btn-c" onClick={() => {
                     setContactoSeleccionado(null);
                     setMostrarModalContactos(true);
