@@ -118,8 +118,8 @@ body {
 
 .sub { margin-top: 2.5mm; font-size: 6pt; text-transform: uppercase; letter-spacing: .06em; color: #6B7280; }
 .extra-item { margin-top: 1.2mm; overflow-wrap: anywhere; }
-.extra-item .nom { font-size: 8pt; font-weight: 700; }
-.extra-item .det { font-size: 7pt; font-weight: 700; color: #111827; }
+.extra-item .nom { font-size: 9pt; font-weight: 600; }
+.extra-item .det { font-size: 9pt; font-weight: 600; color: #111827; }
 
 table.items { width: 100%; table-layout: fixed; border-collapse: collapse; margin-top: 1mm; }
 table.items thead th { text-align: left; font-size: 7pt; text-transform: uppercase; letter-spacing: .06em; color: #6B7280; border-bottom: 1pt solid #0C4A8C; padding: 2mm 2mm 1.5mm; }

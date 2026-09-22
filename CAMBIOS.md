@@ -2,6 +2,16 @@
 
 ## Fecha: 2026-09-22
 
+### v2.137: OT y Cotización PDF — "Contactos adicionales" en negrita y con letra distinta al contacto principal
+
+**Problema:** en ambos PDF, los "Contactos adicionales" se imprimían en negrita y con un tamaño de letra distinto al de los datos del contacto principal.
+
+**Solución:** se igualaron `.extra-item .nom` y `.extra-item .det` al estilo de `.f .v` (datos del contacto principal): `font-size: 9pt`, `font-weight: 600` (sin negrita), en vez del `700`/tamaños dispares que tenían antes.
+
+**Archivos:** `ordenServicioDoc.js`, `cotizacionDoc.js`.
+
+**Verificación:** `npm run build` OK.
+
 ### v2.136: OT PDF — "Serie" y "Marca / Modelo" en orden invertido
 
 **Cambio:** en la sección "Datos de Equipo" del PDF de la OT, "Marca / Modelo" ahora se muestra antes que "Serie" (antes era al revés).
