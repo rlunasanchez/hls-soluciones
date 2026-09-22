@@ -1,5 +1,27 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-22
+
+### v2.136: OT PDF — "Serie" y "Marca / Modelo" en orden invertido
+
+**Cambio:** en la sección "Datos de Equipo" del PDF de la OT, "Marca / Modelo" ahora se muestra antes que "Serie" (antes era al revés).
+
+**Archivo:** `ordenServicioDoc.js`.
+
+**Verificación:** `npm run build` OK.
+
+### v2.135: OT PDF — "Informe Técnico" se veía con letra más grande que "Observaciones"
+
+**Problema:** en el PDF de la OT, el texto de la sección "Informe Técnico" se imprimía notoriamente más grande que "Observaciones", debiendo ser del mismo tamaño.
+
+**Causa:** la sección "Informe Técnico" usa la clase `.txt-grande` (exclusiva de esa sección), que tenía `font-size: 11pt` fijo, mientras "Observaciones" usa `.txt` con `8.5pt`.
+
+**Solución:** se bajó `.txt-grande` a `8.5pt`, igualando el tamaño de fuente entre ambas secciones. Se mantuvieron sin cambios `line-height` y `min-height` (solo afectan espaciado).
+
+**Archivo:** `ordenServicioDoc.js`.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-21
 
 ### v2.134: Cotización — "Nueva Cotización" no era responsive en pantallas angostas
