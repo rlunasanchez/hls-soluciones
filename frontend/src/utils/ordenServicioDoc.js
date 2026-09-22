@@ -180,7 +180,7 @@ img.logo { max-width: 100%; max-height: 100%; object-fit: contain; }
 
 .txt { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 0; font-size: 8.5pt; orphans: 3; widows: 3; }
 .sec-grande { padding: 5mm 4mm 4.5mm; }
-.txt-grande { font-size: 11pt; line-height: 1.6; min-height: 18mm; }
+.txt-grande { font-size: 8.5pt; line-height: 1.6; min-height: 18mm; }
 
 .pie { margin-top: auto; padding-top: 2.5mm; break-inside: avoid; border-top: .5pt solid #CBD5E1; }
 .firmas { display: grid; grid-template-columns: 1fr 1fr; column-gap: 14mm; }
@@ -254,8 +254,8 @@ export function generarHtmlOrdenServicio(orden, opciones) {
       ${h2("Datos de Equipo")}
       <div class="grid grid-3">
         ${campo("Equipo", orden.equipo)}
-        ${campo("Serie", orden.serie, true)}
         ${campo("Marca / Modelo", marcaModelo)}
+        ${campo("Serie", orden.serie, true)}
         ${campo("Contador Pág.", orden.contador_pag_out, true)}
         ${campo("Nivel de Tinta", orden.nivel_tinta)}
       </div>
