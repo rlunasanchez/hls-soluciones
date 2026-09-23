@@ -10,6 +10,14 @@
 
 **Verificación:** `npm run build` OK.
 
+### v2.146: Cotización PDF — "Condición/Emisión/Válido hasta" movidos junto a "Total"
+
+**Cambio:** "Condición", "Emisión" y "Válido hasta" se sacaron de la sección "Ejecutivo y Condiciones" (que ahora se llama solo "Ejecutivo") y se movieron al pie de la tabla de ítems, al costado izquierdo, a la altura de "Total" — mismo estilo de etiqueta/valor que tenían antes, ahora en 3 columnas debajo del texto de condiciones legales.
+
+**Archivo:** `cotizacionDoc.js`.
+
+**Verificación:** `npm run build` OK.
+
 ### v2.145: Cotización PDF — "Email" en su propia línea dentro de "Datos Bancarios"
 
 **Cambio:** se agregó un salto de línea antes de "Email:" en el texto de "Datos Bancarios", para que quede en su propia línea en vez de seguir corrido después del titular de la cuenta.
