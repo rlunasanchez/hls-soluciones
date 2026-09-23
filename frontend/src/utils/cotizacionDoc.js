@@ -267,7 +267,7 @@ export function generarHtmlCotizacion(cot, opciones) {
 
   <div class="sec bancarios">
     <b>Datos Bancarios:</b> ${esc(DATOS_BANCARIOS.tipoCuenta)} del ${esc(DATOS_BANCARIOS.banco)}, N° ${esc(DATOS_BANCARIOS.numero)}
-    a nombre de ${esc(DATOS_BANCARIOS.titular)}; Email: ${esc(EMPRESA.email)}; RUT ${esc(EMPRESA_RUT)}
+    a nombre de ${esc(DATOS_BANCARIOS.titular)}<br>Email: ${esc(EMPRESA.email)}; RUT ${esc(EMPRESA_RUT)}
   </div>
 
   </div>

@@ -10,6 +10,14 @@
 
 **Verificación:** `npm run build` OK.
 
+### v2.145: Cotización PDF — "Email" en su propia línea dentro de "Datos Bancarios"
+
+**Cambio:** se agregó un salto de línea antes de "Email:" en el texto de "Datos Bancarios", para que quede en su propia línea en vez de seguir corrido después del titular de la cuenta.
+
+**Archivo:** `cotizacionDoc.js`.
+
+**Verificación:** `npm run build` OK.
+
 ### v2.143: Ciudad y Comuna del contacto principal se perdían al usar "Hacer principal"
 
 **Problema:** al promover un contacto adicional a principal (botón "Hacer principal" en "Editar Cliente"), su Ciudad y Comuna desaparecían tanto en la ficha del cliente como al reflejarse en la OT.
