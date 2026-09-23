@@ -2,6 +2,22 @@
 
 ## Fecha: 2026-09-23
 
+### v2.144: Cotización PDF — recuadro de folio y datos bancarios
+
+**Cambios:** en el PDF de Cotización, el recuadro superior derecho ahora muestra solo "N° {folio}" (se sacó la palabra "Folio") con letra más grande (`7.5pt` → `12pt`); "HLS Soluciones E.I.R.L." se agrandó (`6.5pt` → `8pt`) y el RUT de la empresa quedó en negrita. El texto de "Datos Bancarios" al pie también se agrandó (`7.5pt` → `9pt`, igual al resto del documento).
+
+**Archivo:** `cotizacionDoc.js`.
+
+**Verificación:** `npm run build` OK.
+
+### v2.145: Cotización PDF — "Email" en su propia línea dentro de "Datos Bancarios"
+
+**Cambio:** se agregó un salto de línea antes de "Email:" en el texto de "Datos Bancarios", para que quede en su propia línea en vez de seguir corrido después del titular de la cuenta.
+
+**Archivo:** `cotizacionDoc.js`.
+
+**Verificación:** `npm run build` OK.
+
 ### v2.143: Ciudad y Comuna del contacto principal se perdían al usar "Hacer principal"
 
 **Problema:** al promover un contacto adicional a principal (botón "Hacer principal" en "Editar Cliente"), su Ciudad y Comuna desaparecían tanto en la ficha del cliente como al reflejarse en la OT.
