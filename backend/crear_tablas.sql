@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS clientes (
   contacto_fono VARCHAR(20),
   contacto_cargo VARCHAR(100),
   contacto_direccion VARCHAR(255),
+  contacto_ciudad VARCHAR(100),
+  contacto_comuna VARCHAR(100),
   activo TINYINT(1) DEFAULT 1,
   fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
