@@ -104,9 +104,9 @@ body {
 
 .folio-box { text-align: center; align-self: flex-end; background: #FFFFFF; border: 1pt solid #0C4A8C; border-radius: 7pt; padding: 1.4mm 5mm; }
 .folio-box h1 { margin: 0; font-size: 10pt; font-weight: 800; letter-spacing: .04em; color: #0C4A8C; }
-.folio-box .folio-n { font-size: 7.5pt; font-weight: 700; color: #111827; }
-.folio-box .rut-emp { margin-top: .5mm; font-size: 6.5pt; color: #374151; }
-.folio-box .razon-emp { font-size: 6.5pt; font-weight: 700; color: #374151; }
+.folio-box .folio-n { font-size: 12pt; font-weight: 700; color: #111827; }
+.folio-box .rut-emp { margin-top: .5mm; font-size: 6.5pt; font-weight: 700; color: #374151; }
+.folio-box .razon-emp { font-size: 8pt; font-weight: 700; color: #374151; }
 
 .sec { margin-top: 2mm; break-inside: avoid; background: #FFFFFF; border: .5pt solid #E2E8F0; border-radius: 7pt; padding: 1.8mm 4mm; box-shadow: 0 1px 4px rgba(15,23,42,.15); }
 .sec h2 { margin: 0 0 1.2mm; padding-left: 6pt; border-left: 5pt solid #0C4A8C; border-radius: 2pt; font-size: 7pt; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #0C4A8C; break-after: avoid; }
@@ -142,7 +142,7 @@ table.items td.detalle { font-weight: 600; color: #111827; white-space: pre-wrap
 .totales .fila.total { border-top: 1pt solid #0C4A8C; margin-top: 1mm; padding-top: 2mm; font-weight: 800; font-size: 10pt; color: #0C4A8C; }
 .totales .fila span:last-child { font-variant-numeric: tabular-nums; }
 
-.bancarios { margin-top: 3mm; font-size: 7.5pt; color: #374151; }
+.bancarios { margin-top: 3mm; font-size: 9pt; color: #374151; }
 .bancarios b { color: #111827; }
 `;
 
@@ -192,7 +192,7 @@ export function generarHtmlCotizacion(cot, opciones) {
       </div>
       <div class="folio-box">
         <h1>COTIZACIÓN</h1>
-        <div class="folio-n">Folio N° ${esc(cot.folio)}</div>
+        <div class="folio-n">N° ${esc(cot.folio)}</div>
         <div class="rut-emp">${esc(EMPRESA_RUT)}</div>
         <div class="razon-emp">${esc(EMPRESA_RAZON_SOCIAL)}</div>
       </div>
