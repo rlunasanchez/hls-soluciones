@@ -137,6 +137,7 @@ table.items td.detalle { font-weight: 600; color: #111827; white-space: pre-wrap
 .pie-tabla { display: flex; gap: 6mm; margin-top: 3mm; }
 .legales { flex: 1 1 auto; font-size: 6.5pt; color: #6B7280; }
 .legales p { margin: 0; }
+.cond-pie { margin-top: 4mm; grid-template-columns: 1fr 1fr 1fr; }
 .totales { flex: 0 0 55mm; }
 .totales .fila { display: flex; justify-content: space-between; padding: 1.2mm 0; font-size: 8.5pt; }
 .totales .fila.total { border-top: 1pt solid #0C4A8C; margin-top: 1mm; padding-top: 2mm; font-weight: 800; font-size: 10pt; color: #0C4A8C; }
@@ -225,14 +226,11 @@ export function generarHtmlCotizacion(cot, opciones) {
     ${contactosExtra.length ? `<div class="sub">› Contactos adicionales</div>${contactosExtra.map(contactoExtraHtml).join("")}` : ""}
   </div>
   <div class="sec">
-    ${h2("Ejecutivo y Condiciones")}
+    ${h2("Ejecutivo")}
     <div class="grid grid-3">
       ${campo("Ejecutivo", cot.ejecutivo)}
       ${campo("Fono Ejecutivo", cot.ejecutivo_fono)}
       ${campo("Email Ejecutivo", cot.ejecutivo_email)}
-      ${campo("Condición", cot.condicion)}
-      ${campo("Emisión", fecha(cot.fecha_emision))}
-      ${campo("Válido hasta", fecha(cot.fecha_valido_hasta))}
     </div>
     ${cot.glosa ? `<div class="grid" style="margin-top:2mm"><div class="f" style="grid-column: 1 / -1"><span class="l">Glosa</span><span class="v">${esc(cot.glosa)}</span></div></div>` : ""}
   </div>
@@ -256,6 +254,11 @@ export function generarHtmlCotizacion(cot, opciones) {
     <div class="pie-tabla">
       <div class="legales">
         ${CONDICIONES_COTIZACION.map((t) => `<p>${esc(t)}</p>`).join("")}
+        <div class="grid cond-pie">
+          ${campo("Condición", cot.condicion)}
+          ${campo("Emisión", fecha(cot.fecha_emision))}
+          ${campo("Válido hasta", fecha(cot.fecha_valido_hasta))}
+        </div>
       </div>
       <div class="totales">
         <div class="fila"><span>Neto:</span><span>${clp(neto)} CLP</span></div>
