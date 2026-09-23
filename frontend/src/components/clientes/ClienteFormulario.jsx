@@ -26,6 +26,9 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
   const [contactos, setContactos] = useState([]);
   const [mostrarModalContactos, setMostrarModalContactos] = useState(false);
   const [contactoSeleccionado, setContactoSeleccionado] = useState(null);
+  // Índice del contacto elegido en el popup de detalle, para que "Editar"
+  // abra el modal con ese contacto ya desplegado en vez de la lista colapsada.
+  const [idxContactoAEditar, setIdxContactoAEditar] = useState(null);
   const [contactosExpandidos, setContactosExpandidos] = useState(false);
   const [rutError, setRutError] = useState("");
   const [guardando, setGuardando] = useState(false);
@@ -602,8 +605,9 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
         <ModalContactos
           contactos={contactos}
           onChange={setContactos}
-          onClose={() => setMostrarModalContactos(false)}
+          onClose={() => { setMostrarModalContactos(false); setIdxContactoAEditar(null); }}
           readOnly={readOnly}
+          abrirIdx={idxContactoAEditar}
         />
       )}
       {contactoSeleccionado && (
@@ -626,12 +630,19 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
               {contactoSeleccionado.direccion && (
                 <div className="detalle-row"><span className="detalle-label">Dirección</span><span className="detalle-valor">{contactoSeleccionado.direccion}</span></div>
               )}
+              {contactoSeleccionado.ciudad && (
+                <div className="detalle-row"><span className="detalle-label">Ciudad</span><span className="detalle-valor">{contactoSeleccionado.ciudad}</span></div>
+              )}
+              {contactoSeleccionado.comuna && (
+                <div className="detalle-row"><span className="detalle-label">Comuna</span><span className="detalle-valor">{contactoSeleccionado.comuna}</span></div>
+              )}
               {!readOnly && (
                 <div className="detalle-acciones">
                   <button type="button" className="cf-btn-p" onClick={() => hacerPrincipal(contactoSeleccionado)}>
                     Hacer principal
                   </button>
                   <button type="button" className="cf-btn-c" onClick={() => {
+                    setIdxContactoAEditar(contactos.indexOf(contactoSeleccionado));
                     setContactoSeleccionado(null);
                     setMostrarModalContactos(true);
                   }}>Editar</button>

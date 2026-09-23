@@ -1,5 +1,71 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-23
+
+### v2.143: Ciudad y Comuna del contacto principal se perdían al usar "Hacer principal"
+
+**Problema:** al promover un contacto adicional a principal (botón "Hacer principal" en "Editar Cliente"), su Ciudad y Comuna desaparecían tanto en la ficha del cliente como al reflejarse en la OT.
+
+**Causa:** la tabla `clientes` nunca tuvo columnas `contacto_ciudad`/`contacto_comuna` — el backend las descartaba en cada `POST`/`PUT` aunque el frontend (`ClienteFormulario.jsx`) sí las enviaba. No era un problema de la OT sino de guardado real en la base.
+
+**Solución:** se agregaron las columnas `contacto_ciudad` y `contacto_comuna` a `clientes` (local vía `ALTER TABLE`, y `crear_tablas.sql` para instalaciones nuevas) y se actualizó `backend/routes/clientes.js` (`POST`/`PUT`) para persistirlas. De paso, `armarContactos()` en `OrdenFormCliente.jsx` (que compara el cliente antes/después del guardado) ahora también arma esos dos campos para el principal, así que cuando el ex-principal baja a "Otros Contactos" de la OT ya no le hardcodea `ciudad`/`comuna` en vacío. También se agregaron Ciudad y Comuna al popup de detalle de "Otros Contactos" en `ClienteFormulario.jsx`, que no las mostraba.
+
+**Pendiente:** aplicar el mismo `ALTER TABLE` en Neon y el equivalente Postgres en la rama `deploy/cloud` antes de que este cambio llegue a producción (instrucciones abajo).
+
+**Archivos:** `backend/crear_tablas.sql`, `backend/routes/clientes.js`, `OrdenFormCliente.jsx`, `ClienteFormulario.jsx`.
+
+**Verificación:** `npm run build` OK. `ALTER TABLE` corrido en MySQL local.
+
+### v2.142: Editar Cliente — "Editar" sobre un contacto puntual permitía saltar a editar otros
+
+**Problema:** al pinchar "Editar" sobre "Contacto 2" en el popup de detalle, el modal de "Contactos Adicionales" abría la lista completa colapsada — había que volver a buscar el chip correcto, y de paso quedaba disponible editar "Contacto 3" u otros desde ahí, cuando la intención era editar solo el elegido.
+
+**Solución:** `ModalContactos.jsx` ahora acepta un prop `abrirIdx`; cuando viene seteado (se pasa desde `ClienteFormulario.jsx` al presionar "Editar"), el modal entra en un modo acotado a ese contacto: título "Editar Contacto N", sin el toggle/chips de los demás y sin "+ Agregar Contacto".
+
+**Archivos:** `ClienteFormulario.jsx`, `ModalContactos.jsx`.
+
+**Verificación:** `npm run build` OK.
+
+### v2.141: OT — "Otros Contactos" se desvinculaba al corregir una letra del nombre
+
+**Problema:** al editar un contacto adicional desde "Editar Cliente" (ej. corregir una letra del nombre) y guardar, ese contacto quedaba con el nombre viejo en la OT, desvinculado de la ficha del cliente (aparecía el botón "Registrar" como si no existiera en el cliente).
+
+**Causa:** la reconciliación de "Otros Contactos" de la OT (`guardarEdicionCliente`) buscaba el contacto editado por nombre exacto contra la lista fresca del cliente; si el nombre cambiaba aunque fuera una letra, no encontraba match y dejaba el contacto tal cual estaba antes (con el nombre viejo).
+
+**Solución:** se agregó un respaldo por posición (`contactosExtraAntes`/`contactosExtraDespues`), igual al que ya usan las direcciones extra, para que un cambio de nombre actualice el contacto en vez de dejarlo huérfano.
+
+**Archivo:** `OrdenFormCliente.jsx`.
+
+**Verificación:** `npm run build` OK.
+
+### v2.140: OT — "Buscar Contacto" con el mismo color que "Contacto" de al lado
+
+**Problema:** la etiqueta y el texto tipeado en "Buscar Contacto" se veían igual (mismo gris/negro) que el campo "Contacto" justo al lado, prestándose a confusión por el nombre similar.
+
+**Solución:** la etiqueta "Buscar Contacto" ahora se ve en `var(--primary)` (azul) y el texto que se escribe en el input en verde-teal `#0D9488` y negrita, bien diferenciados del resto de los campos.
+
+**Archivo:** `OrdenFormCliente.jsx`.
+
+**Verificación:** `npm run build` OK.
+
+### v2.139: OT — punto de color en "Adjunto" e "Información Interna" cuando tienen contenido
+
+**Cambio:** en el formulario de la OT, los encabezados colapsables "Adjunto" e "Información Interna" ahora muestran un punto de color junto al título cuando hay un archivo adjunto o texto cargado, para saber que tienen contenido sin necesidad de desplegarlos. El punto usa el mismo color de cada sección (azul para Adjunto, ámbar para Información Interna).
+
+**Archivo:** `OrdenFormCliente.jsx`.
+
+**Verificación:** `npm run build` OK.
+
+### v2.138: OT — el nombre del técnico se mostraba todo en mayúsculas
+
+**Problema:** el técnico asignado se guarda en mayúsculas (mismo criterio que otros campos), pero eso hacía que en la lista de OT, el formulario y el PDF apareciera como "JUAN PEREZ" en vez de "Juan Perez".
+
+**Solución:** se agregó `capitalizarNombre` (`helpers.js`) que capitaliza cada palabra sin tocar cómo se guarda el dato, y se aplicó solo en los puntos donde se muestra: tabla y vista tarjeta de `OrdenLista.jsx`, el rótulo "Técnico:" del formulario en `OrdenTrabajo.jsx`, y la firma del técnico en el PDF (`ordenServicioDoc.js`).
+
+**Archivos:** `helpers.js`, `OrdenLista.jsx`, `OrdenTrabajo.jsx`, `ordenServicioDoc.js`.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-22
 
 ### v2.137: OT y Cotización PDF — "Contactos adicionales" en negrita y con letra distinta al contacto principal

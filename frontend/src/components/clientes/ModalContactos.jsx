@@ -4,7 +4,7 @@ import { upperInput, validarEmail } from "../../utils/helpers";
 
 const crearContactoVacio = () => ({ nombre: "", email: "", fono: "", cargo: "", direccion: "", ciudad: "", comuna: "" });
 
-function ModalContactos({ contactos = [], onChange, onClose, readOnly = false }) {
+function ModalContactos({ contactos = [], onChange, onClose, readOnly = false, abrirIdx = null }) {
   const [lista, setLista] = useState([]);
   // Mismo patrón que Sucursales/Direcciones: resumen colapsado por defecto,
   // cada chip se abre/cierra individualmente (varias pueden estar abiertas
@@ -17,8 +17,15 @@ function ModalContactos({ contactos = [], onChange, onClose, readOnly = false })
       const cargados = contactos.filter(c => c.nombre && c.nombre.trim());
       if (cargados.length > 0) {
         setLista([...cargados]);
-        setResumenAbierto(false);
-        setManualVisibles(new Set());
+        // Si se abrió el modal desde "Editar" sobre un contacto puntual (ej.
+        // Contacto 2), ese va directo desplegado en vez del resumen colapsado.
+        if (abrirIdx !== null && abrirIdx >= 0 && abrirIdx < cargados.length) {
+          setResumenAbierto(true);
+          setManualVisibles(new Set([abrirIdx]));
+        } else {
+          setResumenAbierto(false);
+          setManualVisibles(new Set());
+        }
       } else {
         setLista([crearContactoVacio()]);
         setManualVisibles(new Set([0]));
@@ -27,7 +34,7 @@ function ModalContactos({ contactos = [], onChange, onClose, readOnly = false })
       setLista([crearContactoVacio()]);
       setManualVisibles(new Set([0]));
     }
-  }, [contactos]);
+  }, [contactos, abrirIdx]);
 
   const agregar = () => {
     const nuevoIdx = lista.length;
@@ -74,6 +81,9 @@ function ModalContactos({ contactos = [], onChange, onClose, readOnly = false })
 
   const total = lista.filter(c => c.nombre && c.nombre.trim()).length;
   const hayOcultos = lista.some((_, i) => !manualVisibles.has(i));
+  // Abierto desde "Editar" sobre un contacto puntual: se edita solo ese, sin
+  // dar pie a saltar a los demás (ni a agregar uno nuevo de paso).
+  const modoEdicionUnica = abrirIdx !== null && abrirIdx >= 0 && abrirIdx < lista.length;
 
   return (
     <div className="modal-overlay">
@@ -81,13 +91,15 @@ function ModalContactos({ contactos = [], onChange, onClose, readOnly = false })
         <div className="modal-contactos-head">
           <h3>
             <UserPlus size={18} />
-            Contactos Adicionales {total > 0 && <span className="modal-contactos-badge">{total}</span>}
+            {modoEdicionUnica ? `Editar Contacto ${abrirIdx + 2}` : (
+              <>Contactos Adicionales {total > 0 && <span className="modal-contactos-badge">{total}</span>}</>
+            )}
           </h3>
           <button type="button" onClick={onClose}><X size={18} /></button>
         </div>
 
         <div className="modal-contactos-body">
-          {lista.length > 0 && (resumenAbierto || hayOcultos) && (
+          {!modoEdicionUnica && lista.length > 0 && (resumenAbierto || hayOcultos) && (
             <button
               type="button"
               className="contacto-chip-toggle"
@@ -106,7 +118,7 @@ function ModalContactos({ contactos = [], onChange, onClose, readOnly = false })
             </button>
           )}
 
-          {lista.length > 0 && resumenAbierto && (
+          {!modoEdicionUnica && lista.length > 0 && resumenAbierto && (
             <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "8px" }}>
               {lista.map((_, idx) => {
                 const activo = manualVisibles.has(idx);
@@ -211,7 +223,7 @@ function ModalContactos({ contactos = [], onChange, onClose, readOnly = false })
         </div>
 
         <div className="modal-contactos-foot">
-          {!readOnly && (
+          {!readOnly && !modoEdicionUnica && (
             <button type="button" className="cf-btn-a" onClick={agregar}>
               + Agregar Contacto
             </button>
@@ -222,7 +234,7 @@ function ModalContactos({ contactos = [], onChange, onClose, readOnly = false })
             </button>
             {!readOnly && (
               <button type="button" className="cf-btn-p" onClick={guardar}>
-                Guardar Contactos
+                {modoEdicionUnica ? "Guardar Contacto" : "Guardar Contactos"}
               </button>
             )}
           </div>
