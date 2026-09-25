@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Eye, PackagePlus, Pencil } from "lucide-react";
+import { Search, PackagePlus, Pencil } from "lucide-react";
 import EquipoFormulario from "../equipos/EquipoFormulario";
 import { createPortal } from "react-dom";
 import api from "../../services/api";
@@ -22,7 +22,6 @@ function OrdenFormEquipo({
   onRegistrarEquipo = null,
   onEquiposRefresh = null
 }) {
-  const [mostrarDetalleEquipo, setMostrarDetalleEquipo] = useState(false);
   const [mostrarEditarEquipo, setMostrarEditarEquipo] = useState(false);
   const [equipoEnEdicion, setEquipoEnEdicion] = useState(null);
 
@@ -31,13 +30,6 @@ function OrdenFormEquipo({
     border: '1.5px solid var(--border)', borderRadius: '6px', fontSize: '.82rem'
   };
 
-  const equipoSnapshot = {
-    codigo: "",
-    equipo: nuevaOrden.equipo || "",
-    marca: nuevaOrden.marca || "",
-    modelo: nuevaOrden.modelo || "",
-    serie: nuevaOrden.serie || ""
-  };
   const hayDatosEquipo = !!(nuevaOrden.equipo || nuevaOrden.marca || nuevaOrden.modelo || nuevaOrden.serie);
   const normEq = (v) => (v || "").trim().toLowerCase();
   const equipoExistente = (equipos || []).find(eq =>
@@ -78,8 +70,6 @@ function OrdenFormEquipo({
 
   return (
     <div className="of-sec primary">
-      <div className="of-st muted">Datos del Equipo</div>
-
       {equipoFijo && equipoSeleccionado && (
         <div style={{
           flex: 1,
@@ -101,34 +91,34 @@ function OrdenFormEquipo({
       )}
 
       {equipoFijo && equipoSeleccionado ? null : (
-      <div className="of-r3" style={{ gap: '20px', marginBottom: '8px' }}>
-        <div>
-          <div ref={equipoModeloDropdownRef} style={{ position: 'relative' }}>
-            <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)' }}>
-              <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
-              Buscar por Modelo
-            </label>
-            <div>
-              <input
-                type="text"
-                className="ot-search"
-                placeholder="Ej: IR2520"
-                value={busquedaModelo}
-                onChange={(e) => {
-                  setBusquedaModelo(upperInput(e));
-                  setMostrarDropdownModelo(e.target.value.length >= 2);
-                }}
-                onFocus={() => {
-                  if (busquedaModelo.length >= 2) setMostrarDropdownModelo(true);
-                }}
-                disabled={readOnly}
-                style={{
-                  width: '100%', padding: '2px 8px',
-                  border: '1.5px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '.82rem',
-                  background: equipoSeleccionado ? '#E0F2FE' : 'white'
-                }}
-              />
-            </div>
+      <div style={{ marginBottom: '8px' }}>
+        <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)' }}>
+          <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
+          Buscar por Modelo
+        </label>
+        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div ref={equipoModeloDropdownRef} style={{ position: 'relative', flex: '1 1 200px', minWidth: '120px' }}>
+            <input
+              type="text"
+              className="ot-search"
+              placeholder="Ej: IR2520"
+              value={busquedaModelo}
+              onChange={(e) => {
+                setBusquedaModelo(upperInput(e));
+                setMostrarDropdownModelo(e.target.value.length >= 2);
+              }}
+              onFocus={() => {
+                if (busquedaModelo.length >= 2) setMostrarDropdownModelo(true);
+              }}
+              disabled={readOnly}
+              style={{
+                width: '100%', padding: '2px 8px',
+                border: '1.5px solid var(--border)', borderRadius: '6px', fontSize: '.82rem',
+                lineHeight: '1.3', boxSizing: 'border-box',
+                background: equipoSeleccionado ? '#E0F2FE' : 'white',
+                color: '#0D9488', fontWeight: 600
+              }}
+            />
 
             {mostrarDropdownModelo && busquedaModelo.length >= 2 && (
               <div style={{
@@ -157,55 +147,38 @@ function OrdenFormEquipo({
               </div>
             )}
           </div>
+          {!readOnly && hayDatosEquipo && (
+            equipoExistente ? (
+              <button
+                type="button"
+                onClick={abrirEditarEquipo}
+                title="Editar en el mantenedor el equipo con estos datos"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0,
+                  background: 'var(--warning)', color: 'white', border: 'none',
+                  padding: '2px 8px', borderRadius: '6px', cursor: 'pointer',
+                  fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap'
+                }}
+              >
+                <Pencil size={12} /> Editar
+              </button>
+            ) : onRegistrarEquipo ? (
+              <button
+                type="button"
+                onClick={() => onRegistrarEquipo()}
+                title="Registrar este equipo en el mantenedor de Equipos si no existe"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0,
+                  background: 'var(--success)', color: 'white', border: 'none',
+                  padding: '2px 8px', borderRadius: '6px', cursor: 'pointer',
+                  fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap'
+                }}
+              >
+                <PackagePlus size={12} /> Registrar
+              </button>
+            ) : null
+          )}
         </div>
-        {!readOnly && onRegistrarEquipo && (
-          <button
-            type="button"
-            onClick={() => onRegistrarEquipo()}
-            title="Registrar este equipo en el mantenedor de Equipos si no existe"
-            style={{
-              display: 'flex', alignItems: 'center', gap: '4px',
-              background: 'var(--success)', color: 'white', border: 'none',
-              padding: '2px 10px', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
-              fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap',
-              flexShrink: 0, height: '24px', alignSelf: 'end'
-            }}
-          >
-            <PackagePlus size={14} /> Registrar en Equipos
-          </button>
-        )}
-        {!readOnly && equipoExistente && (
-          <button
-            type="button"
-            onClick={abrirEditarEquipo}
-            title="Editar en el mantenedor el equipo con estos datos"
-            style={{
-              display: 'flex', alignItems: 'center', gap: '4px',
-              background: 'var(--warning)', color: 'white', border: 'none',
-              padding: '2px 10px', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
-              fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap',
-              flexShrink: 0, height: '24px', alignSelf: 'end'
-            }}
-          >
-            <Pencil size={14} /> Editar
-          </button>
-        )}
-        {readOnly && hayDatosEquipo && (
-          <button
-            type="button"
-            onClick={() => setMostrarDetalleEquipo(true)}
-            title="Ver datos del equipo"
-            style={{
-              display: 'flex', alignItems: 'center', gap: '4px',
-              background: '#0D9488', color: 'white', border: 'none',
-              padding: '2px 8px', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
-              fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap',
-              flexShrink: 0, height: '24px', alignSelf: 'end'
-            }}
-          >
-            <Eye size={14} /> Ver
-          </button>
-        )}
       </div>
       )}
 
@@ -260,26 +233,6 @@ function OrdenFormEquipo({
             style={inputStyle} />
         </div>
       </div>
-
-      {/* Modal Detalle Equipo (solo lectura) — portal fuera del form de la OT */}
-      {mostrarDetalleEquipo && (equipoSeleccionado || hayDatosEquipo) && createPortal(
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
-        }}
-        >
-          <div style={{ maxHeight: '90vh', overflow: 'auto', width: '100%', maxWidth: '900px' }}>
-            <EquipoFormulario
-              equipoEditando={equipoSeleccionado || equipoSnapshot}
-              equipos={equipos}
-              onSave={() => {}}
-              onCancel={() => setMostrarDetalleEquipo(false)}
-              readOnly
-            />
-          </div>
-        </div>,
-        document.body
-      )}
 
       {/* Modal Editar Equipo (mantenedor desde la OT) — portal fuera del form de la OT */}
       {mostrarEditarEquipo && equipoEnEdicion && createPortal(

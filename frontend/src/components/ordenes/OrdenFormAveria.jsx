@@ -3,9 +3,9 @@ import { upperInput } from "../../utils/helpers";
 
 function OrdenFormAveria({ nuevaOrden, setNuevaOrden, readOnly }) {
   return (
-    <div className="of-sec muted">
+    <div className="of-sec primary">
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-        <span className="of-st muted">Avería/Falla/Incidencia</span>
+        <span className="of-st success">Avería/Falla/Incidencia</span>
         {!readOnly && (nuevaOrden.averia || nuevaOrden.actividad || nuevaOrden.observaciones) && (
           <button
             type="button"
@@ -26,7 +26,7 @@ function OrdenFormAveria({ nuevaOrden, setNuevaOrden, readOnly }) {
         />
       </div>
 
-      <div className="of-st muted">Actividad</div>
+      <div className="of-st success">Actividad</div>
       <div className="of-f">
         <textarea
           placeholder="Describa la actividad realizada..."

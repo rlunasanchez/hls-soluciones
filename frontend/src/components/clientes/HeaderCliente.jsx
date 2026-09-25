@@ -1,11 +1,13 @@
 import { useNavigate } from "react-router-dom";
-import { Home, Users, Package, FileText, FileSpreadsheet, ClipboardList, ShoppingCart, UserCog, LogOut } from "lucide-react";
+import { Home, Users, Package, Contact, MapPin, FileText, FileSpreadsheet, ClipboardList, ShoppingCart, UserCog, LogOut } from "lucide-react";
 
 function HeaderCliente({ usuarioActual, onLogout }) {
   const navigate = useNavigate();
 
   const navItems = [
     { label: "Inicio", path: "/home", icon: Home },
+    { label: "Contactos", path: "/contactos", icon: Contact },
+    { label: "Direcciones", path: "/direcciones", icon: MapPin },
     { label: "Equipos", path: "/equipos", icon: Package },
     { label: "Orden de Trabajo", path: "/orden-trabajo", icon: ClipboardList },
     { label: "Informes Técnicos", path: "/informes", icon: FileText },
@@ -15,7 +17,7 @@ function HeaderCliente({ usuarioActual, onLogout }) {
   ];
 
   const colors = [
-    "var(--gradient)", "var(--success)", "var(--warning)", "#EA580C", "#DB2777", "#1E40AF", "#0D9488"
+    "var(--gradient)", "#7C3AED", "#0891B2", "var(--success)", "var(--warning)", "#EA580C", "#DB2777", "#1E40AF", "#0D9488"
   ];
 
   return (

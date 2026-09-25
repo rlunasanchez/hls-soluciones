@@ -4,6 +4,8 @@ import Login from "./pages/Login";
 import Home from "./pages/Home";
 import GestionUsuarios from "./pages/GestionUsuarios";
 import Equipos from "./pages/Equipos";
+import Contactos from "./pages/Contactos";
+import Direcciones from "./pages/Direcciones";
 import Clientes from "./pages/Clientes";
 import Informes from "./pages/Informes";
 import Cotizaciones from "./pages/Cotizaciones";
@@ -55,11 +57,23 @@ function App() {
             authenticated ? <GestionUsuarios /> : <Navigate to="/login" />
           } 
         />
-        <Route 
-          path="/equipos" 
+        <Route
+          path="/equipos"
           element={
             authenticated ? <Equipos /> : <Navigate to="/login" />
-          } 
+          }
+        />
+        <Route
+          path="/contactos"
+          element={
+            authenticated ? <Contactos /> : <Navigate to="/login" />
+          }
+        />
+        <Route
+          path="/direcciones"
+          element={
+            authenticated ? <Direcciones /> : <Navigate to="/login" />
+          }
         />
         <Route 
           path="/clientes" 

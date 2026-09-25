@@ -99,12 +99,6 @@ td.col-ot-dot {
   margin-bottom: 20px;
 }
 
-/* Contacto (OT): Buscar Contacto + los 4 campos en la misma grilla,
-   siempre 3 columnas (fila 1: Buscar/Contacto/Fono, fila 2: Email/Cargo) */
-.of-contacto-grid {
-  grid-template-columns: repeat(3, 1fr);
-}
-
 /* =========================
    CHECK CUSTOM (Otras Direcciones / Otros Contactos)
    ========================= */
@@ -282,9 +276,5 @@ input[type="checkbox"].of-check--pdf { --check-color: #7C3AED; }
 
   .of-form-grid .of-f {
     grid-column: auto !important;
-  }
-
-  .of-contacto-grid {
-    grid-template-columns: repeat(3, 1fr) !important;
   }
 }

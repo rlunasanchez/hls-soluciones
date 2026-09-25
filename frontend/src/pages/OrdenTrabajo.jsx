@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
-  Home, Users, Package, FileText, FileSpreadsheet, ShoppingCart, UserCog,
-  Save, X, Wrench, ChevronDown, ChevronUp
+  Home, Users, Package, Contact, MapPin, FileText, FileSpreadsheet, ShoppingCart, UserCog,
+  Save, X, Wrench, ChevronDown, ChevronUp, UserPlus, Paperclip, AlertTriangle
 } from "lucide-react";
 import api from "../services/api";
 import { getCached } from "../services/cache";
@@ -80,6 +80,10 @@ function OrdenTrabajo() {
   const [clienteInactivo, setClienteInactivo] = useState(false);
   const [soloLectura, setSoloLectura] = useState(false);
   const [ordenParaPDF, setOrdenParaPDF] = useState(null);
+  // Navegación por secciones dentro del formulario de la OT: mismo
+  // formulario/estado de siempre, solo que se muestra de a una sección a
+  // la vez (como "ventanas" separadas) para no abrumar con todo junto.
+  const [seccionOT, setSeccionOT] = useState('cliente');
   
   // Refs para detectar clics fuera de los dropdowns
   const equipoModeloDropdownRef = useRef(null);
@@ -120,6 +124,12 @@ function OrdenTrabajo() {
     fonoContacto: "",
     emailContacto: "",
     cargoContacto: "",
+    contactoId: null,
+    contactoDireccion: "",
+    contactoCiudad: "",
+    contactoComuna: "",
+    direccionId: null,
+    clienteDireccionId: null,
     tecnicoAsignado: tecnicoDeSesion(),
     contactosExtra: [],
     direccionesExtra: [],
@@ -195,7 +205,7 @@ function OrdenTrabajo() {
         setClienteInactivo(false);
         setEquipoSeleccionado(null);
         setEquipoFijo(false);
-        setBusquedaCliente((clienteFromNav.razon_social || "").toUpperCase());
+        setBusquedaCliente("");
     setBusquedaModelo("");
     setEquiposModeloSugeridos([]);
         setInsumos([
@@ -223,10 +233,6 @@ function OrdenTrabajo() {
         rut: clienteFromNav.rut || "",
         email: clienteFromNav.email || "",
         fonoPrincipal: clienteFromNav.telefono || "",
-        contacto: (clienteFromNav.contacto_nombre || "").toUpperCase(),
-        fonoContacto: clienteFromNav.contacto_fono || "",
-        emailContacto: clienteFromNav.contacto_email || "",
-        cargoContacto: (clienteFromNav.contacto_cargo || "").toUpperCase(),
         tecnicoAsignado: tecnicoDeSesion(),
         equipo: "",
         modelo: "",
@@ -243,6 +249,7 @@ function OrdenTrabajo() {
         direccionesExtra: []
       });
       setMostrarFormulario(true);
+    setSeccionOT('cliente');
     }
     };
     init();
@@ -287,6 +294,7 @@ function OrdenTrabajo() {
     ]);
     setInsumosVisibles(2);
     setMostrarFormulario(true);
+    setSeccionOT('cliente');
   };
 
   // Cotizaciones asociadas a la orden abierta (solo lectura, para el badge y
@@ -400,6 +408,7 @@ function OrdenTrabajo() {
     setEquipoFijo(false);
     setEquipoSeleccionado(null);
     setMostrarFormulario(true);
+    setSeccionOT('cliente');
 
     // Cargar datos de la orden en el formulario
     setNuevaOrden({
@@ -425,6 +434,12 @@ function OrdenTrabajo() {
       fonoContacto: orden.fono_contacto || "",
       emailContacto: orden.email_contacto || "",
       cargoContacto: toUpper(orden.cargo_contacto) || "",
+      contactoId: orden.contacto_id || null,
+      contactoDireccion: toUpper(orden.contacto_direccion) || "",
+      contactoCiudad: toUpper(orden.contacto_ciudad) || "",
+      contactoComuna: toUpper(orden.contacto_comuna) || "",
+      direccionId: orden.direccion_id || null,
+      clienteDireccionId: orden.cliente_direccion_id || null,
       tecnicoAsignado: toUpper(orden.tecnico_asignado),
       equipo: toUpper(orden.equipo),
       modelo: toUpper(orden.modelo),
@@ -461,7 +476,7 @@ function OrdenTrabajo() {
     if (cl) {
       setClienteSeleccionado(cl);
       setClienteInactivo(false);
-      setBusquedaCliente((cl.razon_social || orden.cliente || "").toUpperCase());
+      setBusquedaCliente("");
     } else if (orden.cliente_id) {
       try {
         const resCli = await getCached(`/api/clientes`);
@@ -469,21 +484,21 @@ function OrdenTrabajo() {
         if (clFresco) {
           setClienteSeleccionado(clFresco);
           setClienteInactivo(false);
-          setBusquedaCliente((clFresco.razon_social || orden.cliente || "").toUpperCase());
+          setBusquedaCliente("");
         } else {
           setClienteSeleccionado(null);
           setClienteInactivo(true);
-          setBusquedaCliente((orden.cliente || "").toUpperCase());
+          setBusquedaCliente("");
         }
       } catch {
         setClienteSeleccionado(null);
         setClienteInactivo(true);
-        setBusquedaCliente((orden.cliente || "").toUpperCase());
+        setBusquedaCliente("");
       }
     } else {
       setClienteSeleccionado(null);
       setClienteInactivo(!!orden.cliente_id);
-      setBusquedaCliente((orden.cliente || "").toUpperCase());
+      setBusquedaCliente("");
     }
 
     // Cargar insumos
@@ -512,6 +527,7 @@ function OrdenTrabajo() {
     setEditingId(null);
     setOrdenIdActual(orden.id);
     setMostrarFormulario(true);
+    setSeccionOT('cliente');
     
     setNuevaOrden({
       numeroOrden: orden.numero_orden || "",
@@ -536,6 +552,12 @@ function OrdenTrabajo() {
       fonoContacto: orden.fono_contacto || "",
       emailContacto: orden.email_contacto || "",
       cargoContacto: toUpper(orden.cargo_contacto) || "",
+      contactoId: orden.contacto_id || null,
+      contactoDireccion: toUpper(orden.contacto_direccion) || "",
+      contactoCiudad: toUpper(orden.contacto_ciudad) || "",
+      contactoComuna: toUpper(orden.contacto_comuna) || "",
+      direccionId: orden.direccion_id || null,
+      clienteDireccionId: orden.cliente_direccion_id || null,
       tecnicoAsignado: toUpper(orden.tecnico_asignado),
       equipo: toUpper(orden.equipo),
       modelo: toUpper(orden.modelo),
@@ -571,7 +593,7 @@ function OrdenTrabajo() {
     if (cl) {
       setClienteSeleccionado(cl);
       setClienteInactivo(false);
-      setBusquedaCliente((cl.razon_social || orden.cliente || "").toUpperCase());
+      setBusquedaCliente("");
     } else if (orden.cliente_id) {
       try {
         const resCli = await getCached(`/api/clientes`);
@@ -579,21 +601,21 @@ function OrdenTrabajo() {
         if (clFresco) {
           setClienteSeleccionado(clFresco);
           setClienteInactivo(false);
-          setBusquedaCliente((clFresco.razon_social || orden.cliente || "").toUpperCase());
+          setBusquedaCliente("");
         } else {
           setClienteSeleccionado(null);
           setClienteInactivo(true);
-          setBusquedaCliente((orden.cliente || "").toUpperCase());
+          setBusquedaCliente("");
         }
       } catch {
         setClienteSeleccionado(null);
         setClienteInactivo(true);
-        setBusquedaCliente((orden.cliente || "").toUpperCase());
+        setBusquedaCliente("");
       }
     } else {
       setClienteSeleccionado(null);
       setClienteInactivo(!!orden.cliente_id);
-      setBusquedaCliente((orden.cliente || "").toUpperCase());
+      setBusquedaCliente("");
     }
 
     const insumosData = [];
@@ -643,7 +665,7 @@ function OrdenTrabajo() {
     const mismoCliente = clienteSeleccionado?.id === cliente.id;
     setClienteSeleccionado(cliente);
     setClienteInactivo(false);
-    setBusquedaCliente(toUpper(cliente.razon_social));
+    setBusquedaCliente("");
     setMostrarDropdownClientes(false);
 
     // Mismo cliente re-seleccionado en modo edicion: solo re-sincroniza sus
@@ -657,13 +679,10 @@ function OrdenTrabajo() {
         direccion: toUpper(cliente.direccion),
         ciudad: toUpper(cliente.ciudad),
         comuna: toUpper(cliente.comuna),
+        clienteDireccionId: null,
         rut: cliente.rut || "",
         email: cliente.email || "",
-        fonoPrincipal: cliente.telefono || "",
-        contacto: prev.contacto || toUpper(cliente.contacto_nombre || ""),
-        fonoContacto: prev.fonoContacto || cliente.contacto_fono || "",
-        emailContacto: prev.emailContacto || cliente.contacto_email || "",
-        cargoContacto: prev.cargoContacto || toUpper(cliente.contacto_cargo || "")
+        fonoPrincipal: cliente.telefono || ""
       }));
       return;
     }
@@ -676,13 +695,10 @@ function OrdenTrabajo() {
         direccion: toUpper(cliente.direccion),
         ciudad: toUpper(cliente.ciudad),
         comuna: toUpper(cliente.comuna),
+        clienteDireccionId: null,
         rut: cliente.rut || "",
         email: cliente.email || "",
         fonoPrincipal: cliente.telefono || "",
-        contacto: toUpper(cliente.contacto_nombre || ""),
-        fonoContacto: cliente.contacto_fono || "",
-        emailContacto: cliente.contacto_email || "",
-        cargoContacto: toUpper(cliente.contacto_cargo || ""),
         contactosExtra: [],
         direccionesExtra: []
       }));
@@ -700,10 +716,6 @@ function OrdenTrabajo() {
       rut: cliente.rut || "",
       email: cliente.email || "",
       fonoPrincipal: cliente.telefono || "",
-      contacto: toUpper(cliente.contacto_nombre || ""),
-      fonoContacto: cliente.contacto_fono || "",
-      emailContacto: cliente.contacto_email || "",
-      cargoContacto: toUpper(cliente.contacto_cargo || ""),
       contactosExtra: [],
       direccionesExtra: [],
       equipo: "",
@@ -729,7 +741,7 @@ function OrdenTrabajo() {
       // NOTA: No vincula equipo (equipoId = null) ni serie, solo los datos del modelo
     }));
 
-     setBusquedaModelo((equipo.modelo || "").toUpperCase());
+     setBusquedaModelo("");
      setMostrarDropdownModelo(false);
   };
 
@@ -752,14 +764,32 @@ function OrdenTrabajo() {
   // Se usa desde el botón "+ Registrar en Equipos" al crear o editar una OT.
   const registrarEquipoEnMantenedor = async () => {
     const { equipo, marca, modelo, serie } = nuevaOrden;
+    const normTxtEq = (s) => String(s || "").toUpperCase().trim();
+    // Aviso de "parecidos" antes de crear (mismo criterio que Contactos/Direcciones).
+    try {
+      const parecidos = await api.get(`/api/equipos?q=${encodeURIComponent(String(equipo || "").trim())}`);
+      const similares = parecidos.data.filter((x) =>
+        !(normTxtEq(x.equipo) === normTxtEq(equipo) && normTxtEq(x.marca) === normTxtEq(marca) && normTxtEq(x.modelo) === normTxtEq(modelo))
+      );
+      if (similares.length > 0) {
+        const listado = similares.slice(0, 5).map((x) => `• ${x.equipo} ${x.marca || ''} ${x.modelo || ''}`.replace(/\s+/g, ' ').trim()).join('\n');
+        const seguir = confirm(`Ya existen equipos parecidos:\n${listado}\n\n¿Seguro que quiere crear este como uno nuevo?\n(Cancelar para elegir uno de arriba en el buscador)`);
+        if (!seguir) return;
+      }
+    } catch { /* si falla la búsqueda de parecidos, sigue igual */ }
     try {
       const res = await api.post("/api/equipos", { equipo, marca, modelo, serie });
       alert(`Equipo creado en el mantenedor con código ${res.data.codigo}.`);
       const lista = await api.get("/api/equipos");
       setEquipos(lista.data);
     } catch (err) {
-      const msg = err.response?.data?.msg;
-      alert(msg || "Error al registrar el equipo en el mantenedor.");
+      // Ya existe (mismo Equipo+Marca+Modelo): no es un error, ya está en el
+      // mantenedor con ese código — mismo criterio que Contactos/Direcciones.
+      if (err.response?.status === 400) {
+        alert(err.response?.data?.msg || "Ese equipo ya está en el mantenedor.");
+        return;
+      }
+      alert(err.response?.data?.msg || "Error al registrar el equipo en el mantenedor.");
     }
   };
 
@@ -884,9 +914,14 @@ function OrdenTrabajo() {
       }
 
       if (mantener) {
-        // "Guardar Cambios"/"Guardar": guarda y se mantiene en la OT para seguir editando o generar el PDF
+        // "Guardar Cambios"/"Guardar": guarda y se mantiene en la OT para seguir editando o generar el PDF.
+        // editarOrden() recarga todo el formulario y por eso resetea la pestaña
+        // activa a "cliente" — se guarda y se restaura para que el usuario no
+        // se mueva de donde estaba (ej. si guardó estando en "Avería").
+        const seccionAntes = seccionOT;
         const res = await api.get(`/api/ordenes/${idActual}`);
         await editarOrden(res.data);
+        setSeccionOT(seccionAntes);
       } else {
         alert(eraOrdenNueva ? "Orden guardada exitosamente" : "Orden actualizada exitosamente");
         setMostrarFormulario(false);
@@ -933,6 +968,12 @@ function OrdenTrabajo() {
       fonoContacto: "",
       emailContacto: "",
       cargoContacto: "",
+      contactoId: null,
+    contactoDireccion: "",
+    contactoCiudad: "",
+    contactoComuna: "",
+    direccionId: null,
+    clienteDireccionId: null,
       tecnicoAsignado: tecnicoDeSesion(),
       equipo: "",
       modelo: "",
@@ -989,6 +1030,8 @@ function OrdenTrabajo() {
   const navItems = [
     { label: "Inicio", icon: Home, onClick: () => navigate("/home"), color: "var(--gradient)" },
     { label: "Clientes", icon: Users, onClick: () => navigate("/clientes"), color: "var(--primary)" },
+    { label: "Contactos", icon: Contact, onClick: () => navigate("/contactos"), color: "#7C3AED" },
+    { label: "Direcciones", icon: MapPin, onClick: () => navigate("/direcciones"), color: "#0891B2" },
     { label: "Equipos", icon: Package, onClick: () => navigate("/equipos"), color: "var(--success)" },
     { label: "Informes Técnicos", icon: FileText, onClick: () => navigate("/informes"), color: "#EA580C" },
     { label: "Cotizaciones", icon: FileSpreadsheet, onClick: () => navigate("/cotizaciones"), color: "#DB2777" },
@@ -1062,9 +1105,31 @@ function OrdenTrabajo() {
                 />
               </div>
 
+              <div className="of-tabs">
+                {[
+                  { id: 'cliente', label: 'Datos de Cliente', icon: Users },
+                  { id: 'contacto', label: 'Contacto y Dirección', icon: Contact },
+                  { id: 'otros-contactos', label: 'Otros Contactos', icon: UserPlus },
+                  { id: 'adjuntos', label: 'Adjuntos e Info. Interna', icon: Paperclip },
+                  { id: 'equipo', label: 'Datos del Equipo', icon: Package },
+                  { id: 'averia', label: 'Avería / Informe Técnico', icon: AlertTriangle },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    className={`of-tab${seccionOT === tab.id ? ' active' : ''}`}
+                    onClick={() => setSeccionOT(tab.id)}
+                  >
+                    <tab.icon size={14} />
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
               <div className="of-cols">
-                <div className="of-col-left">
+                <div className="of-col-left" style={{ gridColumn: '1 / -1', width: 'calc(50% - 4px)', margin: '0 auto', display: ['cliente', 'contacto', 'otros-contactos', 'adjuntos'].includes(seccionOT) ? undefined : 'none' }}>
                 <OrdenFormCliente
+                  seccionActiva={seccionOT}
                   busquedaCliente={busquedaCliente}
                   setBusquedaCliente={setBusquedaCliente}
                   mostrarDropdownClientes={mostrarDropdownClientes}
@@ -1134,7 +1199,8 @@ function OrdenTrabajo() {
                 )}
                 </div>
 
-                <div className="of-col-right">
+                <div className="of-col-right" style={{ gridColumn: '1 / -1', width: 'calc(50% - 4px)', margin: '0 auto', display: ['equipo', 'averia'].includes(seccionOT) ? undefined : 'none' }}>
+                <div style={{ display: seccionOT === 'equipo' ? undefined : 'none' }}>
                 <OrdenFormEquipo
                   busquedaModelo={busquedaModelo}
                   setBusquedaModelo={setBusquedaModelo}
@@ -1161,15 +1227,17 @@ function OrdenTrabajo() {
                   setInsumos={setInsumos}
                   readOnly={soloLectura}
                 />
+                </div>
 
+                <div style={{ display: seccionOT === 'averia' ? undefined : 'none' }}>
                   <OrdenFormAveria
                     nuevaOrden={nuevaOrden}
                     setNuevaOrden={setNuevaOrden}
                     readOnly={soloLectura}
                   />
 
-                  <div className="of-sec muted">
-                    <div className="of-st muted">Observaciones</div>
+                  <div className="of-sec primary">
+                    <div className="of-st success">Observaciones</div>
                     <div className="of-f">
                       <textarea
                         placeholder="Observaciones adicionales..."
@@ -1180,6 +1248,7 @@ function OrdenTrabajo() {
                       />
                     </div>
                   </div>
+                </div>
                 </div>
               </div>
 

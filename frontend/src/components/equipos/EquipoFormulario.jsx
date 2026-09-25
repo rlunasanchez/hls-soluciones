@@ -36,8 +36,8 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, readOnly 
     e.preventDefault();
     e.stopPropagation();
     if (guardandoRef.current) return;
-    if (!nuevoEquipo.equipo.trim() || !nuevoEquipo.marca.trim() || !nuevoEquipo.modelo.trim()) {
-      alert("Complete Equipo, Marca y Modelo antes de guardar.");
+    if (nuevoEquipo.equipo.trim().length < 2) {
+      alert("Ingrese el Equipo (mínimo 2 caracteres) antes de guardar.");
       return;
     }
     guardandoRef.current = true;
@@ -72,16 +72,16 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, readOnly 
                     onChange={e => setNuevoEquipo({...nuevoEquipo, equipo: upperInput(e)})} required />
                 </div>
                 <div className="ef-f">
-                  <label>Marca *</label>
+                  <label>Marca</label>
                   <input placeholder="Marca" value={nuevoEquipo.marca}
                     disabled={readOnly}
-                    onChange={e => setNuevoEquipo({...nuevoEquipo, marca: upperInput(e)})} required />
+                    onChange={e => setNuevoEquipo({...nuevoEquipo, marca: upperInput(e)})} />
                 </div>
                 <div className="ef-f">
-                  <label>Modelo *</label>
+                  <label>Modelo</label>
                   <input placeholder="Modelo" value={nuevoEquipo.modelo}
                     disabled={readOnly}
-                    onChange={e => setNuevoEquipo({...nuevoEquipo, modelo: upperInput(e)})} required />
+                    onChange={e => setNuevoEquipo({...nuevoEquipo, modelo: upperInput(e)})} />
                 </div>
               </div>
             </div>

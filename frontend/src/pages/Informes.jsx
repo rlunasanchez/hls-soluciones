@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { FileText, Package, Users, UserCog, LogOut, FileSpreadsheet, ClipboardList, ShoppingCart, Home } from "lucide-react";
+import { FileText, Package, Users, Contact, MapPin, UserCog, LogOut, FileSpreadsheet, ClipboardList, ShoppingCart, Home } from "lucide-react";
 import { cerrarSesion } from "../utils/helpers";
 
 function Informes() {
@@ -22,6 +22,14 @@ function Informes() {
           <button onClick={() => navigate("/clientes")} className="logout-btn" style={{ background: 'var(--primary)', color: 'white' }}>
             <Users size={18} />
             <span className="btn-label">Clientes</span>
+          </button>
+          <button onClick={() => navigate("/contactos")} className="logout-btn" style={{ background: '#7C3AED', color: 'white' }}>
+            <Contact size={18} />
+            <span className="btn-label">Contactos</span>
+          </button>
+          <button onClick={() => navigate("/direcciones")} className="logout-btn" style={{ background: '#0891B2', color: 'white' }}>
+            <MapPin size={18} />
+            <span className="btn-label">Direcciones</span>
           </button>
           <button onClick={() => navigate("/equipos")} className="logout-btn" style={{ background: 'var(--success)', color: 'white' }}>
             <Package size={18} />

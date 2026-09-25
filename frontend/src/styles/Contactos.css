@@ -1,0 +1,48 @@
+.cof-wrap { background: white; border-radius: 16px; box-shadow: var(--shadow-lg); overflow: hidden; }
+.cof-head { background: var(--gradient); padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; }
+.cof-head h2 { color: white; margin: 0; display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 600; }
+.cof-head-close { background: rgba(255,255,255,0.2); border: none; border-radius: 8px; padding: 8px; cursor: pointer; color: white; display: flex; }
+.cof-form { padding: 18px; display: grid; gap: 14px; }
+.cof-s { padding: 12px; border-radius: 10px; }
+.cof-s.primary { background: var(--primary-light); }
+.cof-st { font-size: 13px; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+.cof-st.primary { color: var(--primary); }
+.cof-r2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cof-r3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.cof-f { display: flex; flex-direction: column; gap: 2px; }
+.cof-f label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .3px; }
+.cof-f input { padding: 2px 8px; font-size: .82rem; line-height: 1.3; border: 1.5px solid var(--border); border-radius: 6px; background: white; transition: border-color .15s; width: 100%; box-sizing: border-box; }
+.cof-f input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37,99,235,.1); }
+.cof-code input { background: #e8f0fe !important; color: #1a73e8; font-weight: 700; font-size: .85rem !important; }
+.cof-code label { color: #1a73e8 !important; }
+.cof-btn-p { padding: 4px 12px; font-size: .78rem; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+.cof-btn-p:disabled { opacity: .6; cursor: not-allowed; }
+.cof-btn-s { padding: 4px 12px; font-size: .78rem; background: var(--success); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 5px; transition: all .2s; }
+.cof-btn-s:hover { filter: brightness(.92); }
+.cof-btn-s:disabled { opacity: .6; cursor: not-allowed; }
+.cof-btn-c { padding: 4px 12px; font-size: .78rem; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 5px; transition: all .2s; }
+.cof-btn-c:hover { background: #e2e8f0; }
+.cof-sub { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; margin-top: 2px; }
+@media (max-width: 768px) {
+  .cof-r2, .cof-r3 { grid-template-columns: 1fr; }
+  .cof-form { padding: 12px; gap: 10px; }
+  .cof-f input { padding: 10px 12px; font-size: .9rem; min-height: 44px; }
+  .filtro-grupo-contactos input { padding: 10px 12px; font-size: .9rem; min-height: 44px; }
+  .cof-sub { flex-direction: column; }
+  .cof-sub button { width: 100%; justify-content: center; }
+}
+
+/* Filtros - mismos estilos que Equipos/Clientes */
+.filtro-grupo-contactos { flex: 0 0 auto; width: 200px; }
+.filtro-grupo-contactos label { display: block; margin-bottom: 4px; font-weight: 600; font-size: 0.8rem; color: var(--text-muted); }
+.filtro-grupo-contactos input { width: 100%; padding: 2px 8px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.82rem; font-family: inherit; transition: border-color 0.2s; }
+.filtro-grupo-contactos input:focus { border-color: var(--primary); outline: none; }
+.btn-limpiar-contactos { display: flex; align-items: center; gap: 4px; padding: 6px 12px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500; white-space: nowrap; }
+.btn-limpiar-contactos:hover { filter: brightness(0.92); }
+
+@media (max-width: 768px) {
+  .filters-content { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .filtro-grupo-contactos { width: 100%; }
+  .filtro-grupo-contactos input { padding: 10px 12px; font-size: .9rem; min-height: 44px; box-sizing: border-box; }
+  .filters-content .btn-limpiar-contactos { grid-column: 1 / -1; justify-content: center; padding: 10px 16px; }
+}

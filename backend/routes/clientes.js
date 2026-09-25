@@ -51,24 +51,9 @@ function validarEmail(v) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || "").trim());
 }
 
-// Emails con formato válido (ignora los vacíos)
-function hayEmailInvalido(...valores) {
-  return valores.some((v) => String(v || "").trim() && !validarEmail(v));
-}
-
 router.get("/", authMiddleware, async (req, res) => {
   try {
-    const [rows] = await pool.query(`
-      SELECT c.*,
-        (SELECT IFNULL(GROUP_CONCAT(
-          CONCAT(IFNULL(d.tipo_direccion, ''), '|', IFNULL(d.direccion, ''), '|', IFNULL(d.fono, ''), '|', IFNULL(d.ciudad, ''), '|', IFNULL(d.comuna, ''))
-        ORDER BY d.id SEPARATOR ';;'), '') FROM clientes_direcciones d WHERE d.cliente_id = c.id) as direcciones,
-        (SELECT IFNULL(GROUP_CONCAT(
-          CONCAT(IFNULL(co.nombre, ''), '|', IFNULL(co.email, ''), '|', IFNULL(co.fono, ''), '|', IFNULL(co.cargo, ''), '|', IFNULL(co.direccion, ''), '|', IFNULL(co.ciudad, ''), '|', IFNULL(co.comuna, ''))
-        ORDER BY co.id SEPARATOR ';;'), '') FROM clientes_contactos co WHERE co.cliente_id = c.id) as contactos
-      FROM clientes c
-      ORDER BY c.id DESC
-    `);
+    const [rows] = await pool.query(`SELECT * FROM clientes ORDER BY id DESC`);
     res.json(rows);
   } catch (err) {
     console.error(err);
@@ -78,17 +63,7 @@ router.get("/", authMiddleware, async (req, res) => {
 
 router.get("/:id", authMiddleware, async (req, res) => {
   try {
-    const [rows] = await pool.query(`
-      SELECT c.*,
-        (SELECT IFNULL(GROUP_CONCAT(
-          CONCAT(IFNULL(d.tipo_direccion, ''), '|', IFNULL(d.direccion, ''), '|', IFNULL(d.fono, ''), '|', IFNULL(d.ciudad, ''), '|', IFNULL(d.comuna, ''))
-        ORDER BY d.id SEPARATOR ';;'), '') FROM clientes_direcciones d WHERE d.cliente_id = c.id) as direcciones,
-        (SELECT IFNULL(GROUP_CONCAT(
-          CONCAT(IFNULL(co.nombre, ''), '|', IFNULL(co.email, ''), '|', IFNULL(co.fono, ''), '|', IFNULL(co.cargo, ''), '|', IFNULL(co.direccion, ''), '|', IFNULL(co.ciudad, ''), '|', IFNULL(co.comuna, ''))
-        ORDER BY co.id SEPARATOR ';;'), '') FROM clientes_contactos co WHERE co.cliente_id = c.id) as contactos
-      FROM clientes c
-      WHERE c.id = ?
-    `, [req.params.id]);
+    const [rows] = await pool.query(`SELECT * FROM clientes WHERE id = ?`, [req.params.id]);
     if (rows.length === 0) return res.status(404).json({ msg: "Cliente no encontrado" });
     res.json(rows[0]);
   } catch (err) {
@@ -98,12 +73,7 @@ router.get("/:id", authMiddleware, async (req, res) => {
 });
 
 router.post("/", authMiddleware, async (req, res) => {
-  const {
-    razon_social, giro, rut, direccion, ciudad, comuna, telefono, email,
-    contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion,
-    contacto_ciudad, contacto_comuna,
-    direcciones, contactos
-  } = req.body;
+  const { razon_social, giro, rut, direccion, ciudad, comuna, telefono, email } = req.body;
   const codigo = await generarCodigo();
   try {
     // Datos mínimos obligatorios: Razón Social + RUT
@@ -124,40 +94,15 @@ router.post("/", authMiddleware, async (req, res) => {
         return res.status(400).json({ msg: `El cliente ya existe (${dup.codigo || "CL-????"})` });
       }
     }
-    // Emails con formato válido: empresa, contacto principal y contactos adicionales
-    if (hayEmailInvalido(email, contacto_email, ...(Array.isArray(contactos) ? contactos.map((c) => c?.email) : []))) {
+    if (String(email || "").trim() && !validarEmail(email)) {
       return res.status(400).json({ msg: "Email inválido" });
     }
     const [result] = await pool.query(
-      `INSERT INTO clientes (codigo, razon_social, giro, rut, direccion, ciudad, comuna, telefono, email, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion, contacto_ciudad, contacto_comuna)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [codigo, razon_social, giro, rut, direccion, ciudad, comuna, telefono, email, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion, contacto_ciudad || '', contacto_comuna || '']
+      `INSERT INTO clientes (codigo, razon_social, giro, rut, direccion, ciudad, comuna, telefono, email)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [codigo, razon_social, giro || '', rut, direccion || '', ciudad || '', comuna || '', telefono || '', email || '']
     );
-    const clienteId = result.insertId;
-
-    if (direcciones && direcciones.length > 0) {
-      for (const d of direcciones) {
-        if (d.direccion && d.direccion.trim()) {
-          await pool.query(
-            "INSERT INTO clientes_direcciones (cliente_id, tipo_direccion, direccion, fono, ciudad, comuna) VALUES (?, ?, ?, ?, ?, ?)",
-            [clienteId, d.tipo_direccion || '', d.direccion, d.fono || '', d.ciudad || '', d.comuna || '']
-          );
-        }
-      }
-    }
-
-    if (contactos && contactos.length > 0) {
-      for (const c of contactos) {
-        if (c.nombre && c.nombre.trim()) {
-          await pool.query(
-            "INSERT INTO clientes_contactos (cliente_id, nombre, email, fono, cargo, direccion, ciudad, comuna) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            [clienteId, c.nombre, c.email || '', c.fono || '', c.cargo || '', c.direccion || '', c.ciudad || '', c.comuna || '']
-          );
-        }
-      }
-    }
-
-    res.status(201).json({ msg: "Cliente creado", codigo, id: clienteId });
+    res.status(201).json({ msg: "Cliente creado", codigo, id: result.insertId });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
@@ -166,12 +111,7 @@ router.post("/", authMiddleware, async (req, res) => {
 
 router.put("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
-  const {
-    razon_social, giro, rut, direccion, ciudad, comuna, telefono, email,
-    contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion,
-    contacto_ciudad, contacto_comuna,
-    direcciones, contactos
-  } = req.body;
+  const { razon_social, giro, rut, direccion, ciudad, comuna, telefono, email } = req.body;
   const connection = await pool.getConnection();
   try {
     // Datos mínimos obligatorios: Razón Social + RUT
@@ -196,8 +136,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
         return res.status(400).json({ msg: `El RUT ya existe (${dup.codigo || "CL-????"})` });
       }
     }
-    // Emails con formato válido: empresa, contacto principal y contactos adicionales
-    if (hayEmailInvalido(email, contacto_email, ...(Array.isArray(contactos) ? contactos.map((c) => c?.email) : []))) {
+    if (String(email || "").trim() && !validarEmail(email)) {
       connection.release();
       return res.status(400).json({ msg: "Email inválido" });
     }
@@ -207,34 +146,15 @@ router.put("/:id", authMiddleware, async (req, res) => {
 
     await connection.beginTransaction();
     await connection.query(
-      `UPDATE clientes SET codigo=?, razon_social=?, giro=?, rut=?, direccion=?, ciudad=?, comuna=?, telefono=?, email=?, contacto_nombre=?, contacto_email=?, contacto_fono=?, contacto_cargo=?, contacto_direccion=?, contacto_ciudad=?, contacto_comuna=? WHERE id=?`,
-      [codigo, razon_social, giro, rut, direccion, ciudad, comuna, telefono, email, contacto_nombre, contacto_email, contacto_fono, contacto_cargo, contacto_direccion, contacto_ciudad || '', contacto_comuna || '', id]
+      `UPDATE clientes SET codigo=?, razon_social=?, giro=?, rut=?, direccion=?, ciudad=?, comuna=?, telefono=?, email=? WHERE id=?`,
+      [codigo, razon_social, giro || '', rut, direccion || '', ciudad || '', comuna || '', telefono || '', email || '', id]
     );
-    await connection.query("DELETE FROM clientes_direcciones WHERE cliente_id = ?", [id]);
-    if (direcciones && direcciones.length > 0) {
-      for (const d of direcciones) {
-        if (d.direccion && d.direccion.trim()) {
-          await connection.query(
-            "INSERT INTO clientes_direcciones (cliente_id, tipo_direccion, direccion, fono, ciudad, comuna) VALUES (?, ?, ?, ?, ?, ?)",
-            [id, d.tipo_direccion || '', d.direccion, d.fono || '', d.ciudad || '', d.comuna || '']
-          );
-        }
-      }
-    }
-    await connection.query("DELETE FROM clientes_contactos WHERE cliente_id = ?", [id]);
-    if (contactos && contactos.length > 0) {
-      for (const c of contactos) {
-        if (c.nombre && c.nombre.trim()) {
-          await connection.query(
-            "INSERT INTO clientes_contactos (cliente_id, nombre, email, fono, cargo, direccion, ciudad, comuna) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            [id, c.nombre, c.email || '', c.fono || '', c.cargo || '', c.direccion || '', c.ciudad || '', c.comuna || '']
-          );
-        }
-      }
-    }
+    // Sincroniza en las OT de este cliente solo sus datos propios (Contacto
+    // ya no se deriva de Cliente — vive aparte en el catálogo de Contactos
+    // y se administra por OT, no se pisa acá).
     await connection.query(
-      `UPDATE ordenes_trabajo SET cliente = ?, direccion = ?, ciudad = ?, comuna = ?, rut = ?, contacto = ?, fono_contacto = ?, email_contacto = ?, cargo_contacto = ?, fono_principal = ?, email = ? WHERE cliente_id = ?`,
-      [razon_social, direccion || null, ciudad || null, comuna || null, rut || null, contacto_nombre || null, contacto_fono || null, contacto_email || null, contacto_cargo || null, telefono || null, email || null, id]
+      `UPDATE ordenes_trabajo SET cliente = ?, direccion = ?, ciudad = ?, comuna = ?, rut = ?, fono_principal = ?, email = ? WHERE cliente_id = ?`,
+      [razon_social, direccion || null, ciudad || null, comuna || null, rut || null, telefono || null, email || null, id]
     );
     await connection.commit();
     res.json({ msg: "Cliente actualizado", codigo });

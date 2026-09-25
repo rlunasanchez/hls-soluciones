@@ -1,14 +1,19 @@
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
-  FileSpreadsheet, Package, Users, UserCog, LogOut, FileText, ClipboardList, ShoppingCart, Home,
-  Search, Save, X, Plus, Trash2, FileDown, ChevronUp, ChevronDown, UserPlus
+  FileSpreadsheet, Package, Users, Contact, MapPin, UserCog, LogOut, FileText, ClipboardList, ShoppingCart, Home,
+  Search, Save, X, Plus, Trash2, FileDown, ChevronUp, ChevronDown, UserPlus, Pencil
 } from "lucide-react";
 import api from "../services/api";
 import { getCached, invalidar } from "../services/cache";
 import { toUpper, cerrarSesion, upperInput, parseToken, formatearRutInput } from "../utils/helpers";
 import "../styles/OrdenTrabajo.css";
 import "../styles/ordenes-componentes.css";
+import "../styles/Contactos.css";
+import "../styles/Direcciones.css";
+import ContactoFormulario from "../components/contactos/ContactoFormulario";
+import DireccionFormulario from "../components/direcciones/DireccionFormulario";
 import { EMPRESA } from "../utils/empresa";
 import { calcularTotales } from "../utils/cotizacionDoc";
 import CotizacionLista from "../components/cotizaciones/CotizacionLista";
@@ -36,12 +41,18 @@ const cotizacionVacia = () => ({
   clienteDireccion: "",
   clienteCiudad: "",
   clienteComuna: "",
+  clienteDireccionId: null,
   clienteTelefono: "",
   clienteEmail: "",
   contactoNombre: "",
   contactoFono: "",
   contactoEmail: "",
   contactoCargo: "",
+  contactoId: null,
+  contactoDireccion: "",
+  contactoCiudad: "",
+  contactoComuna: "",
+  direccionId: null,
   contactosExtra: [],
   ejecutivo: parseToken().nombre || parseToken().usuario || "",
   ejecutivoFono: EMPRESA.fono,
@@ -89,6 +100,33 @@ function Cotizaciones() {
   const [contactosResumenAbierto, setContactosResumenAbierto] = useState(false);
   const [contactosManualVisibles, setContactosManualVisibles] = useState(() => new Set());
   const nombreContactoEnFocoRef = useRef("");
+  // Buscador para agregar un contacto existente a "Otros Contactos".
+  const [busquedaContactoExtra, setBusquedaContactoExtra] = useState("");
+  const [mostrarDropdownContactoExtra, setMostrarDropdownContactoExtra] = useState(false);
+  const [contactosExtraSugeridos, setContactosExtraSugeridos] = useState([]);
+  const contactoExtraDropdownRef = useRef(null);
+  const [contactoEnEdicion, setContactoEnEdicion] = useState(null);
+  const [contactoEditTarget, setContactoEditTarget] = useState(null);
+  // Buscador de Dirección (mantenedor de Direcciones), catálogo global —
+  // mismo patrón que Contacto, un solo slot ligado al contacto principal.
+  const [busquedaDireccion, setBusquedaDireccion] = useState("");
+  const [mostrarDropdownDireccionBusq, setMostrarDropdownDireccionBusq] = useState(false);
+  const [direccionesSugeridas, setDireccionesSugeridas] = useState([]);
+  const direccionBusqDropdownRef = useRef(null);
+  const [direccionEnEdicion, setDireccionEnEdicion] = useState(null);
+  const [direccionEditTarget, setDireccionEditTarget] = useState(null);
+  // Buscador de Dirección dentro de una fila de "Otros Contactos". Solo una
+  // fila está visible a la vez, así que un único slot compartido alcanza.
+  const [busquedaDireccionExtra, setBusquedaDireccionExtra] = useState("");
+  const [mostrarDropdownDireccionExtra, setMostrarDropdownDireccionExtra] = useState(false);
+  const [direccionesExtraSugeridas, setDireccionesExtraSugeridas] = useState([]);
+  const direccionExtraDropdownRef = useRef(null);
+  // Buscador de Dirección del Cliente (la "primera dirección"): ya no se
+  // ingresa a mano en el mantenedor de Cliente, se busca y se llama.
+  const [busquedaDireccionCliente, setBusquedaDireccionCliente] = useState("");
+  const [mostrarDropdownDireccionCliente, setMostrarDropdownDireccionCliente] = useState(false);
+  const [direccionesClienteSugeridas, setDireccionesClienteSugeridas] = useState([]);
+  const direccionClienteDropdownRef = useRef(null);
 
   const [cotizacion, setCotizacion] = useState(cotizacionVacia());
   // Distinto de cotizacion.ordenId: esto es "por dónde entré al formulario",
@@ -199,18 +237,23 @@ function Cotizaciones() {
           clienteDireccion: toUpper(orden.direccion || clienteMatch?.direccion || ""),
           clienteCiudad: toUpper(orden.ciudad || clienteMatch?.ciudad || ""),
           clienteComuna: toUpper(orden.comuna || clienteMatch?.comuna || ""),
+          clienteDireccionId: orden.cliente_direccion_id || null,
           clienteTelefono: orden.fono_principal || clienteMatch?.telefono || "",
           clienteEmail: orden.email || clienteMatch?.email || "",
           contactoNombre: toUpper(orden.contacto || ""),
           contactoFono: orden.fono_contacto || "",
           contactoEmail: orden.email_contacto || "",
           contactoCargo: toUpper(orden.cargo_contacto || ""),
+          contactoId: orden.contacto_id || null,
+          contactoDireccion: toUpper(orden.contacto_direccion || ""),
+          contactoCiudad: toUpper(orden.contacto_ciudad || ""),
+          contactoComuna: toUpper(orden.contacto_comuna || ""),
+          direccionId: orden.direccion_id || null,
           ordenId: orden.id,
           ordenNumero: orden.numero_orden || ""
         });
       } else {
         setBusquedaCliente(toUpper(clienteNav.razon_social || ""));
-        setBusquedaContacto(toUpper(clienteNav.contacto_nombre || ""));
         setCotizacion({
           ...nuevaCotizacion(),
           clienteId: clienteNav.id || null,
@@ -220,11 +263,7 @@ function Cotizaciones() {
           clienteCiudad: toUpper(clienteNav.ciudad || ""),
           clienteComuna: toUpper(clienteNav.comuna || ""),
           clienteTelefono: clienteNav.telefono || "",
-          clienteEmail: clienteNav.email || "",
-          contactoNombre: toUpper(clienteNav.contacto_nombre || ""),
-          contactoFono: clienteNav.contacto_fono || "",
-          contactoEmail: clienteNav.contacto_email || "",
-          contactoCargo: toUpper(clienteNav.contacto_cargo || "")
+          clienteEmail: clienteNav.email || ""
         });
       }
       setMostrarFormulario(true);
@@ -241,6 +280,18 @@ function Cotizaciones() {
       }
       if (contactoDropdownRef.current && !contactoDropdownRef.current.contains(event.target)) {
         setMostrarDropdownContacto(false);
+      }
+      if (contactoExtraDropdownRef.current && !contactoExtraDropdownRef.current.contains(event.target)) {
+        setMostrarDropdownContactoExtra(false);
+      }
+      if (direccionBusqDropdownRef.current && !direccionBusqDropdownRef.current.contains(event.target)) {
+        setMostrarDropdownDireccionBusq(false);
+      }
+      if (direccionExtraDropdownRef.current && !direccionExtraDropdownRef.current.contains(event.target)) {
+        setMostrarDropdownDireccionExtra(false);
+      }
+      if (direccionClienteDropdownRef.current && !direccionClienteDropdownRef.current.contains(event.target)) {
+        setMostrarDropdownDireccionCliente(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -347,12 +398,18 @@ function Cotizaciones() {
       clienteDireccion: c.cliente_direccion || "",
       clienteCiudad: c.cliente_ciudad || "",
       clienteComuna: c.cliente_comuna || "",
+      clienteDireccionId: c.cliente_direccion_id || null,
       clienteTelefono: c.cliente_telefono || "",
       clienteEmail: c.cliente_email || "",
       contactoNombre: c.contacto_nombre || "",
       contactoFono: c.contacto_fono || "",
       contactoEmail: c.contacto_email || "",
       contactoCargo: c.contacto_cargo || "",
+      contactoId: c.contacto_id || null,
+      contactoDireccion: c.contacto_direccion || "",
+      contactoCiudad: c.contacto_ciudad || "",
+      contactoComuna: c.contacto_comuna || "",
+      direccionId: c.direccion_id || null,
       contactosExtra: parseExtra(c.contactos_extra),
       ejecutivo: c.ejecutivo || "",
       ejecutivoFono: c.ejecutivo_fono || "",
@@ -423,7 +480,6 @@ function Cotizaciones() {
     setClienteSeleccionado(cliente);
     setBusquedaCliente(toUpper(cliente.razon_social));
     setMostrarDropdownClientes(false);
-    setBusquedaContacto(toUpper(cliente.contacto_nombre || ""));
     setCotizacion((prev) => ({
       ...prev,
       clienteId: cliente.id,
@@ -432,12 +488,9 @@ function Cotizaciones() {
       clienteDireccion: toUpper(cliente.direccion || ""),
       clienteCiudad: toUpper(cliente.ciudad || ""),
       clienteComuna: toUpper(cliente.comuna || ""),
+      clienteDireccionId: null,
       clienteTelefono: cliente.telefono || "",
-      clienteEmail: cliente.email || "",
-      contactoNombre: toUpper(cliente.contacto_nombre || ""),
-      contactoFono: cliente.contacto_fono || "",
-      contactoEmail: cliente.contacto_email || "",
-      contactoCargo: toUpper(cliente.contacto_cargo || "")
+      clienteEmail: cliente.email || ""
     }));
   };
 
@@ -453,55 +506,70 @@ function Cotizaciones() {
       ).slice(0, 10)
     : [];
 
-  // Contactos disponibles para buscar: el principal (contacto_nombre/email/fono
-  // en la ficha del cliente) más los adicionales (clientes_contactos, empaquetados
-  // en el campo agregado "contactos"), mismo patrón que el buscador de la OT.
-  // Si hay un cliente asociado, se busca solo entre sus contactos; si es una
-  // cotización suelta (sin cliente), se busca entre los de todos los clientes.
-  const contactosDeCliente = (cli) => {
-    const principalNombre = String(cli.contacto_nombre || "").toUpperCase().trim();
-    const principalEmail = String(cli.contacto_email || "").toUpperCase().trim();
-    const extras = String(cli.contactos || "")
-      .split(";;")
-      .map((c) => {
-        const p = c.split("|");
-        return { nombre: (p[0] || "").toUpperCase().trim(), email: p[1] || "", fono: p[2] || "", cargo: p[3] || "", cliente: cli.razon_social || "" };
-      })
-      .filter((c) => c.nombre)
-      .filter((c) => {
-        const n = c.nombre.toUpperCase().trim();
-        const e = (c.email || "").toUpperCase().trim();
-        if (principalNombre && n === principalNombre) return false;
-        if (principalEmail && e && e === principalEmail) return false;
-        return true;
-      });
-    const principal = principalNombre
-      ? [{
-          nombre: principalNombre,
-          email: cli.contacto_email || "",
-          fono: cli.contacto_fono || "",
-          cargo: cli.contacto_cargo || "",
-          cliente: cli.razon_social || "",
-          principal: true
-        }]
-      : [];
-    return [...principal, ...extras];
-  };
+  // Contacto: catálogo global (mantenedor de Contactos), independiente del
+  // cliente — se busca y se copia, mismo patrón que el buscador de Equipo.
+  const [contactosSugeridos, setContactosSugeridos] = useState([]);
+  useEffect(() => {
+    if (busquedaContacto.trim().length < 2) { setContactosSugeridos([]); return; }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await api.get(`/api/contactos?q=${encodeURIComponent(busquedaContacto.trim())}`);
+        setContactosSugeridos(res.data);
+      } catch { setContactosSugeridos([]); }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [busquedaContacto]);
 
-  const contactosDisponibles = clienteSeleccionado
-    ? contactosDeCliente(clienteSeleccionado)
-    : clientes.flatMap(contactosDeCliente);
-
-  const contactosFiltrados = busquedaContacto.trim().length >= 2
-    ? contactosDisponibles.filter((c) => {
-        const q = busquedaContacto.toUpperCase();
-        return (c.nombre || "").includes(q) || (c.email || "").toUpperCase().includes(q);
-      })
-    : [];
+  useEffect(() => {
+    if (busquedaContactoExtra.trim().length < 2) { setContactosExtraSugeridos([]); return; }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await api.get(`/api/contactos?q=${encodeURIComponent(busquedaContactoExtra.trim())}`);
+        setContactosExtraSugeridos(res.data);
+      } catch { setContactosExtraSugeridos([]); }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [busquedaContactoExtra]);
 
   // Al elegir otro contacto como principal, el principal anterior baja a
   // "Otros Contactos" (en vez de perderse), y si el elegido ya estaba ahí,
   // se saca de esa lista para no quedar duplicado.
+  // Da de alta un contacto en el mantenedor de Contactos, o si el backend
+  // responde "ya existe" (nombre repetido), lo busca y lo enlaza igual, para
+  // no dejar la fila sin poder editarse cuando el contacto ya estaba ahí.
+  const registrarOEnlazarContacto = async (nombre, email, fono, cargo) => {
+    if (String(nombre || "").trim().length < 3) {
+      alert("Ingrese el nombre completo del contacto (mínimo 3 caracteres) antes de registrarlo.");
+      return null;
+    }
+    // Aviso de "parecidos" antes de crear: si ya hay contactos con nombre
+    // similar (no idéntico — eso ya lo maneja el enlace automático de más
+    // abajo), se le pregunta si de verdad quiere crear uno nuevo.
+    try {
+      const parecidos = await api.get(`/api/contactos?q=${encodeURIComponent(nombre.trim())}`);
+      const similares = parecidos.data.filter((x) => normTxt(x.nombre) !== normTxt(nombre));
+      if (similares.length > 0) {
+        const listado = similares.slice(0, 5).map((x) => `• ${x.nombre}${x.cargo ? ` (${x.cargo})` : ''}`).join('\n');
+        const seguir = confirm(`Ya existen contactos parecidos:\n${listado}\n\n¿Seguro que quiere crear "${nombre.trim()}" como uno nuevo?\n(Cancelar para elegir uno de arriba en el buscador)`);
+        if (!seguir) return null;
+      }
+    } catch { /* si falla la búsqueda de parecidos, sigue igual */ }
+    try {
+      const res = await api.post("/api/contactos", { nombre, email, fono, cargo });
+      const lista = await api.get(`/api/contactos?q=${encodeURIComponent(nombre)}`);
+      const creado = lista.data.find((x) => x.codigo === res.data.codigo);
+      return { id: creado?.id || null, yaExistia: false };
+    } catch (err) {
+      if (err.response?.status === 400) {
+        const lista = await api.get(`/api/contactos?q=${encodeURIComponent(nombre)}`);
+        const existente = lista.data.find((x) => normTxt(x.nombre) === normTxt(nombre));
+        if (existente) return { id: existente.id, yaExistia: true };
+      }
+      alert(err.response?.data?.msg || "Error al registrar el contacto.");
+      return null;
+    }
+  };
+
   const seleccionarContactoBusqueda = (c) => {
     const nombreNuevo = normTxt(c.nombre);
     setCotizacion((prev) => {
@@ -510,7 +578,7 @@ function Cotizaciones() {
         extras = [...extras, {
           nombre: prev.contactoNombre, email: prev.contactoEmail,
           fono: prev.contactoFono, cargo: prev.contactoCargo,
-          direccion: "", ciudad: "", comuna: ""
+          contactoId: prev.contactoId || null
         }];
       }
       return {
@@ -519,11 +587,249 @@ function Cotizaciones() {
         contactoEmail: c.email || "",
         contactoFono: c.fono || "",
         contactoCargo: c.cargo || "",
+        contactoId: c.id,
         contactosExtra: extras
       };
     });
     setBusquedaContacto(c.nombre);
     setMostrarDropdownContacto(false);
+  };
+
+  const abrirEditarContacto = async (target, id) => {
+    try {
+      const res = await api.get(`/api/contactos/${id}`);
+      setContactoEnEdicion(res.data);
+      setContactoEditTarget(target);
+    } catch {
+      alert("No se pudo cargar el contacto para editar.");
+    }
+  };
+
+  const guardarEdicionContacto = async (payload, id, mantener = false) => {
+    try {
+      await api.put(`/api/contactos/${id}`, payload);
+      const res = await api.get(`/api/contactos/${id}`);
+      const actualizado = res.data;
+      if (contactoEditTarget === 'principal') {
+        setCotizacion((prev) => ({
+          ...prev,
+          contactoNombre: toUpper(actualizado.nombre),
+          contactoEmail: actualizado.email || "",
+          contactoFono: actualizado.fono || "",
+          contactoCargo: toUpper(actualizado.cargo || "")
+        }));
+      } else if (typeof contactoEditTarget === 'number') {
+        setCotizacion((prev) => {
+          const arr = [...prev.contactosExtra];
+          arr[contactoEditTarget] = {
+            ...arr[contactoEditTarget],
+            nombre: toUpper(actualizado.nombre),
+            email: actualizado.email || "",
+            fono: actualizado.fono || "",
+            cargo: toUpper(actualizado.cargo || "")
+          };
+          return { ...prev, contactosExtra: arr };
+        });
+      }
+      if (mantener) {
+        setContactoEnEdicion(actualizado);
+      } else {
+        setContactoEnEdicion(null);
+        setContactoEditTarget(null);
+      }
+    } catch (err) {
+      alert(err.response?.data?.msg || "Error al guardar el contacto.");
+    }
+  };
+
+  // Dirección (del contacto): catálogo global (mantenedor de Direcciones),
+  // independiente del cliente — mismo patrón que Contacto, un solo slot.
+  useEffect(() => {
+    if (busquedaDireccion.trim().length < 2) { setDireccionesSugeridas([]); return; }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await api.get(`/api/direcciones?q=${encodeURIComponent(busquedaDireccion.trim())}`);
+        setDireccionesSugeridas(res.data);
+      } catch { setDireccionesSugeridas([]); }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [busquedaDireccion]);
+
+  const seleccionarDireccionBusqueda = (d) => {
+    setCotizacion((prev) => ({
+      ...prev,
+      contactoDireccion: toUpper(d.direccion || ""),
+      contactoCiudad: toUpper(d.ciudad || ""),
+      contactoComuna: toUpper(d.comuna || ""),
+      direccionId: d.id
+    }));
+    setBusquedaDireccion(d.direccion);
+    setMostrarDropdownDireccionBusq(false);
+  };
+
+  const registrarOEnlazarDireccion = async (direccion, ciudad, comuna) => {
+    if (String(direccion || "").trim().length < 5) {
+      alert("Ingrese la dirección completa (mínimo 5 caracteres) antes de registrarla.");
+      return null;
+    }
+    // Aviso de "parecidas" antes de crear (ver registrarOEnlazarContacto).
+    try {
+      const parecidas = await api.get(`/api/direcciones?q=${encodeURIComponent(direccion.trim())}`);
+      const similares = parecidas.data.filter((x) => normTxt(x.direccion) !== normTxt(direccion));
+      if (similares.length > 0) {
+        const listado = similares.slice(0, 5).map((x) => `• ${x.direccion}${x.comuna ? ` (${x.comuna})` : ''}`).join('\n');
+        const seguir = confirm(`Ya existen direcciones parecidas:\n${listado}\n\n¿Seguro que quiere crear "${direccion.trim()}" como una nueva?\n(Cancelar para elegir una de arriba en el buscador)`);
+        if (!seguir) return null;
+      }
+    } catch { /* si falla la búsqueda de parecidas, sigue igual */ }
+    try {
+      const res = await api.post("/api/direcciones", { direccion, ciudad, comuna });
+      const lista = await api.get(`/api/direcciones?q=${encodeURIComponent(direccion)}`);
+      const creada = lista.data.find((x) => x.codigo === res.data.codigo);
+      return { id: creada?.id || null, yaExistia: false };
+    } catch (err) {
+      if (err.response?.status === 400) {
+        const lista = await api.get(`/api/direcciones?q=${encodeURIComponent(direccion)}`);
+        const existente = lista.data.find((x) => normTxt(x.direccion) === normTxt(direccion));
+        if (existente) return { id: existente.id, yaExistia: true };
+      }
+      alert(err.response?.data?.msg || "Error al registrar la dirección.");
+      return null;
+    }
+  };
+
+  const registrarDireccionContacto = async () => {
+    const resultado = await registrarOEnlazarDireccion(cotizacion.contactoDireccion, cotizacion.contactoCiudad, cotizacion.contactoComuna);
+    if (!resultado) return;
+    alert(resultado.yaExistia ? `La dirección ya estaba en el mantenedor — se enlazó.` : `Dirección registrada en el mantenedor.`);
+    setCotizacion((prev) => ({ ...prev, direccionId: resultado.id }));
+  };
+
+  const abrirEditarDireccion = async (target, id) => {
+    try {
+      const res = await api.get(`/api/direcciones/${id}`);
+      setDireccionEnEdicion(res.data);
+      setDireccionEditTarget(target);
+    } catch {
+      alert("No se pudo cargar la dirección para editar.");
+    }
+  };
+
+  const guardarEdicionDireccion = async (payload, id, mantener = false) => {
+    try {
+      await api.put(`/api/direcciones/${id}`, payload);
+      const res = await api.get(`/api/direcciones/${id}`);
+      const actualizada = res.data;
+      if (direccionEditTarget === 'principal') {
+        setCotizacion((prev) => ({
+          ...prev,
+          contactoDireccion: toUpper(actualizada.direccion || ""),
+          contactoCiudad: toUpper(actualizada.ciudad || ""),
+          contactoComuna: toUpper(actualizada.comuna || "")
+        }));
+      } else if (direccionEditTarget === 'cliente') {
+        setCotizacion((prev) => ({
+          ...prev,
+          clienteDireccion: toUpper(actualizada.direccion || ""),
+          clienteCiudad: toUpper(actualizada.ciudad || ""),
+          clienteComuna: toUpper(actualizada.comuna || "")
+        }));
+      } else if (typeof direccionEditTarget === 'number') {
+        setCotizacion((prev) => {
+          const arr = [...prev.contactosExtra];
+          arr[direccionEditTarget] = {
+            ...arr[direccionEditTarget],
+            direccion: toUpper(actualizada.direccion || ""),
+            ciudad: toUpper(actualizada.ciudad || ""),
+            comuna: toUpper(actualizada.comuna || "")
+          };
+          return { ...prev, contactosExtra: arr };
+        });
+      }
+      if (mantener) {
+        setDireccionEnEdicion(actualizada);
+      } else {
+        setDireccionEnEdicion(null);
+        setDireccionEditTarget(null);
+      }
+    } catch (err) {
+      alert(err.response?.data?.msg || "Error al guardar la dirección.");
+    }
+  };
+
+  // Buscador de Dirección dentro de una fila de "Otros Contactos": mismo
+  // catálogo global, consulta propia.
+  useEffect(() => {
+    if (busquedaDireccionExtra.trim().length < 2) { setDireccionesExtraSugeridas([]); return; }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await api.get(`/api/direcciones?q=${encodeURIComponent(busquedaDireccionExtra.trim())}`);
+        setDireccionesExtraSugeridas(res.data);
+      } catch { setDireccionesExtraSugeridas([]); }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [busquedaDireccionExtra]);
+
+  const seleccionarDireccionExtraBusqueda = (d, idx) => {
+    setCotizacion((prev) => {
+      const arr = [...prev.contactosExtra];
+      arr[idx] = {
+        ...arr[idx],
+        direccion: toUpper(d.direccion || ""),
+        ciudad: toUpper(d.ciudad || ""),
+        comuna: toUpper(d.comuna || ""),
+        direccionId: d.id
+      };
+      return { ...prev, contactosExtra: arr };
+    });
+    setBusquedaDireccionExtra(d.direccion);
+    setMostrarDropdownDireccionExtra(false);
+  };
+
+  const registrarDireccionExtra = async (contacto, idx) => {
+    const resultado = await registrarOEnlazarDireccion(contacto.direccion, contacto.ciudad, contacto.comuna);
+    if (!resultado) return;
+    alert(resultado.yaExistia ? `La dirección ya estaba en el mantenedor — se enlazó.` : `Dirección registrada en el mantenedor.`);
+    setCotizacion((prev) => {
+      const arr = [...prev.contactosExtra];
+      arr[idx] = { ...arr[idx], direccionId: resultado.id };
+      return { ...prev, contactosExtra: arr };
+    });
+  };
+
+  // Buscador de Dirección del Cliente (la "primera dirección" de la
+  // cotización): mismo catálogo global, ya no se ingresa a mano en el
+  // mantenedor de Cliente — se busca y se llama, igual que Contacto.
+  useEffect(() => {
+    if (busquedaDireccionCliente.trim().length < 2) { setDireccionesClienteSugeridas([]); return; }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await api.get(`/api/direcciones?q=${encodeURIComponent(busquedaDireccionCliente.trim())}`);
+        setDireccionesClienteSugeridas(res.data);
+      } catch { setDireccionesClienteSugeridas([]); }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [busquedaDireccionCliente]);
+
+  const seleccionarDireccionClienteBusqueda = (d) => {
+    setCotizacion((prev) => ({
+      ...prev,
+      clienteDireccion: toUpper(d.direccion || ""),
+      clienteCiudad: toUpper(d.ciudad || ""),
+      clienteComuna: toUpper(d.comuna || ""),
+      clienteDireccionId: d.id
+    }));
+    setBusquedaDireccionCliente(d.direccion);
+    setMostrarDropdownDireccionCliente(false);
+  };
+
+  const registrarDireccionCliente = async () => {
+    const resultado = await registrarOEnlazarDireccion(cotizacion.clienteDireccion, cotizacion.clienteCiudad, cotizacion.clienteComuna);
+    if (!resultado) return;
+    alert(resultado.yaExistia
+      ? `La dirección ya estaba en el mantenedor — se enlazó.`
+      : `Dirección registrada en el mantenedor.`);
+    setCotizacion((prev) => ({ ...prev, clienteDireccionId: resultado.id }));
   };
 
   const actualizarItem = (idx, campo, valor) => {
@@ -687,6 +993,14 @@ function Cotizaciones() {
             <Users size={18} />
             <span className="btn-label">Clientes</span>
           </button>
+          <button onClick={() => navigate("/contactos")} className="logout-btn" style={{ background: '#7C3AED', color: 'white' }}>
+            <Contact size={18} />
+            <span className="btn-label">Contactos</span>
+          </button>
+          <button onClick={() => navigate("/direcciones")} className="logout-btn" style={{ background: '#0891B2', color: 'white' }}>
+            <MapPin size={18} />
+            <span className="btn-label">Direcciones</span>
+          </button>
           <button onClick={() => navigate("/equipos")} className="logout-btn" style={{ background: 'var(--success)', color: 'white' }}>
             <Package size={18} />
             <span className="btn-label">Equipos</span>
@@ -834,6 +1148,91 @@ function Cotizaciones() {
                       />
                     </div>
                   </div>
+                  <div ref={direccionClienteDropdownRef} className="of-f" style={{ marginTop: 10, position: 'relative' }}>
+                    <label style={{ color: 'var(--primary)' }}>
+                      <Search size={11} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'text-bottom' }} />
+                      Buscar Dirección
+                    </label>
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <input
+                        type="text"
+                        className="ot-search"
+                        placeholder="Escriba para buscar una dirección..."
+                        value={busquedaDireccionCliente}
+                        onChange={(e) => {
+                          setBusquedaDireccionCliente(e.target.value);
+                          setMostrarDropdownDireccionCliente(e.target.value.trim().length >= 2);
+                        }}
+                        onFocus={() => { if (busquedaDireccionCliente.trim().length >= 2) setMostrarDropdownDireccionCliente(true); }}
+                        disabled={soloLectura}
+                        style={{
+                          flex: '1 1 200px', minWidth: '120px', padding: '2px 8px', border: '1.5px solid var(--border)',
+                          borderRadius: 'var(--radius-sm)', fontSize: '.82rem', background: 'white',
+                          color: '#0D9488', fontWeight: 600
+                        }}
+                      />
+                      {!soloLectura && String(cotizacion.clienteDireccion || "").trim() && (
+                        cotizacion.clienteDireccionId ? (
+                          <button
+                            type="button"
+                            onClick={() => abrirEditarDireccion('cliente', cotizacion.clienteDireccionId)}
+                            title="Editar esta dirección en el mantenedor de Direcciones"
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0,
+                              background: 'var(--warning)', color: 'white', border: 'none',
+                              padding: '2px 8px', borderRadius: '6px', cursor: 'pointer',
+                              fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap'
+                            }}
+                          >
+                            <Pencil size={12} /> Editar
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={registrarDireccionCliente}
+                            title="Registrar esta dirección en el mantenedor de Direcciones si no existe"
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0,
+                              background: 'var(--success)', color: 'white', border: 'none',
+                              padding: '2px 8px', borderRadius: '6px', cursor: 'pointer',
+                              fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap'
+                            }}
+                          >
+                            <MapPin size={12} /> Registrar
+                          </button>
+                        )
+                      )}
+                    </div>
+                    {mostrarDropdownDireccionCliente && (
+                      <div style={{
+                        position: 'absolute', top: '100%', left: 0, right: 0,
+                        background: 'white', border: '1px solid var(--border)', borderTop: 'none',
+                        borderRadius: '0 0 8px 8px', maxHeight: '200px', overflow: 'auto',
+                        zIndex: 1000, boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                      }}>
+                        {direccionesClienteSugeridas.length > 0 ? (
+                          direccionesClienteSugeridas.map((d) => (
+                            <div key={d.id}
+                              onClick={() => seleccionarDireccionClienteBusqueda(d)}
+                              style={{ padding: '8px 10px', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}
+                              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--primary-light)'; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.background = 'white'; }}
+                            >
+                              <div style={{ fontWeight: 600, fontSize: '.85rem' }}>{d.direccion}</div>
+                              <div style={{ fontSize: '.75rem', color: 'var(--text-muted)' }}>
+                                {[d.ciudad, d.comuna].filter(Boolean).join(' - ')}
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div style={{ padding: '12px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                            No se encontraron direcciones
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
                   <div className="of-form-grid" style={{ gridTemplateColumns: '1.4fr 1fr 1fr', marginTop: 10 }}>
                     <div className="of-f">
                       <label>Dirección</label>
@@ -841,7 +1240,7 @@ function Cotizaciones() {
                         type="text"
                         placeholder="Dirección del cliente"
                         value={cotizacion.clienteDireccion}
-                        onChange={(e) => setCotizacion({ ...cotizacion, clienteDireccion: upperInput(e) })}
+                        onChange={(e) => setCotizacion({ ...cotizacion, clienteDireccion: upperInput(e), clienteDireccionId: null })}
                         disabled={soloLectura}
                       />
                     </div>
@@ -851,7 +1250,7 @@ function Cotizaciones() {
                         type="text"
                         placeholder="Ciudad"
                         value={cotizacion.clienteCiudad}
-                        onChange={(e) => setCotizacion({ ...cotizacion, clienteCiudad: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '') })}
+                        onChange={(e) => setCotizacion({ ...cotizacion, clienteCiudad: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''), clienteDireccionId: null })}
                         disabled={soloLectura}
                       />
                     </div>
@@ -861,7 +1260,7 @@ function Cotizaciones() {
                         type="text"
                         placeholder="Comuna"
                         value={cotizacion.clienteComuna}
-                        onChange={(e) => setCotizacion({ ...cotizacion, clienteComuna: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '') })}
+                        onChange={(e) => setCotizacion({ ...cotizacion, clienteComuna: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''), clienteDireccionId: null })}
                         disabled={soloLectura}
                       />
                     </div>
@@ -894,26 +1293,26 @@ function Cotizaciones() {
                       <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Search size={10} />Contacto</label>
                       <input
                         type="text"
-                        placeholder={contactosDisponibles.length ? "Escriba para buscar o cambiar..." : "Nombre del contacto"}
+                        placeholder="Escriba para buscar un contacto..."
                         value={busquedaContacto}
                         onChange={(e) => {
                           const v = upperInput(e);
                           setBusquedaContacto(v);
-                          setCotizacion((prev) => ({ ...prev, contactoNombre: v }));
+                          setCotizacion((prev) => ({ ...prev, contactoNombre: v, contactoId: null }));
                           setMostrarDropdownContacto(v.trim().length >= 2);
                         }}
                         onFocus={() => { if (busquedaContacto.trim().length >= 2) setMostrarDropdownContacto(true); }}
                         disabled={soloLectura}
                       />
-                      {mostrarDropdownContacto && contactosFiltrados.length > 0 && (
+                      {mostrarDropdownContacto && contactosSugeridos.length > 0 && (
                         <div style={{
                           position: 'absolute', top: '100%', left: 0, right: 0,
                           background: 'white', border: '1px solid var(--border)', borderTop: 'none',
                           borderRadius: '0 0 8px 8px', maxHeight: '200px', overflow: 'auto',
                           zIndex: 1000, boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
                         }}>
-                          {contactosFiltrados.map((c, idx) => (
-                            <div key={idx}
+                          {contactosSugeridos.map((c) => (
+                            <div key={c.id}
                               onClick={() => seleccionarContactoBusqueda(c)}
                               style={{ padding: '8px 10px', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}
                               onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--primary-light)'; }}
@@ -921,10 +1320,9 @@ function Cotizaciones() {
                             >
                               <div style={{ fontWeight: 600, fontSize: '.85rem' }}>
                                 {c.nombre}
-                                {!c.principal && <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}> (adicional)</span>}
                               </div>
                               <div style={{ fontSize: '.75rem', color: 'var(--text-muted)' }}>
-                                {!clienteSeleccionado && c.cliente ? `${c.cliente} | ` : ''}{c.email ? `✉ ${c.email}` : ''}{c.fono ? ` | Tel: ${c.fono}` : ''}{c.cargo ? ` | ${c.cargo}` : ''}
+                                {c.email ? `✉ ${c.email}` : ''}{c.fono ? ` | Tel: ${c.fono}` : ''}{c.cargo ? ` | ${c.cargo}` : ''}
                               </div>
                             </div>
                           ))}
@@ -941,7 +1339,147 @@ function Cotizaciones() {
                     </div>
                     <div className="of-f">
                       <label style={{ display: 'flex', alignItems: 'center' }}>Cargo Contacto</label>
-                      <input type="text" placeholder="Cargo del contacto" value={cotizacion.contactoCargo} onChange={(e) => setCotizacion({ ...cotizacion, contactoCargo: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '') })} disabled={soloLectura} />
+                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <input type="text" placeholder="Cargo del contacto" value={cotizacion.contactoCargo} onChange={(e) => setCotizacion({ ...cotizacion, contactoCargo: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '') })} disabled={soloLectura} style={{ flex: '1 1 100px', minWidth: '80px' }} />
+                        {!soloLectura && String(cotizacion.contactoNombre || "").trim() && (
+                          cotizacion.contactoId ? (
+                            <button
+                              type="button"
+                              onClick={() => abrirEditarContacto('principal', cotizacion.contactoId)}
+                              title="Editar este contacto en el mantenedor de Contactos"
+                              style={{
+                                display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0,
+                                background: 'var(--warning)', color: 'white', border: 'none',
+                                padding: '2px 8px', borderRadius: '6px', cursor: 'pointer',
+                                fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap'
+                              }}
+                            >
+                              <Pencil size={12} /> Editar
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                const resultado = await registrarOEnlazarContacto(cotizacion.contactoNombre, cotizacion.contactoEmail, cotizacion.contactoFono, cotizacion.contactoCargo);
+                                if (!resultado) return;
+                                alert(resultado.yaExistia
+                                  ? `El contacto "${cotizacion.contactoNombre}" ya estaba en el mantenedor — se enlazó.`
+                                  : `Contacto "${cotizacion.contactoNombre}" registrado en el mantenedor.`);
+                                setCotizacion((prev) => ({ ...prev, contactoId: resultado.id }));
+                              }}
+                              title="Registrar este contacto en el mantenedor de Contactos si no existe"
+                              style={{
+                                display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0,
+                                background: 'var(--success)', color: 'white', border: 'none',
+                                padding: '2px 8px', borderRadius: '6px', cursor: 'pointer',
+                                fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap'
+                              }}
+                            >
+                              <Contact size={12} /> Registrar
+                            </button>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div ref={direccionBusqDropdownRef} className="of-f" style={{ marginTop: 4, marginBottom: '8px', position: 'relative' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Search size={10} />
+                      Buscar Dirección
+                    </label>
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <input
+                        type="text"
+                        className="ot-search"
+                        placeholder="Escriba para buscar una dirección..."
+                        value={busquedaDireccion}
+                        onChange={(e) => {
+                          setBusquedaDireccion(e.target.value);
+                          setMostrarDropdownDireccionBusq(e.target.value.trim().length >= 2);
+                        }}
+                        onFocus={() => { if (busquedaDireccion.trim().length >= 2) setMostrarDropdownDireccionBusq(true); }}
+                        disabled={soloLectura}
+                        style={{
+                          flex: '1 1 200px', minWidth: '120px', padding: '2px 8px', border: '1.5px solid var(--border)',
+                          borderRadius: 'var(--radius-sm)', fontSize: '.82rem', background: 'white',
+                          color: '#0D9488', fontWeight: 600
+                        }}
+                      />
+                      {!soloLectura && String(cotizacion.contactoDireccion || "").trim() && (
+                        cotizacion.direccionId ? (
+                          <button
+                            type="button"
+                            onClick={() => abrirEditarDireccion('principal', cotizacion.direccionId)}
+                            title="Editar esta dirección en el mantenedor de Direcciones"
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0,
+                              background: 'var(--warning)', color: 'white', border: 'none',
+                              padding: '2px 8px', borderRadius: '6px', cursor: 'pointer',
+                              fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap'
+                            }}
+                          >
+                            <Pencil size={12} /> Editar
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={registrarDireccionContacto}
+                            title="Registrar esta dirección en el mantenedor de Direcciones si no existe"
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0,
+                              background: 'var(--success)', color: 'white', border: 'none',
+                              padding: '2px 8px', borderRadius: '6px', cursor: 'pointer',
+                              fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap'
+                            }}
+                          >
+                            <MapPin size={12} /> Registrar
+                          </button>
+                        )
+                      )}
+                    </div>
+                    {mostrarDropdownDireccionBusq && (
+                      <div style={{
+                        position: 'absolute', top: '100%', left: 0, right: 0,
+                        background: 'white', border: '1px solid var(--border)', borderTop: 'none',
+                        borderRadius: '0 0 8px 8px', maxHeight: '200px', overflow: 'auto',
+                        zIndex: 1000, boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                      }}>
+                        {direccionesSugeridas.length > 0 ? (
+                          direccionesSugeridas.map((d) => (
+                            <div key={d.id}
+                              onClick={() => seleccionarDireccionBusqueda(d)}
+                              style={{ padding: '8px 10px', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}
+                              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--primary-light)'; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.background = 'white'; }}
+                            >
+                              <div style={{ fontWeight: 600, fontSize: '.85rem' }}>{d.direccion}</div>
+                              <div style={{ fontSize: '.75rem', color: 'var(--text-muted)' }}>
+                                {[d.ciudad, d.comuna].filter(Boolean).join(' - ')}
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div style={{ padding: '12px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                            No se encontraron direcciones
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="of-form-grid" style={{ gridTemplateColumns: '1.4fr 1fr 1fr' }}>
+                    <div className="of-f">
+                      <label>Dirección</label>
+                      <input type="text" placeholder="Dirección" value={cotizacion.contactoDireccion || ""} onChange={(e) => setCotizacion({ ...cotizacion, contactoDireccion: upperInput(e), direccionId: null })} disabled={soloLectura} />
+                    </div>
+                    <div className="of-f">
+                      <label>Ciudad</label>
+                      <input type="text" placeholder="Ciudad" value={cotizacion.contactoCiudad || ""} onChange={(e) => setCotizacion({ ...cotizacion, contactoCiudad: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''), direccionId: null })} disabled={soloLectura} />
+                    </div>
+                    <div className="of-f">
+                      <label>Comuna</label>
+                      <input type="text" placeholder="Comuna" value={cotizacion.contactoComuna || ""} onChange={(e) => setCotizacion({ ...cotizacion, contactoComuna: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''), direccionId: null })} disabled={soloLectura} />
                     </div>
                   </div>
 
@@ -974,36 +1512,26 @@ function Cotizaciones() {
                     {mostrarContactosExtra && (
                       <div style={{ marginTop: '10px' }}>
                         {(() => {
-                          const contactosCliente = clienteSeleccionado
-                            ? String(clienteSeleccionado.contactos || "").split(";;")
-                                .map(c => {
-                                  const p = c.split("|");
-                                  return { nombre: (p[0] || "").toUpperCase().trim(), email: p[1] || "", fono: p[2] || "", cargo: p[3] || "", direccion: (p[4] || "").toUpperCase().trim(), ciudad: (p[5] || "").toUpperCase().trim(), comuna: (p[6] || "").toUpperCase().trim() };
-                                })
-                                .filter(c => c.nombre)
-                            : [];
+                          const actualizarContacto = (idx, campo, valor) => {
+                            const arr = [...cotizacion.contactosExtra];
+                            arr[idx] = { ...arr[idx], [campo]: valor };
+                            if (campo === 'nombre') arr[idx].contactoId = null;
+                            setCotizacion({ ...cotizacion, contactosExtra: arr });
+                          };
 
-                          const agregarContacto = (c) => {
+                          // Agrega un contacto existente del catálogo global como nueva fila.
+                          const agregarContactoDesdeBusqueda = (c) => {
                             const nuevoIdx = cotizacion.contactosExtra.length;
                             setCotizacion({
                               ...cotizacion,
                               contactosExtra: [...cotizacion.contactosExtra, {
-                                nombre: c.nombre,
-                                email: c.email,
-                                fono: c.fono,
-                                cargo: c.cargo,
-                                direccion: c.direccion || "",
-                                ciudad: c.ciudad || "",
-                                comuna: c.comuna || ""
+                                nombre: c.nombre, email: c.email || "", fono: c.fono || "", cargo: c.cargo || "",
+                                contactoId: c.id
                               }]
                             });
                             setContactosManualVisibles(new Set([nuevoIdx]));
-                          };
-
-                          const actualizarContacto = (idx, campo, valor) => {
-                            const arr = [...cotizacion.contactosExtra];
-                            arr[idx] = { ...arr[idx], [campo]: valor };
-                            setCotizacion({ ...cotizacion, contactosExtra: arr });
+                            setBusquedaContactoExtra("");
+                            setMostrarDropdownContactoExtra(false);
                           };
 
                           const eliminarContacto = (idx) => {
@@ -1020,101 +1548,77 @@ function Cotizaciones() {
                           };
 
                           // Evita crear a mano un contacto que ya existe: como Contacto principal
-                          // de la cotización, en la ficha del cliente, o en otra fila de Otros Contactos.
+                          // de la cotización o en otra fila de Otros Contactos.
                           const nombreContactoDuplicado = (idx, valor) => {
                             const v = normTxt(valor);
                             if (!v) return false;
                             if (normTxt(cotizacion.contactoNombre) === v) return true;
-                            if (contactosCliente.some((cc) => normTxt(cc.nombre) === v)) return true;
                             if (cotizacion.contactosExtra.some((c, i) => i !== idx && normTxt(c.nombre) === v)) return true;
                             return false;
                           };
 
-                          const contactosYaUsados = [
-                            normTxt(cotizacion.contactoNombre),
-                            ...cotizacion.contactosExtra.map(c => normTxt(c.nombre))
-                          ].filter(Boolean);
-                          const contactosExtraDisponibles = contactosCliente.filter(c => !contactosYaUsados.includes(normTxt(c.nombre)));
-
-                          // Da de alta en clientes_contactos un contacto tipeado a mano acá que
-                          // todavía no existe en la ficha del cliente. Solo disponible si el
-                          // cliente ya está en el mantenedor (tiene id).
-                          const registrarContactoEnCliente = async (contacto, idx) => {
-                            if (!clienteSeleccionado?.id) return;
-                            try {
-                              const direccionesCliente = String(clienteSeleccionado.direcciones || "").split(";;")
-                                .map(d => {
-                                  const p = d.split("|");
-                                  return { tipo_direccion: p[0] || "", direccion: p[1] || "", fono: p[2] || "", ciudad: p[3] || "", comuna: p[4] || "" };
-                                })
-                                .filter(d => d.direccion.trim());
-                              const payload = {
-                                razon_social: clienteSeleccionado.razon_social,
-                                giro: clienteSeleccionado.giro,
-                                rut: clienteSeleccionado.rut,
-                                direccion: clienteSeleccionado.direccion,
-                                ciudad: clienteSeleccionado.ciudad,
-                                comuna: clienteSeleccionado.comuna,
-                                telefono: clienteSeleccionado.telefono,
-                                email: clienteSeleccionado.email,
-                                contacto_nombre: clienteSeleccionado.contacto_nombre,
-                                contacto_email: clienteSeleccionado.contacto_email,
-                                contacto_fono: clienteSeleccionado.contacto_fono,
-                                contacto_cargo: clienteSeleccionado.contacto_cargo,
-                                direcciones: direccionesCliente,
-                                contactos: [...contactosCliente, {
-                                  nombre: contacto.nombre, email: contacto.email, fono: contacto.fono,
-                                  cargo: contacto.cargo, direccion: contacto.direccion,
-                                  ciudad: contacto.ciudad, comuna: contacto.comuna
-                                }]
-                              };
-                              await api.put(`/api/clientes/${clienteSeleccionado.id}`, payload);
-                              alert(`Contacto "${contacto.nombre}" registrado en el cliente.`);
-                              const lista = await api.get("/api/clientes");
-                              setClientes(lista.data);
-                              const actualizado = lista.data.find((c) => c.id === clienteSeleccionado.id);
-                              if (actualizado) setClienteSeleccionado(actualizado);
-                              setContactosManualVisibles(prev => {
-                                const next = new Set(prev);
-                                next.delete(idx);
-                                return next;
-                              });
-                            } catch (err) {
-                              alert(err.response?.data?.msg || "Error al registrar el contacto en el cliente.");
-                            }
+                          // Da de alta en el mantenedor de Contactos un contacto tipeado a mano
+                          // en "Otros Contactos" que todavía no existe ahí.
+                          const registrarContactoExtraEnContactos = async (contacto, idx) => {
+                            const resultado = await registrarOEnlazarContacto(contacto.nombre, contacto.email, contacto.fono, contacto.cargo);
+                            if (!resultado) return;
+                            alert(resultado.yaExistia
+                              ? `El contacto "${contacto.nombre}" ya estaba en el mantenedor — se enlazó.`
+                              : `Contacto "${contacto.nombre}" registrado en el mantenedor.`);
+                            setCotizacion((prev) => {
+                              const arr = [...prev.contactosExtra];
+                              arr[idx] = { ...arr[idx], contactoId: resultado.id };
+                              return { ...prev, contactosExtra: arr };
+                            });
+                            setContactosManualVisibles(prev => {
+                              const next = new Set(prev);
+                              next.delete(idx);
+                              return next;
+                            });
                           };
 
                           return (
                             <>
-                              {contactosCliente.length >= 1 && (
-                                <div style={{ marginBottom: '10px' }}>
-                                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)', fontSize: '0.8rem' }}>
-                                    Agregar contacto del cliente
-                                  </label>
-                                  <select
-                                    disabled={soloLectura || contactosExtraDisponibles.length === 0}
-                                    value=""
+                              {!soloLectura && (
+                                <div ref={contactoExtraDropdownRef} className="of-f" style={{ position: 'relative', marginBottom: '10px' }}>
+                                  <input
+                                    type="text"
+                                    placeholder="Buscar un contacto existente para agregarlo..."
+                                    value={busquedaContactoExtra}
                                     onChange={(e) => {
-                                      const elegido = contactosExtraDisponibles.find((c) => normTxt(c.nombre) === e.target.value);
-                                      if (!elegido) return;
-                                      agregarContacto(elegido);
+                                      setBusquedaContactoExtra(e.target.value);
+                                      setMostrarDropdownContactoExtra(e.target.value.trim().length >= 2);
                                     }}
-                                    style={{
-                                      width: '100%',
-                                      padding: '2px 8px',
-                                      border: '1.5px solid var(--border)',
-                                      borderRadius: '6px',
-                                      fontSize: '.82rem',
-                                      background: 'white'
-                                    }}
-                                  >
-                                    <option value="">-- Elegir contacto --</option>
-                                    {contactosExtraDisponibles.map((c, idx) => (
-                                      <option key={idx} value={normTxt(c.nombre)}>
-                                        {c.nombre}{c.fono ? ` | ${c.fono}` : ''}{c.email ? ` | ${c.email}` : ''}
-                                      </option>
-                                    ))}
-                                  </select>
+                                    onFocus={() => { if (busquedaContactoExtra.trim().length >= 2) setMostrarDropdownContactoExtra(true); }}
+                                  />
+                                  {mostrarDropdownContactoExtra && (
+                                    <div style={{
+                                      position: 'absolute', top: '100%', left: 0, right: 0,
+                                      background: 'white', border: '1px solid var(--border)', borderTop: 'none',
+                                      borderRadius: '0 0 8px 8px', maxHeight: '200px', overflow: 'auto',
+                                      zIndex: 1000, boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                                    }}>
+                                      {contactosExtraSugeridos.length > 0 ? (
+                                        contactosExtraSugeridos.map((c) => (
+                                          <div key={c.id}
+                                            onClick={() => agregarContactoDesdeBusqueda(c)}
+                                            style={{ padding: '8px 10px', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}
+                                            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--primary-light)'; }}
+                                            onMouseLeave={(e) => { e.currentTarget.style.background = 'white'; }}
+                                          >
+                                            <div style={{ fontWeight: '600', color: 'var(--text)', fontSize: '0.82rem' }}>{c.nombre}</div>
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                              {c.email ? `✉ ${c.email}` : ''}{c.fono ? ` | Tel: ${c.fono}` : ''}{c.cargo ? ` | ${c.cargo}` : ''}
+                                            </div>
+                                          </div>
+                                        ))
+                                      ) : (
+                                        <div style={{ padding: '12px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                                          No se encontraron contactos
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
                                 </div>
                               )}
 
@@ -1189,7 +1693,7 @@ function Cotizaciones() {
                                         onBlur={(e) => {
                                           if (e.target.value === nombreContactoEnFocoRef.current) return;
                                           if (nombreContactoDuplicado(idx, e.target.value)) {
-                                            alert(`El contacto "${e.target.value.trim()}" ya existe. Elíjalo desde "Agregar contacto del cliente" en vez de crearlo de nuevo.`);
+                                            alert(`El contacto "${e.target.value.trim()}" ya existe en esta cotización.`);
                                             const arr = [...cotizacion.contactosExtra];
                                             arr[idx] = { ...arr[idx], nombre: '', email: '' };
                                             setCotizacion({ ...cotizacion, contactosExtra: arr });
@@ -1207,31 +1711,29 @@ function Cotizaciones() {
                                       <input type="tel" placeholder="Fono" value={c.fono} onChange={(e) => actualizarContacto(idx, 'fono', e.target.value.replace(/[^0-9+]/g, ''))} disabled={soloLectura} />
                                     </div>
                                     <div className="of-f">
-                                      <label>Dirección Contacto</label>
-                                      <input type="text" placeholder="Dirección Contacto" value={c.direccion} onChange={(e) => actualizarContacto(idx, 'direccion', upperInput(e))} disabled={soloLectura} />
-                                    </div>
-                                    <div className="of-f">
-                                      <label>Ciudad</label>
-                                      <input type="text" placeholder="Ciudad" value={c.ciudad || ""} onChange={(e) => actualizarContacto(idx, 'ciudad', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={soloLectura} />
-                                    </div>
-                                    <div className="of-f">
-                                      <label>Comuna</label>
-                                      <input type="text" placeholder="Comuna" value={c.comuna || ""} onChange={(e) => actualizarContacto(idx, 'comuna', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={soloLectura} />
-                                    </div>
-                                    <div className="of-f">
                                       <label>Cargo</label>
-                                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                                        <input type="text" placeholder="Cargo" value={c.cargo} onChange={(e) => actualizarContacto(idx, 'cargo', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={soloLectura} style={{ flex: '1 1 auto', width: 'auto' }} />
-                                        {!soloLectura && clienteSeleccionado?.id && c.nombre.trim() &&
-                                          !contactosCliente.some((cc) => normTxt(cc.nombre) === normTxt(c.nombre)) && (
-                                          <button
-                                            type="button"
-                                            onClick={() => registrarContactoEnCliente(c, idx)}
-                                            title="Registrar este contacto en la ficha del cliente si no existe"
-                                            style={{ background: '#F0FDF4', color: 'var(--success)', border: '1px solid #7AD6EC', borderRadius: '6px', padding: '2px 8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.75rem', lineHeight: '1.3', flexShrink: 0 }}
-                                          >
-                                            <UserPlus size={12} style={{ verticalAlign: 'text-bottom' }} /> Registrar
-                                          </button>
+                                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                        <input type="text" placeholder="Cargo" value={c.cargo} onChange={(e) => actualizarContacto(idx, 'cargo', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={soloLectura} style={{ flex: '1 1 120px', minWidth: '80px' }} />
+                                        {!soloLectura && c.nombre.trim() && (
+                                          c.contactoId ? (
+                                            <button
+                                              type="button"
+                                              onClick={() => abrirEditarContacto(idx, c.contactoId)}
+                                              title="Editar este contacto en el mantenedor de Contactos"
+                                              style={{ background: '#FFF7ED', color: 'var(--warning)', border: '1px solid #FED7AA', borderRadius: '6px', padding: '2px 8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.75rem', lineHeight: '1.3', flexShrink: 0 }}
+                                            >
+                                              <Pencil size={12} style={{ verticalAlign: 'text-bottom' }} /> Editar
+                                            </button>
+                                          ) : (
+                                            <button
+                                              type="button"
+                                              onClick={() => registrarContactoExtraEnContactos(c, idx)}
+                                              title="Registrar este contacto en el mantenedor de Contactos si no existe"
+                                              style={{ background: '#F0FDF4', color: 'var(--success)', border: '1px solid #7AD6EC', borderRadius: '6px', padding: '2px 8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.75rem', lineHeight: '1.3', flexShrink: 0 }}
+                                            >
+                                              <UserPlus size={12} style={{ verticalAlign: 'text-bottom' }} /> Registrar
+                                            </button>
+                                          )
                                         )}
                                         {!soloLectura && (
                                           <button
@@ -1248,6 +1750,106 @@ function Cotizaciones() {
                                       </div>
                                     </div>
                                   </div>
+
+                                  <div ref={direccionExtraDropdownRef} className="of-f" style={{ marginTop: 6, position: 'relative' }}>
+                                    <label style={{ color: 'var(--primary)' }}>
+                                      <Search size={11} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'text-bottom' }} />
+                                      Buscar Dirección
+                                    </label>
+                                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                      <input
+                                        type="text"
+                                        className="ot-search"
+                                        placeholder="Escriba para buscar una dirección..."
+                                        value={busquedaDireccionExtra}
+                                        onChange={(e) => {
+                                          setBusquedaDireccionExtra(e.target.value);
+                                          setMostrarDropdownDireccionExtra(e.target.value.trim().length >= 2);
+                                        }}
+                                        onFocus={() => { if (busquedaDireccionExtra.trim().length >= 2) setMostrarDropdownDireccionExtra(true); }}
+                                        disabled={soloLectura}
+                                        style={{
+                                          flex: '1 1 200px', minWidth: '120px', padding: '2px 8px', border: '1.5px solid var(--border)',
+                                          borderRadius: 'var(--radius-sm)', fontSize: '.82rem', background: 'white',
+                                          color: '#0D9488', fontWeight: 600
+                                        }}
+                                      />
+                                      {!soloLectura && String(c.direccion || "").trim() && (
+                                        c.direccionId ? (
+                                          <button
+                                            type="button"
+                                            onClick={() => abrirEditarDireccion(idx, c.direccionId)}
+                                            title="Editar esta dirección en el mantenedor de Direcciones"
+                                            style={{
+                                              display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0,
+                                              background: 'var(--warning)', color: 'white', border: 'none',
+                                              padding: '2px 8px', borderRadius: '6px', cursor: 'pointer',
+                                              fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap'
+                                            }}
+                                          >
+                                            <Pencil size={12} /> Editar
+                                          </button>
+                                        ) : (
+                                          <button
+                                            type="button"
+                                            onClick={() => registrarDireccionExtra(c, idx)}
+                                            title="Registrar esta dirección en el mantenedor de Direcciones si no existe"
+                                            style={{
+                                              display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0,
+                                              background: 'var(--success)', color: 'white', border: 'none',
+                                              padding: '2px 8px', borderRadius: '6px', cursor: 'pointer',
+                                              fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap'
+                                            }}
+                                          >
+                                            <MapPin size={12} /> Registrar
+                                          </button>
+                                        )
+                                      )}
+                                    </div>
+                                    {mostrarDropdownDireccionExtra && (
+                                      <div style={{
+                                        position: 'absolute', top: '100%', left: 0, right: 0,
+                                        background: 'white', border: '1px solid var(--border)', borderTop: 'none',
+                                        borderRadius: '0 0 8px 8px', maxHeight: '200px', overflow: 'auto',
+                                        zIndex: 1000, boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                                      }}>
+                                        {direccionesExtraSugeridas.length > 0 ? (
+                                          direccionesExtraSugeridas.map((d) => (
+                                            <div key={d.id}
+                                              onClick={() => seleccionarDireccionExtraBusqueda(d, idx)}
+                                              style={{ padding: '8px 10px', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}
+                                              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--primary-light)'; }}
+                                              onMouseLeave={(e) => { e.currentTarget.style.background = 'white'; }}
+                                            >
+                                              <div style={{ fontWeight: 600, fontSize: '.85rem' }}>{d.direccion}</div>
+                                              <div style={{ fontSize: '.75rem', color: 'var(--text-muted)' }}>
+                                                {[d.ciudad, d.comuna].filter(Boolean).join(' - ')}
+                                              </div>
+                                            </div>
+                                          ))
+                                        ) : (
+                                          <div style={{ padding: '12px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                                            No se encontraron direcciones
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div className="of-form-grid" style={{ gridTemplateColumns: '1.4fr 1fr 1fr', marginTop: 6 }}>
+                                    <div className="of-f">
+                                      <label>Dirección</label>
+                                      <input type="text" placeholder="Dirección" value={c.direccion || ""} onChange={(e) => actualizarContacto(idx, 'direccion', upperInput(e))} disabled={soloLectura} />
+                                    </div>
+                                    <div className="of-f">
+                                      <label>Ciudad</label>
+                                      <input type="text" placeholder="Ciudad" value={c.ciudad || ""} onChange={(e) => actualizarContacto(idx, 'ciudad', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={soloLectura} />
+                                    </div>
+                                    <div className="of-f">
+                                      <label>Comuna</label>
+                                      <input type="text" placeholder="Comuna" value={c.comuna || ""} onChange={(e) => actualizarContacto(idx, 'comuna', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={soloLectura} />
+                                    </div>
+                                  </div>
                                 </div>
                                 );
                               })}
@@ -1259,7 +1861,7 @@ function Cotizaciones() {
                                     const nuevoIdx = cotizacion.contactosExtra.length;
                                     setCotizacion({
                                       ...cotizacion,
-                                      contactosExtra: [...cotizacion.contactosExtra, { nombre: "", email: "", fono: "", direccion: "", cargo: "", ciudad: "", comuna: "" }]
+                                      contactosExtra: [...cotizacion.contactosExtra, { nombre: "", email: "", fono: "", cargo: "" }]
                                     });
                                     setContactosManualVisibles(new Set([nuevoIdx]));
                                   }}
@@ -1425,6 +2027,42 @@ function Cotizaciones() {
 
       {cotParaPDF && (
         <ModalOpcionesPDFCotizacion cot={cotParaPDF} onClose={() => setCotParaPDF(null)} />
+      )}
+
+      {contactoEnEdicion && createPortal(
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
+        }}
+        >
+          <div style={{ maxHeight: '90vh', overflow: 'auto', width: '100%', maxWidth: '740px' }}>
+            <ContactoFormulario
+              contactoEditando={contactoEnEdicion}
+              contactos={[]}
+              onSave={guardarEdicionContacto}
+              onCancel={() => { setContactoEnEdicion(null); setContactoEditTarget(null); }}
+            />
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {direccionEnEdicion && createPortal(
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
+        }}
+        >
+          <div style={{ maxHeight: '90vh', overflow: 'auto', width: '100%', maxWidth: '740px' }}>
+            <DireccionFormulario
+              direccionEditando={direccionEnEdicion}
+              direcciones={[]}
+              onSave={guardarEdicionDireccion}
+              onCancel={() => { setDireccionEnEdicion(null); setDireccionEditTarget(null); }}
+            />
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );

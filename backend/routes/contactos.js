@@ -6,23 +6,26 @@ import { authMiddleware } from "../middleware/authMiddleware.js";
 dotenv.config();
 const router = express.Router();
 
+// Mantenedor de Contactos: catálogo global, independiente de Cliente (mismo
+// espíritu que Equipos — sin FK a clientes). Se "llama" desde la OT/Cotización
+// buscando y copiando los campos, no por referencia viva.
 async function generarCodigo() {
   const [rows] = await pool.query(
-    "SELECT MAX(CAST(SUBSTRING(codigo, 4) AS UNSIGNED)) AS num FROM equipos WHERE codigo LIKE 'EQ-%'"
+    "SELECT MAX(CAST(SUBSTRING(codigo, 4) AS UNSIGNED)) AS num FROM contactos WHERE codigo LIKE 'CO-%'"
   );
   const num = rows[0].num || 0;
-  return `EQ-${String(num + 1).padStart(4, "0")}`;
+  return `CO-${String(num + 1).padStart(4, "0")}`;
 }
 
 router.get("/", authMiddleware, async (req, res) => {
   try {
     const { q } = req.query;
-    let sql = `SELECT * FROM equipos`;
+    let sql = `SELECT * FROM contactos`;
     let conditions = [];
     let params = [];
     if (q && q.trim()) {
       const term = `%${q.trim()}%`;
-      conditions.push(`(LOWER(codigo) LIKE LOWER(?) OR LOWER(serie) LIKE LOWER(?) OR LOWER(equipo) LIKE LOWER(?) OR LOWER(marca) LIKE LOWER(?) OR LOWER(modelo) LIKE LOWER(?))`);
+      conditions.push(`(LOWER(codigo) LIKE LOWER(?) OR LOWER(nombre) LIKE LOWER(?) OR LOWER(email) LIKE LOWER(?) OR LOWER(fono) LIKE LOWER(?) OR LOWER(cargo) LIKE LOWER(?))`);
       params.push(term, term, term, term, term);
     }
     if (conditions.length > 0) {
@@ -40,11 +43,11 @@ router.get("/", authMiddleware, async (req, res) => {
 router.get("/:id", authMiddleware, async (req, res) => {
   try {
     const [rows] = await pool.query(
-      "SELECT * FROM equipos WHERE id = ?",
+      "SELECT * FROM contactos WHERE id = ?",
       [req.params.id]
     );
     if (rows.length === 0) {
-      return res.status(404).json({ msg: "Equipo no encontrado" });
+      return res.status(404).json({ msg: "Contacto no encontrado" });
     }
     res.json(rows[0]);
   } catch (err) {
@@ -54,27 +57,25 @@ router.get("/:id", authMiddleware, async (req, res) => {
 });
 
 router.post("/", authMiddleware, async (req, res) => {
-  const { equipo, modelo, marca, serie } = req.body;
+  const { nombre, email, fono, cargo } = req.body;
   try {
-    if (!equipo || equipo.trim().length < 2) {
-      return res.status(400).json({ msg: "Ingrese el Equipo (mínimo 2 caracteres) antes de guardar" });
+    if (!nombre || nombre.trim().length < 3) {
+      return res.status(400).json({ msg: "Ingrese el nombre completo del contacto (mínimo 3 caracteres)" });
     }
     const [dup] = await pool.query(
-      `SELECT codigo FROM equipos
-      WHERE LOWER(TRIM(equipo)) = LOWER(?) AND LOWER(TRIM(IFNULL(marca,''))) = LOWER(?) AND LOWER(TRIM(IFNULL(modelo,''))) = LOWER(?)
-      LIMIT 1`,
-      [equipo.trim(), (marca || '').trim(), (modelo || '').trim()]
+      `SELECT codigo FROM contactos WHERE LOWER(TRIM(nombre)) = LOWER(?) LIMIT 1`,
+      [nombre.trim()]
     );
     if (dup.length > 0) {
-      return res.status(400).json({ msg: `El equipo ${equipo.trim()} ${(marca || '').trim()} ${(modelo || '').trim()} ya existe en el mantenedor con el código ${dup[0].codigo}. No se creó un nuevo registro.` });
+      return res.status(400).json({ msg: `El contacto "${nombre.trim()}" ya existe en el mantenedor con el código ${dup[0].codigo}. No se creó un nuevo registro.` });
     }
     const codigo = await generarCodigo();
     await pool.query(
-      `INSERT INTO equipos (codigo, equipo, modelo, marca, serie)
+      `INSERT INTO contactos (codigo, nombre, email, fono, cargo)
       VALUES (?, ?, ?, ?, ?)`,
-      [codigo, equipo.trim(), modelo || '', marca || '', serie || null]
+      [codigo, nombre.trim(), email || null, fono || null, cargo || null]
     );
-    res.status(201).json({ msg: "Equipo creado", codigo });
+    res.status(201).json({ msg: "Contacto creado", codigo });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
@@ -83,21 +84,21 @@ router.post("/", authMiddleware, async (req, res) => {
 
 router.put("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
-  const { equipo, modelo, marca, serie } = req.body;
+  const { nombre, email, fono, cargo } = req.body;
   try {
-    if (!equipo || equipo.trim().length < 2) {
-      return res.status(400).json({ msg: "Ingrese el Equipo (mínimo 2 caracteres) antes de guardar" });
+    if (!nombre || nombre.trim().length < 3) {
+      return res.status(400).json({ msg: "Ingrese el nombre completo del contacto (mínimo 3 caracteres)" });
     }
-    const [existing] = await pool.query("SELECT codigo FROM equipos WHERE id = ?", [id]);
+    const [existing] = await pool.query("SELECT codigo FROM contactos WHERE id = ?", [id]);
     let codigo = existing[0]?.codigo;
     if (!codigo) {
       codigo = await generarCodigo();
     }
     await pool.query(
-      `UPDATE equipos SET codigo = ?, equipo = ?, modelo = ?, marca = ?, serie = ? WHERE id = ?`,
-      [codigo, equipo.trim(), modelo || '', marca || '', serie || null, id]
+      `UPDATE contactos SET codigo = ?, nombre = ?, email = ?, fono = ?, cargo = ? WHERE id = ?`,
+      [codigo, nombre.trim(), email || null, fono || null, cargo || null, id]
     );
-    res.json({ msg: "Equipo actualizado", codigo });
+    res.json({ msg: "Contacto actualizado", codigo });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
@@ -107,8 +108,8 @@ router.put("/:id", authMiddleware, async (req, res) => {
 router.delete("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
   try {
-    await pool.query("DELETE FROM equipos WHERE id = ?", [id]);
-    res.json({ msg: "Equipo eliminado" });
+    await pool.query("DELETE FROM contactos WHERE id = ?", [id]);
+    res.json({ msg: "Contacto eliminado" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });

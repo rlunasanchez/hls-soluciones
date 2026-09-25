@@ -29,13 +29,16 @@ function ModalOpcionesPDF({ orden, onClose }) {
   const [marcados, setMarcados] = useState({});
 
   const contactosTodos = useMemo(() => {
-    // Si "P" queda desplazado a adicional, muestra la dirección del cliente
-    // (el contacto principal de la OT nunca tuvo una propia) en vez de
-    // aparecer sin dirección en la lista de adicionales.
+    // El contacto principal ahora sí puede tener su propia dirección
+    // (mantenedor de Direcciones, ver OrdenFormCliente.jsx); si no la tiene
+    // cargada, se cae a la del cliente para no quedar sin dirección.
+    const tieneDireccionPropia = !!String(orden.contacto_direccion || "").trim();
     const principalDb = {
       key: "P", nombre: orden.contacto, cargo: orden.cargo_contacto,
       email: orden.email_contacto, fono: orden.fono_contacto,
-      direccion: orden.direccion, ciudad: resolverCiudad(orden, direccionesExtra), comuna: orden.comuna
+      direccion: tieneDireccionPropia ? orden.contacto_direccion : orden.direccion,
+      ciudad: tieneDireccionPropia ? orden.contacto_ciudad : resolverCiudad(orden, direccionesExtra),
+      comuna: tieneDireccionPropia ? orden.contacto_comuna : orden.comuna
     };
     return [principalDb, ...contactosExtra.map((c, i) => ({ ...c, key: `e${i}` }))];
   }, [orden, contactosExtra, direccionesExtra]);

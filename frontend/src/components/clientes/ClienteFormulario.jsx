@@ -1,83 +1,24 @@
 import { useState, useEffect, useRef } from "react";
-import { Save, X, Trash2, Users, ChevronUp, ChevronDown } from "lucide-react";
+import { Save, X } from "lucide-react";
 import { toUpper, validarRUT, upperInput, normalizarRut, validarEmail } from "../../utils/helpers";
-import ModalContactos from "./ModalContactos";
 
-const crearSucursalVacia = () => ({ tipo_direccion: "", direccion: "", fono: "", ciudad: "", comuna: "" });
-
+// Los contactos ya no se gestionan acá — viven en su propio mantenedor
+// (Contactos, independiente de Cliente) y se "llaman" desde la OT/Cotización
+// buscándolos, no editándolos desde la ficha del cliente. Las sucursales
+// tampoco: viven en el mantenedor de Direcciones.
 const ESTADO_INICIAL_CLIENTE = {
   razon_social: "", giro: "", rut: "", direccion: "", ciudad: "",
-  comuna: "", telefono: "", email: "", contacto_nombre: "", contacto_email: "",
-  contacto_fono: "", contacto_cargo: "", contacto_direccion: "", contacto_ciudad: "",
-  contacto_comuna: ""
+  comuna: "", telefono: "", email: ""
 };
 
 function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, titulo, readOnly = false, modoRegistro = false }) {
   const [nuevoCliente, setNuevoCliente] = useState(ESTADO_INICIAL_CLIENTE);
-  // Un cliente nuevo arranca con una sucursal ya lista para completar (la
-  // "Matriz", lo más común); al editar uno existente todas quedan
-  // colapsadas por defecto (ver el useEffect de carga más abajo).
-  const [sucursales, setSucursales] = useState([crearSucursalVacia()]);
-  // Resumen colapsado por defecto (mismo patrón que "Otras Direcciones" de la
-  // OT): el botón "N agregadas — Ver" despliega los chips; cada chip se abre
-  // a mano para editar sus campos, sin depender del resumen general.
-  const [sucursalesResumenAbierto, setSucursalesResumenAbierto] = useState(false);
-  const [sucursalesManualVisibles, setSucursalesManualVisibles] = useState(() => new Set([0]));
-  const [contactos, setContactos] = useState([]);
-  const [mostrarModalContactos, setMostrarModalContactos] = useState(false);
-  const [contactoSeleccionado, setContactoSeleccionado] = useState(null);
-  // Índice del contacto elegido en el popup de detalle, para que "Editar"
-  // abra el modal con ese contacto ya desplegado en vez de la lista colapsada.
-  const [idxContactoAEditar, setIdxContactoAEditar] = useState(null);
-  const [contactosExpandidos, setContactosExpandidos] = useState(false);
   const [rutError, setRutError] = useState("");
   const [guardando, setGuardando] = useState(false);
   const guardandoRef = useRef(false);
 
   useEffect(() => {
     if (clienteEditando) {
-      let dirs = [];
-      if (clienteEditando.direcciones) {
-        dirs = clienteEditando.direcciones.split(";;").map((d) => {
-          const parts = d.split("|");
-          return {
-            tipo_direccion: parts[0] || "", direccion: toUpper(parts[1] || ""),
-            fono: parts[2] || "", ciudad: toUpper(parts[3] || ""), comuna: toUpper(parts[4] || "")
-          };
-        }).filter((d) => d.direccion);
-      }
-      setSucursales(dirs);
-      setSucursalesResumenAbierto(false);
-      setSucursalesManualVisibles(new Set());
-
-      let contacts = [];
-      if (clienteEditando.contactos) {
-        contacts = clienteEditando.contactos.split(";;").map((c) => {
-          const parts = c.split("|");
-          return {
-            nombre: toUpper(parts[0] || ""),
-            email: parts[1] || "",
-            fono: parts[2] || "",
-            cargo: toUpper(parts[3] || ""),
-            direccion: toUpper(parts[4] || ""),
-            ciudad: toUpper(parts[5] || ""),
-            comuna: toUpper(parts[6] || "")
-          };
-        }).filter((c) => c.nombre);
-      }
-      if (contacts.length === 0 && clienteEditando.contacto_nombre) {
-        contacts = [{
-          nombre: toUpper(clienteEditando.contacto_nombre),
-          email: clienteEditando.contacto_email || "",
-          fono: clienteEditando.contacto_fono || "",
-          cargo: toUpper(clienteEditando.contacto_cargo),
-          direccion: toUpper(clienteEditando.contacto_direccion)
-        }];
-      }
-      const primerContacto = contacts[0] || {};
-      const contactosAdicionales = contacts.slice(1);
-      setContactos(contactosAdicionales);
-
       setRutError("");
       setNuevoCliente({
         codigo: clienteEditando.codigo || "",
@@ -88,15 +29,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
         ciudad: toUpper(clienteEditando.ciudad),
         comuna: toUpper(clienteEditando.comuna),
         telefono: clienteEditando.telefono || "",
-        email: clienteEditando.email || "",
-        contacto_nombre: primerContacto.nombre || toUpper(clienteEditando.contacto_nombre) || "",
-        contacto_email: primerContacto.email || clienteEditando.contacto_email || "",
-        contacto_fono: primerContacto.fono || clienteEditando.contacto_fono || "",
-        contacto_cargo: primerContacto.cargo || toUpper(clienteEditando.contacto_cargo) || "",
-        contacto_direccion: primerContacto.direccion || "",
-        contacto_ciudad: primerContacto.ciudad || "",
-        contacto_comuna: primerContacto.comuna || "",
-        direcciones: dirs
+        email: clienteEditando.email || ""
       });
     }
   }, [clienteEditando]);
@@ -112,72 +45,8 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
     return `CL-${String(max + 1).padStart(4, "0")}`;
   };
 
-  const actualizarSucursal = (idx, campo, valor) => {
-    const nuevas = sucursales.map((s, i) => i === idx ? { ...s, [campo]: valor } : s);
-    setSucursales(nuevas);
-  };
-
-  const agregarSucursal = () => {
-    const nuevoIdx = sucursales.length;
-    setSucursales([...sucursales, crearSucursalVacia()]);
-    // Solo la recién agregada queda abierta; las anteriores vuelven a
-    // colapsarse (se ven de nuevo con "Ver") para no estirar la pantalla.
-    setSucursalesManualVisibles(new Set([nuevoIdx]));
-  };
-
-  // Compartida por el botón "Eliminar" de cada fila y por la ✕ del chip.
-  const eliminarSucursal = (idx) => {
-    const nuevas = sucursales.filter((_, i) => i !== idx);
-    setSucursales(nuevas);
-    setSucursalesManualVisibles(prev => {
-      const next = new Set();
-      prev.forEach(i => {
-        if (i < idx) next.add(i);
-        else if (i > idx) next.add(i - 1);
-      });
-      return next;
-    });
-    if (nuevas.length === 0) setSucursalesResumenAbierto(false);
-  };
-
-  // Intercambia el contacto adicional elegido con el contacto principal del
-  // formulario: sus datos pasan a "Datos del Contacto" (arriba) y el
-  // principal anterior baja a la lista de adicionales. Es un cambio local al
-  // formulario, como editar cualquier campo — queda guardado recién al
-  // guardar el cliente (mismo mecanismo que ya arma el payload).
-  const hacerPrincipal = (contacto) => {
-    const principalActual = {
-      nombre: nuevoCliente.contacto_nombre, email: nuevoCliente.contacto_email,
-      fono: nuevoCliente.contacto_fono, cargo: nuevoCliente.contacto_cargo,
-      direccion: nuevoCliente.contacto_direccion, ciudad: nuevoCliente.contacto_ciudad,
-      comuna: nuevoCliente.contacto_comuna
-    };
-    setNuevoCliente({
-      ...nuevoCliente,
-      contacto_nombre: contacto.nombre || "",
-      contacto_email: contacto.email || "",
-      contacto_fono: contacto.fono || "",
-      contacto_cargo: contacto.cargo || "",
-      contacto_direccion: contacto.direccion || "",
-      contacto_ciudad: contacto.ciudad || "",
-      contacto_comuna: contacto.comuna || ""
-    });
-    setContactos(
-      String(principalActual.nombre || "").trim()
-        ? contactos.map((c) => (c === contacto ? principalActual : c))
-        : contactos.filter((c) => c !== contacto)
-    );
-    setContactoSeleccionado(null);
-  };
-
   const resetFormulario = () => {
     setNuevoCliente(ESTADO_INICIAL_CLIENTE);
-    setSucursales([crearSucursalVacia()]);
-    setSucursalesResumenAbierto(false);
-    setSucursalesManualVisibles(new Set([0]));
-    setContactos([]);
-    setMostrarModalContactos(false);
-    setContactosExpandidos(false);
     setRutError("");
   };
 
@@ -208,44 +77,13 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
         return;
       }
     }
-    // Emails con formato válido: empresa, contacto principal y contactos adicionales
-    const emailsAValidar = [
-      ["Email", nuevoCliente.email],
-      ["Email de contacto", nuevoCliente.contacto_email],
-      ...contactos.map((c, i) => [`Email contacto ${i + 2}`, c.email]),
-    ];
-    for (const [campo, valor] of emailsAValidar) {
-      if (String(valor || "").trim() && !validarEmail(valor)) {
-        alert(`Email inválido (${campo}).`);
-        return;
-      }
-    }
-    if (contactos.length > 0 && !String(nuevoCliente.contacto_nombre || "").trim()) {
-      alert("Ingrese el nombre del contacto principal.");
+    if (String(nuevoCliente.email || "").trim() && !validarEmail(nuevoCliente.email)) {
+      alert("Email inválido.");
       return;
     }
-    const dirs = sucursales.filter((s) => s.direccion.trim() !== "");
-    const primerContacto = {
-      nombre: nuevoCliente.contacto_nombre,
-      email: nuevoCliente.contacto_email,
-      fono: nuevoCliente.contacto_fono,
-      cargo: nuevoCliente.contacto_cargo,
-      direccion: nuevoCliente.contacto_direccion,
-      ciudad: nuevoCliente.contacto_ciudad,
-      comuna: nuevoCliente.contacto_comuna
-    };
-    const todosContactos = [];
-    if (primerContacto.nombre && primerContacto.nombre.trim()) {
-      todosContactos.push(primerContacto);
-    }
-    todosContactos.push(...contactos);
     guardandoRef.current = true;
     setGuardando(true);
-    Promise.resolve(onSave({
-      ...nuevoCliente,
-      direcciones: dirs,
-      contactos: todosContactos
-    }, resetFormulario, mantener)).finally(() => {
+    Promise.resolve(onSave({ ...nuevoCliente }, resetFormulario, mantener)).finally(() => {
       guardandoRef.current = false;
       setGuardando(false);
     });
@@ -298,7 +136,16 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                   />
                 </div>
               </div>
-              <div className="cf-r1">
+              <div style={{ display: "grid", gridTemplateColumns: "200px", gap: 6 }}>
+                <div className="cf-field" style={{ position: "relative" }}>
+                  <label>RUT {rutError && <span style={{ position: "absolute", right: 0, top: 0, whiteSpace: "nowrap", color: "#dc2626", fontSize: ".7rem" }}>{rutError}</span>}</label>
+                  <input placeholder="Ej: 12.345.678-9" value={nuevoCliente.rut}
+                    disabled={readOnly}
+                    style={rutError ? { border: "1px solid #f87171", background: "#fef2f2" } : {}}
+                    onChange={handleRutChange} onBlur={handleRutBlur} />
+                </div>
+              </div>
+              <div className="cf-r1 cf-mt">
                 <div className="cf-field">
                   <label>Razón Social *</label>
                   <input placeholder="Razón social" value={nuevoCliente.razon_social}
@@ -314,16 +161,12 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                     onChange={(e) => setNuevoCliente({ ...nuevoCliente, giro: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
                 </div>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "200px", gap: 6, marginTop: 6 }}>
-                <div className="cf-field" style={{ position: "relative" }}>
-                  <label>RUT {rutError && <span style={{ position: "absolute", right: 0, top: 0, whiteSpace: "nowrap", color: "#dc2626", fontSize: ".7rem" }}>{rutError}</span>}</label>
-                  <input placeholder="Ej: 12.345.678-9" value={nuevoCliente.rut}
-                    disabled={readOnly}
-                    style={rutError ? { border: "1px solid #f87171", background: "#fef2f2" } : {}}
-                    onChange={handleRutChange} onBlur={handleRutBlur} />
-                </div>
-              </div>
-              <div className="cf-r1 cf-mt">
+              {/* Dirección/Ciudad/Comuna del cliente ya no se ingresan acá: se
+                  buscan y se llaman desde la OT/Cotización (mantenedor de
+                  Direcciones, independiente de Cliente). Se dejan ocultos
+                  (no se borran) para no perder los valores ya guardados de
+                  clientes existentes al editar otros campos. */}
+              <div className="cf-r1" style={{ display: "none" }}>
                 <div className="cf-field">
                   <label>Dirección</label>
                   <input placeholder="Ingrese la dirección completa" value={nuevoCliente.direccion}
@@ -331,7 +174,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                     onChange={(e) => setNuevoCliente({ ...nuevoCliente, direccion: upperInput(e) })} />
                 </div>
               </div>
-              <div className="cf-r3 cf-mt">
+              <div className="cf-r3" style={{ display: "none" }}>
                 <div className="cf-field">
                   <label>Ciudad</label>
                   <input placeholder="Ciudad" value={nuevoCliente.ciudad}
@@ -344,14 +187,14 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                     disabled={readOnly}
                     onChange={(e) => setNuevoCliente({ ...nuevoCliente, comuna: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
                 </div>
+              </div>
+              <div className="cf-r2 cf-mt">
                 <div className="cf-field">
                   <label>Fono</label>
                   <input placeholder="Fono" value={nuevoCliente.telefono}
                     disabled={readOnly}
                     onChange={(e) => setNuevoCliente({ ...nuevoCliente, telefono: e.target.value.replace(/[^0-9+]/g, "") })} />
                 </div>
-              </div>
-              <div className="cf-r1 cf-mt">
                 <div className="cf-field">
                   <label>Email</label>
                   <input type="email" placeholder="Email" value={nuevoCliente.email}
@@ -360,231 +203,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                 </div>
               </div>
             </div>
-
-            <div className="cf-sec cf-sec-contacto">
-              <h3>Datos del Contacto</h3>
-              <div className="cf-r1 cf-mt">
-                <div className="cf-field">
-                  <label>Nombre Contacto</label>
-                  <input placeholder="Nombre" value={nuevoCliente.contacto_nombre}
-                    disabled={readOnly}
-                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_nombre: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
-                </div>
-              </div>
-              <div className="cf-r2 cf-mt">
-                <div className="cf-field">
-                  <label>Email</label>
-                  <input type="email" placeholder="Email" value={nuevoCliente.contacto_email}
-                    disabled={readOnly}
-                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_email: e.target.value })} />
-                </div>
-                <div className="cf-field">
-                  <label>Fono</label>
-                  <input placeholder="Fono" value={nuevoCliente.contacto_fono}
-                    disabled={readOnly}
-                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_fono: e.target.value.replace(/[^0-9+]/g, "") })} />
-                </div>
-              </div>
-              <div className="cf-r1 cf-mt">
-                <div className="cf-field">
-                  <label>Cargo</label>
-                  <input placeholder="Cargo" value={nuevoCliente.contacto_cargo}
-                    disabled={readOnly}
-                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_cargo: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
-                </div>
-              </div>
-              <div className="cf-r1 cf-mt">
-                <div className="cf-field">
-                  <label>Dirección</label>
-                  <input placeholder="Dirección del contacto (si es distinta a la del cliente)" value={nuevoCliente.contacto_direccion}
-                    disabled={readOnly}
-                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_direccion: upperInput(e) })} />
-                </div>
-              </div>
-              <div className="cf-r2 cf-mt">
-                <div className="cf-field">
-                  <label>Ciudad</label>
-                  <input placeholder="Ciudad" value={nuevoCliente.contacto_ciudad}
-                    disabled={readOnly}
-                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_ciudad: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
-                </div>
-                <div className="cf-field">
-                  <label>Comuna</label>
-                  <input placeholder="Comuna" value={nuevoCliente.contacto_comuna}
-                    disabled={readOnly}
-                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, contacto_comuna: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
-                </div>
-              </div>
-              {!readOnly ? (
-                <div className="contactos-adicionales">
-                  <button type="button" className="cf-btn-contactos" onClick={() => setMostrarModalContactos(true)}>
-                    <Users size={15} />
-                    <span>
-                      {contactos.length > 0
-                        ? `${contactos.length} contacto${contactos.length > 1 ? 's' : ''} adicional${contactos.length > 1 ? 'es' : ''}`
-                        : "+ Agregar otro contacto"}
-                    </span>
-                  </button>
-                  {contactos.length > 0 && (
-                    <div className="contactos-lista-preview">
-                      {(contactosExpandidos ? contactos : contactos.slice(0, 4)).map((c, i) => (
-                        <div key={i} className="contacto-chip" style={{ cursor: "pointer" }} onClick={() => setContactoSeleccionado(c)}>
-                          <span className="contacto-chip-nombre">{`Contacto ${i + 2}`}</span>
-                        </div>
-                      ))}
-                      {contactos.length > 4 && (
-                        <button type="button" className="contacto-chip-toggle" onClick={() => setContactosExpandidos(!contactosExpandidos)}>
-                          {contactosExpandidos ? "Mostrar menos" : `+${contactos.length - 4} más`}
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ) : contactos.length > 0 && (
-                <div className="contactos-adicionales">
-                  <label style={{ fontSize: ".78rem", fontWeight: 600, color: "#475569" }}>Contactos Adicionales</label>
-                  <div className="contactos-lista-preview">
-                    {(contactosExpandidos ? contactos : contactos.slice(0, 4)).map((c, i) => (
-                      <div key={i} className="contacto-chip" style={{ cursor: "pointer" }} onClick={() => setContactoSeleccionado(c)}>
-                        <span className="contacto-chip-nombre">{`Contacto ${i + 2}`}</span>
-                      </div>
-                    ))}
-                    {contactos.length > 4 && (
-                      <button type="button" className="contacto-chip-toggle" onClick={() => setContactosExpandidos(!contactosExpandidos)}>
-                        {contactosExpandidos ? "Mostrar menos" : `+${contactos.length - 4} más`}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
-
-          {/* Sucursales/Direcciones oculto de momento: con Ciudad/Comuna ya
-              disponibles en Contactos adicionales, esta sección queda redundante.
-              No borrar — la lógica (sucursales, agregarSucursal, etc.) sigue
-              intacta arriba, ver CAMBIOS.md v2.112. */}
-          {false && (
-          <div className="cf-sec cf-sec-suc">
-            <div className="cf-sh">
-              <h3>Sucursales/Direcciones</h3>
-              <div className="cf-sh-actions">
-                {sucursales.length > 0 && (sucursalesResumenAbierto || sucursales.some((_, i) => !sucursalesManualVisibles.has(i))) && (
-                  <button
-                    type="button"
-                    className="cf-btn-toggle-suc"
-                    onClick={() => {
-                      const abrir = !sucursalesResumenAbierto;
-                      setSucursalesResumenAbierto(abrir);
-                      if (!abrir) setSucursalesManualVisibles(new Set());
-                    }}
-                    style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
-                  >
-                    {sucursalesResumenAbierto ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-                    {sucursalesResumenAbierto
-                      ? "Ver menos"
-                      : `${sucursales.length} sucursal${sucursales.length > 1 ? "es" : ""} agregada${sucursales.length > 1 ? "s" : ""} — Ver`}
-                  </button>
-                )}
-                {!readOnly && (
-                  <button type="button" className="cf-btn-a" onClick={agregarSucursal}>+ Agregar</button>
-                )}
-              </div>
-            </div>
-
-            {sucursales.length > 0 && sucursalesResumenAbierto && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "8px" }}>
-                {sucursales.map((_, idx) => {
-                  const activa = sucursalesManualVisibles.has(idx);
-                  return (
-                  <span key={idx} style={{
-                    display: "inline-flex", alignItems: "center", gap: "6px",
-                    background: activa ? "#0ea5e9" : "#e0f2fe",
-                    color: activa ? "#ffffff" : "#0369a1",
-                    border: "1px solid #0ea5e9",
-                    borderRadius: "999px", padding: "2px 6px 2px 10px", fontSize: "0.75rem", fontWeight: 600
-                  }}>
-                    <span
-                      onClick={() => setSucursalesManualVisibles(prev => (
-                        // Exclusivo: pinchar una sucursal muestra solo esa (no se
-                        // van acumulando hacia abajo). Pinchar la misma que ya
-                        // está abierta la cierra.
-                        prev.has(idx) && prev.size === 1 ? new Set() : new Set([idx])
-                      ))}
-                      title="Editar sucursal"
-                      style={{ cursor: "pointer" }}
-                    >
-                      {`Sucursal ${idx + 1}`}
-                    </span>
-                    {!readOnly && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (!window.confirm(`¿Eliminar sucursal ${idx + 1}?`)) return;
-                          eliminarSucursal(idx);
-                        }}
-                        title="Quitar sucursal"
-                        style={{ background: "none", border: "none", color: activa ? "#ffffff" : "#0369a1", cursor: "pointer", display: "flex", padding: 0 }}
-                      >
-                        <X size={12} />
-                      </button>
-                    )}
-                  </span>
-                  );
-                })}
-              </div>
-            )}
-
-            {sucursales.map((suc, idx) => {
-              if (!sucursalesManualVisibles.has(idx)) return null;
-              return (
-              <div key={idx} className="cf-sc">
-                <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#0369a1", marginBottom: "4px" }}>
-                  Sucursal {idx + 1}
-                </div>
-                <div className="cf-r2 cf-mb">
-                  <div className="cf-field cf-m0">
-                    <label>Tipo</label>
-                    <select value={suc.tipo_direccion} disabled={readOnly} onChange={(e) => actualizarSucursal(idx, "tipo_direccion", e.target.value)}>
-                      <option value="">Seleccionar</option>
-                      <option value="Matriz">Matriz</option>
-                      <option value="Sucursal">Sucursal</option>
-                    </select>
-                  </div>
-                  <div className="cf-field cf-m0">
-                    <label>Dirección</label>
-                    <input placeholder="Ingrese la dirección completa" value={suc.direccion} disabled={readOnly} onChange={(e) => actualizarSucursal(idx, "direccion", upperInput(e))} />
-                  </div>
-                </div>
-                <div className="cf-r3 cf-mb">
-                  <div className="cf-field cf-m0">
-                    <label>Ciudad</label>
-                    <input placeholder="Ciudad" value={suc.ciudad} disabled={readOnly} onChange={(e) => actualizarSucursal(idx, "ciudad", upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ""))} />
-                  </div>
-                  <div className="cf-field cf-m0">
-                    <label>Comuna</label>
-                    <input placeholder="Comuna" value={suc.comuna} disabled={readOnly} onChange={(e) => actualizarSucursal(idx, "comuna", upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ""))} />
-                  </div>
-                  <div className="cf-field cf-m0">
-                    <label>Fono</label>
-                    <input placeholder="Fono" value={suc.fono} disabled={readOnly} onChange={(e) => actualizarSucursal(idx, "fono", e.target.value.replace(/[^0-9+]/g, ""))} />
-                  </div>
-                </div>
-                {!readOnly && (
-                <div className="cf-sc-del">
-                  <button type="button" className="cf-btn-d" onClick={() => {
-                    if (!window.confirm(`¿Eliminar sucursal ${idx + 1}?`)) return;
-                    eliminarSucursal(idx);
-                  }}>
-                    <Trash2 size={14} /> Eliminar
-                  </button>
-                </div>
-                )}
-              </div>
-              );
-            })}
-          </div>
-          )}
 
           <div className="cf-sub">
             {readOnly ? (
@@ -601,62 +220,6 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
           </div>
         </form>
       </div>
-      {mostrarModalContactos && (
-        <ModalContactos
-          contactos={contactos}
-          onChange={setContactos}
-          onClose={() => { setMostrarModalContactos(false); setIdxContactoAEditar(null); }}
-          readOnly={readOnly}
-          abrirIdx={idxContactoAEditar}
-        />
-      )}
-      {contactoSeleccionado && (
-        <div className="modal-overlay">
-          <div className="modal-contacto-detalle" onClick={e => e.stopPropagation()}>
-            <div className="modal-contacto-detalle-head">
-              <h3><Users size={16} /> {contactoSeleccionado.nombre}</h3>
-              <button type="button" onClick={() => setContactoSeleccionado(null)}><X size={16} /></button>
-            </div>
-            <div className="modal-contacto-detalle-body">
-              {contactoSeleccionado.cargo && (
-                <div className="detalle-row"><span className="detalle-label">Cargo</span><span className="detalle-valor">{contactoSeleccionado.cargo}</span></div>
-              )}
-              {contactoSeleccionado.email && (
-                <div className="detalle-row"><span className="detalle-label">Email</span><span className="detalle-valor">{contactoSeleccionado.email}</span></div>
-              )}
-              {contactoSeleccionado.fono && (
-                <div className="detalle-row"><span className="detalle-label">Fono</span><span className="detalle-valor">{contactoSeleccionado.fono}</span></div>
-              )}
-              {contactoSeleccionado.direccion && (
-                <div className="detalle-row"><span className="detalle-label">Dirección</span><span className="detalle-valor">{contactoSeleccionado.direccion}</span></div>
-              )}
-              {contactoSeleccionado.ciudad && (
-                <div className="detalle-row"><span className="detalle-label">Ciudad</span><span className="detalle-valor">{contactoSeleccionado.ciudad}</span></div>
-              )}
-              {contactoSeleccionado.comuna && (
-                <div className="detalle-row"><span className="detalle-label">Comuna</span><span className="detalle-valor">{contactoSeleccionado.comuna}</span></div>
-              )}
-              {!readOnly && (
-                <div className="detalle-acciones">
-                  <button type="button" className="cf-btn-p" onClick={() => hacerPrincipal(contactoSeleccionado)}>
-                    Hacer principal
-                  </button>
-                  <button type="button" className="cf-btn-c" onClick={() => {
-                    setIdxContactoAEditar(contactos.indexOf(contactoSeleccionado));
-                    setContactoSeleccionado(null);
-                    setMostrarModalContactos(true);
-                  }}>Editar</button>
-                  <button type="button" className="cf-btn-d" onClick={() => {
-                    if (!window.confirm(`¿Eliminar contacto ${contactoSeleccionado.nombre}?`)) return;
-                    setContactos(contactos.filter(c => c !== contactoSeleccionado));
-                    setContactoSeleccionado(null);
-                  }}><Trash2 size={13} /> Eliminar</button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
