@@ -160,6 +160,8 @@
 
 **⚠️ Igual que v2.152/v2.153/v2.154: nada de esto está subido a git ni pusheado.**
 
+**Nota post-push (2026-09-25):** todo lo de v2.147 a v2.155 se subió a `main` (no a `deploy/cloud`). Para replicar el esquema de MySQL en cualquier otra base (por ejemplo la de casa), correr `backend/migracion_2026-09-25_contactos_direcciones.sql` — crea las tablas `contactos`/`direcciones`, agrega las columnas `contacto_id`/`direccion_id`/etc. en `ordenes_trabajo` y `cotizaciones`, y borra `clientes_contactos`/`clientes_direcciones`/las 7 columnas `contacto_*` de `clientes`. Antes de deployar a `deploy/cloud` sigue faltando portar `contactos.js`/`direcciones.js` a sintaxis Postgres y correr el equivalente en Neon.
+
 ---
 
 ## Fecha: 2026-09-23
