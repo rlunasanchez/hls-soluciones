@@ -1209,7 +1209,7 @@ function OrdenFormCliente({
               fontSize: '.82rem',
               lineHeight: '1.3',
               boxSizing: 'border-box',
-              background: nuevaOrden.contactoId ? '#E0F2FE' : 'white',
+              background: '#E0F2FE',
               color: '#0D9488',
               fontWeight: 600
             }}
@@ -1624,7 +1624,7 @@ function OrdenFormCliente({
                           style={{
                             flex: '1 1 200px', minWidth: '120px', padding: '2px 8px', border: '1.5px solid var(--border)', borderRadius: '6px',
                             fontSize: '.82rem', lineHeight: '1.3', boxSizing: 'border-box',
-                            background: 'white', color: '#0D9488', fontWeight: 600
+                            background: '#E0F2FE', color: '#0D9488', fontWeight: 600
                           }}
                         />
                       </div>

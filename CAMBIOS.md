@@ -2,6 +2,12 @@
 
 ## Fecha: 2026-09-26 (solo `main` / MySQL local — `deploy/cloud` y Neon no se tocaron)
 
+### v2.163: Buscadores de Contacto con fondo celeste fijo (OT y Cotización)
+
+Igual que v2.161 pero para contactos: "Buscar un contacto existente para agregarlo..." y el buscador del contacto principal eran blancos (el del principal en la OT solo se ponía celeste al enlazar un contacto). Ahora ambos tienen fondo `#E0F2FE` fijo en `OrdenFormCliente.jsx` y `Cotizaciones.jsx`, igual que el "Buscar Contacto" dentro de cada fila. `npm run build` OK. No probado en el navegador.
+
+**Pendiente para otro día (el usuario indicó que faltan cambios):** revisar en la app Clientes, Nueva OT y Nueva cotización tras las versiones v2.156–v2.163. Sin definir aún: comportamiento de "crear" en los mantenedores de Contactos/Direcciones (hoy vuelve al listado, igual que Clientes y Equipos) y el buscador de Cliente en OT/Cotización (fondo celeste solo al seleccionar un cliente).
+
 ### v2.162: "Registrar" contacto en Otros Contactos ya no cierra la fila
 
 Al registrar en el mantenedor un contacto escrito a mano (OT y Cotización), la fila se cerraba sola (`registrarContactoExtraEnContactos` quitaba el índice de `contactosManualVisibles`). Ahora la fila queda abierta y el botón pasa de **Registrar** a **Editar** (ya enlazado). Archivos: `OrdenFormCliente.jsx`, `Cotizaciones.jsx`. (En los mantenedores de Contactos/Direcciones no se cambió: crear uno nuevo vuelve al listado, igual que Clientes y Equipos.) `npm run build` OK.

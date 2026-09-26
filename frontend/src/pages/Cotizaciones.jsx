@@ -1303,6 +1303,7 @@ function Cotizaciones() {
                         }}
                         onFocus={() => { if (busquedaContacto.trim().length >= 2) setMostrarDropdownContacto(true); }}
                         disabled={soloLectura}
+                        style={{ background: '#E0F2FE', color: '#0D9488', fontWeight: 600 }}
                       />
                       {mostrarDropdownContacto && contactosSugeridos.length > 0 && (
                         <div style={{
@@ -1586,6 +1587,7 @@ function Cotizaciones() {
                                       setMostrarDropdownContactoExtra(e.target.value.trim().length >= 2);
                                     }}
                                     onFocus={() => { if (busquedaContactoExtra.trim().length >= 2) setMostrarDropdownContactoExtra(true); }}
+                                    style={{ background: '#E0F2FE', color: '#0D9488', fontWeight: 600 }}
                                   />
                                   {mostrarDropdownContactoExtra && (
                                     <div style={{
