@@ -19,7 +19,7 @@
 
 **`DATABASE.md`:** estaba desactualizado (describía `clientes_direcciones`, `clientes.contacto_*`, `equipos.insumo1..12`, etc.). Se reemplazó por una guía corta que apunta a `crear_tablas.sql` y lista los scripts de migración en orden.
 
-**Pendiente (no se pudo hacer):** borrar `scripts/` (`migrar-columnas-faltantes.js` volvería a agregar columnas ya eliminadas; `seed-test-data.js` inserta `giro`/dirección en `clientes`) y `backup/` (copias viejas de archivos). Ninguno está referenciado por el proyecto.
+**Archivos obsoletos eliminados:** `scripts/` (`migrar-columnas-faltantes.js` habría vuelto a agregar columnas ya eliminadas; `seed-test-data.js` insertaba `giro`/dirección en `clientes`) y `backup/` (copias viejas de archivos y un `.patch`). Ninguno estaba referenciado por el proyecto y siguen en el historial de git. También se agregó `.claude/settings.local.json` al `.gitignore`.
 
 **Verificación:** `INSERT`/`UPDATE`/sincronización a OT de clientes contra el esquema nuevo con rollback; `node --check`; `npm run build` OK. No probado en el navegador. Solo `main`/MySQL local.
 
