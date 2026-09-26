@@ -2,6 +2,10 @@
 
 ## Fecha: 2026-09-26 (solo `main` / MySQL local — `deploy/cloud` y Neon no se tocaron)
 
+### v2.162: "Registrar" contacto en Otros Contactos ya no cierra la fila
+
+Al registrar en el mantenedor un contacto escrito a mano (OT y Cotización), la fila se cerraba sola (`registrarContactoExtraEnContactos` quitaba el índice de `contactosManualVisibles`). Ahora la fila queda abierta y el botón pasa de **Registrar** a **Editar** (ya enlazado). Archivos: `OrdenFormCliente.jsx`, `Cotizaciones.jsx`. (En los mantenedores de Contactos/Direcciones no se cambió: crear uno nuevo vuelve al listado, igual que Clientes y Equipos.) `npm run build` OK.
+
 ### v2.161: Buscadores de Dirección con fondo celeste fijo (igual que el de Contacto)
 
 Los buscadores de dirección eran blancos (en la OT solo se ponían celestes cuando ya había una dirección enlazada; en Cotizaciones eran blancos fijos). Ahora los 6 (cliente, contacto principal y "Otros Contactos", en `OrdenFormCliente.jsx` y `Cotizaciones.jsx`) tienen fondo `#E0F2FE` siempre, igual que el buscador de contactos. `npm run build` OK.

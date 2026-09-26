@@ -1597,11 +1597,7 @@ function OrdenFormCliente({
                   arr[idx] = { ...arr[idx], contactoId: resultado.id };
                   return { ...prev, contactosExtra: arr };
                 });
-                setContactosManualVisibles(prev => {
-                  const next = new Set(prev);
-                  next.delete(idx);
-                  return next;
-                });
+                // La fila se queda abierta: el botón pasa de "Registrar" a "Editar".
               };
 
               const activeIdx = contactosManualVisibles.size === 1 ? [...contactosManualVisibles][0] : null;

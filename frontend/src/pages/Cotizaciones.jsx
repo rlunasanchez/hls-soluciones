@@ -1570,11 +1570,7 @@ function Cotizaciones() {
                               arr[idx] = { ...arr[idx], contactoId: resultado.id };
                               return { ...prev, contactosExtra: arr };
                             });
-                            setContactosManualVisibles(prev => {
-                              const next = new Set(prev);
-                              next.delete(idx);
-                              return next;
-                            });
+                            // La fila se queda abierta: el botón pasa de "Registrar" a "Editar".
                           };
 
                           return (
