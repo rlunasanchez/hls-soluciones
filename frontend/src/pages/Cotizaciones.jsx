@@ -1167,7 +1167,7 @@ function Cotizaciones() {
                         disabled={soloLectura}
                         style={{
                           flex: '1 1 200px', minWidth: '120px', padding: '2px 8px', border: '1.5px solid var(--border)',
-                          borderRadius: 'var(--radius-sm)', fontSize: '.82rem', background: 'white',
+                          borderRadius: 'var(--radius-sm)', fontSize: '.82rem', background: '#E0F2FE',
                           color: '#0D9488', fontWeight: 600
                         }}
                       />
@@ -1402,7 +1402,7 @@ function Cotizaciones() {
                         disabled={soloLectura}
                         style={{
                           flex: '1 1 200px', minWidth: '120px', padding: '2px 8px', border: '1.5px solid var(--border)',
-                          borderRadius: 'var(--radius-sm)', fontSize: '.82rem', background: 'white',
+                          borderRadius: 'var(--radius-sm)', fontSize: '.82rem', background: '#E0F2FE',
                           color: '#0D9488', fontWeight: 600
                         }}
                       />
@@ -1770,7 +1770,7 @@ function Cotizaciones() {
                                         disabled={soloLectura}
                                         style={{
                                           flex: '1 1 200px', minWidth: '120px', padding: '2px 8px', border: '1.5px solid var(--border)',
-                                          borderRadius: 'var(--radius-sm)', fontSize: '.82rem', background: 'white',
+                                          borderRadius: 'var(--radius-sm)', fontSize: '.82rem', background: '#E0F2FE',
                                           color: '#0D9488', fontWeight: 600
                                         }}
                                       />

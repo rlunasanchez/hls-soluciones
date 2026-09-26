@@ -1078,7 +1078,7 @@ function OrdenFormCliente({
               flex: '1 1 200px', minWidth: '120px',
               padding: '2px 8px', border: '1.5px solid var(--border)', borderRadius: '6px',
               fontSize: '.82rem', lineHeight: '1.3', boxSizing: 'border-box',
-              background: nuevaOrden.clienteDireccionId ? '#E0F2FE' : 'white',
+              background: '#E0F2FE',
               color: '#0D9488', fontWeight: 600
             }}
           />
@@ -1376,7 +1376,7 @@ function OrdenFormCliente({
               flex: '1 1 200px', minWidth: '120px',
               padding: '2px 8px', border: '1.5px solid var(--border)', borderRadius: '6px',
               fontSize: '.82rem', lineHeight: '1.3', boxSizing: 'border-box',
-              background: nuevaOrden.direccionId ? '#E0F2FE' : 'white',
+              background: '#E0F2FE',
               color: '#0D9488', fontWeight: 600
             }}
           />
@@ -1892,7 +1892,7 @@ function OrdenFormCliente({
                               flex: '1 1 200px', minWidth: '120px',
                               padding: '2px 8px', border: '1.5px solid var(--border)', borderRadius: '6px',
                               fontSize: '.82rem', lineHeight: '1.3', boxSizing: 'border-box',
-                              background: c.direccionId ? '#E0F2FE' : 'white',
+                              background: '#E0F2FE',
                               color: '#0D9488', fontWeight: 600
                             }}
                           />

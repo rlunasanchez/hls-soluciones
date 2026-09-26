@@ -2,6 +2,10 @@
 
 ## Fecha: 2026-09-26 (solo `main` / MySQL local — `deploy/cloud` y Neon no se tocaron)
 
+### v2.161: Buscadores de Dirección con fondo celeste fijo (igual que el de Contacto)
+
+Los buscadores de dirección eran blancos (en la OT solo se ponían celestes cuando ya había una dirección enlazada; en Cotizaciones eran blancos fijos). Ahora los 6 (cliente, contacto principal y "Otros Contactos", en `OrdenFormCliente.jsx` y `Cotizaciones.jsx`) tienen fondo `#E0F2FE` siempre, igual que el buscador de contactos. `npm run build` OK.
+
 ### v2.160: OT — "+ Agregar contacto" ahora permite escribir el contacto a mano
 
 **Problema:** al agregar un contacto en "Otros Contactos" de la OT solo aparecían "Buscar Contacto" y la dirección; la grilla Nombre/Email/Fono/Cargo estaba oculta hasta que el contacto ya tuviera nombre (es decir, solo se podía llenar eligiendo uno del buscador). No había forma de ingresar un contacto nuevo a mano.
