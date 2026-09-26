@@ -2,6 +2,17 @@
 
 ## Fecha: 2026-09-26 (solo `main` / MySQL local — `deploy/cloud` y Neon no se tocaron)
 
+### v2.157: Limpieza de columnas de la base que ningún código usa
+
+**Auditoría:** se cruzó cada columna de la base local contra el backend (`routes/*.js`) y el frontend. Todo se usa salvo lo siguiente, que se eliminó:
+- `equipos`: `cliente_id`, `insumo1`…`insumo12`, `averia`, `actividad`, `observaciones` (16 columnas). Nada las escribía ni leía — el mantenedor de Equipos solo maneja `codigo, equipo, modelo, marca, serie` (los datos de servicio viven en `ordenes_trabajo`). Estaban solo en la base local, `crear_tablas.sql` ya no las tenía. Se habían eliminado antes `contador_pag` y `nivel_tintas` (tampoco usadas).
+- `activo` en `equipos`, `clientes`, `contactos` y `direcciones`: se borra con `DELETE` real y nunca se filtra por `activo`. **Se conserva `usuarios.activo`** (Gestión de Usuarios lo usa).
+- **No se tocaron** `fecha_creacion`/`fecha_actualizacion` (registro de auditoría de OT/cotizaciones y fecha de creación de los mantenedores).
+
+**Archivos:** `backend/migracion_2026-09-26_limpieza_columnas.sql` (nuevo, para replicar en otra base — falla si alguna columna ya no existe, MySQL 8 no soporta `DROP COLUMN IF EXISTS`) y `backend/crear_tablas.sql` (sin `activo` en esas 4 tablas).
+
+**Verificación:** respaldo con `mysqldump` antes (fuera del repo); `SELECT *` sobre las 7 tablas e `INSERT`/`UPDATE` de equipos, contactos, direcciones y clientes contra el esquema nuevo, con rollback; `node --check` de todas las rutas. Sin cambios de frontend. Solo `main`/MySQL local — `deploy/cloud` y Neon no se tocaron.
+
 ### v2.156: Formularios de Contacto y Dirección con inputs del mismo tamaño que Cliente + limpieza de columna muerta
 
 **Formularios de Contacto y Dirección (`ContactoFormulario.jsx`, `DireccionFormulario.jsx`, `Contactos.css`, `Direcciones.css`):** los inputs se veían más grandes que en Cliente. El `padding`/`font-size` de los inputs en escritorio ya eran iguales; la diferencia real era el contenedor (740px vs 480px de `.cf-wrap` en Cliente), las etiquetas (10px en mayúsculas vs `.78rem` normal) y el input en móvil (44px de alto mínimo vs `padding: 8px 10px`). Ahora:
