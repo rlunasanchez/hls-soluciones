@@ -485,9 +485,9 @@ function Cotizaciones() {
       clienteId: cliente.id,
       clienteRut: cliente.rut || "",
       clienteRazonSocial: toUpper(cliente.razon_social),
-      clienteDireccion: toUpper(cliente.direccion || ""),
-      clienteCiudad: toUpper(cliente.ciudad || ""),
-      clienteComuna: toUpper(cliente.comuna || ""),
+      clienteDireccion: "",
+      clienteCiudad: "",
+      clienteComuna: "",
       clienteDireccionId: null,
       clienteTelefono: cliente.telefono || "",
       clienteEmail: cliente.email || ""

@@ -7,8 +7,7 @@ import { toUpper, validarRUT, upperInput, normalizarRut, validarEmail } from "..
 // buscándolos, no editándolos desde la ficha del cliente. Las sucursales
 // tampoco: viven en el mantenedor de Direcciones.
 const ESTADO_INICIAL_CLIENTE = {
-  razon_social: "", rut: "", direccion: "", ciudad: "",
-  comuna: "", telefono: "", email: ""
+  razon_social: "", rut: "", telefono: "", email: ""
 };
 
 function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, titulo, readOnly = false, modoRegistro = false }) {
@@ -24,9 +23,6 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
         codigo: clienteEditando.codigo || "",
         razon_social: toUpper(clienteEditando.razon_social),
         rut: clienteEditando.rut || "",
-        direccion: toUpper(clienteEditando.direccion),
-        ciudad: toUpper(clienteEditando.ciudad),
-        comuna: toUpper(clienteEditando.comuna),
         telefono: clienteEditando.telefono || "",
         email: clienteEditando.email || ""
       });
@@ -150,33 +146,6 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                   <input placeholder="Razón social" value={nuevoCliente.razon_social}
                     disabled={readOnly}
                     onChange={(e) => setNuevoCliente({ ...nuevoCliente, razon_social: upperInput(e) })} required />
-                </div>
-              </div>
-              {/* Dirección/Ciudad/Comuna del cliente ya no se ingresan acá: se
-                  buscan y se llaman desde la OT/Cotización (mantenedor de
-                  Direcciones, independiente de Cliente). Se dejan ocultos
-                  (no se borran) para no perder los valores ya guardados de
-                  clientes existentes al editar otros campos. */}
-              <div className="cf-r1" style={{ display: "none" }}>
-                <div className="cf-field">
-                  <label>Dirección</label>
-                  <input placeholder="Ingrese la dirección completa" value={nuevoCliente.direccion}
-                    disabled={readOnly}
-                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, direccion: upperInput(e) })} />
-                </div>
-              </div>
-              <div className="cf-r3" style={{ display: "none" }}>
-                <div className="cf-field">
-                  <label>Ciudad</label>
-                  <input placeholder="Ciudad" value={nuevoCliente.ciudad}
-                    disabled={readOnly}
-                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, ciudad: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
-                </div>
-                <div className="cf-field">
-                  <label>Comuna</label>
-                  <input placeholder="Comuna" value={nuevoCliente.comuna}
-                    disabled={readOnly}
-                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, comuna: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
                 </div>
               </div>
               <div className="cf-r2 cf-mt">

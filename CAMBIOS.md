@@ -2,6 +2,27 @@
 
 ## Fecha: 2026-09-26 (solo `main` / MySQL local — `deploy/cloud` y Neon no se tocaron)
 
+### v2.159: Cliente ya no lleva Dirección/Ciudad/Comuna — se buscan desde el mantenedor de Direcciones
+
+**Cambio de criterio (reemplaza lo dicho en v2.158 sobre dejar esas columnas):** la dirección ya no vive en Cliente. Se elige en la OT/Cotización con "Buscar Dirección" contra el catálogo de Direcciones. Se eliminan `clientes.direccion`, `clientes.ciudad` y `clientes.comuna`.
+
+**Backend (`routes/clientes.js`, `crear_tablas.sql`):** `POST`/`PUT` ya no reciben ni guardan esos campos (`INSERT` con 5 columnas/5 placeholders). Al editar un cliente, la sincronización a sus OT ahora solo copia `cliente`, `rut`, `fono_principal` y `email` — **ya no pisa `direccion/ciudad/comuna` de la OT**. Esto corrige un error real: editar un cliente sin dirección dejaba en `NULL` la dirección elegida desde el mantenedor en todas sus OT.
+
+**Frontend:**
+- `ClienteFormulario.jsx`: sin los campos ocultos de dirección.
+- `ClienteLista.jsx`: sin la columna/fila "Ciudad".
+- `OrdenTrabajo.jsx` (`seleccionarCliente`): al elegir cliente en una OT nueva o cambiar de cliente, la dirección queda vacía (y se suelta `clienteDireccionId`) hasta buscarla; al re-seleccionar el mismo cliente en edición **no se toca** la dirección ni su enlace.
+- `Cotizaciones.jsx`: al elegir cliente ya no copia dirección.
+- `OrdenFormCliente.jsx`: el listado de búsqueda de clientes ya no muestra dirección/comuna; al editar o registrar un cliente desde la OT ya no se lee ni pisa la dirección de la OT; el prefill de "Registrar cliente" ya no arrastra dirección ni contacto.
+
+**Base local:** `ALTER TABLE clientes DROP COLUMN direccion, ciudad, comuna` (script `backend/migracion_2026-09-26_quitar_direccion_cliente.sql`). Respaldo previo con `mysqldump` fuera del repo. Las direcciones de OT/cotizaciones ya guardadas no se tocan; solo se pierde la dirección propia de los 2 clientes de prueba.
+
+**`DATABASE.md`:** estaba desactualizado (describía `clientes_direcciones`, `clientes.contacto_*`, `equipos.insumo1..12`, etc.). Se reemplazó por una guía corta que apunta a `crear_tablas.sql` y lista los scripts de migración en orden.
+
+**Pendiente (no se pudo hacer):** borrar `scripts/` (`migrar-columnas-faltantes.js` volvería a agregar columnas ya eliminadas; `seed-test-data.js` inserta `giro`/dirección en `clientes`) y `backup/` (copias viejas de archivos). Ninguno está referenciado por el proyecto.
+
+**Verificación:** `INSERT`/`UPDATE`/sincronización a OT de clientes contra el esquema nuevo con rollback; `node --check`; `npm run build` OK. No probado en el navegador. Solo `main`/MySQL local.
+
 ### v2.158: Se elimina `clientes.giro`
 
 **Motivo:** desde v2.148 el campo Giro estaba oculto en el formulario de Cliente (`display: none`) y ningún otro código lo leía ni lo mostraba (ni PDFs, ni OT, ni cotizaciones).

@@ -668,18 +668,15 @@ function OrdenTrabajo() {
     setBusquedaCliente("");
     setMostrarDropdownClientes(false);
 
+    // La direccion del cliente ya no vive en Cliente: se busca en el
+    // mantenedor de Direcciones desde la OT. Por eso acá nunca se copia.
     // Mismo cliente re-seleccionado en modo edicion: solo re-sincroniza sus
     // datos propios con lo registrado (por si se editaron a mano en la OT),
-    // sin tocar equipo ni direcciones/contactos extra. El contacto principal
-    // se completa solo si todavia esta vacio, para no pisar uno ya editado.
+    // sin tocar equipo, direccion ni contactos/direcciones extra.
     if (mismoCliente && editingId) {
       setNuevaOrden(prev => ({
         ...prev,
         cliente: toUpper(cliente.razon_social),
-        direccion: toUpper(cliente.direccion),
-        ciudad: toUpper(cliente.ciudad),
-        comuna: toUpper(cliente.comuna),
-        clienteDireccionId: null,
         rut: cliente.rut || "",
         email: cliente.email || "",
         fonoPrincipal: cliente.telefono || ""
@@ -692,9 +689,9 @@ function OrdenTrabajo() {
       setNuevaOrden(prev => ({
         ...prev,
         cliente: toUpper(cliente.razon_social),
-        direccion: toUpper(cliente.direccion),
-        ciudad: toUpper(cliente.ciudad),
-        comuna: toUpper(cliente.comuna),
+        direccion: "",
+        ciudad: "",
+        comuna: "",
         clienteDireccionId: null,
         rut: cliente.rut || "",
         email: cliente.email || "",
@@ -710,9 +707,10 @@ function OrdenTrabajo() {
     setNuevaOrden(prev => ({
       ...prev,
       cliente: toUpper(cliente.razon_social),
-      direccion: toUpper(cliente.direccion),
-      ciudad: toUpper(cliente.ciudad),
-      comuna: toUpper(cliente.comuna),
+      direccion: "",
+      ciudad: "",
+      comuna: "",
+      clienteDireccionId: null,
       rut: cliente.rut || "",
       email: cliente.email || "",
       fonoPrincipal: cliente.telefono || "",

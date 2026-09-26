@@ -6,9 +6,6 @@ CREATE TABLE IF NOT EXISTS clientes (
   codigo VARCHAR(50) UNIQUE,
   razon_social VARCHAR(255) NOT NULL,
   rut VARCHAR(20),
-  direccion VARCHAR(255),
-  ciudad VARCHAR(100),
-  comuna VARCHAR(100),
   telefono VARCHAR(20),
   email VARCHAR(100),
   fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP

@@ -623,9 +623,6 @@ function OrdenFormCliente({
         ...prev,
         cliente: toUpper(fresh.razon_social || ""),
         rut: fresh.rut || "",
-        direccion: toUpper(fresh.direccion || ""),
-        ciudad: toUpper(fresh.ciudad || ""),
-        comuna: toUpper(fresh.comuna || ""),
         email: fresh.email || "",
         fonoPrincipal: fresh.telefono || ""
       }));
@@ -667,15 +664,8 @@ function OrdenFormCliente({
     setPrefillCliente({
       razon_social: nuevaOrden.cliente || "",
       rut: nuevaOrden.rut || "",
-      direccion: nuevaOrden.direccion || "",
-      ciudad: nuevaOrden.ciudad || "",
-      comuna: nuevaOrden.comuna || "",
       telefono: nuevaOrden.fonoPrincipal || "",
-      email: nuevaOrden.email || "",
-      contacto_nombre: nuevaOrden.contacto || "",
-      contacto_email: nuevaOrden.emailContacto || "",
-      contacto_fono: nuevaOrden.fonoContacto || "",
-      contacto_cargo: nuevaOrden.cargoContacto || ""
+      email: nuevaOrden.email || ""
     });
     setMostrarRegistrarCliente(true);
   };
@@ -709,9 +699,6 @@ function OrdenFormCliente({
           ...prev,
           cliente: toUpper(fresh.razon_social || "") || prev.cliente,
           rut: fresh.rut || prev.rut,
-          direccion: toUpper(fresh.direccion || "") || prev.direccion,
-          ciudad: toUpper(fresh.ciudad || "") || prev.ciudad,
-          comuna: toUpper(fresh.comuna || "") || prev.comuna,
           email: fresh.email || prev.email,
           fonoPrincipal: fresh.telefono || prev.fonoPrincipal
         }));
@@ -869,7 +856,7 @@ function OrdenFormCliente({
                         </span>
                       </div>
                       <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                        RUT: {cliente.rut || 'N/A'} | {cliente.direccion || ''}, {cliente.comuna || ''}
+                        RUT: {cliente.rut || 'N/A'}
                         {cliente.telefono ? ` | Tel: ${cliente.telefono}` : ''}
                       </div>
                     </div>
