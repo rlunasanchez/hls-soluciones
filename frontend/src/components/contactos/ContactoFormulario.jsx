@@ -53,7 +53,7 @@ function ContactoFormulario({ contactoEditando, onCancel, onSave, contactos, rea
   };
 
   return (
-    <div style={{ maxWidth: '740px', margin: '0 auto', padding: '20px' }}>
+    <div style={{ maxWidth: '480px', margin: '0 auto', padding: '12px' }}>
       <div className="cof-wrap">
         <div className="cof-head">
           <h2><Contact size={22} />{readOnly ? "Ver Contacto" : contactoEditando ? "Editar Contacto" : "Nuevo Contacto"}</h2>

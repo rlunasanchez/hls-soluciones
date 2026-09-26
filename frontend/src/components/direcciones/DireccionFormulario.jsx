@@ -48,7 +48,7 @@ function DireccionFormulario({ direccionEditando, onCancel, onSave, direcciones,
   };
 
   return (
-    <div style={{ maxWidth: '740px', margin: '0 auto', padding: '20px' }}>
+    <div style={{ maxWidth: '480px', margin: '0 auto', padding: '12px' }}>
       <div className="dif-wrap">
         <div className="dif-head">
           <h2><MapPin size={22} />{readOnly ? "Ver Dirección" : direccionEditando ? "Editar Dirección" : "Nueva Dirección"}</h2>

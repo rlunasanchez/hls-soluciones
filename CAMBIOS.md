@@ -1,5 +1,25 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-09-26 (solo `main` / MySQL local — `deploy/cloud` y Neon no se tocaron)
+
+### v2.156: Formularios de Contacto y Dirección con inputs del mismo tamaño que Cliente + limpieza de columna muerta
+
+**Formularios de Contacto y Dirección (`ContactoFormulario.jsx`, `DireccionFormulario.jsx`, `Contactos.css`, `Direcciones.css`):** los inputs se veían más grandes que en Cliente. El `padding`/`font-size` de los inputs en escritorio ya eran iguales; la diferencia real era el contenedor (740px vs 480px de `.cf-wrap` en Cliente), las etiquetas (10px en mayúsculas vs `.78rem` normal) y el input en móvil (44px de alto mínimo vs `padding: 8px 10px`). Ahora:
+- Contenedor `maxWidth: 480px`, `padding: 12px` (igual que Cliente).
+- Etiquetas `.78rem`, sin mayúsculas, color `#475569`.
+- Móvil: inputs `padding: 8px 10px; font-size: .85rem`, sin `min-height`.
+- Cantidad y orden de campos sin cambios. Los inputs de los filtros de las listas no se tocaron.
+
+**Limpieza (`ClienteLista.jsx`):** se elimina la columna/fila "Contacto" de la lista de clientes (tabla y tarjetas móviles). Leía `c.contacto_nombre`, que `clientes.js` ya no devuelve desde v2.147, así que siempre salía vacía. Los `contacto_nombre` de `Cotizaciones.jsx` y `crear_tablas.sql` son de la tabla `cotizaciones` y siguen vigentes.
+
+**Base de datos local (MySQL `soporte_tecnico_db`):** se aplicó `backend/migracion_2026-09-25_contactos_direcciones.sql` en esta máquina, que seguía con el esquema previo a v2.147 (sin `contactos`/`direcciones` ni las columnas `contacto_id`/`direccion_id`/etc.). Antes se hizo respaldo con `mysqldump` (fuera del repo). Se eliminaron `clientes_contactos` (4 filas) y `clientes_direcciones` (2 filas), datos de prueba que **no** se migraron a los catálogos nuevos.
+- ⚠️ El script tal cual falla en una base que no tenga `clientes.contacto_ciudad`/`contacto_comuna` (es el caso de esta máquina): el `ALTER TABLE clientes ... DROP COLUMN` de esas dos columnas da error. Aquí se corrió una copia sin esas dos líneas. Si se replica en otra máquina, revisar primero qué columnas `contacto_*` existen en `clientes`.
+- Tampoco es re-ejecutable: los `ALTER ... ADD COLUMN` fallan si la columna ya existe.
+
+**Verificación:** `npm run build` OK. No probado visualmente en el navegador.
+
+---
+
 ## Fecha: 2026-09-25 (solo local, no pusheado — ver nota al final)
 
 ### v2.147: Mantenedores independientes de Contactos y Direcciones

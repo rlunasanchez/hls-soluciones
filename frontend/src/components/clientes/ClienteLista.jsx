@@ -16,7 +16,6 @@ function ClienteLista({ clientes, onVer, onEditar, onEliminar }) {
               <th>RUT</th>
               <th>Teléfono</th>
               <th>Ciudad</th>
-              <th>Contacto</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -30,7 +29,6 @@ function ClienteLista({ clientes, onVer, onEditar, onEliminar }) {
                 <td>{c.rut}</td>
                 <td>{c.telefono}</td>
                 <td>{c.ciudad}</td>
-                <td>{c.contacto_nombre}</td>
                 <td>
                   <ClienteAcciones
                     cliente={c}
@@ -65,10 +63,6 @@ function ClienteLista({ clientes, onVer, onEditar, onEliminar }) {
             <div className="data-card-row">
               <span className="label">Ciudad</span>
               <span className="value">{c.ciudad}</span>
-            </div>
-            <div className="data-card-row">
-              <span className="label">Contacto</span>
-              <span className="value">{c.contacto_nombre}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px' }}>
               <ClienteAcciones
