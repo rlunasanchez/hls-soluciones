@@ -5,7 +5,6 @@ CREATE TABLE IF NOT EXISTS clientes (
   id INT AUTO_INCREMENT PRIMARY KEY,
   codigo VARCHAR(50) UNIQUE,
   razon_social VARCHAR(255) NOT NULL,
-  giro VARCHAR(100),
   rut VARCHAR(20),
   direccion VARCHAR(255),
   ciudad VARCHAR(100),

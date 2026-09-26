@@ -7,7 +7,7 @@ import { toUpper, validarRUT, upperInput, normalizarRut, validarEmail } from "..
 // buscándolos, no editándolos desde la ficha del cliente. Las sucursales
 // tampoco: viven en el mantenedor de Direcciones.
 const ESTADO_INICIAL_CLIENTE = {
-  razon_social: "", giro: "", rut: "", direccion: "", ciudad: "",
+  razon_social: "", rut: "", direccion: "", ciudad: "",
   comuna: "", telefono: "", email: ""
 };
 
@@ -23,7 +23,6 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
       setNuevoCliente({
         codigo: clienteEditando.codigo || "",
         razon_social: toUpper(clienteEditando.razon_social),
-        giro: toUpper(clienteEditando.giro),
         rut: clienteEditando.rut || "",
         direccion: toUpper(clienteEditando.direccion),
         ciudad: toUpper(clienteEditando.ciudad),
@@ -151,14 +150,6 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                   <input placeholder="Razón social" value={nuevoCliente.razon_social}
                     disabled={readOnly}
                     onChange={(e) => setNuevoCliente({ ...nuevoCliente, razon_social: upperInput(e) })} required />
-                </div>
-              </div>
-              <div className="cf-r1" style={{ display: "none" }}>
-                <div className="cf-field">
-                  <label>Giro</label>
-                  <input placeholder="Giro" value={nuevoCliente.giro}
-                    disabled={readOnly}
-                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, giro: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
                 </div>
               </div>
               {/* Dirección/Ciudad/Comuna del cliente ya no se ingresan acá: se

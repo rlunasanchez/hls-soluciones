@@ -2,6 +2,16 @@
 
 ## Fecha: 2026-09-26 (solo `main` / MySQL local — `deploy/cloud` y Neon no se tocaron)
 
+### v2.158: Se elimina `clientes.giro`
+
+**Motivo:** desde v2.148 el campo Giro estaba oculto en el formulario de Cliente (`display: none`) y ningún otro código lo leía ni lo mostraba (ni PDFs, ni OT, ni cotizaciones).
+
+**Cambios:** `backend/routes/clientes.js` (sin `giro` en el destructuring, `INSERT` — 8 columnas/8 placeholders — ni `UPDATE`), `ClienteFormulario.jsx` (sin estado ni bloque oculto), `backend/crear_tablas.sql` y columna borrada en el MySQL local. Script para replicar en otra base: `backend/migracion_2026-09-26_quitar_giro.sql`.
+
+**Se dejan a propósito** `clientes.direccion/ciudad/comuna`: aunque el formulario ya no las edita, se siguen sincronizando a las OT del cliente al editarlo (comportamiento intencional).
+
+**Verificación:** respaldo con `mysqldump` antes (fuera del repo); `INSERT`/`UPDATE`/sincronización a OT contra el esquema nuevo con rollback; `node --check` de las rutas; `npm run build` OK. Solo `main`/MySQL local.
+
 ### v2.157: Limpieza de columnas de la base que ningún código usa
 
 **Auditoría:** se cruzó cada columna de la base local contra el backend (`routes/*.js`) y el frontend. Todo se usa salvo lo siguiente, que se eliminó:

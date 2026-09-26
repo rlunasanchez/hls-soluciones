@@ -73,7 +73,7 @@ router.get("/:id", authMiddleware, async (req, res) => {
 });
 
 router.post("/", authMiddleware, async (req, res) => {
-  const { razon_social, giro, rut, direccion, ciudad, comuna, telefono, email } = req.body;
+  const { razon_social, rut, direccion, ciudad, comuna, telefono, email } = req.body;
   const codigo = await generarCodigo();
   try {
     // Datos mínimos obligatorios: Razón Social + RUT
@@ -98,9 +98,9 @@ router.post("/", authMiddleware, async (req, res) => {
       return res.status(400).json({ msg: "Email inválido" });
     }
     const [result] = await pool.query(
-      `INSERT INTO clientes (codigo, razon_social, giro, rut, direccion, ciudad, comuna, telefono, email)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [codigo, razon_social, giro || '', rut, direccion || '', ciudad || '', comuna || '', telefono || '', email || '']
+      `INSERT INTO clientes (codigo, razon_social, rut, direccion, ciudad, comuna, telefono, email)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [codigo, razon_social, rut, direccion || '', ciudad || '', comuna || '', telefono || '', email || '']
     );
     res.status(201).json({ msg: "Cliente creado", codigo, id: result.insertId });
   } catch (err) {
@@ -111,7 +111,7 @@ router.post("/", authMiddleware, async (req, res) => {
 
 router.put("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
-  const { razon_social, giro, rut, direccion, ciudad, comuna, telefono, email } = req.body;
+  const { razon_social, rut, direccion, ciudad, comuna, telefono, email } = req.body;
   const connection = await pool.getConnection();
   try {
     // Datos mínimos obligatorios: Razón Social + RUT
@@ -146,8 +146,8 @@ router.put("/:id", authMiddleware, async (req, res) => {
 
     await connection.beginTransaction();
     await connection.query(
-      `UPDATE clientes SET codigo=?, razon_social=?, giro=?, rut=?, direccion=?, ciudad=?, comuna=?, telefono=?, email=? WHERE id=?`,
-      [codigo, razon_social, giro || '', rut, direccion || '', ciudad || '', comuna || '', telefono || '', email || '', id]
+      `UPDATE clientes SET codigo=?, razon_social=?, rut=?, direccion=?, ciudad=?, comuna=?, telefono=?, email=? WHERE id=?`,
+      [codigo, razon_social, rut, direccion || '', ciudad || '', comuna || '', telefono || '', email || '', id]
     );
     // Sincroniza en las OT de este cliente solo sus datos propios (Contacto
     // ya no se deriva de Cliente — vive aparte en el catálogo de Contactos
