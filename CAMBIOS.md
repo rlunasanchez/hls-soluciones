@@ -2,6 +2,14 @@
 
 ## Fecha: 2026-09-26 (solo `main` / MySQL local — `deploy/cloud` y Neon no se tocaron)
 
+### v2.160: OT — "+ Agregar contacto" ahora permite escribir el contacto a mano
+
+**Problema:** al agregar un contacto en "Otros Contactos" de la OT solo aparecían "Buscar Contacto" y la dirección; la grilla Nombre/Email/Fono/Cargo estaba oculta hasta que el contacto ya tuviera nombre (es decir, solo se podía llenar eligiendo uno del buscador). No había forma de ingresar un contacto nuevo a mano.
+
+**Cambio (`OrdenFormCliente.jsx`):** la grilla Nombre/Email/Fono/Cargo se muestra siempre en la fila expandida. Al escribir el nombre aparece el botón **Registrar** (junto al buscador) que lo graba en el mantenedor de Contactos y lo enlaza (`contactoId`); si ya existe, lo enlaza sin duplicar. Cotizaciones ya mostraba la grilla siempre, no cambia.
+
+**Verificación:** `npm run build` OK. No probado en el navegador.
+
 ### v2.159: Cliente ya no lleva Dirección/Ciudad/Comuna — se buscan desde el mantenedor de Direcciones
 
 **Cambio de criterio (reemplaza lo dicho en v2.158 sobre dejar esas columnas):** la dirección ya no vive en Cliente. Se elige en la OT/Cotización con "Buscar Dirección" contra el catálogo de Direcciones. Se eliminan `clientes.direccion`, `clientes.ciudad` y `clientes.comuna`.

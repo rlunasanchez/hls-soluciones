@@ -1835,7 +1835,6 @@ function OrdenFormCliente({
                           )}
                         </div>
                       )}
-                      {(c.nombre.trim() || readOnly) && (
                       <div className="of-form-grid" style={{ gap: '8px', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
                         <div className="of-f">
                           <label>Contacto {idx + 2}</label>
@@ -1871,7 +1870,6 @@ function OrdenFormCliente({
                           <input type="text" placeholder="Cargo" value={c.cargo} onChange={(e) => actualizarContacto(idx, 'cargo', upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, ''))} disabled={readOnly} style={{ width: '66%' }} />
                         </div>
                       </div>
-                      )}
 
                       <div ref={direccionExtraDropdownRef} className="of-f" style={{ marginTop: 6, position: 'relative' }}>
                         <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)', fontSize: '1rem', textTransform: 'none', letterSpacing: 'normal' }}>
