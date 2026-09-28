@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import api from "../services/api";
 import { getCached } from "../services/cache";
-import { toUpper, cerrarSesion, upperInput, validarRUT, normalizarRut, validarEmail, parseToken } from "../utils/helpers";
+import { toUpper, capitalizarNombre, cerrarSesion, upperInput, validarRUT, normalizarRut, validarEmail, parseToken } from "../utils/helpers";
 import '../styles/OrdenTrabajo.css';
 import "../styles/ordenes-componentes.css";
 import HeaderOrdenTrabajo from "../components/ordenes/HeaderOrdenTrabajo";
@@ -1042,7 +1042,7 @@ function OrdenTrabajo() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   {(ordenIdActual ? nuevaOrden.tecnicoAsignado : tecnicoDeSesion()) && (
                     <span style={{ fontWeight: 600, fontSize: '0.75rem', color: '#fff', background: 'rgba(255,255,255,0.22)', padding: '2px 8px', borderRadius: 999 }}>
-                      Técnico: {ordenIdActual ? nuevaOrden.tecnicoAsignado : tecnicoDeSesion()}
+                      Técnico: {capitalizarNombre(ordenIdActual ? nuevaOrden.tecnicoAsignado : tecnicoDeSesion())}
                     </span>
                   )}
                   {cotizacionesDeOrden.length > 0 && (

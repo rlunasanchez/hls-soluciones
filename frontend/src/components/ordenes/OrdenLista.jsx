@@ -1,6 +1,7 @@
 import { ClipboardList, Plus, RotateCcw } from "lucide-react";
 import Pagination from "../Pagination";
 import OrdenAcciones from "./OrdenAcciones";
+import { capitalizarNombre } from "../../utils/helpers";
 
 function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtroCliente, onFiltroClienteChange, filtroSerie, onFiltroSerieChange, filtroEstado, onFiltroEstadoChange, filtroGarantia, onFiltroGarantiaChange, filtroFechaDesde, onFiltroFechaDesdeChange, filtroFechaHasta, onFiltroFechaHastaChange, onLimpiar, onNueva, paginaActual, totalPaginas, onPageChange, onVer, onEditar, onEliminar, onInforme, onCotizacion, onPDF }) {
 
@@ -132,7 +133,7 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                     <td data-label="Equipo">
                       {orden.equipo} {orden.marca} {orden.modelo}
                     </td>
-                    <td data-label="Técnico">{orden.tecnico_asignado}</td>
+                    <td data-label="Técnico">{capitalizarNombre(orden.tecnico_asignado)}</td>
                     <td data-label="Estado">
                       {orden.fecha_entrega ? (
                         <span className="badge-estado-cerrada">Cerrada</span>
@@ -197,7 +198,7 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                 </div>
                 <div className="data-card-row">
                   <span className="label">Técnico</span>
-                  <span className="value">{orden.tecnico_asignado}</span>
+                  <span className="value">{capitalizarNombre(orden.tecnico_asignado)}</span>
                 </div>
                 <div className="data-card-row">
                   <span className="label">Estado</span>

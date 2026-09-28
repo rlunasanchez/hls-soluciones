@@ -1,6 +1,7 @@
 // Generador del documento "Orden de Servicio" (HTML listo para imprimir/guardar como PDF).
 // Función pura: no toca el DOM ni React. La impresión la dispara utils/imprimir.js.
 import { EMPRESA, LOGO_HLS, LOGO_BROTHER, CONDICIONES_ORDEN_SERVICIO } from "./empresa";
+import { capitalizarNombre } from "./helpers";
 
 // ── Helpers de escape y formato ──────────────────────────────────────────
 // Los valores son texto libre escrito por el usuario y se inyectan con
@@ -101,7 +102,7 @@ function piePagina(orden) {
       </div>
       <div class="firma-linea">
         <div class="t">Técnico</div>
-        <div class="n">${esc(orden.tecnico_asignado || "")}</div>
+        <div class="n">${esc(capitalizarNombre(orden.tecnico_asignado))}</div>
       </div>
     </div>
     <div class="legales">

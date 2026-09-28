@@ -297,7 +297,10 @@ function OrdenFormCliente({
 
       // Sincronizar en la OT los datos derivados del cliente recién editado
       const armarContactos = (cli) => {
-        const principal = { nombre: normTxt(cli.contacto_nombre), email: cli.contacto_email || "", fono: cli.contacto_fono || "", cargo: cli.contacto_cargo || "" };
+        const principal = {
+          nombre: normTxt(cli.contacto_nombre), email: cli.contacto_email || "", fono: cli.contacto_fono || "", cargo: cli.contacto_cargo || "",
+          direccion: (cli.contacto_direccion || "").toUpperCase().trim(), ciudad: (cli.contacto_ciudad || "").toUpperCase().trim(), comuna: (cli.contacto_comuna || "").toUpperCase().trim()
+        };
         const extras = String(cli.contactos || "").split(";;").map((s) => {
           const p = s.split("|");
           return { nombre: (p[0] || "").toUpperCase().trim(), email: p[1] || "", fono: p[2] || "", cargo: p[3] || "" };
@@ -322,6 +325,13 @@ function OrdenFormCliente({
         return { nombre: (p[0] || "").toUpperCase().trim(), email: p[1] || "", fono: p[2] || "", cargo: p[3] || "", direccion: (p[4] || "").toUpperCase().trim(), ciudad: (p[5] || "").toUpperCase().trim(), comuna: (p[6] || "").toUpperCase().trim() };
       }).filter((c) => c.nombre);
       const contactosExtraDespues = armarContactosExtra(fresh);
+      // Snapshot de antes, en el mismo orden en que vienen serializados en
+      // clientes_contactos: a diferencia de "todosContactosAntes" (que excluye
+      // al principal y por eso se corre de posición si hubo un intercambio),
+      // esta lista no filtra nada, así que editar un contacto (ej. corregir
+      // una letra del nombre) no le cambia la posición — sirve de respaldo
+      // cuando el nombre nuevo ya no calza con ningún nombre viejo.
+      const contactosExtraAntes = armarContactosExtra(clienteAEditar);
 
       setNuevaOrden((prev) => {
         const base = {
@@ -381,7 +391,11 @@ function OrdenFormCliente({
           .filter((c) => normTxt(c.nombre) !== nombrePrincipalDespues)
           .map((c) => {
             const nomOT = normTxt(c.nombre);
-            const match = contactosExtraDespues.find((x) => x.nombre === nomOT);
+            let match = contactosExtraDespues.find((x) => x.nombre === nomOT);
+            if (!match) {
+              const idxAntes = contactosExtraAntes.findIndex((x) => x.nombre === nomOT);
+              if (idxAntes !== -1) match = contactosExtraDespues[idxAntes];
+            }
             return match ? { nombre: match.nombre, email: match.email, fono: match.fono, cargo: match.cargo, direccion: match.direccion, ciudad: match.ciudad, comuna: match.comuna } : c;
           });
         // Si la OT seguía al principal del cliente y este cambió de persona,
@@ -392,7 +406,7 @@ function OrdenFormCliente({
           const viejo = todosContactosAntes[0];
           extrasBase = [...extrasBase, {
             nombre: viejo.nombre, email: viejo.email, fono: viejo.fono, cargo: viejo.cargo,
-            direccion: "", ciudad: "", comuna: ""
+            direccion: viejo.direccion || "", ciudad: viejo.ciudad || "", comuna: viejo.comuna || ""
           }];
         }
         base.contactosExtra = extrasBase;
@@ -1280,7 +1294,7 @@ function OrdenFormCliente({
       <div className="of-form-grid of-contacto-grid">
         {clienteSeleccionado && (
         <div ref={contactoDropdownRef} className="of-f" style={{ position: 'relative' }}>
-          <label>
+          <label style={{ color: 'var(--primary)' }}>
             <Search size={11} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'text-bottom' }} />
             Buscar Contacto
           </label>
@@ -1301,7 +1315,9 @@ function OrdenFormCliente({
               border: '1.5px solid var(--border)',
               borderRadius: 'var(--radius-sm)',
               fontSize: '.82rem',
-              background: 'white'
+              background: 'white',
+              color: '#0D9488',
+              fontWeight: 600
             }}
           />
 
@@ -1771,6 +1787,9 @@ function OrdenFormCliente({
             {mostrarAdjunto ? <ChevronUp size={14} style={{ color: 'var(--primary)', flexShrink: 0 }} /> : <ChevronDown size={14} style={{ color: 'var(--primary)', flexShrink: 0 }} />}
             <Paperclip size={14} style={{ color: 'var(--primary)', flexShrink: 0 }} />
             Adjunto
+            {(nuevaOrden.adjuntos || []).length > 0 && (
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)', flexShrink: 0 }} title="Tiene adjunto" />
+            )}
           </button>
         </label>
 
@@ -1861,6 +1880,9 @@ function OrdenFormCliente({
           >
             {mostrarInfoInterna ? <ChevronUp size={14} style={{ color: '#B45309', flexShrink: 0 }} /> : <ChevronDown size={14} style={{ color: '#B45309', flexShrink: 0 }} />}
             Información Interna
+            {String(nuevaOrden.infoInterna || "").trim() && (
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#B45309', flexShrink: 0 }} title="Tiene información interna" />
+            )}
           </button>
         </label>
 

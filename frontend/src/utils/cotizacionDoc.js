@@ -104,9 +104,9 @@ body {
 
 .folio-box { text-align: center; align-self: flex-end; background: #FFFFFF; border: 1pt solid #0C4A8C; border-radius: 7pt; padding: 1.4mm 5mm; }
 .folio-box h1 { margin: 0; font-size: 10pt; font-weight: 800; letter-spacing: .04em; color: #0C4A8C; }
-.folio-box .folio-n { font-size: 7.5pt; font-weight: 700; color: #111827; }
-.folio-box .rut-emp { margin-top: .5mm; font-size: 6.5pt; color: #374151; }
-.folio-box .razon-emp { font-size: 6.5pt; font-weight: 700; color: #374151; }
+.folio-box .folio-n { font-size: 12pt; font-weight: 700; color: #111827; }
+.folio-box .rut-emp { margin-top: .5mm; font-size: 6.5pt; font-weight: 700; color: #374151; }
+.folio-box .razon-emp { font-size: 8pt; font-weight: 700; color: #374151; }
 
 .sec { margin-top: 2mm; break-inside: avoid; background: #FFFFFF; border: .5pt solid #E2E8F0; border-radius: 7pt; padding: 1.8mm 4mm; box-shadow: 0 1px 4px rgba(15,23,42,.15); }
 .sec h2 { margin: 0 0 1.2mm; padding-left: 6pt; border-left: 5pt solid #0C4A8C; border-radius: 2pt; font-size: 7pt; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #0C4A8C; break-after: avoid; }
@@ -137,12 +137,13 @@ table.items td.detalle { font-weight: 600; color: #111827; white-space: pre-wrap
 .pie-tabla { display: flex; gap: 6mm; margin-top: 3mm; }
 .legales { flex: 1 1 auto; font-size: 6.5pt; color: #6B7280; }
 .legales p { margin: 0; }
+.cond-pie { margin-top: 4mm; grid-template-columns: 1fr 1fr 1fr; }
 .totales { flex: 0 0 55mm; }
 .totales .fila { display: flex; justify-content: space-between; padding: 1.2mm 0; font-size: 8.5pt; }
 .totales .fila.total { border-top: 1pt solid #0C4A8C; margin-top: 1mm; padding-top: 2mm; font-weight: 800; font-size: 10pt; color: #0C4A8C; }
 .totales .fila span:last-child { font-variant-numeric: tabular-nums; }
 
-.bancarios { margin-top: 3mm; font-size: 7.5pt; color: #374151; }
+.bancarios { margin-top: 3mm; font-size: 9pt; color: #374151; }
 .bancarios b { color: #111827; }
 `;
 
@@ -192,7 +193,7 @@ export function generarHtmlCotizacion(cot, opciones) {
       </div>
       <div class="folio-box">
         <h1>COTIZACIÓN</h1>
-        <div class="folio-n">Folio N° ${esc(cot.folio)}</div>
+        <div class="folio-n">N° ${esc(cot.folio)}</div>
         <div class="rut-emp">${esc(EMPRESA_RUT)}</div>
         <div class="razon-emp">${esc(EMPRESA_RAZON_SOCIAL)}</div>
       </div>
@@ -225,14 +226,11 @@ export function generarHtmlCotizacion(cot, opciones) {
     ${contactosExtra.length ? `<div class="sub">› Contactos adicionales</div>${contactosExtra.map(contactoExtraHtml).join("")}` : ""}
   </div>
   <div class="sec">
-    ${h2("Ejecutivo y Condiciones")}
+    ${h2("Ejecutivo")}
     <div class="grid grid-3">
       ${campo("Ejecutivo", cot.ejecutivo)}
       ${campo("Fono Ejecutivo", cot.ejecutivo_fono)}
       ${campo("Email Ejecutivo", cot.ejecutivo_email)}
-      ${campo("Condición", cot.condicion)}
-      ${campo("Emisión", fecha(cot.fecha_emision))}
-      ${campo("Válido hasta", fecha(cot.fecha_valido_hasta))}
     </div>
     ${cot.glosa ? `<div class="grid" style="margin-top:2mm"><div class="f" style="grid-column: 1 / -1"><span class="l">Glosa</span><span class="v">${esc(cot.glosa)}</span></div></div>` : ""}
   </div>
@@ -256,6 +254,11 @@ export function generarHtmlCotizacion(cot, opciones) {
     <div class="pie-tabla">
       <div class="legales">
         ${CONDICIONES_COTIZACION.map((t) => `<p>${esc(t)}</p>`).join("")}
+        <div class="grid cond-pie">
+          ${campo("Condición", cot.condicion)}
+          ${campo("Emisión", fecha(cot.fecha_emision))}
+          ${campo("Válido hasta", fecha(cot.fecha_valido_hasta))}
+        </div>
       </div>
       <div class="totales">
         <div class="fila"><span>Neto:</span><span>${clp(neto)} CLP</span></div>
@@ -267,7 +270,7 @@ export function generarHtmlCotizacion(cot, opciones) {
 
   <div class="sec bancarios">
     <b>Datos Bancarios:</b> ${esc(DATOS_BANCARIOS.tipoCuenta)} del ${esc(DATOS_BANCARIOS.banco)}, N° ${esc(DATOS_BANCARIOS.numero)}
-    a nombre de ${esc(DATOS_BANCARIOS.titular)}; Email: ${esc(EMPRESA.email)}; RUT ${esc(EMPRESA_RUT)}
+    a nombre de ${esc(DATOS_BANCARIOS.titular)}<br>Email: ${esc(EMPRESA.email)}; RUT ${esc(EMPRESA_RUT)}
   </div>
 
   </div>

@@ -1,5 +1,13 @@
 export const toUpper = (v) => (v || "").toUpperCase();
 
+// Solo para mostrar: el técnico se guarda en mayúsculas (mismo criterio que
+// el resto del campo), pero en pantalla/PDF se muestra Nombre Apellido con
+// cada palabra capitalizada.
+export const capitalizarNombre = (v) =>
+  (v || "")
+    .toLowerCase()
+    .replace(/(^|\s)([a-záéíóúñ])/g, (_, sep, letra) => sep + letra.toUpperCase());
+
 // Aplica transformación (mayúsculas + regex opcional) directamente en el input
 // y restaura el caret para evitar que React lo mueva al final.
 export const upperInput = (e, regex) => {
