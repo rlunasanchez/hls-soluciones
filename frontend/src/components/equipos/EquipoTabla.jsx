@@ -6,7 +6,6 @@ function EquipoTabla({ equipos, onVer, onEditar, onEliminar }) {
       <table>
         <thead>
           <tr>
-            <th>Código</th>
             <th>Equipo</th>
             <th>Marca</th>
             <th>Modelo</th>
@@ -16,9 +15,6 @@ function EquipoTabla({ equipos, onVer, onEditar, onEliminar }) {
         <tbody>
           {equipos.map((eq) => (
             <tr key={eq.id}>
-              <td data-label="Código">
-                <span style={{ fontWeight: '600', color: 'var(--primary)' }}>{eq.codigo || '-'}</span>
-              </td>
               <td data-label="Equipo">{eq.equipo}</td>
               <td data-label="Marca">{eq.marca}</td>
               <td data-label="Modelo">{eq.modelo}</td>

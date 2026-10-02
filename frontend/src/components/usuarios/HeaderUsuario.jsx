@@ -1,4 +1,4 @@
-import { Users, Home, Package, ClipboardList, FileText, FileSpreadsheet, ShoppingCart, LogOut } from "lucide-react";
+import { Users, Home, Package, Contact, MapPin, ClipboardList, FileText, FileSpreadsheet, ShoppingCart, LogOut } from "lucide-react";
 
 function HeaderUsuario({ navigate, onLogout, rol }) {
   return (
@@ -12,6 +12,12 @@ function HeaderUsuario({ navigate, onLogout, rol }) {
         </button>
         <button onClick={() => navigate("/clientes")} className="logout-btn" style={{ background: 'var(--primary)', color: 'white' }}>
           <Users size={18} /><span className="btn-label">Clientes</span>
+        </button>
+        <button onClick={() => navigate("/contactos")} className="logout-btn" style={{ background: '#7C3AED', color: 'white' }}>
+          <Contact size={18} /><span className="btn-label">Contactos</span>
+        </button>
+        <button onClick={() => navigate("/direcciones")} className="logout-btn" style={{ background: '#0891B2', color: 'white' }}>
+          <MapPin size={18} /><span className="btn-label">Direcciones</span>
         </button>
         <button onClick={() => navigate("/equipos")} className="logout-btn" style={{ background: 'var(--success)', color: 'white' }}>
           <Package size={18} /><span className="btn-label">Equipos</span>

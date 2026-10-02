@@ -1,5 +1,332 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-10-02 (solo local — no subido a GitHub ni a la nube)
+
+### v2.156: Cliente con varios contactos y direcciones, check "En la OT", OT según boceto y componentes compartidos
+
+**Base:** rama local `vinculos-sobre-origin-main`, que parte de `origin/main` (v2.138, el diseño de la nube) y le suma los mantenedores independientes de Contactos y Direcciones que estaban en el `main` local (v2.147–v2.155). Sin commit; el `main` local y `deploy/cloud` no se tocaron. Para seguir desde otro PC ver `CONTINUAR_EN_OTRO_PC.md`.
+
+#### Cómo funciona (decisiones de diseño)
+
+- **Cliente = empresa o persona.** Guarda sus datos propios: razón social, RUT, fono, email, dirección, ciudad y comuna. La dirección/ciudad/comuna propias **no se usan en la OT**. El cliente **no tiene** contacto ni dirección "principal".
+- **Contactos y Direcciones son catálogos** (mantenedores propios). Un cliente puede tener muchos de cada uno, y uno solo puede estar en varios clientes (relación muchos a muchos). Crear uno que ya existe **no da error**: se reutiliza el existente.
+- **Check "En la OT"** (en la ficha del cliente, uno por tabla): indica qué contacto y qué dirección se llevan a la OT. Es de **un solo uso**: al presionar "OT" en el cliente (o guardar "Editar completo" desde la OT) los datos viajan y los checks se desmarcan. **Sin marca no viaja nada**; ni siquiera el contacto único.
+- **OT desde cero:** al buscar un cliente solo se llevan sus datos (razón social, RUT, fono, email). El contacto y la dirección se eligen con "Buscar Contacto" y "Buscar Dirección" (primero lo del cliente, luego el catálogo). Cambiarlos vale **solo para esa OT**, nunca modifica al cliente.
+- **Volver a elegir el cliente** en una OT limpia contacto y dirección (se eligen de nuevo).
+- **Desde la OT:** `Editar completo` (ficha de 3 columnas con checks) y `Editar` (solo datos del cliente). Si en `Editar completo` cambia el marcado, la OT toma el nuevo contacto/dirección; si no cambia, la OT no se toca. Al contacto y a la dirección de la OT se les puede hacer `Editar` (si existen en su mantenedor) o `Registrar` (si se escribieron a mano).
+- Se ocultan en la OT "Otros Contactos" y "Otras Direcciones" (el código queda con `{false && ...}`; las OT antiguas conservan esos datos).
+- **Códigos** (`CL-`, `CO-`, `DI-`, `EQ-`): se siguen generando y guardando, pero **no se muestran** en Clientes, Contactos, Direcciones ni Equipos.
+
+#### Base de datos (MySQL)
+
+Tablas **nuevas**, ya incluidas en `backend/crear_tablas.sql` y en `backend/migracion_2026-10-01_cliente_vinculos.sql`:
+
+| Tabla | Columnas | Notas |
+|---|---|---|
+| `cliente_contactos` | `cliente_id`, `contacto_id`, `orden`, `a_ot`, `fecha_creacion` | PK (`cliente_id`,`contacto_id`); FK con `ON DELETE CASCADE` a `clientes` y `contactos` |
+| `cliente_direcciones` | `cliente_id`, `direccion_id`, `orden`, `a_ot`, `fecha_creacion` | PK (`cliente_id`,`direccion_id`); FK con `ON DELETE CASCADE` a `clientes` y `direcciones` |
+
+- `a_ot` (TINYINT): 1 = marcado "En la OT". `orden`: posición en la lista del cliente.
+- Quitar un contacto/dirección de un cliente solo borra la fila de vínculo; no los elimina del mantenedor.
+- Sin migración de datos: las tablas nacen vacías y los vínculos se hacen desde la ficha del cliente.
+- Una base creada desde cero usa solo `crear_tablas.sql`. Una base con el esquema antiguo (`clientes_contactos`, `clientes_direcciones`, columnas `contacto_*` en `clientes`) necesita antes `migracion_2026-09-25_contactos_direcciones.sql`.
+
+#### Backend
+
+- `routes/clientes.js`:
+  - `GET /api/clientes` y `GET /api/clientes/:id` agregan los campos que lee la OT del diseño de la nube, armados desde los vínculos: `contacto_nombre/email/fono/cargo` (el marcado), `contactos` y `direcciones` (texto con `;;` y `|`) y `ot_direccion/ot_ciudad/ot_comuna` (la dirección marcada). `direccion/ciudad/comuna` son los datos propios del cliente y no se pisan.
+  - `GET|POST /api/clientes/:id/(contactos|direcciones)` y `DELETE .../:refId`: listar, vincular y desvincular.
+  - `POST /api/clientes/:id/limpiar-a-ot`: desmarca los checks (un solo uso).
+  - `POST` y `PUT` aceptan `contacto_ids`, `direccion_ids`, `contacto_a_ot_id`, `direccion_a_ot_id`; también las listas del formato de la nube (`contacto_nombre` + `contactos[]` + `direcciones[]`), que se convierten en altas/reutilizaciones en los mantenedores. Un `PUT` sin esos campos no toca los vínculos.
+  - Guardar un cliente ya **no reescribe la dirección** de sus OT (solo razón social, RUT, fono y email).
+- `routes/contactos.js` y `routes/direcciones.js`: `POST` acepta `reutilizar: true` y devuelve el registro existente en vez de error 400 por duplicado (el mantenedor propio sigue estricto); el alta devuelve también el `id`.
+
+#### Frontend
+
+- **Ficha de cliente** (`ClienteFormulario.jsx`): 3 columnas — Empresa o Persona | Contactos | Direcciones. Orden de la primera columna: RUT, razón social, fono, email, dirección, ciudad y comuna. Tablas numeradas (N°) con check "En la OT", `Editar` y una X que pide confirmar ("¿Realmente desea quitarlo?"). Modo `soloCliente` (sin tablas).
+- **Lista de clientes:** solo razón social, RUT, teléfono y email; encabezados con la primera letra en mayúscula.
+- **OT** (`OrdenFormCliente.jsx`, `OrdenTrabajo.jsx`): vuelve al diseño de la nube (dos columnas, sin pestañas) con el área del cliente reordenada según boceto: búsqueda de cliente + `Editar completo`/`Editar`; recuadro "Datos del cliente"; "Buscar Contacto" y "Buscar Dirección" lado a lado; recuadros "Datos del contacto" y "Datos de la dirección". Los tres buscadores se vacían tras elegir.
+- **Piezas compartidas nuevas (reutilización):**
+  - `components/comunes/CampoCatalogo.jsx`: buscador de contacto/dirección con `Editar`/`Registrar` (OT) o para vincular (ficha del cliente).
+  - `components/comunes/ModalEditarCatalogo.jsx`, `BotonQuitar.jsx`, `AccionesFicha.jsx`.
+  - `hooks/useBusquedaApi.js`, `hooks/useGuardar.js`.
+  - `styles/botones.css` (una sola definición de los botones `cf-`, `cof-`, `dif-`, `of-` y de los botones mini: mismo tamaño, naranja = editar, verde = crear) y `styles/campo-catalogo.css`.
+- `OrdenFormCliente.jsx` pasó de 2.226 a ~1.760 líneas.
+
+#### Archivos
+
+- **Nuevos:** `backend/migracion_2026-10-01_cliente_vinculos.sql`, `CONTINUAR_EN_OTRO_PC.md`, `frontend/src/components/clientes/VinculosCliente.jsx`, `frontend/src/components/comunes/*`, `frontend/src/hooks/useBusquedaApi.js`, `useGuardar.js`, `frontend/src/styles/botones.css`, `campo-catalogo.css`.
+- **Modificados:** `backend/routes/clientes.js`, `contactos.js`, `direcciones.js`, `backend/crear_tablas.sql`; `ClienteFormulario.jsx`, `ClienteLista.jsx`, `OrdenFormCliente.jsx`, `OrdenTrabajo.jsx`, `ContactoFormulario/Tabla/Card.jsx`, `DireccionFormulario/Tabla/Card.jsx`, `EquipoFormulario/Tabla/Card.jsx`, `Cotizaciones.jsx` (solo búsqueda y reutilización), y los CSS `Clientes.css`, `Contactos.css`, `Direcciones.css`, `OrdenTrabajo.css`.
+- **Eliminado:** `ModalContactos.jsx` (los contactos ya no viven dentro de la ficha del cliente).
+
+#### Verificación
+
+- Backend: 8 grupos de pruebas contra MySQL con datos temporales (se borraron al terminar): vínculos, reutilización de duplicados, checks de un solo uso, direcciones propias vs. de la OT.
+- Frontend: `vite build` sin errores; revisión de variables sin definir; simulación en un navegador de prueba (jsdom) de la OT y de la ficha del cliente.
+- **No verificado:** el aspecto visual en pantalla (espacios, tamaños, colores).
+
+#### Pendiente
+
+- **Cotizaciones** conserva la versión del `main` local (con la búsqueda nueva); falta adaptarla a los checks, a los botones `Editar`/`Registrar` y al diseño de la nube.
+- **Informes** y **Orden de Compra** siguen siendo páginas vacías.
+- La rama `deploy/cloud` (PostgreSQL) no tiene nada de esto: las tablas nuevas habría que crearlas también en Neon antes de desplegar.
+
+---
+
+## Fecha: 2026-09-25 (solo local, no pusheado — ver nota al final)
+
+### v2.147: Mantenedores independientes de Contactos y Direcciones
+
+**Cambio de fondo:** hasta ahora el contacto y la dirección de un cliente vivían embebidos dentro de la ficha de Cliente (`clientes_contactos`/`clientes_direcciones`, sin ID estable — se borraban y reinsertaban enteras al guardar, causa raíz de bugs de "se desvincula al renombrar"). Ahora son catálogos globales propios, con el mismo criterio que ya existía para Equipos: sin FK a Cliente, se buscan y se "llaman" (copian) desde la OT, no se referencian en vivo.
+
+**Nuevo — Backend:**
+- `backend/routes/contactos.js` y `backend/routes/direcciones.js`: CRUD completo (`GET /?q=`, `GET /:id`, `POST`, `PUT`, `DELETE`), con código autogenerado `CO-0001`/`DI-0001` y detección de duplicados (si ya existe, se devuelve el existente en vez de crear otro).
+- Tablas nuevas `contactos` (nombre, email, fono, cargo) y `direcciones` (direccion, ciudad, comuna — **sin** fono: el teléfono es del contacto, no de la dirección) en `backend/crear_tablas.sql` y creadas en el MySQL local.
+- Columnas nuevas para enlazar por ID (en vez de por texto) en `ordenes_trabajo` y `cotizaciones`: `contacto_id`, `contacto_direccion`, `contacto_ciudad`, `contacto_comuna`, `direccion_id`, `cliente_direccion_id`.
+- `server.js`: registradas las rutas `/api/contactos` y `/api/direcciones`.
+
+**Nuevo — Frontend:**
+- Mantenedores completos `pages/Contactos.jsx` y `pages/Direcciones.jsx` (calco de Equipos): `components/contactos/*`, `components/direcciones/*`, `styles/Contactos.css`, `styles/Direcciones.css`.
+- Botones de navegación agregados en todos los headers (`HeaderCliente`, `HeaderEquipo`, `HeaderUsuario`, `HeaderContacto`, `OrdenTrabajo`, `Cotizaciones`, `OrdenCompra`, `Informes`) y en `Home.jsx`, justo después de "Clientes".
+
+**Integración en la OT (`OrdenFormCliente.jsx`) y en Cotización (`Cotizaciones.jsx`, implementación duplicada propia):**
+- El contacto y la dirección del cliente ("la primera dirección"), el contacto principal, y cada dirección/contacto dentro de "Otros Contactos" ahora tienen su propio buscador ("Buscar Contacto"/"Buscar Dirección") contra el catálogo global, con botón **Registrar** (si es nuevo) o **Editar** (si ya está enlazado, abre un modal con el mantenedor real).
+- Si se registra un nombre/dirección que ya existe, en vez de mostrar error se busca y enlaza automáticamente (evita el "ya existe" sin poder asociarlo).
+- "Otros Contactos" ahora permite además buscar/asociar una dirección propia por cada contacto adicional (antes no existía esa posibilidad).
+
+**Riesgo de datos evitado:** las columnas y tablas viejas (`clientes_contactos`, `clientes_direcciones`, `clientes.contacto_*`, `clientes.direccion/ciudad/comuna`) **no se tocaron ni se borraron** — quedan intactas para no perder historial, aunque el flujo nuevo ya no las alimenta desde la OT/Cliente (ver sección de limpieza pendiente).
+
+### v2.148: Cliente simplificado — ya no se ingresan Contacto ni Dirección ahí
+
+**Cambio:** `ClienteFormulario.jsx` deja de mostrar "Datos del Contacto" y "Dirección/Ciudad/Comuna" — esos datos ahora se buscan/registran desde la OT contra los catálogos globales (v2.147). El campo RUT ahora aparece **antes** de Razón Social, y Fono+Email quedaron en una sola línea (antes cada uno en su fila).
+
+**Cómo se hizo sin perder datos:** los campos de Dirección/Ciudad/Comuna se dejaron en el estado del formulario pero **ocultos** (`style={{display:'none'}}`, mismo truco que ya existía para "Giro") — así un cliente viejo que edita otro campo no pierde su dirección guardada, solo que ya no se ve ni se edita ahí.
+
+**Archivos:** `frontend/src/components/clientes/ClienteFormulario.jsx`, `frontend/src/styles/Clientes.css` (`.cf-grid` a una columna, `.cf-wrap` angostado a 480px).
+
+### v2.149: Orden de Trabajo — rediseño en pestañas
+
+**Motivo:** el formulario de la OT mostraba todo junto en dos columnas; con la llegada de Contactos/Direcciones como catálogos propios, la sección de cliente se volvió demasiado larga. Se pidió dividir en "ventanas" — mismo formulario y mismo estado, solo que se muestra de una sección a la vez.
+
+**Estructura nueva (`pages/OrdenTrabajo.jsx` + `components/ordenes/OrdenFormCliente.jsx`):**
+- Arriba se mantiene igual: título "Nueva Orden"/técnico y `OrdenFormDatos` (fecha, checks de ingreso/término/entrega/compra, garantía).
+- Debajo, una barra de 6 pestañas (`seccionOT`, estado en `OrdenTrabajo.jsx`): **Datos de Cliente** · **Contacto y Dirección** · **Otros Contactos** · **Adjuntos e Info. Interna** · **Datos del Equipo** · **Avería / Informe Técnico**.
+- Solo se muestra la sección activa (`display:none` en las demás — no se desmonta, así no se pierde nada al cambiar de pestaña).
+- El contenedor se centra en un ancho fijo de 720px (antes eran 2 columnas de ~700px cada una mostrándose siempre juntas).
+
+**⚠️ Importante — asimetría con Cotización:** este rediseño en pestañas **solo se hizo en la OT**. `Cotizaciones.jsx` tiene su propia implementación duplicada de toda la sección de Cliente/Contacto/Dirección/Otros Contactos y **sigue en el formato viejo de 2 columnas sin pestañas**. Si se decide llevar el mismo rediseño a Cotización, hay que repetir el trabajo ahí (no comparten componente).
+
+**Colores unificados:** las 6 secciones (antes algunas usaban `of-sec muted` gris y otras `of-sec primary` celeste) ahora todas usan el mismo esquema celeste/verde (`of-sec primary` + `of-st success`), incluyendo Avería/Informe Técnico/Observaciones que antes eran grises.
+
+### v2.150: Ajustes de consistencia visual en la OT
+
+- Los 7 buscadores de la OT (Cliente, Contacto, Dirección ×3, Modelo, y el buscador dentro de "Otros Contactos") ahora comparten exactamente el mismo estilo: mismo tamaño de letra/ícono en la etiqueta, mismo alto de input (`padding`/`border`/`fontSize`/`line-height` explícitos, ya no dependen de qué clase CSS gane la pulseada), y el mismo fondo celeste (`#E0F2FE`) cuando ya hay algo enlazado al catálogo (antes solo "Buscar Cliente" y "Buscar Modelo" lo tenían).
+- Se agregaron pequeños espaciadores en "Contacto"/"Fono Contacto" (13px) para alinear su input con el de "Buscar Contacto" (que quedó con etiqueta más grande y por eso más alto que sus vecinos de fila).
+- Se sacaron los títulos redundantes "Datos del Cliente"/"Datos del Equipo"/"Contacto y Dirección" de dentro de cada tarjeta (esa info ya está en el botón de la pestaña).
+- Fix de un bug introducido por el propio rediseño: la tarjeta celeste de "Datos de Cliente" envolvía también a "Contacto y Dirección" y "Otros Contactos", pero solo su contenido interno se ocultaba al cambiar de pestaña — quedaba una franja celeste vacía flotando en Adjuntos/Equipo/Avería.
+
+**Archivos:** `frontend/src/components/ordenes/OrdenFormCliente.jsx`, `OrdenFormEquipo.jsx`, `OrdenFormAveria.jsx`, `frontend/src/pages/OrdenTrabajo.jsx`, `frontend/src/styles/OrdenTrabajo.css` (clases nuevas `.of-tabs`/`.of-tab`).
+
+---
+
+### v2.151: Limpieza de basura post-Contactos/Direcciones (confirmado: todo descartado)
+
+**Borrado en base de datos (MySQL local, sin datos históricos en riesgo — se verificó 0 filas antes de borrar):**
+- Tablas `clientes_contactos` y `clientes_direcciones` (el modelo viejo de contacto/sucursal embebido en Cliente).
+- Columnas `clientes.contacto_nombre/email/fono/cargo/direccion/ciudad/comuna` (las 7 del contacto embebido — **no** se tocaron `clientes.direccion/ciudad/comuna`, que son la dirección propia del cliente y siguen vivas).
+- `crear_tablas.sql` actualizado para que un setup nuevo ya no las cree.
+
+**🐛 Bug real encontrado y corregido en el camino:** `backend/routes/clientes.js` propagaba `contacto_nombre/email/fono/cargo` a **todas las OT de ese cliente** (`UPDATE ordenes_trabajo ... WHERE cliente_id = ?`) cada vez que se guardaba una edición de Cliente. Como `ClienteFormulario.jsx` ya no envía esos campos (v2.148), cada edición de cliente estaba **borrando el contacto de sus OT en silencio**. Se sacó esa propagación — el Contacto de una OT ya no depende de Cliente, así que no corresponde pisarlo desde ahí.
+
+**Backend reescrito (`clientes.js`):** ya no arma `contactos`/`direcciones` con subqueries `GROUP_CONCAT` sobre las tablas borradas; `GET/POST/PUT` quedan con solo los campos propios del cliente.
+
+**Frontend — código muerto borrado:**
+- Bloque `{false && (...)}` completo de "Otras Direcciones / Sucursales" en `OrdenFormCliente.jsx` (~340 líneas) + sus estados (`mostrarDireccionesExtra`, `direccionesResumenAbierto`, `direccionesManualVisibles`, `direccionEnFocoRef`).
+- La sección "Sucursales/Direcciones" completa en `ClienteFormulario.jsx` (estado `sucursales` y todo su CRUD local, la carga desde `clienteEditando.direcciones`, y el envío de `direcciones` en el submit) — la razón por la que estaba oculta ("ya está en Contactos adicionales") ya no aplicaba, así que se retiró del todo en vez de dejarla oculta.
+- La lógica de reconciliación por nombre en `guardarEdicionCliente` (`OrdenFormCliente.jsx`, ~130 líneas) que sincronizaba el Contacto/Otros Contactos de la OT contra `cliente.contactos`/`contacto_nombre` — ya no tiene sentido con Contacto viviendo en su propio catálogo con ID estable.
+- Los `cliente.contacto_nombre/fono/email/cargo` que se seguían leyendo para auto-completar el Contacto de la OT al elegir un cliente, en **`OrdenTrabajo.jsx`** (3 puntos en `seleccionarCliente` + 1 en la carga por navegación) y **`Cotizaciones.jsx`** (2 puntos). *(Los usos de `contacto_nombre` sobre `cotizacion`/`orden` — el contacto propio guardado en esa OT/Cotización — no se tocaron, son un campo distinto y siguen vivos.)*
+- Clase CSS `.of-contacto-grid` (`ordenes-componentes.css`) y ~10 clases CSS sin uso en `Clientes.css` (`.cf-sec-suc`, `.cf-sh*`, `.cf-btn-toggle-suc`, `.cf-sc*`, `.cf-m0`, `.cf-mb`, `.contactos-adicionales`, `.contacto-chip*`, `.modal-contacto-detalle*`, `.detalle-*`, `.modal-contacto-card/header/num/campos` — todo del viejo `ModalContactos.jsx`, ya eliminado).
+
+**Verificación:** `npm run build` OK después de cada paso; se revisó con grep que no quedara ninguna referencia colgante antes de borrar cada pieza.
+
+### v2.152: Ronda de ajustes finos post-limpieza (consistencia + reglas de negocio)
+
+**🐛 Bug: al guardar cambios en la OT volvía siempre a "Datos de Cliente".** `guardarOrden()` con "Guardar"/"Guardar Cambios" (`mantener=true`) recarga la orden llamando a `editarOrden()`, y esa función siempre resetea la pestaña activa a `'cliente'`. Ahora se guarda la pestaña en la que estaba el usuario antes de recargar y se restaura después — si guardó estando en "Avería", se queda en "Avería".
+
+**🐛 Bug: la tarjeta celeste de "Datos de Cliente" dejaba una franja vacía en otras pestañas.** Ya estaba parcialmente arreglado en v2.150, pero la primera corrección fue demasiado estricta y hacía desaparecer "Contacto y Dirección" y "Otros Contactos" también. Quedó bien: ese div externo se oculta solo cuando la pestaña activa es alguna *fuera* del grupo Cliente/Contacto/Otros Contactos.
+
+**Consistencia visual de los 7 buscadores de la OT** (Cliente, Contacto, Dirección ×3, Modelo, buscador de "Otros Contactos"): se comparó cada uno contra "Buscar y Seleccionar Cliente" como referencia y se corrigieron las diferencias reales que quedaban:
+- Las etiquetas de "Buscar Contacto"/"Buscar Dirección" heredaban `font-size:9px` + mayúsculas de la clase `.of-f label` (por estar dentro de un contenedor `.of-f`) — se les puso estilo explícito idéntico al de "Buscar Cliente" (tamaño, color, ícono).
+- Los inputs de esos mismos buscadores no tenían `padding`/`border`/`fontSize`/`line-height`/`box-sizing` explícitos, dependiendo de qué clase CSS ganara la pulseada — se explicitaron los 7 para que el alto sea idéntico al de un input normal, sin ambigüedad.
+- El fondo celeste (`#E0F2FE`) que indica "ya enlazado al catálogo" solo lo tenían "Buscar Cliente" y "Buscar Modelo" — se extendió a los 7.
+- Se agregó un espaciador de 13px en "Contacto"/"Fono Contacto" para que su input calce con el de "Buscar Contacto" (que quedó con etiqueta más grande que sus vecinos de fila).
+
+**🐛 Bug: la fila de "Otros Contactos" (Nombre/Email/Fono/Cargo) quedó forzada a 4 columnas en una sola línea**, muy angosta — arrastre de un ajuste de ancho de sesiones anteriores. Se volvió a 2×2 (Contacto+Email / Fono+Cargo), dejando más espacio a los botones Editar/Registrar/Quitar que van junto a Cargo. (Cotizaciones.jsx no se vio afectado, nunca tuvo ese grid forzado.)
+
+**Reglas mínimas antes de "Registrar" en un catálogo** (se creaban registros con una sola letra):
+- Dirección: mínimo 5 caracteres.
+- Contacto: mínimo 3 caracteres en el nombre.
+- Equipo: ahora solo el campo "Equipo" es obligatorio (mínimo 2 caracteres) — Marca y Modelo quedaron opcionales, tanto en el mantenedor como al registrar desde la OT.
+- Aplicado en los 3 niveles de cada uno: el buscador (OT/Cotización), el mantenedor propio, y el backend como respaldo.
+
+**Duplicados de Dirección: detección más laxa.** Antes exigía que Dirección **+ Ciudad + Comuna** coincidieran exactamente para enlazar en vez de crear otra; ahora alcanza con que el texto de la Dirección sea igual (ciudad/comuna pueden venir vacías o distintas en esa carga puntual).
+
+**Aviso de "parecidos" antes de crear.** Al tocar "Registrar" en Contacto, Dirección o Equipo, si hay coincidencias *parecidas* (no exactas — esas ya se enlazan solas) se muestra un `confirm()` con la lista y se puede cancelar para ir a elegir uno del buscador en vez de crear un duplicado con otro nombre/dirección.
+
+**Verificación:** `npm run build` OK después de cada cambio.
+
+**⚠️ Nada de esto se subió a git ni se pusheó** (branches `main`/`deploy/cloud` intactos) — todo el trabajo de contactos/direcciones/pestañas/limpieza/ajustes de esta sesión vive solo en el checkout local y solo en MySQL local. Antes de deployar hace falta: portar `contactos.js`/`direcciones.js` a sintaxis Postgres, correr el `CREATE TABLE`/`ALTER TABLE`/`DROP` equivalente en Neon, y decidir si el rediseño en pestañas de la OT también se lleva a Cotización (sigue pendiente, ver v2.149).
+
+### v2.153: Datos del Equipo y Otros Contactos — tamaños/alineación, y regla global "el buscador es solo buscador"
+
+**🐛 Bug: botones de Equipo con tamaño y alineación distinta al resto.** En `OrdenFormEquipo.jsx`, "Registrar"/"Editar" vivían en una columna de un grid de 3 (`.of-r3`), y al no tener `justify-self` se estiraban para llenar toda la columna (mucho más anchos que los mismos botones en Cliente/Contacto/Dirección, que viven en filas `flex`). Además el label estaba adentro del mismo bloque que el input, así que alinear por `alignSelf:'end'` no calzaba con la fila real del input. Se restructuró para que "Buscar por Modelo" siga el mismo patrón que el resto: label en su propia línea, y el input + el botón como hermanos directos en un `flex` con `alignItems:'center'` — misma jerarquía que ya usan Dirección/Contacto, mismo resultado visual.
+
+**🐛 Bug: en Datos del Equipo aparecían "Registrar" y "Editar" a la vez.** Estaban condicionados por `&&` independientes en vez de un `if/else` — cuando el equipo ya existía en el mantenedor, se mostraban los dos botones juntos. Ahora es mutuamente excluyente: Editar si ya existe, Registrar si no.
+
+**Otros Contactos — la dirección de cada contacto ahora se puede quitar por separado.** Antes solo tenía Registrar/Editar; se agregó un botón "Quitar" propio para la dirección de esa fila (limpia `direccion/ciudad/comuna/direccionId` sin tocar el resto del contacto). Y al revés: si se quita el *contacto* de una fila que ya tiene una dirección enlazada, la dirección **ya no se borra** — solo se limpian nombre/email/fono/cargo/contactoId, la fila y su dirección quedan. Si la fila no tenía dirección, "Quitar" sigue eliminando la fila entera como antes.
+
+**🐛 Bug: el buscador de dirección de "Otros Contactos" mostraba la dirección de otra fila.** `busquedaDireccionExtra` es un solo estado compartido por todas las filas (no uno por fila). Al agregar un contacto nuevo, agregar una fila manual, o cambiar de fila desde el resumen, no se limpiaba — quedaba mostrando texto de la fila anterior aunque la fila actual no tuviera ninguna dirección elegida. Ahora se limpia en los tres casos.
+
+**Botones de "Otros Contactos" normalizados y reubicados.** Editar/Registrar/Quitar del contacto (antes con fondo tenue y borde, tamaño distinto al resto) pasaron al mismo estilo sólido compacto que ya usa toda la OT, y se movieron junto al buscador de arriba ("Buscar un contacto existente para agregarlo"), aplicándose a la fila actualmente activa — en vez de vivir pegados al campo Cargo de cada fila, donde achicaban ese input.
+
+**Anchos de input parejos con el resto de la OT.** Los inputs de Contacto/Email/Fono/Cargo en cada fila de "Otros Contactos" quedaron al 66% de su columna (≈33% del ancho total, igual que el resto de los campos de la OT) — antes ocupaban el 100% de su columna en la grilla de 2, más grandes que en cualquier otra sección.
+
+**Cambio de criterio (aplicado a todos los buscadores de la OT, sin excepción): "el buscador es solo buscador".** Hasta ahora, al elegir algo del dropdown, el input de búsqueda se quedaba mostrando el texto elegido (con fondo celeste). Se decidió que el buscador debe quedar siempre vacío después de elegir — listo para una nueva búsqueda — y que el fondo celeste (`#E0F2FE`) siga siendo el único indicador de "hay algo enlazado" (ese fondo ya dependía del ID, no del texto, así que no hubo que tocarlo, solo dejar de rellenar el texto). Aplicado en Buscar Cliente, Buscar Contacto, Buscar Dirección (×2), Buscar por Modelo, y los dos buscadores de "Otros Contactos". Se encontraron y limpiaron además ~9 puntos en `editarOrden`/`verOrden` (`OrdenTrabajo.jsx`) que repoblaban "Buscar Cliente" con la razón social cada vez que se abría una OT guardada para editar/ver — por eso el nombre seguía viéndose en el buscador aunque la selección desde el dropdown ya estuviera arreglada.
+
+**Se sacaron los badges "✓ Seleccionado"** que quedaban junto al buscador de Cliente (en las dos variantes: cliente fijo/badge y cliente buscado) — redundantes con el criterio anterior; se mantiene la advertencia "⚠️ Cliente desactivado" porque es información que sí hace falta.
+
+**Se quitó el botón "Ver" (ícono de ojo) en Datos de Cliente y Datos del Equipo**, junto con sus modales de detalle de solo lectura y el código que ya no se usaba (`mostrarDetalleCliente`/`mostrarDetalleEquipo`, el snapshot de equipo que solo alimentaba ese modal, el import de `Eye` en `OrdenFormEquipo.jsx`).
+
+**Decisión de negocio (sin cambio de código): qué debe estar registrado en el mantenedor para guardar una OT.** Se revisó y quedó así a propósito: **Cliente** sigue siendo obligatorio (debe existir en el mantenedor de Clientes, `guardarOrden()` lo valida) porque es la entidad sobre la que se organiza el negocio (reportes, historial, facturación). **Contacto, Dirección, Otros Contactos y Equipo** siguen sin esa exigencia — se pueden escribir a mano y guardar la OT sin registrarlos, porque son datos de apoyo de esa OT puntual, no algo que el negocio necesite agrupar como unidad.
+
+**Archivos:** `frontend/src/components/ordenes/OrdenFormEquipo.jsx`, `OrdenFormCliente.jsx`, `frontend/src/pages/OrdenTrabajo.jsx`.
+
+**Verificación:** `npm run build` OK después de cada cambio.
+
+**⚠️ Igual que v2.152: nada de esto está subido a git ni pusheado.**
+
+### v2.154: Otros Contactos — reusar la fila vacía en vez de crear una nueva
+
+**🐛 Bug: al quitar el contacto de una fila (queda solo con dirección), buscar uno nuevo creaba otra fila en vez de completar esa misma.** `agregarContactoDesdeBusqueda` siempre agregaba al final del array. Ahora, si la fila activa (la que está expandida) no tiene nombre, se completa esa misma fila en vez de crear una nueva — no vuelve a asignar la dirección que ya tenía.
+
+**Se dejó de mostrar la grilla vacía de Nombre/Email/Fono/Cargo cuando la fila no tiene contacto.** En su lugar, esa fila muestra su propio "Buscar Contacto" (mismo patrón que "Buscar Dirección" ya tenía: label + input + dropdown), para elegir el contacto ahí mismo sin tener que ir al buscador de arriba. El buscador de arriba ("Buscar un contacto existente para agregarlo...") queda reservado para agregar una fila completamente nueva — se oculta mientras la fila activa está en este estado "solo dirección", para no tener dos buscadores iguales visibles a la vez.
+
+**Verificado (sin cambio de código):** en el PDF de la OT (`ordenServicioDoc.js`) ya estaba implementado que "Datos de Cliente" siempre muestra Dirección/Ciudad-Comuna del cliente, y la sección "Contacto" solo muestra la Dirección/Ciudad-Comuna del contacto si es distinta a la del cliente (comparación normalizada, sin mayúsculas/espacios) — evita repetir la misma dirección dos veces. "Otros Contactos" no se tocó, sigue mostrando su dirección inline siempre.
+
+**Archivo:** `frontend/src/components/ordenes/OrdenFormCliente.jsx`.
+
+**Verificación:** `npm run build` OK.
+
+**⚠️ Igual que v2.152/v2.153: nada de esto está subido a git ni pusheado.**
+
+### v2.155: Otros Contactos — "Buscar Contacto" pasa a ser permanente en la fila (ajusta v2.154)
+
+**Cambio sobre lo hecho en v2.154:** ahí "Buscar Contacto" dentro de la fila solo aparecía mientras la fila no tenía contacto (se ocultaba al elegir uno, mostrando solo la grilla Nombre/Email/Fono/Cargo). Ahora queda visible siempre que la fila esté expandida, tenga o no contacto ya asignado — mismo patrón que "Buscar Dirección" en esa misma fila, que ya funcionaba así. Se le movieron los botones Editar/Registrar/Quitar (antes vivían en el buscador de arriba).
+
+**El buscador de arriba ("Buscar un contacto existente para agregarlo...") ahora se oculta cada vez que hay una fila expandida**, no solo cuando esa fila está vacía — evita mostrar dos buscadores de contacto idénticos (mismo estado compartido) al mismo tiempo. Sus botones Editar/Registrar/Quitar, que ya no se iban a mostrar nunca en ese estado, se sacaron.
+
+**Color de fondo:** después de varias vueltas probando distintos criterios (celeste solo si hay contacto enlazado, gris fijo, etc.), quedó simple: fondo celeste fijo siempre en este buscador, sin condición.
+
+**Archivo:** `frontend/src/components/ordenes/OrdenFormCliente.jsx`.
+
+**Verificación:** `npm run build` OK.
+
+**⚠️ Igual que v2.152/v2.153/v2.154: nada de esto está subido a git ni pusheado.**
+
+**Nota post-push (2026-09-25):** todo lo de v2.147 a v2.155 se subió a `main` (no a `deploy/cloud`). Para replicar el esquema de MySQL en cualquier otra base (por ejemplo la de casa), correr `backend/migracion_2026-09-25_contactos_direcciones.sql` — crea las tablas `contactos`/`direcciones`, agrega las columnas `contacto_id`/`direccion_id`/etc. en `ordenes_trabajo` y `cotizaciones`, y borra `clientes_contactos`/`clientes_direcciones`/las 7 columnas `contacto_*` de `clientes`. Antes de deployar a `deploy/cloud` sigue faltando portar `contactos.js`/`direcciones.js` a sintaxis Postgres y correr el equivalente en Neon.
+
+---
+
+## Fecha: 2026-09-23
+
+### v2.144: Cotización PDF — recuadro de folio y datos bancarios
+
+**Cambios:** en el PDF de Cotización, el recuadro superior derecho ahora muestra solo "N° {folio}" (se sacó la palabra "Folio") con letra más grande (`7.5pt` → `12pt`); "HLS Soluciones E.I.R.L." se agrandó (`6.5pt` → `8pt`) y el RUT de la empresa quedó en negrita. El texto de "Datos Bancarios" al pie también se agrandó (`7.5pt` → `9pt`, igual al resto del documento).
+
+**Archivo:** `cotizacionDoc.js`.
+
+**Verificación:** `npm run build` OK.
+
+### v2.146: Cotización PDF — "Condición/Emisión/Válido hasta" movidos junto a "Total"
+
+**Cambio:** "Condición", "Emisión" y "Válido hasta" se sacaron de la sección "Ejecutivo y Condiciones" (que ahora se llama solo "Ejecutivo") y se movieron al pie de la tabla de ítems, al costado izquierdo, a la altura de "Total" — mismo estilo de etiqueta/valor que tenían antes, ahora en 3 columnas debajo del texto de condiciones legales.
+
+**Archivo:** `cotizacionDoc.js`.
+
+**Verificación:** `npm run build` OK.
+
+### v2.145: Cotización PDF — "Email" en su propia línea dentro de "Datos Bancarios"
+
+**Cambio:** se agregó un salto de línea antes de "Email:" en el texto de "Datos Bancarios", para que quede en su propia línea en vez de seguir corrido después del titular de la cuenta.
+
+**Archivo:** `cotizacionDoc.js`.
+
+**Verificación:** `npm run build` OK.
+
+### v2.143: Ciudad y Comuna del contacto principal se perdían al usar "Hacer principal"
+
+**Problema:** al promover un contacto adicional a principal (botón "Hacer principal" en "Editar Cliente"), su Ciudad y Comuna desaparecían tanto en la ficha del cliente como al reflejarse en la OT.
+
+**Causa:** la tabla `clientes` nunca tuvo columnas `contacto_ciudad`/`contacto_comuna` — el backend las descartaba en cada `POST`/`PUT` aunque el frontend (`ClienteFormulario.jsx`) sí las enviaba. No era un problema de la OT sino de guardado real en la base.
+
+**Solución:** se agregaron las columnas `contacto_ciudad` y `contacto_comuna` a `clientes` (local vía `ALTER TABLE`, y `crear_tablas.sql` para instalaciones nuevas) y se actualizó `backend/routes/clientes.js` (`POST`/`PUT`) para persistirlas. De paso, `armarContactos()` en `OrdenFormCliente.jsx` (que compara el cliente antes/después del guardado) ahora también arma esos dos campos para el principal, así que cuando el ex-principal baja a "Otros Contactos" de la OT ya no le hardcodea `ciudad`/`comuna` en vacío. También se agregaron Ciudad y Comuna al popup de detalle de "Otros Contactos" en `ClienteFormulario.jsx`, que no las mostraba.
+
+**Pendiente:** aplicar el mismo `ALTER TABLE` en Neon y el equivalente Postgres en la rama `deploy/cloud` antes de que este cambio llegue a producción (instrucciones abajo).
+
+**Archivos:** `backend/crear_tablas.sql`, `backend/routes/clientes.js`, `OrdenFormCliente.jsx`, `ClienteFormulario.jsx`.
+
+**Verificación:** `npm run build` OK. `ALTER TABLE` corrido en MySQL local.
+
+### v2.142: Editar Cliente — "Editar" sobre un contacto puntual permitía saltar a editar otros
+
+**Problema:** al pinchar "Editar" sobre "Contacto 2" en el popup de detalle, el modal de "Contactos Adicionales" abría la lista completa colapsada — había que volver a buscar el chip correcto, y de paso quedaba disponible editar "Contacto 3" u otros desde ahí, cuando la intención era editar solo el elegido.
+
+**Solución:** `ModalContactos.jsx` ahora acepta un prop `abrirIdx`; cuando viene seteado (se pasa desde `ClienteFormulario.jsx` al presionar "Editar"), el modal entra en un modo acotado a ese contacto: título "Editar Contacto N", sin el toggle/chips de los demás y sin "+ Agregar Contacto".
+
+**Archivos:** `ClienteFormulario.jsx`, `ModalContactos.jsx`.
+
+**Verificación:** `npm run build` OK.
+
+### v2.141: OT — "Otros Contactos" se desvinculaba al corregir una letra del nombre
+
+**Problema:** al editar un contacto adicional desde "Editar Cliente" (ej. corregir una letra del nombre) y guardar, ese contacto quedaba con el nombre viejo en la OT, desvinculado de la ficha del cliente (aparecía el botón "Registrar" como si no existiera en el cliente).
+
+**Causa:** la reconciliación de "Otros Contactos" de la OT (`guardarEdicionCliente`) buscaba el contacto editado por nombre exacto contra la lista fresca del cliente; si el nombre cambiaba aunque fuera una letra, no encontraba match y dejaba el contacto tal cual estaba antes (con el nombre viejo).
+
+**Solución:** se agregó un respaldo por posición (`contactosExtraAntes`/`contactosExtraDespues`), igual al que ya usan las direcciones extra, para que un cambio de nombre actualice el contacto en vez de dejarlo huérfano.
+
+**Archivo:** `OrdenFormCliente.jsx`.
+
+**Verificación:** `npm run build` OK.
+
+### v2.140: OT — "Buscar Contacto" con el mismo color que "Contacto" de al lado
+
+**Problema:** la etiqueta y el texto tipeado en "Buscar Contacto" se veían igual (mismo gris/negro) que el campo "Contacto" justo al lado, prestándose a confusión por el nombre similar.
+
+**Solución:** la etiqueta "Buscar Contacto" ahora se ve en `var(--primary)` (azul) y el texto que se escribe en el input en verde-teal `#0D9488` y negrita, bien diferenciados del resto de los campos.
+
+**Archivo:** `OrdenFormCliente.jsx`.
+
+**Verificación:** `npm run build` OK.
+
+### v2.139: OT — punto de color en "Adjunto" e "Información Interna" cuando tienen contenido
+
+**Cambio:** en el formulario de la OT, los encabezados colapsables "Adjunto" e "Información Interna" ahora muestran un punto de color junto al título cuando hay un archivo adjunto o texto cargado, para saber que tienen contenido sin necesidad de desplegarlos. El punto usa el mismo color de cada sección (azul para Adjunto, ámbar para Información Interna).
+
+**Archivo:** `OrdenFormCliente.jsx`.
+
+**Verificación:** `npm run build` OK.
+
+### v2.138: OT — el nombre del técnico se mostraba todo en mayúsculas
+
+**Problema:** el técnico asignado se guarda en mayúsculas (mismo criterio que otros campos), pero eso hacía que en la lista de OT, el formulario y el PDF apareciera como "JUAN PEREZ" en vez de "Juan Perez".
+
+**Solución:** se agregó `capitalizarNombre` (`helpers.js`) que capitaliza cada palabra sin tocar cómo se guarda el dato, y se aplicó solo en los puntos donde se muestra: tabla y vista tarjeta de `OrdenLista.jsx`, el rótulo "Técnico:" del formulario en `OrdenTrabajo.jsx`, y la firma del técnico en el PDF (`ordenServicioDoc.js`).
+
+**Archivos:** `helpers.js`, `OrdenLista.jsx`, `OrdenTrabajo.jsx`, `ordenServicioDoc.js`.
+
+**Verificación:** `npm run build` OK.
+
 ## Fecha: 2026-09-22
 
 ### v2.137: OT y Cotización PDF — "Contactos adicionales" en negrita y con letra distinta al contacto principal

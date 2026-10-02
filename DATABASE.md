@@ -1,3 +1,7 @@
+-- ⚠ DESACTUALIZADO: este archivo describe el esquema antiguo. El esquema vigente está en
+--   backend/crear_tablas.sql (incluye cliente_contactos y cliente_direcciones).
+--   Para montarlo en otro PC ver CONTINUAR_EN_OTRO_PC.md.
+
 -- Script completo para crear la base de datos: soporte_tecnico_db
 -- Ejecutar en MySQL/MariaDB
 

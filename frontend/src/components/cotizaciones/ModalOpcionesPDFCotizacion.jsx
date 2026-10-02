@@ -18,13 +18,16 @@ function ModalOpcionesPDFCotizacion({ cot, onClose }) {
   const [principalKey, setPrincipalKey] = useState("P");
 
   const contactosTodos = useMemo(() => {
-    // Si "P" queda desplazado a adicional, muestra la dirección del cliente
-    // (el contacto principal de la cotización nunca tuvo una propia) en vez
-    // de aparecer sin dirección en la lista de adicionales.
+    // El contacto principal ahora sí puede tener su propia dirección
+    // (mantenedor de Direcciones); si no la tiene cargada, se cae a la del
+    // cliente para no quedar sin dirección.
+    const tieneDireccionPropia = !!String(cot.contacto_direccion || "").trim();
     const principalDb = {
       key: "P", nombre: cot.contacto_nombre, cargo: cot.contacto_cargo,
       email: cot.contacto_email, fono: cot.contacto_fono,
-      direccion: cot.cliente_direccion, ciudad: cot.cliente_ciudad, comuna: cot.cliente_comuna
+      direccion: tieneDireccionPropia ? cot.contacto_direccion : cot.cliente_direccion,
+      ciudad: tieneDireccionPropia ? cot.contacto_ciudad : cot.cliente_ciudad,
+      comuna: tieneDireccionPropia ? cot.contacto_comuna : cot.cliente_comuna
     };
     return [principalDb, ...contactosExtra.map((c, i) => ({ ...c, key: `e${i}` }))];
   }, [cot, contactosExtra]);

@@ -12,37 +12,8 @@ CREATE TABLE IF NOT EXISTS clientes (
   comuna VARCHAR(100),
   telefono VARCHAR(20),
   email VARCHAR(100),
-  contacto_nombre VARCHAR(100),
-  contacto_email VARCHAR(100),
-  contacto_fono VARCHAR(20),
-  contacto_cargo VARCHAR(100),
-  contacto_direccion VARCHAR(255),
   activo TINYINT(1) DEFAULT 1,
   fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE IF NOT EXISTS clientes_contactos (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  cliente_id INT NOT NULL,
-  nombre VARCHAR(100),
-  email VARCHAR(100),
-  fono VARCHAR(20),
-  cargo VARCHAR(100),
-  direccion VARCHAR(255),
-  ciudad VARCHAR(100),
-  comuna VARCHAR(100),
-  FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE IF NOT EXISTS clientes_direcciones (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  cliente_id INT NOT NULL,
-  tipo_direccion VARCHAR(50),
-  direccion VARCHAR(255),
-  fono VARCHAR(20),
-  ciudad VARCHAR(100),
-  comuna VARCHAR(100),
-  FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS equipos (
@@ -54,6 +25,62 @@ CREATE TABLE IF NOT EXISTS equipos (
   serie VARCHAR(100),
   activo TINYINT(1) DEFAULT 1,
   fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Mantenedor de Contactos: catálogo global, independiente de Cliente (mismo
+-- criterio que Equipos, sin FK). Se llama desde la OT/Cotización buscando y
+-- copiando los campos al momento, no por referencia viva.
+CREATE TABLE IF NOT EXISTS contactos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  codigo VARCHAR(50) UNIQUE,
+  nombre VARCHAR(100) NOT NULL,
+  email VARCHAR(100),
+  fono VARCHAR(20),
+  cargo VARCHAR(100),
+  activo TINYINT(1) DEFAULT 1,
+  fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Mantenedor de Direcciones: catálogo global, independiente de Cliente,
+-- mismo criterio que Contactos.
+CREATE TABLE IF NOT EXISTS direcciones (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  codigo VARCHAR(50) UNIQUE,
+  direccion VARCHAR(255) NOT NULL,
+  ciudad VARCHAR(100),
+  comuna VARCHAR(100),
+  activo TINYINT(1) DEFAULT 1,
+  fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Vínculos Cliente <-> Contactos / Direcciones (muchos a muchos). Los contactos y las
+-- direcciones siguen siendo catálogos globales: un mismo contacto o dirección puede estar
+-- en varios clientes. Quitarlo de un cliente solo borra el vínculo, no lo elimina del mantenedor.
+--   orden: posición en la lista del cliente.
+--   a_ot : 1 = marcado "En la OT" (uno por cliente y por tabla). Es de un solo uso: al enviarlo a
+--          la OT se desmarca (POST /api/clientes/:id/limpiar-a-ot). Sin marca no viaja nada.
+CREATE TABLE IF NOT EXISTS cliente_contactos (
+  cliente_id INT NOT NULL,
+  contacto_id INT NOT NULL,
+  orden INT NOT NULL DEFAULT 0,
+  a_ot TINYINT(1) NOT NULL DEFAULT 0,
+  fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (cliente_id, contacto_id),
+  INDEX idx_cc_contacto (contacto_id),
+  FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE,
+  FOREIGN KEY (contacto_id) REFERENCES contactos(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS cliente_direcciones (
+  cliente_id INT NOT NULL,
+  direccion_id INT NOT NULL,
+  orden INT NOT NULL DEFAULT 0,
+  a_ot TINYINT(1) NOT NULL DEFAULT 0,
+  fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (cliente_id, direccion_id),
+  INDEX idx_cd_direccion (direccion_id),
+  FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE,
+  FOREIGN KEY (direccion_id) REFERENCES direcciones(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS ordenes_trabajo (
@@ -82,6 +109,12 @@ CREATE TABLE IF NOT EXISTS ordenes_trabajo (
   fono_contacto VARCHAR(50),
   email_contacto VARCHAR(100),
   cargo_contacto VARCHAR(100),
+  contacto_id INT,
+  contacto_direccion VARCHAR(255),
+  contacto_ciudad VARCHAR(100),
+  contacto_comuna VARCHAR(100),
+  direccion_id INT,
+  cliente_direccion_id INT,
   contactos_extra TEXT,
   direcciones_extra TEXT,
   fono_principal VARCHAR(50),
@@ -160,6 +193,7 @@ CREATE TABLE IF NOT EXISTS cotizaciones (
   cliente_direccion VARCHAR(255),
   cliente_ciudad VARCHAR(100),
   cliente_comuna VARCHAR(100),
+  cliente_direccion_id INT,
   cliente_telefono VARCHAR(20),
   cliente_email VARCHAR(100),
 
@@ -167,6 +201,11 @@ CREATE TABLE IF NOT EXISTS cotizaciones (
   contacto_fono VARCHAR(20),
   contacto_email VARCHAR(100),
   contacto_cargo VARCHAR(100),
+  contacto_id INT,
+  contacto_direccion VARCHAR(255),
+  contacto_ciudad VARCHAR(100),
+  contacto_comuna VARCHAR(100),
+  direccion_id INT,
   contactos_extra TEXT,
 
   ejecutivo VARCHAR(100),

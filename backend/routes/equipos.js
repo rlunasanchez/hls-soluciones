@@ -56,23 +56,23 @@ router.get("/:id", authMiddleware, async (req, res) => {
 router.post("/", authMiddleware, async (req, res) => {
   const { equipo, modelo, marca, serie } = req.body;
   try {
-    if (!equipo || !equipo.trim() || !marca || !marca.trim() || !modelo || !modelo.trim()) {
-      return res.status(400).json({ msg: "Complete Equipo, Marca y Modelo antes de guardar" });
+    if (!equipo || equipo.trim().length < 2) {
+      return res.status(400).json({ msg: "Ingrese el Equipo (mínimo 2 caracteres) antes de guardar" });
     }
     const [dup] = await pool.query(
       `SELECT codigo FROM equipos
-      WHERE LOWER(TRIM(equipo)) = LOWER(?) AND LOWER(TRIM(marca)) = LOWER(?) AND LOWER(TRIM(modelo)) = LOWER(?)
+      WHERE LOWER(TRIM(equipo)) = LOWER(?) AND LOWER(TRIM(IFNULL(marca,''))) = LOWER(?) AND LOWER(TRIM(IFNULL(modelo,''))) = LOWER(?)
       LIMIT 1`,
-      [equipo.trim(), marca.trim(), modelo.trim()]
+      [equipo.trim(), (marca || '').trim(), (modelo || '').trim()]
     );
     if (dup.length > 0) {
-      return res.status(400).json({ msg: `El equipo ${equipo.trim()} ${marca.trim()} ${modelo.trim()} ya existe en el mantenedor con el código ${dup[0].codigo}. No se creó un nuevo registro.` });
+      return res.status(400).json({ msg: `El equipo ${equipo.trim()} ${(marca || '').trim()} ${(modelo || '').trim()} ya existe en el mantenedor con el código ${dup[0].codigo}. No se creó un nuevo registro.` });
     }
     const codigo = await generarCodigo();
     await pool.query(
       `INSERT INTO equipos (codigo, equipo, modelo, marca, serie)
       VALUES (?, ?, ?, ?, ?)`,
-      [codigo, equipo, modelo, marca, serie || null]
+      [codigo, equipo.trim(), modelo || '', marca || '', serie || null]
     );
     res.status(201).json({ msg: "Equipo creado", codigo });
   } catch (err) {
@@ -85,8 +85,8 @@ router.put("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
   const { equipo, modelo, marca, serie } = req.body;
   try {
-    if (!equipo || !equipo.trim() || !marca || !marca.trim() || !modelo || !modelo.trim()) {
-      return res.status(400).json({ msg: "Complete Equipo, Marca y Modelo antes de guardar" });
+    if (!equipo || equipo.trim().length < 2) {
+      return res.status(400).json({ msg: "Ingrese el Equipo (mínimo 2 caracteres) antes de guardar" });
     }
     const [existing] = await pool.query("SELECT codigo FROM equipos WHERE id = ?", [id]);
     let codigo = existing[0]?.codigo;
@@ -95,7 +95,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
     }
     await pool.query(
       `UPDATE equipos SET codigo = ?, equipo = ?, modelo = ?, marca = ?, serie = ? WHERE id = ?`,
-      [codigo, equipo, modelo, marca, serie || null, id]
+      [codigo, equipo.trim(), modelo || '', marca || '', serie || null, id]
     );
     res.json({ msg: "Equipo actualizado", codigo });
   } catch (err) {

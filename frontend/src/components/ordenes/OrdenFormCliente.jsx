@@ -2,7 +2,10 @@ import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import { Search, Users, ChevronDown, ChevronUp, Eye, UserPlus, MapPin, Paperclip, MoreVertical, Download, Trash2, FileText, Printer, Pencil, X } from "lucide-react";
 import ClienteFormulario from "../clientes/ClienteFormulario";
+import CampoCatalogo from "../comunes/CampoCatalogo";
 import "../../styles/Clientes.css";
+import "../../styles/campo-catalogo.css";
+import "../../styles/botones.css";
 import { upperInput, validarRUT, formatearRutInput, toUpper, normalizarRut } from "../../utils/helpers";
 import api from "../../services/api";
 
@@ -32,15 +35,14 @@ function OrdenFormCliente({
   const [contactosResumenAbierto, setContactosResumenAbierto] = useState(false);
   // Mismo patrón que direccionesManualVisibles pero para Otros Contactos.
   const [contactosManualVisibles, setContactosManualVisibles] = useState(() => new Set());
-  const [busquedaContacto, setBusquedaContacto] = useState("");
-  const [mostrarDropdownContacto, setMostrarDropdownContacto] = useState(false);
-  const contactoDropdownRef = useRef(null);
   // Valor que tenía el campo al enfocarlo, para no disparar el aviso de
   // "ya existe" si al final se dejó igual a como estaba (sin cambios reales).
   const direccionEnFocoRef = useRef("");
   const nombreContactoEnFocoRef = useRef("");
   const [mostrarEditarClienteModal, setMostrarEditarClienteModal] = useState(false);
   const [clienteAEditar, setClienteAEditar] = useState(null);
+  // true = ficha solo con los datos del cliente; false = ficha completa (con contactos y direcciones)
+  const [editarSoloCliente, setEditarSoloCliente] = useState(false);
   const [mostrarRegistrarCliente, setMostrarRegistrarCliente] = useState(false);
   const [prefillCliente, setPrefillCliente] = useState(null);
   const [mostrarInfoInterna, setMostrarInfoInterna] = useState(false);
@@ -192,21 +194,6 @@ function OrdenFormCliente({
     else setRutError("");
   };
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (contactoDropdownRef.current && !contactoDropdownRef.current.contains(event.target)) {
-        setMostrarDropdownContacto(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    setBusquedaContacto("");
-    setMostrarDropdownContacto(false);
-  }, [clienteSeleccionado?.id, clienteSeleccionado?.razon_social]);
-
   const contactosDisponibles = (() => {
     if (!clienteSeleccionado) return [];
     const principalNombre = String(clienteSeleccionado.contacto_nombre || "").toUpperCase().trim();
@@ -237,45 +224,32 @@ function OrdenFormCliente({
     return [...principal, ...extras];
   })();
 
-  const contactosFiltrados = busquedaContacto.trim().length >= 2
-    ? contactosDisponibles.filter((c) => {
-        const q = busquedaContacto.toUpperCase();
-        return (c.nombre || "").includes(q) || (c.email || "").toUpperCase().includes(q);
-      })
-    : [];
-
   const normTxt = (s) => String(s || "").toUpperCase().trim();
 
-  // Al elegir otro contacto como principal, el principal anterior baja a
-  // "Otros Contactos" de la OT (en vez de perderse), y si el elegido ya
-  // estaba ahí, se saca de esa lista para no quedar duplicado.
-  const seleccionarContactoBusqueda = (c) => {
-    const nombreNuevo = normTxt(c.nombre);
-    const principalActual = {
-      nombre: nuevaOrden.contacto, email: nuevaOrden.emailContacto,
-      fono: nuevaOrden.fonoContacto, cargo: nuevaOrden.cargoContacto
-    };
-    let extras = nuevaOrden.contactosExtra.filter((x) => normTxt(x.nombre) !== nombreNuevo);
-    if (normTxt(principalActual.nombre) && normTxt(principalActual.nombre) !== nombreNuevo) {
-      extras = [...extras, {
-        nombre: principalActual.nombre, email: principalActual.email,
-        fono: principalActual.fono, cargo: principalActual.cargo,
-        direccion: "", ciudad: "", comuna: ""
-      }];
-    }
-    setNuevaOrden({
-      ...nuevaOrden,
-      contacto: c.nombre,
-      emailContacto: c.email || "",
-      fonoContacto: c.fono || "",
-      cargoContacto: c.cargo || "",
-      contactosExtra: extras
-    });
-    setBusquedaContacto(c.nombre);
-    setMostrarDropdownContacto(false);
-  };
+  // Contacto y dirección de la OT: se eligen (o se corrigen en su ficha) con CampoCatalogo.
+  // La OT muestra un contacto y una dirección; si lo elegido estaba entre los "adicionales"
+  // de una OT antigua, se saca de ahí.
+  const contactoEnOT = (c) => setNuevaOrden((prev) => ({
+    ...prev,
+    contacto: toUpper(c.nombre), emailContacto: c.email || "", fonoContacto: c.fono || "", cargoContacto: toUpper(c.cargo || ""),
+    contactosExtra: (prev.contactosExtra || []).filter((x) => normTxt(x.nombre) !== normTxt(c.nombre))
+  }));
+  const direccionEnOT = (d) => setNuevaOrden((prev) => ({
+    ...prev,
+    direccion: toUpper(d.direccion), ciudad: toUpper(d.ciudad || ""), comuna: toUpper(d.comuna || ""),
+    direccionesExtra: (prev.direccionesExtra || []).filter((x) => normTxt(x.direccion) !== normTxt(d.direccion))
+  }));
 
-  const abrirEditarCliente = async () => {
+  // Direcciones vinculadas al cliente (llegan como texto: tipo|direccion|fono|ciudad|comuna)
+  const direccionesDelCliente = clienteSeleccionado
+    ? String(clienteSeleccionado.direcciones || "").split(";;").map((d) => {
+        const p = d.split("|");
+        return { direccion: (p[1] || "").toUpperCase().trim(), ciudad: (p[3] || "").toUpperCase().trim(), comuna: (p[4] || "").toUpperCase().trim() };
+      }).filter((d) => d.direccion)
+    : [];
+
+  const abrirEditarCliente = async (soloCliente = false) => {
+    setEditarSoloCliente(soloCliente);
     let fresh = clienteSeleccionado;
     try {
       const res = await api.get(`/api/clientes/${clienteSeleccionado.id}`);
@@ -289,138 +263,60 @@ function OrdenFormCliente({
     if (!clienteAEditar?.id) return;
     try {
       await api.put(`/api/clientes/${clienteAEditar.id}`, payload);
-      const lista = await api.get("/api/clientes");
-      if (onClientesRefresh) onClientesRefresh(lista.data);
       const freshRes = await api.get(`/api/clientes/${clienteAEditar.id}`);
       const fresh = freshRes.data;
-      if (setClienteSeleccionado) setClienteSeleccionado(fresh);
 
-      // Sincronizar en la OT los datos derivados del cliente recién editado
-      const armarContactos = (cli) => {
-        const principal = {
-          nombre: normTxt(cli.contacto_nombre), email: cli.contacto_email || "", fono: cli.contacto_fono || "", cargo: cli.contacto_cargo || "",
-          direccion: (cli.contacto_direccion || "").toUpperCase().trim(), ciudad: (cli.contacto_ciudad || "").toUpperCase().trim(), comuna: (cli.contacto_comuna || "").toUpperCase().trim()
-        };
-        const extras = String(cli.contactos || "").split(";;").map((s) => {
-          const p = s.split("|");
-          return { nombre: (p[0] || "").toUpperCase().trim(), email: p[1] || "", fono: p[2] || "", cargo: p[3] || "" };
-        }).filter((c) => c.nombre && c.nombre !== principal.nombre);
-        return [...(principal.nombre ? [principal] : []), ...extras];
-      };
-      const todosContactos = armarContactos(fresh);
-      // Estado del cliente antes de este guardado (para poder seguir el contacto
-      // por posición aunque le hayan cambiado el nombre, ej. renombrar el principal)
-      const todosContactosAntes = armarContactos(clienteAEditar);
+      // Se refrescan los datos propios del cliente. El check "En la OT" solo indica qué
+      // contacto/dirección llevar: si al guardar cambió el marcado, la OT toma el nuevo;
+      // si no cambió (o no hay ninguno marcado), el contacto y la dirección de la OT no se tocan.
+      const cambioContacto = !!fresh.contacto_nombre && normTxt(fresh.contacto_nombre) !== normTxt(clienteAEditar.contacto_nombre);
+      const cambioDireccion = !!fresh.ot_direccion && normTxt(fresh.ot_direccion) !== normTxt(clienteAEditar.ot_direccion);
+      setNuevaOrden((prev) => ({
+        ...prev,
+        cliente: toUpper(fresh.razon_social || ""),
+        rut: fresh.rut || "",
+        email: fresh.email || "",
+        fonoPrincipal: fresh.telefono || "",
+        ...(cambioContacto ? {
+          contacto: toUpper(fresh.contacto_nombre),
+          emailContacto: fresh.contacto_email || "",
+          fonoContacto: fresh.contacto_fono || "",
+          cargoContacto: toUpper(fresh.contacto_cargo || "")
+        } : {}),
+        ...(cambioDireccion ? {
+          direccion: toUpper(fresh.ot_direccion),
+          ciudad: toUpper(fresh.ot_ciudad || ""),
+          comuna: toUpper(fresh.ot_comuna || "")
+        } : {})
+      }));
 
-      // Mismo criterio para las direcciones y contactos "extra" ya agregados a la OT
-      const armarDirecciones = (cli) => String(cli.direcciones || "").split(";;").map((d) => {
-        const p = d.split("|");
-        return { tipo: (p[0] || "").trim(), direccion: (p[1] || "").toUpperCase().trim(), fono: p[2] || "", ciudad: (p[3] || "").toUpperCase().trim(), comuna: (p[4] || "").toUpperCase().trim() };
-      }).filter((d) => d.direccion);
-      const direccionesDespues = armarDirecciones(fresh);
-      const direccionesAntes = armarDirecciones(clienteAEditar);
-
-      const armarContactosExtra = (cli) => String(cli.contactos || "").split(";;").map((c) => {
-        const p = c.split("|");
-        return { nombre: (p[0] || "").toUpperCase().trim(), email: p[1] || "", fono: p[2] || "", cargo: p[3] || "", direccion: (p[4] || "").toUpperCase().trim(), ciudad: (p[5] || "").toUpperCase().trim(), comuna: (p[6] || "").toUpperCase().trim() };
-      }).filter((c) => c.nombre);
-      const contactosExtraDespues = armarContactosExtra(fresh);
-      // Snapshot de antes, en el mismo orden en que vienen serializados en
-      // clientes_contactos: a diferencia de "todosContactosAntes" (que excluye
-      // al principal y por eso se corre de posición si hubo un intercambio),
-      // esta lista no filtra nada, así que editar un contacto (ej. corregir
-      // una letra del nombre) no le cambia la posición — sirve de respaldo
-      // cuando el nombre nuevo ya no calza con ningún nombre viejo.
-      const contactosExtraAntes = armarContactosExtra(clienteAEditar);
-
-      setNuevaOrden((prev) => {
-        const base = {
-          ...prev,
-          cliente: toUpper(fresh.razon_social || ""),
-          rut: fresh.rut || "",
-          direccion: toUpper(fresh.direccion || ""),
-          ciudad: toUpper(fresh.ciudad || ""),
-          comuna: toUpper(fresh.comuna || ""),
-          email: fresh.email || "",
-          fonoPrincipal: fresh.telefono || ""
-        };
-        // Si el contacto cargado en la OT sigue existiendo, refresca nombre/email/fono.
-        // Si le cambiaron el nombre, se lo sigue por la misma posición que ocupaba antes.
-        const contactoOT = normTxt(prev.contacto);
-        const nombrePrincipalAntes = todosContactosAntes[0]?.nombre || "";
-        const nombrePrincipalDespues = todosContactos[0]?.nombre || "";
-        // La OT seguía al principal del cliente (antes de este guardado) si su
-        // contacto era exactamente ese — se usa más abajo también para
-        // reconciliar "Otros Contactos" cuando hubo un cambio de principal.
-        const otSeguiaAlPrincipal = !!contactoOT && contactoOT === nombrePrincipalAntes;
-        if (contactoOT) {
-          let match;
-          // Si el contacto de la OT era el principal del cliente antes de este
-          // guardado, sigue al nuevo principal aunque haya cambiado de persona
-          // (ej. se usó "Hacer principal" con otro contacto) — no a esa persona
-          // en particular, que ahora es solo un contacto adicional.
-          if (otSeguiaAlPrincipal) {
-            match = todosContactos[0];
-          } else {
-            match = todosContactos.find((c) => c.nombre === contactoOT);
-          }
-          if (match) {
-            base.contacto = match.nombre;
-            base.emailContacto = match.email;
-            base.fonoContacto = match.fono;
-            base.cargoContacto = match.cargo;
-          }
-        }
-
-        // Refresca las direcciones extra ya agregadas que sigan existiendo en el cliente
-        base.direccionesExtra = prev.direccionesExtra.map((d) => {
-          const dirOT = normTxt(d.direccion);
-          let match = direccionesDespues.find((x) => x.direccion === dirOT);
-          if (!match) {
-            const idxAntes = direccionesAntes.findIndex((x) => x.direccion === dirOT);
-            if (idxAntes !== -1) match = direccionesDespues[idxAntes];
-          }
-          return match ? { tipo: match.tipo, direccion: match.direccion, ciudad: match.ciudad, fono: match.fono, comuna: match.comuna } : d;
-        });
-
-        // Refresca los contactos extra de la OT que sigan existiendo como
-        // adicionales del cliente. Si alguno de ellos es ahora el nuevo
-        // principal, se saca de acá (ya quedó reflejado arriba, en el
-        // Contacto de la OT) para no quedar duplicado.
-        let extrasBase = prev.contactosExtra
-          .filter((c) => normTxt(c.nombre) !== nombrePrincipalDespues)
-          .map((c) => {
-            const nomOT = normTxt(c.nombre);
-            let match = contactosExtraDespues.find((x) => x.nombre === nomOT);
-            if (!match) {
-              const idxAntes = contactosExtraAntes.findIndex((x) => x.nombre === nomOT);
-              if (idxAntes !== -1) match = contactosExtraDespues[idxAntes];
-            }
-            return match ? { nombre: match.nombre, email: match.email, fono: match.fono, cargo: match.cargo, direccion: match.direccion, ciudad: match.ciudad, comuna: match.comuna } : c;
-          });
-        // Si la OT seguía al principal del cliente y este cambió de persona,
-        // el que era principal baja a "Otros Contactos" de la OT (si no
-        // estaba ya ahí) — mismo criterio que ya se aplica en el Cliente.
-        if (otSeguiaAlPrincipal && nombrePrincipalAntes !== nombrePrincipalDespues &&
-            !extrasBase.some((c) => normTxt(c.nombre) === nombrePrincipalAntes)) {
-          const viejo = todosContactosAntes[0];
-          extrasBase = [...extrasBase, {
-            nombre: viejo.nombre, email: viejo.email, fono: viejo.fono, cargo: viejo.cargo,
-            direccion: viejo.direccion || "", ciudad: viejo.ciudad || "", comuna: viejo.comuna || ""
-          }];
-        }
-        base.contactosExtra = extrasBase;
-
-        return base;
-      });
+      // El check es de un solo uso: ya se enviaron los datos a la OT, se desmarca
+      // (en la edición solo del cliente no se tocan los checks)
+      if (!editarSoloCliente) await api.post(`/api/clientes/${clienteAEditar.id}/limpiar-a-ot`);
+      const [lista, limpio] = await Promise.all([api.get("/api/clientes"), api.get(`/api/clientes/${clienteAEditar.id}`)]);
+      if (onClientesRefresh) onClientesRefresh(lista.data);
+      if (setClienteSeleccionado) setClienteSeleccionado(limpio.data);
 
       alert("Cliente actualizado");
-      if (mantener) setClienteAEditar(fresh);
+      if (mantener) setClienteAEditar(limpio.data);
       else setMostrarEditarClienteModal(false);
     } catch (err) {
       alert(err.response?.data?.msg || "Error al actualizar el cliente");
     }
   };
+
+  const botonesEditarCliente = (
+    <>
+      <button type="button" className="btn-mini btn-mini--warning" onClick={() => abrirEditarCliente(false)}
+        title="Editar el cliente con sus contactos y direcciones">
+        <Pencil size={14} /> Editar completo
+      </button>
+      <button type="button" className="btn-mini btn-mini--warning" onClick={() => abrirEditarCliente(true)}
+        title="Editar solo los datos del cliente (razón social, RUT, fono, email)">
+        <Pencil size={14} /> Editar
+      </button>
+    </>
+  );
 
   const abrirRegistrarCliente = () => {
     // Con el comodín "19" se permite crear aunque el RUT o la razón social ya existan
@@ -497,9 +393,6 @@ function OrdenFormCliente({
           ...prev,
           cliente: toUpper(fresh.razon_social || "") || prev.cliente,
           rut: fresh.rut || prev.rut,
-          direccion: toUpper(fresh.direccion || "") || prev.direccion,
-          ciudad: toUpper(fresh.ciudad || "") || prev.ciudad,
-          comuna: toUpper(fresh.comuna || "") || prev.comuna,
           email: fresh.email || prev.email,
           fonoPrincipal: fresh.telefono || prev.fonoPrincipal,
           contacto: toUpper(fresh.contacto_nombre || "") || prev.contacto,
@@ -560,11 +453,7 @@ function OrdenFormCliente({
                 <span style={{ background: '#F97316', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>
                   ⚠ Cliente desactivado
                 </span>
-              ) : (
-                <span style={{ background: 'var(--success)', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>
-                  ✓ Seleccionado
-                </span>
-              )}
+              ) : null}
             </div>
             {readOnly && (
               <button
@@ -591,13 +480,14 @@ function OrdenFormCliente({
                 <Eye size={14} /> Ver
               </button>
             )}
+            {!readOnly && botonesEditarCliente}
           </div>
         ) : (
           <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
             <div ref={clienteDropdownRef} style={{ position: 'relative', flex: 1 }}>
             <input
               type="text"
-              className="ot-search"
+              className="ot-search bc-input"
               placeholder="Escriba para buscar cliente por nombre o RUT..."
               value={busquedaCliente}
               onChange={(e) => {
@@ -614,10 +504,6 @@ function OrdenFormCliente({
                 if (busquedaCliente.length >= 2) setMostrarDropdownClientes(true);
               }}
               disabled={readOnly}
-              style={{
-                width: '100%',
-                background: clienteSeleccionado ? '#E0F2FE' : 'white'
-              }}
             />
             {clienteInactivo && (
               <span style={{
@@ -632,21 +518,6 @@ function OrdenFormCliente({
                 fontSize: '0.75rem'
               }}>
                 ⚠ Cliente desactivado
-              </span>
-            )}
-            {!clienteInactivo && clienteSeleccionado && (
-              <span style={{
-                position: 'absolute',
-                right: '40px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                background: 'var(--success)',
-                color: 'white',
-                padding: '2px 8px',
-                borderRadius: '4px',
-                fontSize: '0.75rem'
-              }}>
-                ✓ Seleccionado
               </span>
             )}
             <ChevronDown
@@ -736,35 +607,10 @@ function OrdenFormCliente({
                 <Eye size={14} /> Ver
             </button>
           )}
-          {!readOnly && clienteSeleccionado && (
-            <button
-              type="button"
-              onClick={abrirEditarCliente}
-              title="Editar todos los datos de este cliente"
-              style={{
-                display: 'flex', alignItems: 'center', gap: '4px',
-                background: 'var(--warning)', color: 'white', border: 'none',
-                padding: '2px 10px', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
-                fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap',
-                flexShrink: 0, height: '24px'
-              }}
-            >
-              <Pencil size={14} /> Editar
-            </button>
-          )}
+          {!readOnly && clienteSeleccionado && botonesEditarCliente}
           {!readOnly && !clienteSeleccionado && ((nuevaOrden.cliente || "").trim() || (nuevaOrden.rut || "").trim()) && (
-            <button
-              type="button"
-              onClick={abrirRegistrarCliente}
-              title="Registrar este cliente en el mantenedor de Clientes"
-              style={{
-                display: 'flex', alignItems: 'center', gap: '4px',
-                background: 'var(--success)', color: 'white', border: 'none',
-                padding: '2px 10px', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
-                fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap',
-                flexShrink: 0, height: '24px'
-              }}
-            >
+            <button type="button" className="btn-mini btn-mini--success" onClick={abrirRegistrarCliente}
+              title="Registrar este cliente en el mantenedor de Clientes">
               <UserPlus size={14} /> Registrar en Clientes
             </button>
           )}
@@ -774,12 +620,8 @@ function OrdenFormCliente({
 
       {/* Modal Detalle Cliente (solo lectura) */}
       {mostrarDetalleCliente && clienteSeleccionado && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
-        }}
-        >
-          <div style={{ maxHeight: '90vh', overflow: 'auto', width: '100%', maxWidth: '900px' }}>
+        <div className="bc-modal">
+          <div className="bc-modal-caja bc-modal-caja--ancha">
             <ClienteFormulario
               clienteEditando={clienteSeleccionado}
               clientes={clientes}
@@ -793,17 +635,15 @@ function OrdenFormCliente({
 
       {/* Modal Editar Cliente completo desde la OT (portal fuera del form) */}
       {mostrarEditarClienteModal && clienteAEditar && createPortal(
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
-        }}
-        >
-          <div style={{ maxHeight: '90vh', overflow: 'auto', width: '100%', maxWidth: '900px' }}>
+        <div className="bc-modal">
+          <div className={`bc-modal-caja ${editarSoloCliente ? "bc-modal-caja--chica" : "bc-modal-caja--ancha"}`}>
             <ClienteFormulario
               clienteEditando={clienteAEditar}
               clientes={clientes}
               onSave={guardarEdicionCliente}
               onCancel={() => setMostrarEditarClienteModal(false)}
+              soloCliente={editarSoloCliente}
+              titulo={editarSoloCliente ? "Editar Cliente" : "Editar Cliente completo"}
             />
           </div>
         </div>,
@@ -812,12 +652,8 @@ function OrdenFormCliente({
 
       {/* Modal Registrar Cliente desde la OT (portal fuera del form) */}
       {mostrarRegistrarCliente && createPortal(
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
-        }}
-        >
-          <div style={{ maxHeight: '90vh', overflow: 'auto', width: '100%', maxWidth: '900px' }}>
+        <div className="bc-modal">
+          <div className="bc-modal-caja bc-modal-caja--ancha">
             <ClienteFormulario
               clienteEditando={prefillCliente}
               clientes={clientes}
@@ -831,119 +667,234 @@ function OrdenFormCliente({
         document.body
       )}
 
-      <div className="of-form-grid" style={{ gridTemplateColumns: '2fr 1fr', marginBottom: '15px' }}>
-        <div className="of-f">
-          <label>Cliente *</label>
-          <input
-            type="text"
-            placeholder="Nombre del cliente"
-            value={nuevaOrden.cliente}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, cliente: upperInput(e)})}
-            disabled={readOnly}
-            required
-            style={{
-              width: '100%',
-              padding: '2px 8px',
-              border: '1.5px solid var(--border)',
-              borderRadius: '6px',
-              fontSize: '.82rem'
-            }}
-          />
+      {/* Datos del cliente */}
+      <div className="of-caja">
+        <div className="of-caja-titulo">Datos del cliente</div>
+        <div className="of-form-grid" style={{ gridTemplateColumns: '2fr 1fr', marginBottom: '15px' }}>
+          <div className="of-f">
+            <label>Cliente *</label>
+            <input
+              type="text"
+              placeholder="Nombre del cliente"
+              value={nuevaOrden.cliente}
+              onChange={(e) => setNuevaOrden({...nuevaOrden, cliente: upperInput(e)})}
+              disabled={readOnly}
+              required
+              style={{
+                width: '100%',
+                padding: '2px 8px',
+                border: '1.5px solid var(--border)',
+                borderRadius: '6px',
+                fontSize: '.82rem'
+              }}
+            />
+          </div>
+
+          <div className="of-f" style={{ position: 'relative' }}>
+            <label>RUT {rutError && <span style={{ position: 'absolute', right: 0, top: 0, whiteSpace: 'nowrap', color: '#dc2626', fontSize: '.7rem', textTransform: 'none', letterSpacing: 'normal' }}>{rutError}</span>}</label>
+            <input
+              type="text"
+              placeholder="Ej: 12.345.678-9"
+              value={nuevaOrden.rut}
+              onChange={handleRutChange}
+              onBlur={handleRutBlur}
+              disabled={readOnly}
+              style={{
+                width: '100%',
+                border: rutError ? '1px solid #f87171' : undefined,
+                background: rutError ? '#fef2f2' : undefined
+              }}
+            />
+          </div>
         </div>
 
-        <div className="of-f" style={{ position: 'relative' }}>
-          <label>RUT {rutError && <span style={{ position: 'absolute', right: 0, top: 0, whiteSpace: 'nowrap', color: '#dc2626', fontSize: '.7rem', textTransform: 'none', letterSpacing: 'normal' }}>{rutError}</span>}</label>
-          <input
-            type="text"
-            placeholder="Ej: 12.345.678-9"
-            value={nuevaOrden.rut}
-            onChange={handleRutChange}
-            onBlur={handleRutBlur}
-            disabled={readOnly}
-            style={{
-              width: '100%',
-              border: rutError ? '1px solid #f87171' : undefined,
-              background: rutError ? '#fef2f2' : undefined
-            }}
-          />
+        <div className="of-form-grid" style={{ gridTemplateColumns: '1fr 1fr', marginBottom: 0 }}>
+          <div className="of-f">
+            <label>Fono Principal</label>
+            <input
+              type="tel"
+              placeholder="Teléfono principal del cliente"
+              value={nuevaOrden.fonoPrincipal}
+              onChange={(e) => setNuevaOrden({...nuevaOrden, fonoPrincipal: e.target.value.replace(/[^0-9+]/g, '')})}
+              disabled={readOnly}
+              style={{
+                width: '100%',
+                padding: '2px 8px',
+                border: '1.5px solid var(--border)',
+                borderRadius: '6px',
+                fontSize: '.82rem'
+              }}
+            />
+          </div>
+
+          <div className="of-f">
+            <label>Email</label>
+            <input
+              type="email"
+              placeholder="Email del cliente"
+              value={nuevaOrden.email}
+              onChange={(e) => setNuevaOrden({...nuevaOrden, email: e.target.value})}
+              disabled={readOnly}
+              style={{
+                width: '100%',
+                padding: '2px 8px',
+                border: '1.5px solid var(--border)',
+                borderRadius: '6px',
+                fontSize: '.82rem'
+              }}
+            />
+          </div>
         </div>
       </div>
 
-      <div className="of-form-grid" style={{ gridTemplateColumns: '1.4fr 1fr 1fr', marginBottom: '15px' }}>
-        <div className="of-f">
-          <label>Dirección</label>
-          <input
-            type="text"
-            placeholder="Dirección del cliente"
-            value={nuevaOrden.direccion}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, direccion: upperInput(e)})}
-            disabled={readOnly}
-            style={{ width: '100%' }}
+      {/* Buscadores: contacto y dirección, uno al lado del otro; ambos con lista para ver y elegir */}
+      <div className="of-form-grid" style={{ gridTemplateColumns: '1fr 1fr', marginBottom: '10px' }}>
+          <CampoCatalogo
+            key={`contactos-${clienteSeleccionado?.id || "sin-cliente"}`}
+            tipo="contactos"
+            etiqueta="Buscar Contacto"
+            placeholder="Buscar contacto del cliente o de Contactos..."
+            readOnly={readOnly}
+            deCliente={contactosDisponibles}
+            actual={nuevaOrden.contacto}
+            datosRegistro={{ nombre: nuevaOrden.contacto, email: nuevaOrden.emailContacto, fono: nuevaOrden.fonoContacto, cargo: nuevaOrden.cargoContacto }}
+            onElegir={contactoEnOT}
+            onActualizado={contactoEnOT}
           />
-        </div>
+        <CampoCatalogo
+          key={`direcciones-${clienteSeleccionado?.id || "sin-cliente"}`}
+          tipo="direcciones"
+          etiqueta="Buscar Dirección"
+          placeholder="Buscar dirección del cliente o de Direcciones..."
+          deCliente={direccionesDelCliente}
+          actual={nuevaOrden.direccion}
+          readOnly={readOnly}
+          datosRegistro={{ direccion: nuevaOrden.direccion, ciudad: nuevaOrden.ciudad, comuna: nuevaOrden.comuna }}
+          onElegir={direccionEnOT}
+          onActualizado={direccionEnOT}
+        />
+      </div>
 
-        <div className="of-f">
-          <label>Ciudad</label>
-          <input
-            type="text"
-            placeholder="Ciudad"
-            value={nuevaOrden.ciudad}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, ciudad: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
-            disabled={readOnly}
-            style={{ width: '100%' }}
-          />
-        </div>
+      {/* Datos del contacto */}
+      <div className="of-caja">
+        <div className="of-caja-titulo">Datos del contacto</div>
+        <div className="of-form-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+          <div className="of-f">
+            <label>Contacto</label>
+            <input
+              type="text"
+              placeholder="Nombre del contacto"
+              value={nuevaOrden.contacto}
+              onChange={(e) => setNuevaOrden({...nuevaOrden, contacto: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
+              disabled={readOnly}
+              style={{
+                width: '100%',
+                padding: '2px 8px',
+                border: '1.5px solid var(--border)',
+                borderRadius: '6px',
+                fontSize: '.82rem'
+              }}
+            />
+          </div>
 
-        <div className="of-f">
-          <label>Comuna</label>
-          <input
-            type="text"
-            placeholder="Comuna"
-            value={nuevaOrden.comuna}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, comuna: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
-            disabled={readOnly}
-            style={{ width: '100%' }}
-          />
+          <div className="of-f">
+            <label>Fono Contacto</label>
+            <input
+              type="tel"
+              placeholder="Teléfono del contacto"
+              value={nuevaOrden.fonoContacto}
+              onChange={(e) => setNuevaOrden({...nuevaOrden, fonoContacto: e.target.value.replace(/[^0-9+]/g, '')})}
+              disabled={readOnly}
+              style={{
+                width: '100%',
+                padding: '2px 8px',
+                border: '1.5px solid var(--border)',
+                borderRadius: '6px',
+                fontSize: '.82rem'
+              }}
+            />
+          </div>
+
+          <div className="of-f">
+            <label>Email Contacto</label>
+            <input
+              type="email"
+              placeholder="Email del contacto"
+              value={nuevaOrden.emailContacto}
+              onChange={(e) => setNuevaOrden({...nuevaOrden, emailContacto: e.target.value})}
+              disabled={readOnly}
+              style={{
+                width: '100%',
+                padding: '2px 8px',
+                border: '1.5px solid var(--border)',
+                borderRadius: '6px',
+                fontSize: '.82rem'
+              }}
+            />
+          </div>
+
+          <div className="of-f">
+            <label>Cargo Contacto</label>
+            <input
+              type="text"
+              placeholder="Cargo del contacto"
+              value={nuevaOrden.cargoContacto}
+              onChange={(e) => setNuevaOrden({...nuevaOrden, cargoContacto: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
+              disabled={readOnly}
+              style={{
+                width: '100%',
+                padding: '2px 8px',
+                border: '1.5px solid var(--border)',
+                borderRadius: '6px',
+                fontSize: '.82rem'
+              }}
+            />
+          </div>
         </div>
       </div>
 
-      <div className="of-form-grid" style={{ marginTop: '14px', gridTemplateColumns: 'repeat(3, minmax(200px, 1fr))' }}>
-        <div className="of-f">
-          <label>Fono Principal</label>
-          <input
-            type="tel"
-            placeholder="Teléfono principal del cliente"
-            value={nuevaOrden.fonoPrincipal}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, fonoPrincipal: e.target.value.replace(/[^0-9+]/g, '')})}
-            disabled={readOnly}
-            style={{
-              width: '100%',
-              padding: '2px 8px',
-              border: '1.5px solid var(--border)',
-              borderRadius: '6px',
-              fontSize: '.82rem'
-            }}
-          />
-        </div>
+      {/* Datos de la dirección */}
+      <div className="of-caja">
+        <div className="of-caja-titulo">Datos de la dirección</div>
+        <div className="of-form-grid" style={{ gridTemplateColumns: '1.4fr 1fr 1fr', marginBottom: 0 }}>
+          <div className="of-f">
+            <label>Dirección</label>
+            <input
+              type="text"
+              placeholder="Dirección del cliente"
+              value={nuevaOrden.direccion}
+              onChange={(e) => setNuevaOrden({...nuevaOrden, direccion: upperInput(e)})}
+              disabled={readOnly}
+              style={{ width: '100%' }}
+            />
+          </div>
 
-        <div className="of-f">
-          <label>Email</label>
-          <input
-            type="email"
-            placeholder="Email del cliente"
-            value={nuevaOrden.email}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, email: e.target.value})}
-            disabled={readOnly}
-            style={{
-              width: '100%',
-              padding: '2px 8px',
-              border: '1.5px solid var(--border)',
-              borderRadius: '6px',
-              fontSize: '.82rem'
-            }}
-          />
+          <div className="of-f">
+            <label>Ciudad</label>
+            <input
+              type="text"
+              placeholder="Ciudad"
+              value={nuevaOrden.ciudad}
+              onChange={(e) => setNuevaOrden({...nuevaOrden, ciudad: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
+              disabled={readOnly}
+              style={{ width: '100%' }}
+            />
+          </div>
+
+          <div className="of-f">
+            <label>Comuna</label>
+            <input
+              type="text"
+              placeholder="Comuna"
+              value={nuevaOrden.comuna}
+              onChange={(e) => setNuevaOrden({...nuevaOrden, comuna: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
+              disabled={readOnly}
+              style={{ width: '100%' }}
+            />
+          </div>
         </div>
       </div>
+
 
       {/* Direcciones Extra / Sucursales oculto de momento: con Ciudad/Comuna ya
           disponibles en Otros Contactos, esta sección queda redundante. No
@@ -1289,148 +1240,10 @@ function OrdenFormCliente({
       </div>
       )}
 
-      <div style={{ marginTop: 6, paddingTop: 3, borderTop: '2px solid #cbd5e1' }} />
 
-      <div className="of-form-grid of-contacto-grid">
-        {clienteSeleccionado && (
-        <div ref={contactoDropdownRef} className="of-f" style={{ position: 'relative' }}>
-          <label style={{ color: 'var(--primary)' }}>
-            <Search size={11} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'text-bottom' }} />
-            Buscar Contacto
-          </label>
-          <input
-            type="text"
-            className="ot-search"
-            placeholder="Escriba para buscar contacto del cliente..."
-            value={busquedaContacto}
-            onChange={(e) => {
-              setBusquedaContacto(e.target.value);
-              setMostrarDropdownContacto(e.target.value.trim().length >= 2);
-            }}
-            onFocus={() => { if (busquedaContacto.trim().length >= 2) setMostrarDropdownContacto(true); }}
-            disabled={readOnly || contactosDisponibles.length === 0}
-            style={{
-              width: '100%',
-              padding: '2px 8px',
-              border: '1.5px solid var(--border)',
-              borderRadius: 'var(--radius-sm)',
-              fontSize: '.82rem',
-              background: 'white',
-              color: '#0D9488',
-              fontWeight: 600
-            }}
-          />
-
-          <div style={{ height: '6px' }} />
-
-          {mostrarDropdownContacto && (
-            <div style={{
-              position: 'absolute', top: '100%', left: 0, right: 0,
-              background: 'white', border: '1px solid var(--border)', borderTop: 'none',
-              borderRadius: '0 0 8px 8px', maxHeight: '200px', overflow: 'auto',
-              zIndex: 1000, boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-            }}>
-              {contactosFiltrados.length > 0 ? (
-                contactosFiltrados.map((c, idx) => (
-                  <div key={idx}
-                    onClick={() => seleccionarContactoBusqueda(c)}
-                    style={{ padding: '8px 10px', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--primary-light)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = 'white'; }}
-                  >
-                    <div style={{ fontWeight: '600', color: 'var(--text)', fontSize: '0.82rem' }}>
-                      {c.nombre}
-                      {!c.principal && <span style={{ fontWeight: '400', color: 'var(--text-muted)' }}> (adicional)</span>}
-                    </div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                      {c.email ? `✉ ${c.email}` : ''}{c.fono ? ` | Tel: ${c.fono}` : ''}{c.cargo ? ` | ${c.cargo}` : ''}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div style={{ padding: '12px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                  No se encontraron contactos
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-        )}
-
-        <div className="of-f">
-          <label>Contacto</label>
-          <input
-            type="text"
-            placeholder="Nombre del contacto"
-            value={nuevaOrden.contacto}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, contacto: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
-            disabled={readOnly}
-            style={{
-              width: '100%',
-              padding: '2px 8px',
-              border: '1.5px solid var(--border)',
-              borderRadius: '6px',
-              fontSize: '.82rem'
-            }}
-          />
-        </div>
-
-        <div className="of-f">
-          <label>Fono Contacto</label>
-          <input
-            type="tel"
-            placeholder="Teléfono del contacto"
-            value={nuevaOrden.fonoContacto}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, fonoContacto: e.target.value.replace(/[^0-9+]/g, '')})}
-            disabled={readOnly}
-            style={{
-              width: '100%',
-              padding: '2px 8px',
-              border: '1.5px solid var(--border)',
-              borderRadius: '6px',
-              fontSize: '.82rem'
-            }}
-          />
-        </div>
-
-        <div className="of-f">
-          <label>Email Contacto</label>
-          <input
-            type="email"
-            placeholder="Email del contacto"
-            value={nuevaOrden.emailContacto}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, emailContacto: e.target.value})}
-            disabled={readOnly}
-            style={{
-              width: '100%',
-              padding: '2px 8px',
-              border: '1.5px solid var(--border)',
-              borderRadius: '6px',
-              fontSize: '.82rem'
-            }}
-          />
-        </div>
-
-        <div className="of-f">
-          <label>Cargo Contacto</label>
-          <input
-            type="text"
-            placeholder="Cargo del contacto"
-            value={nuevaOrden.cargoContacto}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, cargoContacto: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
-            disabled={readOnly}
-            style={{
-              width: '100%',
-              padding: '2px 8px',
-              border: '1.5px solid var(--border)',
-              borderRadius: '6px',
-              fontSize: '.82rem'
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Contactos Extra (dinámicos) */}
+      {/* Contactos Extra (dinámicos) oculto: la OT muestra un solo contacto y se cambia con "Buscar Contacto".
+          No borrar el bloque: las OT antiguas conservan sus contactos adicionales en los datos. */}
+      {false && (
       <div style={{ marginTop: '10px', padding: '4px 10px', background: '#F0FDF4', border: '1px solid #7AD6EC', borderRadius: '8px', lineHeight: '1.2' }}>
         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer', fontSize: '0.8rem', width: 'fit-content', maxWidth: '100%' }}>
           {mostrarContactosExtra ? <ChevronUp size={14} style={{ color: 'var(--success)', flexShrink: 0 }} /> : <ChevronDown size={14} style={{ color: 'var(--success)', flexShrink: 0 }} />}
@@ -1775,6 +1588,7 @@ function OrdenFormCliente({
           </div>
         )}
       </div>
+      )}
     </div>
 
       <div style={{ marginTop: '10px', padding: '4px 10px', background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '8px', lineHeight: '1.2' }}>

@@ -1,10 +1,10 @@
-import { Package, Home, Users, Contact, MapPin, ClipboardList, FileText, FileSpreadsheet, ShoppingCart, UserCog, LogOut } from "lucide-react";
+import { MapPin, Home, Users, Contact, Package, ClipboardList, FileText, FileSpreadsheet, ShoppingCart, UserCog, LogOut } from "lucide-react";
 
-function HeaderEquipo({ navigate, onLogout }) {
+function HeaderDireccion({ navigate, onLogout }) {
   return (
     <div className="header" style={{ background: 'var(--gradient)', padding: '20px 32px', flexDirection: 'row', alignItems: 'center', gap: '16px' }}>
       <div className="header-left">
-        <h1 style={{ color: 'white' }}><Package size={28} /> Mantenedor de Equipos</h1>
+        <h1 style={{ color: 'white' }}><MapPin size={28} /> Mantenedor de Direcciones</h1>
       </div>
       <div className="nav-buttons" style={{ gap: '10px' }}>
         <button onClick={() => navigate("/home")} className="logout-btn" style={{ background: 'var(--gradient)', color: 'white' }}>
@@ -16,8 +16,8 @@ function HeaderEquipo({ navigate, onLogout }) {
         <button onClick={() => navigate("/contactos")} className="logout-btn" style={{ background: '#7C3AED', color: 'white' }}>
           <Contact size={18} /><span className="btn-label">Contactos</span>
         </button>
-        <button onClick={() => navigate("/direcciones")} className="logout-btn" style={{ background: '#0891B2', color: 'white' }}>
-          <MapPin size={18} /><span className="btn-label">Direcciones</span>
+        <button onClick={() => navigate("/equipos")} className="logout-btn" style={{ background: 'var(--success)', color: 'white' }}>
+          <Package size={18} /><span className="btn-label">Equipos</span>
         </button>
         <button onClick={() => navigate("/orden-trabajo")} className="logout-btn" style={{ background: 'var(--warning)', color: 'white' }}>
           <ClipboardList size={18} /><span className="btn-label">Orden de Trabajo</span>
@@ -42,4 +42,4 @@ function HeaderEquipo({ navigate, onLogout }) {
   );
 }
 
-export default HeaderEquipo;
+export default HeaderDireccion;

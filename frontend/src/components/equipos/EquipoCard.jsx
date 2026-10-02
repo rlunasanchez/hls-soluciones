@@ -4,7 +4,7 @@ function EquipoCard({ equipo, onVer, onEditar, onEliminar }) {
   return (
     <div key={equipo.id} className="data-card">
       <div className="data-card-header">
-        <strong>{equipo.codigo || equipo.equipo}</strong>
+        <strong>{equipo.equipo}</strong>
         <span className="badge badge-info">{equipo.marca} {equipo.modelo}</span>
       </div>
       <div className="data-card-row">
