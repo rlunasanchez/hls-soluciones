@@ -42,7 +42,7 @@ const CONFIG = {
 // Para reiniciarlo al cambiar de cliente, el padre le pasa una key distinta.
 // En la ficha del cliente se usa para vincular: excluirIds oculta lo ya vinculado y accionExtra
 // agrega un botón al lado ("Nuevo").
-function CampoCatalogo({ tipo, etiqueta, placeholder, deCliente = [], actual, datosRegistro, onElegir, onActualizado = () => {}, excluirIds = [], accionExtra = null, readOnly = false }) {
+function CampoCatalogo({ tipo, etiqueta, placeholder, deCliente = [], actual, datosRegistro, onElegir, onActualizado = () => {}, onEnCatalogo = null, excluirIds = [], accionExtra = null, readOnly = false }) {
   const cfg = CONFIG[tipo];
   const [texto, setTexto] = useState("");
   const [abierto, setAbierto] = useState(false);
@@ -63,6 +63,11 @@ function CampoCatalogo({ tipo, etiqueta, placeholder, deCliente = [], actual, da
   const enCatalogo = claveActual.length >= cfg.minExiste && existentes
     ? (existentes.find((r) => cfg.clave(r) === claveActual) || null)
     : undefined;
+
+  // Avisa al padre si lo de la OT ya está en el catálogo (true), no está (false) o aún se comprueba (null)
+  useEffect(() => {
+    if (onEnCatalogo) onEnCatalogo(enCatalogo === undefined ? null : !!enCatalogo);
+  }, [enCatalogo]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const propios = deCliente.filter((r) => !q || cfg.busqueda(r).includes(q));
   const yaEstan = new Set(deCliente.map(cfg.clave));

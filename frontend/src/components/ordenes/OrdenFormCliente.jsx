@@ -248,6 +248,70 @@ function OrdenFormCliente({
       }).filter((d) => d.direccion)
     : [];
 
+  // ¿El contacto / la dirección de la OT siguen vinculados a la ficha del cliente?
+  const contactoDesvinculado = !!clienteSeleccionado && !!normTxt(nuevaOrden.contacto)
+    && !contactosDisponibles.some((c) => normTxt(c.nombre) === normTxt(nuevaOrden.contacto));
+  const direccionDesvinculada = !!clienteSeleccionado && !!normTxt(nuevaOrden.direccion)
+    && !direccionesDelCliente.some((d) => normTxt(d.direccion) === normTxt(nuevaOrden.direccion));
+  const avisoDesvinculado = {
+    display: 'inline-flex', alignItems: 'center', gap: '8px',
+    background: 'var(--warning-light)', color: '#8A4B00', border: '1px solid color-mix(in srgb, var(--warning) 45%, white)',
+    borderRadius: 'var(--radius-sm)', padding: '2px 10px', fontSize: '.74rem', fontWeight: 600
+  };
+  const botonVincular = {
+    padding: '0 10px', height: '22px', marginRight: '-6px', border: 'none', borderRadius: '4px',
+    background: 'var(--primary)', color: 'white', fontSize: '.72rem', fontWeight: 600, cursor: 'pointer'
+  };
+
+  // Al abrir la OT (o al volver a la ventana) se vuelve a leer la ficha del cliente: los
+  // contactos y direcciones vinculados pueden haber cambiado desde que se cargó la lista,
+  // y de eso depende el aviso "ya no está vinculado".
+  useEffect(() => {
+    const id = clienteSeleccionado?.id;
+    if (!id || readOnly) return undefined;
+    let vigente = true;
+    const refrescar = async () => {
+      try {
+        const { data } = await api.get(`/api/clientes/${id}`);
+        if (!vigente || !data || !setClienteSeleccionado) return;
+        setClienteSeleccionado((prev) => (
+          prev && prev.id === id && (prev.contactos !== data.contactos || prev.direcciones !== data.direcciones
+            || prev.contacto_nombre !== data.contacto_nombre) ? data : prev
+        ));
+      } catch { /* se queda con los datos que ya hay */ }
+    };
+    refrescar();
+    window.addEventListener("focus", refrescar);
+    return () => { vigente = false; window.removeEventListener("focus", refrescar); };
+  }, [clienteSeleccionado?.id, readOnly]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Vincula al cliente el contacto / dirección que la OT ya tiene: se reutiliza el del
+  // catálogo si existe (por nombre / dirección) o se crea, y se enlaza a la ficha.
+  const [vinculando, setVinculando] = useState(false);
+  // ¿Lo que tiene la OT ya está en el catálogo? Vincular solo se ofrece después de Registrar.
+  const [contactoRegistrado, setContactoRegistrado] = useState(null);
+  const [direccionRegistrada, setDireccionRegistrada] = useState(null);
+  const vincularAlCliente = async (tipo) => {
+    if (!clienteSeleccionado?.id || vinculando) return;
+    setVinculando(true);
+    try {
+      const esContacto = tipo === "contactos";
+      const body = esContacto
+        ? { nombre: nuevaOrden.contacto, email: nuevaOrden.emailContacto, fono: nuevaOrden.fonoContacto, cargo: nuevaOrden.cargoContacto, reutilizar: true }
+        : { direccion: nuevaOrden.direccion, ciudad: nuevaOrden.ciudad, comuna: nuevaOrden.comuna, reutilizar: true };
+      const { data } = await api.post(`/api/${tipo}`, body);
+      await api.post(`/api/clientes/${clienteSeleccionado.id}/${tipo}`, esContacto ? { contacto_id: data.id } : { direccion_id: data.id });
+      const lista = await api.get("/api/clientes");
+      if (onClientesRefresh) onClientesRefresh(lista.data);
+      const actualizado = lista.data.find((c) => c.id === clienteSeleccionado.id);
+      if (actualizado && setClienteSeleccionado) setClienteSeleccionado(actualizado);
+    } catch (err) {
+      alert(err.response?.data?.msg || "Error al vincular al cliente.");
+    } finally {
+      setVinculando(false);
+    }
+  };
+
   const abrirEditarCliente = async (soloCliente = false) => {
     setEditarSoloCliente(soloCliente);
     let fresh = clienteSeleccionado;
@@ -760,6 +824,7 @@ function OrdenFormCliente({
             datosRegistro={{ nombre: nuevaOrden.contacto, email: nuevaOrden.emailContacto, fono: nuevaOrden.fonoContacto, cargo: nuevaOrden.cargoContacto }}
             onElegir={contactoEnOT}
             onActualizado={contactoEnOT}
+            onEnCatalogo={setContactoRegistrado}
           />
         <CampoCatalogo
           key={`direcciones-${clienteSeleccionado?.id || "sin-cliente"}`}
@@ -772,8 +837,38 @@ function OrdenFormCliente({
           datosRegistro={{ direccion: nuevaOrden.direccion, ciudad: nuevaOrden.ciudad, comuna: nuevaOrden.comuna }}
           onElegir={direccionEnOT}
           onActualizado={direccionEnOT}
+          onEnCatalogo={setDireccionRegistrada}
         />
       </div>
+
+      {/* La OT conserva su copia del contacto y la dirección; si ya no están vinculados al
+          cliente (se quitaron de su ficha) se avisa, sin borrar nada. */}
+      {clienteSeleccionado && (contactoDesvinculado || direccionDesvinculada) && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '10px' }}>
+          {contactoDesvinculado && (
+            <span style={avisoDesvinculado}>
+              ⚠ Este contacto ya no está vinculado al cliente
+              {!readOnly && contactoRegistrado === false && " (primero Regístralo)"}
+              {!readOnly && contactoRegistrado === true && (
+                <button type="button" disabled={vinculando} onClick={() => vincularAlCliente("contactos")} style={botonVincular}>
+                  Vincular al cliente
+                </button>
+              )}
+            </span>
+          )}
+          {direccionDesvinculada && (
+            <span style={avisoDesvinculado}>
+              ⚠ Esta dirección ya no está vinculada al cliente
+              {!readOnly && direccionRegistrada === false && " (primero Regístrala)"}
+              {!readOnly && direccionRegistrada === true && (
+                <button type="button" disabled={vinculando} onClick={() => vincularAlCliente("direcciones")} style={botonVincular}>
+                  Vincular al cliente
+                </button>
+              )}
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Datos del contacto */}
       <div className="of-caja">

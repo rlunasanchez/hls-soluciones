@@ -25,7 +25,11 @@ api.interceptors.response.use(
     // para que la próxima lectura vaya a la red en vez de servir datos viejos.
     const metodo = (response.config?.method || 'get').toLowerCase();
     if (metodo !== 'get') {
-      invalidar(prefijoRecurso(response.config?.url));
+      const prefijo = prefijoRecurso(response.config?.url);
+      invalidar(prefijo);
+      // Contactos y Direcciones están vinculados a los clientes (borrar o cambiar uno
+      // modifica la ficha de sus clientes): el listado de clientes también queda viejo.
+      if (prefijo === '/api/contactos' || prefijo === '/api/direcciones') invalidar('/api/clientes');
     }
     return response;
   },
