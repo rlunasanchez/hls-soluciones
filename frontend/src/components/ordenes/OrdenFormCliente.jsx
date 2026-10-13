@@ -197,7 +197,6 @@ function OrdenFormCliente({
   const contactosDisponibles = (() => {
     if (!clienteSeleccionado) return [];
     const principalNombre = String(clienteSeleccionado.contacto_nombre || "").toUpperCase().trim();
-    const principalEmail = String(clienteSeleccionado.contacto_email || "").toUpperCase().trim();
     const extras = String(clienteSeleccionado.contactos || "")
       .split(";;")
       .map((c) => {
@@ -205,13 +204,9 @@ function OrdenFormCliente({
         return { nombre: (p[0] || "").toUpperCase().trim(), email: p[1] || "", fono: p[2] || "", cargo: p[3] || "" };
       })
       .filter((c) => c.nombre)
-      .filter((c) => {
-        const n = c.nombre.toUpperCase().trim();
-        const e = (c.email || "").toUpperCase().trim();
-        if (principalNombre && n === principalNombre) return false;
-        if (principalEmail && e && e === principalEmail) return false;
-        return true;
-      });
+      // El principal ya no viene repetido en la lista, pero por si acaso se descarta por NOMBRE.
+      // No por correo: contactos distintos pueden compartir el mismo email.
+      .filter((c) => !(principalNombre && c.nombre.toUpperCase().trim() === principalNombre));
     const principal = principalNombre
       ? [{
           nombre: principalNombre,

@@ -43,7 +43,9 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
       if (err.name !== "CanceledError") console.error("Error al cargar vínculos:", err);
     });
     return () => controller.abort();
-  }, [clienteEditando?.id]);
+    // Depende del objeto (no solo del id): tras "Guardar Cambios" el padre entrega el cliente
+    // refrescado y hay que volver a leer los vínculos (el check "En la OT" ya se desmarcó en el servidor).
+  }, [clienteEditando]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (clienteEditando) {

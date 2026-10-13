@@ -1969,3 +1969,19 @@ Verificado con `node --check backend/routes/cotizaciones.js` y `npm run build` e
 **Migración SQL en Neon:** ejecutada a mano por el usuario (`ALTER TABLE cotizaciones ADD COLUMN IF NOT EXISTS contactos_extra TEXT;`).
 
 **Verificación:** `npm run build` OK; probado en el navegador por el usuario (agregar/guardar/PDF).
+
+---
+
+## Cambios Recientes (13 Octubre 2026)
+
+### 70. Contactos y Direcciones como catálogos vinculados al cliente (v2.156–v2.160)
+Detalle completo en `CAMBIOS.md` (entradas 2026-10-13 y 2026-10-02). Resumen para retomar el trabajo:
+
+- **Modelo:** `contactos` y `direcciones` son catálogos globales (mantenedores propios, códigos `CO-` / `DI-`). Se vinculan a cada cliente con `cliente_contactos` y `cliente_direcciones` (`orden`, `a_ot`). Un contacto o dirección puede estar en varios clientes; el buscador de la ficha avisa "(ya es de CL-XXXX)" y deja agregarlo tras confirmar.
+- **Check "En la OT":** es de un solo uso; sin marca no viaja nada a la OT (se eligen con "Buscar Contacto" / "Buscar Dirección").
+- **La OT guarda una copia** del contacto y la dirección. Si ya no están vinculados al cliente se muestra un aviso ámbar; tras **Registrar** en el catálogo aparece **Vincular al cliente**.
+- **Borrar** un contacto/dirección del catálogo lo quita de todos los clientes: el servidor responde 409 con la lista y el mantenedor pide confirmar (`?forzar=1`).
+- **Caché:** `services/api.js` invalida `/api/clientes` cuando se escribe en contactos o direcciones.
+- **Base antigua:** el sistema original (SQL Server, base `ods`) está documentado en `BASE_DATOS_ANTIGUA.md`. Dato clave: el 24% de sus OT perdió el contacto por guardar solo el id.
+- **Neon:** `backend/migracion_neon_2026-10-13.sql` (aditiva, repetible, con copia de datos). Falta portar `contactos.js`, `direcciones.js`, `clientes.js`, `ordenes.js` y `server.js` a PostgreSQL en `deploy/cloud`.
+- **Git:** trabajar solo con commits locales; no hacer `git push` ni cambiar de rama sin orden expresa. Respaldo del `main` anterior en la rama local `respaldo/main-2026-10-13`.

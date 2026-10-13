@@ -1,5 +1,62 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-10-13 (solo local — la nube no se tocó)
+
+### v2.157–v2.160: Contactos y direcciones de la OT cuando se quitan del cliente, avisos de vínculos y migración para Neon
+
+**Rama:** `vinculos-sobre-origin-main` (después llevada a `main`, ver "Git" abajo). Continúa v2.156.
+
+#### Reglas de diseño acordadas
+
+- **La OT guarda una copia (snapshot)** del contacto y la dirección elegidos. Si después se quitan del cliente, la OT los sigue mostrando (es un documento histórico). Motivo, visto en la base antigua (`BASE_DATOS_ANTIGUA.md`): allí la OT guardaba solo el `id` y **3.507 de 14.581 órdenes (24%) quedaron apuntando a un contacto que ya no existía**.
+- **Un contacto o dirección puede estar en varios clientes.** El buscador de la ficha avisa "(ya es de CL-XXXX)" y pregunta si se agrega igual. (En v2.158 se había bloqueado en el servidor; se retiró en v2.159 a pedido: "que avise pero que me deje agregarlo".)
+- **Borrar un contacto/dirección del catálogo** lo quita de **todos** los clientes (`ON DELETE CASCADE`). Ahora el servidor responde 409 con la lista de clientes afectados y el mantenedor pide confirmar (`?forzar=1`).
+- **Sin check "En la OT" no viaja nada** (sin cambios respecto de v2.156): la OT se abre con Contacto y Dirección vacíos y se eligen con "Buscar Contacto" / "Buscar Dirección".
+
+#### Cómo funciona ahora (OT)
+
+1. Si el contacto o la dirección de la OT ya **no está entre los vinculados al cliente** aparece un aviso ámbar: "ya no está vinculado al cliente".
+2. Si además **no existe en el catálogo**, el buscador muestra **Registrar** y el aviso dice "(primero Regístralo)".
+3. Tras registrar aparece el botón **Vincular al cliente** (azul). Reutiliza el registro del catálogo si existe (por nombre / dirección) y lo vincula a la ficha. El aviso desaparece.
+4. La ficha del cliente se vuelve a leer al abrir la OT y al volver a la ventana (evita datos viejos si el contacto se borró en otro lado).
+
+#### Errores corregidos
+
+- **Aviso "no vinculado" falso al cambiar el contacto marcado:** `OrdenFormCliente.jsx` descartaba como "repetido" a cualquier contacto con el **mismo correo** que el principal. Si dos contactos compartían email (p. ej. un correo genérico de la empresa), uno desaparecía de la lista. Ahora solo se compara por nombre.
+- **El check "En la OT" quedaba marcado en la ficha tras "Guardar Cambios":** `ClienteFormulario.jsx` cargaba los vínculos solo cuando cambiaba el `id` del cliente; ahora depende del objeto y los recarga (el servidor ya había desmarcado el check).
+- **Caché de clientes viejo al borrar un contacto/dirección:** `services/api.js` invalidaba solo `/api/contactos`; ahora una escritura en contactos o direcciones invalida también `/api/clientes` (TTL de 60 s).
+
+#### Archivos
+
+- **Frontend:** `components/ordenes/OrdenFormCliente.jsx` (aviso, Vincular, refresco de ficha, filtro de email), `components/comunes/CampoCatalogo.jsx` (callback `onEnCatalogo`, nota "(ya es de …)" y confirmación), `components/clientes/VinculosCliente.jsx` y `ClienteFormulario.jsx` (dueños, recarga de vínculos), `pages/Contactos.jsx` y `pages/Direcciones.jsx` (confirmación al borrar con clientes), `services/api.js` (invalidación).
+- **Backend:** `routes/contactos.js` y `routes/direcciones.js` (el listado incluye `duenos` = `id:codigo` de los clientes vinculados; `DELETE` devuelve 409 si hay clientes, `?forzar=1` confirma), `routes/clientes.js` (manejo de errores 400 con `err.http`).
+- **Nuevos:** `BASE_DATOS_ANTIGUA.md` (esquema del sistema antiguo SQL Server, hallazgos y equivalencias), `backend/migracion_neon_2026-10-13.sql` (migración PostgreSQL, ver abajo).
+
+#### Base de datos de la nube (Neon / PostgreSQL)
+
+`backend/migracion_neon_2026-10-13.sql` equivale a las dos migraciones MySQL (`2026-09-25` y `2026-10-01`) **más la copia de los datos** actuales de Neon. Es aditiva (no borra ni cambia nada), segura de repetir y se probó en un PostgreSQL real (pglite) con datos de ejemplo.
+
+1. Crea `contactos`, `direcciones`, `cliente_contactos` y `cliente_direcciones` (con `ON DELETE CASCADE`).
+2. Agrega 6 columnas a `ordenes_trabajo` y 6 a `cotizaciones`: `contacto_id`, `contacto_direccion`, `contacto_ciudad`, `contacto_comuna`, `direccion_id`, `cliente_direccion_id`.
+3. **Copia** los contactos de `clientes_contactos` y `clientes.contacto_*` al catálogo `contactos` (un nombre = un contacto, sin distinguir mayúsculas, mínimo 3 letras) y los vincula; igual con `clientes_direcciones` → `direcciones` (mínimo 5 caracteres). Todos los vínculos nacen con `a_ot = 0`.
+4. No borra `clientes_contactos`, `clientes_direcciones` ni `clientes.contacto_*` (respaldo). Se pierden el tipo (Matriz/Sucursal) y el fono de cada dirección, que el catálogo nuevo no guarda.
+5. **Importante:** la migración sola no activa nada en la web. Falta portar a PostgreSQL `routes/contactos.js`, `direcciones.js`, `clientes.js` y `ordenes.js`, y registrar las rutas en `server.js` de la rama `deploy/cloud`. Como la migración es aditiva, el código actual de la nube sigue funcionando mientras tanto.
+
+#### Pendiente
+
+- Portar el backend a PostgreSQL en `deploy/cloud` y publicar (en Vercel, "Promote to Production").
+- Cotizaciones: adaptarla a los checks "En la OT" y a los botones Editar / Registrar.
+- Informes y Orden de Compra siguen vacíos (el sistema antiguo tenía orden de compra con detalle y factura con pagos; ver `BASE_DATOS_ANTIGUA.md`).
+- Importar datos históricos del sistema antiguo (14.581 OT, 5.698 contactos), si se desea.
+- No se probó la interfaz de estos cambios en un navegador automatizado; se probó a mano por el usuario.
+
+#### Git
+
+- Se hicieron 4 pushes a `origin/vinculos-sobre-origin-main` (`0637ec1`, `036ae77`, `e548049`, `50a169b`) antes de que se indicara que el trabajo debía quedar solo local. `main` y `deploy/cloud` remotos no se tocaron. **Desde ahora, solo commits locales.**
+- Respaldo del `main` anterior: rama local `respaldo/main-2026-10-13` (apunta a `a06a8f9`).
+
+---
+
 ## Fecha: 2026-10-02 (solo local — no subido a GitHub ni a la nube)
 
 ### v2.156: Cliente con varios contactos y direcciones, check "En la OT", OT según boceto y componentes compartidos
