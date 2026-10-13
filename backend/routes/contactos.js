@@ -113,6 +113,16 @@ router.put("/:id", authMiddleware, async (req, res) => {
 router.delete("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
   try {
+    // Un contacto del catálogo puede estar vinculado a varios clientes; borrarlo se los
+    // quita a todos. Sin ?forzar=1 se avisa primero qué clientes lo usan.
+    if (!req.query.forzar) {
+      const [usados] = await pool.query(
+        `SELECT cl.codigo, cl.razon_social FROM cliente_contactos v JOIN clientes cl ON cl.id = v.cliente_id
+         WHERE v.contacto_id = ? ORDER BY cl.razon_social`, [id]);
+      if (usados.length > 0) {
+        return res.status(409).json({ msg: "El contacto está vinculado a clientes", clientes: usados });
+      }
+    }
     await pool.query("DELETE FROM contactos WHERE id = ?", [id]);
     res.json({ msg: "Contacto eliminado" });
   } catch (err) {

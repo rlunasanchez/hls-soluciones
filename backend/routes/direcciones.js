@@ -118,6 +118,16 @@ router.put("/:id", authMiddleware, async (req, res) => {
 router.delete("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
   try {
+    // Una dirección del catálogo puede estar vinculada a varios clientes; borrarla se la
+    // quita a todos. Sin ?forzar=1 se avisa primero qué clientes la usan.
+    if (!req.query.forzar) {
+      const [usados] = await pool.query(
+        `SELECT cl.codigo, cl.razon_social FROM cliente_direcciones v JOIN clientes cl ON cl.id = v.cliente_id
+         WHERE v.direccion_id = ? ORDER BY cl.razon_social`, [id]);
+      if (usados.length > 0) {
+        return res.status(409).json({ msg: "La dirección está vinculada a clientes", clientes: usados });
+      }
+    }
     await pool.query("DELETE FROM direcciones WHERE id = ?", [id]);
     res.json({ msg: "Dirección eliminada" });
   } catch (err) {

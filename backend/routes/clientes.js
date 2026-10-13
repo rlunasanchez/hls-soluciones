@@ -76,8 +76,30 @@ function idsValidos(v) {
 // el primero es el principal)
 // aOtId = el contacto/dirección marcado "En la OT": un id lo marca, null deja
 // ninguno, undefined conserva el que ya estaba marcado (si sigue vinculado).
+// Un contacto pertenece a un solo cliente: devuelve (para un error 400) el primero de los
+// `ids` que ya está vinculado a OTRO cliente, o null si todos están libres.
+async function contactoDeOtroCliente(conn, clienteId, ids) {
+  if (ids.length === 0) return null;
+  const [rows] = await conn.query(
+    `SELECT co.nombre, cl.codigo, cl.razon_social FROM cliente_contactos v
+     JOIN contactos co ON co.id = v.contacto_id JOIN clientes cl ON cl.id = v.cliente_id
+     WHERE v.contacto_id IN (?) AND v.cliente_id <> ? LIMIT 1`, [ids, clienteId]);
+  return rows[0] || null;
+}
+const errorContactoAjeno = (o) => Object.assign(
+  new Error(`El contacto ${o.nombre} ya pertenece al cliente ${o.codigo} ${o.razon_social}. Un contacto solo puede estar en un cliente.`),
+  { http: 400 });
+
 async function sincronizarVinculos(conn, clienteId, tipo, ids, aOtId) {
   const { tabla, columna } = VINCULOS[tipo];
+  if (tipo === "contactos") {
+    // Solo se revisan los contactos que este cliente aún no tenía: así un cliente con
+    // contactos compartidos de antes puede seguir guardándose.
+    const [actuales] = await conn.query(`SELECT ${columna} AS ref FROM ${tabla} WHERE cliente_id = ?`, [clienteId]);
+    const yaTenia = new Set(actuales.map((r) => Number(r.ref)));
+    const ajeno = await contactoDeOtroCliente(conn, clienteId, ids.filter((id) => !yaTenia.has(Number(id))));
+    if (ajeno) throw errorContactoAjeno(ajeno);
+  }
   if (aOtId === undefined) {
     const [prev] = await conn.query(`SELECT ${columna} AS ref FROM ${tabla} WHERE cliente_id = ? AND a_ot = 1`, [clienteId]);
     aOtId = prev[0]?.ref;
@@ -236,6 +258,10 @@ router.post("/:id/:tipo(contactos|direcciones)", authMiddleware, async (req, res
     const { tabla, columna } = VINCULOS[req.params.tipo];
     const refId = Number(req.body[columna]);
     if (!Number.isInteger(refId) || refId <= 0) return res.status(400).json({ msg: "Registro inválido" });
+    if (req.params.tipo === "contactos") {
+      const ajeno = await contactoDeOtroCliente(pool, req.params.id, [refId]);
+      if (ajeno) return res.status(400).json({ msg: errorContactoAjeno(ajeno).message });
+    }
     await pool.query(
       `INSERT IGNORE INTO ${tabla} (cliente_id, ${columna}, orden)
        SELECT ?, ?, IFNULL(MAX(orden) + 1, 0) FROM ${tabla} WHERE cliente_id = ?`,
@@ -315,6 +341,7 @@ router.post("/", authMiddleware, async (req, res) => {
       connection.release();
     }
   } catch (err) {
+    if (err.http) return res.status(err.http).json({ msg: err.message });
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
   }
@@ -375,6 +402,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
     res.json({ msg: "Cliente actualizado", codigo });
   } catch (err) {
     await connection.rollback();
+    if (err.http) return res.status(err.http).json({ msg: err.message });
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
   } finally {

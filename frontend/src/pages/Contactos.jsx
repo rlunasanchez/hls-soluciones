@@ -76,7 +76,15 @@ function Contactos() {
   const eliminarContacto = async (id) => {
     if (!window.confirm("¿Eliminar este contacto?")) return;
     try {
-      await api.delete(`/api/contactos/${id}`);
+      try {
+        await api.delete(`/api/contactos/${id}`);
+      } catch (err) {
+        // Vinculado a clientes: se muestra cuáles y se pide confirmar antes de quitárselo a todos
+        if (err.response?.status !== 409) throw err;
+        const lista = err.response.data.clientes.map((c) => `• ${c.codigo} ${c.razon_social}`).join("\n");
+        if (!window.confirm(`Este contacto está vinculado a ${err.response.data.clientes.length} cliente(s):\n\n${lista}\n\nSi lo eliminas, desaparece de todos ellos. ¿Eliminar de todos modos?`)) return;
+        await api.delete(`/api/contactos/${id}?forzar=1`);
+      }
       fetchContactos();
     } catch (err) {
       alert("Error al eliminar");

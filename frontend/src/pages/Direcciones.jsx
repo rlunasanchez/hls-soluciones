@@ -76,7 +76,15 @@ function Direcciones() {
   const eliminarDireccion = async (id) => {
     if (!window.confirm("¿Eliminar esta dirección?")) return;
     try {
-      await api.delete(`/api/direcciones/${id}`);
+      try {
+        await api.delete(`/api/direcciones/${id}`);
+      } catch (err) {
+        // Vinculada a clientes: se muestra cuáles y se pide confirmar antes de quitársela a todos
+        if (err.response?.status !== 409) throw err;
+        const lista = err.response.data.clientes.map((c) => `• ${c.codigo} ${c.razon_social}`).join("\n");
+        if (!window.confirm(`Esta dirección está vinculada a ${err.response.data.clientes.length} cliente(s):\n\n${lista}\n\nSi la eliminas, desaparece de todos ellos. ¿Eliminar de todos modos?`)) return;
+        await api.delete(`/api/direcciones/${id}?forzar=1`);
+      }
       fetchDirecciones();
     } catch (err) {
       alert("Error al eliminar");
