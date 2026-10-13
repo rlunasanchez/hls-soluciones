@@ -64,10 +64,7 @@ cd backend && node crear-admin.js        # crea el usuario admin con ADMIN_PASSW
 | `cliente_direcciones` | Vínculo cliente ↔ dirección (`orden`, `a_ot`) — **nueva** |
 | `equipos`, `ordenes_trabajo`, `cotizaciones`, `usuarios` | Igual que antes |
 
-Si ya tienes una base creada con el **esquema antiguo** (con `clientes_contactos` y `clientes_direcciones`), no uses `crear_tablas.sql`: corre en este orden
-`backend/migracion_2026-09-25_contactos_direcciones.sql` y luego `backend/migracion_2026-10-01_cliente_vinculos.sql`.
-
-No hay migración de datos: las tablas nacen vacías y los contactos y direcciones se vinculan a cada cliente desde su ficha.
+Las tablas nacen vacías y los contactos y direcciones se vinculan a cada cliente desde su ficha. Si una base vieja tiene el esquema antiguo, lo más simple es crear una base nueva con `crear_tablas.sql`.
 
 ## 6. Levantar el proyecto
 
