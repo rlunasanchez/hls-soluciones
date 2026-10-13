@@ -1,0 +1,29 @@
+/* Botones de ficha: una sola definición para Cliente (cf), Contacto (cof), Dirección (dif) y OT (of).
+   p = principal (guardar), s = secundario (guardar y seguir), c = cancelar. */
+.cf-btn-p,.cof-btn-p,.dif-btn-p,.of-btn-p{padding:4px 12px;font-size:.78rem;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px;transition:all .2s}
+.cf-btn-p:hover,.cof-btn-p:hover,.dif-btn-p:hover,.of-btn-p:hover{background:#0a3d75}
+.cf-btn-s,.cof-btn-s,.dif-btn-s,.of-btn-s{padding:4px 12px;font-size:.78rem;background:var(--success);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px;transition:all .2s}
+.cf-btn-s:hover,.cof-btn-s:hover,.dif-btn-s:hover,.of-btn-s:hover{filter:brightness(.92)}
+.cf-btn-c,.cof-btn-c,.dif-btn-c,.of-btn-c{padding:4px 12px;font-size:.78rem;background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px;transition:all .2s}
+.cf-btn-c:hover,.cof-btn-c:hover,.dif-btn-c:hover,.of-btn-c:hover{background:#e2e8f0}
+.cf-btn-p:disabled,.cof-btn-p:disabled,.dif-btn-p:disabled,.of-btn-p:disabled,
+.cf-btn-s:disabled,.cof-btn-s:disabled,.dif-btn-s:disabled,.of-btn-s:disabled{opacity:.6;cursor:not-allowed}
+
+/* Botón mini (Editar / Registrar / Editar completo): el mismo tamaño en el cliente, el contacto y la dirección */
+.btn-mini{display:flex;align-items:center;gap:4px;flex-shrink:0;height:24px;padding:2px 10px;border:none;border-radius:var(--radius-sm);color:#fff;cursor:pointer;font-weight:600;font-size:.75rem;white-space:nowrap}
+.btn-mini--warning{background:var(--warning)}
+.btn-mini--success{background:var(--success)}
+.btn-mini--principal{background:var(--primary)}
+.btn-mini--neutro{background:#f1f5f9;color:#334155;border:1px solid #e2e8f0}
+
+/* Botón para sacar algo de una lista (no lo elimina del mantenedor): discreto hasta que se acerca el mouse */
+.btn-quitar{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border:1.5px solid transparent;border-radius:var(--radius-sm);background:transparent;color:#94a3b8;cursor:pointer;transition:color .15s,background .15s,border-color .15s}
+.btn-quitar:hover,.btn-quitar:focus-visible{color:#dc2626;background:#fef2f2;border-color:#fecaca;outline:none}
+.quitar-aviso{position:fixed;z-index:10000;transform:translate(-50%,9px);display:flex;flex-direction:column;gap:3px;width:max-content;max-width:260px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff;color:var(--text);font-size:.78rem;line-height:1.4;box-shadow:0 8px 22px rgba(12,74,140,.18);animation:aviso-entra .12s ease-out}
+.quitar-aviso strong{font-weight:600;color:var(--primary)}
+.quitar-aviso span{color:var(--text-muted)}
+.quitar-aviso::before{content:"";position:absolute;bottom:100%;left:calc(50% + var(--flecha,0px));margin-left:-6px;border:6px solid transparent;border-bottom-color:var(--border)}
+.quitar-aviso::after{content:"";position:absolute;bottom:100%;left:calc(50% + var(--flecha,0px));margin-left:-5px;margin-bottom:-1px;border:5px solid transparent;border-bottom-color:#fff}
+.quitar-aviso-botones{display:flex;justify-content:flex-end;gap:6px;margin-top:6px}
+@keyframes aviso-entra{from{opacity:0;transform:translate(-50%,4px)}to{opacity:1;transform:translate(-50%,9px)}}
+@media (prefers-reduced-motion:reduce){.quitar-aviso{animation:none}.btn-quitar{transition:none}}

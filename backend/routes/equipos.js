@@ -74,17 +74,17 @@ router.post("/", authMiddleware, async (req, res) => {
     insumo1, insumo2, insumo3, insumo4, insumo5, insumo6,
     insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia, actividad, observaciones } = req.body;
   try {
-    if (!equipo || !equipo.trim() || !marca || !marca.trim() || !modelo || !modelo.trim()) {
-      return res.status(400).json({ msg: "Complete Equipo, Marca y Modelo antes de guardar" });
+    if (!equipo || equipo.trim().length < 2) {
+      return res.status(400).json({ msg: "Ingrese el Equipo (mínimo 2 caracteres) antes de guardar" });
     }
     const dupResult = await pool.query(
       `SELECT codigo FROM equipos
-      WHERE LOWER(TRIM(equipo)) = LOWER($1) AND LOWER(TRIM(marca)) = LOWER($2) AND LOWER(TRIM(modelo)) = LOWER($3)
+      WHERE LOWER(TRIM(equipo)) = LOWER($1) AND LOWER(TRIM(COALESCE(marca,''))) = LOWER($2) AND LOWER(TRIM(COALESCE(modelo,''))) = LOWER($3)
       LIMIT 1`,
-      [equipo.trim(), marca.trim(), modelo.trim()]
+      [equipo.trim(), (marca || '').trim(), (modelo || '').trim()]
     );
     if (dupResult.rows.length > 0) {
-      return res.status(400).json({ msg: `El equipo ${equipo.trim()} ${marca.trim()} ${modelo.trim()} ya existe en el mantenedor con el código ${dupResult.rows[0].codigo}. No se creó un nuevo registro.` });
+      return res.status(400).json({ msg: `El equipo ${equipo.trim()} ${(marca || '').trim()} ${(modelo || '').trim()} ya existe en el mantenedor con el código ${dupResult.rows[0].codigo}. No se creó un nuevo registro.` });
     }
     const codigo = await generarCodigo();
     await pool.query(
@@ -92,7 +92,7 @@ router.post("/", authMiddleware, async (req, res) => {
         insumo1, insumo2, insumo3, insumo4, insumo5, insumo6,
         insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia, actividad, observaciones)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)`,
-      [codigo, cliente_id || null, equipo, modelo, marca, serie || null, contador_pag || 0, nivel_tintas || null,
+      [codigo, cliente_id || null, equipo.trim(), modelo || '', marca || '', serie || null, contador_pag || 0, nivel_tintas || null,
         insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null,
         insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null,
         insumo9 || null, insumo10 || null, insumo11 || null, insumo12 || null, averia || null,
@@ -111,8 +111,8 @@ router.put("/:id", authMiddleware, async (req, res) => {
     insumo1, insumo2, insumo3, insumo4, insumo5, insumo6,
     insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia, actividad, observaciones } = req.body;
   try {
-    if (!equipo || !equipo.trim() || !marca || !marca.trim() || !modelo || !modelo.trim()) {
-      return res.status(400).json({ msg: "Complete Equipo, Marca y Modelo antes de guardar" });
+    if (!equipo || equipo.trim().length < 2) {
+      return res.status(400).json({ msg: "Ingrese el Equipo (mínimo 2 caracteres) antes de guardar" });
     }
     const result = await pool.query("SELECT codigo FROM equipos WHERE id = $1", [id]);
     let codigo = result.rows[0]?.codigo;
@@ -128,7 +128,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
           insumo1 = $9, insumo2 = $10, insumo3 = $11, insumo4 = $12, insumo5 = $13, insumo6 = $14,
           insumo7 = $15, insumo8 = $16, insumo9 = $17, insumo10 = $18, insumo11 = $19, insumo12 = $20,
           averia = $21, actividad = $22, observaciones = $23 WHERE id = $24`,
-        [codigo, equipo, modelo, marca, serie, contador_pag || 0, nivel_tintas, cliente_id || null,
+        [codigo, equipo.trim(), modelo || '', marca || '', serie, contador_pag || 0, nivel_tintas, cliente_id || null,
           insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null,
           insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null,
           insumo9 || null, insumo10 || null, insumo11 || null, insumo12 || null, averia || null,

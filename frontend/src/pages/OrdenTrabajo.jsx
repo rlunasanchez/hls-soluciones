@@ -191,11 +191,11 @@ function OrdenTrabajo() {
         const numeroOt = await calcularSiguienteNumeroOrden();
         setEditingId(null);
         setClienteSeleccionado(clienteFromNav);
-        setClienteFijo(true);
+        setClienteFijo(false);
         setClienteInactivo(false);
         setEquipoSeleccionado(null);
         setEquipoFijo(false);
-        setBusquedaCliente((clienteFromNav.razon_social || "").toUpperCase());
+        setBusquedaCliente("");
     setBusquedaModelo("");
     setEquiposModeloSugeridos([]);
         setInsumos([
@@ -217,9 +217,10 @@ function OrdenTrabajo() {
         fechaCompra: "",
         fechaCompraCheck: false,
         cliente: (clienteFromNav.razon_social || "").toUpperCase(),
-        direccion: (clienteFromNav.direccion || "").toUpperCase(),
-        ciudad: (clienteFromNav.ciudad || "").toUpperCase(),
-        comuna: (clienteFromNav.comuna || "").toUpperCase(),
+        // Desde el botón OT del cliente viaja solo lo marcado "En la OT" (sin marca, vacío)
+        direccion: (clienteFromNav.ot_direccion || "").toUpperCase(),
+        ciudad: (clienteFromNav.ot_ciudad || "").toUpperCase(),
+        comuna: (clienteFromNav.ot_comuna || "").toUpperCase(),
         rut: clienteFromNav.rut || "",
         email: clienteFromNav.email || "",
         fonoPrincipal: clienteFromNav.telefono || "",
@@ -461,7 +462,7 @@ function OrdenTrabajo() {
     if (cl) {
       setClienteSeleccionado(cl);
       setClienteInactivo(false);
-      setBusquedaCliente((cl.razon_social || orden.cliente || "").toUpperCase());
+      setBusquedaCliente("");
     } else if (orden.cliente_id) {
       try {
         const resCli = await getCached(`/api/clientes`);
@@ -469,21 +470,21 @@ function OrdenTrabajo() {
         if (clFresco) {
           setClienteSeleccionado(clFresco);
           setClienteInactivo(false);
-          setBusquedaCliente((clFresco.razon_social || orden.cliente || "").toUpperCase());
+          setBusquedaCliente("");
         } else {
           setClienteSeleccionado(null);
           setClienteInactivo(true);
-          setBusquedaCliente((orden.cliente || "").toUpperCase());
+          setBusquedaCliente("");
         }
       } catch {
         setClienteSeleccionado(null);
         setClienteInactivo(true);
-        setBusquedaCliente((orden.cliente || "").toUpperCase());
+        setBusquedaCliente("");
       }
     } else {
       setClienteSeleccionado(null);
       setClienteInactivo(!!orden.cliente_id);
-      setBusquedaCliente((orden.cliente || "").toUpperCase());
+      setBusquedaCliente("");
     }
 
     // Cargar insumos
@@ -571,7 +572,7 @@ function OrdenTrabajo() {
     if (cl) {
       setClienteSeleccionado(cl);
       setClienteInactivo(false);
-      setBusquedaCliente((cl.razon_social || orden.cliente || "").toUpperCase());
+      setBusquedaCliente("");
     } else if (orden.cliente_id) {
       try {
         const resCli = await getCached(`/api/clientes`);
@@ -579,21 +580,21 @@ function OrdenTrabajo() {
         if (clFresco) {
           setClienteSeleccionado(clFresco);
           setClienteInactivo(false);
-          setBusquedaCliente((clFresco.razon_social || orden.cliente || "").toUpperCase());
+          setBusquedaCliente("");
         } else {
           setClienteSeleccionado(null);
           setClienteInactivo(true);
-          setBusquedaCliente((orden.cliente || "").toUpperCase());
+          setBusquedaCliente("");
         }
       } catch {
         setClienteSeleccionado(null);
         setClienteInactivo(true);
-        setBusquedaCliente((orden.cliente || "").toUpperCase());
+        setBusquedaCliente("");
       }
     } else {
       setClienteSeleccionado(null);
       setClienteInactivo(!!orden.cliente_id);
-      setBusquedaCliente((orden.cliente || "").toUpperCase());
+      setBusquedaCliente("");
     }
 
     const insumosData = [];
@@ -643,46 +644,46 @@ function OrdenTrabajo() {
     const mismoCliente = clienteSeleccionado?.id === cliente.id;
     setClienteSeleccionado(cliente);
     setClienteInactivo(false);
-    setBusquedaCliente(toUpper(cliente.razon_social));
+    setBusquedaCliente("");
     setMostrarDropdownClientes(false);
 
-    // Mismo cliente re-seleccionado en modo edicion: solo re-sincroniza sus
-    // datos propios con lo registrado (por si se editaron a mano en la OT),
-    // sin tocar equipo ni direcciones/contactos extra. El contacto principal
-    // se completa solo si todavia esta vacio, para no pisar uno ya editado.
+    // Cliente (re)seleccionado en una OT guardada: solo se llevan sus datos propios.
+    // El contacto y la dirección salen y se eligen de nuevo con sus buscadores
+    // (no se toca el equipo). Igual que en una OT nueva.
     if (mismoCliente && editingId) {
       setNuevaOrden(prev => ({
         ...prev,
         cliente: toUpper(cliente.razon_social),
-        direccion: toUpper(cliente.direccion),
-        ciudad: toUpper(cliente.ciudad),
-        comuna: toUpper(cliente.comuna),
+        direccion: "",
+        ciudad: "",
+        comuna: "",
         rut: cliente.rut || "",
         email: cliente.email || "",
         fonoPrincipal: cliente.telefono || "",
-        contacto: prev.contacto || toUpper(cliente.contacto_nombre || ""),
-        fonoContacto: prev.fonoContacto || cliente.contacto_fono || "",
-        emailContacto: prev.emailContacto || cliente.contacto_email || "",
-        cargoContacto: prev.cargoContacto || toUpper(cliente.contacto_cargo || "")
+        contacto: "",
+        fonoContacto: "",
+        emailContacto: "",
+        cargoContacto: ""
       }));
       return;
     }
 
-    // En modo edicion, solo actualizar datos del cliente sin limpiar equipo
+    // En modo edicion, solo actualizar datos del cliente sin limpiar equipo; el contacto
+    // y la dirección se eligen con sus buscadores
     if (editingId) {
       setNuevaOrden(prev => ({
         ...prev,
         cliente: toUpper(cliente.razon_social),
-        direccion: toUpper(cliente.direccion),
-        ciudad: toUpper(cliente.ciudad),
-        comuna: toUpper(cliente.comuna),
+        direccion: "",
+        ciudad: "",
+        comuna: "",
         rut: cliente.rut || "",
         email: cliente.email || "",
         fonoPrincipal: cliente.telefono || "",
-        contacto: toUpper(cliente.contacto_nombre || ""),
-        fonoContacto: cliente.contacto_fono || "",
-        emailContacto: cliente.contacto_email || "",
-        cargoContacto: toUpper(cliente.contacto_cargo || ""),
+        contacto: "",
+        fonoContacto: "",
+        emailContacto: "",
+        cargoContacto: "",
         contactosExtra: [],
         direccionesExtra: []
       }));
@@ -691,19 +692,21 @@ function OrdenTrabajo() {
 
     setEquipoSeleccionado(null);
     setBusquedaModelo("");
+    // OT desde cero: al elegir el cliente solo se llevan sus datos (razón social, RUT, fono,
+    // email). El contacto y la dirección no vienen por defecto: se eligen en sus buscadores.
     setNuevaOrden(prev => ({
       ...prev,
       cliente: toUpper(cliente.razon_social),
-      direccion: toUpper(cliente.direccion),
-      ciudad: toUpper(cliente.ciudad),
-      comuna: toUpper(cliente.comuna),
+      direccion: "",
+      ciudad: "",
+      comuna: "",
       rut: cliente.rut || "",
       email: cliente.email || "",
       fonoPrincipal: cliente.telefono || "",
-      contacto: toUpper(cliente.contacto_nombre || ""),
-      fonoContacto: cliente.contacto_fono || "",
-      emailContacto: cliente.contacto_email || "",
-      cargoContacto: toUpper(cliente.contacto_cargo || ""),
+      contacto: "",
+      fonoContacto: "",
+      emailContacto: "",
+      cargoContacto: "",
       contactosExtra: [],
       direccionesExtra: [],
       equipo: "",

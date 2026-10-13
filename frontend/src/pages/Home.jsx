@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Package, Users, UserCog, FileText, FileSpreadsheet, ClipboardList, Home as HomeIcon, LogOut, ChevronRight, ShoppingCart } from "lucide-react";
+import { Package, Users, Contact, MapPin, UserCog, FileText, FileSpreadsheet, ClipboardList, Home as HomeIcon, LogOut, ChevronRight, ShoppingCart } from "lucide-react";
 import { cerrarSesion } from "../utils/helpers";
 
 function Home({ onLogout }) {
@@ -7,6 +7,8 @@ function Home({ onLogout }) {
 
   const menuItems = [
     { title: "Clientes", icon: Users, path: "/clientes", desc: "Mantenedor de clientes" },
+    { title: "Contactos", icon: Contact, path: "/contactos", desc: "Mantenedor de contactos" },
+    { title: "Direcciones", icon: MapPin, path: "/direcciones", desc: "Mantenedor de direcciones" },
     { title: "Equipos", icon: Package, path: "/equipos", desc: "Mantenedor de equipos técnicos" },
     { title: "Orden de Trabajo", icon: ClipboardList, path: "/orden-trabajo", desc: "Crear y gestionar órdenes de trabajo" },
     { title: "Informes Técnicos", icon: FileText, path: "/informes", desc: "Mantenedor de informes técnicos" },
@@ -64,11 +66,11 @@ function Home({ onLogout }) {
               width: '80px',
               height: '80px',
               borderRadius: '50%',
-              background: idx === 0 ? 'var(--primary-light)' : idx === 1 ? 'var(--success-light)' : idx === 2 ? 'var(--warning-light)' : idx === 3 ? '#FFEDD5' : idx === 4 ? '#FCE7F3' : '#E0F2FE',
+              background: idx === 0 ? 'var(--primary-light)' : idx === 1 ? '#EDE9FE' : idx === 2 ? '#CFFAFE' : idx === 3 ? 'var(--success-light)' : idx === 4 ? 'var(--warning-light)' : idx === 5 ? '#FFEDD5' : idx === 6 ? '#FCE7F3' : '#E0F2FE',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: idx === 0 ? 'var(--primary)' : idx === 1 ? 'var(--success)' : idx === 2 ? 'var(--warning)' : idx === 3 ? '#EA580C' : idx === 4 ? '#DB2777' : '#1E40AF'
+              color: idx === 0 ? 'var(--primary)' : idx === 1 ? '#7C3AED' : idx === 2 ? '#0891B2' : idx === 3 ? 'var(--success)' : idx === 4 ? 'var(--warning)' : idx === 5 ? '#EA580C' : idx === 6 ? '#DB2777' : '#1E40AF'
             }}>
               <item.icon size={40} />
             </div>

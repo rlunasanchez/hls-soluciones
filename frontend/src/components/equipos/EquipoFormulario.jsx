@@ -9,17 +9,6 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, readOnly 
   const [guardando, setGuardando] = useState(false);
   const guardandoRef = useRef(false);
 
-  const codigoActual = (() => {
-    let max = 0;
-    (equipos || []).forEach(eq => {
-      if (eq.codigo && eq.codigo.startsWith("EQ-")) {
-        const num = parseInt(eq.codigo.split("-")[1], 10);
-        if (num > max) max = num;
-      }
-    });
-    return `EQ-${String(max + 1).padStart(4, "0")}`;
-  })();
-
   useEffect(() => {
     if (equipoEditando) {
       setNuevoEquipo({
@@ -36,8 +25,8 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, readOnly 
     e.preventDefault();
     e.stopPropagation();
     if (guardandoRef.current) return;
-    if (!nuevoEquipo.equipo.trim() || !nuevoEquipo.marca.trim() || !nuevoEquipo.modelo.trim()) {
-      alert("Complete Equipo, Marca y Modelo antes de guardar.");
+    if (nuevoEquipo.equipo.trim().length < 2) {
+      alert("Ingrese el Equipo (mínimo 2 caracteres) antes de guardar.");
       return;
     }
     guardandoRef.current = true;
@@ -58,12 +47,6 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, readOnly 
           <form onSubmit={handleSubmit} className="ef-form">
             <div className="ef-s primary">
               <div className="ef-st primary">Información del Equipo</div>
-              <div className="ef-r2" style={{ marginBottom: '8px' }}>
-                <div className="ef-f ef-code">
-                  <label>Código</label>
-                  <input value={equipoEditando ? (equipoEditando.codigo || codigoActual) : codigoActual} disabled />
-                </div>
-              </div>
               <div className="ef-r3" style={{ marginTop: '8px' }}>
                 <div className="ef-f">
                   <label>Equipo *</label>
@@ -72,16 +55,16 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, readOnly 
                     onChange={e => setNuevoEquipo({...nuevoEquipo, equipo: upperInput(e)})} required />
                 </div>
                 <div className="ef-f">
-                  <label>Marca *</label>
+                  <label>Marca</label>
                   <input placeholder="Marca" value={nuevoEquipo.marca}
                     disabled={readOnly}
-                    onChange={e => setNuevoEquipo({...nuevoEquipo, marca: upperInput(e)})} required />
+                    onChange={e => setNuevoEquipo({...nuevoEquipo, marca: upperInput(e)})} />
                 </div>
                 <div className="ef-f">
-                  <label>Modelo *</label>
+                  <label>Modelo</label>
                   <input placeholder="Modelo" value={nuevoEquipo.modelo}
                     disabled={readOnly}
-                    onChange={e => setNuevoEquipo({...nuevoEquipo, modelo: upperInput(e)})} required />
+                    onChange={e => setNuevoEquipo({...nuevoEquipo, modelo: upperInput(e)})} />
                 </div>
               </div>
             </div>
