@@ -1,12 +1,12 @@
 # Continuar el proyecto en otro PC (sin tocar la web)
 
-Guía para seguir trabajando en la rama de pruebas desde otro equipo, por ejemplo la casa, sin que nada llegue a la web. El detalle de lo que cambió está en `CAMBIOS.md` (entrada v2.156).
+Guía para seguir trabajando desde otro equipo, por ejemplo la casa. El detalle de lo que cambió está en `CAMBIOS.md` (entradas del 2026-10-02 y 2026-10-13).
 
 ## 1. Reglas para no afectar la web
 
-- Se trabaja **solo** en la rama de pruebas (`vinculos-sobre-origin-main` u otra rama extra con nombre propio).
-- **Nunca** hacer push a `main` ni a `deploy/cloud`. La web (Vercel y Render) sale de esas ramas.
-- Verificar en los paneles de **Vercel** y **Render** cuál es la rama de producción y que no sea la rama de pruebas. Vercel además crea una vista previa (con otra URL) por cada rama que se sube; se puede desactivar en el proyecto, en *Settings → Git → Ignored Build Step*, con un comando que solo construya la rama de producción.
+- Solo existen dos ramas: `main` y `deploy/cloud`. Ya no hay rama de pruebas: para trabajar sin publicar, haz **commits locales y no hagas `git push`**.
+- **Un `git push` a `main` publica el frontend en Vercel** (su rama de producción es `main`), y un push a `deploy/cloud` actualiza el backend en Render. Si el frontend nuevo llega antes que el backend, la web da 404 en las rutas nuevas. Orden para publicar: migración en Neon → `deploy/cloud` → `main`.
+- Vercel además crea una vista previa (con otra URL) por cada rama que se sube.
 - Nunca subir `backend/.env` (ya está en `.gitignore`), ni `node_modules/`, ni `.claude/`.
 
 ## 2. Requisitos del otro PC
@@ -20,7 +20,7 @@ Guía para seguir trabajando en la rama de pruebas desde otro equipo, por ejempl
 ```bash
 git clone https://github.com/rlunasanchez/hls-soluciones.git
 cd hls-soluciones
-git switch vinculos-sobre-origin-main      # la rama de pruebas (debe existir en origin)
+git switch main                            # MySQL local (deploy/cloud es la versión PostgreSQL de la nube)
 cd backend && npm install
 cd ../frontend && npm install
 ```
@@ -83,10 +83,10 @@ Abrir `http://localhost:5173`. El backend **no** se recarga solo con `node serve
 ```bash
 git add <archivos>
 git commit -m "..."
-git push origin vinculos-sobre-origin-main      # solo la rama de pruebas
+git push origin main      # ATENCIÓN: publica el frontend en Vercel. Solo cuando quieras publicar.
 ```
 
-En el otro PC: `git pull` dentro de la misma rama. Antes de cada `push`, revisar con `git branch --show-current` que no sea `main` ni `deploy/cloud`.
+Para llevar el trabajo a casa sin publicar, copia la carpeta o usa un bundle (`git bundle`). En el otro PC: `git pull` dentro de `main`. Antes de cada `push`, revisa con `git branch --show-current` en qué rama estás.
 
 ## 8. Qué probar primero
 

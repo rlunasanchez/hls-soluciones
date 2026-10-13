@@ -4,7 +4,7 @@
 
 ### v2.157–v2.160: Contactos y direcciones de la OT cuando se quitan del cliente, avisos de vínculos y migración para Neon
 
-**Rama:** `vinculos-sobre-origin-main` (después llevada a `main`, ver "Git" abajo). Continúa v2.156.
+**Rama:** se desarrolló en `vinculos-sobre-origin-main`, que ya no existe: todo quedó en `main` y `deploy/cloud` (ver "Git" abajo). Continúa v2.156.
 
 #### Reglas de diseño acordadas
 
@@ -52,8 +52,12 @@
 
 #### Git
 
-- Se hicieron 4 pushes a `origin/vinculos-sobre-origin-main` (`0637ec1`, `036ae77`, `e548049`, `50a169b`) antes de que se indicara que el trabajo debía quedar solo local. `main` y `deploy/cloud` remotos no se tocaron. **Desde ahora, solo commits locales.**
-- Respaldo del `main` anterior: rama local `respaldo/main-2026-10-13` (apunta a `a06a8f9`).
+- **Solo existen dos ramas: `main` y `deploy/cloud`.** Se borraron `vinculos-sobre-origin-main`, `cloud-port`, `respaldo/main-2026-10-13` y `worktree-pdf-orden-servicio` (locales y del remoto); todas estaban contenidas en `main` o `deploy/cloud`, sin perder commits. El `main` anterior a este trabajo es el commit `a06a8f9` (sigue en el historial de `main`).
+- **En Vercel la rama de producción es `main`** (comprobado con `gh api repos/rlunasanchez/hls-soluciones/deployments`): un push a `main` publica el frontend. Render despliega `deploy/cloud` (backend). **Orden para publicar:** 1) migraciones en Neon, 2) push de `deploy/cloud`, 3) push de `main`. Si el frontend nuevo llega antes que el backend, la web da 404 en las rutas nuevas (pasó el 13 oct 2026).
+- `deploy/cloud` = `main` + backend PostgreSQL. Al llevar cambios de `main`, el backend de la nube se porta a mano (`$1` en vez de `?`, `.rows`, `RETURNING id`); el merge limpio de los archivos de alrededor no garantiza que las rutas queden bien.
+- **Neon:** la migración `backend/migracion_neon_2026-10-13.sql` ya se corrió. **Pendiente:** borrar `clientes_contactos`, `clientes_direcciones` y las columnas `clientes.contacto_*` (esquema antiguo, vacío) cuando se confirme que la web funciona.
+- **Limpieza (v2.161):** eliminados los bloques ocultos `{false && …}` de "Otras Direcciones" y "Otros Contactos" en `OrdenFormCliente.jsx` (1.842 → 1.138 líneas, junto con sus estados e imports sin uso) y la carpeta `backup/`. Los datos `contactos_extra` / `direcciones_extra` de las OT antiguas se conservan en la base y siguen viajando al guardar.
+- La base antigua `ods` (SQL Server local) se conserva a propósito como referencia del sistema original.
 
 ---
 
@@ -61,7 +65,7 @@
 
 ### v2.156: Cliente con varios contactos y direcciones, check "En la OT", OT según boceto y componentes compartidos
 
-**Base:** rama local `vinculos-sobre-origin-main`, que parte de `origin/main` (v2.138, el diseño de la nube) y le suma los mantenedores independientes de Contactos y Direcciones que estaban en el `main` local (v2.147–v2.155). Sin commit; el `main` local y `deploy/cloud` no se tocaron. Para seguir desde otro PC ver `CONTINUAR_EN_OTRO_PC.md`.
+**Base:** rama `vinculos-sobre-origin-main` (ya eliminada, su contenido está en `main`), que partía de `origin/main` (v2.138, el diseño de la nube) y le suma los mantenedores independientes de Contactos y Direcciones que estaban en el `main` local (v2.147–v2.155). Sin commit; el `main` local y `deploy/cloud` no se tocaron. Para seguir desde otro PC ver `CONTINUAR_EN_OTRO_PC.md`.
 
 #### Cómo funciona (decisiones de diseño)
 

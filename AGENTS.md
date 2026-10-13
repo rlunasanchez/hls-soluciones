@@ -1984,4 +1984,6 @@ Detalle completo en `CAMBIOS.md` (entradas 2026-10-13 y 2026-10-02). Resumen par
 - **Caché:** `services/api.js` invalida `/api/clientes` cuando se escribe en contactos o direcciones.
 - **Base antigua:** el sistema original (SQL Server, base `ods`) está documentado en `BASE_DATOS_ANTIGUA.md`. Dato clave: el 24% de sus OT perdió el contacto por guardar solo el id.
 - **Neon:** `backend/migracion_neon_2026-10-13.sql` (aditiva, repetible, con copia de datos). Falta portar `contactos.js`, `direcciones.js`, `clientes.js`, `ordenes.js` y `server.js` a PostgreSQL en `deploy/cloud`.
-- **Git:** trabajar solo con commits locales; no hacer `git push` ni cambiar de rama sin orden expresa. Respaldo del `main` anterior en la rama local `respaldo/main-2026-10-13`.
+- **Ramas:** solo `main` (MySQL local; en Vercel es la **rama de producción**, un push publica el frontend) y `deploy/cloud` (PostgreSQL; Render despliega el backend). No hay ramas de prueba ni de respaldo. Orden para publicar: migración en Neon → push de `deploy/cloud` → push de `main`. No hacer `git push` sin orden expresa.
+- **Neon:** `migracion_neon_2026-10-13.sql` ya corrida. Pendiente borrar las tablas antiguas `clientes_contactos` y `clientes_direcciones` y las columnas `clientes.contacto_*` cuando se confirme que la web funciona. La base antigua `ods` (SQL Server local) se conserva como referencia.
+- **Limpieza (v2.161):** eliminado el código muerto de la OT (bloques ocultos "Otras Direcciones" / "Otros Contactos") y la carpeta `backup/`.
