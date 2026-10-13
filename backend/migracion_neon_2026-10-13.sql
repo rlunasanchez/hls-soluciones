@@ -86,14 +86,16 @@ ALTER TABLE cotizaciones
 
 -- 4) Copia de los CONTACTOS existentes --------------------------------------
 --    Origen: clientes_contactos (todos los contactos) y clientes.contacto_* (el principal).
+--    Los textos se recortan al largo de las columnas nuevas (LEFT) para que un dato demasiado
+--    largo no haga fallar y deshacer toda la migración.
 --    Un mismo nombre (sin importar mayúsculas) se convierte en UN solo contacto del catálogo,
 --    igual que hace la aplicación al reutilizar por nombre. Mínimo 3 letras, como en la app.
 CREATE TEMP TABLE _origen_contactos ON COMMIT DROP AS
-  SELECT cliente_id, TRIM(nombre) AS nombre, email, fono, cargo, id AS ord
+  SELECT cliente_id, LEFT(TRIM(nombre), 100) AS nombre, LEFT(email, 100) AS email, LEFT(fono, 20) AS fono, LEFT(cargo, 100) AS cargo, id AS ord
   FROM clientes_contactos
   WHERE LENGTH(TRIM(COALESCE(nombre, ''))) >= 3
   UNION ALL
-  SELECT id, TRIM(contacto_nombre), contacto_email, contacto_fono, contacto_cargo, 0
+  SELECT id, LEFT(TRIM(contacto_nombre), 100), LEFT(contacto_email, 100), LEFT(contacto_fono, 20), LEFT(contacto_cargo, 100), 0
   FROM clientes
   WHERE LENGTH(TRIM(COALESCE(contacto_nombre, ''))) >= 3;
 
@@ -132,7 +134,7 @@ ON CONFLICT (cliente_id, contacto_id) DO NOTHING;
 --    Origen: clientes_direcciones. (clientes.direccion/ciudad/comuna son los datos propios
 --    del cliente y NO se copian: siguen en la ficha.) Mínimo 5 caracteres, como en la app.
 CREATE TEMP TABLE _origen_direcciones ON COMMIT DROP AS
-  SELECT cliente_id, TRIM(direccion) AS direccion, ciudad, comuna, id AS ord
+  SELECT cliente_id, LEFT(TRIM(direccion), 255) AS direccion, LEFT(ciudad, 100) AS ciudad, LEFT(comuna, 100) AS comuna, id AS ord
   FROM clientes_direcciones
   WHERE LENGTH(TRIM(COALESCE(direccion, ''))) >= 5;
 
