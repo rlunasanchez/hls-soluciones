@@ -10,7 +10,9 @@
 --  2. Pega todo el archivo en el SQL Editor de Neon y ejecútalo de una vez.
 --  3. Es ADITIVA: solo crea tablas y columnas nuevas y copia datos. No borra ni modifica
 --     nada existente, así que el sistema actual de la nube sigue funcionando igual.
---  4. Es seguro repetirla: no duplica tablas, columnas ni registros.
+--  4. Es seguro repetirla: no duplica tablas, columnas ni registros. No usa transacción ni
+--     tablas temporales a propósito: cada instrucción funciona por sí sola, y si algo falla
+--     a medias basta con volver a ejecutarla.
 --
 -- QUÉ NO HACE
 --  - No borra clientes_contactos, clientes_direcciones ni las columnas clientes.contacto_*
@@ -20,8 +22,6 @@
 --  - Se pierden dos datos menores del esquema antiguo, que el catálogo nuevo no tiene:
 --    el "tipo" de la dirección (Matriz / Sucursal) y el fono de cada dirección.
 -- ============================================================================
-
-BEGIN;
 
 -- 1) Catálogos globales -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS contactos (
@@ -90,18 +90,16 @@ ALTER TABLE cotizaciones
 --    largo no haga fallar y deshacer toda la migración.
 --    Un mismo nombre (sin importar mayúsculas) se convierte en UN solo contacto del catálogo,
 --    igual que hace la aplicación al reutilizar por nombre. Mínimo 3 letras, como en la app.
-CREATE TEMP TABLE _origen_contactos ON COMMIT DROP AS
-  SELECT cliente_id, LEFT(TRIM(nombre), 100) AS nombre, LEFT(email, 100) AS email, LEFT(fono, 20) AS fono, LEFT(cargo, 100) AS cargo, id AS ord
-  FROM clientes_contactos
-  WHERE LENGTH(TRIM(COALESCE(nombre, ''))) >= 3
-  UNION ALL
-  SELECT id, LEFT(TRIM(contacto_nombre), 100), LEFT(contacto_email, 100), LEFT(contacto_fono, 20), LEFT(contacto_cargo, 100), 0
-  FROM clientes
-  WHERE LENGTH(TRIM(COALESCE(contacto_nombre, ''))) >= 3;
-
-WITH unicos AS (
+WITH origen AS (SELECT cliente_id, LEFT(TRIM(nombre), 100) AS nombre, LEFT(email, 100) AS email, LEFT(fono, 20) AS fono, LEFT(cargo, 100) AS cargo, id AS ord
+   FROM clientes_contactos
+   WHERE LENGTH(TRIM(COALESCE(nombre, ''))) >= 3
+   UNION ALL
+   SELECT id, LEFT(TRIM(contacto_nombre), 100), LEFT(contacto_email, 100), LEFT(contacto_fono, 20), LEFT(contacto_cargo, 100), 0
+   FROM clientes
+   WHERE LENGTH(TRIM(COALESCE(contacto_nombre, ''))) >= 3),
+unicos AS (
   SELECT DISTINCT ON (LOWER(nombre)) nombre, email, fono, cargo
-  FROM _origen_contactos
+  FROM origen
   ORDER BY LOWER(nombre), ord
 ),
 nuevos AS (
@@ -120,11 +118,18 @@ SELECT 'CO-' || LPAD((base.m + nuevos.n)::TEXT, 4, '0'),
 FROM nuevos CROSS JOIN base;
 
 INSERT INTO cliente_contactos (cliente_id, contacto_id, orden)
+WITH origen AS (SELECT cliente_id, LEFT(TRIM(nombre), 100) AS nombre, LEFT(email, 100) AS email, LEFT(fono, 20) AS fono, LEFT(cargo, 100) AS cargo, id AS ord
+   FROM clientes_contactos
+   WHERE LENGTH(TRIM(COALESCE(nombre, ''))) >= 3
+   UNION ALL
+   SELECT id, LEFT(TRIM(contacto_nombre), 100), LEFT(contacto_email, 100), LEFT(contacto_fono, 20), LEFT(contacto_cargo, 100), 0
+   FROM clientes
+   WHERE LENGTH(TRIM(COALESCE(contacto_nombre, ''))) >= 3)
 SELECT x.cliente_id, c.id,
        ROW_NUMBER() OVER (PARTITION BY x.cliente_id ORDER BY x.ord, c.id) - 1
 FROM (
   SELECT DISTINCT ON (cliente_id, LOWER(nombre)) cliente_id, nombre, ord
-  FROM _origen_contactos
+  FROM origen
   ORDER BY cliente_id, LOWER(nombre), ord
 ) x
 JOIN contactos c ON LOWER(TRIM(c.nombre)) = LOWER(x.nombre)
@@ -133,14 +138,12 @@ ON CONFLICT (cliente_id, contacto_id) DO NOTHING;
 -- 5) Copia de las DIRECCIONES existentes ------------------------------------
 --    Origen: clientes_direcciones. (clientes.direccion/ciudad/comuna son los datos propios
 --    del cliente y NO se copian: siguen en la ficha.) Mínimo 5 caracteres, como en la app.
-CREATE TEMP TABLE _origen_direcciones ON COMMIT DROP AS
-  SELECT cliente_id, LEFT(TRIM(direccion), 255) AS direccion, LEFT(ciudad, 100) AS ciudad, LEFT(comuna, 100) AS comuna, id AS ord
-  FROM clientes_direcciones
-  WHERE LENGTH(TRIM(COALESCE(direccion, ''))) >= 5;
-
-WITH unicos AS (
+WITH origen AS (SELECT cliente_id, LEFT(TRIM(direccion), 255) AS direccion, LEFT(ciudad, 100) AS ciudad, LEFT(comuna, 100) AS comuna, id AS ord
+   FROM clientes_direcciones
+   WHERE LENGTH(TRIM(COALESCE(direccion, ''))) >= 5),
+unicos AS (
   SELECT DISTINCT ON (LOWER(direccion)) direccion, ciudad, comuna
-  FROM _origen_direcciones
+  FROM origen
   ORDER BY LOWER(direccion), ord
 ),
 nuevos AS (
@@ -159,17 +162,19 @@ SELECT 'DI-' || LPAD((base.m + nuevos.n)::TEXT, 4, '0'),
 FROM nuevos CROSS JOIN base;
 
 INSERT INTO cliente_direcciones (cliente_id, direccion_id, orden)
+WITH origen AS (SELECT cliente_id, LEFT(TRIM(direccion), 255) AS direccion, LEFT(ciudad, 100) AS ciudad, LEFT(comuna, 100) AS comuna, id AS ord
+   FROM clientes_direcciones
+   WHERE LENGTH(TRIM(COALESCE(direccion, ''))) >= 5)
 SELECT x.cliente_id, d.id,
        ROW_NUMBER() OVER (PARTITION BY x.cliente_id ORDER BY x.ord, d.id) - 1
 FROM (
   SELECT DISTINCT ON (cliente_id, LOWER(direccion)) cliente_id, direccion, ord
-  FROM _origen_direcciones
+  FROM origen
   ORDER BY cliente_id, LOWER(direccion), ord
 ) x
 JOIN direcciones d ON LOWER(TRIM(d.direccion)) = LOWER(x.direccion)
 ON CONFLICT (cliente_id, direccion_id) DO NOTHING;
 
-COMMIT;
 
 -- 6) Verificación (ejecútala después; los números deben coincidir) -----------
 -- SELECT (SELECT COUNT(*) FROM contactos)            AS contactos_catalogo,
