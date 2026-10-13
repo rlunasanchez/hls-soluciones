@@ -47,15 +47,6 @@ router.get("/", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/siguiente-folio", authMiddleware, async (req, res) => {
-  try {
-    res.json({ folio: await calcularSiguienteFolio() });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Error del servidor" });
-  }
-});
-
 router.get("/:id", authMiddleware, async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM cotizaciones WHERE id = $1", [req.params.id]);
