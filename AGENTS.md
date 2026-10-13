@@ -83,14 +83,7 @@ Solo existen **dos ramas**:
 
 ## 7. Estado y pendientes (13-oct-2026)
 
-- **Neon:** migración de contactos/direcciones **ya corrida**; backend PostgreSQL **desplegado**. Pendiente borrar lo antiguo cuando se confirme que la web funciona:
-  ```sql
-  DROP TABLE IF EXISTS clientes_contactos;
-  DROP TABLE IF EXISTS clientes_direcciones;
-  ALTER TABLE clientes DROP COLUMN IF EXISTS contacto_nombre, DROP COLUMN IF EXISTS contacto_email,
-    DROP COLUMN IF EXISTS contacto_fono, DROP COLUMN IF EXISTS contacto_cargo,
-    DROP COLUMN IF EXISTS contacto_direccion, DROP COLUMN IF EXISTS contacto_ciudad, DROP COLUMN IF EXISTS contacto_comuna;
-  ```
+- **Neon:** migración de contactos/direcciones **corrida**, backend PostgreSQL **desplegado** y esquema antiguo **ya borrado** (`clientes_contactos`, `clientes_direcciones` y las columnas `clientes.contacto_*`). Neon tiene 9 tablas: `clientes`, `contactos`, `direcciones`, `cliente_contactos`, `cliente_direcciones`, `equipos`, `ordenes_trabajo`, `cotizaciones`, `usuarios`.
 - Adaptar **Cotizaciones** a los checks "En la OT" y a los botones Editar/Registrar (`NOTAS-COTIZACIONES.md` tiene el relevamiento).
 - Construir **Informes** y **Orden de Compra** (referencia: `BASE_DATOS_ANTIGUA.md`).
 - Decidir si se elimina `POST /api/auth/setup-admin` (no lo llama el programa; el primer admin se puede crear con `crear-admin.js`).
