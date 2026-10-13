@@ -25,6 +25,15 @@ cd backend && npm install
 cd ../frontend && npm install
 ```
 
+### Si ya tienes una copia antigua del proyecto en ese PC
+
+No hace falta bajar todo de nuevo:
+
+1. `git status` y `git branch -vv`. Si hay cambios sin guardar, copia la carpeta antes de seguir.
+2. `git fetch origin`, luego `git switch main` y `git pull`. Si dice que las ramas **divergieron**, no fuerces nada: revisa primero con `git log origin/main..main` qué commits solo existen ahí.
+3. `npm install` en `backend/` y en `frontend/`.
+4. La base de datos de esa copia tiene el esquema antiguo (`clientes_contactos`, `clientes_direcciones`): crea una base nueva con `backend/crear_tablas.sql`, ejecuta `node crear-admin.js` y apunta `DB_NAME` del `.env` a la base nueva. La vieja queda intacta. Las migraciones antiguas se borraron del repo; siguen en el historial de git si se necesitan para conservar datos.
+
 ## 4. Variables de entorno
 
 Crear `backend/.env` (no se sube a git). Variables necesarias:
