@@ -35,7 +35,15 @@ const CONFIG = {
 
 const soloLetras = (e) => upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "");
 
-function VinculosCliente({ tipo, vinculados, onChange, readOnly = false }) {
+// Contactos y direcciones tienen un solo dueño: devuelve el código del cliente dueño si es de OTRO cliente
+const duenoAjeno = (clienteId) => (r) => {
+  const otros = String(r.duenos || "").split(",").filter(Boolean).map((p) => p.split(":"))
+    .filter(([id]) => Number(id) !== Number(clienteId));
+  const propios = String(r.duenos || "").split(",").filter(Boolean).some((p) => Number(p.split(":")[0]) === Number(clienteId));
+  return otros.length > 0 && !propios ? otros[0][1] : null;
+};
+
+function VinculosCliente({ tipo, vinculados, onChange, clienteId = null, readOnly = false }) {
   const cfg = CONFIG[tipo];
   const [creando, setCreando] = useState(false);
   const [nuevo, setNuevo] = useState(cfg.nuevo);
@@ -91,6 +99,7 @@ function VinculosCliente({ tipo, vinculados, onChange, readOnly = false }) {
             etiqueta={cfg.etiqueta}
             placeholder={cfg.placeholder}
             excluirIds={vinculados.map((v) => v.id)}
+            ajeno={duenoAjeno(clienteId)}
             onElegir={vincular}
             accionExtra={(
               <button type="button" className="btn-mini btn-mini--success" onClick={() => setCreando(!creando)}>

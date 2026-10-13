@@ -42,7 +42,7 @@ const CONFIG = {
 // Para reiniciarlo al cambiar de cliente, el padre le pasa una key distinta.
 // En la ficha del cliente se usa para vincular: excluirIds oculta lo ya vinculado y accionExtra
 // agrega un botón al lado ("Nuevo").
-function CampoCatalogo({ tipo, etiqueta, placeholder, deCliente = [], actual, datosRegistro, onElegir, onActualizado = () => {}, onEnCatalogo = null, excluirIds = [], accionExtra = null, readOnly = false }) {
+function CampoCatalogo({ tipo, etiqueta, placeholder, deCliente = [], actual, datosRegistro, onElegir, onActualizado = () => {}, onEnCatalogo = null, ajeno = null, excluirIds = [], accionExtra = null, readOnly = false }) {
   const cfg = CONFIG[tipo];
   const [texto, setTexto] = useState("");
   const [abierto, setAbierto] = useState(false);
@@ -124,17 +124,26 @@ function CampoCatalogo({ tipo, etiqueta, placeholder, deCliente = [], actual, da
 
       {abierto && (opciones.length > 0 || sinResultados) && (
         <div className="bc-lista">
-          {opciones.map((r, i) => (
-            <div key={`${cfg.clave(r)}-${i}`} className="bc-opcion" onClick={() => elegir(r)}>
+          {opciones.map((r, i) => {
+            // ajeno(r): texto con el cliente dueño si el registro ya es de otro cliente: se avisa y se puede agregar igual
+            const dueno = ajeno ? ajeno(r) : null;
+            return (
+            <div key={`${cfg.clave(r)}-${i}`} className="bc-opcion"
+              onClick={() => {
+                if (dueno && !window.confirm(`Este ${cfg.verbo} ya está vinculado a ${dueno}.\n\n¿Agregarlo también a este cliente?`)) return;
+                elegir(r);
+              }}>
               <div className="bc-titulo">
                 {cfg.titulo(r)}
-                {r.delCatalogo
+                {dueno && <span className="bc-nota"> (ya es de {dueno})</span>}
+                {!dueno && (r.delCatalogo
                   ? <span className="bc-nota"> (catálogo)</span>
-                  : cfg.clave(r) === claveActual && <span className="bc-nota"> (en la OT)</span>}
+                  : cfg.clave(r) === claveActual && <span className="bc-nota"> (en la OT)</span>)}
               </div>
               <div className="bc-detalle">{cfg.detalle(r)}</div>
             </div>
-          ))}
+            );
+          })}
           {sinResultados && <div className="bc-vacio">{cfg.vacio}</div>}
         </div>
       )}

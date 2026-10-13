@@ -20,7 +20,12 @@ async function generarCodigo() {
 router.get("/", authMiddleware, async (req, res) => {
   try {
     const { q } = req.query;
-    let sql = `SELECT * FROM direcciones`;
+    // duenos: clientes a los que está vinculada ("id:codigo,id:codigo"); una dirección
+    // pertenece a un solo cliente, así que el buscador de la ficha oculta las ajenas.
+    let sql = `SELECT direcciones.*,
+      (SELECT GROUP_CONCAT(CONCAT(cl.id, ':', cl.codigo)) FROM cliente_direcciones v
+        JOIN clientes cl ON cl.id = v.cliente_id WHERE v.direccion_id = direcciones.id) AS duenos
+      FROM direcciones`;
     let conditions = [];
     let params = [];
     if (q && q.trim()) {
