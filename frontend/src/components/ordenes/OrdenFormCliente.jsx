@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
-import { Search, Users, ChevronDown, ChevronUp, Eye, UserPlus, Paperclip, MoreVertical, Download, Trash2, FileText, Printer, Pencil } from "lucide-react";
+import { Search, Users, ChevronDown, ChevronUp, Eye, UserPlus, Paperclip, MoreVertical, Download, Trash2, FileText, Printer, Pencil, Link2 } from "lucide-react";
 import ClienteFormulario from "../clientes/ClienteFormulario";
 import CampoCatalogo from "../comunes/CampoCatalogo";
 import "../../styles/Clientes.css";
@@ -236,13 +236,9 @@ function OrdenFormCliente({
   const direccionDesvinculada = !!clienteSeleccionado && !!normTxt(nuevaOrden.direccion)
     && !direccionesDelCliente.some((d) => normTxt(d.direccion) === normTxt(nuevaOrden.direccion));
   const avisoDesvinculado = {
-    display: 'inline-flex', alignItems: 'center', gap: '8px',
+    display: 'inline-flex', alignItems: 'center', height: '24px', boxSizing: 'border-box',
     background: 'var(--warning-light)', color: '#8A4B00', border: '1px solid color-mix(in srgb, var(--warning) 45%, white)',
-    borderRadius: 'var(--radius-sm)', padding: '2px 10px', fontSize: '.74rem', fontWeight: 600
-  };
-  const botonVincular = {
-    padding: '0 10px', height: '22px', marginRight: '-6px', border: 'none', borderRadius: '4px',
-    background: 'var(--primary)', color: 'white', fontSize: '.72rem', fontWeight: 600, cursor: 'pointer'
+    borderRadius: 'var(--radius-sm)', padding: '0 10px', fontSize: '.74rem', fontWeight: 600
   };
 
   // Al abrir la OT (o al volver a la ventana) se vuelve a leer la ficha del cliente: los
@@ -826,28 +822,34 @@ function OrdenFormCliente({
       {/* La OT conserva su copia del contacto y la dirección; si ya no están vinculados al
           cliente (se quitaron de su ficha) se avisa, sin borrar nada. */}
       {clienteSeleccionado && (contactoDesvinculado || direccionDesvinculada) && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '10px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 16px', marginBottom: '10px' }}>
           {contactoDesvinculado && (
-            <span style={avisoDesvinculado}>
-              ⚠ Este contacto ya no está vinculado al cliente
-              {!readOnly && contactoRegistrado === false && " (primero Regístralo)"}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={avisoDesvinculado}>
+                ⚠ Este contacto ya no está vinculado al cliente
+                {!readOnly && contactoRegistrado === false && " (primero Regístralo)"}
+              </span>
               {!readOnly && contactoRegistrado === true && (
-                <button type="button" disabled={vinculando} onClick={() => vincularAlCliente("contactos")} style={botonVincular}>
-                  Vincular al cliente
+                <button type="button" className="btn-mini btn-mini--success" disabled={vinculando}
+                  onClick={() => vincularAlCliente("contactos")} title="Vincular este contacto a la ficha del cliente">
+                  <Link2 size={14} /> Vincular al cliente
                 </button>
               )}
-            </span>
+            </div>
           )}
           {direccionDesvinculada && (
-            <span style={avisoDesvinculado}>
-              ⚠ Esta dirección ya no está vinculada al cliente
-              {!readOnly && direccionRegistrada === false && " (primero Regístrala)"}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={avisoDesvinculado}>
+                ⚠ Esta dirección ya no está vinculada al cliente
+                {!readOnly && direccionRegistrada === false && " (primero Regístrala)"}
+              </span>
               {!readOnly && direccionRegistrada === true && (
-                <button type="button" disabled={vinculando} onClick={() => vincularAlCliente("direcciones")} style={botonVincular}>
-                  Vincular al cliente
+                <button type="button" className="btn-mini btn-mini--success" disabled={vinculando}
+                  onClick={() => vincularAlCliente("direcciones")} title="Vincular esta dirección a la ficha del cliente">
+                  <Link2 size={14} /> Vincular al cliente
                 </button>
               )}
-            </span>
+            </div>
           )}
         </div>
       )}
