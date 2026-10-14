@@ -16,6 +16,10 @@
 .cf-sec-contactos,.cf-sec-direcciones{background:#f0f7ff}
 .cf-sec-contactos h3,.cf-sec-direcciones h3{color:#0C4A8C}
 .cf-vinc{min-width:0}
+/* "Nuevo" contacto/dirección: 2 columnas fijas (la dirección ocupa las dos), el botón Agregar queda debajo; separado de la tabla */
+.cf-vinc-nuevo{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 12px}
+.cf-vinc-nuevo .cf-vinc-ancho{grid-column:1 / -1}
+@media(max-width:767px){.cf-vinc-nuevo{grid-template-columns:1fr}}
 .cf-vinc .table-wrapper{overflow-x:auto}
 .cf-vinc .table-wrapper table{font-size:.74rem}
 .cf-vinc .table-wrapper th,.cf-vinc .table-wrapper td{padding:5px 7px}
