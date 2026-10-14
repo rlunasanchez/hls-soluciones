@@ -108,7 +108,7 @@ function VinculosCliente({ tipo, vinculados, onChange, clienteId = null, readOnl
             )}
           />
           {creando && (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 8, marginTop: 8 }}>
+            <div className="cf-vinc-nuevo">
               {tipo === "contactos" ? (
                 <>
                   <input placeholder="Nombre *" value={nuevo.nombre} onChange={(e) => setNuevo({ ...nuevo, nombre: soloLetras(e) })} />
@@ -118,7 +118,7 @@ function VinculosCliente({ tipo, vinculados, onChange, clienteId = null, readOnl
                 </>
               ) : (
                 <>
-                  <input placeholder="Dirección *" value={nuevo.direccion} onChange={(e) => setNuevo({ ...nuevo, direccion: upperInput(e) })} />
+                  <input className="cf-vinc-ancho" placeholder="Dirección *" value={nuevo.direccion} onChange={(e) => setNuevo({ ...nuevo, direccion: upperInput(e) })} />
                   <input placeholder="Ciudad" value={nuevo.ciudad} onChange={(e) => setNuevo({ ...nuevo, ciudad: soloLetras(e) })} />
                   <input placeholder="Comuna" value={nuevo.comuna} onChange={(e) => setNuevo({ ...nuevo, comuna: soloLetras(e) })} />
                 </>

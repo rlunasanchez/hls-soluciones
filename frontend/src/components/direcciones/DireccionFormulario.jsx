@@ -42,13 +42,13 @@ function DireccionFormulario({ direccionEditando, onCancel, onSave, direcciones,
         <form onSubmit={handleSubmit} className="dif-form">
           <div className="dif-s primary">
             <div className="dif-st primary">Datos de la Dirección</div>
-            <div className="dif-f" style={{ marginTop: '8px' }}>
-              <label>Dirección *</label>
-              <input placeholder="Dirección" value={nuevaDireccion.direccion}
-                disabled={readOnly}
-                onChange={e => setNuevaDireccion({ ...nuevaDireccion, direccion: upperInput(e) })} required />
-            </div>
             <div className="dif-r2" style={{ marginTop: '8px' }}>
+              <div className="dif-f dif-f-ancho">
+                <label>Dirección *</label>
+                <input placeholder="Dirección" value={nuevaDireccion.direccion}
+                  disabled={readOnly}
+                  onChange={e => setNuevaDireccion({ ...nuevaDireccion, direccion: upperInput(e) })} required />
+              </div>
               <div className="dif-f">
                 <label>Ciudad</label>
                 <input placeholder="Ciudad" value={nuevaDireccion.ciudad}

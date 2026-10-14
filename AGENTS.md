@@ -69,6 +69,7 @@ Solo existen **dos ramas**:
 - Botones de formularios con 3 opciones al editar: **Guardar Cambios** (se queda), **Cerrar** (guarda y sale), **Cancelar**. Protección anti doble envío con `useGuardar`.
 - Botones pequeños de acción (Editar, Registrar, Vincular…): clase compartida `btn-mini` de `styles/botones.css` con icono de `lucide-react`. **Naranja (`--warning`) = editar; verde (`--success`) = crear / registrar / vincular.** No crear estilos en línea para botones nuevos.
 - **Menú superior:** cada pantalla enlaza a las otras 9 (Inicio, Clientes, Contactos, Direcciones, Equipos, Orden de Trabajo, Informes, Cotizaciones, Orden de Compra, Usuarios), sin su propio botón, con el mismo orden, icono y color. Está repetido en 6 componentes `Header*` y en las páginas `Home`, `Informes`, `OrdenCompra` y `Cotizaciones`: **al agregar un módulo hay que sumar su botón en todos** (ver `CAMBIOS.md` v2.163).
+- **Ancho de los campos de los formularios de mantenedor** (Equipos, Contactos, Direcciones): el estándar es un tercio de la fila (~220 px en el formulario de 740 px, como en Equipos). Con 2 campos por fila se usa `repeat(2, calc((100% - 16px) / 3))`, nunca `1fr 1fr`. Solo la dirección puede ocupar 2 columnas. Ver `CAMBIOS.md` v2.164.
 - Móvil (≤768px): botones de 40 px, inputs de filtro de 44 px.
 - Códigos autogenerados: máximo existente + 1, nunca por id de base de datos.
 

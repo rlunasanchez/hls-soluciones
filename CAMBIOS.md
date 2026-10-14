@@ -2,6 +2,18 @@
 
 ## Fecha: 2026-10-14
 
+### v2.164: Tamaño de campos estandarizado en los mantenedores de Contactos y Direcciones, y bloque "Nuevo" de la ficha del cliente
+
+**Archivos (solo frontend, sin cambios de backend ni de base de datos):** `components/direcciones/DireccionFormulario.jsx`, `components/clientes/VinculosCliente.jsx`, `styles/Contactos.css`, `styles/Direcciones.css`, `styles/Clientes.css`.
+
+- **Problema:** los inputs de Contactos (2 por fila, ~340 px) y de Direcciones (dirección sola a todo el ancho, ~700 px) eran mucho más largos que los de Equipos (3 por fila, ~220 px). Los tres formularios miden 740 px; la diferencia estaba solo en la grilla.
+- **Solución:** el campo estándar mide lo mismo que en Equipos (un tercio de la fila).
+  - **Contactos:** Nombre, Cargo / Email, Fono (2 arriba y 2 abajo), cada campo con el ancho estándar. Clase `cof-r2` = `repeat(2, calc((100% - 16px) / 3))`.
+  - **Direcciones:** Dirección (ocupa las dos columnas, el doble del estándar, clase `dif-f-ancho`) / Ciudad, Comuna (ancho estándar). Clase `dif-r2`.
+  - Se eliminaron las reglas de CSS que quedaron sin uso (`cof-r3`, `dif-r3` y las versiones previas de `cof-r2` / `dif-r2`).
+  - En móvil (≤768 px) los campos se apilan en una columna, como antes.
+- **Ficha del cliente, botón "Nuevo" en Contactos y Direcciones** (`VinculosCliente.jsx`): el bloque con los campos y el botón **Agregar** quedaba pegado a la tabla. Ahora tiene 12 px de margen inferior y usa la clase `cf-vinc-nuevo`: 2 columnas fijas para los dos (antes la grilla automática decidía sola), y en Direcciones el input de dirección ocupa las dos columnas (`cf-vinc-ancho`). El botón Agregar queda en una tercera fila, igual en ambos.
+
 ### v2.163: Menú superior de la Orden de Trabajo igual al de las demás pantallas
 
 **Archivo:** `frontend/src/pages/OrdenTrabajo.jsx` (solo frontend, sin cambios de backend ni de base de datos).
