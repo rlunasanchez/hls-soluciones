@@ -67,6 +67,7 @@ Solo existen **dos ramas**:
 - Dropdowns: `useRef` + `mousedown` para cerrar al hacer clic fuera, z-index alto, buscan con 2+ caracteres.
 - Listados paginados de **4** ítems con `usePaginaPersistente` y `useClampPagina`; filtrado con `slice()` en el frontend.
 - Botones de formularios con 3 opciones al editar: **Guardar Cambios** (se queda), **Cerrar** (guarda y sale), **Cancelar**. Protección anti doble envío con `useGuardar`.
+- Botones pequeños de acción (Editar, Registrar, Vincular…): clase compartida `btn-mini` de `styles/botones.css` con icono de `lucide-react`. **Naranja (`--warning`) = editar; verde (`--success`) = crear / registrar / vincular.** No crear estilos en línea para botones nuevos.
 - Móvil (≤768px): botones de 40 px, inputs de filtro de 44 px.
 - Códigos autogenerados: máximo existente + 1, nunca por id de base de datos.
 

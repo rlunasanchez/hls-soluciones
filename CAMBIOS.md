@@ -1,5 +1,18 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-10-14
+
+### v2.162: Botón "Vincular al cliente" separado del aviso y con el estilo de los otros botones
+
+**Archivo:** `frontend/src/components/ordenes/OrdenFormCliente.jsx` (solo frontend, sin cambios de backend ni de base de datos).
+
+- El botón **"Vincular al cliente"** (aparece en la OT cuando el contacto o la dirección ya no están vinculados al cliente y ya fueron registrados en el catálogo) dejó de ir *dentro* del aviso ámbar: ahora está **al lado**, en la misma línea.
+- Usa la clase compartida `btn-mini btn-mini--success` (misma altura de 24 px, letra y esquinas que Editar / Registrar) con el icono `Link2`. Es verde porque en los botones del sistema **naranja = editar y verde = crear / registrar / vincular** (`styles/botones.css`).
+- El aviso ámbar quedó con el mismo alto (24 px) para que ambos se alineen. Se eliminó el estilo en línea `botonVincular`.
+- Orden de publicación: solo cambia el frontend, así que basta el push de `main` (Vercel); `deploy/cloud` recibe el mismo commit por merge.
+
+---
+
 ## Fecha: 2026-10-13 (solo local — la nube no se tocó)
 
 ### v2.157–v2.160: Contactos y direcciones de la OT cuando se quitan del cliente, avisos de vínculos y migración para Neon
