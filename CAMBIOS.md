@@ -2,6 +2,15 @@
 
 ## Fecha: 2026-10-14
 
+### v2.165: Scroll interno en las tablas de Contactos y Direcciones de la ficha del cliente
+
+**Archivo:** `frontend/src/styles/Clientes.css` (solo estilos; sin cambios de backend ni de base de datos).
+
+- **Problema:** las tablas de contactos y direcciones de la ficha del cliente crecían hacia abajo sin límite; con muchos contactos la ficha se alargaba y los botones Guardar / Cerrar quedaban lejos.
+- **Solución:** `.cf-vinc .table-wrapper` tiene `max-height: 200px` con `overflow-y: auto` (unas 5 filas) y el encabezado queda fijo (`position: sticky`). Con 5 filas o menos no cambia nada. El buscador, el botón **Nuevo** y el bloque **Agregar** quedan fuera del scroll.
+- **Sin tope de cantidad:** no hay ningún límite de contactos ni de direcciones por cliente (ni en la ficha, ni en el servidor, ni en la base). En el sistema antiguo el máximo observado fue 36 por entidad. Se decidió **no** poner un tope por ahora.
+- La altura de 200 px es una estimación de 5 filas; si en pantalla se ven más o menos, se ajusta en esa regla.
+
 ### v2.164: Tamaño de campos estandarizado en los mantenedores de Contactos y Direcciones, y bloque "Nuevo" de la ficha del cliente
 
 **Archivos (solo frontend, sin cambios de backend ni de base de datos):** `components/direcciones/DireccionFormulario.jsx`, `components/clientes/VinculosCliente.jsx`, `styles/Contactos.css`, `styles/Direcciones.css`, `styles/Clientes.css`.
