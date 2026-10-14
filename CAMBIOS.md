@@ -2,6 +2,14 @@
 
 ## Fecha: 2026-10-14
 
+### v2.163: Menú superior de la Orden de Trabajo igual al de las demás pantallas
+
+**Archivo:** `frontend/src/pages/OrdenTrabajo.jsx` (solo frontend, sin cambios de backend ni de base de datos).
+
+- Al menú de la OT le faltaban los botones **Contactos** (`/contactos`, violeta `#7C3AED`, icono `Contact`) y **Direcciones** (`/direcciones`, turquesa `#0891B2`, icono `MapPin`), que sí tienen las demás pantallas desde que existen esos mantenedores. Se agregaron en el mismo orden que el resto (después de Clientes, antes de Equipos).
+- Se revisaron los menús de todas las pantallas: cada una enlaza ahora a los otros 9 destinos (Inicio, Clientes, Contactos, Direcciones, Equipos, Orden de Trabajo, Informes, Cotizaciones, Orden de Compra, Usuarios), sin su propio botón.
+- **Regla para el futuro:** al agregar un módulo nuevo hay que sumar su botón en **todos** los menús; están repartidos en `HeaderCliente`, `HeaderEquipo`, `HeaderContacto`, `HeaderDireccion`, `HeaderUsuario`, `HeaderOrdenTrabajo` (lista `navItems` en `OrdenTrabajo.jsx`) y en las páginas `Home`, `Informes`, `OrdenCompra` y `Cotizaciones`.
+
 ### v2.162: Botón "Vincular al cliente" separado del aviso y con el estilo de los otros botones
 
 **Archivo:** `frontend/src/components/ordenes/OrdenFormCliente.jsx` (solo frontend, sin cambios de backend ni de base de datos).

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
-  Home, Users, Package, FileText, FileSpreadsheet, ShoppingCart, UserCog,
+  Home, Users, Contact, MapPin, Package, FileText, FileSpreadsheet, ShoppingCart, UserCog,
   Save, X, Wrench, ChevronDown, ChevronUp
 } from "lucide-react";
 import api from "../services/api";
@@ -992,6 +992,8 @@ function OrdenTrabajo() {
   const navItems = [
     { label: "Inicio", icon: Home, onClick: () => navigate("/home"), color: "var(--gradient)" },
     { label: "Clientes", icon: Users, onClick: () => navigate("/clientes"), color: "var(--primary)" },
+    { label: "Contactos", icon: Contact, onClick: () => navigate("/contactos"), color: "#7C3AED" },
+    { label: "Direcciones", icon: MapPin, onClick: () => navigate("/direcciones"), color: "#0891B2" },
     { label: "Equipos", icon: Package, onClick: () => navigate("/equipos"), color: "var(--success)" },
     { label: "Informes Técnicos", icon: FileText, onClick: () => navigate("/informes"), color: "#EA580C" },
     { label: "Cotizaciones", icon: FileSpreadsheet, onClick: () => navigate("/cotizaciones"), color: "#DB2777" },
