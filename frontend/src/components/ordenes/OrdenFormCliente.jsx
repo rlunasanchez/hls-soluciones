@@ -455,7 +455,7 @@ function OrdenFormCliente({
   return (
     <>
     <div className="of-sec primary">
-      <div className="of-st success">Datos del Cliente</div>
+      <div className="of-st primary">Datos del Cliente</div>
 
       <div style={{ marginBottom: '8px' }}>
         <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)' }}>

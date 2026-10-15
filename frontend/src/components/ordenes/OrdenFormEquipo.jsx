@@ -78,7 +78,7 @@ function OrdenFormEquipo({
 
   return (
     <div className="of-sec primary">
-      <div className="of-st muted">Datos del Equipo</div>
+      <div className="of-st primary">Datos del Equipo</div>
 
       {equipoFijo && equipoSeleccionado && (
         <div style={{

@@ -2,6 +2,15 @@
 
 ## Fecha: 2026-10-15
 
+### v2.167: Títulos de la OT en un solo azul y limpieza de clases CSS nuevas que duplicaban existentes
+
+**Alcance:** Clientes, Contactos, Direcciones y Orden de Trabajo. Solo frontend, sin cambios de backend ni de base de datos.
+
+- **Colores de los títulos de sección de la OT:** estaban en tres colores (celeste `success`, azul `primary` y negro `muted`). Ahora todos usan `of-st primary`, el azul `--primary` que usa la etiqueta "Buscar Contacto". Afectados: Datos del Cliente (era celeste), Datos del Equipo, Insumos, Avería/Falla/Incidencia, Actividad y Observaciones (eran negros). Archivos: `OrdenFormCliente.jsx`, `OrdenFormEquipo.jsx`, `OrdenFormInsumos.jsx`, `OrdenFormAveria.jsx`, `pages/OrdenTrabajo.jsx`.
+- **Clases CSS que se habían creado de más en v2.164 y ya existían:** se eliminaron `cf-vinc-nuevo`, `cf-vinc-ancho` (en `Clientes.css`) y `dif-f-ancho` (en `Direcciones.css`). Ahora el bloque "Nuevo" de la ficha del cliente usa la grilla existente `cf-r2` y el ancho completo de la dirección usa `of-col-full`, en `VinculosCliente.jsx` y `DireccionFormulario.jsx`. El resultado visual es el mismo.
+- **Regla (en `AGENTS.md`, convenciones):** reutilizar clases existentes y no crear nuevas con otro nombre; antes de agregar una, buscarla con `git grep` en `frontend/src/styles/`. Títulos de sección de la OT siempre `of-st primary`.
+- **No se tocó Cotizaciones**, que usa las mismas clases `of-st success` / `of-st muted` (por eso esas reglas CSS se conservan en `OrdenTrabajo.css`).
+
 ### v2.166: PDF de la Orden de Trabajo con un solo contacto y check "Contacto" al generarlo
 
 **Archivos (solo frontend, sin cambios de backend ni de base de datos):** `components/ordenes/ModalOpcionesPDF.jsx`, `utils/ordenServicioDoc.js`.
