@@ -103,7 +103,7 @@ Solo existen **dos ramas**:
 
 Meta del dueño: ningún archivo de pantalla con miles de líneas; que el código sea escalable. Alcance: **solo Clientes, Contactos, Direcciones y OT** (no Cotizaciones, Informes ni Orden de Compra todavía). **Todo local**: no hacer `git push` ni tocar `deploy/cloud`/Neon hasta que el dueño lo ordene. Hacer los pasos **de a uno**: extraer, `npx vite build`, y que el dueño pruebe en pantalla antes del siguiente. Es traslado de código: no cambiar comportamiento.
 
-**Primero, confirmar con el dueño** que el foco tenue de Tab en botones (v2.170) se ve bien.
+El foco tenue de Tab en botones (v2.170) ya fue confirmado por el dueño.
 
 Estado de tamaños (líneas): `OrdenTrabajo.jsx` 802, `OrdenFormCliente.jsx` 739, `OrdenFormEquipo.jsx` 309, `ordenServicioDoc.js` 292, `OrdenAdjuntos.jsx` 257, `useClienteOT.jsx` 246, `ClienteFormulario.jsx` 252.
 

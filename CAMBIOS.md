@@ -7,7 +7,7 @@
 **Archivo:** `frontend/src/styles/index.css` (solo estilos; sin cambios de backend ni de base de datos).
 
 - Regla global para `button`, `select`, `a`, `summary` y `[role="button"]` en `:focus-visible`: sin el contorno grueso del navegador, con un halo azul de 2px (`rgba(12,74,140,.15)`), el mismo de los campos de texto. Los botones que ya tenían su propio foco tenue no cambian.
-- Queda **pendiente de que el dueño lo confirme en pantalla** (Tab por los botones en varias pantallas).
+- **Confirmado por el dueño en pantalla.**
 
 ### v2.169: OT en archivos más chicos (listado y formulario vacío fuera de la página)
 
