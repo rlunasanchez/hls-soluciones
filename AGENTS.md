@@ -99,6 +99,21 @@ Solo existen **dos ramas**:
 - Opcional: importar datos históricos del sistema antiguo (14.581 OT, 5.698 contactos).
 - No hay pruebas automáticas del frontend: los cambios de pantalla se prueban a mano.
 
+## 7b. Próxima sesión: seguir reduciendo la OT a ~400 líneas por archivo (plan acordado)
+
+Meta del dueño: ningún archivo de pantalla con miles de líneas; que el código sea escalable. Alcance: **solo Clientes, Contactos, Direcciones y OT** (no Cotizaciones, Informes ni Orden de Compra todavía). **Todo local**: no hacer `git push` ni tocar `deploy/cloud`/Neon hasta que el dueño lo ordene. Hacer los pasos **de a uno**: extraer, `npx vite build`, y que el dueño pruebe en pantalla antes del siguiente. Es traslado de código: no cambiar comportamiento.
+
+**Primero, confirmar con el dueño** que el foco tenue de Tab en botones (v2.170) se ve bien.
+
+Estado de tamaños (líneas): `OrdenTrabajo.jsx` 802, `OrdenFormCliente.jsx` 739, `OrdenFormEquipo.jsx` 309, `ordenServicioDoc.js` 292, `OrdenAdjuntos.jsx` 257, `useClienteOT.jsx` 246, `ClienteFormulario.jsx` 252.
+
+1. **`OrdenFormCliente.jsx` → ~250.** Sacar a componentes propios (en `components/ordenes/`): `OrdenBuscadorCliente.jsx` (buscador de cliente y sus tarjetas, ~210), `OrdenDatosCliente.jsx` (cliente, RUT, fono, email, ~100), `OrdenAvisosVinculo.jsx` (buscadores de contacto/dirección y avisos "ya no vinculado", ~65), `OrdenDatosContacto.jsx` (~80) y `OrdenDatosDireccion.jsx` (~90). Se queda la lógica (RUT, `contactosDisponibles`, `vincularAlCliente`, `refrescarClienteSeleccionado`).
+2. **`OrdenTrabajo.jsx` → ~450.** Sacar: `OrdenCotizaciones.jsx` (chips y contador de cotizaciones asociadas, ~70), `OrdenFormCabecera.jsx` (título, técnico y cerrar, ~40), un hook `useOrdenDesdeNavegacion` (el `init` que recibe cliente/orden desde Clientes o Cotizaciones, ~75) y unificar las 3 ramas casi iguales de `seleccionarCliente` (~110) usando `datosDelTipo`.
+3. Para bajar de 450 a 400 habría que mover el estado del formulario a un hook propio (lo más delicado: más de 40 `useState`).
+4. Después, revisar `OrdenFormEquipo.jsx` (309) y `ordenServicioDoc.js` (292), que ya están cerca de la meta.
+
+Antes de publicar algún día (no ahora): migración de Neon y portar `clientes.js`, `ordenes.js` y `auth.js` a PostgreSQL, ver `CAMBIOS.md` v2.168.
+
 ## 8. Cómo trabajar con el dueño
 
 - **Hacer solo lo que se pide**; si algo parece necesario pero no fue pedido, preguntar. No crear carpetas, scripts, ramas ni worktrees extra sin avisar.

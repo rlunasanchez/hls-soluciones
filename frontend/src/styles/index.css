@@ -1146,3 +1146,12 @@ table tr:last-child td {
     padding-bottom: 12px;
   }
 }
+/* Foco por teclado (Tab) tenue en botones, selects y enlaces: sin el contorno grueso del navegador */
+button:focus-visible,
+select:focus-visible,
+a:focus-visible,
+summary:focus-visible,
+[role="button"]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(12, 74, 140, 0.15);
+}
