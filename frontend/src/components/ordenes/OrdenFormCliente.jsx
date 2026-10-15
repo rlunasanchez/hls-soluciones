@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect, useLayoutEffect } from "react";
-import { createPortal } from "react-dom";
-import { Search, Users, ChevronDown, ChevronUp, Eye, UserPlus, Paperclip, MoreVertical, Download, Trash2, FileText, Printer, Pencil, Link2 } from "lucide-react";
-import ClienteFormulario from "../clientes/ClienteFormulario";
+import { useState, useEffect } from "react";
+import { Search, Users, ChevronDown, ChevronUp, Eye, UserPlus, Link2 } from "lucide-react";
 import CampoCatalogo from "../comunes/CampoCatalogo";
+import OrdenAdjuntos from "./OrdenAdjuntos";
+import useClienteOT from "./useClienteOT";
 import "../../styles/Clientes.css";
 import "../../styles/campo-catalogo.css";
 import "../../styles/botones.css";
@@ -24,135 +24,8 @@ function OrdenFormCliente({
   setClienteSeleccionado,
   onClientesRefresh
 }) {
-  const [mostrarDetalleCliente, setMostrarDetalleCliente] = useState(false);
   const [rutError, setRutError] = useState("");
-  const [mostrarEditarClienteModal, setMostrarEditarClienteModal] = useState(false);
-  const [clienteAEditar, setClienteAEditar] = useState(null);
-  // true = ficha solo con los datos del cliente; false = ficha completa (con contactos y direcciones)
-  const [editarSoloCliente, setEditarSoloCliente] = useState(false);
-  const [mostrarRegistrarCliente, setMostrarRegistrarCliente] = useState(false);
-  const [prefillCliente, setPrefillCliente] = useState(null);
   const [mostrarInfoInterna, setMostrarInfoInterna] = useState(false);
-  const [mostrarAdjunto, setMostrarAdjunto] = useState(false);
-  const [mostrarMenuAdjunto, setMostrarMenuAdjunto] = useState(false);
-  const [adjuntoParaVer, setAdjuntoParaVer] = useState(null);
-  const [posAdjunto, setPosAdjunto] = useState({ top: 0, left: 0 });
-  const adjuntoDropdownRef = useRef(null);
-  const adjuntoIdxRef = useRef(-1);
-  const btnAdjuntoRef = useRef(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (adjuntoDropdownRef.current && adjuntoDropdownRef.current.contains(event.target)) return;
-      if (event.target.closest(".acciones-menu-btn")) return;
-      setMostrarMenuAdjunto(false);
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  useLayoutEffect(() => {
-    if (!mostrarMenuAdjunto || !btnAdjuntoRef.current || !adjuntoDropdownRef.current) return;
-    const rect = btnAdjuntoRef.current.getBoundingClientRect();
-    const menuHeight = adjuntoDropdownRef.current.offsetHeight;
-    const menuWidth = 140;
-    const left = Math.min(Math.max(rect.right - menuWidth, 4), window.innerWidth - menuWidth);
-    let top = rect.bottom + 4;
-    if (top + menuHeight > window.innerHeight) {
-      top = Math.max(rect.top - menuHeight - 4, 4);
-    }
-    setPosAdjunto({ top, left });
-  }, [mostrarMenuAdjunto]);
-
-  const TIPOS_PERMITIDOS = ["image/", "application/pdf"];
-
-  const handleAdjuntoChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const actuales = nuevaOrden.adjuntos || [];
-    if (actuales.length >= 2) {
-      alert("Máximo 2 archivos adjuntos por orden.");
-      e.target.value = "";
-      return;
-    }
-    const permitido = TIPOS_PERMITIDOS.some((t) => file.type.startsWith(t)) || file.type === "application/pdf";
-    if (!permitido) {
-      alert("Solo se permiten imágenes (JPG, PNG, etc.) o PDF.");
-      e.target.value = "";
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      alert("El archivo supera el máximo de 5MB.");
-      e.target.value = "";
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      setNuevaOrden({ ...nuevaOrden, adjuntos: [...actuales, { nombre: file.name, tipo: file.type, data: reader.result }] });
-      e.target.value = "";
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const abrirMenuAdjunto = (e, idx) => {
-    e.stopPropagation();
-    if (mostrarMenuAdjunto && adjuntoIdxRef.current === idx) {
-      setMostrarMenuAdjunto(false);
-      return;
-    }
-    adjuntoIdxRef.current = idx;
-    btnAdjuntoRef.current = e.currentTarget;
-    setMostrarMenuAdjunto(true);
-  };
-
-  const descargarAdjunto = (idx = adjuntoIdxRef.current) => {
-    const adj = (nuevaOrden.adjuntos || [])[idx];
-    if (!adj) return;
-    const a = document.createElement("a");
-    a.href = adj.data;
-    a.download = adj.nombre || `adjunto-ot-${(nuevaOrden.numeroOrden || "").replace(/\s+/g, "-") || "archivo"}`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setMostrarMenuAdjunto(false);
-  };
-
-  const verAdjunto = (idx = adjuntoIdxRef.current) => {
-    const adj = (nuevaOrden.adjuntos || [])[idx];
-    if (!adj) return;
-    setAdjuntoParaVer(adj);
-    setMostrarMenuAdjunto(false);
-  };
-
-  const imprimirAdjunto = () => {
-    if (!adjuntoParaVer || adjuntoParaVer.tipo === "application/pdf") return;
-    const frame = document.createElement("iframe");
-    frame.style.position = "fixed";
-    frame.style.width = "0";
-    frame.style.height = "0";
-    frame.style.border = "0";
-    frame.style.visibility = "hidden";
-    document.body.appendChild(frame);
-    const doc = frame.contentWindow?.document;
-    if (!doc) return;
-    doc.open();
-    doc.write(
-      `<html><head><title>${adjuntoParaVer.nombre || "Adjunto"}</title></head>` +
-      `<body style="margin:0;text-align:center;"><img src="${adjuntoParaVer.data}" style="max-width:100%;" ` +
-      `onload="window.focus();window.print();" /></body></html>`
-    );
-    doc.close();
-    setTimeout(() => { if (frame.parentNode) frame.parentNode.removeChild(frame); }, 60000);
-  };
-
-  const eliminarAdjunto = (idx = adjuntoIdxRef.current) => {
-    const adj = (nuevaOrden.adjuntos || [])[idx];
-    if (!adj) return;
-    if (confirm(`¿Eliminar el archivo "${adj.nombre}"?`)) {
-      setNuevaOrden({ ...nuevaOrden, adjuntos: (nuevaOrden.adjuntos || []).filter((_, i) => i !== idx) });
-      setMostrarMenuAdjunto(false);
-    }
-  };
 
   const handleRutChange = (e) => {
     let val = upperInput(e, /[^0-9K-]/g);
@@ -208,6 +81,12 @@ function OrdenFormCliente({
 
   const normTxt = (s) => String(s || "").toUpperCase().trim();
 
+  // Ver / editar / registrar el cliente desde la OT (modales y sus funciones de guardado)
+  const { botonesEditarCliente, abrirRegistrarCliente, abrirDetalleCliente, modalesCliente } = useClienteOT({
+    nuevaOrden, setNuevaOrden, clientes, clienteSeleccionado, setClienteSeleccionado,
+    onClientesRefresh, setBusquedaCliente, normTxt
+  });
+
   // Contacto y dirección de la OT: se eligen (o se corrigen en su ficha) con CampoCatalogo.
   // La OT muestra un contacto y una dirección; si lo elegido estaba entre los "adicionales"
   // de una OT antigua, se saca de ahí.
@@ -222,6 +101,20 @@ function OrdenFormCliente({
     direccionesExtra: (prev.direccionesExtra || []).filter((x) => normTxt(x.direccion) !== normTxt(d.direccion))
   }));
 
+  // Tras editar un contacto/dirección en el catálogo, las listas del cliente seleccionado quedan
+  // viejas y el aviso "ya no está vinculado" salta aunque sea el mismo registro: se recargan.
+  const refrescarClienteSeleccionado = async () => {
+    if (!clienteSeleccionado?.id) return;
+    try {
+      const lista = await api.get("/api/clientes");
+      if (onClientesRefresh) onClientesRefresh(lista.data);
+      const actualizado = lista.data.find((c) => c.id === clienteSeleccionado.id);
+      if (actualizado && setClienteSeleccionado) setClienteSeleccionado(actualizado);
+    } catch { /* el aviso se corrige al volver a abrir; no es crítico */ }
+  };
+  const contactoEditadoEnOT = (c) => { contactoEnOT(c); refrescarClienteSeleccionado(); };
+  const direccionEditadaEnOT = (d) => { direccionEnOT(d); refrescarClienteSeleccionado(); };
+
   // Direcciones vinculadas al cliente (llegan como texto: tipo|direccion|fono|ciudad|comuna)
   const direccionesDelCliente = clienteSeleccionado
     ? String(clienteSeleccionado.direcciones || "").split(";;").map((d) => {
@@ -231,7 +124,8 @@ function OrdenFormCliente({
     : [];
 
   // ¿El contacto / la dirección de la OT siguen vinculados a la ficha del cliente?
-  const contactoDesvinculado = !!clienteSeleccionado && !!normTxt(nuevaOrden.contacto)
+  const esPersona = nuevaOrden.clienteTipo === "PERSONA";
+  const contactoDesvinculado = !esPersona && !!clienteSeleccionado && !!normTxt(nuevaOrden.contacto)
     && !contactosDisponibles.some((c) => normTxt(c.nombre) === normTxt(nuevaOrden.contacto));
   const direccionDesvinculada = !!clienteSeleccionado && !!normTxt(nuevaOrden.direccion)
     && !direccionesDelCliente.some((d) => normTxt(d.direccion) === normTxt(nuevaOrden.direccion));
@@ -269,6 +163,21 @@ function OrdenFormCliente({
   // ¿Lo que tiene la OT ya está en el catálogo? Vincular solo se ofrece después de Registrar.
   const [contactoRegistrado, setContactoRegistrado] = useState(null);
   const [direccionRegistrada, setDireccionRegistrada] = useState(null);
+  // Lo traído del buscador (está en el catálogo o vinculado al cliente) no se escribe a mano: para
+  // cambiarlo se usa "Editar" o se busca otro. Lo que no está en ningún lado queda libre.
+  const contactoBloqueado = !esPersona && !!normTxt(nuevaOrden.contacto)
+    && (contactoRegistrado === true || (!!clienteSeleccionado && !contactoDesvinculado));
+  const direccionBloqueada = !!normTxt(nuevaOrden.direccion)
+    && (direccionRegistrada === true || (!!clienteSeleccionado && !direccionDesvinculada));
+  // Datos propios del cliente: bloqueados mientras coincidan con su ficha (para cambiarlos, "Editar")
+  const dig = (v) => String(v || "").replace(/\D/g, "");
+  const igual = (a, b) => !!normTxt(b) && normTxt(a) === normTxt(b);
+  const cli = clienteSeleccionado;
+  const clienteBloqueado = !!cli && igual(nuevaOrden.cliente, cli.razon_social);
+  const rutBloqueado = !!cli && !!normalizarRut(cli.rut) && normalizarRut(nuevaOrden.rut) === normalizarRut(cli.rut);
+  const fonoBloqueado = !!cli && !!dig(cli.telefono) && dig(nuevaOrden.fonoPrincipal) === dig(cli.telefono);
+  const emailBloqueado = !!cli && !!String(cli.email || "").trim()
+    && String(nuevaOrden.email || "").trim().toLowerCase() === String(cli.email).trim().toLowerCase();
   const vincularAlCliente = async (tipo) => {
     if (!clienteSeleccionado?.id || vinculando) return;
     setVinculando(true);
@@ -287,168 +196,6 @@ function OrdenFormCliente({
       alert(err.response?.data?.msg || "Error al vincular al cliente.");
     } finally {
       setVinculando(false);
-    }
-  };
-
-  const abrirEditarCliente = async (soloCliente = false) => {
-    setEditarSoloCliente(soloCliente);
-    let fresh = clienteSeleccionado;
-    try {
-      const res = await api.get(`/api/clientes/${clienteSeleccionado.id}`);
-      if (res.data) fresh = res.data;
-    } catch { /* fallback: datos locales */ }
-    setClienteAEditar(fresh);
-    setMostrarEditarClienteModal(true);
-  };
-
-  const guardarEdicionCliente = async (payload, _resetFn, mantener = false) => {
-    if (!clienteAEditar?.id) return;
-    try {
-      await api.put(`/api/clientes/${clienteAEditar.id}`, payload);
-      const freshRes = await api.get(`/api/clientes/${clienteAEditar.id}`);
-      const fresh = freshRes.data;
-
-      // Se refrescan los datos propios del cliente. El check "En la OT" solo indica qué
-      // contacto/dirección llevar: si al guardar cambió el marcado, la OT toma el nuevo;
-      // si no cambió (o no hay ninguno marcado), el contacto y la dirección de la OT no se tocan.
-      const cambioContacto = !!fresh.contacto_nombre && normTxt(fresh.contacto_nombre) !== normTxt(clienteAEditar.contacto_nombre);
-      const cambioDireccion = !!fresh.ot_direccion && normTxt(fresh.ot_direccion) !== normTxt(clienteAEditar.ot_direccion);
-      setNuevaOrden((prev) => ({
-        ...prev,
-        cliente: toUpper(fresh.razon_social || ""),
-        rut: fresh.rut || "",
-        email: fresh.email || "",
-        fonoPrincipal: fresh.telefono || "",
-        ...(cambioContacto ? {
-          contacto: toUpper(fresh.contacto_nombre),
-          emailContacto: fresh.contacto_email || "",
-          fonoContacto: fresh.contacto_fono || "",
-          cargoContacto: toUpper(fresh.contacto_cargo || "")
-        } : {}),
-        ...(cambioDireccion ? {
-          direccion: toUpper(fresh.ot_direccion),
-          ciudad: toUpper(fresh.ot_ciudad || ""),
-          comuna: toUpper(fresh.ot_comuna || "")
-        } : {})
-      }));
-
-      // El check es de un solo uso: ya se enviaron los datos a la OT, se desmarca
-      // (en la edición solo del cliente no se tocan los checks)
-      if (!editarSoloCliente) await api.post(`/api/clientes/${clienteAEditar.id}/limpiar-a-ot`);
-      const [lista, limpio] = await Promise.all([api.get("/api/clientes"), api.get(`/api/clientes/${clienteAEditar.id}`)]);
-      if (onClientesRefresh) onClientesRefresh(lista.data);
-      if (setClienteSeleccionado) setClienteSeleccionado(limpio.data);
-
-      alert("Cliente actualizado");
-      if (mantener) setClienteAEditar(limpio.data);
-      else setMostrarEditarClienteModal(false);
-    } catch (err) {
-      alert(err.response?.data?.msg || "Error al actualizar el cliente");
-    }
-  };
-
-  const botonesEditarCliente = (
-    <>
-      <button type="button" className="btn-mini btn-mini--warning" onClick={() => abrirEditarCliente(false)}
-        title="Editar el cliente con sus contactos y direcciones">
-        <Pencil size={14} /> Editar completo
-      </button>
-      <button type="button" className="btn-mini btn-mini--warning" onClick={() => abrirEditarCliente(true)}
-        title="Editar solo los datos del cliente (razón social, RUT, fono, email)">
-        <Pencil size={14} /> Editar
-      </button>
-    </>
-  );
-
-  const abrirRegistrarCliente = () => {
-    // Con el comodín "19" se permite crear aunque el RUT o la razón social ya existan
-    if (normalizarRut(nuevaOrden.rut) === "19") {
-      setPrefillCliente({
-        razon_social: nuevaOrden.cliente || "",
-        rut: nuevaOrden.rut || "",
-        direccion: nuevaOrden.direccion || "",
-        ciudad: nuevaOrden.ciudad || "",
-        comuna: nuevaOrden.comuna || "",
-        telefono: nuevaOrden.fonoPrincipal || "",
-        email: nuevaOrden.email || "",
-        contacto_nombre: nuevaOrden.contacto || "",
-        contacto_email: nuevaOrden.emailContacto || "",
-        contacto_fono: nuevaOrden.fonoContacto || "",
-        contacto_cargo: nuevaOrden.cargoContacto || ""
-      });
-      setMostrarRegistrarCliente(true);
-      return;
-    }
-    // Si el RUT o la razón social ya existen en el mantenedor → solo avisar con el código
-    const rutOT = normalizarRut(nuevaOrden.rut);
-    const existente =
-      (rutOT && (clientes || []).find((c) => normalizarRut(c.rut) === rutOT)) ||
-      (clientes || []).find((c) => normTxt(c.razon_social) === normTxt(nuevaOrden.cliente)) ||
-      null;
-    if (existente) {
-      alert(`El cliente ya existe (${existente.codigo || "CL-????"}).`);
-      setNuevaOrden((prev) => ({ ...prev, rut: "" }));
-      return;
-    }
-    setPrefillCliente({
-      razon_social: nuevaOrden.cliente || "",
-      rut: nuevaOrden.rut || "",
-      direccion: nuevaOrden.direccion || "",
-      ciudad: nuevaOrden.ciudad || "",
-      comuna: nuevaOrden.comuna || "",
-      telefono: nuevaOrden.fonoPrincipal || "",
-      email: nuevaOrden.email || "",
-      contacto_nombre: nuevaOrden.contacto || "",
-      contacto_email: nuevaOrden.emailContacto || "",
-      contacto_fono: nuevaOrden.fonoContacto || "",
-      contacto_cargo: nuevaOrden.cargoContacto || ""
-    });
-    setMostrarRegistrarCliente(true);
-  };
-
-  const guardarNuevoClienteDesdeOT = async (payload) => {
-    try {
-      // Con el comodín "19" se crea directo sin chequear duplicados
-      // Si ya existe un cliente con ese RUT o razón social → avisar con su código y vincularlo sin crear duplicado
-      const esComodin = normalizarRut(payload.rut) === "19";
-      const existente = esComodin ? null :
-        ((payload.rut && normalizarRut(payload.rut) && (clientes || []).find((c) => normalizarRut(c.rut) === normalizarRut(payload.rut))) ||
-        (clientes || []).find((c) => normTxt(c.razon_social) === normTxt(payload.razon_social)) ||
-        null);
-      if (existente) {
-        alert(`El cliente ya existe (${existente.codigo || "CL-????"}).`);
-        return;
-      }
-      const res = await api.post("/api/clientes", payload);
-      const lista = await api.get("/api/clientes");
-      if (onClientesRefresh) onClientesRefresh(lista.data);
-      let fresh = null;
-      if (res.data?.id) {
-        const freshRes = await api.get(`/api/clientes/${res.data.id}`);
-        fresh = freshRes.data;
-      } else {
-        fresh = (lista.data || []).find((c) => normTxt(c.razon_social) === normTxt(payload.razon_social)) || null;
-      }
-      if (fresh && setClienteSeleccionado) setClienteSeleccionado(fresh);
-      if (fresh) {
-        setNuevaOrden((prev) => ({
-          ...prev,
-          cliente: toUpper(fresh.razon_social || "") || prev.cliente,
-          rut: fresh.rut || prev.rut,
-          email: fresh.email || prev.email,
-          fonoPrincipal: fresh.telefono || prev.fonoPrincipal,
-          contacto: toUpper(fresh.contacto_nombre || "") || prev.contacto,
-          emailContacto: fresh.contacto_email || prev.emailContacto,
-          fonoContacto: fresh.contacto_fono || prev.fonoContacto,
-          cargoContacto: toUpper(fresh.contacto_cargo || "") || prev.cargoContacto
-        }));
-        setBusquedaCliente(toUpper(fresh.razon_social || ""));
-      }
-      alert(`Cliente registrado (${res.data?.codigo || "CL-????"}). Ya puede guardar la orden.`);
-      setMostrarRegistrarCliente(false);
-      setPrefillCliente(null);
-    } catch (err) {
-      alert(err.response?.data?.msg || "Error al registrar el cliente");
     }
   };
 
@@ -500,7 +247,7 @@ function OrdenFormCliente({
             {readOnly && (
               <button
                 type="button"
-                onClick={() => setMostrarDetalleCliente(true)}
+                onClick={abrirDetalleCliente}
                 title="Ver todos los datos del cliente"
                 style={{
                   display: 'flex',
@@ -627,7 +374,7 @@ function OrdenFormCliente({
           {clienteSeleccionado && readOnly && (
             <button
               type="button"
-              onClick={() => setMostrarDetalleCliente(true)}
+              onClick={abrirDetalleCliente}
               title="Ver todos los datos del cliente"
               style={{
                 display: 'flex',
@@ -660,67 +407,40 @@ function OrdenFormCliente({
           )}
         </div>
 
-      {/* Modal Detalle Cliente (solo lectura) */}
-      {mostrarDetalleCliente && clienteSeleccionado && (
-        <div className="bc-modal">
-          <div className="bc-modal-caja bc-modal-caja--ancha">
-            <ClienteFormulario
-              clienteEditando={clienteSeleccionado}
-              clientes={clientes}
-              onSave={() => {}}
-              onCancel={() => setMostrarDetalleCliente(false)}
-              readOnly
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Modal Editar Cliente completo desde la OT (portal fuera del form) */}
-      {mostrarEditarClienteModal && clienteAEditar && createPortal(
-        <div className="bc-modal">
-          <div className={`bc-modal-caja ${editarSoloCliente ? "bc-modal-caja--chica" : "bc-modal-caja--ancha"}`}>
-            <ClienteFormulario
-              clienteEditando={clienteAEditar}
-              clientes={clientes}
-              onSave={guardarEdicionCliente}
-              onCancel={() => setMostrarEditarClienteModal(false)}
-              soloCliente={editarSoloCliente}
-              titulo={editarSoloCliente ? "Editar Cliente" : "Editar Cliente completo"}
-            />
-          </div>
-        </div>,
-        document.body
-      )}
-
-      {/* Modal Registrar Cliente desde la OT (portal fuera del form) */}
-      {mostrarRegistrarCliente && createPortal(
-        <div className="bc-modal">
-          <div className="bc-modal-caja bc-modal-caja--ancha">
-            <ClienteFormulario
-              clienteEditando={prefillCliente}
-              clientes={clientes}
-              titulo="Registrar Cliente"
-              modoRegistro
-              onSave={guardarNuevoClienteDesdeOT}
-              onCancel={() => { setMostrarRegistrarCliente(false); setPrefillCliente(null); }}
-            />
-          </div>
-        </div>,
-        document.body
-      )}
+      {modalesCliente}
 
       {/* Datos del cliente */}
       <div className="of-caja">
-        <div className="of-caja-titulo">Datos del cliente</div>
+        <div className="of-caja-titulo" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          Datos del cliente
+          {/* Con un cliente elegido el tipo viene de su ficha; en una OT desde cero se elige acá. */}
+          <select
+            value={esPersona ? "PERSONA" : "EMPRESA"}
+            disabled={readOnly || !!clienteSeleccionado}
+            style={{ padding: '0 6px', fontSize: '.75rem', height: '20px', border: '1.5px solid var(--border)', borderRadius: '6px', textTransform: 'none', letterSpacing: 'normal', fontWeight: 400, color: 'var(--text-secondary, #475569)' }}
+            onChange={(e) => {
+              const tipo = e.target.value;
+              setNuevaOrden((prev) => ({
+                ...prev,
+                clienteTipo: tipo,
+                // Una persona no tiene contacto: se limpian sus campos
+                ...(tipo === "PERSONA" ? { contacto: "", fonoContacto: "", emailContacto: "", cargoContacto: "" } : {})
+              }));
+            }}
+          >
+            <option value="EMPRESA">Empresa</option>
+            <option value="PERSONA">Persona</option>
+          </select>
+        </div>
         <div className="of-form-grid" style={{ gridTemplateColumns: '2fr 1fr', marginBottom: '15px' }}>
           <div className="of-f">
-            <label>Cliente *</label>
+            <label>{esPersona ? "Nombre *" : "Cliente *"}</label>
             <input
               type="text"
               placeholder="Nombre del cliente"
               value={nuevaOrden.cliente}
               onChange={(e) => setNuevaOrden({...nuevaOrden, cliente: upperInput(e)})}
-              disabled={readOnly}
+              disabled={readOnly || clienteBloqueado}
               required
               style={{
                 width: '100%',
@@ -740,7 +460,7 @@ function OrdenFormCliente({
               value={nuevaOrden.rut}
               onChange={handleRutChange}
               onBlur={handleRutBlur}
-              disabled={readOnly}
+              disabled={readOnly || rutBloqueado}
               style={{
                 width: '100%',
                 border: rutError ? '1px solid #f87171' : undefined,
@@ -758,7 +478,7 @@ function OrdenFormCliente({
               placeholder="Teléfono principal del cliente"
               value={nuevaOrden.fonoPrincipal}
               onChange={(e) => setNuevaOrden({...nuevaOrden, fonoPrincipal: e.target.value.replace(/[^0-9+]/g, '')})}
-              disabled={readOnly}
+              disabled={readOnly || fonoBloqueado}
               style={{
                 width: '100%',
                 padding: '2px 8px',
@@ -776,7 +496,7 @@ function OrdenFormCliente({
               placeholder="Email del cliente"
               value={nuevaOrden.email}
               onChange={(e) => setNuevaOrden({...nuevaOrden, email: e.target.value})}
-              disabled={readOnly}
+              disabled={readOnly || emailBloqueado}
               style={{
                 width: '100%',
                 padding: '2px 8px',
@@ -791,7 +511,7 @@ function OrdenFormCliente({
 
       {/* Buscadores: contacto y dirección, uno al lado del otro; ambos con lista para ver y elegir */}
       <div className="of-form-grid" style={{ gridTemplateColumns: '1fr 1fr', marginBottom: '10px' }}>
-          <CampoCatalogo
+          {!esPersona && <CampoCatalogo
             key={`contactos-${clienteSeleccionado?.id || "sin-cliente"}`}
             tipo="contactos"
             etiqueta="Buscar Contacto"
@@ -801,9 +521,9 @@ function OrdenFormCliente({
             actual={nuevaOrden.contacto}
             datosRegistro={{ nombre: nuevaOrden.contacto, email: nuevaOrden.emailContacto, fono: nuevaOrden.fonoContacto, cargo: nuevaOrden.cargoContacto }}
             onElegir={contactoEnOT}
-            onActualizado={contactoEnOT}
+            onActualizado={contactoEditadoEnOT}
             onEnCatalogo={setContactoRegistrado}
-          />
+          />}
         <CampoCatalogo
           key={`direcciones-${clienteSeleccionado?.id || "sin-cliente"}`}
           tipo="direcciones"
@@ -814,7 +534,7 @@ function OrdenFormCliente({
           readOnly={readOnly}
           datosRegistro={{ direccion: nuevaOrden.direccion, ciudad: nuevaOrden.ciudad, comuna: nuevaOrden.comuna }}
           onElegir={direccionEnOT}
-          onActualizado={direccionEnOT}
+          onActualizado={direccionEditadaEnOT}
           onEnCatalogo={setDireccionRegistrada}
         />
       </div>
@@ -865,7 +585,7 @@ function OrdenFormCliente({
               placeholder="Nombre del contacto"
               value={nuevaOrden.contacto}
               onChange={(e) => setNuevaOrden({...nuevaOrden, contacto: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
-              disabled={readOnly}
+              disabled={readOnly || esPersona || contactoBloqueado}
               style={{
                 width: '100%',
                 padding: '2px 8px',
@@ -883,7 +603,7 @@ function OrdenFormCliente({
               placeholder="Teléfono del contacto"
               value={nuevaOrden.fonoContacto}
               onChange={(e) => setNuevaOrden({...nuevaOrden, fonoContacto: e.target.value.replace(/[^0-9+]/g, '')})}
-              disabled={readOnly}
+              disabled={readOnly || esPersona || contactoBloqueado}
               style={{
                 width: '100%',
                 padding: '2px 8px',
@@ -901,7 +621,7 @@ function OrdenFormCliente({
               placeholder="Email del contacto"
               value={nuevaOrden.emailContacto}
               onChange={(e) => setNuevaOrden({...nuevaOrden, emailContacto: e.target.value})}
-              disabled={readOnly}
+              disabled={readOnly || esPersona || contactoBloqueado}
               style={{
                 width: '100%',
                 padding: '2px 8px',
@@ -919,7 +639,7 @@ function OrdenFormCliente({
               placeholder="Cargo del contacto"
               value={nuevaOrden.cargoContacto}
               onChange={(e) => setNuevaOrden({...nuevaOrden, cargoContacto: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
-              disabled={readOnly}
+              disabled={readOnly || esPersona || contactoBloqueado}
               style={{
                 width: '100%',
                 padding: '2px 8px',
@@ -943,7 +663,7 @@ function OrdenFormCliente({
               placeholder="Dirección del cliente"
               value={nuevaOrden.direccion}
               onChange={(e) => setNuevaOrden({...nuevaOrden, direccion: upperInput(e)})}
-              disabled={readOnly}
+              disabled={readOnly || direccionBloqueada}
               style={{ width: '100%' }}
             />
           </div>
@@ -955,7 +675,7 @@ function OrdenFormCliente({
               placeholder="Ciudad"
               value={nuevaOrden.ciudad}
               onChange={(e) => setNuevaOrden({...nuevaOrden, ciudad: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
-              disabled={readOnly}
+              disabled={readOnly || direccionBloqueada}
               style={{ width: '100%' }}
             />
           </div>
@@ -967,7 +687,7 @@ function OrdenFormCliente({
               placeholder="Comuna"
               value={nuevaOrden.comuna}
               onChange={(e) => setNuevaOrden({...nuevaOrden, comuna: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
-              disabled={readOnly}
+              disabled={readOnly || direccionBloqueada}
               style={{ width: '100%' }}
             />
           </div>
@@ -979,99 +699,7 @@ function OrdenFormCliente({
 
     </div>
 
-      <div style={{ marginTop: '10px', padding: '4px 10px', background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '8px', lineHeight: '1.2' }}>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer', fontSize: '0.8rem', width: 'fit-content', maxWidth: '100%' }}>
-          <button
-            type="button"
-            onClick={() => setMostrarAdjunto(!mostrarAdjunto)}
-            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text)', fontWeight: 600, fontSize: '0.8rem', fontFamily: 'inherit' }}
-          >
-            {mostrarAdjunto ? <ChevronUp size={14} style={{ color: 'var(--primary)', flexShrink: 0 }} /> : <ChevronDown size={14} style={{ color: 'var(--primary)', flexShrink: 0 }} />}
-            <Paperclip size={14} style={{ color: 'var(--primary)', flexShrink: 0 }} />
-            Adjunto
-            {(nuevaOrden.adjuntos || []).length > 0 && (
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)', flexShrink: 0 }} title="Tiene adjunto" />
-            )}
-          </button>
-        </label>
-
-        {mostrarAdjunto && (
-        <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          {(nuevaOrden.adjuntos || []).map((adj, idx) => (
-            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#fff', border: '1px solid var(--border)', borderRadius: '8px', padding: '6px 10px' }}>
-              {adj.tipo === "application/pdf" ? (
-                <div style={{ width: '44px', height: '44px', borderRadius: '6px', border: '1px solid var(--border)', background: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <FileText size={22} style={{ color: '#DC2626' }} />
-                </div>
-              ) : (
-                adj.tipo.startsWith("image/") && (
-                  <img
-                    src={adj.data}
-                    alt={adj.nombre}
-                    style={{ width: '44px', height: '44px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border)', flexShrink: 0 }}
-                  />
-                )
-              )}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: '600', fontSize: '.75rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {adj.nombre || "Archivo adjunto"}
-                </div>
-                <div style={{ fontSize: '.68rem', color: 'var(--muted)' }}>{idx === 0 ? "Adjunto 1" : "Adjunto 2"}</div>
-              </div>
-              <div className="acciones-menu" style={{ position: 'relative' }}>
-                <button
-                  type="button"
-                  className="acciones-menu-btn"
-                  onClick={(e) => abrirMenuAdjunto(e, idx)}
-                  aria-label={`Opciones de ${adj.nombre}`}
-                >
-                  <MoreVertical size={16} />
-                </button>
-              </div>
-            </div>
-          ))}
-
-          {mostrarMenuAdjunto && (
-            <div className="acciones-dropdown" ref={adjuntoDropdownRef} style={{ position: 'fixed', top: posAdjunto.top, left: posAdjunto.left, zIndex: 9999 }}>
-              <button className="acciones-item ver" type="button" onClick={() => verAdjunto()}>
-                <Eye size={14} /> Ver
-              </button>
-              {!readOnly && (
-                <>
-                  <button className="acciones-item edit" type="button" onClick={() => descargarAdjunto()}>
-                    <Download size={14} /> Descargar
-                  </button>
-                  <button className="acciones-item delete" type="button" onClick={() => eliminarAdjunto()}>
-                    <Trash2 size={14} /> Eliminar
-                  </button>
-                </>
-              )}
-            </div>
-          )}
-
-          {(nuevaOrden.adjuntos || []).length < 2 && (
-            <div className="of-f">
-              <label
-                className="ot-search"
-                style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: readOnly ? 'not-allowed' : 'pointer', color: 'var(--muted)', minHeight: '26px', margin: 0 }}
-              >
-                <Paperclip size={14} style={{ color: 'var(--primary)', flexShrink: 0 }} />
-                <span style={{ flex: 1, fontSize: '.78rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {readOnly ? "Sin archivo" : "Seleccionar archivo"}
-                </span>
-                <input
-                  type="file"
-                  accept="image/*,.pdf"
-                  onChange={handleAdjuntoChange}
-                  disabled={readOnly}
-                  style={{ display: 'none' }}
-                />
-              </label>
-            </div>
-          )}
-        </div>
-        )}
-      </div>
+      <OrdenAdjuntos nuevaOrden={nuevaOrden} setNuevaOrden={setNuevaOrden} readOnly={readOnly} />
 
       <div style={{ marginTop: '10px', padding: '4px 10px', background: '#FEF9E7', border: '1px solid #F5D48C', borderRadius: '8px', lineHeight: '1.2' }}>
         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer', fontSize: '0.8rem', width: 'fit-content', maxWidth: '100%' }}>
@@ -1104,35 +732,6 @@ function OrdenFormCliente({
         )}
       </div>
 
-      {adjuntoParaVer && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(0,0,0,.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-          <div style={{ background: '#fff', borderRadius: '10px', padding: '12px', width: '90vw', maxWidth: '1000px', height: '88vh', display: 'flex', flexDirection: 'column', gap: '10px', position: 'relative' }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
-              <span style={{ fontWeight: 600, fontSize: '.85rem', color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{adjuntoParaVer.nombre}</span>
-              <button type="button" onClick={() => setAdjuntoParaVer(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: 'var(--muted)', lineHeight: 1 }} aria-label="Cerrar">×</button>
-            </div>
-            {adjuntoParaVer.tipo === "application/pdf" ? (
-              <iframe
-                src={adjuntoParaVer.data}
-                title={adjuntoParaVer.nombre}
-                style={{ width: '100%', height: '100%', flex: 1, border: 'none', borderRadius: '6px', background: '#fff' }}
-              />
-            ) : (
-              <img src={adjuntoParaVer.data} alt={adjuntoParaVer.nombre} style={{ maxWidth: '100%', maxHeight: '75vh', objectFit: 'contain', borderRadius: '6px' }} />
-            )}
-            {adjuntoParaVer.tipo !== "application/pdf" && (
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
-                <button type="button" onClick={imprimirAdjunto} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', border: 'none', borderRadius: '6px', background: '#0D9488', color: '#fff', cursor: 'pointer', fontSize: '.78rem', fontWeight: 600 }}>
-                  <Printer size={14} /> Imprimir
-                </button>
-                <button type="button" onClick={() => descargarAdjunto()} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', border: 'none', borderRadius: '6px', background: 'var(--primary)', color: '#fff', cursor: 'pointer', fontSize: '.78rem', fontWeight: 600 }}>
-                  <Download size={14} /> Descargar
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </>
   );
 }

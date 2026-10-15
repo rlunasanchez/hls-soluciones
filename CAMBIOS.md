@@ -2,6 +2,35 @@
 
 ## Fecha: 2026-10-15
 
+### v2.168: Empresa / Persona, limpieza de código, columnas sin uso y OT en archivos más chicos
+
+**Alcance:** Clientes, Contactos, Direcciones y Orden de Trabajo. Cambia el esquema de la base (ver "Migración"). Todo **solo en local**: no se ha publicado ni se ha migrado Neon.
+
+- **Cliente Empresa o Persona**
+  - `clientes.tipo` (`EMPRESA` | `PERSONA`, por defecto `EMPRESA`) y `ordenes_trabajo.cliente_tipo` (copia del tipo al guardar la OT).
+  - Ficha del cliente: selector Tipo. **Persona:** etiqueta "Nombre", una sola columna, sin tabla de Contactos y con su **dirección en la tabla de Direcciones** (mantenedor, vinculada y marcada "En la OT"; si no hay marca se usa la primera). **Empresa:** sin cambios; su dirección propia queda en la ficha y no viaja a la OT.
+  - Una persona **no tiene contacto**: en la OT los campos de contacto quedan vacíos y deshabilitados, y no aparece el buscador de contacto. Su dirección sí viaja a la OT.
+  - OT: selector Tipo junto al título "Datos del cliente" (bloqueado si hay cliente seleccionado; sin cliente se elige ahí).
+  - PDF de la OT: **Empresa** → Dirección y Ciudad - Comuna dentro de la sección Contacto; **Persona** → dirección en Datos de Cliente y sin sección Contacto (el check "Contacto" del modal se oculta).
+  - `backend/routes/clientes.js`: POST/PUT aceptan `tipo` (el PUT lo conserva si no se envía) y el cascade a las OT actualiza `cliente_tipo`. `enriquecerClientes` entrega, para una persona, la dirección vinculada como `ot_*` y deja el contacto vacío.
+  - Listado y filtro de clientes: "Razón social / Nombre".
+- **Campos bloqueados cuando vienen del buscador (OT)**
+  - Cliente, RUT, fono y email: bloqueados mientras coincidan con la ficha del cliente seleccionado. Se cambian con "Editar" / "Editar completo".
+  - Contacto y dirección: bloqueados si están en el catálogo o vinculados al cliente. Libres si el texto no existe en ninguna parte (para poder corregirlo).
+  - Equipo, Marca y Modelo: bloqueados si coinciden con un equipo del mantenedor. Serie, nivel de tinta, contador e insumos siguen libres. Botón **"Cambiar equipo"** (azul) para vaciarlos; **"+ Registrar en Equipos"** ya no aparece si el equipo existe.
+  - Tras editar una dirección o contacto desde el buscador se recarga el cliente seleccionado (antes salía un aviso falso "no está vinculada").
+  - Texto de los buscadores de la ficha del cliente en verde (la regla `.cf-vinc input` lo pisaba).
+- **Limpieza**
+  - Eliminado `POST /api/auth/setup-admin` (nada lo llamaba y, sin `SETUP_ADMIN_KEY` definida, permitía resetear al admin sin clave). El primer admin se crea con `node backend/crear-admin.js`.
+  - Columnas de `ordenes_trabajo` que la OT nunca escribía: `contacto_id`, `contacto_direccion`, `contacto_ciudad`, `contacto_comuna`, `direccion_id`, `cliente_direccion_id`, `equipo_id`. Quitadas de `ordenes.js`, de `crear_tablas.sql` y de la base local. **Cotizaciones no se tocó** (sigue leyendo esos campos de la OT y recibe vacío, igual que antes).
+  - Sin variables ni imports sin uso, y todos los endpoints del backend tienen quien los llame. Tablas: las 9 existentes se usan, no hay ninguna que sobre.
+- **Reestructuración de la OT en archivos más chicos** (traslado de código, sin cambios de comportamiento)
+  - `OrdenFormCliente.jsx` 1.193 → 739 líneas: `OrdenAdjuntos.jsx` (adjuntos y visor) y `useClienteOT.jsx` (ver / editar / registrar cliente y sus modales).
+  - `OrdenTrabajo.jsx` 1.243 → 958 líneas: `editarOrden` y `verOrden` unificadas en `cargarOrden(orden, modo)`; `utils/ordenFormato.js` (orden → formulario, equipo e insumos) y `utils/validarOrden.js` (validaciones y payload).
+- **Migración (cuando se publique)**
+  - MySQL local: ya aplicada.
+  - Neon: `ALTER TABLE clientes ADD COLUMN IF NOT EXISTS tipo VARCHAR(10) NOT NULL DEFAULT 'EMPRESA'; ALTER TABLE ordenes_trabajo ADD COLUMN IF NOT EXISTS cliente_tipo VARCHAR(10) DEFAULT 'EMPRESA';` y quitar las 7 columnas de `ordenes_trabajo` indicadas arriba. Además hay que portar `clientes.js`, `ordenes.js` y `auth.js` a PostgreSQL (renumerar `$N`) y publicar en el orden: Neon → `deploy/cloud` → `main`.
+
 ### v2.167: Títulos de la OT en un solo azul y limpieza de clases CSS nuevas que duplicaban existentes
 
 **Alcance:** Clientes, Contactos, Direcciones y Orden de Trabajo. Solo frontend, sin cambios de backend ni de base de datos.

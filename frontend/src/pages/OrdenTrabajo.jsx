@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   Home, Users, Contact, MapPin, Package, FileText, FileSpreadsheet, ShoppingCart, UserCog,
   Save, X, Wrench, ChevronDown, ChevronUp
 } from "lucide-react";
 import api from "../services/api";
 import { getCached } from "../services/cache";
-import { toUpper, capitalizarNombre, cerrarSesion, upperInput, validarRUT, normalizarRut, validarEmail, parseToken } from "../utils/helpers";
+import { toUpper, capitalizarNombre, cerrarSesion, upperInput, parseToken } from "../utils/helpers";
+import { ordenAFormulario, buscarEquipoDeOrden, insumosDeOrden } from "../utils/ordenFormato";
+import { validarOrden, armarPayloadOrden } from "../utils/validarOrden";
 import '../styles/OrdenTrabajo.css';
 import "../styles/ordenes-componentes.css";
 import HeaderOrdenTrabajo from "../components/ordenes/HeaderOrdenTrabajo";
@@ -33,7 +35,6 @@ const tecnicoDeSesion = () => {
 
 function OrdenTrabajo() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   
   // Estados para listar órdenes con paginación
@@ -135,6 +136,7 @@ function OrdenTrabajo() {
     actividad: "",
     observaciones: "",
     infoInterna: "",
+    clienteTipo: "EMPRESA",
     adjuntos: []
   });
 
@@ -239,6 +241,7 @@ function OrdenTrabajo() {
         actividad: "",
         observaciones: "",
         infoInterna: "",
+        clienteTipo: clienteFromNav.tipo === "PERSONA" ? "PERSONA" : "EMPRESA",
         adjuntos: [],
         contactosExtra: [],
         direccionesExtra: []
@@ -360,255 +363,49 @@ function OrdenTrabajo() {
 
   useClampPagina(paginaActual, setPaginaActual, totalPaginas);
 
-  const fmtDate = (d) => {
-    if (!d) return "";
-    const dt = typeof d === "string" ? new Date(d) : d;
-    if (isNaN(dt.getTime())) return "";
-    return dt.toISOString().split("T")[0];
-  };
+  // Abre una orden guardada en el formulario. modo "editar" la deja editable; modo "ver", en solo lectura.
+  // El listado no trae "adjunto" (es pesado): la orden completa se pide recién al abrirla.
+  const cargarOrden = async (ordenListado, modo) => {
+    const { data: orden } = await api.get(`/api/ordenes/${ordenListado.id}`);
 
-  const parseExtra = (val) => {
-    try {
-      const arr = JSON.parse(val || "[]");
-      return Array.isArray(arr) ? arr : [];
-    } catch {
-      return [];
-    }
-  };
-
-  // Adjuntos: la columna guarda JSON array [{nombre, tipo, data}] o null.
-  // Compatibilidad con datos viejos guardados como data URL suelto (v1.94 previa).
-  const parseAdjuntos = (val) => {
-    if (!val) return [];
-    if (Array.isArray(val)) return val;
-    try {
-      const arr = JSON.parse(val);
-      return Array.isArray(arr) ? arr : [];
-    } catch {
-      return [];
-    }
-  };
-
-  const editarOrden = async (orden) => {
-    // El listado ya no trae "adjunto" (es pesado y no se muestra ahí): se pide
-    // la orden completa recién al abrirla, para no perder el archivo al guardar.
-    const res = await api.get(`/api/ordenes/${orden.id}`);
-    orden = res.data;
-
-    setEditingId(orden.id);
+    setSoloLectura(modo === "ver");
+    setEditingId(modo === "editar" ? orden.id : null);
     setOrdenIdActual(orden.id);
     setClienteFijo(false);
     setEquipoFijo(false);
-    setEquipoSeleccionado(null);
     setMostrarFormulario(true);
 
-    // Cargar datos de la orden en el formulario
-    setNuevaOrden({
-      numeroOrden: orden.numero_orden || "",
-      fecha: fmtDate(orden.fecha),
-      esGarantia: orden.es_garantia || false,
-      fechaIngreso: fmtDate(orden.fecha_ingreso),
-      fechaIngresoCheck: orden.fecha_ingreso_check || false,
-      fechaTermino: fmtDate(orden.fecha_termino),
-      fechaTerminoCheck: orden.fecha_termino_check || false,
-      fechaEntrega: fmtDate(orden.fecha_entrega),
-      fechaEntregaCheck: orden.fecha_entrega_check || false,
-      fechaCompra: fmtDate(orden.fecha_compra),
-      fechaCompraCheck: orden.fecha_compra_check || false,
-      cliente: toUpper(orden.cliente),
-      direccion: toUpper(orden.direccion),
-      ciudad: toUpper(orden.ciudad),
-      comuna: toUpper(orden.comuna),
-      rut: orden.rut || "",
-      email: orden.email || "",
-      fonoPrincipal: orden.fono_principal || "",
-      contacto: toUpper(orden.contacto),
-      fonoContacto: orden.fono_contacto || "",
-      emailContacto: orden.email_contacto || "",
-      cargoContacto: toUpper(orden.cargo_contacto) || "",
-      tecnicoAsignado: toUpper(orden.tecnico_asignado),
-      equipo: toUpper(orden.equipo),
-      modelo: toUpper(orden.modelo),
-      marca: toUpper(orden.marca),
-      serie: toUpper(orden.serie),
-      contadorPagOut: orden.contador_pag_out || "",
-      nivelTinta: toUpper(orden.nivel_tinta),
-      averia: toUpper(orden.averia),
-      actividad: toUpper(orden.actividad),
-      observaciones: toUpper(orden.observaciones),
-      infoInterna: toUpper(orden.info_interna),
-      adjuntos: parseAdjuntos(orden.adjunto),
-      contactosExtra: parseExtra(orden.contactos_extra),
-      direccionesExtra: parseExtra(orden.direcciones_extra)
-    });
+    // Los campos de la OT son una copia (snapshot): no se pisan con datos frescos del cliente/equipo
+    setNuevaOrden(ordenAFormulario(orden));
 
-    // Igual que con el cliente: si los datos del equipo coinciden con un registro
-    // del mantenedor, se marca como seleccionado (badge ✓ y botón Editar disponibles)
-    const normEqOT = (v) => String(v || "").trim().toUpperCase();
-    if (orden.equipo && orden.marca && orden.modelo) {
-      const eq = (equipos || []).find(e =>
-        normEqOT(e.equipo) === normEqOT(orden.equipo) &&
-        normEqOT(e.marca) === normEqOT(orden.marca) &&
-        normEqOT(e.modelo) === normEqOT(orden.modelo)
-      );
-      setEquipoSeleccionado(eq || null);
-    }
+    // Si el equipo coincide con un registro del mantenedor se marca como seleccionado
+    // (habilita los botones Ver/Editar del equipo)
+    setEquipoSeleccionado(buscarEquipoDeOrden(orden, equipos));
 
-    // Buscar cliente asociado - solo para badge/estado, NO sobreescribir datos de la OT
-    const cl = clientes.find(c => 
-      (orden.cliente_id && c.id === orden.cliente_id) || 
-      (orden.cliente && c.razon_social === orden.cliente)
+    // Cliente asociado: solo para badge/estado
+    const cl = clientes.find((c) =>
+      (orden.cliente_id && c.id === orden.cliente_id) || (orden.cliente && c.razon_social === orden.cliente)
     );
-    if (cl) {
-      setClienteSeleccionado(cl);
-      setClienteInactivo(false);
-      setBusquedaCliente("");
-    } else if (orden.cliente_id) {
+    let seleccionado = cl || null;
+    let inactivo = false;
+    if (!cl && orden.cliente_id) {
       try {
         const resCli = await getCached(`/api/clientes`);
-        const clFresco = resCli.data.find(c => c.id === orden.cliente_id);
-        if (clFresco) {
-          setClienteSeleccionado(clFresco);
-          setClienteInactivo(false);
-          setBusquedaCliente("");
-        } else {
-          setClienteSeleccionado(null);
-          setClienteInactivo(true);
-          setBusquedaCliente("");
-        }
-      } catch {
-        setClienteSeleccionado(null);
-        setClienteInactivo(true);
-        setBusquedaCliente("");
-      }
-    } else {
-      setClienteSeleccionado(null);
-      setClienteInactivo(!!orden.cliente_id);
-      setBusquedaCliente("");
+        seleccionado = resCli.data.find((c) => c.id === orden.cliente_id) || null;
+      } catch { /* sin conexión: se trata como no encontrado */ }
+      inactivo = !seleccionado;
     }
+    setClienteSeleccionado(seleccionado);
+    setClienteInactivo(inactivo);
+    setBusquedaCliente("");
 
-    // Cargar insumos
-    const insumosData = [];
-    for (let i = 1; i <= 12; i++) {
-      const insumo = orden[`insumo${i}`];
-      if (insumo) insumosData.push({ nombre: insumo });
-    }
-    const nuevosInsumos = [...insumosData];
-    while (nuevosInsumos.length < 12) {
-      nuevosInsumos.push({ nombre: "" });
-    }
-    setInsumos(nuevosInsumos);
-    setInsumosVisibles(Math.max(2, insumosData.length));
+    const { insumos: lista, visibles } = insumosDeOrden(orden);
+    setInsumos(lista);
+    setInsumosVisibles(visibles);
   };
 
-  const verOrden = async (orden) => {
-    // Mismo motivo que en editarOrden: el listado no trae "adjunto".
-    const res = await api.get(`/api/ordenes/${orden.id}`);
-    orden = res.data;
-
-    setSoloLectura(true);
-    setClienteFijo(false);
-    setEquipoFijo(false);
-    setEquipoSeleccionado(null);
-    setEditingId(null);
-    setOrdenIdActual(orden.id);
-    setMostrarFormulario(true);
-    
-    setNuevaOrden({
-      numeroOrden: orden.numero_orden || "",
-      fecha: fmtDate(orden.fecha),
-      esGarantia: orden.es_garantia || false,
-      fechaIngreso: fmtDate(orden.fecha_ingreso),
-      fechaIngresoCheck: orden.fecha_ingreso_check || false,
-      fechaTermino: fmtDate(orden.fecha_termino),
-      fechaTerminoCheck: orden.fecha_termino_check || false,
-      fechaEntrega: fmtDate(orden.fecha_entrega),
-      fechaEntregaCheck: orden.fecha_entrega_check || false,
-      fechaCompra: fmtDate(orden.fecha_compra),
-      fechaCompraCheck: orden.fecha_compra_check || false,
-      cliente: toUpper(orden.cliente),
-      direccion: toUpper(orden.direccion),
-      ciudad: toUpper(orden.ciudad),
-      comuna: toUpper(orden.comuna),
-      rut: orden.rut || "",
-      email: orden.email || "",
-      fonoPrincipal: orden.fono_principal || "",
-      contacto: toUpper(orden.contacto),
-      fonoContacto: orden.fono_contacto || "",
-      emailContacto: orden.email_contacto || "",
-      cargoContacto: toUpper(orden.cargo_contacto) || "",
-      tecnicoAsignado: toUpper(orden.tecnico_asignado),
-      equipo: toUpper(orden.equipo),
-      modelo: toUpper(orden.modelo),
-      marca: toUpper(orden.marca),
-      serie: toUpper(orden.serie),
-      contadorPagOut: orden.contador_pag_out || "",
-      nivelTinta: toUpper(orden.nivel_tinta),
-      averia: toUpper(orden.averia),
-      actividad: toUpper(orden.actividad),
-      observaciones: toUpper(orden.observaciones),
-      infoInterna: toUpper(orden.info_interna),
-      adjuntos: parseAdjuntos(orden.adjunto),
-      contactosExtra: parseExtra(orden.contactos_extra),
-      direccionesExtra: parseExtra(orden.direcciones_extra)
-    });
-
-    // Igual que en edición: si el equipo coincide con un registro del mantenedor
-    // se marca como seleccionado (habilita botones Ver/Editar)
-    const normEqOT = (v) => String(v || "").trim().toUpperCase();
-    if (orden.equipo && orden.marca && orden.modelo) {
-      const eq = (equipos || []).find(e =>
-        normEqOT(e.equipo) === normEqOT(orden.equipo) &&
-        normEqOT(e.marca) === normEqOT(orden.marca) &&
-        normEqOT(e.modelo) === normEqOT(orden.modelo)
-      );
-      setEquipoSeleccionado(eq || null);
-    }
-
-    const cl = clientes.find(c => 
-      (orden.cliente_id && c.id === orden.cliente_id) || 
-      (orden.cliente && c.razon_social === orden.cliente)
-    );
-    if (cl) {
-      setClienteSeleccionado(cl);
-      setClienteInactivo(false);
-      setBusquedaCliente("");
-    } else if (orden.cliente_id) {
-      try {
-        const resCli = await getCached(`/api/clientes`);
-        const clFresco = resCli.data.find(c => c.id === orden.cliente_id);
-        if (clFresco) {
-          setClienteSeleccionado(clFresco);
-          setClienteInactivo(false);
-          setBusquedaCliente("");
-        } else {
-          setClienteSeleccionado(null);
-          setClienteInactivo(true);
-          setBusquedaCliente("");
-        }
-      } catch {
-        setClienteSeleccionado(null);
-        setClienteInactivo(true);
-        setBusquedaCliente("");
-      }
-    } else {
-      setClienteSeleccionado(null);
-      setClienteInactivo(!!orden.cliente_id);
-      setBusquedaCliente("");
-    }
-
-    const insumosData = [];
-    for (let i = 1; i <= 12; i++) {
-      const insumo = orden[`insumo${i}`];
-      if (insumo) insumosData.push({ nombre: insumo });
-    }
-    const nuevosInsumos = [...insumosData];
-    while (nuevosInsumos.length < 12) {
-      nuevosInsumos.push({ nombre: "" });
-    }
-    setInsumos(nuevosInsumos);
-    setInsumosVisibles(Math.max(2, insumosData.length));
-  };
+  const editarOrden = (orden) => cargarOrden(orden, "editar");
+  const verOrden = (orden) => cargarOrden(orden, "ver");
 
   const eliminarOrden = async (id) => {
     if (!window.confirm("¿Está seguro de eliminar esta orden de trabajo?")) return;
@@ -640,6 +437,22 @@ function OrdenTrabajo() {
   };
 
   // Seleccionar cliente y cargar sus datos
+  // Una persona no tiene contacto: va sin datos de contacto y con la dirección que tiene vinculada
+  // (copia, snapshot). En una empresa el contacto y la dirección se eligen aparte.
+  const datosDelTipo = (cliente) => cliente.tipo === "PERSONA"
+    ? {
+        clienteTipo: "PERSONA",
+        contacto: "",
+        fonoContacto: "",
+        emailContacto: "",
+        cargoContacto: "",
+        // Su dirección es la que tiene vinculada en el mantenedor de Direcciones
+        direccion: toUpper(cliente.ot_direccion),
+        ciudad: toUpper(cliente.ot_ciudad),
+        comuna: toUpper(cliente.ot_comuna)
+      }
+    : { clienteTipo: "EMPRESA" };
+
   const seleccionarCliente = (cliente) => {
     const mismoCliente = clienteSeleccionado?.id === cliente.id;
     setClienteSeleccionado(cliente);
@@ -663,7 +476,8 @@ function OrdenTrabajo() {
         contacto: "",
         fonoContacto: "",
         emailContacto: "",
-        cargoContacto: ""
+        cargoContacto: "",
+        ...datosDelTipo(cliente)
       }));
       return;
     }
@@ -685,7 +499,8 @@ function OrdenTrabajo() {
         emailContacto: "",
         cargoContacto: "",
         contactosExtra: [],
-        direccionesExtra: []
+        direccionesExtra: [],
+        ...datosDelTipo(cliente)
       }));
       return;
     }
@@ -717,7 +532,8 @@ function OrdenTrabajo() {
       contadorPagOut: "",
       averia: "",
       actividad: "",
-      observaciones: ""
+      observaciones: "",
+      ...datosDelTipo(cliente)
     }));
   };
 
@@ -785,94 +601,14 @@ function OrdenTrabajo() {
     e.preventDefault();
     if (guardandoRef.current) return;
 
-    // Cliente y RUT obligatorios y completos
-    if (!nuevaOrden.cliente || !nuevaOrden.cliente.trim()) {
-      alert("Complete el Cliente antes de guardar la orden.");
-      return;
-    }
-    if (!nuevaOrden.tecnicoAsignado || !nuevaOrden.tecnicoAsignado.trim()) {
-      alert("Complete el Técnico Asignado antes de guardar la orden.");
-      return;
-    }
-    // RUT "19" = comodín (cliente sin RUT conocido): se permite sin validar formato
-    const rutNormOT = normalizarRut(nuevaOrden.rut);
-    if (rutNormOT !== "19" && (!nuevaOrden.rut || !nuevaOrden.rut.trim() || !validarRUT(nuevaOrden.rut))) {
-      alert("Complete el RUT del cliente (con guion y dígito verificador) antes de guardar la orden.");
+    const mensajeError = validarOrden(nuevaOrden, { clientes, clienteSeleccionado });
+    if (mensajeError) {
+      alert(mensajeError);
       return;
     }
 
-    // Emails con formato válido: cliente, contacto y contactos adicionales
-    const emailsOT = [
-      ["Email", nuevaOrden.email],
-      ["Email Contacto", nuevaOrden.emailContacto],
-      ...(nuevaOrden.contactosExtra || []).map((c, i) => [`Email contacto ${i + 1}`, c.email]),
-    ];
-    for (const [campo, valor] of emailsOT) {
-      if (String(valor || "").trim() && !validarEmail(valor)) {
-        alert(`Email inválido (${campo}).`);
-        return;
-      }
-    }
+    const payload = armarPayloadOrden(nuevaOrden, insumos, clienteSeleccionado);
 
-    // El cliente debe existir en el mantenedor de Clientes
-    const normTxtOT = (s) => String(s || "").toUpperCase().trim();
-    const clienteEncontrado =
-      (clientes || []).find((c) => normTxtOT(c.razon_social) === normTxtOT(nuevaOrden.cliente)) ||
-      (clientes || []).find((c) => rutNormOT && normalizarRut(c.rut) === rutNormOT) ||
-      null;
-    if (!clienteEncontrado) {
-      alert(`El cliente no está registrado. Use "Registrar en Clientes".`);
-      return;
-    }
-
-    // El cliente debe estar seleccionado explícitamente en el buscador para poder guardar
-    if (!clienteSeleccionado) {
-      alert("Seleccione un cliente del buscador antes de guardar.");
-      return;
-    }
-
-    // El RUT escrito no puede pertenecer a otro cliente distinto del seleccionado
-    // (el comodín "19" se excluye porque lo comparten varios clientes)
-    if (rutNormOT && rutNormOT !== "19") {
-      const duenoRut = (clientes || []).find((c) => normalizarRut(c.rut) === rutNormOT);
-      if (duenoRut && duenoRut.id !== clienteSeleccionado.id) {
-        alert(`El RUT ${nuevaOrden.rut} pertenece al cliente ${duenoRut.codigo || "CL-????"}.`);
-        return;
-      }
-    }
-
-    // Validar peso total de adjuntos: data URL base64 ≈ 33% más pesada que el archivo original
-    const adjuntos = nuevaOrden.adjuntos || [];
-    if (adjuntos.length > 0) {
-      const bytesTotal = adjuntos.reduce((acc, a) => acc + (a.data?.length || 0), 0);
-      const mbTotal = (bytesTotal * 0.75) / (1024 * 1024);
-      if (mbTotal > 18) {
-        alert(`Las imágenes adjuntas suman aproximadamente ${mbTotal.toFixed(1)} MB.\nEl límite es 20 MB. Reducí el tamaño de las imágenes o eliminá algunas antes de guardar.`);
-        return;
-      }
-    }
-    
-    // Preparar insumos
-    const ins = insumos.filter(i => i.nombre.trim() !== "").map(i => i.nombre);
-    
-    const payload = {
-      ...nuevaOrden,
-      clienteId: clienteSeleccionado?.id || null,
-      equipoId: null, // Las OT no se vinculan a equipos: se copian los datos (mismo modelo puede tener otra serie)
-      insumo1: ins[0] || "",
-      insumo2: ins[1] || "",
-      insumo3: ins[2] || "",
-      insumo4: ins[3] || "",
-      insumo5: ins[4] || "",
-      insumo6: ins[5] || "",
-      insumo7: ins[6] || "",
-      insumo8: ins[7] || "",
-      insumo9: ins[8] || "",
-      insumo10: ins[9] || "",
-      insumo11: ins[10] || "",
-      insumo12: ins[11] || ""
-    };
-    
     const eraOrdenNueva = !editingId;
     guardandoRef.current = true;
     setGuardando(true);
@@ -947,6 +683,7 @@ function OrdenTrabajo() {
       actividad: "",
       observaciones: "",
       infoInterna: "",
+      clienteTipo: "EMPRESA",
       adjuntos: [],
       contactosExtra: [],
       direccionesExtra: []

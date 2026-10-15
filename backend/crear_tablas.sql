@@ -4,6 +4,7 @@
 CREATE TABLE IF NOT EXISTS clientes (
   id INT AUTO_INCREMENT PRIMARY KEY,
   codigo VARCHAR(50) UNIQUE,
+  tipo VARCHAR(10) NOT NULL DEFAULT 'EMPRESA',  -- EMPRESA | PERSONA
   razon_social VARCHAR(255) NOT NULL,
   giro VARCHAR(100),
   rut VARCHAR(20),
@@ -109,12 +110,6 @@ CREATE TABLE IF NOT EXISTS ordenes_trabajo (
   fono_contacto VARCHAR(50),
   email_contacto VARCHAR(100),
   cargo_contacto VARCHAR(100),
-  contacto_id INT,
-  contacto_direccion VARCHAR(255),
-  contacto_ciudad VARCHAR(100),
-  contacto_comuna VARCHAR(100),
-  direccion_id INT,
-  cliente_direccion_id INT,
   contactos_extra TEXT,
   direcciones_extra TEXT,
   fono_principal VARCHAR(50),
@@ -151,7 +146,7 @@ CREATE TABLE IF NOT EXISTS ordenes_trabajo (
 
   -- Relaciones
   cliente_id INT,
-  equipo_id INT,
+  cliente_tipo VARCHAR(10) DEFAULT 'EMPRESA',  -- copia del tipo del cliente al guardar la OT
 
   fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

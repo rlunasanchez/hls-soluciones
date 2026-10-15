@@ -10,7 +10,7 @@ import AccionesFicha from "../comunes/AccionesFicha";
 // globales). Acá solo se buscan y se vinculan al cliente (muchos a muchos);
 // la OT/Cotización/Informe/Orden de Compra los llaman desde esta relación.
 const ESTADO_INICIAL_CLIENTE = {
-  razon_social: "", giro: "", rut: "", direccion: "", ciudad: "",
+  tipo: "EMPRESA", razon_social: "", giro: "", rut: "", direccion: "", ciudad: "",
   comuna: "", telefono: "", email: ""
 };
 
@@ -52,6 +52,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
       setRutError("");
       setNuevoCliente({
         codigo: clienteEditando.codigo || "",
+        tipo: clienteEditando.tipo === "PERSONA" ? "PERSONA" : "EMPRESA",
         razon_social: toUpper(clienteEditando.razon_social),
         giro: toUpper(clienteEditando.giro),
         rut: clienteEditando.rut || "",
@@ -102,12 +103,18 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
       alert("Email inválido.");
       return;
     }
+    // Una persona no tiene contactos vinculados (no se envían): solo su dirección, del mantenedor
+    // de Direcciones. Si no marcó ninguna "En la OT", la primera es la de la OT.
+    const aOtDireccion = direcciones.find((d) => d.a_ot)?.id ?? (esPersona ? (direcciones[0]?.id ?? null) : null);
     const vinculos = (vinculosListos && !soloCliente)
       ? {
-          contacto_ids: contactos.map((c) => c.id), direccion_ids: direcciones.map((d) => d.id),
-          // Marcado "En la OT" (uno por tabla; null = ninguno)
-          contacto_a_ot_id: contactos.find((c) => c.a_ot)?.id ?? null,
-          direccion_a_ot_id: direcciones.find((d) => d.a_ot)?.id ?? null
+          ...(esPersona ? {} : {
+            contacto_ids: contactos.map((c) => c.id),
+            // Marcado "En la OT" (uno por tabla; null = ninguno)
+            contacto_a_ot_id: contactos.find((c) => c.a_ot)?.id ?? null
+          }),
+          direccion_ids: direcciones.map((d) => d.id),
+          direccion_a_ot_id: aOtDireccion
         }
       : {};
     guardar(() => onSave({ ...nuevoCliente, ...vinculos }, resetFormulario, mantener));
@@ -140,18 +147,29 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
     else setRutError("");
   };
 
+  const esPersona = nuevoCliente.tipo === "PERSONA";
+  const unaColumna = soloCliente || esPersona;
+
   return (
-    <div className={soloCliente ? "cf-wrap" : "cf-wrap cf-wrap-ancho"}>
+    <div className={unaColumna ? "cf-wrap" : "cf-wrap cf-wrap-ancho"}>
       <div className="cf-card">
         <div className="cf-head">
           <h2>{titulo || (readOnly ? "Ver Cliente" : clienteEditando ? "Editar Cliente" : "Nuevo Cliente")}</h2>
           <button type="button" onClick={() => { resetFormulario(); onCancel(); }}><X size={20} /></button>
         </div>
         <form onSubmit={handleSubmit} className="cf" noValidate>
-          <div className={soloCliente ? "cf-grid" : "cf-grid cf-grid-3"}>
+          <div className={unaColumna ? "cf-grid" : "cf-grid cf-grid-3"}>
             <div className="cf-sec cf-sec-empresa">
               <h3>Empresa o Persona</h3>
-              <div style={{ display: "grid", gridTemplateColumns: "200px", gap: 6 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "200px 200px", gap: 6 }}>
+                <div className="cf-field">
+                  <label>Tipo</label>
+                  <select value={nuevoCliente.tipo} disabled={readOnly}
+                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, tipo: e.target.value })}>
+                    <option value="EMPRESA">Empresa</option>
+                    <option value="PERSONA">Persona</option>
+                  </select>
+                </div>
                 <div className="cf-field" style={{ position: "relative" }}>
                   <label>RUT {rutError && <span style={{ position: "absolute", right: 0, top: 0, whiteSpace: "nowrap", color: "#dc2626", fontSize: ".7rem" }}>{rutError}</span>}</label>
                   <input placeholder="Ej: 12.345.678-9" value={nuevoCliente.rut}
@@ -162,8 +180,8 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
               </div>
               <div className="cf-r1 cf-mt">
                 <div className="cf-field">
-                  <label>Razón Social *</label>
-                  <input placeholder="Razón social" value={nuevoCliente.razon_social}
+                  <label>{esPersona ? "Nombre *" : "Razón Social *"}</label>
+                  <input placeholder={esPersona ? "Nombre" : "Razón social"} value={nuevoCliente.razon_social}
                     disabled={readOnly}
                     onChange={(e) => setNuevoCliente({ ...nuevoCliente, razon_social: upperInput(e) })} required />
                 </div>
@@ -190,8 +208,9 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                     onChange={(e) => setNuevoCliente({ ...nuevoCliente, email: e.target.value })} />
                 </div>
               </div>
-              {/* Dirección, ciudad y comuna propias de la empresa o persona. No se usan en la OT:
-                  allí el contacto y la dirección se eligen de los mantenedores. */}
+              {/* Dirección, ciudad y comuna propias de la empresa. No se usan en la OT: allí el contacto
+                  y la dirección se eligen de los mantenedores. La persona usa el mantenedor de Direcciones. */}
+              {!esPersona && <>
               <div className="cf-r1 cf-mt">
                 <div className="cf-field">
                   <label>Dirección</label>
@@ -214,9 +233,10 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
                     onChange={(e) => setNuevoCliente({ ...nuevoCliente, comuna: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
                 </div>
               </div>
+              </>}
             </div>
-            {!soloCliente && <VinculosCliente tipo="contactos" vinculados={contactos} onChange={setContactos} clienteId={clienteEditando?.id} readOnly={readOnly} />}
-            {!soloCliente && <VinculosCliente tipo="direcciones" vinculados={direcciones} onChange={setDirecciones} clienteId={clienteEditando?.id} readOnly={readOnly} />}
+            {!unaColumna && <VinculosCliente tipo="contactos" vinculados={contactos} onChange={setContactos} clienteId={clienteEditando?.id} readOnly={readOnly} />}
+            {(!unaColumna || (esPersona && !soloCliente)) && <VinculosCliente tipo="direcciones" vinculados={direcciones} onChange={setDirecciones} clienteId={clienteEditando?.id} readOnly={readOnly} />}
           </div>
 
           <AccionesFicha clase="cf" readOnly={readOnly} guardando={guardando}

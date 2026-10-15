@@ -13,26 +13,6 @@ function validarEmail(v) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || "").trim());
 }
 
-router.post("/setup-admin", async (req, res) => {
-  const { key } = req.body;
-  if (key !== process.env.SETUP_ADMIN_KEY) {
-    return res.status(403).json({ msg: "Key inválida" });
-  }
-  try {
-    const passwordHash = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
-    await pool.query(
-      `INSERT INTO usuarios (usuario, password, rol, email, activo) 
-       VALUES (?, ?, 'admin', ?, true)
-       ON DUPLICATE KEY UPDATE password = VALUES(password), rol = 'admin', activo = true`,
-      ["admin", passwordHash, process.env.ADMIN_EMAIL]
-    );
-    res.json({ msg: "Admin creado/actualizado correctamente" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Error del servidor" });
-  }
-});
-
 router.post("/login", async (req, res) => {
   const { usuario, password } = req.body;
   try {

@@ -18,7 +18,7 @@ function ClienteLista({ clientes, onVer, onEditar, onEliminar }) {
         <table>
           <thead>
             <tr>
-              <th>Razón social</th>
+              <th>Razón social / Nombre</th>
               <th>RUT</th>
               <th>Teléfono</th>
               <th>Email</th>

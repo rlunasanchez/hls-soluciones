@@ -30,7 +30,7 @@ export const upperInput = (e, regex) => {
 };
 
 // Calcula el dígito verificador (módulo 11) de un RUT chileno
-export const calcularDV = (cuerpo) => {
+const calcularDV = (cuerpo) => {
   let suma = 0, mul = 2;
   const digitos = String(cuerpo).split("").reverse().join("");
   for (let i = 0; i < digitos.length; i++) {

@@ -37,7 +37,7 @@ Solo existen **dos ramas**:
 
 - **Backend:** Node + Express, puerto **5001**. `server.js` registra `/api/auth|equipos|contactos|direcciones|clientes|ordenes|cotizaciones`. JWT (`JWT_SECRET` obligatorio, sin valor por defecto). `middleware/authMiddleware.js` exporta `authMiddleware` y `adminOnly`. Rate limiter general 500 por 15 min. CORS para localhost 5173/5174/3000 y Vercel.
 - **Frontend:** React 18 + Vite, puerto **5173**. `services/api.js` (axios + invalidación de caché), `services/cache.js` (TTL 60 s para listados). Estilos en `src/styles/` con variables CSS (`--primary: #0C4A8C`, `--warning`, `--success`…); no usar colores fijos.
-- **Variables de entorno (`backend/.env`, no se sube):** `DB_HOST DB_PORT DB_USER DB_PASSWORD DB_NAME JWT_SECRET SETUP_ADMIN_KEY ADMIN_PASSWORD ADMIN_EMAIL`. En Render: `DATABASE_URL`, `JWT_SECRET`, `NODE_ENV=production`, `FRONTEND_URL`. En Vercel: `VITE_API_URL`.
+- **Variables de entorno (`backend/.env`, no se sube):** `DB_HOST DB_PORT DB_USER DB_PASSWORD DB_NAME JWT_SECRET ADMIN_PASSWORD ADMIN_EMAIL`. En Render: `DATABASE_URL`, `JWT_SECRET`, `NODE_ENV=production`, `FRONTEND_URL`. En Vercel: `VITE_API_URL`.
 - **Crear el primer admin:** `node backend/crear-admin.js` (usa el `.env`).
 - **Arrancar en local:** `node server.js` en `backend/` (no se recarga solo; `npm run dev` usa `--watch`) y `npm run dev` en `frontend/`. Base nueva: `mysql … < backend/crear_tablas.sql`. Guía para otro PC: `CONTINUAR_EN_OTRO_PC.md`.
 
@@ -45,6 +45,8 @@ Solo existen **dos ramas**:
 - `pages/` una por módulo (`Clientes`, `Contactos`, `Direcciones`, `Equipos`, `OrdenTrabajo`, `Cotizaciones`, `GestionUsuarios`, `Home`, `Login`, `Informes`, `OrdenCompra`).
 - `components/clientes/ClienteFormulario.jsx` (ficha de 3 columnas: cliente | contactos | direcciones) y `VinculosCliente.jsx` (tabla de vínculos con check "En la OT").
 - `components/ordenes/OrdenFormCliente.jsx` (cliente, contacto, dirección, aviso "ya no vinculado", Adjunto, Información Interna), `OrdenFormEquipo.jsx`, `OrdenFormInsumos.jsx`, `OrdenFormAveria.jsx`, `OrdenFormDatos.jsx`.
+- `components/ordenes/OrdenAdjuntos.jsx` (apartado Adjunto de la OT: archivos, menú y visor) y `components/ordenes/useClienteOT.jsx` (hook: ver / editar / registrar el cliente desde la OT con sus modales). `OrdenFormCliente.jsx` los usa; **no volver a meter esa lógica dentro de un archivo grande**.
+- `utils/ordenFormato.js` (orden guardada → estado del formulario, equipo e insumos) y `utils/validarOrden.js` (validaciones previas a guardar y payload). `OrdenTrabajo.jsx` abre una orden con una sola función `cargarOrden(orden, "editar" | "ver")`.
 - `components/comunes/CampoCatalogo.jsx` (buscador de contacto/dirección con Editar/Registrar/ "(ya es de CL-X)"), `ModalEditarCatalogo.jsx`, `BotonQuitar.jsx`, `AccionesFicha.jsx`.
 - `hooks/usePaginacion.js` (`usePaginaPersistente`, `useClampPagina`), `useBusquedaApi.js`, `useGuardar.js` (evita doble envío).
 - `utils/helpers.js` (`toUpper`, `upperInput`, `validarRUT`, `formatearRutInput`, `parseToken`, `cerrarSesion`), `cotizacionDoc.js` y `ordenServicioDoc.js` (PDF por HTML + `imprimir.js`), `empresa.js` (datos de la empresa).
@@ -53,7 +55,7 @@ Solo existen **dos ramas**:
 
 **Tablas (MySQL; en Neon equivalentes):** `clientes`, `contactos`, `direcciones`, `cliente_contactos` y `cliente_direcciones` (vínculos: `cliente_id`, `contacto_id`/`direccion_id`, `orden`, `a_ot`; `ON DELETE CASCADE`), `equipos`, `ordenes_trabajo`, `cotizaciones`, `usuarios`. El esquema vigente está en `backend/crear_tablas.sql`.
 
-- **Cliente:** razón social, RUT (válido y único; "19" = comodín sin RUT), fono, email, dirección/ciudad/comuna **propias** (no viajan a la OT). No tiene contacto ni dirección "principal".
+- **Cliente:** `tipo` (`EMPRESA` | `PERSONA`), razón social o nombre, RUT (válido y único; "19" = comodín sin RUT), fono, email, dirección/ciudad/comuna **propias** en la ficha (en una empresa no viajan a la OT). **Persona:** no tiene contacto (ella misma es el cliente) y su dirección es la que tiene vinculada en Direcciones (la marcada "En la OT" o la primera); la OT copia `cliente_tipo`.
 - **Contactos y Direcciones son catálogos globales** (`CO-0001`, `DI-0001`). Un cliente tiene muchos de cada uno y el mismo registro puede estar en varios clientes: el buscador avisa "(ya es de CL-XXXX)" y deja agregarlo tras confirmar. Crear uno que ya existe **no da error**: se reutiliza (`reutilizar: true`). Borrar uno vinculado: el servidor responde **409** con los clientes afectados y se confirma con `?forzar=1`.
 - **Check "En la OT":** marca qué contacto y qué dirección viajan a la OT. Es de **un solo uso** (`POST /clientes/:id/limpiar-a-ot` lo desmarca tras enviar). **Sin marca no viaja nada**: la OT se abre con Contacto y Dirección vacíos y se eligen con "Buscar Contacto" / "Buscar Dirección".
 - **La OT guarda una copia (snapshot)** del cliente, contacto, dirección y equipo, y las columnas `contacto_id`/`direccion_id` solo como referencia. Si algo se quita del cliente, la OT lo conserva y muestra un aviso ámbar; tras **Registrar** en el catálogo aparece **Vincular al cliente**. (En el sistema antiguo la OT guardaba solo el id y el 24% de las órdenes perdió su contacto.)
@@ -70,6 +72,7 @@ Solo existen **dos ramas**:
 - Botones pequeños de acción (Editar, Registrar, Vincular…): clase compartida `btn-mini` de `styles/botones.css` con icono de `lucide-react`. **Naranja (`--warning`) = editar; verde (`--success`) = crear / registrar / vincular.** No crear estilos en línea para botones nuevos.
 - **Menú superior:** cada pantalla enlaza a las otras 9 (Inicio, Clientes, Contactos, Direcciones, Equipos, Orden de Trabajo, Informes, Cotizaciones, Orden de Compra, Usuarios), sin su propio botón, con el mismo orden, icono y color. Está repetido en 6 componentes `Header*` y en las páginas `Home`, `Informes`, `OrdenCompra` y `Cotizaciones`: **al agregar un módulo hay que sumar su botón en todos** (ver `CAMBIOS.md` v2.163).
 - **Ancho de los campos de los formularios de mantenedor** (Equipos, Contactos, Direcciones): el estándar es un tercio de la fila (~220 px en el formulario de 740 px, como en Equipos). Con 2 campos por fila se usa `repeat(2, calc((100% - 16px) / 3))`, nunca `1fr 1fr`. Solo la dirección puede ocupar 2 columnas (clase existente `of-col-full`). Ver `CAMBIOS.md` v2.164.
+- **Tamaño de archivos:** un archivo de pantalla no debería pasar de unas 400 líneas. Si crece, extraer a un componente, un hook (`use*.jsx`) o una utilidad (`utils/`); la lógica sin interfaz (validar, convertir) va en `utils/` para poder probarla sola.
 - **Reutilizar, no crear clases CSS nuevas.** Antes de agregar una clase, buscar una equivalente con `git grep` en `frontend/src/styles/`. Las que ya existen y sirven: grillas `cf-r2` / `cf-r3` (Clientes), `ef-r2` / `ef-r3` (Equipos), `of-r2` / `of-r3` / `of-cols` (OT); ocupar toda la fila `of-col-full`; botones `btn-mini`; título de sección `of-st primary` (azul `--primary`, el mismo de "Buscar Contacto"). Si hay que ajustar algo, modificar la clase existente o usar `style` puntual, no duplicarla con otro nombre.
 - **Títulos de sección de la OT:** todos con `of-st primary` (azul). No usar `success` (celeste) ni `muted` (negro).
 - Móvil (≤768px): botones de 40 px, inputs de filtro de 44 px.
@@ -91,7 +94,7 @@ Solo existen **dos ramas**:
 - **Neon:** migración de contactos/direcciones **corrida**, backend PostgreSQL **desplegado** y esquema antiguo **ya borrado** (`clientes_contactos`, `clientes_direcciones` y las columnas `clientes.contacto_*`). Neon tiene 9 tablas: `clientes`, `contactos`, `direcciones`, `cliente_contactos`, `cliente_direcciones`, `equipos`, `ordenes_trabajo`, `cotizaciones`, `usuarios`.
 - Adaptar **Cotizaciones** a los checks "En la OT" y a los botones Editar/Registrar (`NOTAS-COTIZACIONES.md` tiene el relevamiento).
 - Construir **Informes** y **Orden de Compra** (referencia: `BASE_DATOS_ANTIGUA.md`).
-- Decidir si se elimina `POST /api/auth/setup-admin` (no lo llama el programa; el primer admin se puede crear con `crear-admin.js`).
+- `POST /api/auth/setup-admin` ya se eliminó (v2.168); el primer admin se crea con `crear-admin.js`.
 - Opcional: importar datos históricos del sistema antiguo (14.581 OT, 5.698 contactos).
 - No hay pruebas automáticas del frontend: los cambios de pantalla se prueban a mano.
 

@@ -59,7 +59,7 @@ export function derivarListas(orden) {
 // Para OT viejas guardadas antes de ese campo, se cae al criterio anterior:
 // dirección Matriz con ciudad cargada, si no la primera dirección extra que la
 // tenga. Nunca se deriva de la comuna.
-export function resolverCiudad(orden, direccionesExtra) {
+function resolverCiudad(orden, direccionesExtra) {
   if (String(orden.ciudad || "").trim()) return orden.ciudad;
   const matriz = direccionesExtra.find((d) => d.tipo === "Matriz" && String(d.ciudad || "").trim());
   if (matriz) return matriz.ciudad;
@@ -189,14 +189,21 @@ export function generarHtmlOrdenServicio(orden, opciones) {
 
   const marcaModelo = [orden.marca, orden.modelo].filter((v) => String(v || "").trim()).join(" ");
 
-  const seccionContacto = opciones.contacto === false ? "" : `
+  // Empresa: la dirección es la del contacto y va en la sección Contacto. Persona: ella misma es el
+  // contacto, así que no hay sección Contacto y su dirección va en Datos de Cliente.
+  const esPersona = orden.cliente_tipo === "PERSONA";
+  const camposDireccion = `
+        ${campo("Dirección", orden.direccion)}
+        ${campo("Ciudad - Comuna", [ciudad, orden.comuna].filter((v) => String(v || "").trim()).join(" - "))}`;
+
+  const seccionContacto = (esPersona || opciones.contacto === false) ? "" : `
     <section class="sec">
       ${h2("Contacto")}
-      <div class="grid">
+      <div class="grid grid-3">
         ${campo("Contacto", orden.contacto)}
         ${campo("Cargo Contacto", orden.cargo_contacto)}
         ${campo("Email Contacto", orden.email_contacto)}
-        ${campo("Fono Contacto", orden.fono_contacto, true)}
+        ${campo("Fono Contacto", orden.fono_contacto, true)}${camposDireccion}
       </div>
     </section>`;
 
@@ -205,9 +212,7 @@ export function generarHtmlOrdenServicio(orden, opciones) {
       ${h2("Datos de Cliente")}
       <div class="grid grid-3">
         ${campo("Cliente", orden.cliente)}
-        ${campo("RUT", orden.rut, true)}
-        ${campo("Dirección", orden.direccion)}
-        ${campo("Ciudad - Comuna", [ciudad, orden.comuna].filter((v) => String(v || "").trim()).join(" - "))}
+        ${campo("RUT", orden.rut, true)}${esPersona ? camposDireccion : ""}
         ${campo("Teléfono", orden.fono_principal, true)}
         ${campo("Email Cliente", orden.email)}
       </div>
