@@ -51,9 +51,8 @@ export function derivarListas(orden) {
     const nombre = String(orden[`insumo${i}`] || "").trim();
     if (nombre) insumos.push({ n: i, nombre });
   }
-  const contactosExtra = parseJsonArray(orden.contactos_extra).filter((c) => String(c?.nombre || "").trim());
   const direccionesExtra = parseJsonArray(orden.direcciones_extra).filter((d) => String(d?.direccion || "").trim());
-  return { insumos, contactosExtra, direccionesExtra };
+  return { insumos, direccionesExtra };
 }
 
 // orden.ciudad es la Ciudad propia de la OT (agregada junto a Dirección/Comuna).
@@ -66,20 +65,6 @@ export function resolverCiudad(orden, direccionesExtra) {
   if (matriz) return matriz.ciudad;
   const conCiudad = direccionesExtra.find((d) => String(d.ciudad || "").trim());
   return conCiudad ? conCiudad.ciudad : "";
-}
-
-function contactoExtraHtml(c) {
-  const direccion = [c.direccion, c.ciudad, c.comuna].filter((v) => String(v || "").trim()).join(", ");
-  const detalle = [c.cargo, c.fono, c.email, direccion].filter((v) => String(v || "").trim()).map(esc).join(" · ");
-  return `<div class="extra-item"><span class="nom">${esc(c.nombre)}</span>${detalle ? ` <span class="det">${detalle}</span>` : ""}</div>`;
-}
-
-function direccionExtraHtml(d) {
-  const tipo = String(d.tipo || "").trim();
-  const linea = [d.direccion, d.ciudad, d.comuna].filter((v) => String(v || "").trim()).join(", ");
-  const nom = tipo ? `${tipo} — ${linea}` : linea;
-  const fono = String(d.fono || "").trim();
-  return `<div class="extra-item"><span class="nom">${esc(nom)}</span>${fono ? ` <span class="det">${esc(fono)}</span>` : ""}</div>`;
 }
 
 function seccionTexto(titulo, valor) {
@@ -172,9 +157,6 @@ img.logo { max-width: 100%; max-height: 100%; object-fit: contain; }
 .f .v.num { font-variant-numeric: tabular-nums; }
 
 .sub { margin-top: 2.5mm; font-size: 6pt; text-transform: uppercase; letter-spacing: .06em; color: #6B7280; }
-.extra-item { margin-top: 1.2mm; overflow-wrap: anywhere; }
-.extra-item .nom { font-size: 9pt; font-weight: 600; }
-.extra-item .det { font-size: 9pt; font-weight: 600; color: #111827; }
 
 .chips { margin-top: .8mm; }
 .chip { display: inline-block; max-width: 100%; overflow-wrap: anywhere; background: #E8F1FB; border: .5pt solid rgba(12,74,140,.15); border-radius: 999px; padding: 1.5pt 7pt; font-size: 7.5pt; font-weight: 600; color: #0C4A8C; margin: 0 3pt 2pt 0; }
@@ -195,32 +177,28 @@ img.logo { max-width: 100%; max-height: 100%; object-fit: contain; }
 
 // ── Generación ────────────────────────────────────────────────────────────
 // orden: fila cruda de la OT (snake_case, tal como llega del listado GET /api/ordenes).
-// opciones: booleanos por sección + arrays de booleanos alineados 1:1 con
-// derivarListas(orden).insumos / .contactosExtra / .direccionesExtra.
+// opciones: booleanos por sección (contacto, averia, actividad, observaciones,
+// firma) + array de booleanos alineado 1:1 con derivarListas(orden).insumos.
+// La OT tiene un solo contacto; opciones.contacto === false lo omite del PDF.
 export function generarHtmlOrdenServicio(orden, opciones) {
-  const { insumos, contactosExtra, direccionesExtra } = derivarListas(orden);
+  const { insumos, direccionesExtra } = derivarListas(orden);
   const numero = String(orden.numero_orden || "").split("-").pop() || "—";
   const ciudad = resolverCiudad(orden, direccionesExtra);
 
   const insumosSel = insumos.filter((_, i) => opciones.insumos?.[i]);
-  const contactosSel = contactosExtra.filter((_, i) => opciones.contactosExtra?.[i]);
-  const direccionesSel = direccionesExtra.filter((_, i) => opciones.direccionesExtra?.[i]);
-  // Direcciones adicionales ocultas de momento en el PDF: con Ciudad/Comuna ya
-  // disponibles en Contactos adicionales, esta sección queda redundante.
-  // No borrar — ver CAMBIOS.md v2.112.
-  // const htmlDireccionesAdicionales = direccionesSel.length ? `<div class="sub">› Direcciones adicionales</div>${direccionesSel.map(direccionExtraHtml).join("")}` : "";
-  const htmlDireccionesAdicionales = "";
 
   const marcaModelo = [orden.marca, orden.modelo].filter((v) => String(v || "").trim()).join(" ");
 
-  // Dirección del contacto (solo existe cuando se elige un contacto adicional
-  // como principal desde el modal de PDF — ver ModalOpcionesPDF.jsx): se
-  // imprime únicamente si es distinta a la dirección del cliente, para no
-  // repetir el mismo dato que ya aparece en "Datos de Cliente".
-  const normDir = (...partes) => partes.filter((v) => String(v || "").trim()).map((v) => String(v).trim().toUpperCase()).join("|");
-  const direccionClienteNorm = normDir(orden.direccion, ciudad, orden.comuna);
-  const direccionContactoNorm = normDir(orden.contacto_direccion, orden.contacto_ciudad, orden.contacto_comuna);
-  const mostrarDireccionContacto = !!direccionContactoNorm && direccionContactoNorm !== direccionClienteNorm;
+  const seccionContacto = opciones.contacto === false ? "" : `
+    <section class="sec">
+      ${h2("Contacto")}
+      <div class="grid">
+        ${campo("Contacto", orden.contacto)}
+        ${campo("Cargo Contacto", orden.cargo_contacto)}
+        ${campo("Email Contacto", orden.email_contacto)}
+        ${campo("Fono Contacto", orden.fono_contacto, true)}
+      </div>
+    </section>`;
 
   const seccionCliente = `
     <section class="sec">
@@ -233,20 +211,7 @@ export function generarHtmlOrdenServicio(orden, opciones) {
         ${campo("Teléfono", orden.fono_principal, true)}
         ${campo("Email Cliente", orden.email)}
       </div>
-      ${htmlDireccionesAdicionales}
-    </section>
-    <section class="sec">
-      ${h2("Contacto")}
-      <div class="grid${mostrarDireccionContacto ? " grid-3" : ""}">
-        ${campo("Contacto", orden.contacto)}
-        ${campo("Cargo Contacto", orden.cargo_contacto)}
-        ${campo("Email Contacto", orden.email_contacto)}
-        ${campo("Fono Contacto", orden.fono_contacto, true)}
-        ${mostrarDireccionContacto ? campo("Dirección Contacto", orden.contacto_direccion) : ""}
-        ${mostrarDireccionContacto ? campo("Ciudad - Comuna Contacto", [orden.contacto_ciudad, orden.contacto_comuna].filter((v) => String(v || "").trim()).join(" - ")) : ""}
-      </div>
-      ${contactosSel.length ? `<div class="sub">› Contactos adicionales</div>${contactosSel.map(contactoExtraHtml).join("")}` : ""}
-    </section>`;
+    </section>${seccionContacto}`;
 
   // El título ya no dice "Técnico Asignado" porque ese dato se muestra abajo
   // en el bloque "Técnico" (línea ~103); el campo sigue en formulario y BD.

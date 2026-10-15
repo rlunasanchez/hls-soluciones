@@ -1,5 +1,19 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-10-15
+
+### v2.166: PDF de la Orden de Trabajo con un solo contacto y check "Contacto" al generarlo
+
+**Archivos (solo frontend, sin cambios de backend ni de base de datos):** `components/ordenes/ModalOpcionesPDF.jsx`, `utils/ordenServicioDoc.js`.
+
+- **Problema:** el modal "Generar Orden de Servicio" mostraba el contacto de la OT bajo el título **"Contactos adicionales"** ("principal de este documento, siempre incluido"), un resto de cuando la OT tenía varios contactos. Las OT actuales no tienen contactos adicionales (`contactos_extra` vacío), así que el título confundía.
+- **Solución:**
+  - El modal ahora tiene un check **"Contacto — NOMBRE (cargo)"** como primer ítem de "Secciones", junto a Falla / Incidencia, Informe Técnico, Observaciones y Firma y condiciones. Viene marcado si la OT tiene contacto; si no, aparece "(sin datos)". Desmarcarlo omite la sección Contacto del PDF (`opciones.contacto === false`).
+  - Se eliminaron del modal el selector de "Contacto principal del documento" y la lista de "Contactos adicionales".
+  - En el generador del PDF se quitaron los contactos adicionales, la dirección del contacto (solo existía al cambiar el contacto principal desde el modal), las direcciones adicionales ocultas, `contactoExtraHtml`, `direccionExtraHtml` y las reglas CSS `.extra-item`. `derivarListas` ya no devuelve `contactosExtra`.
+- **Consecuencia:** las OT antiguas que tuvieran `contactos_extra` ya no los imprimen (los datos siguen en la base, pero ninguna pantalla los muestra).
+- **No se tocó:** el PDF de **Cotizaciones** (`cotizacionDoc.js`, `ModalOpcionesPDFCotizacion.jsx`) conserva su sección "Contactos adicionales", porque ese módulo aún guarda `contactos_extra`.
+
 ## Fecha: 2026-10-14
 
 ### v2.165: Scroll interno en las tablas de Contactos y Direcciones de la ficha del cliente
