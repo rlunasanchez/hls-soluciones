@@ -1174,7 +1174,7 @@ function OrdenTrabajo() {
                   />
 
                   <div className="of-sec muted">
-                    <div className="of-st muted">Observaciones</div>
+                    <div className="of-st primary">Observaciones</div>
                     <div className="of-f">
                       <textarea
                         placeholder="Observaciones adicionales..."

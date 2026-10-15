@@ -43,7 +43,7 @@ function DireccionFormulario({ direccionEditando, onCancel, onSave, direcciones,
           <div className="dif-s primary">
             <div className="dif-st primary">Datos de la Dirección</div>
             <div className="dif-r2" style={{ marginTop: '8px' }}>
-              <div className="dif-f dif-f-ancho">
+              <div className="dif-f of-col-full">
                 <label>Dirección *</label>
                 <input placeholder="Dirección" value={nuevaDireccion.direccion}
                   disabled={readOnly}
