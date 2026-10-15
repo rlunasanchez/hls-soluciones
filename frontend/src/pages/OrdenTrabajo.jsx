@@ -7,7 +7,7 @@ import {
 import api from "../services/api";
 import { getCached } from "../services/cache";
 import { toUpper, capitalizarNombre, cerrarSesion, upperInput, parseToken } from "../utils/helpers";
-import { ordenAFormulario, buscarEquipoDeOrden, insumosDeOrden } from "../utils/ordenFormato";
+import { ordenAFormulario, buscarEquipoDeOrden, insumosDeOrden, ordenVacia, insumosVacios } from "../utils/ordenFormato";
 import { validarOrden, armarPayloadOrden } from "../utils/validarOrden";
 import '../styles/OrdenTrabajo.css';
 import "../styles/ordenes-componentes.css";
@@ -20,7 +20,7 @@ import OrdenFormInsumos from "../components/ordenes/OrdenFormInsumos";
 import OrdenFormAveria from "../components/ordenes/OrdenFormAveria";
 import ModalOpcionesPDF from "../components/ordenes/ModalOpcionesPDF";
 import OrdenFormAcciones from "../components/ordenes/OrdenFormAcciones";
-import { usePaginaPersistente, useClampPagina } from "../hooks/usePaginacion";
+import useOrdenesListado from "../hooks/useOrdenesListado";
 
 
 // Nombre y apellido de la sesión actual, para precargar el Técnico Asignado
@@ -37,10 +37,13 @@ function OrdenTrabajo() {
   const navigate = useNavigate();
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   
-  // Estados para listar órdenes con paginación
-  const [ordenes, setOrdenes] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const ITEMS_POR_PAG = 4;
+  // Listado de órdenes: carga, filtros y paginación
+  const {
+    ordenes, loading, fetchOrdenes, ordenesPag, totalPaginas, paginaActual, setPaginaActual,
+    filtroNumeroOrden, setFiltroNumeroOrden, filtroCliente, setFiltroCliente, filtroSerie, setFiltroSerie,
+    filtroEstado, setFiltroEstado, filtroGarantia, setFiltroGarantia,
+    filtroFechaDesde, setFiltroFechaDesde, filtroFechaHasta, setFiltroFechaHasta
+  } = useOrdenesListado();
   const [editingId, setEditingId] = useState(null);
   const [guardando, setGuardando] = useState(false);
   const guardandoRef = useRef(false);
@@ -55,17 +58,7 @@ function OrdenTrabajo() {
   // el resto queda tras un "Ver N más".
   const [verTodasCotizaciones, setVerTodasCotizaciones] = useState(false);
   const COTIZ_VISIBLES = 3;
-  const [filtroNumeroOrden, setFiltroNumeroOrden] = useState("");
-  const [filtroCliente, setFiltroCliente] = useState("");
-  const [filtroSerie, setFiltroSerie] = useState("");
-  const [filtroEstado, setFiltroEstado] = useState("todos");
-  const [filtroGarantia, setFiltroGarantia] = useState("todos");
-  const [filtroFechaDesde, setFiltroFechaDesde] = useState("");
-  const [filtroFechaHasta, setFiltroFechaHasta] = useState("");
-  const [paginaActual, setPaginaActual] = usePaginaPersistente("pagOrdenes", [
-    filtroNumeroOrden, filtroCliente, filtroSerie, filtroEstado, filtroGarantia, filtroFechaDesde, filtroFechaHasta
-  ]);
-  
+
   // Estados para autocompletar clientes y equipos
   const [clientes, setClientes] = useState([]);
   const [equipos, setEquipos] = useState([]);
@@ -86,59 +79,12 @@ function OrdenTrabajo() {
   const equipoModeloDropdownRef = useRef(null);
   const clienteDropdownRef = useRef(null);
   
-  // Estado para los insumos dinámicos
-  const [insumos, setInsumos] = useState([
-    { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
-    { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
-    { nombre: "" }, { nombre: "" }
-  ]);
+  // Insumos dinámicos (se muestran de a 2; hasta 12)
+  const [insumos, setInsumos] = useState(insumosVacios);
   const [insumosVisibles, setInsumosVisibles] = useState(2);
-  
+
   // Estado principal de la orden
-  const [nuevaOrden, setNuevaOrden] = useState({
-    // Datos de la Orden
-    numeroOrden: "",
-    fecha: "",
-    esGarantia: false,
-    // Fechas con checkbox
-    fechaIngreso: "",
-    fechaIngresoCheck: false,
-    fechaTermino: "",
-    fechaTerminoCheck: false,
-    fechaEntrega: "",
-    fechaEntregaCheck: false,
-    fechaCompra: "",
-    fechaCompraCheck: false,
-    // Datos del Cliente
-    cliente: "",
-    direccion: "",
-    ciudad: "",
-    comuna: "",
-    rut: "",
-    email: "",
-    fonoPrincipal: "",
-    contacto: "",
-    fonoContacto: "",
-    emailContacto: "",
-    cargoContacto: "",
-    tecnicoAsignado: tecnicoDeSesion(),
-    contactosExtra: [],
-    direccionesExtra: [],
-    // Datos del Equipo
-    equipo: "",
-    modelo: "",
-    marca: "",
-    serie: "",
-    contadorPagOut: "",
-    nivelTinta: "",
-    // Avería/Falla/Incidencia
-    averia: "",
-    actividad: "",
-    observaciones: "",
-    infoInterna: "",
-    clienteTipo: "EMPRESA",
-    adjuntos: []
-  });
+  const [nuevaOrden, setNuevaOrden] = useState(() => ordenVacia(tecnicoDeSesion()));
 
   // Cargar clientes, equipos y órdenes al montar el componente
   useEffect(() => {
@@ -200,52 +146,26 @@ function OrdenTrabajo() {
         setBusquedaCliente("");
     setBusquedaModelo("");
     setEquiposModeloSugeridos([]);
-        setInsumos([
-          { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
-          { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
-          { nombre: "" },           { nombre: "" }
-        ]);
+        setInsumos(insumosVacios());
         setInsumosVisibles(2);
         setNuevaOrden({
+          ...ordenVacia(tecnicoDeSesion()),
           numeroOrden: numeroOt,
           fecha: fechaActual,
-          esGarantia: false,
-          fechaIngreso: "",
-          fechaIngresoCheck: false,
-          fechaTermino: "",
-          fechaTerminoCheck: false,
-          fechaEntrega: "",
-          fechaEntregaCheck: false,
-        fechaCompra: "",
-        fechaCompraCheck: false,
-        cliente: (clienteFromNav.razon_social || "").toUpperCase(),
-        // Desde el botón OT del cliente viaja solo lo marcado "En la OT" (sin marca, vacío)
-        direccion: (clienteFromNav.ot_direccion || "").toUpperCase(),
-        ciudad: (clienteFromNav.ot_ciudad || "").toUpperCase(),
-        comuna: (clienteFromNav.ot_comuna || "").toUpperCase(),
-        rut: clienteFromNav.rut || "",
-        email: clienteFromNav.email || "",
-        fonoPrincipal: clienteFromNav.telefono || "",
-        contacto: (clienteFromNav.contacto_nombre || "").toUpperCase(),
-        fonoContacto: clienteFromNav.contacto_fono || "",
-        emailContacto: clienteFromNav.contacto_email || "",
-        cargoContacto: (clienteFromNav.contacto_cargo || "").toUpperCase(),
-        tecnicoAsignado: tecnicoDeSesion(),
-        equipo: "",
-        modelo: "",
-        marca: "",
-        serie: "",
-        contadorPagOut: "",
-        nivelTinta: "",
-        averia: "",
-        actividad: "",
-        observaciones: "",
-        infoInterna: "",
-        clienteTipo: clienteFromNav.tipo === "PERSONA" ? "PERSONA" : "EMPRESA",
-        adjuntos: [],
-        contactosExtra: [],
-        direccionesExtra: []
-      });
+          cliente: (clienteFromNav.razon_social || "").toUpperCase(),
+          // Desde el botón OT del cliente viaja solo lo marcado "En la OT" (sin marca, vacío)
+          direccion: (clienteFromNav.ot_direccion || "").toUpperCase(),
+          ciudad: (clienteFromNav.ot_ciudad || "").toUpperCase(),
+          comuna: (clienteFromNav.ot_comuna || "").toUpperCase(),
+          rut: clienteFromNav.rut || "",
+          email: clienteFromNav.email || "",
+          fonoPrincipal: clienteFromNav.telefono || "",
+          contacto: (clienteFromNav.contacto_nombre || "").toUpperCase(),
+          fonoContacto: clienteFromNav.contacto_fono || "",
+          emailContacto: clienteFromNav.contacto_email || "",
+          cargoContacto: (clienteFromNav.contacto_cargo || "").toUpperCase(),
+          clienteTipo: clienteFromNav.tipo === "PERSONA" ? "PERSONA" : "EMPRESA"
+        });
       setMostrarFormulario(true);
     }
     };
@@ -284,11 +204,7 @@ function OrdenTrabajo() {
     setBusquedaCliente("");
     setBusquedaModelo("");
     setEquiposModeloSugeridos([]);
-    setInsumos([
-      { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
-      { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
-      { nombre: "" },       { nombre: "" }
-    ]);
+    setInsumos(insumosVacios());
     setInsumosVisibles(2);
     setMostrarFormulario(true);
   };
@@ -332,36 +248,6 @@ function OrdenTrabajo() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-
-  const fetchOrdenes = async (signal) => {
-    setLoading(true);
-    try {
-      const res = await getCached("/api/ordenes?page=1&limit=10000", { signal });
-      setOrdenes(res.data.ordenes);
-    } catch (err) {
-      if (err.name !== "CanceledError") console.error("Error al cargar órdenes:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const ordenesFiltradas = ordenes.filter(orden => {
-    if (filtroNumeroOrden && !orden.numero_orden?.toLowerCase().includes(filtroNumeroOrden.toLowerCase())) return false;
-    if (filtroCliente && !orden.cliente?.toLowerCase().includes(filtroCliente.toLowerCase())) return false;
-    if (filtroSerie && !orden.serie?.toLowerCase().includes(filtroSerie.toLowerCase())) return false;
-    if (filtroEstado === "cerrada" && !orden.fecha_entrega) return false;
-    if (filtroEstado === "pendiente" && orden.fecha_entrega) return false;
-    if (filtroGarantia === "si" && !orden.es_garantia) return false;
-    if (filtroGarantia === "no" && orden.es_garantia) return false;
-    if (filtroFechaDesde && orden.fecha && orden.fecha.substring(0, 10) < filtroFechaDesde) return false;
-    if (filtroFechaHasta && orden.fecha && orden.fecha.substring(0, 10) > filtroFechaHasta) return false;
-    return true;
-  });
-
-  const totalPaginas = Math.ceil(ordenesFiltradas.length / ITEMS_POR_PAG);
-  const ordenesPag = ordenesFiltradas.slice((paginaActual - 1) * ITEMS_POR_PAG, paginaActual * ITEMS_POR_PAG);
-
-  useClampPagina(paginaActual, setPaginaActual, totalPaginas);
 
   // Abre una orden guardada en el formulario. modo "editar" la deja editable; modo "ver", en solo lectura.
   // El listado no trae "adjunto" (es pesado): la orden completa se pide recién al abrirla.
@@ -649,50 +535,8 @@ function OrdenTrabajo() {
   };
 
   const resetFormulario = () => {
-    setNuevaOrden({
-      numeroOrden: "",
-      fecha: "",
-      esGarantia: false,
-      fechaIngreso: "",
-      fechaIngresoCheck: false,
-      fechaTermino: "",
-      fechaTerminoCheck: false,
-      fechaEntrega: "",
-      fechaEntregaCheck: false,
-      fechaCompra: "",
-      fechaCompraCheck: false,
-      cliente: "",
-      direccion: "",
-      ciudad: "",
-      comuna: "",
-      rut: "",
-      email: "",
-      fonoPrincipal: "",
-      contacto: "",
-      fonoContacto: "",
-      emailContacto: "",
-      cargoContacto: "",
-      tecnicoAsignado: tecnicoDeSesion(),
-      equipo: "",
-      modelo: "",
-      marca: "",
-      serie: "",
-      contadorPagOut: "",
-      nivelTinta: "",
-      averia: "",
-      actividad: "",
-      observaciones: "",
-      infoInterna: "",
-      clienteTipo: "EMPRESA",
-      adjuntos: [],
-      contactosExtra: [],
-      direccionesExtra: []
-    });
-    setInsumos([
-      { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
-      { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" }, { nombre: "" },
-      { nombre: "" },       { nombre: "" }
-    ]);
+    setNuevaOrden(ordenVacia(tecnicoDeSesion()));
+    setInsumos(insumosVacios());
     setInsumosVisibles(2);
     setClienteSeleccionado(null);
     setClienteFijo(false);

@@ -46,7 +46,8 @@ Solo existen **dos ramas**:
 - `components/clientes/ClienteFormulario.jsx` (ficha de 3 columnas: cliente | contactos | direcciones) y `VinculosCliente.jsx` (tabla de vínculos con check "En la OT").
 - `components/ordenes/OrdenFormCliente.jsx` (cliente, contacto, dirección, aviso "ya no vinculado", Adjunto, Información Interna), `OrdenFormEquipo.jsx`, `OrdenFormInsumos.jsx`, `OrdenFormAveria.jsx`, `OrdenFormDatos.jsx`.
 - `components/ordenes/OrdenAdjuntos.jsx` (apartado Adjunto de la OT: archivos, menú y visor) y `components/ordenes/useClienteOT.jsx` (hook: ver / editar / registrar el cliente desde la OT con sus modales). `OrdenFormCliente.jsx` los usa; **no volver a meter esa lógica dentro de un archivo grande**.
-- `utils/ordenFormato.js` (orden guardada → estado del formulario, equipo e insumos) y `utils/validarOrden.js` (validaciones previas a guardar y payload). `OrdenTrabajo.jsx` abre una orden con una sola función `cargarOrden(orden, "editar" | "ver")`.
+- `hooks/useOrdenesListado.js` (listado de OT: carga, filtros y paginación).
+- `utils/ordenFormato.js` (orden guardada → estado del formulario, `ordenVacia`, equipo e insumos) y `utils/validarOrden.js` (validaciones previas a guardar y payload). `OrdenTrabajo.jsx` abre una orden con una sola función `cargarOrden(orden, "editar" | "ver")`.
 - `components/comunes/CampoCatalogo.jsx` (buscador de contacto/dirección con Editar/Registrar/ "(ya es de CL-X)"), `ModalEditarCatalogo.jsx`, `BotonQuitar.jsx`, `AccionesFicha.jsx`.
 - `hooks/usePaginacion.js` (`usePaginaPersistente`, `useClampPagina`), `useBusquedaApi.js`, `useGuardar.js` (evita doble envío).
 - `utils/helpers.js` (`toUpper`, `upperInput`, `validarRUT`, `formatearRutInput`, `parseToken`, `cerrarSesion`), `cotizacionDoc.js` y `ordenServicioDoc.js` (PDF por HTML + `imprimir.js`), `empresa.js` (datos de la empresa).

@@ -2,6 +2,16 @@
 
 ## Fecha: 2026-10-15
 
+### v2.169: OT en archivos más chicos (listado y formulario vacío fuera de la página)
+
+**Alcance:** Orden de Trabajo, solo frontend. Traslado de código sin cambios de comportamiento; sin cambios de backend ni de base de datos. Probado en pantalla (listado, filtros, paginación, nueva OT, desde Clientes y guardado).
+
+- **`hooks/useOrdenesListado.js` (nuevo, 59 líneas):** carga de las órdenes, los 7 filtros (N° de orden, cliente, serie, estado, garantía, desde, hasta), el filtrado y la paginación de 4 por página con la página persistente entre recargas.
+- **`utils/ordenFormato.js`:** se agregan `ordenVacia(tecnico)` e `insumosVacios()`. El formulario vacío estaba escrito 3 veces dentro de la página y los 12 insumos en blanco 4 veces.
+- **`pages/OrdenTrabajo.jsx`:** 958 → **802** líneas (en esta sesión: 1.243 → 802). Ningún archivo de la OT pasa ya de 802 líneas; el segundo es `OrdenFormCliente.jsx` con 739.
+- **Regla de tamaño** (en `AGENTS.md`): un archivo de pantalla no debería pasar de unas 400 líneas; si crece se extrae a un componente, un hook o una utilidad.
+- **Pendiente:** `OrdenTrabajo.jsx` (802) y `OrdenFormCliente.jsx` (739) siguen sobre la meta de 400. Candidatos: la sección de cotizaciones asociadas del encabezado de la OT, y dividir "Datos del cliente / contacto / dirección" de `OrdenFormCliente` en componentes propios.
+
 ### v2.168: Empresa / Persona, limpieza de código, columnas sin uso y OT en archivos más chicos
 
 **Alcance:** Clientes, Contactos, Direcciones y Orden de Trabajo. Cambia el esquema de la base (ver "Migración"). Todo **solo en local**: no se ha publicado ni se ha migrado Neon.

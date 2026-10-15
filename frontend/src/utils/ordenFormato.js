@@ -93,3 +93,24 @@ export function insumosDeOrden(orden) {
   while (insumos.length < 12) insumos.push({ nombre: "" });
   return { insumos, visibles: Math.max(2, usados.length) };
 }
+
+// Formulario de una OT nueva, sin datos. El técnico viene de la sesión.
+export function ordenVacia(tecnicoAsignado = "") {
+  return {
+    numeroOrden: "", fecha: "", esGarantia: false,
+    fechaIngreso: "", fechaIngresoCheck: false,
+    fechaTermino: "", fechaTerminoCheck: false,
+    fechaEntrega: "", fechaEntregaCheck: false,
+    fechaCompra: "", fechaCompraCheck: false,
+    cliente: "", direccion: "", ciudad: "", comuna: "", rut: "", email: "", fonoPrincipal: "",
+    contacto: "", fonoContacto: "", emailContacto: "", cargoContacto: "",
+    tecnicoAsignado,
+    equipo: "", modelo: "", marca: "", serie: "", contadorPagOut: "", nivelTinta: "",
+    averia: "", actividad: "", observaciones: "", infoInterna: "",
+    clienteTipo: "EMPRESA",
+    adjuntos: [], contactosExtra: [], direccionesExtra: []
+  };
+}
+
+// Los 12 insumos en blanco (cada uno es un objeto propio).
+export const insumosVacios = () => Array.from({ length: 12 }, () => ({ nombre: "" }));
