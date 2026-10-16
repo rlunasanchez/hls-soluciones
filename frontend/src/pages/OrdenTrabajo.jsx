@@ -209,6 +209,12 @@ function OrdenTrabajo() {
     setMostrarFormulario(true);
   };
 
+  // Si el cliente de la OT ya está seleccionado (porque se registró de nuevo o se eligió otro),
+  // deja de estar "desactivado": se quita el aviso sin tener que salir y volver a entrar.
+  useEffect(() => {
+    if (clienteSeleccionado) setClienteInactivo(false);
+  }, [clienteSeleccionado]);
+
   // Cotizaciones asociadas a la orden abierta (solo lectura, para el badge y
   // los chips del header). Se re-consulta cada vez que cambia la orden abierta.
   useEffect(() => {

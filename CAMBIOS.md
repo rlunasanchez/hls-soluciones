@@ -8,7 +8,9 @@
 
 - **Una persona solo puede tener 1 dirección** (`VinculosCliente.jsx` nuevo prop `maximo`, `ClienteFormulario.jsx` lo pasa como 1 cuando es persona). Con una dirección vinculada se ocultan el buscador y "Nuevo" y se muestra "Solo se permite 1 dirección. Quita la actual para elegir otra." Una empresa no tiene límite. Si un cliente cambia de Empresa a Persona con varias direcciones, se conservan todas hasta que se quiten.
 - **`OrdenFormCliente.jsx` 739 → 473 líneas** (traslado de código, sin cambios de comportamiento). Componentes nuevos en `components/ordenes/`: `OrdenDatosCliente.jsx` (cliente, RUT con su validación, fono, email y Tipo), `OrdenDatosContacto.jsx`, `OrdenDatosDireccion.jsx` (los campos se generan desde una lista en vez de repetir cada input) y `OrdenInfoInterna.jsx`.
-- **Pendiente:** extraer el buscador de cliente (la parte más grande que queda en `OrdenFormCliente`) y seguir con `OrdenTrabajo.jsx` (802). Ver `AGENTS.md` sección 7b.
+- **`OrdenFormCliente.jsx` 473 → 280 líneas:** el buscador de cliente (caja de búsqueda, lista de resultados, tarjeta del cliente asignado y botones Ver / Editar / Registrar) pasó a `OrdenBuscadorCliente.jsx` (219 líneas). Con esto `OrdenFormCliente` queda bajo la meta (de 739 a 280 en total).
+- **Fix: el aviso "Cliente desactivado" no se quitaba al registrar de nuevo al cliente** (`OrdenTrabajo.jsx`): la marca `clienteInactivo` solo se apagaba al elegir un cliente con el buscador. Ahora un efecto la apaga siempre que hay un cliente seleccionado (cubre "+ Registrar en Clientes"). Probado.
+- **Pendiente:** `OrdenTrabajo.jsx` (802 líneas). Ver `AGENTS.md` sección 7b.
 
 ## Fecha: 2026-10-15
 
