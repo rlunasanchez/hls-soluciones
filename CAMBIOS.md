@@ -2,6 +2,14 @@
 
 ## Fecha: 2026-10-16
 
+### v2.173: `OrdenTrabajo.jsx` más chico (cabecera, cotizaciones asociadas y botones) y fix del aviso al volver desde una cotización
+
+**Alcance:** Orden de Trabajo, solo frontend. Traslado de código sin cambios de comportamiento, salvo lo indicado. Probado en pantalla.
+
+- **`OrdenTrabajo.jsx` 802 → 730 líneas.** Componentes nuevos en `components/ordenes/`: `OrdenFormCabecera.jsx` (título según el modo, técnico, contador de cotizaciones y cerrar), `OrdenCotizaciones.jsx` (contador y chips de cotizaciones asociadas; se monta con `key={ordenIdActual}`, así vuelve a empezar colapsado al cambiar de orden) y `OrdenFormBotones.jsx` (Cancelar, Guardar Cambios, Guardar Orden, PDF y Cotización).
+- **Fix: "Cliente desactivado" al volver a la OT desde una cotización** (`cargarOrden`): al volver, la lista local de clientes aún está vacía y el respaldo (lista fresca) buscaba solo por id; si el cliente se había borrado y registrado de nuevo con otro id, la OT salía como desactivada. Ahora el respaldo busca igual que la lista local: por id o por nombre.
+- **Pendiente:** `OrdenTrabajo.jsx` sigue en 730 líneas. Siguientes candidatos: el `init` que recibe cliente/orden desde Clientes o Cotizaciones (hook `useOrdenDesdeNavegacion`, ~75 líneas) y unificar las 3 ramas de `seleccionarCliente` (~110). Ver `AGENTS.md` sección 7b.
+
 ### v2.171: Persona con una sola dirección y `OrdenFormCliente` dividido en componentes
 
 **Alcance:** Clientes y Orden de Trabajo, solo frontend. Probado en pantalla.

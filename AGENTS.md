@@ -105,7 +105,7 @@ Meta del dueño: ningún archivo de pantalla con miles de líneas; que el códig
 
 El foco tenue de Tab en botones (v2.170) ya fue confirmado por el dueño.
 
-Estado de tamaños (líneas): `OrdenTrabajo.jsx` 802, `OrdenFormCliente.jsx` 280 (ya hecho), `OrdenFormEquipo.jsx` 320, `ordenServicioDoc.js` 292, `OrdenAdjuntos.jsx` 257, `useClienteOT.jsx` 246, `ClienteFormulario.jsx` 252.
+Estado de tamaños (líneas): `OrdenTrabajo.jsx` 730, `OrdenFormCliente.jsx` 280 (ya hecho), `OrdenFormEquipo.jsx` 320, `ordenServicioDoc.js` 292, `OrdenAdjuntos.jsx` 257, `useClienteOT.jsx` 246, `ClienteFormulario.jsx` 252.
 
 1. **HECHO (v2.171–v2.172): `OrdenFormCliente.jsx` quedó en 280 líneas** (antes 739). Plan original:  Sacar a componentes propios (en `components/ordenes/`): `OrdenBuscadorCliente.jsx` (buscador de cliente y sus tarjetas, ~210), `OrdenDatosCliente.jsx` (cliente, RUT, fono, email, ~100), `OrdenAvisosVinculo.jsx` (buscadores de contacto/dirección y avisos "ya no vinculado", ~65), `OrdenDatosContacto.jsx` (~80) y `OrdenDatosDireccion.jsx` (~90). Se queda la lógica (RUT, `contactosDisponibles`, `vincularAlCliente`, `refrescarClienteSeleccionado`).
 2. **`OrdenTrabajo.jsx` → ~450.** Sacar: `OrdenCotizaciones.jsx` (chips y contador de cotizaciones asociadas, ~70), `OrdenFormCabecera.jsx` (título, técnico y cerrar, ~40), un hook `useOrdenDesdeNavegacion` (el `init` que recibe cliente/orden desde Clientes o Cotizaciones, ~75) y unificar las 3 ramas casi iguales de `seleccionarCliente` (~110) usando `datosDelTipo`.

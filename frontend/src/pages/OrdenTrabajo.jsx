@@ -1,12 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Home, Users, Contact, MapPin, Package, FileText, FileSpreadsheet, ShoppingCart, UserCog,
-  Save, X, Wrench, ChevronDown, ChevronUp
+  Home, Users, Contact, MapPin, Package, FileText, FileSpreadsheet, ShoppingCart, UserCog
 } from "lucide-react";
 import api from "../services/api";
 import { getCached } from "../services/cache";
-import { toUpper, capitalizarNombre, cerrarSesion, upperInput, parseToken } from "../utils/helpers";
+import { toUpper, cerrarSesion, upperInput, parseToken } from "../utils/helpers";
 import { ordenAFormulario, buscarEquipoDeOrden, insumosDeOrden, ordenVacia, insumosVacios } from "../utils/ordenFormato";
 import { validarOrden, armarPayloadOrden } from "../utils/validarOrden";
 import '../styles/OrdenTrabajo.css';
@@ -19,7 +18,9 @@ import OrdenFormEquipo from "../components/ordenes/OrdenFormEquipo";
 import OrdenFormInsumos from "../components/ordenes/OrdenFormInsumos";
 import OrdenFormAveria from "../components/ordenes/OrdenFormAveria";
 import ModalOpcionesPDF from "../components/ordenes/ModalOpcionesPDF";
-import OrdenFormAcciones from "../components/ordenes/OrdenFormAcciones";
+import OrdenFormCabecera from "../components/ordenes/OrdenFormCabecera";
+import OrdenCotizaciones from "../components/ordenes/OrdenCotizaciones";
+import OrdenFormBotones from "../components/ordenes/OrdenFormBotones";
 import useOrdenesListado from "../hooks/useOrdenesListado";
 
 
@@ -53,11 +54,6 @@ function OrdenTrabajo() {
   // consultar las cotizaciones asociadas sin importar el modo.
   const [ordenIdActual, setOrdenIdActual] = useState(null);
   const [cotizacionesDeOrden, setCotizacionesDeOrden] = useState([]);
-  const [mostrarCotizacionesAsociadas, setMostrarCotizacionesAsociadas] = useState(false);
-  // Dentro del bloque expandido se muestran como máximo COTIZ_VISIBLES chips;
-  // el resto queda tras un "Ver N más".
-  const [verTodasCotizaciones, setVerTodasCotizaciones] = useState(false);
-  const COTIZ_VISIBLES = 3;
 
   // Estados para autocompletar clientes y equipos
   const [clientes, setClientes] = useState([]);
@@ -218,7 +214,6 @@ function OrdenTrabajo() {
   // Cotizaciones asociadas a la orden abierta (solo lectura, para el badge y
   // los chips del header). Se re-consulta cada vez que cambia la orden abierta.
   useEffect(() => {
-    setVerTodasCotizaciones(false);
     if (!ordenIdActual) { setCotizacionesDeOrden([]); return; }
     const controller = new AbortController();
     api.get(`/api/cotizaciones?orden_id=${ordenIdActual}&limit=100`, { signal: controller.signal })
@@ -274,16 +269,17 @@ function OrdenTrabajo() {
     // (habilita los botones Ver/Editar del equipo)
     setEquipoSeleccionado(buscarEquipoDeOrden(orden, equipos));
 
-    // Cliente asociado: solo para badge/estado
-    const cl = clientes.find((c) =>
-      (orden.cliente_id && c.id === orden.cliente_id) || (orden.cliente && c.razon_social === orden.cliente)
-    );
-    let seleccionado = cl || null;
+    // Cliente asociado: solo para badge/estado. Se busca por id o, si ya no existe ese id (el cliente
+    // se borró y se registró de nuevo), por nombre. La lista local puede estar vacía si la orden se
+    // abre al volver desde otra pantalla: en ese caso se consulta la lista fresca.
+    const esDeLaOrden = (c) =>
+      (orden.cliente_id && c.id === orden.cliente_id) || (orden.cliente && c.razon_social === orden.cliente);
+    let seleccionado = clientes.find(esDeLaOrden) || null;
     let inactivo = false;
-    if (!cl && orden.cliente_id) {
+    if (!seleccionado && orden.cliente_id) {
       try {
         const resCli = await getCached(`/api/clientes`);
-        seleccionado = resCli.data.find((c) => c.id === orden.cliente_id) || null;
+        seleccionado = resCli.data.find(esDeLaOrden) || null;
       } catch { /* sin conexión: se trata como no encontrado */ }
       inactivo = !seleccionado;
     }
@@ -629,22 +625,11 @@ function OrdenTrabajo() {
           <>
           <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '12px' }}>
             <div className="of-wrap">
-              <div className="of-head">
-                <h2><Wrench size={20} /> {soloLectura ? "Ver Orden" : editingId ? "Editar Orden" : "Nueva Orden"}</h2>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  {(ordenIdActual ? nuevaOrden.tecnicoAsignado : tecnicoDeSesion()) && (
-                    <span style={{ fontWeight: 600, fontSize: '0.75rem', color: '#fff', background: 'rgba(255,255,255,0.22)', padding: '2px 8px', borderRadius: 999 }}>
-                      Técnico: {capitalizarNombre(ordenIdActual ? nuevaOrden.tecnicoAsignado : tecnicoDeSesion())}
-                    </span>
-                  )}
-                  {cotizacionesDeOrden.length > 0 && (
-                    <span style={{ fontWeight: 600, fontSize: '0.75rem', color: '#fff', background: 'rgba(255,255,255,0.22)', padding: '2px 8px', borderRadius: 999 }}>
-                      Cotizaciones: {cotizacionesDeOrden.length}
-                    </span>
-                  )}
-                  <button type="button" className="of-head-close" onClick={cerrarFormulario}><X size={18} /></button>
-                </div>
-              </div>
+              <OrdenFormCabecera
+                soloLectura={soloLectura} editingId={editingId}
+                tecnico={ordenIdActual ? nuevaOrden.tecnicoAsignado : tecnicoDeSesion()}
+                cantidadCotizaciones={cotizacionesDeOrden.length} onCerrar={cerrarFormulario}
+              />
             <form onSubmit={guardarOrden} className="of-form" noValidate>
               <div className="of-col-full">
                 <OrdenFormDatos
@@ -675,55 +660,7 @@ function OrdenTrabajo() {
                   onClientesRefresh={(lista) => setClientes(lista)}
                 />
 
-                {cotizacionesDeOrden.length > 0 && (
-                  <div style={{ marginTop: '10px', padding: '4px 10px', background: '#FEF9E7', border: '1px solid #F5D48C', borderRadius: '8px', lineHeight: '1.2' }}>
-                    <button
-                      type="button"
-                      onClick={() => { setMostrarCotizacionesAsociadas(!mostrarCotizacionesAsociadas); setVerTodasCotizaciones(false); }}
-                      style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text)', fontWeight: 600, fontSize: '0.8rem', fontFamily: 'inherit' }}
-                    >
-                      {mostrarCotizacionesAsociadas ? <ChevronUp size={14} style={{ color: '#B45309', flexShrink: 0 }} /> : <ChevronDown size={14} style={{ color: '#B45309', flexShrink: 0 }} />}
-                      Cotizaciones Asociadas
-                      <span style={{
-                        background: '#B45309', color: 'white', padding: '1px 8px', borderRadius: '10px',
-                        fontSize: '0.75rem', fontWeight: '700'
-                      }}>
-                        {cotizacionesDeOrden.length}
-                      </span>
-                    </button>
-
-                    {mostrarCotizacionesAsociadas && (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: '8px', alignItems: 'center' }}>
-                        {(verTodasCotizaciones ? cotizacionesDeOrden : cotizacionesDeOrden.slice(0, COTIZ_VISIBLES)).map((c) => (
-                          <span key={c.id}
-                            onClick={() => navigate('/cotizaciones', { state: { cotizacionId: c.id, cotizacionSoloLectura: soloLectura, volverOrdenId: ordenIdActual, volverOrdenSoloLectura: soloLectura } })}
-                            title="Ver esta cotización"
-                            style={{
-                              display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer',
-                              background: 'var(--primary-light)', color: 'var(--primary)',
-                              border: '1px solid var(--primary)', borderRadius: 999,
-                              padding: '3px 10px', fontSize: '.75rem', fontWeight: 600
-                            }}
-                          >
-                            N° {c.folio}
-                          </span>
-                        ))}
-                        {cotizacionesDeOrden.length > COTIZ_VISIBLES && (
-                          <button
-                            type="button"
-                            onClick={() => setVerTodasCotizaciones(!verTodasCotizaciones)}
-                            style={{
-                              background: 'none', border: 'none', padding: '3px 4px', cursor: 'pointer',
-                              color: '#B45309', fontSize: '.75rem', fontWeight: 700, fontFamily: 'inherit'
-                            }}
-                          >
-                            {verTodasCotizaciones ? 'Ver menos' : `Ver ${cotizacionesDeOrden.length - COTIZ_VISIBLES} más`}
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
+                <OrdenCotizaciones key={ordenIdActual} cotizaciones={cotizacionesDeOrden} ordenIdActual={ordenIdActual} soloLectura={soloLectura} />
                 </div>
 
                 <div className="of-col-right">
@@ -775,25 +712,11 @@ function OrdenTrabajo() {
                 </div>
               </div>
 
-              {/* Botones de acción del formulario */}
-              <div className="of-sub">
-                <button type="button" className="of-btn-c" onClick={cerrarFormulario}>
-                  <X size={16} /> {soloLectura ? "Cerrar" : "Cancelar"}
-                </button>
-                {!soloLectura && (
-                  <button type="button" className="of-btn-s" onClick={(e) => guardarOrden(e, true)} disabled={guardando}>
-                    <Save size={16} /> {guardando ? "Guardando..." : (editingId ? "Guardar Cambios" : "Guardar")}
-                  </button>
-                )}
-                {!soloLectura && (
-                  <button type="submit" className="of-btn-p" disabled={guardando}>
-                    <Save size={16} /> {guardando ? "Guardando..." : (editingId ? "Cerrar" : "Guardar Orden")}
-                  </button>
-                )}
-                {editingId && (
-                  <OrdenFormAcciones onPDF={generarPDFOrdenActual} onCotizacion={irACotizacionOrdenActual} />
-                )}
-              </div>
+              <OrdenFormBotones
+                soloLectura={soloLectura} editingId={editingId} guardando={guardando}
+                onCerrar={cerrarFormulario} onGuardarCambios={(e) => guardarOrden(e, true)}
+                onPDF={generarPDFOrdenActual} onCotizacion={irACotizacionOrdenActual}
+              />
             </form>
             </div>
           </div></>
