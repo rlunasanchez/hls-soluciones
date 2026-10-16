@@ -119,6 +119,7 @@ Antes de publicar algún día (no ahora): migración de Neon y portar `clientes.
 
 ## 8. Cómo trabajar con el dueño
 
+- **Regla permanente: código escalable, nunca archivos de miles de líneas.** Lo pidió el dueño el 16-oct-2026 ("no me sirven miles de líneas en el mismo código"). Todo código nuevo o modificado debe quedar repartido: **un archivo de pantalla o componente no debería pasar de unas 400 líneas**. Antes de agregar algo a un archivo grande (hoy `OrdenTrabajo.jsx` 658, `OrdenFormEquipo.jsx` 320), extraer a un componente, un hook (`hooks/use*.js`) o una utilidad (`utils/`). La lógica sin interfaz (validar, convertir, armar datos) va en `utils/`. No repetir el mismo bloque (formulario vacío, ramas casi iguales): unificarlo en una función. Si un cambio obliga a pasar de ese tamaño, partir primero y luego agregar. Aplica a todo módulo nuevo (Cotizaciones, Informes, Orden de Compra) desde el inicio.
 - **Hacer solo lo que se pide**; si algo parece necesario pero no fue pedido, preguntar. No crear carpetas, scripts, ramas ni worktrees extra sin avisar.
 - **No hacer `git push` ni cambiar de rama sin orden expresa**, porque publica en producción. Los commits locales sí. No usar `--force` sin permiso.
 - **No borrar datos de producción ni bases** sin confirmar qué se borra; el dueño ejecuta él mismo lo que toque Neon (Claude no tiene acceso a Neon ni sus credenciales).
