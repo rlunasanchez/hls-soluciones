@@ -114,3 +114,22 @@ export function ordenVacia(tecnicoAsignado = "") {
 
 // Los 12 insumos en blanco (cada uno es un objeto propio).
 export const insumosVacios = () => Array.from({ length: 12 }, () => ({ nombre: "" }));
+
+// Campos de la OT que se llevan de la ficha de un cliente al abrir una OT nueva desde Clientes.
+// Viaja solo el contacto y la dirección marcados "En la OT" (sin marca, vacíos).
+export function ordenParaCliente(cliente) {
+  return {
+    cliente: toUpper(cliente.razon_social),
+    direccion: toUpper(cliente.ot_direccion),
+    ciudad: toUpper(cliente.ot_ciudad),
+    comuna: toUpper(cliente.ot_comuna),
+    rut: cliente.rut || "",
+    email: cliente.email || "",
+    fonoPrincipal: cliente.telefono || "",
+    contacto: toUpper(cliente.contacto_nombre),
+    fonoContacto: cliente.contacto_fono || "",
+    emailContacto: cliente.contacto_email || "",
+    cargoContacto: toUpper(cliente.contacto_cargo),
+    clienteTipo: cliente.tipo === "PERSONA" ? "PERSONA" : "EMPRESA"
+  };
+}

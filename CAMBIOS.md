@@ -2,6 +2,15 @@
 
 ## Fecha: 2026-10-16
 
+### v2.174: `OrdenTrabajo.jsx` a 658 líneas (nueva OT desde Clientes y selección de cliente unificadas)
+
+**Alcance:** Orden de Trabajo, solo frontend. Traslado de código sin cambios de comportamiento. Probado en pantalla (nueva OT desde el listado y desde Clientes con empresa y persona, elegir y cambiar de cliente).
+
+- **`abrirNuevaOrden(clienteInicial = null)`:** una sola función abre la OT nueva, en blanco o con los datos de un cliente que viene desde Clientes (botón "OT"). Se eliminó el bloque duplicado de ~35 líneas del efecto `init`. Los campos que se llevan del cliente están en `ordenParaCliente(cliente)` (`utils/ordenFormato.js`): sus datos propios y solo el contacto y la dirección marcados "En la OT". Ojo: `onNueva` pasa `() => abrirNuevaOrden()` para no recibir el evento del clic como cliente.
+- **`seleccionarCliente`:** las 3 ramas casi idénticas son una sola. Al elegir un cliente se llevan sus datos propios (una persona trae además su dirección, ver `datosDelTipo`). En una OT guardada se conserva el equipo; si es el mismo cliente se conservan sus contactos y direcciones adicionales y si es otro se limpian. En una OT nueva además se limpian equipo y avería.
+- **Tamaños de la OT:** `OrdenTrabajo.jsx` 1.243 → **658**, `OrdenFormCliente.jsx` 1.193 → **280**.
+- **Pendiente:** para bajar `OrdenTrabajo.jsx` hacia ~450 habría que mover el estado del formulario (más de 40 `useState`) a un hook propio; es lo más delicado. También quedan por revisar `OrdenFormEquipo.jsx` (320) y `ordenServicioDoc.js` (292).
+
 ### v2.173: `OrdenTrabajo.jsx` más chico (cabecera, cotizaciones asociadas y botones) y fix del aviso al volver desde una cotización
 
 **Alcance:** Orden de Trabajo, solo frontend. Traslado de código sin cambios de comportamiento, salvo lo indicado. Probado en pantalla.

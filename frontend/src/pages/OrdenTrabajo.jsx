@@ -6,7 +6,7 @@ import {
 import api from "../services/api";
 import { getCached } from "../services/cache";
 import { toUpper, cerrarSesion, upperInput, parseToken } from "../utils/helpers";
-import { ordenAFormulario, buscarEquipoDeOrden, insumosDeOrden, ordenVacia, insumosVacios } from "../utils/ordenFormato";
+import { ordenAFormulario, buscarEquipoDeOrden, insumosDeOrden, ordenVacia, insumosVacios, ordenParaCliente } from "../utils/ordenFormato";
 import { validarOrden, armarPayloadOrden } from "../utils/validarOrden";
 import '../styles/OrdenTrabajo.css';
 import "../styles/ordenes-componentes.css";
@@ -130,40 +130,7 @@ function OrdenTrabajo() {
         window.history.replaceState({}, document.title);
       }
 
-      if (clienteFromNav) {
-        const fechaActual = new Date().toISOString().split("T")[0];
-        const numeroOt = await calcularSiguienteNumeroOrden();
-        setEditingId(null);
-        setClienteSeleccionado(clienteFromNav);
-        setClienteFijo(false);
-        setClienteInactivo(false);
-        setEquipoSeleccionado(null);
-        setEquipoFijo(false);
-        setBusquedaCliente("");
-    setBusquedaModelo("");
-    setEquiposModeloSugeridos([]);
-        setInsumos(insumosVacios());
-        setInsumosVisibles(2);
-        setNuevaOrden({
-          ...ordenVacia(tecnicoDeSesion()),
-          numeroOrden: numeroOt,
-          fecha: fechaActual,
-          cliente: (clienteFromNav.razon_social || "").toUpperCase(),
-          // Desde el botón OT del cliente viaja solo lo marcado "En la OT" (sin marca, vacío)
-          direccion: (clienteFromNav.ot_direccion || "").toUpperCase(),
-          ciudad: (clienteFromNav.ot_ciudad || "").toUpperCase(),
-          comuna: (clienteFromNav.ot_comuna || "").toUpperCase(),
-          rut: clienteFromNav.rut || "",
-          email: clienteFromNav.email || "",
-          fonoPrincipal: clienteFromNav.telefono || "",
-          contacto: (clienteFromNav.contacto_nombre || "").toUpperCase(),
-          fonoContacto: clienteFromNav.contacto_fono || "",
-          emailContacto: clienteFromNav.contacto_email || "",
-          cargoContacto: (clienteFromNav.contacto_cargo || "").toUpperCase(),
-          clienteTipo: clienteFromNav.tipo === "PERSONA" ? "PERSONA" : "EMPRESA"
-        });
-      setMostrarFormulario(true);
-    }
+      if (clienteFromNav) await abrirNuevaOrden(clienteFromNav);
     };
     init();
   }, []);
@@ -180,19 +147,20 @@ function OrdenTrabajo() {
   };
 
   // Función para abrir formulario de nueva orden con valores automáticos
-  const abrirNuevaOrden = async () => {
+  // Abre una OT nueva, en blanco o (clienteInicial) con los datos de un cliente que viene desde Clientes.
+  const abrirNuevaOrden = async (clienteInicial = null) => {
     await fetchClientes();
-    const fechaActual = new Date().toISOString().split("T")[0];
     const numeroOt = await calcularSiguienteNumeroOrden();
-    setNuevaOrden(prev => ({
-      ...prev,
+    setNuevaOrden({
+      ...ordenVacia(tecnicoDeSesion()),
+      ...(clienteInicial ? ordenParaCliente(clienteInicial) : {}),
       numeroOrden: numeroOt,
-      fecha: fechaActual
-    }));
+      fecha: new Date().toISOString().split("T")[0]
+    });
     setEditingId(null);
     setOrdenIdActual(null);
     setSoloLectura(false);
-    setClienteSeleccionado(null);
+    setClienteSeleccionado(clienteInicial);
     setClienteFijo(false);
     setEquipoSeleccionado(null);
     setEquipoFijo(false);
@@ -348,79 +316,38 @@ function OrdenTrabajo() {
     setBusquedaCliente("");
     setMostrarDropdownClientes(false);
 
-    // Cliente (re)seleccionado en una OT guardada: solo se llevan sus datos propios.
-    // El contacto y la dirección salen y se eligen de nuevo con sus buscadores
-    // (no se toca el equipo). Igual que en una OT nueva.
-    if (mismoCliente && editingId) {
-      setNuevaOrden(prev => ({
-        ...prev,
-        cliente: toUpper(cliente.razon_social),
-        direccion: "",
-        ciudad: "",
-        comuna: "",
-        rut: cliente.rut || "",
-        email: cliente.email || "",
-        fonoPrincipal: cliente.telefono || "",
-        contacto: "",
-        fonoContacto: "",
-        emailContacto: "",
-        cargoContacto: "",
-        ...datosDelTipo(cliente)
-      }));
-      return;
-    }
-
-    // En modo edicion, solo actualizar datos del cliente sin limpiar equipo; el contacto
-    // y la dirección se eligen con sus buscadores
-    if (editingId) {
-      setNuevaOrden(prev => ({
-        ...prev,
-        cliente: toUpper(cliente.razon_social),
-        direccion: "",
-        ciudad: "",
-        comuna: "",
-        rut: cliente.rut || "",
-        email: cliente.email || "",
-        fonoPrincipal: cliente.telefono || "",
-        contacto: "",
-        fonoContacto: "",
-        emailContacto: "",
-        cargoContacto: "",
-        contactosExtra: [],
-        direccionesExtra: [],
-        ...datosDelTipo(cliente)
-      }));
-      return;
-    }
-
-    setEquipoSeleccionado(null);
-    setBusquedaModelo("");
-    // OT desde cero: al elegir el cliente solo se llevan sus datos (razón social, RUT, fono,
-    // email). El contacto y la dirección no vienen por defecto: se eligen en sus buscadores.
-    setNuevaOrden(prev => ({
-      ...prev,
+    // Al elegir un cliente solo se llevan sus datos propios (razón social, RUT, fono, email). El contacto
+    // y la dirección salen y se eligen con sus buscadores (una persona trae los suyos, ver datosDelTipo).
+    const datosCliente = {
       cliente: toUpper(cliente.razon_social),
-      direccion: "",
-      ciudad: "",
-      comuna: "",
+      direccion: "", ciudad: "", comuna: "",
       rut: cliente.rut || "",
       email: cliente.email || "",
       fonoPrincipal: cliente.telefono || "",
-      contacto: "",
-      fonoContacto: "",
-      emailContacto: "",
-      cargoContacto: "",
-      contactosExtra: [],
-      direccionesExtra: [],
-      equipo: "",
-      modelo: "",
-      marca: "",
-      serie: "",
-      nivelTinta: "",
-      contadorPagOut: "",
-      averia: "",
-      actividad: "",
-      observaciones: "",
+      contacto: "", fonoContacto: "", emailContacto: "", cargoContacto: ""
+    };
+
+    // Cliente (re)seleccionado en una OT guardada: el equipo no se toca. Si es el mismo cliente se
+    // conservan sus contactos y direcciones adicionales; si es otro, se limpian.
+    if (editingId) {
+      setNuevaOrden(prev => ({
+        ...prev,
+        ...datosCliente,
+        ...(mismoCliente ? {} : { contactosExtra: [], direccionesExtra: [] }),
+        ...datosDelTipo(cliente)
+      }));
+      return;
+    }
+
+    // OT desde cero: además se limpia el equipo y la avería.
+    setEquipoSeleccionado(null);
+    setBusquedaModelo("");
+    setNuevaOrden(prev => ({
+      ...prev,
+      ...datosCliente,
+      contactosExtra: [], direccionesExtra: [],
+      equipo: "", modelo: "", marca: "", serie: "", nivelTinta: "", contadorPagOut: "",
+      averia: "", actividad: "", observaciones: "",
       ...datosDelTipo(cliente)
     }));
   };
@@ -608,7 +535,7 @@ function OrdenTrabajo() {
             filtroFechaHasta={filtroFechaHasta}
             onFiltroFechaHastaChange={setFiltroFechaHasta}
             onLimpiar={() => { setFiltroNumeroOrden(""); setFiltroCliente(""); setFiltroSerie(""); setFiltroEstado("todos"); setFiltroGarantia("todos"); setFiltroFechaDesde(""); setFiltroFechaHasta(""); }}
-            onNueva={abrirNuevaOrden}
+            onNueva={() => abrirNuevaOrden()}
             paginaActual={paginaActual}
             totalPaginas={totalPaginas}
             onPageChange={setPaginaActual}
