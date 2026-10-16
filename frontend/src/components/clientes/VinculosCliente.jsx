@@ -43,7 +43,8 @@ const duenoAjeno = (clienteId) => (r) => {
   return otros.length > 0 && !propios ? otros[0][1] : null;
 };
 
-function VinculosCliente({ tipo, vinculados, onChange, clienteId = null, readOnly = false }) {
+// maximo: cantidad máxima de registros vinculados (una persona solo tiene una dirección); null = sin límite
+function VinculosCliente({ tipo, vinculados, onChange, clienteId = null, readOnly = false, maximo = null }) {
   const cfg = CONFIG[tipo];
   const [creando, setCreando] = useState(false);
   const [nuevo, setNuevo] = useState(cfg.nuevo);
@@ -51,6 +52,7 @@ function VinculosCliente({ tipo, vinculados, onChange, clienteId = null, readOnl
   const [guardando, setGuardando] = useState(false);
 
   const yaVinculado = (id) => vinculados.some((v) => v.id === id);
+  const lleno = maximo !== null && vinculados.length >= maximo;
 
   const vincular = (registro) => {
     if (!yaVinculado(registro.id)) onChange([...vinculados, registro]);
@@ -92,7 +94,13 @@ function VinculosCliente({ tipo, vinculados, onChange, clienteId = null, readOnl
     <div className={`cf-sec cf-vinc cf-sec-${tipo}`}>
       <h3>{cfg.titulo}</h3>
 
-      {!readOnly && (
+      {!readOnly && lleno && (
+        <p className="cf-vacio" style={{ fontSize: ".75rem", color: "#6b7280", margin: "4px 0 8px" }}>
+          Solo se permite {maximo} {cfg.verbo}. Quita la actual para elegir otra.
+        </p>
+      )}
+
+      {!readOnly && !lleno && (
         <>
           <CampoCatalogo
             tipo={tipo}

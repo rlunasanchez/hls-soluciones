@@ -236,7 +236,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
               </>}
             </div>
             {!unaColumna && <VinculosCliente tipo="contactos" vinculados={contactos} onChange={setContactos} clienteId={clienteEditando?.id} readOnly={readOnly} />}
-            {(!unaColumna || (esPersona && !soloCliente)) && <VinculosCliente tipo="direcciones" vinculados={direcciones} onChange={setDirecciones} clienteId={clienteEditando?.id} readOnly={readOnly} />}
+            {(!unaColumna || (esPersona && !soloCliente)) && <VinculosCliente tipo="direcciones" vinculados={direcciones} onChange={setDirecciones} clienteId={clienteEditando?.id} readOnly={readOnly} maximo={esPersona ? 1 : null} />}
           </div>
 
           <AccionesFicha clase="cf" readOnly={readOnly} guardando={guardando}

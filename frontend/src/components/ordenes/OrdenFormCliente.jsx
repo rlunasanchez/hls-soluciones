@@ -2,11 +2,15 @@ import { useState, useEffect } from "react";
 import { Search, Users, ChevronDown, ChevronUp, Eye, UserPlus, Link2 } from "lucide-react";
 import CampoCatalogo from "../comunes/CampoCatalogo";
 import OrdenAdjuntos from "./OrdenAdjuntos";
+import OrdenInfoInterna from "./OrdenInfoInterna";
+import OrdenDatosCliente from "./OrdenDatosCliente";
+import OrdenDatosContacto from "./OrdenDatosContacto";
+import OrdenDatosDireccion from "./OrdenDatosDireccion";
 import useClienteOT from "./useClienteOT";
 import "../../styles/Clientes.css";
 import "../../styles/campo-catalogo.css";
 import "../../styles/botones.css";
-import { upperInput, validarRUT, formatearRutInput, toUpper, normalizarRut } from "../../utils/helpers";
+import { upperInput, formatearRutInput, toUpper, normalizarRut } from "../../utils/helpers";
 import api from "../../services/api";
 
 function OrdenFormCliente({
@@ -24,36 +28,6 @@ function OrdenFormCliente({
   setClienteSeleccionado,
   onClientesRefresh
 }) {
-  const [rutError, setRutError] = useState("");
-  const [mostrarInfoInterna, setMostrarInfoInterna] = useState(false);
-
-  const handleRutChange = (e) => {
-    let val = upperInput(e, /[^0-9K-]/g);
-    if (val.length > 12) val = val.slice(0, 12);
-    const partes = val.split("-");
-    if (partes.length === 2) {
-      if (partes[1].length > 1) partes[1] = partes[1][0];
-      if (partes[0].length > 0) partes[0] = partes[0].replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
-    } else if (partes.length === 1 && partes[0].length > 0) {
-      partes[0] = partes[0].replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
-    }
-    val = partes.join("-");
-    setNuevaOrden({ ...nuevaOrden, rut: val });
-    if (rutError && val.length >= 9 && validarRUT(val)) setRutError("");
-  };
-
-  const handleRutBlur = (e) => {
-    const val = e.target.value;
-    if (!val) { setRutError(""); return; }
-    const limpio = val.replace(/\./g, "").toUpperCase();
-    const tieneGuion = limpio.includes("-");
-    const match = limpio.match(/^(\d+)-([K0-9])$/);
-    if (match) { if (validarRUT(val)) setRutError(""); else setRutError("RUT inválido"); return; }
-    if (tieneGuion && !match) setRutError("RUT inválido");
-    else if (!tieneGuion && limpio.length >= 5) setRutError("Falta el guion y dígito verificador");
-    else setRutError("");
-  };
-
   const contactosDisponibles = (() => {
     if (!clienteSeleccionado) return [];
     const principalNombre = String(clienteSeleccionado.contacto_nombre || "").toUpperCase().trim();
@@ -409,105 +383,11 @@ function OrdenFormCliente({
 
       {modalesCliente}
 
-      {/* Datos del cliente */}
-      <div className="of-caja">
-        <div className="of-caja-titulo" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          Datos del cliente
-          {/* Con un cliente elegido el tipo viene de su ficha; en una OT desde cero se elige acá. */}
-          <select
-            value={esPersona ? "PERSONA" : "EMPRESA"}
-            disabled={readOnly || !!clienteSeleccionado}
-            style={{ padding: '0 6px', fontSize: '.75rem', height: '20px', border: '1.5px solid var(--border)', borderRadius: '6px', textTransform: 'none', letterSpacing: 'normal', fontWeight: 400, color: 'var(--text-secondary, #475569)' }}
-            onChange={(e) => {
-              const tipo = e.target.value;
-              setNuevaOrden((prev) => ({
-                ...prev,
-                clienteTipo: tipo,
-                // Una persona no tiene contacto: se limpian sus campos
-                ...(tipo === "PERSONA" ? { contacto: "", fonoContacto: "", emailContacto: "", cargoContacto: "" } : {})
-              }));
-            }}
-          >
-            <option value="EMPRESA">Empresa</option>
-            <option value="PERSONA">Persona</option>
-          </select>
-        </div>
-        <div className="of-form-grid" style={{ gridTemplateColumns: '2fr 1fr', marginBottom: '15px' }}>
-          <div className="of-f">
-            <label>{esPersona ? "Nombre *" : "Cliente *"}</label>
-            <input
-              type="text"
-              placeholder="Nombre del cliente"
-              value={nuevaOrden.cliente}
-              onChange={(e) => setNuevaOrden({...nuevaOrden, cliente: upperInput(e)})}
-              disabled={readOnly || clienteBloqueado}
-              required
-              style={{
-                width: '100%',
-                padding: '2px 8px',
-                border: '1.5px solid var(--border)',
-                borderRadius: '6px',
-                fontSize: '.82rem'
-              }}
-            />
-          </div>
-
-          <div className="of-f" style={{ position: 'relative' }}>
-            <label>RUT {rutError && <span style={{ position: 'absolute', right: 0, top: 0, whiteSpace: 'nowrap', color: '#dc2626', fontSize: '.7rem', textTransform: 'none', letterSpacing: 'normal' }}>{rutError}</span>}</label>
-            <input
-              type="text"
-              placeholder="Ej: 12.345.678-9"
-              value={nuevaOrden.rut}
-              onChange={handleRutChange}
-              onBlur={handleRutBlur}
-              disabled={readOnly || rutBloqueado}
-              style={{
-                width: '100%',
-                border: rutError ? '1px solid #f87171' : undefined,
-                background: rutError ? '#fef2f2' : undefined
-              }}
-            />
-          </div>
-        </div>
-
-        <div className="of-form-grid" style={{ gridTemplateColumns: '1fr 1fr', marginBottom: 0 }}>
-          <div className="of-f">
-            <label>Fono Principal</label>
-            <input
-              type="tel"
-              placeholder="Teléfono principal del cliente"
-              value={nuevaOrden.fonoPrincipal}
-              onChange={(e) => setNuevaOrden({...nuevaOrden, fonoPrincipal: e.target.value.replace(/[^0-9+]/g, '')})}
-              disabled={readOnly || fonoBloqueado}
-              style={{
-                width: '100%',
-                padding: '2px 8px',
-                border: '1.5px solid var(--border)',
-                borderRadius: '6px',
-                fontSize: '.82rem'
-              }}
-            />
-          </div>
-
-          <div className="of-f">
-            <label>Email</label>
-            <input
-              type="email"
-              placeholder="Email del cliente"
-              value={nuevaOrden.email}
-              onChange={(e) => setNuevaOrden({...nuevaOrden, email: e.target.value})}
-              disabled={readOnly || emailBloqueado}
-              style={{
-                width: '100%',
-                padding: '2px 8px',
-                border: '1.5px solid var(--border)',
-                borderRadius: '6px',
-                fontSize: '.82rem'
-              }}
-            />
-          </div>
-        </div>
-      </div>
+      <OrdenDatosCliente
+        nuevaOrden={nuevaOrden} setNuevaOrden={setNuevaOrden} readOnly={readOnly} esPersona={esPersona}
+        tieneCliente={!!clienteSeleccionado}
+        bloqueados={{ cliente: clienteBloqueado, rut: rutBloqueado, fono: fonoBloqueado, email: emailBloqueado }}
+      />
 
       {/* Buscadores: contacto y dirección, uno al lado del otro; ambos con lista para ver y elegir */}
       <div className="of-form-grid" style={{ gridTemplateColumns: '1fr 1fr', marginBottom: '10px' }}>
@@ -574,126 +454,9 @@ function OrdenFormCliente({
         </div>
       )}
 
-      {/* Datos del contacto */}
-      <div className="of-caja">
-        <div className="of-caja-titulo">Datos del contacto</div>
-        <div className="of-form-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
-          <div className="of-f">
-            <label>Contacto</label>
-            <input
-              type="text"
-              placeholder="Nombre del contacto"
-              value={nuevaOrden.contacto}
-              onChange={(e) => setNuevaOrden({...nuevaOrden, contacto: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
-              disabled={readOnly || esPersona || contactoBloqueado}
-              style={{
-                width: '100%',
-                padding: '2px 8px',
-                border: '1.5px solid var(--border)',
-                borderRadius: '6px',
-                fontSize: '.82rem'
-              }}
-            />
-          </div>
+      <OrdenDatosContacto nuevaOrden={nuevaOrden} setNuevaOrden={setNuevaOrden} deshabilitado={readOnly || esPersona || contactoBloqueado} />
 
-          <div className="of-f">
-            <label>Fono Contacto</label>
-            <input
-              type="tel"
-              placeholder="Teléfono del contacto"
-              value={nuevaOrden.fonoContacto}
-              onChange={(e) => setNuevaOrden({...nuevaOrden, fonoContacto: e.target.value.replace(/[^0-9+]/g, '')})}
-              disabled={readOnly || esPersona || contactoBloqueado}
-              style={{
-                width: '100%',
-                padding: '2px 8px',
-                border: '1.5px solid var(--border)',
-                borderRadius: '6px',
-                fontSize: '.82rem'
-              }}
-            />
-          </div>
-
-          <div className="of-f">
-            <label>Email Contacto</label>
-            <input
-              type="email"
-              placeholder="Email del contacto"
-              value={nuevaOrden.emailContacto}
-              onChange={(e) => setNuevaOrden({...nuevaOrden, emailContacto: e.target.value})}
-              disabled={readOnly || esPersona || contactoBloqueado}
-              style={{
-                width: '100%',
-                padding: '2px 8px',
-                border: '1.5px solid var(--border)',
-                borderRadius: '6px',
-                fontSize: '.82rem'
-              }}
-            />
-          </div>
-
-          <div className="of-f">
-            <label>Cargo Contacto</label>
-            <input
-              type="text"
-              placeholder="Cargo del contacto"
-              value={nuevaOrden.cargoContacto}
-              onChange={(e) => setNuevaOrden({...nuevaOrden, cargoContacto: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
-              disabled={readOnly || esPersona || contactoBloqueado}
-              style={{
-                width: '100%',
-                padding: '2px 8px',
-                border: '1.5px solid var(--border)',
-                borderRadius: '6px',
-                fontSize: '.82rem'
-              }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Datos de la dirección */}
-      <div className="of-caja">
-        <div className="of-caja-titulo">Datos de la dirección</div>
-        <div className="of-form-grid" style={{ gridTemplateColumns: '1.4fr 1fr 1fr', marginBottom: 0 }}>
-          <div className="of-f">
-            <label>Dirección</label>
-            <input
-              type="text"
-              placeholder="Dirección del cliente"
-              value={nuevaOrden.direccion}
-              onChange={(e) => setNuevaOrden({...nuevaOrden, direccion: upperInput(e)})}
-              disabled={readOnly || direccionBloqueada}
-              style={{ width: '100%' }}
-            />
-          </div>
-
-          <div className="of-f">
-            <label>Ciudad</label>
-            <input
-              type="text"
-              placeholder="Ciudad"
-              value={nuevaOrden.ciudad}
-              onChange={(e) => setNuevaOrden({...nuevaOrden, ciudad: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
-              disabled={readOnly || direccionBloqueada}
-              style={{ width: '100%' }}
-            />
-          </div>
-
-          <div className="of-f">
-            <label>Comuna</label>
-            <input
-              type="text"
-              placeholder="Comuna"
-              value={nuevaOrden.comuna}
-              onChange={(e) => setNuevaOrden({...nuevaOrden, comuna: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')})}
-              disabled={readOnly || direccionBloqueada}
-              style={{ width: '100%' }}
-            />
-          </div>
-        </div>
-      </div>
-
+      <OrdenDatosDireccion nuevaOrden={nuevaOrden} setNuevaOrden={setNuevaOrden} deshabilitado={readOnly || direccionBloqueada} />
 
 
 
@@ -701,36 +464,7 @@ function OrdenFormCliente({
 
       <OrdenAdjuntos nuevaOrden={nuevaOrden} setNuevaOrden={setNuevaOrden} readOnly={readOnly} />
 
-      <div style={{ marginTop: '10px', padding: '4px 10px', background: '#FEF9E7', border: '1px solid #F5D48C', borderRadius: '8px', lineHeight: '1.2' }}>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', color: 'var(--text)', cursor: 'pointer', fontSize: '0.8rem', width: 'fit-content', maxWidth: '100%' }}>
-          <button
-            type="button"
-            onClick={() => setMostrarInfoInterna(!mostrarInfoInterna)}
-            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text)', fontWeight: 600, fontSize: '0.8rem', fontFamily: 'inherit' }}
-          >
-            {mostrarInfoInterna ? <ChevronUp size={14} style={{ color: '#B45309', flexShrink: 0 }} /> : <ChevronDown size={14} style={{ color: '#B45309', flexShrink: 0 }} />}
-            Información Interna
-            {String(nuevaOrden.infoInterna || "").trim() && (
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#B45309', flexShrink: 0 }} title="Tiene información interna" />
-            )}
-          </button>
-        </label>
-
-        {mostrarInfoInterna && (
-          <div style={{ marginTop: '8px' }}>
-            <div className="of-f">
-              <textarea
-                rows={4}
-                placeholder="Notas internas de la orden (no visibles para el cliente)..."
-                value={nuevaOrden.infoInterna || ""}
-                onChange={(e) => setNuevaOrden({...nuevaOrden, infoInterna: upperInput(e)})}
-                disabled={readOnly}
-                style={{ width: '100%', padding: '2px 8px', border: '1.5px solid var(--border)', borderRadius: '6px', fontSize: '.82rem', fontFamily: 'inherit', resize: 'vertical' }}
-              />
-            </div>
-          </div>
-        )}
-      </div>
+      <OrdenInfoInterna nuevaOrden={nuevaOrden} setNuevaOrden={setNuevaOrden} readOnly={readOnly} />
 
     </>
   );

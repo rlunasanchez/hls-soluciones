@@ -1,5 +1,15 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-10-16
+
+### v2.171: Persona con una sola dirección y `OrdenFormCliente` dividido en componentes
+
+**Alcance:** Clientes y Orden de Trabajo, solo frontend. Probado en pantalla.
+
+- **Una persona solo puede tener 1 dirección** (`VinculosCliente.jsx` nuevo prop `maximo`, `ClienteFormulario.jsx` lo pasa como 1 cuando es persona). Con una dirección vinculada se ocultan el buscador y "Nuevo" y se muestra "Solo se permite 1 dirección. Quita la actual para elegir otra." Una empresa no tiene límite. Si un cliente cambia de Empresa a Persona con varias direcciones, se conservan todas hasta que se quiten.
+- **`OrdenFormCliente.jsx` 739 → 473 líneas** (traslado de código, sin cambios de comportamiento). Componentes nuevos en `components/ordenes/`: `OrdenDatosCliente.jsx` (cliente, RUT con su validación, fono, email y Tipo), `OrdenDatosContacto.jsx`, `OrdenDatosDireccion.jsx` (los campos se generan desde una lista en vez de repetir cada input) y `OrdenInfoInterna.jsx`.
+- **Pendiente:** extraer el buscador de cliente (la parte más grande que queda en `OrdenFormCliente`) y seguir con `OrdenTrabajo.jsx` (802). Ver `AGENTS.md` sección 7b.
+
 ## Fecha: 2026-10-15
 
 ### v2.170: Foco tenue en botones al navegar con Tab
