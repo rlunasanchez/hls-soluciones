@@ -90,7 +90,10 @@ Solo existen **dos ramas**:
 - Windows: en el shell de Claude Code los heredocs largos con comillas fallan; usar la herramienta de escritura de archivos. Los archivos del repo están en LF y Git avisa de CRLF; es normal.
 - El backend local no se recarga solo; reiniciarlo tras cambiar código. En el navegador, **Ctrl+F5** tras un cambio de frontend si ves comportamiento viejo.
 
-## 7. Estado y pendientes (13-oct-2026)
+## 7. Estado y pendientes (16-oct-2026)
+
+**Hay cambios locales sin publicar (v2.168 a v2.175).** La web sigue en v2.167. El dueño decidió publicar el jueves 22-oct-2026. Todo lo necesario (SQL de Neon, cómo portar el backend a PostgreSQL con los `$N` renumerados, orden de publicación, verificación y reversión) está en **`MIGRACION_PENDIENTE.md`**. No hacer `git push` sin orden expresa.
+
 
 - **Neon:** migración de contactos/direcciones **corrida**, backend PostgreSQL **desplegado** y esquema antiguo **ya borrado** (`clientes_contactos`, `clientes_direcciones` y las columnas `clientes.contacto_*`). Neon tiene 9 tablas: `clientes`, `contactos`, `direcciones`, `cliente_contactos`, `cliente_direcciones`, `equipos`, `ordenes_trabajo`, `cotizaciones`, `usuarios`.
 - Adaptar **Cotizaciones** a los checks "En la OT" y a los botones Editar/Registrar (`NOTAS-COTIZACIONES.md` tiene el relevamiento).
