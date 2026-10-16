@@ -102,6 +102,18 @@ Solo existen **dos ramas**:
 - Opcional: importar datos históricos del sistema antiguo (14.581 OT, 5.698 contactos).
 - No hay pruebas automáticas del frontend: los cambios de pantalla se prueban a mano.
 
+## 7a. PRIORIDAD: soportar el volumen del sistema antiguo (paginación y búsqueda en el servidor)
+
+Este sistema reemplaza uno que tenía **14.581 órdenes de servicio, 6.420 empresas, 7.118 personas y 5.698 contactos** (ver `BASE_DATOS_ANTIGUA.md`). Hoy el nuevo carga todo y filtra/pagina en el navegador, lo cual **no escala a ese volumen** y hay que resolverlo **antes de importar datos históricos** (dicho por el dueño el 16-oct-2026: "este sistema está hecho para gran volumen, recuerda la base del sistema viejo").
+
+Qué no escala hoy:
+1. `GET /api/ordenes?page=1&limit=10000` trae hasta 10.000 de una vez; con 14.581 OT faltarían órdenes y sería lento (`useOrdenesListado.js`).
+2. El buscador de cliente de la OT filtra sobre `clientes` completo cargado en memoria (`clientesFiltrados` en `OrdenTrabajo.jsx`); además `GET /api/clientes` arma contactos y direcciones de **todos** los clientes (`enriquecerClientes`).
+3. Listados de Clientes (`Clientes.jsx`) y de Equipos (`Equipos.jsx`): mismo patrón de cargar todo.
+4. `GET /api/equipos` sin límite.
+
+Cómo resolverlo (no con un tope de cantidad, que ocultaría registros): **paginación y filtros en el servidor** (`pagina`, `limite` y filtros en la consulta con `WHERE` y `LIMIT/OFFSET`, la respuesta trae la página y el `total`); el buscador de cliente consulta al servidor desde 2 letras y devuelve ~10 resultados; `enriquecerClientes` solo para los clientes de la página. Los buscadores de Contactos y Direcciones ya consultan al servidor (`useBusquedaApi`): usar ese patrón. Orden sugerido: 1) OT, 2) buscador de cliente, 3) Clientes, 4) Equipos. Hacerlo en pasos chicos, probando cada uno; crear datos de prueba temporales (como se hizo con la paginación) y borrarlos al terminar. Considerar índices en `ordenes_trabajo` (número, cliente, fecha) y `clientes` (razón social, RUT).
+
 ## 7b. Próxima sesión: seguir reduciendo la OT a ~400 líneas por archivo (plan acordado)
 
 Meta del dueño: ningún archivo de pantalla con miles de líneas; que el código sea escalable. Alcance: **solo Clientes, Contactos, Direcciones y OT** (no Cotizaciones, Informes ni Orden de Compra todavía). **Todo local**: no hacer `git push` ni tocar `deploy/cloud`/Neon hasta que el dueño lo ordene. Hacer los pasos **de a uno**: extraer, `npx vite build`, y que el dueño pruebe en pantalla antes del siguiente. Es traslado de código: no cambiar comportamiento.
