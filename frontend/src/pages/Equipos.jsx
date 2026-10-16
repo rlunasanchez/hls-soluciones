@@ -83,6 +83,8 @@ function Equipos() {
     }
   };
 
+  // Devuelve "rechazado" si el servidor no aceptó los datos (por ejemplo, equipo repetido) para que el
+  // formulario vuelva a su estado anterior; "error" si falló por otra causa; "ok" si guardó.
   const guardarEquipo = async (payload, id, mantener = false) => {
     try {
       if (id) {
@@ -104,9 +106,11 @@ function Equipos() {
         const res = await getCached("/api/equipos");
         setEquipos(res.data);
       }
+      return "ok";
     } catch (err) {
       const msg = err.response?.data?.msg;
       alert(msg || "Error al guardar");
+      return err.response?.status === 400 ? "rechazado" : "error";
     }
   };
 

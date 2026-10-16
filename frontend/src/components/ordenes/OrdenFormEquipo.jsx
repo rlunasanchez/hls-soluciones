@@ -73,6 +73,8 @@ function OrdenFormEquipo({
       }
     } catch (err) {
       alert(err.response?.data?.msg || "Error al guardar el equipo.");
+      // El formulario vuelve a lo guardado cuando el servidor rechaza los datos (equipo repetido)
+      return err.response?.status === 400 ? "rechazado" : "error";
     }
   };
 

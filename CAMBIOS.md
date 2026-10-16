@@ -2,6 +2,16 @@
 
 ## Fecha: 2026-10-16
 
+### v2.175: Mantenedor de Equipos: sin duplicados al editar, eliminar solo admin y formulario que se limpia al ser rechazado
+
+**Alcance:** Equipos (y el formulario de edición de equipo dentro de la OT). Backend y frontend, sin cambios de base de datos. Probado en pantalla.
+
+- **Editar ya no deja crear duplicados** (`backend/routes/equipos.js`, `PUT /:id`): igual que al crear, rechaza con 400 si existe otro equipo con el mismo Equipo + Marca + Modelo (sin distinguir mayúsculas ni espacios, y sin compararse consigo mismo). Mensaje: "Ya existe otro equipo … con el código EQ-XXXX."
+- **Eliminar solo para el admin:** `DELETE /api/equipos/:id` exige `adminOnly` y el botón "Eliminar" del menú `...` (`EquipoAcciones.jsx`) solo aparece con `rol === 'admin'`, igual que en Clientes (v2.05).
+- **El formulario se limpia cuando el servidor rechaza los datos:** `guardarEquipo` (`Equipos.jsx`) y el guardado de la edición dentro de la OT (`OrdenFormEquipo.jsx`) devuelven `"rechazado"` ante un 400; `EquipoFormulario.jsx` entonces vuelve a los datos guardados (si edita) o queda en blanco (si crea). Ante otros errores (conexión) conserva lo escrito.
+- **Recordatorio:** la serie ya no está en el mantenedor de Equipos (v2.08); vive solo en la OT, por eso no se corrige desde Equipos.
+- **No se hizo:** límite en `GET /api/equipos` (devuelve todos los equipos; sin impacto hoy).
+
 ### v2.174: `OrdenTrabajo.jsx` a 658 líneas (nueva OT desde Clientes y selección de cliente unificadas)
 
 **Alcance:** Orden de Trabajo, solo frontend. Traslado de código sin cambios de comportamiento. Probado en pantalla (nueva OT desde el listado y desde Clientes con empresa y persona, elegir y cambiar de cliente).
