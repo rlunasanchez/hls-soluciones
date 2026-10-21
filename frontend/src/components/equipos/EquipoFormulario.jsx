@@ -9,17 +9,20 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, readOnly 
   const [guardando, setGuardando] = useState(false);
   const guardandoRef = useRef(false);
 
-  useEffect(() => {
-    if (equipoEditando) {
-      setNuevoEquipo({
+  // Datos del equipo tal como están guardados (o en blanco si es uno nuevo)
+  const datosGuardados = () => equipoEditando
+    ? {
         codigo: equipoEditando.codigo || "",
         equipo: toUpper(equipoEditando.equipo),
         modelo: toUpper(equipoEditando.modelo),
         marca: toUpper(equipoEditando.marca),
         serie: toUpper(equipoEditando.serie)
-      });
-    }
-  }, [equipoEditando]);
+      }
+    : { codigo: "", equipo: "", modelo: "", marca: "", serie: "" };
+
+  useEffect(() => {
+    if (equipoEditando) setNuevoEquipo(datosGuardados());
+  }, [equipoEditando]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSubmit = (e, mantener = false) => {
     e.preventDefault();
@@ -31,7 +34,10 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, readOnly 
     }
     guardandoRef.current = true;
     setGuardando(true);
-    Promise.resolve(onSave({ ...nuevoEquipo }, equipoEditando?.id, mantener)).finally(() => {
+    Promise.resolve(onSave({ ...nuevoEquipo }, equipoEditando?.id, mantener)).then((resultado) => {
+      // Si el servidor rechazó los datos (equipo repetido), el formulario vuelve a lo guardado / queda en blanco
+      if (resultado === "rechazado") setNuevoEquipo(datosGuardados());
+    }).finally(() => {
       guardandoRef.current = false;
       setGuardando(false);
     });

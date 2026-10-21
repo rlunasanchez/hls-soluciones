@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import pool from "../config/db.js";
-import { authMiddleware } from "../middleware/authMiddleware.js";
+import { authMiddleware, adminOnly } from "../middleware/authMiddleware.js";
 
 dotenv.config();
 const router = express.Router();
@@ -114,6 +114,16 @@ router.put("/:id", authMiddleware, async (req, res) => {
     if (!equipo || equipo.trim().length < 2) {
       return res.status(400).json({ msg: "Ingrese el Equipo (mínimo 2 caracteres) antes de guardar" });
     }
+    const dup = await pool.query(
+      `SELECT codigo FROM equipos
+       WHERE id <> $1 AND LOWER(TRIM(equipo)) = LOWER($2)
+         AND LOWER(TRIM(COALESCE(marca,''))) = LOWER($3) AND LOWER(TRIM(COALESCE(modelo,''))) = LOWER($4)
+       LIMIT 1`,
+      [id, equipo.trim(), (marca || '').trim(), (modelo || '').trim()]
+    );
+    if (dup.rows.length > 0) {
+      return res.status(400).json({ msg: `Ya existe otro equipo ${equipo.trim()} ${(marca || '').trim()} ${(modelo || '').trim()} en el mantenedor con el código ${dup.rows[0].codigo}.` });
+    }
     const result = await pool.query("SELECT codigo FROM equipos WHERE id = $1", [id]);
     let codigo = result.rows[0]?.codigo;
     if (!codigo) {
@@ -160,7 +170,7 @@ router.put("/:id/reasignar", authMiddleware, async (req, res) => {
   }
 });
 
-router.delete("/:id", authMiddleware, async (req, res) => {
+router.delete("/:id", authMiddleware, adminOnly, async (req, res) => {
   const { id } = req.params;
   try {
     await pool.query("DELETE FROM equipos WHERE id = $1", [id]);

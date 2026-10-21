@@ -1,6 +1,91 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-10-16
+
+### v2.175: Mantenedor de Equipos: sin duplicados al editar, eliminar solo admin y formulario que se limpia al ser rechazado
+
+**Alcance:** Equipos (y el formulario de edición de equipo dentro de la OT). Backend y frontend, sin cambios de base de datos. Probado en pantalla.
+
+- **Editar ya no deja crear duplicados** (`backend/routes/equipos.js`, `PUT /:id`): igual que al crear, rechaza con 400 si existe otro equipo con el mismo Equipo + Marca + Modelo (sin distinguir mayúsculas ni espacios, y sin compararse consigo mismo). Mensaje: "Ya existe otro equipo … con el código EQ-XXXX."
+- **Eliminar solo para el admin:** `DELETE /api/equipos/:id` exige `adminOnly` y el botón "Eliminar" del menú `...` (`EquipoAcciones.jsx`) solo aparece con `rol === 'admin'`, igual que en Clientes (v2.05).
+- **El formulario se limpia cuando el servidor rechaza los datos:** `guardarEquipo` (`Equipos.jsx`) y el guardado de la edición dentro de la OT (`OrdenFormEquipo.jsx`) devuelven `"rechazado"` ante un 400; `EquipoFormulario.jsx` entonces vuelve a los datos guardados (si edita) o queda en blanco (si crea). Ante otros errores (conexión) conserva lo escrito.
+- **Recordatorio:** la serie ya no está en el mantenedor de Equipos (v2.08); vive solo en la OT, por eso no se corrige desde Equipos.
+- **No se hizo:** límite en `GET /api/equipos` (devuelve todos los equipos; sin impacto hoy).
+
+### v2.174: `OrdenTrabajo.jsx` a 658 líneas (nueva OT desde Clientes y selección de cliente unificadas)
+
+**Alcance:** Orden de Trabajo, solo frontend. Traslado de código sin cambios de comportamiento. Probado en pantalla (nueva OT desde el listado y desde Clientes con empresa y persona, elegir y cambiar de cliente).
+
+- **`abrirNuevaOrden(clienteInicial = null)`:** una sola función abre la OT nueva, en blanco o con los datos de un cliente que viene desde Clientes (botón "OT"). Se eliminó el bloque duplicado de ~35 líneas del efecto `init`. Los campos que se llevan del cliente están en `ordenParaCliente(cliente)` (`utils/ordenFormato.js`): sus datos propios y solo el contacto y la dirección marcados "En la OT". Ojo: `onNueva` pasa `() => abrirNuevaOrden()` para no recibir el evento del clic como cliente.
+- **`seleccionarCliente`:** las 3 ramas casi idénticas son una sola. Al elegir un cliente se llevan sus datos propios (una persona trae además su dirección, ver `datosDelTipo`). En una OT guardada se conserva el equipo; si es el mismo cliente se conservan sus contactos y direcciones adicionales y si es otro se limpian. En una OT nueva además se limpian equipo y avería.
+- **Tamaños de la OT:** `OrdenTrabajo.jsx` 1.243 → **658**, `OrdenFormCliente.jsx` 1.193 → **280**.
+- **Pendiente:** para bajar `OrdenTrabajo.jsx` hacia ~450 habría que mover el estado del formulario (más de 40 `useState`) a un hook propio; es lo más delicado. También quedan por revisar `OrdenFormEquipo.jsx` (320) y `ordenServicioDoc.js` (292).
+
+### v2.173: `OrdenTrabajo.jsx` más chico (cabecera, cotizaciones asociadas y botones) y fix del aviso al volver desde una cotización
+
+**Alcance:** Orden de Trabajo, solo frontend. Traslado de código sin cambios de comportamiento, salvo lo indicado. Probado en pantalla.
+
+- **`OrdenTrabajo.jsx` 802 → 730 líneas.** Componentes nuevos en `components/ordenes/`: `OrdenFormCabecera.jsx` (título según el modo, técnico, contador de cotizaciones y cerrar), `OrdenCotizaciones.jsx` (contador y chips de cotizaciones asociadas; se monta con `key={ordenIdActual}`, así vuelve a empezar colapsado al cambiar de orden) y `OrdenFormBotones.jsx` (Cancelar, Guardar Cambios, Guardar Orden, PDF y Cotización).
+- **Fix: "Cliente desactivado" al volver a la OT desde una cotización** (`cargarOrden`): al volver, la lista local de clientes aún está vacía y el respaldo (lista fresca) buscaba solo por id; si el cliente se había borrado y registrado de nuevo con otro id, la OT salía como desactivada. Ahora el respaldo busca igual que la lista local: por id o por nombre.
+- **Pendiente:** `OrdenTrabajo.jsx` sigue en 730 líneas. Siguientes candidatos: el `init` que recibe cliente/orden desde Clientes o Cotizaciones (hook `useOrdenDesdeNavegacion`, ~75 líneas) y unificar las 3 ramas de `seleccionarCliente` (~110). Ver `AGENTS.md` sección 7b.
+
+### v2.171: Persona con una sola dirección y `OrdenFormCliente` dividido en componentes
+
+**Alcance:** Clientes y Orden de Trabajo, solo frontend. Probado en pantalla.
+
+- **Una persona solo puede tener 1 dirección** (`VinculosCliente.jsx` nuevo prop `maximo`, `ClienteFormulario.jsx` lo pasa como 1 cuando es persona). Con una dirección vinculada se ocultan el buscador y "Nuevo" y se muestra "Solo se permite 1 dirección. Quita la actual para elegir otra." Una empresa no tiene límite. Si un cliente cambia de Empresa a Persona con varias direcciones, se conservan todas hasta que se quiten.
+- **`OrdenFormCliente.jsx` 739 → 473 líneas** (traslado de código, sin cambios de comportamiento). Componentes nuevos en `components/ordenes/`: `OrdenDatosCliente.jsx` (cliente, RUT con su validación, fono, email y Tipo), `OrdenDatosContacto.jsx`, `OrdenDatosDireccion.jsx` (los campos se generan desde una lista en vez de repetir cada input) y `OrdenInfoInterna.jsx`.
+- **`OrdenFormCliente.jsx` 473 → 280 líneas:** el buscador de cliente (caja de búsqueda, lista de resultados, tarjeta del cliente asignado y botones Ver / Editar / Registrar) pasó a `OrdenBuscadorCliente.jsx` (219 líneas). Con esto `OrdenFormCliente` queda bajo la meta (de 739 a 280 en total).
+- **Fix: el aviso "Cliente desactivado" no se quitaba al registrar de nuevo al cliente** (`OrdenTrabajo.jsx`): la marca `clienteInactivo` solo se apagaba al elegir un cliente con el buscador. Ahora un efecto la apaga siempre que hay un cliente seleccionado (cubre "+ Registrar en Clientes"). Probado.
+- **Pendiente:** `OrdenTrabajo.jsx` (802 líneas). Ver `AGENTS.md` sección 7b.
+
 ## Fecha: 2026-10-15
+
+### v2.170: Foco tenue en botones al navegar con Tab
+
+**Archivo:** `frontend/src/styles/index.css` (solo estilos; sin cambios de backend ni de base de datos).
+
+- Regla global para `button`, `select`, `a`, `summary` y `[role="button"]` en `:focus-visible`: sin el contorno grueso del navegador, con un halo azul de 2px (`rgba(12,74,140,.15)`), el mismo de los campos de texto. Los botones que ya tenían su propio foco tenue no cambian.
+- **Confirmado por el dueño en pantalla.**
+
+### v2.169: OT en archivos más chicos (listado y formulario vacío fuera de la página)
+
+**Alcance:** Orden de Trabajo, solo frontend. Traslado de código sin cambios de comportamiento; sin cambios de backend ni de base de datos. Probado en pantalla (listado, filtros, paginación, nueva OT, desde Clientes y guardado).
+
+- **`hooks/useOrdenesListado.js` (nuevo, 59 líneas):** carga de las órdenes, los 7 filtros (N° de orden, cliente, serie, estado, garantía, desde, hasta), el filtrado y la paginación de 4 por página con la página persistente entre recargas.
+- **`utils/ordenFormato.js`:** se agregan `ordenVacia(tecnico)` e `insumosVacios()`. El formulario vacío estaba escrito 3 veces dentro de la página y los 12 insumos en blanco 4 veces.
+- **`pages/OrdenTrabajo.jsx`:** 958 → **802** líneas (en esta sesión: 1.243 → 802). Ningún archivo de la OT pasa ya de 802 líneas; el segundo es `OrdenFormCliente.jsx` con 739.
+- **Regla de tamaño** (en `AGENTS.md`): un archivo de pantalla no debería pasar de unas 400 líneas; si crece se extrae a un componente, un hook o una utilidad.
+- **Pendiente:** `OrdenTrabajo.jsx` (802) y `OrdenFormCliente.jsx` (739) siguen sobre la meta de 400. Candidatos: la sección de cotizaciones asociadas del encabezado de la OT, y dividir "Datos del cliente / contacto / dirección" de `OrdenFormCliente` en componentes propios.
+
+### v2.168: Empresa / Persona, limpieza de código, columnas sin uso y OT en archivos más chicos
+
+**Alcance:** Clientes, Contactos, Direcciones y Orden de Trabajo. Cambia el esquema de la base (ver "Migración"). Todo **solo en local**: no se ha publicado ni se ha migrado Neon.
+
+- **Cliente Empresa o Persona**
+  - `clientes.tipo` (`EMPRESA` | `PERSONA`, por defecto `EMPRESA`) y `ordenes_trabajo.cliente_tipo` (copia del tipo al guardar la OT).
+  - Ficha del cliente: selector Tipo. **Persona:** etiqueta "Nombre", una sola columna, sin tabla de Contactos y con su **dirección en la tabla de Direcciones** (mantenedor, vinculada y marcada "En la OT"; si no hay marca se usa la primera). **Empresa:** sin cambios; su dirección propia queda en la ficha y no viaja a la OT.
+  - Una persona **no tiene contacto**: en la OT los campos de contacto quedan vacíos y deshabilitados, y no aparece el buscador de contacto. Su dirección sí viaja a la OT.
+  - OT: selector Tipo junto al título "Datos del cliente" (bloqueado si hay cliente seleccionado; sin cliente se elige ahí).
+  - PDF de la OT: **Empresa** → Dirección y Ciudad - Comuna dentro de la sección Contacto; **Persona** → dirección en Datos de Cliente y sin sección Contacto (el check "Contacto" del modal se oculta).
+  - `backend/routes/clientes.js`: POST/PUT aceptan `tipo` (el PUT lo conserva si no se envía) y el cascade a las OT actualiza `cliente_tipo`. `enriquecerClientes` entrega, para una persona, la dirección vinculada como `ot_*` y deja el contacto vacío.
+  - Listado y filtro de clientes: "Razón social / Nombre".
+- **Campos bloqueados cuando vienen del buscador (OT)**
+  - Cliente, RUT, fono y email: bloqueados mientras coincidan con la ficha del cliente seleccionado. Se cambian con "Editar" / "Editar completo".
+  - Contacto y dirección: bloqueados si están en el catálogo o vinculados al cliente. Libres si el texto no existe en ninguna parte (para poder corregirlo).
+  - Equipo, Marca y Modelo: bloqueados si coinciden con un equipo del mantenedor. Serie, nivel de tinta, contador e insumos siguen libres. Botón **"Cambiar equipo"** (azul) para vaciarlos; **"+ Registrar en Equipos"** ya no aparece si el equipo existe.
+  - Tras editar una dirección o contacto desde el buscador se recarga el cliente seleccionado (antes salía un aviso falso "no está vinculada").
+  - Texto de los buscadores de la ficha del cliente en verde (la regla `.cf-vinc input` lo pisaba).
+- **Limpieza**
+  - Eliminado `POST /api/auth/setup-admin` (nada lo llamaba y, sin `SETUP_ADMIN_KEY` definida, permitía resetear al admin sin clave). El primer admin se crea con `node backend/crear-admin.js`.
+  - Columnas de `ordenes_trabajo` que la OT nunca escribía: `contacto_id`, `contacto_direccion`, `contacto_ciudad`, `contacto_comuna`, `direccion_id`, `cliente_direccion_id`, `equipo_id`. Quitadas de `ordenes.js`, de `crear_tablas.sql` y de la base local. **Cotizaciones no se tocó** (sigue leyendo esos campos de la OT y recibe vacío, igual que antes).
+  - Sin variables ni imports sin uso, y todos los endpoints del backend tienen quien los llame. Tablas: las 9 existentes se usan, no hay ninguna que sobre.
+- **Reestructuración de la OT en archivos más chicos** (traslado de código, sin cambios de comportamiento)
+  - `OrdenFormCliente.jsx` 1.193 → 739 líneas: `OrdenAdjuntos.jsx` (adjuntos y visor) y `useClienteOT.jsx` (ver / editar / registrar cliente y sus modales).
+  - `OrdenTrabajo.jsx` 1.243 → 958 líneas: `editarOrden` y `verOrden` unificadas en `cargarOrden(orden, modo)`; `utils/ordenFormato.js` (orden → formulario, equipo e insumos) y `utils/validarOrden.js` (validaciones y payload).
+- **Migración (cuando se publique)**
+  - MySQL local: ya aplicada.
+  - Neon: `ALTER TABLE clientes ADD COLUMN IF NOT EXISTS tipo VARCHAR(10) NOT NULL DEFAULT 'EMPRESA'; ALTER TABLE ordenes_trabajo ADD COLUMN IF NOT EXISTS cliente_tipo VARCHAR(10) DEFAULT 'EMPRESA';` y quitar las 7 columnas de `ordenes_trabajo` indicadas arriba. Además hay que portar `clientes.js`, `ordenes.js` y `auth.js` a PostgreSQL (renumerar `$N`) y publicar en el orden: Neon → `deploy/cloud` → `main`.
 
 ### v2.167: Títulos de la OT en un solo azul y limpieza de clases CSS nuevas que duplicaban existentes
 

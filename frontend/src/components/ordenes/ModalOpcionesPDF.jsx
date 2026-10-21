@@ -10,7 +10,8 @@ import { imprimirHtml } from "../../utils/imprimir";
 // (todo lo que tenga datos).
 function ModalOpcionesPDF({ orden, onClose }) {
   const { insumos } = useMemo(() => derivarListas(orden), [orden]);
-  const tieneContacto = !!String(orden.contacto || "").trim();
+  const esPersona = orden.cliente_tipo === "PERSONA";
+  const tieneContacto = !esPersona && !!String(orden.contacto || "").trim();
 
   const [opciones, setOpciones] = useState(() => ({
     insumos: insumos.map(() => true),
@@ -80,13 +81,13 @@ function ModalOpcionesPDF({ orden, onClose }) {
               <span className="mop-group-title">Secciones</span>
             </div>
             <div className="mop-items">
-              <label className={`mop-item${tieneContacto ? "" : " mop-off"}`}>
+              {!esPersona && <label className={`mop-item${tieneContacto ? "" : " mop-off"}`}>
                 <input type="checkbox" className="of-check of-check--pdf" disabled={!tieneContacto}
                   checked={opciones.contacto} onChange={() => setOpciones((o) => ({ ...o, contacto: !o.contacto }))} />
                 Contacto{tieneContacto
                   ? <span className="mop-sub"> — {orden.contacto}{orden.cargo_contacto ? ` (${orden.cargo_contacto})` : ""}</span>
                   : <span className="mop-sub"> (sin datos)</span>}
-              </label>
+              </label>}
               <label className={`mop-item${orden.averia ? "" : " mop-off"}`}>
                 <input type="checkbox" className="of-check of-check--pdf" disabled={!orden.averia}
                   checked={opciones.averia} onChange={() => setOpciones((o) => ({ ...o, averia: !o.averia }))} />

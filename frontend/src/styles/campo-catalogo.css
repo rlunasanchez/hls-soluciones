@@ -5,6 +5,8 @@
 .bc-input{width:100%;padding:2px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:.82rem;background:#fff;color:#0D9488;font-weight:600;box-sizing:border-box}
 .bc-fila{display:flex;align-items:center;gap:6px}
 .bc-fila .bc-input{flex:1;min-width:0;width:auto;height:24px}
+/* dentro de la ficha del cliente (.cf-vinc input) el color del texto debe seguir siendo el verde del buscador */
+.bc-caja .bc-input{color:#0D9488}
 .bc-espacio{height:6px}
 .bc-lista{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;max-height:200px;overflow:auto;z-index:1000;box-shadow:0 4px 6px rgba(0,0,0,.1)}
 .bc-opcion{padding:8px 10px;cursor:pointer;border-bottom:1px solid var(--border)}

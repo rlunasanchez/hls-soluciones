@@ -123,17 +123,22 @@ async function enriquecerClientes(rows) {
     const principal = listaC.find((c) => c.a_ot);
     const resto = listaC.filter((c) => c !== principal);
     const dirPrincipal = listaD.find((d) => d.a_ot);
+    const esPersona = r.tipo === "PERSONA";
+    // Persona: su dirección es la que tiene vinculada (la marcada "En la OT" o, si no hay marca
+    // porque ya se usó, la primera). Empresa: solo la marcada.
+    const dirOT = esPersona ? (dirPrincipal || listaD[0]) : dirPrincipal;
     return {
       ...r,
       // direccion / ciudad / comuna son los datos propios del cliente (no se tocan). La dirección
       // que viaja a la OT es la marcada "En la OT" y sale aparte, en ot_*.
-      ot_direccion: dirPrincipal?.direccion || "",
-      ot_ciudad: dirPrincipal?.ciudad || "",
-      ot_comuna: dirPrincipal?.comuna || "",
-      contacto_nombre: principal?.nombre || "",
-      contacto_email: principal?.email || "",
-      contacto_fono: principal?.fono || "",
-      contacto_cargo: principal?.cargo || "",
+      ot_direccion: dirOT?.direccion || "",
+      ot_ciudad: dirOT?.ciudad || "",
+      ot_comuna: dirOT?.comuna || "",
+      // La persona no tiene contacto: sus datos (nombre, fono, email) ya van en Datos del cliente
+      contacto_nombre: esPersona ? "" : (principal?.nombre || ""),
+      contacto_email: esPersona ? "" : (principal?.email || ""),
+      contacto_fono: esPersona ? "" : (principal?.fono || ""),
+      contacto_cargo: esPersona ? "" : (principal?.cargo || ""),
       contacto_direccion: "",
       contactos: resto.map((c) => [c.nombre, c.email, c.fono, c.cargo, "", "", ""].map(limpiarCampo).join("|")).join(SEP_REG),
       direcciones: (md.get(r.id) || []).map((d) => ["", d.direccion, "", d.ciudad, d.comuna].map(limpiarCampo).join("|")).join(SEP_REG),
@@ -273,6 +278,7 @@ router.get("/:id", authMiddleware, async (req, res) => {
 
 router.post("/", authMiddleware, async (req, res) => {
   const { razon_social, giro, rut, direccion, ciudad, comuna, telefono, email } = req.body;
+  const tipo = req.body.tipo === "PERSONA" ? "PERSONA" : "EMPRESA";
   try {
     const codigo = await generarCodigo();
     // Datos mínimos obligatorios: Razón Social + RUT
@@ -300,9 +306,9 @@ router.post("/", authMiddleware, async (req, res) => {
     try {
       await client.query("BEGIN");
       const result = await client.query(
-        `INSERT INTO clientes (codigo, razon_social, giro, rut, direccion, ciudad, comuna, telefono, email)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`,
-        [codigo, razon_social, giro || '', rut, direccion || '', ciudad || '', comuna || '', telefono || '', email || '']
+        `INSERT INTO clientes (codigo, tipo, razon_social, giro, rut, direccion, ciudad, comuna, telefono, email)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
+        [codigo, tipo, razon_social, giro || '', rut, direccion || '', ciudad || '', comuna || '', telefono || '', email || '']
       );
       const nuevoId = result.rows[0].id;
       const vinc = await idsDeVinculos(client, req.body);
@@ -325,6 +331,8 @@ router.post("/", authMiddleware, async (req, res) => {
 router.put("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
   const { razon_social, giro, rut, direccion, ciudad, comuna, telefono, email } = req.body;
+  // Si el llamado no envía el tipo, se conserva el que ya tiene el cliente
+  const tipoNuevo = req.body.tipo === "PERSONA" ? "PERSONA" : req.body.tipo === "EMPRESA" ? "EMPRESA" : null;
   try {
     // Datos mínimos obligatorios: Razón Social + RUT
     if (!razon_social || !razon_social.trim()) {
@@ -355,15 +363,15 @@ router.put("/:id", authMiddleware, async (req, res) => {
     try {
       await client.query("BEGIN");
       await client.query(
-        `UPDATE clientes SET codigo=$1, razon_social=$2, giro=$3, rut=$4, direccion=$5, ciudad=$6, comuna=$7, telefono=$8, email=$9 WHERE id=$10`,
-        [codigo, razon_social, giro || '', rut, direccion || '', ciudad || '', comuna || '', telefono || '', email || '', id]
+        `UPDATE clientes SET codigo=$1, tipo=COALESCE($2::varchar, tipo), razon_social=$3, giro=$4, rut=$5, direccion=$6, ciudad=$7, comuna=$8, telefono=$9, email=$10 WHERE id=$11`,
+        [codigo, tipoNuevo, razon_social, giro || '', rut, direccion || '', ciudad || '', comuna || '', telefono || '', email || '', id]
       );
       // Sincroniza en las OT de este cliente solo sus datos propios (Contacto
       // ya no se deriva de Cliente — vive aparte en el catálogo de Contactos
       // y se administra por OT, no se pisa acá).
       await client.query(
-        `UPDATE ordenes_trabajo SET cliente = $1, rut = $2, fono_principal = $3, email = $4 WHERE cliente_id = $5`,
-        [razon_social, rut || null, telefono || null, email || null, id]
+        `UPDATE ordenes_trabajo SET cliente = $1, cliente_tipo = (SELECT tipo FROM clientes WHERE id = $2), rut = $3, fono_principal = $4, email = $5 WHERE cliente_id = $6`,
+        [razon_social, id, rut || null, telefono || null, email || null, id]
       );
       // Vínculos: solo si el formulario los envía (así otros llamados al PUT no los borran)
       const vinc = await idsDeVinculos(client, req.body);

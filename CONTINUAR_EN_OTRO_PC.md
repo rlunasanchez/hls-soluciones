@@ -45,7 +45,6 @@ DB_USER=root
 DB_PASSWORD=<la contraseña de tu MySQL>
 DB_NAME=soporte_tecnico_db
 JWT_SECRET=<una frase larga cualquiera>
-SETUP_ADMIN_KEY=<una clave cualquiera>
 ADMIN_PASSWORD=<la contraseña del usuario admin>
 ADMIN_EMAIL=<tu correo>
 ```

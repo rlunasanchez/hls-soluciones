@@ -73,6 +73,8 @@ function OrdenFormEquipo({
       }
     } catch (err) {
       alert(err.response?.data?.msg || "Error al guardar el equipo.");
+      // El formulario vuelve a lo guardado cuando el servidor rechaza los datos (equipo repetido)
+      return err.response?.status === 400 ? "rechazado" : "error";
     }
   };
 
@@ -158,7 +160,7 @@ function OrdenFormEquipo({
             )}
           </div>
         </div>
-        {!readOnly && onRegistrarEquipo && (
+        {!readOnly && onRegistrarEquipo && !equipoExistente && (
           <button
             type="button"
             onClick={() => onRegistrarEquipo()}
@@ -190,6 +192,17 @@ function OrdenFormEquipo({
             <Pencil size={14} /> Editar
           </button>
         )}
+        {!readOnly && equipoExistente && (
+          <button
+            type="button"
+            className="btn-mini btn-mini--principal"
+            style={{ alignSelf: 'end' }}
+            onClick={() => setNuevaOrden({ ...nuevaOrden, equipo: "", marca: "", modelo: "" })}
+            title="Quitar el equipo para elegir otro o escribir uno nuevo (la serie se conserva)"
+          >
+            Cambiar equipo
+          </button>
+        )}
         {readOnly && hayDatosEquipo && (
           <button
             type="button"
@@ -214,21 +227,21 @@ function OrdenFormEquipo({
           <label>Equipo *</label>
           <input type="text" placeholder="Tipo de equipo" value={nuevaOrden.equipo}
             onChange={(e) => setNuevaOrden({...nuevaOrden, equipo: upperInput(e)})}
-            disabled={readOnly}
+            disabled={readOnly || !!equipoExistente}
             required style={inputStyle} />
         </div>
         <div className="of-f">
           <label>Marca *</label>
           <input type="text" placeholder="Marca del equipo" value={nuevaOrden.marca}
             onChange={(e) => setNuevaOrden({...nuevaOrden, marca: upperInput(e)})}
-            disabled={readOnly}
+            disabled={readOnly || !!equipoExistente}
             required style={inputStyle} />
         </div>
         <div className="of-f">
           <label>Modelo *</label>
           <input type="text" placeholder="Modelo del equipo" value={nuevaOrden.modelo}
             onChange={(e) => setNuevaOrden({...nuevaOrden, modelo: upperInput(e)})}
-            disabled={readOnly}
+            disabled={readOnly || !!equipoExistente}
             required style={inputStyle} />
         </div>
         <div className="of-f">
