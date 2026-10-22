@@ -45,14 +45,14 @@ router.post("/login", async (req, res) => {
 // cerrar sesión cada vez que se corrige el Nombre/Email en Gestión de Usuarios.
 router.get("/perfil", authMiddleware, async (req, res) => {
   try {
-    const [rows] = await pool.query(
-      "SELECT usuario, nombre, email, rol FROM usuarios WHERE usuario = ? AND activo = true",
+    const result = await pool.query(
+      "SELECT usuario, nombre, email, rol FROM usuarios WHERE usuario = $1 AND activo = true",
       [req.user.usuario]
     );
-    if (rows.length === 0) {
+    if (result.rows.length === 0) {
       return res.status(404).json({ msg: "Usuario no encontrado" });
     }
-    const u = rows[0];
+    const u = result.rows[0];
     res.json({ usuario: u.usuario, nombre: u.nombre || "", email: u.email || "", rol: u.rol });
   } catch (err) {
     console.error(err);
