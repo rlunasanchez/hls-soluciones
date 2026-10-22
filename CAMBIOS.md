@@ -1,6 +1,25 @@
 # Registro de Cambios - HLS Soluciones
 
-## Fecha: 2026-10-22
+## Fecha: 2026-10-22 (continuación, solo local)
+
+### v2.177: Registrar un cliente desde la OT ahora lleva también la dirección
+
+**Alcance:** Orden de Trabajo, solo frontend (`components/ordenes/useClienteOT.jsx`, `guardarNuevoClienteDesdeOT`). Probado en pantalla.
+
+- Al "Registrar en Clientes" desde la OT, la OT tomaba el contacto marcado "En la OT" pero no la dirección. Ahora también toma dirección, ciudad y comuna de la dirección marcada (si no hay ninguna, no toca lo que ya está en la OT), igual que "Editar completo".
+- Los checks "En la OT" ahora se desmarcan tras registrar (son de un solo uso); antes quedaban puestos.
+
+### v2.176: Listado de OT paginado y filtrado en el servidor
+
+**Alcance:** Orden de Trabajo (listado). Backend y frontend; sin cambios de base de datos. **Solo local: falta portar `routes/ordenes.js` a `deploy/cloud`.** Primer paso de la prioridad de volumen (`AGENTS.md` 7a).
+
+- **Backend:** `GET /api/ordenes` recibe `pagina`, `limite` (máximo 100) y los filtros `numero`, `cliente`, `serie`, `estado` (cerrada/pendiente), `garantia` (si/no), `desde` y `hasta`, y devuelve solo esa página con `pagination.totalItems`/`totalPages`. Siguen funcionando `page`/`limit`. La lógica está en `backend/utils/filtrosOrdenes.js` (50 líneas), **idéntico en MySQL y PostgreSQL**: usa `?` y `numerarMarcadores` los vuelve `$1, $2…` solo en `deploy/cloud`. Garantía con `IS TRUE`/`IS NOT TRUE` (portable). Los `%` y `_` se buscan literales.
+- **Frontend:** `hooks/useOrdenesListado.js` pide al servidor la página de 4 OT en vez de 10.000; los textos se envían 300 ms después de dejar de escribir (`hooks/useValorRetrasado.js`, reutilizable); una respuesta vieja nunca pisa a una nueva; el listado no parpadea al cambiar de página. `OrdenTrabajo.jsx` ya no pide las órdenes al montar (lo hace el hook).
+- **Pruebas:** MySQL 21/21 y PostgreSQL 15/15 con 15.000 OT en bases temporales, comparando contra la lógica antigua del frontend (una página sin filtros ~5 ms). En pantalla se probó con 120 OT temporales (paginación, 7 filtros, combinados, limpiar, sin resultados, ver, editar, PDF, guardar y crear), que ya se borraron.
+- **Índices:** no se agregaron; las búsquedas "contiene" no los usan y con 15.000 filas responden en milisegundos.
+- **Para portar a `deploy/cloud`:** copiar `backend/utils/filtrosOrdenes.js` tal cual y en `ordenes.js` envolver los dos SQL del listado con `numerarMarcadores(...)`, usar `result.rows` y `RETURNING` ya existente; probar con `embedded-postgres`.
+
+## Fecha: 2026-10-22 (publicación)
 
 ### Publicación de v2.168 a v2.175 y limpieza de Neon
 

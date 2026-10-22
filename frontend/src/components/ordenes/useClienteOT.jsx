@@ -172,9 +172,22 @@ export default function useClienteOT({
           contacto: toUpper(fresh.contacto_nombre || "") || prev.contacto,
           emailContacto: fresh.contacto_email || prev.emailContacto,
           fonoContacto: fresh.contacto_fono || prev.fonoContacto,
-          cargoContacto: toUpper(fresh.contacto_cargo || "") || prev.cargoContacto
+          cargoContacto: toUpper(fresh.contacto_cargo || "") || prev.cargoContacto,
+          // La dirección marcada "En la OT" viaja igual que el contacto (si no hay ninguna, no se toca)
+          direccion: toUpper(fresh.ot_direccion || "") || prev.direccion,
+          ciudad: toUpper(fresh.ot_ciudad || "") || prev.ciudad,
+          comuna: toUpper(fresh.ot_comuna || "") || prev.comuna
         }));
         setBusquedaCliente(toUpper(fresh.razon_social || ""));
+        // El check "En la OT" es de un solo uso: ya viajó, se desmarca (como al editar el cliente)
+        try {
+          await api.post(`/api/clientes/${fresh.id}/limpiar-a-ot`);
+          const [lista2, limpio] = await Promise.all([api.get("/api/clientes"), api.get(`/api/clientes/${fresh.id}`)]);
+          if (onClientesRefresh) onClientesRefresh(lista2.data);
+          if (setClienteSeleccionado) setClienteSeleccionado(limpio.data);
+        } catch (e) {
+          console.error("No se pudo desmarcar 'En la OT':", e);
+        }
       }
       alert(`Cliente registrado (${res.data?.codigo || "CL-????"}). Ya puede guardar la orden.`);
       setMostrarRegistrarCliente(false);
