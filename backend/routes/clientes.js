@@ -2,6 +2,9 @@ import express from "express";
 import dotenv from "dotenv";
 import pool from "../config/db.js";
 import { authMiddleware, adminOnly } from "../middleware/authMiddleware.js";
+import { numerarMarcadores } from "../utils/filtrosOrdenes.js";
+import { normalizarRut, validarRutChileno, validarEmail } from "../utils/validaciones.js";
+import { buscarClientesSql, leerLimiteBusqueda, MIN_BUSQUEDA } from "../utils/busquedaClientes.js";
 
 dotenv.config();
 const router = express.Router();
@@ -13,29 +16,6 @@ async function generarCodigo() {
   return `CL-${String(num + 1).padStart(4, "0")}`;
 }
 
-// Normaliza un RUT para comparar unicidad: solo dígitos y K en mayúscula.
-// "12.345.678-k", "12345678-K" y "12345678k" quedan como "12345678K"
-function normalizarRut(v) {
-  return String(v || "").toUpperCase().replace(/[^0-9K]/g, "");
-}
-
-// Valida formato y dígito verificador (módulo 11) de un RUT chileno
-function validarRutChileno(rut) {
-  const norm = normalizarRut(rut);
-  const m = norm.match(/^(\d{6,8})([0-9K])$/);
-  if (!m) return false;
-  const cuerpo = parseInt(m[1], 10);
-  if (cuerpo < 100000) return false;
-  let suma = 0, mul = 2;
-  for (const d of m[1].split("").reverse()) {
-    suma += parseInt(d, 10) * mul;
-    mul = mul === 7 ? 2 : mul + 1;
-  }
-  const res = 11 - (suma % 11);
-  const dv = res === 11 ? "0" : res === 10 ? "K" : String(res);
-  return m[2] === dv;
-}
-
 // Busca otro cliente con el mismo RUT normalizado (compara en JS para que
 // cualquier formato guardado en la BD matchee: sin guion, k minúscula, etc.)
 async function buscarDuplicadoRut(rut, excluirId = null) {
@@ -45,15 +25,36 @@ async function buscarDuplicadoRut(rut, excluirId = null) {
   return result.rows.find((c) => c.id !== excluirId && normalizarRut(c.rut) === objetivo) || null;
 }
 
-// Valida formato básico de email: texto@texto.texto (vacío es válido, se valida aparte)
-function validarEmail(v) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || "").trim());
-}
-
+// Sin parámetros: todos los clientes (listado de Clientes). Con ?q=texto (2+ caracteres): solo los
+// que coinciden, hasta ?limite= (por defecto 10), ya con su contacto y dirección de la OT.
 router.get("/", authMiddleware, async (req, res) => {
   try {
+    const q = String(req.query.q || "").trim();
+    if (q.length >= MIN_BUSQUEDA) {
+      const { where, params } = buscarClientesSql(q);
+      const result = await pool.query(numerarMarcadores(`SELECT * FROM clientes ${where} ORDER BY id DESC LIMIT ?`), [...params, leerLimiteBusqueda(req.query)]);
+      return res.json(await enriquecerClientes(result.rows));
+    }
+    if (req.query.q !== undefined) return res.json([]);
     const result = await pool.query(`SELECT * FROM clientes ORDER BY id DESC`);
     res.json(await enriquecerClientes(result.rows));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Error del servidor" });
+  }
+});
+
+// ¿Ya existe un cliente con este RUT (normalizado) o esta razón social (sin distinguir mayúsculas)?
+// Devuelve { porRut, porNombre }, cada uno con { id, codigo, razon_social, rut } o null.
+router.get("/verificar", authMiddleware, async (req, res) => {
+  try {
+    const campos = "id, codigo, razon_social, rut";
+    const unico = async (sql, params) => (await pool.query(sql, params)).rows[0] || null;
+    const dup = await buscarDuplicadoRut(req.query.rut);
+    const porRut = dup ? await unico(`SELECT ${campos} FROM clientes WHERE id = $1`, [dup.id]) : null;
+    const nombre = String(req.query.razon_social || "").trim().toUpperCase();
+    const porNombre = nombre ? await unico(`SELECT ${campos} FROM clientes WHERE UPPER(TRIM(razon_social)) = $1 LIMIT 1`, [nombre]) : null;
+    res.json({ porRut, porNombre });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });

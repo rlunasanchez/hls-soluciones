@@ -13,6 +13,7 @@ import "../../styles/campo-catalogo.css";
 import "../../styles/botones.css";
 import { toUpper, normalizarRut } from "../../utils/helpers";
 import api from "../../services/api";
+import { clientePorId } from "../../utils/clientesApi";
 
 function OrdenFormCliente({
   busquedaCliente, setBusquedaCliente,
@@ -22,12 +23,10 @@ function OrdenFormCliente({
   clienteDropdownRef,
   seleccionarCliente,
   nuevaOrden, setNuevaOrden,
-  clientes = [],
   clienteInactivo = false,
   clienteFijo = false,
   readOnly = false,
-  setClienteSeleccionado,
-  onClientesRefresh
+  setClienteSeleccionado
 }) {
   const contactosDisponibles = (() => {
     if (!clienteSeleccionado) return [];
@@ -58,8 +57,8 @@ function OrdenFormCliente({
 
   // Ver / editar / registrar el cliente desde la OT (modales y sus funciones de guardado)
   const { botonesEditarCliente, abrirRegistrarCliente, abrirDetalleCliente, modalesCliente } = useClienteOT({
-    nuevaOrden, setNuevaOrden, clientes, clienteSeleccionado, setClienteSeleccionado,
-    onClientesRefresh, setBusquedaCliente, normTxt
+    nuevaOrden, setNuevaOrden, clienteSeleccionado, setClienteSeleccionado,
+    setBusquedaCliente, normTxt
   });
 
   // Contacto y dirección de la OT: se eligen (o se corrigen en su ficha) con CampoCatalogo.
@@ -81,9 +80,7 @@ function OrdenFormCliente({
   const refrescarClienteSeleccionado = async () => {
     if (!clienteSeleccionado?.id) return;
     try {
-      const lista = await api.get("/api/clientes");
-      if (onClientesRefresh) onClientesRefresh(lista.data);
-      const actualizado = lista.data.find((c) => c.id === clienteSeleccionado.id);
+      const actualizado = await clientePorId(clienteSeleccionado.id);
       if (actualizado && setClienteSeleccionado) setClienteSeleccionado(actualizado);
     } catch { /* el aviso se corrige al volver a abrir; no es crítico */ }
   };
@@ -163,9 +160,7 @@ function OrdenFormCliente({
         : { direccion: nuevaOrden.direccion, ciudad: nuevaOrden.ciudad, comuna: nuevaOrden.comuna, reutilizar: true };
       const { data } = await api.post(`/api/${tipo}`, body);
       await api.post(`/api/clientes/${clienteSeleccionado.id}/${tipo}`, esContacto ? { contacto_id: data.id } : { direccion_id: data.id });
-      const lista = await api.get("/api/clientes");
-      if (onClientesRefresh) onClientesRefresh(lista.data);
-      const actualizado = lista.data.find((c) => c.id === clienteSeleccionado.id);
+      const actualizado = await clientePorId(clienteSeleccionado.id);
       if (actualizado && setClienteSeleccionado) setClienteSeleccionado(actualizado);
     } catch (err) {
       alert(err.response?.data?.msg || "Error al vincular al cliente.");
