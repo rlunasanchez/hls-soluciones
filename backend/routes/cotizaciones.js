@@ -14,8 +14,8 @@ async function calcularSiguienteFolio() {
 // no se podría guardar (clave foránea): en ese caso se guarda sin vínculo al cliente.
 async function clienteIdExistente(db, clienteId) {
   if (!clienteId) return null;
-  const [rows] = await db.query("SELECT id FROM clientes WHERE id = ?", [clienteId]);
-  return rows.length > 0 ? clienteId : null;
+  const result = await db.query("SELECT id FROM clientes WHERE id = $1", [clienteId]);
+  return result.rows.length > 0 ? clienteId : null;
 }
 
 router.get("/", authMiddleware, async (req, res) => {
@@ -102,7 +102,7 @@ router.post("/", authMiddleware, async (req, res) => {
        RETURNING id`,
       [
         folio, fechaEmision, fechaValidoHasta || null, condicion || null, glosa || null,
-        await clienteIdExistente(connection, clienteId), clienteRut || null, clienteRazonSocial || '',
+        await clienteIdExistente(client, clienteId), clienteRut || null, clienteRazonSocial || '',
         clienteDireccion || null, clienteCiudad || null, clienteComuna || null, clienteDireccionId || null, clienteTelefono || null, clienteEmail || null,
         contactoNombre || null, contactoFono || null, contactoEmail || null, contactoCargo || null, contactoId || null, contactoDireccion || null, contactoCiudad || null, contactoComuna || null, direccionId || null,
         contactosExtra ? JSON.stringify(contactosExtra) : null,
