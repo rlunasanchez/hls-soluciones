@@ -10,6 +10,14 @@ async function calcularSiguienteFolio() {
   return Math.max(maximo + 1, 2800);
 }
 
+// Si el cliente de la OT se borró y se registró de nuevo, su id viejo ya no existe y la cotización
+// no se podría guardar (clave foránea): en ese caso se guarda sin vínculo al cliente.
+async function clienteIdExistente(db, clienteId) {
+  if (!clienteId) return null;
+  const [rows] = await db.query("SELECT id FROM clientes WHERE id = ?", [clienteId]);
+  return rows.length > 0 ? clienteId : null;
+}
+
 router.get("/", authMiddleware, async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
@@ -91,7 +99,7 @@ router.post("/", authMiddleware, async (req, res) => {
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         folio, fechaEmision, fechaValidoHasta || null, condicion || null, glosa || null,
-        clienteId || null, clienteRut || null, clienteRazonSocial || '',
+        await clienteIdExistente(connection, clienteId), clienteRut || null, clienteRazonSocial || '',
         clienteDireccion || null, clienteCiudad || null, clienteComuna || null, clienteDireccionId || null, clienteTelefono || null, clienteEmail || null,
         contactoNombre || null, contactoFono || null, contactoEmail || null, contactoCargo || null, contactoId || null, contactoDireccion || null, contactoCiudad || null, contactoComuna || null, direccionId || null,
         contactosExtra ? JSON.stringify(contactosExtra) : null,
@@ -136,7 +144,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
        WHERE id = ?`,
       [
         fechaEmision, fechaValidoHasta || null, condicion || null, glosa || null,
-        clienteId || null, clienteRut || null, clienteRazonSocial || '',
+        await clienteIdExistente(pool, clienteId), clienteRut || null, clienteRazonSocial || '',
         clienteDireccion || null, clienteCiudad || null, clienteComuna || null, clienteDireccionId || null, clienteTelefono || null, clienteEmail || null,
         contactoNombre || null, contactoFono || null, contactoEmail || null, contactoCargo || null, contactoId || null, contactoDireccion || null, contactoCiudad || null, contactoComuna || null, direccionId || null,
         contactosExtra ? JSON.stringify(contactosExtra) : null,

@@ -2,6 +2,15 @@
 
 ## Fecha: 2026-10-22 (continuación, solo local)
 
+### v2.180: Crear o editar una cotización ya no falla si el cliente de la OT fue borrado y vuelto a registrar
+
+**Alcance:** backend de Cotizaciones (`routes/cotizaciones.js`), solo el vínculo al cliente. El módulo Cotizaciones sigue **sin adaptarse** a los cambios de Clientes, Contactos, Direcciones y Equipos. **Solo local: falta portarlo a `deploy/cloud`** (mismo cambio con `$N`).
+
+- **Causa:** una OT cuyo cliente se borró y se registró de nuevo conserva el id viejo (`cliente_id`). Al crear una cotización desde esa OT, el id viejo se copiaba y MySQL/PostgreSQL rechazaban el guardado por la clave foránea (`cotizaciones_ibfk_1`): "Error del servidor".
+- **Arreglo:** `clienteIdExistente(db, clienteId)`: si el cliente no existe, la cotización se guarda sin vínculo (`cliente_id` NULL) tanto en `POST` como en `PUT`; los datos del cliente (razón social, RUT, etc.) quedan igual en la cotización.
+- **Pruebas:** MySQL 8/8 (cliente existente, inexistente, sin cliente; crear y editar).
+- **Dato local corregido:** la `OT-2026-02802` apuntaba al cliente id 8 (ya inexistente); se apuntó al id 10 (`GABYY`, `CL-0002`).
+
 ### v2.179: `ordenes.js` arma el INSERT y el UPDATE desde una sola lista de campos
 
 **Alcance:** backend de Órdenes de Trabajo; traslado de código sin cambiar comportamiento ni base de datos. **Solo local, sin publicar** (la web sigue en v2.178).
