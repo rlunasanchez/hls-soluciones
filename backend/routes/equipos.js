@@ -7,44 +7,24 @@ dotenv.config();
 const router = express.Router();
 
 async function generarCodigo() {
-  const result = await pool.query("SELECT codigo FROM equipos WHERE codigo LIKE 'EQ-%' ORDER BY id DESC LIMIT 1");
-  if (result.rows.length === 0) return "EQ-0001";
-  const num = parseInt(result.rows[0].codigo.split("-")[1], 10) || 0;
+  const result = await pool.query(
+    "SELECT MAX(CAST(SUBSTRING(codigo FROM 4) AS INTEGER)) AS num FROM equipos WHERE codigo LIKE 'EQ-%'"
+  );
+  const num = result.rows[0].num || 0;
   return `EQ-${String(num + 1).padStart(4, "0")}`;
 }
 
-router.get("/next-codigo", authMiddleware, async (req, res) => {
-  try {
-    const codigo = await generarCodigo();
-    res.json({ codigo });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Error del servidor" });
-  }
-});
-
 router.get("/", authMiddleware, async (req, res) => {
   try {
-    const { q, cliente_id } = req.query;
-    let sql = `SELECT e.*, c.razon_social as cliente_nombre, c.rut as cliente_rut, c.codigo as cliente_codigo
-      FROM equipos e
-      LEFT JOIN clientes c ON e.cliente_id = c.id`;
-    let conditions = [];
+    const { q } = req.query;
+    let sql = `SELECT * FROM equipos`;
     let params = [];
-    if (cliente_id) {
-      conditions.push(`e.cliente_id = $${params.length + 1}`);
-      params.push(cliente_id);
-    }
     if (q && q.trim()) {
       const term = `%${q.trim()}%`;
-      const start = params.length + 1;
-      conditions.push(`(LOWER(e.codigo) LIKE LOWER($${start}) OR LOWER(e.serie) LIKE LOWER($${start + 1}) OR LOWER(e.equipo) LIKE LOWER($${start + 2}) OR LOWER(e.marca) LIKE LOWER($${start + 3}) OR LOWER(e.modelo) LIKE LOWER($${start + 4}))`);
+      sql += ` WHERE (LOWER(codigo) LIKE LOWER($1) OR LOWER(serie) LIKE LOWER($2) OR LOWER(equipo) LIKE LOWER($3) OR LOWER(marca) LIKE LOWER($4) OR LOWER(modelo) LIKE LOWER($5))`;
       params.push(term, term, term, term, term);
     }
-    if (conditions.length > 0) {
-      sql += ` WHERE ${conditions.join(' AND ')}`;
-    }
-    sql += ` ORDER BY e.id DESC`;
+    sql += ` ORDER BY id DESC`;
     const result = await pool.query(sql, params);
     res.json(result.rows);
   } catch (err) {
@@ -55,10 +35,7 @@ router.get("/", authMiddleware, async (req, res) => {
 
 router.get("/:id", authMiddleware, async (req, res) => {
   try {
-    const result = await pool.query(
-      "SELECT e.*, c.razon_social as cliente_nombre FROM equipos e LEFT JOIN clientes c ON e.cliente_id = c.id WHERE e.id = $1",
-      [req.params.id]
-    );
+    const result = await pool.query("SELECT * FROM equipos WHERE id = $1", [req.params.id]);
     if (result.rows.length === 0) {
       return res.status(404).json({ msg: "Equipo no encontrado" });
     }
@@ -70,33 +47,25 @@ router.get("/:id", authMiddleware, async (req, res) => {
 });
 
 router.post("/", authMiddleware, async (req, res) => {
-  const { equipo, modelo, marca, serie, contador_pag, nivel_tintas, cliente_id,
-    insumo1, insumo2, insumo3, insumo4, insumo5, insumo6,
-    insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia, actividad, observaciones } = req.body;
+  const { equipo, modelo, marca, serie } = req.body;
   try {
     if (!equipo || equipo.trim().length < 2) {
       return res.status(400).json({ msg: "Ingrese el Equipo (mínimo 2 caracteres) antes de guardar" });
     }
-    const dupResult = await pool.query(
+    const dup = await pool.query(
       `SELECT codigo FROM equipos
       WHERE LOWER(TRIM(equipo)) = LOWER($1) AND LOWER(TRIM(COALESCE(marca,''))) = LOWER($2) AND LOWER(TRIM(COALESCE(modelo,''))) = LOWER($3)
       LIMIT 1`,
       [equipo.trim(), (marca || '').trim(), (modelo || '').trim()]
     );
-    if (dupResult.rows.length > 0) {
-      return res.status(400).json({ msg: `El equipo ${equipo.trim()} ${(marca || '').trim()} ${(modelo || '').trim()} ya existe en el mantenedor con el código ${dupResult.rows[0].codigo}. No se creó un nuevo registro.` });
+    if (dup.rows.length > 0) {
+      return res.status(400).json({ msg: `El equipo ${equipo.trim()} ${(marca || '').trim()} ${(modelo || '').trim()} ya existe en el mantenedor con el código ${dup.rows[0].codigo}. No se creó un nuevo registro.` });
     }
     const codigo = await generarCodigo();
     await pool.query(
-      `INSERT INTO equipos (codigo, cliente_id, equipo, modelo, marca, serie, contador_pag, nivel_tintas,
-        insumo1, insumo2, insumo3, insumo4, insumo5, insumo6,
-        insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia, actividad, observaciones)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)`,
-      [codigo, cliente_id || null, equipo.trim(), modelo || '', marca || '', serie || null, contador_pag || 0, nivel_tintas || null,
-        insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null,
-        insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null,
-        insumo9 || null, insumo10 || null, insumo11 || null, insumo12 || null, averia || null,
-        actividad || null, observaciones || null]
+      `INSERT INTO equipos (codigo, equipo, modelo, marca, serie)
+      VALUES ($1, $2, $3, $4, $5)`,
+      [codigo, equipo.trim(), modelo || '', marca || '', serie || null]
     );
     res.status(201).json({ msg: "Equipo creado", codigo });
   } catch (err) {
@@ -107,13 +76,12 @@ router.post("/", authMiddleware, async (req, res) => {
 
 router.put("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
-  const { equipo, modelo, marca, serie, contador_pag, nivel_tintas, cliente_id,
-    insumo1, insumo2, insumo3, insumo4, insumo5, insumo6,
-    insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia, actividad, observaciones } = req.body;
+  const { equipo, modelo, marca, serie } = req.body;
   try {
     if (!equipo || equipo.trim().length < 2) {
       return res.status(400).json({ msg: "Ingrese el Equipo (mínimo 2 caracteres) antes de guardar" });
     }
+    // Igual que al crear: no puede quedar con el mismo Equipo + Marca + Modelo que otro equipo
     const dup = await pool.query(
       `SELECT codigo FROM equipos
        WHERE id <> $1 AND LOWER(TRIM(equipo)) = LOWER($2)
@@ -124,46 +92,16 @@ router.put("/:id", authMiddleware, async (req, res) => {
     if (dup.rows.length > 0) {
       return res.status(400).json({ msg: `Ya existe otro equipo ${equipo.trim()} ${(marca || '').trim()} ${(modelo || '').trim()} en el mantenedor con el código ${dup.rows[0].codigo}.` });
     }
-    const result = await pool.query("SELECT codigo FROM equipos WHERE id = $1", [id]);
-    let codigo = result.rows[0]?.codigo;
+    const existing = await pool.query("SELECT codigo FROM equipos WHERE id = $1", [id]);
+    let codigo = existing.rows[0]?.codigo;
     if (!codigo) {
       codigo = await generarCodigo();
     }
-    const client = await pool.connect();
-    try {
-      await client.query("BEGIN");
-      await client.query(
-        `UPDATE equipos SET codigo = $1, equipo = $2, modelo = $3, marca = $4, serie = $5, contador_pag = $6,
-          nivel_tintas = $7, cliente_id = $8,
-          insumo1 = $9, insumo2 = $10, insumo3 = $11, insumo4 = $12, insumo5 = $13, insumo6 = $14,
-          insumo7 = $15, insumo8 = $16, insumo9 = $17, insumo10 = $18, insumo11 = $19, insumo12 = $20,
-          averia = $21, actividad = $22, observaciones = $23 WHERE id = $24`,
-        [codigo, equipo.trim(), modelo || '', marca || '', serie, contador_pag || 0, nivel_tintas, cliente_id || null,
-          insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null,
-          insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null,
-          insumo9 || null, insumo10 || null, insumo11 || null, insumo12 || null, averia || null,
-          actividad || null, observaciones || null, id]
-      );
-      await client.query("COMMIT");
-      res.json({ msg: "Equipo actualizado", codigo });
-    } catch (err) {
-      await client.query("ROLLBACK");
-      throw err;
-    } finally {
-      client.release();
-    }
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Error del servidor" });
-  }
-});
-
-router.put("/:id/reasignar", authMiddleware, async (req, res) => {
-  const { id } = req.params;
-  const { cliente_id } = req.body;
-  try {
-    await pool.query("UPDATE equipos SET cliente_id = $1 WHERE id = $2", [cliente_id || null, id]);
-    res.json({ msg: "Equipo reasignado" });
+    await pool.query(
+      `UPDATE equipos SET codigo = $1, equipo = $2, modelo = $3, marca = $4, serie = $5 WHERE id = $6`,
+      [codigo, equipo.trim(), modelo || '', marca || '', serie || null, id]
+    );
+    res.json({ msg: "Equipo actualizado", codigo });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
