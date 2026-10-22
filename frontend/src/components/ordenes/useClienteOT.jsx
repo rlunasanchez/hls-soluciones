@@ -4,12 +4,13 @@ import { Pencil } from "lucide-react";
 import ClienteFormulario from "../clientes/ClienteFormulario";
 import { toUpper, normalizarRut } from "../../utils/helpers";
 import api from "../../services/api";
+import { verificarCliente, clientePorId } from "../../utils/clientesApi";
 
 // Cliente de la OT: ver su ficha, editarla (completa o solo sus datos) y registrar uno nuevo con lo
 // escrito en la OT. Devuelve los botones, las acciones y los modales para que la OT los coloque.
 export default function useClienteOT({
-  nuevaOrden, setNuevaOrden, clientes = [], clienteSeleccionado, setClienteSeleccionado,
-  onClientesRefresh, setBusquedaCliente, normTxt
+  nuevaOrden, setNuevaOrden, clienteSeleccionado, setClienteSeleccionado,
+  setBusquedaCliente, normTxt
 }) {
   const [mostrarDetalleCliente, setMostrarDetalleCliente] = useState(false);
   const [mostrarEditarClienteModal, setMostrarEditarClienteModal] = useState(false);
@@ -66,8 +67,7 @@ export default function useClienteOT({
       // El check es de un solo uso: ya se enviaron los datos a la OT, se desmarca
       // (en la edición solo del cliente no se tocan los checks)
       if (!editarSoloCliente) await api.post(`/api/clientes/${clienteAEditar.id}/limpiar-a-ot`);
-      const [lista, limpio] = await Promise.all([api.get("/api/clientes"), api.get(`/api/clientes/${clienteAEditar.id}`)]);
-      if (onClientesRefresh) onClientesRefresh(lista.data);
+      const limpio = await api.get(`/api/clientes/${clienteAEditar.id}`);
       if (setClienteSeleccionado) setClienteSeleccionado(limpio.data);
 
       alert("Cliente actualizado");
@@ -91,7 +91,7 @@ export default function useClienteOT({
     </>
   );
 
-  const abrirRegistrarCliente = () => {
+  const abrirRegistrarCliente = async () => {
     // Con el comodín "19" se permite crear aunque el RUT o la razón social ya existan
     if (normalizarRut(nuevaOrden.rut) === "19") {
       setPrefillCliente({
@@ -111,11 +111,14 @@ export default function useClienteOT({
       return;
     }
     // Si el RUT o la razón social ya existen en el mantenedor → solo avisar con el código
-    const rutOT = normalizarRut(nuevaOrden.rut);
-    const existente =
-      (rutOT && (clientes || []).find((c) => normalizarRut(c.rut) === rutOT)) ||
-      (clientes || []).find((c) => normTxt(c.razon_social) === normTxt(nuevaOrden.cliente)) ||
-      null;
+    let existente = null;
+    try {
+      const v = await verificarCliente({ rut: nuevaOrden.rut, razon_social: nuevaOrden.cliente });
+      existente = v.porRut || v.porNombre;
+    } catch {
+      alert("No se pudo comprobar si el cliente ya existe. Revise la conexión e intente de nuevo.");
+      return;
+    }
     if (existente) {
       alert(`El cliente ya existe (${existente.codigo || "CL-????"}).`);
       setNuevaOrden((prev) => ({ ...prev, rut: "" }));
@@ -140,26 +143,17 @@ export default function useClienteOT({
   const guardarNuevoClienteDesdeOT = async (payload) => {
     try {
       // Con el comodín "19" se crea directo sin chequear duplicados
-      // Si ya existe un cliente con ese RUT o razón social → avisar con su código y vincularlo sin crear duplicado
-      const esComodin = normalizarRut(payload.rut) === "19";
-      const existente = esComodin ? null :
-        ((payload.rut && normalizarRut(payload.rut) && (clientes || []).find((c) => normalizarRut(c.rut) === normalizarRut(payload.rut))) ||
-        (clientes || []).find((c) => normTxt(c.razon_social) === normTxt(payload.razon_social)) ||
-        null);
-      if (existente) {
-        alert(`El cliente ya existe (${existente.codigo || "CL-????"}).`);
-        return;
+      // Si ya existe un cliente con ese RUT o razón social → avisar con su código sin crear duplicado
+      if (normalizarRut(payload.rut) !== "19") {
+        const v = await verificarCliente({ rut: payload.rut, razon_social: payload.razon_social });
+        const existente = v.porRut || v.porNombre;
+        if (existente) {
+          alert(`El cliente ya existe (${existente.codigo || "CL-????"}).`);
+          return;
+        }
       }
       const res = await api.post("/api/clientes", payload);
-      const lista = await api.get("/api/clientes");
-      if (onClientesRefresh) onClientesRefresh(lista.data);
-      let fresh = null;
-      if (res.data?.id) {
-        const freshRes = await api.get(`/api/clientes/${res.data.id}`);
-        fresh = freshRes.data;
-      } else {
-        fresh = (lista.data || []).find((c) => normTxt(c.razon_social) === normTxt(payload.razon_social)) || null;
-      }
+      const fresh = res.data?.id ? await clientePorId(res.data.id) : null;
       if (fresh && setClienteSeleccionado) setClienteSeleccionado(fresh);
       if (fresh) {
         setNuevaOrden((prev) => ({
@@ -182,9 +176,8 @@ export default function useClienteOT({
         // El check "En la OT" es de un solo uso: ya viajó, se desmarca (como al editar el cliente)
         try {
           await api.post(`/api/clientes/${fresh.id}/limpiar-a-ot`);
-          const [lista2, limpio] = await Promise.all([api.get("/api/clientes"), api.get(`/api/clientes/${fresh.id}`)]);
-          if (onClientesRefresh) onClientesRefresh(lista2.data);
-          if (setClienteSeleccionado) setClienteSeleccionado(limpio.data);
+          const limpio = await clientePorId(fresh.id);
+          if (limpio && setClienteSeleccionado) setClienteSeleccionado(limpio);
         } catch (e) {
           console.error("No se pudo desmarcar 'En la OT':", e);
         }
@@ -205,7 +198,6 @@ export default function useClienteOT({
           <div className="bc-modal-caja bc-modal-caja--ancha">
             <ClienteFormulario
               clienteEditando={clienteSeleccionado}
-              clientes={clientes}
               onSave={() => {}}
               onCancel={() => setMostrarDetalleCliente(false)}
               readOnly
@@ -220,7 +212,6 @@ export default function useClienteOT({
           <div className={`bc-modal-caja ${editarSoloCliente ? "bc-modal-caja--chica" : "bc-modal-caja--ancha"}`}>
             <ClienteFormulario
               clienteEditando={clienteAEditar}
-              clientes={clientes}
               onSave={guardarEdicionCliente}
               onCancel={() => setMostrarEditarClienteModal(false)}
               soloCliente={editarSoloCliente}
@@ -237,7 +228,6 @@ export default function useClienteOT({
           <div className="bc-modal-caja bc-modal-caja--ancha">
             <ClienteFormulario
               clienteEditando={prefillCliente}
-              clientes={clientes}
               titulo="Registrar Cliente"
               modoRegistro
               onSave={guardarNuevoClienteDesdeOT}

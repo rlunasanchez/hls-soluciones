@@ -5,6 +5,8 @@ import {
 } from "lucide-react";
 import api from "../services/api";
 import { getCached } from "../services/cache";
+import useBusquedaApi from "../hooks/useBusquedaApi";
+import { verificarCliente, clienteDeOrden } from "../utils/clientesApi";
 import { toUpper, cerrarSesion, upperInput, parseToken } from "../utils/helpers";
 import { ordenAFormulario, buscarEquipoDeOrden, insumosDeOrden, ordenVacia, insumosVacios, ordenParaCliente } from "../utils/ordenFormato";
 import { validarOrden, armarPayloadOrden } from "../utils/validarOrden";
@@ -55,8 +57,7 @@ function OrdenTrabajo() {
   const [ordenIdActual, setOrdenIdActual] = useState(null);
   const [cotizacionesDeOrden, setCotizacionesDeOrden] = useState([]);
 
-  // Estados para autocompletar clientes y equipos
-  const [clientes, setClientes] = useState([]);
+  // Estado para autocompletar equipos (los clientes se buscan en el servidor al escribir)
   const [equipos, setEquipos] = useState([]);
   const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
   const [clienteFijo, setClienteFijo] = useState(false);
@@ -82,10 +83,9 @@ function OrdenTrabajo() {
   // Estado principal de la orden
   const [nuevaOrden, setNuevaOrden] = useState(() => ordenVacia(tecnicoDeSesion()));
 
-  // Cargar clientes y equipos al montar el componente (las órdenes las pide el hook del listado)
+  // Cargar los equipos al montar el componente (las órdenes las pide el hook del listado)
   useEffect(() => {
     const controller = new AbortController();
-    fetchClientes(controller.signal);
     fetchEquipos(controller.signal);
     return () => controller.abort();
   }, []);
@@ -108,8 +108,7 @@ function OrdenTrabajo() {
       const verOrdenSoloLectura = navState?.verOrdenSoloLectura;
 
       if (ordenFromNav) {
-        // Cargar clientes frescos antes de editar la orden
-        await fetchClientes();
+        // Cargar equipos frescos antes de editar la orden
         await fetchEquipos();
         editarOrden(ordenFromNav);
         window.history.replaceState({}, document.title);
@@ -119,7 +118,6 @@ function OrdenTrabajo() {
       // "Cotizaciones Asociadas" → Cancelar/Cerrar en la Cotización), en el
       // mismo modo en que estaba: Ver o Editar.
       if (verOrdenId) {
-        await fetchClientes();
         await fetchEquipos();
         if (verOrdenSoloLectura) {
           verOrden({ id: verOrdenId });
@@ -148,7 +146,6 @@ function OrdenTrabajo() {
   // Función para abrir formulario de nueva orden con valores automáticos
   // Abre una OT nueva, en blanco o (clienteInicial) con los datos de un cliente que viene desde Clientes.
   const abrirNuevaOrden = async (clienteInicial = null) => {
-    await fetchClientes();
     const numeroOt = await calcularSiguienteNumeroOrden();
     setNuevaOrden({
       ...ordenVacia(tecnicoDeSesion()),
@@ -236,20 +233,9 @@ function OrdenTrabajo() {
     // (habilita los botones Ver/Editar del equipo)
     setEquipoSeleccionado(buscarEquipoDeOrden(orden, equipos));
 
-    // Cliente asociado: solo para badge/estado. Se busca por id o, si ya no existe ese id (el cliente
-    // se borró y se registró de nuevo), por nombre. La lista local puede estar vacía si la orden se
-    // abre al volver desde otra pantalla: en ese caso se consulta la lista fresca.
-    const esDeLaOrden = (c) =>
-      (orden.cliente_id && c.id === orden.cliente_id) || (orden.cliente && c.razon_social === orden.cliente);
-    let seleccionado = clientes.find(esDeLaOrden) || null;
-    let inactivo = false;
-    if (!seleccionado && orden.cliente_id) {
-      try {
-        const resCli = await getCached(`/api/clientes`);
-        seleccionado = resCli.data.find(esDeLaOrden) || null;
-      } catch { /* sin conexión: se trata como no encontrado */ }
-      inactivo = !seleccionado;
-    }
+    // Cliente asociado: solo para badge/estado. Se busca en el servidor por id o, si ese id ya no
+    // existe (el cliente se borró y se registró de nuevo), por nombre.
+    const { cliente: seleccionado, inactivo } = await clienteDeOrden(orden);
     setClienteSeleccionado(seleccionado);
     setClienteInactivo(inactivo);
     setBusquedaCliente("");
@@ -270,15 +256,6 @@ function OrdenTrabajo() {
     } catch (err) {
       console.error("Error al eliminar orden:", err);
       alert("Error al eliminar la orden");
-    }
-  };
-
-  const fetchClientes = async (signal) => {
-    try {
-      const res = await getCached("/api/clientes", { signal });
-      setClientes(res.data);
-    } catch (err) {
-      if (err.name !== "CanceledError") console.error("Error al cargar clientes:", err);
     }
   };
 
@@ -366,17 +343,10 @@ function OrdenTrabajo() {
      setMostrarDropdownModelo(false);
   };
 
-  // Filtrar clientes para la búsqueda (local)
-  // El RUT se compara por dígitos (ignora puntos, guion y DV): buscar "14900" encuentra "14.900.665-6"
-  const digRut = (v) => (v || "").replace(/[^0-9]/g, "");
-  const qCliente = busquedaCliente.toLowerCase();
-  const qDig = digRut(busquedaCliente);
-  const esNumerico = /^[0-9]/.test(busquedaCliente.trim());
-  const clientesFiltrados = busquedaCliente.length >= 2 ? clientes.filter(c => 
-    c.razon_social?.toLowerCase().includes(qCliente) ||
-    (esNumerico && qDig && digRut(c.rut).includes(qDig)) ||
-    c.codigo?.toLowerCase().includes(qCliente)
-  ).slice(0, 10) : [];
+  // Buscador de cliente: consulta al servidor desde 2 caracteres (hasta 10 resultados, por nombre,
+  // código o dígitos del RUT). null mientras responde.
+  const [resultadosCliente] = useBusquedaApi("/api/clientes", busquedaCliente);
+  const clientesFiltrados = busquedaCliente.length >= 2 ? resultadosCliente : [];
 
   // Modelos únicos (sin duplicar por serie) para el buscador de modelo
   const equiposModeloFiltrados = [...new Map(equiposModeloSugeridos.map(eq => [eq.modelo, eq])).values()];
@@ -415,7 +385,14 @@ function OrdenTrabajo() {
     e.preventDefault();
     if (guardandoRef.current) return;
 
-    const mensajeError = validarOrden(nuevaOrden, { clientes, clienteSeleccionado });
+    let verificacion;
+    try {
+      verificacion = await verificarCliente({ rut: nuevaOrden.rut, razon_social: nuevaOrden.cliente });
+    } catch {
+      alert("No se pudo comprobar el cliente. Revise la conexión e intente de nuevo.");
+      return;
+    }
+    const mensajeError = validarOrden(nuevaOrden, { verificacion, clienteSeleccionado });
     if (mensajeError) {
       alert(mensajeError);
       return;
@@ -578,12 +555,10 @@ function OrdenTrabajo() {
                   seleccionarCliente={seleccionarCliente}
                   nuevaOrden={nuevaOrden}
                   setNuevaOrden={setNuevaOrden}
-                  clientes={clientes}
                   clienteInactivo={clienteInactivo}
                   clienteFijo={clienteFijo}
                   readOnly={soloLectura}
                   setClienteSeleccionado={setClienteSeleccionado}
-                  onClientesRefresh={(lista) => setClientes(lista)}
                 />
 
                 <OrdenCotizaciones key={ordenIdActual} cotizaciones={cotizacionesDeOrden} ordenIdActual={ordenIdActual} soloLectura={soloLectura} />

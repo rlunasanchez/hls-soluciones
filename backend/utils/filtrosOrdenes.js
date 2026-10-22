@@ -6,7 +6,7 @@ const LIMITE_MAXIMO = 100;
 const FECHA = /^\d{4}-\d{2}-\d{2}$/;
 
 // Escapa % _ \ para que el texto buscado se tome literal dentro de un LIKE.
-const comoLike = (texto) => `%${String(texto).trim().replace(/[\\%_]/g, "\\$&")}%`;
+export const comoLike = (texto) => `%${String(texto).trim().replace(/[\\%_]/g, "\\$&")}%`;
 
 // Página y límite desde la consulta (acepta pagina/limite y los antiguos page/limit).
 export function leerPaginacion(query) {

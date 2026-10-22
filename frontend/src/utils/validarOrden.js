@@ -1,10 +1,9 @@
 // Validaciones previas a guardar una OT y armado de lo que se envía al servidor.
 import { validarRUT, normalizarRut, validarEmail } from "./helpers";
 
-const normTxt = (s) => String(s || "").toUpperCase().trim();
-
 // Devuelve el mensaje del primer problema encontrado, o null si la orden se puede guardar.
-export function validarOrden(orden, { clientes = [], clienteSeleccionado = null } = {}) {
+// `verificacion` es la respuesta de verificarCliente({ rut, razon_social }) hecha antes de llamar.
+export function validarOrden(orden, { verificacion = {}, clienteSeleccionado = null } = {}) {
   if (!orden.cliente || !orden.cliente.trim()) {
     return "Complete el Cliente antes de guardar la orden.";
   }
@@ -29,9 +28,7 @@ export function validarOrden(orden, { clientes = [], clienteSeleccionado = null 
   }
 
   // El cliente debe existir en el mantenedor de Clientes
-  const existe =
-    clientes.find((c) => normTxt(c.razon_social) === normTxt(orden.cliente)) ||
-    clientes.find((c) => rutNorm && normalizarRut(c.rut) === rutNorm);
+  const existe = verificacion.porNombre || (rutNorm && verificacion.porRut);
   if (!existe) return 'El cliente no está registrado. Use "Registrar en Clientes".';
 
   // Y debe estar seleccionado explícitamente en el buscador
@@ -40,7 +37,7 @@ export function validarOrden(orden, { clientes = [], clienteSeleccionado = null 
   // El RUT escrito no puede pertenecer a otro cliente distinto del seleccionado
   // (el comodín "19" se excluye porque lo comparten varios clientes)
   if (rutNorm && rutNorm !== "19") {
-    const dueno = clientes.find((c) => normalizarRut(c.rut) === rutNorm);
+    const dueno = verificacion.porRut;
     if (dueno && dueno.id !== clienteSeleccionado.id) {
       return `El RUT ${orden.rut} pertenece al cliente ${dueno.codigo || "CL-????"}.`;
     }

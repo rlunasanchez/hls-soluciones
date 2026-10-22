@@ -142,7 +142,11 @@ function OrdenBuscadorCliente({
               zIndex: 1000,
               boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
             }}>
-              {clientesFiltrados.length > 0 ? (
+              {clientesFiltrados === null ? (
+                <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                  Buscando…
+                </div>
+              ) : clientesFiltrados.length > 0 ? (
                 clientesFiltrados.map((cliente) => (
                   <div
                     key={cliente.id}
@@ -159,6 +163,9 @@ function OrdenBuscadorCliente({
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' }}>
                         {cliente.codigo || 'CL-XXXX'}
+                      </span>
+                      <span style={{ border: '1px solid var(--border)', color: 'var(--text-muted)', padding: '1px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: '600' }}>
+                        {cliente.tipo === 'PERSONA' ? 'PERSONA' : 'EMPRESA'}
                       </span>
                       <span style={{ fontWeight: '600', color: 'var(--text)' }}>
                         {cliente.razon_social}
