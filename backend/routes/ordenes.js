@@ -3,16 +3,10 @@ import dotenv from "dotenv";
 import pool from "../config/db.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { filtrosOrdenes, leerPaginacion, numerarMarcadores } from "../utils/filtrosOrdenes.js";
+import { armarInsertOrden, armarUpdateOrden } from "../utils/camposOrden.js";
 
 dotenv.config();
 const router = express.Router();
-
-const toDateMySQL = (val) => {
-  if (!val) return null;
-  const d = new Date(val);
-  if (isNaN(d.getTime())) return null;
-  return d.toISOString().split('T')[0];
-};
 
 async function calcularSiguienteNumero() {
   const year = new Date().getFullYear();
@@ -78,8 +72,6 @@ router.get("/:id", authMiddleware, async (req, res) => {
 });
 
 router.post("/", authMiddleware, async (req, res) => {
-  const { fecha, esGarantia, fechaIngreso, fechaIngresoCheck, fechaTermino, fechaTerminoCheck, fechaEntrega, fechaEntregaCheck, fechaCompra, fechaCompraCheck, cliente, direccion, ciudad, comuna, rut, contacto, fonoContacto, emailContacto, cargoContacto, fonoPrincipal, email, tecnicoAsignado, equipo, modelo, marca, serie, contadorPagOut, nivelTinta, insumo1, insumo2, insumo3, insumo4, insumo5, insumo6, insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia, actividad, observaciones, infoInterna, adjuntos, contactosExtra, direccionesExtra, clienteId, clienteTipo } = req.body;
-
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
@@ -91,15 +83,8 @@ router.post("/", authMiddleware, async (req, res) => {
       return res.status(400).json({ msg: "El número de orden ya existe" });
     }
 
-    // La OT se vincula al cliente SOLO si se seleccionó del buscador (clienteId).
-    // Si el cliente se escribió a mano en la OT, los datos quedan solo en la OT
-    // (no se crea ni se busca ningún cliente en el mantenedor).
-    const finalClienteId = clienteId || null;
-
-    const tipoCliente = clienteTipo === "PERSONA" ? "PERSONA" : "EMPRESA";
-
-const resultado = await client.query(`INSERT INTO ordenes_trabajo (numero_orden, fecha, es_garantia, fecha_ingreso, fecha_ingreso_check, fecha_termino, fecha_termino_check, fecha_entrega, fecha_entrega_check, fecha_compra, fecha_compra_check, cliente, direccion, ciudad, comuna, rut, contacto, fono_contacto, email_contacto, cargo_contacto, fono_principal, email, tecnico_asignado, equipo, modelo, marca, serie, contador_pag_out, nivel_tinta, insumo1, insumo2, insumo3, insumo4, insumo5, insumo6, insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia, actividad, observaciones, info_interna, adjunto, contactos_extra, direcciones_extra, cliente_id, cliente_tipo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50) RETURNING id`,
-      [numeroOrden, toDateMySQL(fecha), esGarantia || false, toDateMySQL(fechaIngreso), fechaIngresoCheck || false, toDateMySQL(fechaTermino), fechaTerminoCheck || false, toDateMySQL(fechaEntrega), fechaEntregaCheck || false, toDateMySQL(fechaCompra), fechaCompraCheck || false, cliente, direccion || null, ciudad || null, comuna || null, rut || null, contacto || null, fonoContacto || null, emailContacto || null, cargoContacto || null, fonoPrincipal || null, email || null, tecnicoAsignado, equipo, modelo, marca, serie || null, contadorPagOut || null, nivelTinta || null, insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null, insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null, insumo9 || null, insumo10 || null, insumo11 || null, insumo12 || null, averia || null, actividad || null, observaciones || null, infoInterna || null, adjuntos && adjuntos.length ? JSON.stringify(adjuntos) : null, contactosExtra ? JSON.stringify(contactosExtra) : null, direccionesExtra ? JSON.stringify(direccionesExtra) : null, finalClienteId, tipoCliente]);
+    const { sql, params } = armarInsertOrden(req.body, numeroOrden);
+    const resultado = await client.query(numerarMarcadores(`${sql} RETURNING id`), params);
 
     await client.query("COMMIT");
     res.status(201).json({ msg: "Orden creada", id: resultado.rows[0].id, numeroOrden });
@@ -114,21 +99,12 @@ const resultado = await client.query(`INSERT INTO ordenes_trabajo (numero_orden,
 
 router.put("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
-  const { fecha, esGarantia, fechaIngreso, fechaIngresoCheck, fechaTermino, fechaTerminoCheck, fechaEntrega, fechaEntregaCheck, fechaCompra, fechaCompraCheck, cliente, direccion, ciudad, comuna, rut, contacto, fonoContacto, emailContacto, cargoContacto, fonoPrincipal, email, tecnicoAsignado, equipo, modelo, marca, serie, contadorPagOut, nivelTinta, insumo1, insumo2, insumo3, insumo4, insumo5, insumo6, insumo7, insumo8, insumo9, insumo10, insumo11, insumo12, averia, actividad, observaciones, infoInterna, adjuntos, contactosExtra, direccionesExtra, clienteId, clienteTipo } = req.body;
-
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
 
-    // La OT se vincula al cliente SOLO si se seleccionó del buscador (clienteId).
-    // Si el cliente se escribió a mano en la OT, los datos quedan solo en la OT
-    // (no se crea ni se busca ningún cliente en el mantenedor).
-    const finalClienteId = clienteId || null;
-
-    const tipoCliente = clienteTipo === "PERSONA" ? "PERSONA" : "EMPRESA";
-
-await client.query(`UPDATE ordenes_trabajo SET fecha = $1, es_garantia = $2, fecha_ingreso = $3, fecha_ingreso_check = $4, fecha_termino = $5, fecha_termino_check = $6, fecha_entrega = $7, fecha_entrega_check = $8, fecha_compra = $9, fecha_compra_check = $10, cliente = $11, direccion = $12, ciudad = $13, comuna = $14, rut = $15, contacto = $16, fono_contacto = $17, email_contacto = $18, cargo_contacto = $19, fono_principal = $20, email = $21, tecnico_asignado = $22, equipo = $23, modelo = $24, marca = $25, serie = $26, contador_pag_out = $27, nivel_tinta = $28, insumo1 = $29, insumo2 = $30, insumo3 = $31, insumo4 = $32, insumo5 = $33, insumo6 = $34, insumo7 = $35, insumo8 = $36, insumo9 = $37, insumo10 = $38, insumo11 = $39, insumo12 = $40, averia = $41, actividad = $42, observaciones = $43, info_interna = $44, adjunto = $45, contactos_extra = $46, direcciones_extra = $47, cliente_id = $48, cliente_tipo = $49 WHERE id = $50`,
-      [toDateMySQL(fecha), esGarantia || false, toDateMySQL(fechaIngreso), fechaIngresoCheck || false, toDateMySQL(fechaTermino), fechaTerminoCheck || false, toDateMySQL(fechaEntrega), fechaEntregaCheck || false, toDateMySQL(fechaCompra), fechaCompraCheck || false, cliente, direccion || null, ciudad || null, comuna || null, rut || null, contacto || null, fonoContacto || null, emailContacto || null, cargoContacto || null, fonoPrincipal || null, email || null, tecnicoAsignado, equipo, modelo, marca, serie || null, contadorPagOut || null, nivelTinta || null, insumo1 || null, insumo2 || null, insumo3 || null, insumo4 || null, insumo5 || null, insumo6 || null, insumo7 || null, insumo8 || null, insumo9 || null, insumo10 || null, insumo11 || null, insumo12 || null, averia || null, actividad || null, observaciones || null, infoInterna || null, adjuntos && adjuntos.length ? JSON.stringify(adjuntos) : null, contactosExtra ? JSON.stringify(contactosExtra) : null, direccionesExtra ? JSON.stringify(direccionesExtra) : null, finalClienteId, tipoCliente, id]);
+    const { sql, params } = armarUpdateOrden(req.body, id);
+    await client.query(numerarMarcadores(sql), params);
 
     await client.query("COMMIT");
     res.json({ msg: "Orden actualizada" });
