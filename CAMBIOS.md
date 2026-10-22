@@ -4,11 +4,11 @@
 
 ### v2.178: Buscador de cliente de la OT en el servidor (la OT ya no carga todos los clientes)
 
-**Alcance:** Orden de Trabajo, backend y frontend; sin cambios de base de datos. **Solo local: falta portar `routes/clientes.js` a `deploy/cloud`.** Segundo paso de la prioridad de volumen (`AGENTS.md` 7a).
+**Alcance:** Orden de Trabajo, backend y frontend; sin cambios de base de datos. **Solo local, sin publicar: `main` v2.178 y `deploy/cloud` (merge ya hecho y probado) esperan la orden de push; orden: `deploy/cloud` (Render) primero y `main` (Vercel) después.** Segundo paso de la prioridad de volumen (`AGENTS.md` 7a).
 
 - **Backend:** `GET /api/clientes?q=texto` (2+ caracteres) busca por razón social, código o dígitos del RUT (si el texto parte con un número) y devuelve hasta `limite` (10 por defecto, máximo 50) ya con su contacto y dirección de la OT; sin `q` devuelve todos (el listado de Clientes no cambia). Nuevo `GET /api/clientes/verificar?rut=&razon_social=` -> `{ porRut, porNombre }`. Archivos nuevos: `backend/utils/busquedaClientes.js` (idéntico en MySQL y PostgreSQL, usa `?` y `numerarMarcadores`) y `backend/utils/validaciones.js` (RUT y email, sacados de `clientes.js`).
 - **Frontend:** la OT ya no pide `/api/clientes` completo. Buscador con `useBusquedaApi` (muestra "Buscando…" mientras responde y la etiqueta EMPRESA/PERSONA en cada resultado). Duplicados al registrar un cliente, validación al guardar la OT, ubicar el cliente de una OT guardada (por id o por nombre) y refrescar el cliente tras editar un contacto/dirección usan consultas puntuales (`utils/clientesApi.js`: `verificarCliente`, `clientePorId`, `clienteDeOrden`). `validarOrden` recibe `verificacion` en vez de la lista de clientes.
-- **Pruebas:** MySQL 23/23 con 13.539 clientes en una base temporal (cada búsqueda 4-96 ms, igual resultado que la lógica antigua; `%`, `_`, `ñ`, límite, inyección y `/verificar`). En pantalla con 150 clientes temporales (ya borrados). PostgreSQL: se prueba al portar.
+- **Pruebas:** MySQL 23/23 con 13.539 clientes en una base temporal (cada búsqueda 4-96 ms, igual resultado que la lógica antigua; `%`, `_`, `ñ`, límite, inyección y `/verificar`). En pantalla con 150 clientes temporales (ya borrados). PostgreSQL: 40/40 (búsqueda, verificar y las pruebas anteriores) con el backend ya portado en `deploy/cloud` (merge local `Merge main -> deploy/cloud: v2.178`, **sin push**).
 - **Pendiente:** `GET /api/clientes` sin `q` y `buscarDuplicadoRut` siguen leyendo todos los clientes (Clientes y Cotizaciones); se resuelven en el paso de Clientes.
 
 

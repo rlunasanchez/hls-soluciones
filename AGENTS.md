@@ -49,7 +49,9 @@ Solo existen **dos ramas**:
 - `hooks/useOrdenesListado.js` (listado de OT: carga, filtros y paginación).
 - `utils/ordenFormato.js` (orden guardada → estado del formulario, `ordenVacia`, equipo e insumos) y `utils/validarOrden.js` (validaciones previas a guardar y payload). `OrdenTrabajo.jsx` abre una orden con una sola función `cargarOrden(orden, "editar" | "ver")`.
 - `components/comunes/CampoCatalogo.jsx` (buscador de contacto/dirección con Editar/Registrar/ "(ya es de CL-X)"), `ModalEditarCatalogo.jsx`, `BotonQuitar.jsx`, `AccionesFicha.jsx`.
-- `hooks/usePaginacion.js` (`usePaginaPersistente`, `useClampPagina`), `useBusquedaApi.js`, `useGuardar.js` (evita doble envío).
+- `hooks/usePaginacion.js` (`usePaginaPersistente`, `useClampPagina`), `useBusquedaApi.js` (busca en el servidor mientras se escribe), `useValorRetrasado.js` (espera 300 ms antes de consultar), `useGuardar.js` (evita doble envío).
+- `utils/clientesApi.js` (consultas puntuales de clientes: `verificarCliente`, `clientePorId`, `clienteDeOrden`; **la OT ya no carga la lista completa de clientes**).
+- **Backend `backend/utils/`** (mismo archivo en `main` y `deploy/cloud`, usan `?` y `numerarMarcadores` los vuelve `$1…` solo en PostgreSQL): `filtrosOrdenes.js` (filtros y paginación del listado de OT), `busquedaClientes.js` (buscador de cliente), `validaciones.js` (RUT y email).
 - `utils/helpers.js` (`toUpper`, `upperInput`, `validarRUT`, `formatearRutInput`, `parseToken`, `cerrarSesion`), `cotizacionDoc.js` y `ordenServicioDoc.js` (PDF por HTML + `imprimir.js`), `empresa.js` (datos de la empresa).
 
 ## 4. Modelo de datos y reglas de diseño
@@ -105,11 +107,18 @@ Solo existen **dos ramas**:
 
 Este sistema reemplaza uno que tenía **14.581 órdenes de servicio, 6.420 empresas, 7.118 personas y 5.698 contactos** (ver `BASE_DATOS_ANTIGUA.md`). Hoy el nuevo carga todo y filtra/pagina en el navegador, lo cual **no escala a ese volumen** y hay que resolverlo **antes de importar datos históricos** (dicho por el dueño el 16-oct-2026: "este sistema está hecho para gran volumen, recuerda la base del sistema viejo").
 
-Qué no escala hoy:
-1. `GET /api/ordenes?page=1&limit=10000` trae hasta 10.000 de una vez; con 14.581 OT faltarían órdenes y sería lento (`useOrdenesListado.js`).
-2. El buscador de cliente de la OT filtra sobre `clientes` completo cargado en memoria (`clientesFiltrados` en `OrdenTrabajo.jsx`); además `GET /api/clientes` arma contactos y direcciones de **todos** los clientes (`enriquecerClientes`).
-3. Listados de Clientes (`Clientes.jsx`) y de Equipos (`Equipos.jsx`): mismo patrón de cargar todo.
-4. `GET /api/equipos` sin límite.
+**Alcance acordado (22-oct-2026): primero cerrar hasta la OT** (listado, buscador de cliente, orden de `ordenes.js`, archivos bajo ~400 líneas, PDF); Clientes, Equipos y el resto vienen después. Cotizaciones, Informes y Orden de Compra quedan fuera por ahora.
+
+Avance:
+1. **HECHO y publicado (v2.176):** listado de OT paginado y filtrado en el servidor (`utils/filtrosOrdenes.js`, `useOrdenesListado.js`).
+2. **HECHO en local, sin publicar (v2.178):** buscador de cliente de la OT en el servidor (`GET /api/clientes?q=`, `GET /api/clientes/verificar`, `utils/busquedaClientes.js`, `utils/clientesApi.js`). El merge a `deploy/cloud` ya está hecho y probado en PostgreSQL (40/40); falta la orden de push (Render primero, Vercel después).
+3. **Pendiente de la OT:** ordenar el `INSERT`/`UPDATE` de 50 columnas de `ordenes.js` (lista de campos que genere el SQL y los parámetros, sin `$N` a mano) y bajar `OrdenTrabajo.jsx` (hoy ~630 líneas) hacia 400, incluido el PDF (`ordenServicioDoc.js`).
+
+Qué no escala todavía (después de la OT):
+1. Listados de Clientes (`Clientes.jsx`) y de Equipos (`Equipos.jsx`): cargan todo y filtran en el navegador.
+2. `GET /api/clientes` sin `q` arma contactos y direcciones de **todos** los clientes (`enriquecerClientes`), y `buscarDuplicadoRut` lee todos los clientes en cada alta/edición.
+3. `GET /api/equipos` sin límite.
+4. Cotizaciones carga la lista completa de clientes (módulo fuera de alcance por ahora).
 
 Cómo resolverlo (no con un tope de cantidad, que ocultaría registros): **paginación y filtros en el servidor** (`pagina`, `limite` y filtros en la consulta con `WHERE` y `LIMIT/OFFSET`, la respuesta trae la página y el `total`); el buscador de cliente consulta al servidor desde 2 letras y devuelve ~10 resultados; `enriquecerClientes` solo para los clientes de la página. Los buscadores de Contactos y Direcciones ya consultan al servidor (`useBusquedaApi`): usar ese patrón. Orden sugerido: 1) OT, 2) buscador de cliente, 3) Clientes, 4) Equipos. Hacerlo en pasos chicos, probando cada uno; crear datos de prueba temporales (como se hizo con la paginación) y borrarlos al terminar. Considerar índices en `ordenes_trabajo` (número, cliente, fecha) y `clientes` (razón social, RUT).
 
