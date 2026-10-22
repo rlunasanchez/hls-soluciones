@@ -12,7 +12,7 @@ Idioma de trabajo: **español**. Respuestas directas y breves; hacer solo lo que
 | Contactos y Direcciones (catálogos propios) | Completo |
 | Equipos (solo identidad: equipo, marca, modelo, serie) | Completo |
 | Órdenes de Trabajo (OT) | Completo (PDF de Orden de Servicio, adjuntos imagen/PDF) |
-| Cotizaciones (PDF con folio) | Funciona; **falta adaptarla** a los checks "En la OT" y a los botones Editar/Registrar de contactos/direcciones |
+| Cotizaciones (PDF con folio) | Funciona con el diseño antiguo; **NO está adaptada** a lo nuevo de Clientes, Contactos, Direcciones y Equipos (Empresa/Persona, checks "En la OT" de un solo uso, botones Editar/Registrar, vínculos, equipo solo identidad). No probarla ni tocarla con esos cambios hasta que el dueño pida adaptarla |
 | Usuarios (admin / técnico) | Completo |
 | Informes y Orden de Compra | **Páginas vacías** (ver `BASE_DATOS_ANTIGUA.md` para el modelo del sistema original) |
 
@@ -90,13 +90,12 @@ Solo existen **dos ramas**:
 - Windows: en el shell de Claude Code los heredocs largos con comillas fallan; usar la herramienta de escritura de archivos. Los archivos del repo están en LF y Git avisa de CRLF; es normal.
 - El backend local no se recarga solo; reiniciarlo tras cambiar código. En el navegador, **Ctrl+F5** tras un cambio de frontend si ves comportamiento viejo.
 
-## 7. Estado y pendientes (16-oct-2026)
+## 7. Estado y pendientes (22-oct-2026)
 
-**Hay cambios locales sin publicar (v2.168 a v2.175).** La web sigue en v2.167. El dueño decidió publicar el jueves 22-oct-2026. Todo lo necesario (SQL de Neon, cómo portar el backend a PostgreSQL con los `$N` renumerados, orden de publicación, verificación y reversión) está en **`MIGRACION_PENDIENTE.md`**. No hacer `git push` sin orden expresa.
-
+**v2.168 a v2.175 publicadas el 22-oct-2026** (Neon migrado, `deploy/cloud` en `4733e86`, `main` en `ea5297c`). La web está al día; `MIGRACION_PENDIENTE.md` quedó como registro histórico y se puede borrar. Los commits posteriores de solo documentación van únicamente a `main` local hasta que el dueño ordene un push. No hacer `git push` sin orden expresa.
 
 - **Neon:** migración de contactos/direcciones **corrida**, backend PostgreSQL **desplegado** y esquema antiguo **ya borrado** (`clientes_contactos`, `clientes_direcciones` y las columnas `clientes.contacto_*`). Neon tiene 9 tablas: `clientes`, `contactos`, `direcciones`, `cliente_contactos`, `cliente_direcciones`, `equipos`, `ordenes_trabajo`, `cotizaciones`, `usuarios`.
-- Adaptar **Cotizaciones** a los checks "En la OT" y a los botones Editar/Registrar (`NOTAS-COTIZACIONES.md` tiene el relevamiento).
+- Adaptar **Cotizaciones** a todo lo modificado en Clientes, Contactos, Direcciones y Equipos: tipo Empresa/Persona, checks "En la OT", botones Editar/Registrar, vínculos y equipo solo identidad (`NOTAS-COTIZACIONES.md` tiene el relevamiento). **Aún no se empieza**; su tabla en la nube conserva `contacto_id`/`direccion_id` por eso.
 - Construir **Informes** y **Orden de Compra** (referencia: `BASE_DATOS_ANTIGUA.md`).
 - `POST /api/auth/setup-admin` ya se eliminó (v2.168); el primer admin se crea con `crear-admin.js`.
 - Opcional: importar datos históricos del sistema antiguo (14.581 OT, 5.698 contactos).
@@ -134,7 +133,7 @@ Antes de publicar algún día (no ahora): migración de Neon y portar `clientes.
 - **Regla permanente: código escalable, nunca archivos de miles de líneas.** Lo pidió el dueño el 15-oct-2026 ("no me sirven miles de líneas en el mismo código") y lo retomó el 16-oct-2026 ("continuemos con el código escalable"). Todo código nuevo o modificado debe quedar repartido: **un archivo de pantalla o componente no debería pasar de unas 400 líneas**. Antes de agregar algo a un archivo grande (hoy `OrdenTrabajo.jsx` 658, `OrdenFormEquipo.jsx` 320), extraer a un componente, un hook (`hooks/use*.js`) o una utilidad (`utils/`). La lógica sin interfaz (validar, convertir, armar datos) va en `utils/`. No repetir el mismo bloque (formulario vacío, ramas casi iguales): unificarlo en una función. Si un cambio obliga a pasar de ese tamaño, partir primero y luego agregar. Aplica a todo módulo nuevo (Cotizaciones, Informes, Orden de Compra) desde el inicio.
 - **Hacer solo lo que se pide**; si algo parece necesario pero no fue pedido, preguntar. No crear carpetas, scripts, ramas ni worktrees extra sin avisar.
 - **No hacer `git push` ni cambiar de rama sin orden expresa**, porque publica en producción. Los commits locales sí. No usar `--force` sin permiso.
-- **No borrar datos de producción ni bases** sin confirmar qué se borra; el dueño ejecuta él mismo lo que toque Neon (Claude no tiene acceso a Neon ni sus credenciales).
+- **No borrar datos de producción ni bases** sin confirmar qué se borra; el dueño ejecuta él mismo lo que toque Neon (Claude no tiene acceso a Neon ni sus credenciales). En Windows, `git push` falla desde el shell Bash de Claude Code ("cannot spawn sh"): usar PowerShell.
 - Para cambiar de rama en la carpeta del dueño mientras prueba, usar mejor un `git worktree` temporal y quitarlo después (cambiar la rama de su carpeta puede romperle el entorno local).
 - Preguntar antes de borrar código; verificar con búsquedas que de verdad no se usa. Probar lo que se toca (build del frontend y pruebas del backend) antes de subir.
 - La base **`ods`** (SQL Server local, restaurada de `08-09-26.bak`) es el sistema antiguo y se conserva como referencia. No se toca.

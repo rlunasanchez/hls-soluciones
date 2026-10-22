@@ -82,12 +82,11 @@ function OrdenTrabajo() {
   // Estado principal de la orden
   const [nuevaOrden, setNuevaOrden] = useState(() => ordenVacia(tecnicoDeSesion()));
 
-  // Cargar clientes, equipos y órdenes al montar el componente
+  // Cargar clientes y equipos al montar el componente (las órdenes las pide el hook del listado)
   useEffect(() => {
     const controller = new AbortController();
     fetchClientes(controller.signal);
     fetchEquipos(controller.signal);
-    fetchOrdenes(controller.signal);
     return () => controller.abort();
   }, []);
 

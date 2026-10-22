@@ -1,13 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { getCached } from "../services/cache";
 import { usePaginaPersistente, useClampPagina } from "./usePaginacion";
+import useValorRetrasado from "./useValorRetrasado";
 
 const ITEMS_POR_PAG = 4;
 
-// Listado de órdenes de trabajo: carga, filtros, paginación (la página se conserva entre recargas).
-// Trae todas las órdenes y filtra/pagina en el frontend (datasets pequeños).
+// Listado de órdenes de trabajo: filtros y paginación se resuelven en el servidor
+// (GET /api/ordenes?pagina=&limite=&numero=…); aquí solo se guarda la página en pantalla.
+// La página se conserva entre recargas.
 export default function useOrdenesListado() {
   const [ordenes, setOrdenes] = useState([]);
+  const [totalPaginas, setTotalPaginas] = useState(0);
   const [loading, setLoading] = useState(false);
   const [filtroNumeroOrden, setFiltroNumeroOrden] = useState("");
   const [filtroCliente, setFiltroCliente] = useState("");
@@ -20,38 +23,53 @@ export default function useOrdenesListado() {
     filtroNumeroOrden, filtroCliente, filtroSerie, filtroEstado, filtroGarantia, filtroFechaDesde, filtroFechaHasta
   ]);
 
-  const fetchOrdenes = async (signal) => {
-    setLoading(true);
+  // Los textos se envían al servidor 300 ms después de dejar de escribir
+  const numero = useValorRetrasado(filtroNumeroOrden);
+  const cliente = useValorRetrasado(filtroCliente);
+  const serie = useValorRetrasado(filtroSerie);
+
+  const params = new URLSearchParams({ pagina: paginaActual, limite: ITEMS_POR_PAG });
+  if (numero.trim()) params.set("numero", numero.trim());
+  if (cliente.trim()) params.set("cliente", cliente.trim());
+  if (serie.trim()) params.set("serie", serie.trim());
+  if (filtroEstado !== "todos") params.set("estado", filtroEstado);
+  if (filtroGarantia !== "todos") params.set("garantia", filtroGarantia);
+  if (filtroFechaDesde) params.set("desde", filtroFechaDesde);
+  if (filtroFechaHasta) params.set("hasta", filtroFechaHasta);
+  const url = `/api/ordenes?${params}`;
+
+  const urlRef = useRef(url);
+  urlRef.current = url;
+  const secuencia = useRef(0);
+  const primeraCarga = useRef(true);
+
+  // Pide al servidor la página actual. Una respuesta vieja nunca pisa a una más nueva.
+  const fetchOrdenes = useCallback(async (signal) => {
+    const mia = ++secuencia.current;
+    if (primeraCarga.current) setLoading(true);
     try {
-      const res = await getCached("/api/ordenes?page=1&limit=10000", { signal });
+      const res = await getCached(urlRef.current, { signal });
+      if (mia !== secuencia.current) return;
       setOrdenes(res.data.ordenes);
+      setTotalPaginas(res.data.pagination.totalPages);
+      primeraCarga.current = false;
     } catch (err) {
       if (err.name !== "CanceledError") console.error("Error al cargar órdenes:", err);
     } finally {
-      setLoading(false);
+      if (mia === secuencia.current) setLoading(false);
     }
-  };
+  }, []);
 
-  const ordenesFiltradas = ordenes.filter((orden) => {
-    if (filtroNumeroOrden && !orden.numero_orden?.toLowerCase().includes(filtroNumeroOrden.toLowerCase())) return false;
-    if (filtroCliente && !orden.cliente?.toLowerCase().includes(filtroCliente.toLowerCase())) return false;
-    if (filtroSerie && !orden.serie?.toLowerCase().includes(filtroSerie.toLowerCase())) return false;
-    if (filtroEstado === "cerrada" && !orden.fecha_entrega) return false;
-    if (filtroEstado === "pendiente" && orden.fecha_entrega) return false;
-    if (filtroGarantia === "si" && !orden.es_garantia) return false;
-    if (filtroGarantia === "no" && orden.es_garantia) return false;
-    if (filtroFechaDesde && orden.fecha && orden.fecha.substring(0, 10) < filtroFechaDesde) return false;
-    if (filtroFechaHasta && orden.fecha && orden.fecha.substring(0, 10) > filtroFechaHasta) return false;
-    return true;
-  });
-
-  const totalPaginas = Math.ceil(ordenesFiltradas.length / ITEMS_POR_PAG);
-  const ordenesPag = ordenesFiltradas.slice((paginaActual - 1) * ITEMS_POR_PAG, paginaActual * ITEMS_POR_PAG);
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchOrdenes(controller.signal);
+    return () => controller.abort();
+  }, [url, fetchOrdenes]);
 
   useClampPagina(paginaActual, setPaginaActual, totalPaginas);
 
   return {
-    ordenes, loading, fetchOrdenes, ordenesPag, totalPaginas, paginaActual, setPaginaActual,
+    ordenes, loading, fetchOrdenes, ordenesPag: ordenes, totalPaginas, paginaActual, setPaginaActual,
     filtroNumeroOrden, setFiltroNumeroOrden, filtroCliente, setFiltroCliente, filtroSerie, setFiltroSerie,
     filtroEstado, setFiltroEstado, filtroGarantia, setFiltroGarantia,
     filtroFechaDesde, setFiltroFechaDesde, filtroFechaHasta, setFiltroFechaHasta
