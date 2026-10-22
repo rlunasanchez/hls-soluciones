@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import pool from "../config/db.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
+import { filtrosOrdenes, leerPaginacion } from "../utils/filtrosOrdenes.js";
 
 dotenv.config();
 const router = express.Router();
@@ -13,10 +14,10 @@ const toDateMySQL = (val) => {
   return d.toISOString().split('T')[0];
 };
 
+// Listado paginado y filtrado en el servidor: ?pagina=&limite=&numero=&cliente=&serie=&estado=&garantia=&desde=&hasta=
 router.get("/", authMiddleware, async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const offset = (page - 1) * limit;
+  const { pagina, limite, offset } = leerPaginacion(req.query);
+  const { where, params } = filtrosOrdenes(req.query);
 
   try {
     // Sin "adjunto": es base64 de hasta ~13MB por orden y el listado nunca lo muestra.
@@ -33,11 +34,12 @@ router.get("/", authMiddleware, async (req, res) => {
         averia, observaciones, info_interna,
         cliente_id, cliente_tipo, fecha_creacion, fecha_actualizacion,
         (SELECT COUNT(*) FROM cotizaciones c WHERE c.orden_id = ordenes_trabajo.id) AS cotizaciones_count
-       FROM ordenes_trabajo ORDER BY id DESC LIMIT ? OFFSET ?`,
-      [limit, offset]
+       FROM ordenes_trabajo ${where} ORDER BY id DESC LIMIT ? OFFSET ?`,
+      [...params, limite, offset]
     );
-    const [totalResult] = await pool.query("SELECT COUNT(*) as total FROM ordenes_trabajo");
-    res.json({ ordenes, pagination: { currentPage: page, totalPages: Math.ceil(parseInt(totalResult[0].total) / limit), totalItems: parseInt(totalResult[0].total), itemsPerPage: limit } });
+    const [totalResult] = await pool.query(`SELECT COUNT(*) as total FROM ordenes_trabajo ${where}`, params);
+    const total = parseInt(totalResult[0].total);
+    res.json({ ordenes, pagination: { currentPage: pagina, totalPages: Math.ceil(total / limite), totalItems: total, itemsPerPage: limite } });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
