@@ -2,6 +2,14 @@
 
 ## Fecha: 2026-10-22 (continuación, solo local)
 
+### v2.182: `OrdenTrabajo.jsx` 560 → 489 líneas (paso B): hooks de equipos y de clic fuera
+
+**Alcance:** Orden de Trabajo, solo frontend. Traslado de código sin cambiar comportamiento, salvo lo indicado. **Solo local.**
+
+- **`hooks/useEquiposOT.js`** (nuevo, 82 líneas): lista de equipos del mantenedor, buscador por modelo con sus sugerencias, elegir un equipo (copia equipo/marca/modelo y borra la serie) y registrar el equipo de la OT en el mantenedor. **`hooks/useClicFuera.js`** (nuevo): cierra un desplegable al hacer clic fuera; lo usan el de modelo y el de clientes.
+- **Mejora:** el botón **Cambiar equipo** ahora también vacía la caja "Buscar por Modelo" y cierra su lista (antes el modelo anterior quedaba escrito ahí).
+- **Pruebas en pantalla:** buscar por modelo, clic fuera de los dos desplegables, botones Editar / Cambiar equipo / Registrar según el equipo, editar un equipo desde la OT, nueva OT con buscadores limpios. Revisión automática de nombres sin definir: limpia.
+
 ### v2.181: `OrdenTrabajo.jsx` 633 → 560 líneas (paso A) y arreglo del cierre del formulario
 
 **Alcance:** Orden de Trabajo, solo frontend. Traslado de código sin cambiar comportamiento, salvo lo indicado. **Solo local.**

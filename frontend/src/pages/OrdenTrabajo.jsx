@@ -1,13 +1,12 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Home, Users, Contact, MapPin, Package, FileText, FileSpreadsheet, ShoppingCart, UserCog
 } from "lucide-react";
 import api from "../services/api";
-import { getCached } from "../services/cache";
 import useBusquedaApi from "../hooks/useBusquedaApi";
 import { verificarCliente, clienteDeOrden } from "../utils/clientesApi";
-import { toUpper, cerrarSesion } from "../utils/helpers";
+import { cerrarSesion } from "../utils/helpers";
 import { ordenAFormulario, buscarEquipoDeOrden, insumosDeOrden, ordenVacia, insumosVacios, ordenParaCliente, tecnicoDeSesion, datosAlElegirCliente } from "../utils/ordenFormato";
 import { validarOrden, armarPayloadOrden } from "../utils/validarOrden";
 import '../styles/OrdenTrabajo.css';
@@ -25,6 +24,8 @@ import OrdenCotizaciones from "../components/ordenes/OrdenCotizaciones";
 import OrdenFormBotones from "../components/ordenes/OrdenFormBotones";
 import OrdenFormObservaciones from "../components/ordenes/OrdenFormObservaciones";
 import useCotizacionesDeOrden from "../hooks/useCotizacionesDeOrden";
+import useEquiposOT from "../hooks/useEquiposOT";
+import useClicFuera from "../hooks/useClicFuera";
 import useOrdenesListado from "../hooks/useOrdenesListado";
 
 
@@ -49,23 +50,17 @@ function OrdenTrabajo() {
   const [ordenIdActual, setOrdenIdActual] = useState(null);
   const cotizacionesDeOrden = useCotizacionesDeOrden(ordenIdActual);
 
-  // Estado para autocompletar equipos (los clientes se buscan en el servidor al escribir)
-  const [equipos, setEquipos] = useState([]);
   const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
   const [clienteFijo, setClienteFijo] = useState(false);
   const [equipoSeleccionado, setEquipoSeleccionado] = useState(null);
   const [equipoFijo, setEquipoFijo] = useState(false);
   const [busquedaCliente, setBusquedaCliente] = useState("");
-  const [busquedaModelo, setBusquedaModelo] = useState("");
   const [mostrarDropdownClientes, setMostrarDropdownClientes] = useState(false);
-  const [mostrarDropdownModelo, setMostrarDropdownModelo] = useState(false);
-  const [equiposModeloSugeridos, setEquiposModeloSugeridos] = useState([]);
   const [clienteInactivo, setClienteInactivo] = useState(false);
   const [soloLectura, setSoloLectura] = useState(false);
   const [ordenParaPDF, setOrdenParaPDF] = useState(null);
   
-  // Refs para detectar clics fuera de los dropdowns
-  const equipoModeloDropdownRef = useRef(null);
+  // Ref para detectar clics fuera del desplegable de clientes
   const clienteDropdownRef = useRef(null);
   
   // Insumos dinámicos (se muestran de a 2; hasta 12)
@@ -75,12 +70,13 @@ function OrdenTrabajo() {
   // Estado principal de la orden
   const [nuevaOrden, setNuevaOrden] = useState(() => ordenVacia(tecnicoDeSesion()));
 
-  // Cargar los equipos al montar el componente (las órdenes las pide el hook del listado)
-  useEffect(() => {
-    const controller = new AbortController();
-    fetchEquipos(controller.signal);
-    return () => controller.abort();
-  }, []);
+  // Equipos: lista del mantenedor, buscador por modelo, elegir y registrar equipo
+  const {
+    equipos, setEquipos, fetchEquipos,
+    busquedaModelo, setBusquedaModelo, mostrarDropdownModelo, setMostrarDropdownModelo,
+    setEquiposModeloSugeridos, equiposModeloFiltrados, equipoModeloDropdownRef,
+    seleccionarEquipoPorModelo, registrarEquipoEnMantenedor
+  } = useEquiposOT({ nuevaOrden, setNuevaOrden });
 
   // Recibir cliente u orden desde Clientes
   useEffect(() => {
@@ -167,33 +163,8 @@ function OrdenTrabajo() {
     if (clienteSeleccionado) setClienteInactivo(false);
   }, [clienteSeleccionado]);
 
-  // Buscar equipos por modelo via API
-  useEffect(() => {
-    if (busquedaModelo.length < 2) { setEquiposModeloSugeridos([]); return; }
-    const timer = setTimeout(async () => {
-      try {
-        const res = await api.get(`/api/equipos?q=${encodeURIComponent(busquedaModelo)}`);
-        setEquiposModeloSugeridos(res.data);
-      } catch { setEquiposModeloSugeridos([]); }
-    }, 250);
-    return () => clearTimeout(timer);
-  }, [busquedaModelo]);
-
-  // Cierra los dropdowns al hacer clic fuera
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (equipoModeloDropdownRef.current && !equipoModeloDropdownRef.current.contains(event.target)) {
-        setMostrarDropdownModelo(false);
-      }
-      if (clienteDropdownRef.current && !clienteDropdownRef.current.contains(event.target)) {
-        setMostrarDropdownClientes(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+  // Cierra el desplegable de clientes al hacer clic fuera
+  useClicFuera(clienteDropdownRef, useCallback(() => setMostrarDropdownClientes(false), []));
 
   // Abre una orden guardada en el formulario. modo "editar" la deja editable; modo "ver", en solo lectura.
   // El listado no trae "adjunto" (es pesado): la orden completa se pide recién al abrirla.
@@ -240,15 +211,6 @@ function OrdenTrabajo() {
     }
   };
 
-  const fetchEquipos = async (signal) => {
-    try {
-      const res = await getCached("/api/equipos", { signal });
-      setEquipos(res.data);
-    } catch (err) {
-      if (err.name !== "CanceledError") console.error("Error al cargar equipos:", err);
-    }
-  };
-
   // Seleccionar cliente y cargar sus datos (qué campos cambian: ver datosAlElegirCliente)
   const seleccionarCliente = (cliente) => {
     const mismoCliente = clienteSeleccionado?.id === cliente.id;
@@ -264,43 +226,10 @@ function OrdenTrabajo() {
     setNuevaOrden(prev => ({ ...prev, ...datosAlElegirCliente(cliente, { editando: !!editingId, mismoCliente }) }));
   };
 
-  // Seleccionar solo el modelo - NO vincula serie ni equipo (solo rellena los datos del modelo)
-  const seleccionarEquipoPorModelo = (equipo) => {
-    setNuevaOrden(prev => ({
-      ...prev,
-      equipo: toUpper(equipo.equipo),
-      modelo: toUpper(equipo.modelo),
-      marca: toUpper(equipo.marca),
-      serie: ""
-      // NOTA: No vincula equipo (equipoId = null) ni serie, solo los datos del modelo
-    }));
-
-     setBusquedaModelo((equipo.modelo || "").toUpperCase());
-     setMostrarDropdownModelo(false);
-  };
-
   // Buscador de cliente: consulta al servidor desde 2 caracteres (hasta 10 resultados, por nombre,
   // código o dígitos del RUT). null mientras responde.
   const [resultadosCliente] = useBusquedaApi("/api/clientes", busquedaCliente);
   const clientesFiltrados = busquedaCliente.length >= 2 ? resultadosCliente : [];
-
-  // Modelos únicos (sin duplicar por serie) para el buscador de modelo
-  const equiposModeloFiltrados = [...new Map(equiposModeloSugeridos.map(eq => [eq.modelo, eq])).values()];
-
-  // Registra el equipo del form OT en el mantenedor (la serie es opcional).
-  // Se usa desde el botón "+ Registrar en Equipos" al crear o editar una OT.
-  const registrarEquipoEnMantenedor = async () => {
-    const { equipo, marca, modelo, serie } = nuevaOrden;
-    try {
-      const res = await api.post("/api/equipos", { equipo, marca, modelo, serie });
-      alert(`Equipo creado en el mantenedor con código ${res.data.codigo}.`);
-      const lista = await api.get("/api/equipos");
-      setEquipos(lista.data);
-    } catch (err) {
-      const msg = err.response?.data?.msg;
-      alert(msg || "Error al registrar el equipo en el mantenedor.");
-    }
-  };
 
   // PDF y Cotización de la orden que está abierta en el formulario (ya
   // guardada al menos una vez, con editingId). Traen los datos frescos de

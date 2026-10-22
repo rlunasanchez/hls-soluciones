@@ -98,6 +98,10 @@ Solo existen **dos ramas**:
 
 - **Neon:** migración de contactos/direcciones **corrida**, backend PostgreSQL **desplegado** y esquema antiguo **ya borrado** (`clientes_contactos`, `clientes_direcciones` y las columnas `clientes.contacto_*`). Neon tiene 9 tablas: `clientes`, `contactos`, `direcciones`, `cliente_contactos`, `cliente_direcciones`, `equipos`, `ordenes_trabajo`, `cotizaciones`, `usuarios`.
 - Adaptar **Cotizaciones** a todo lo modificado en Clientes, Contactos, Direcciones y Equipos: tipo Empresa/Persona, checks "En la OT", botones Editar/Registrar, vínculos y equipo solo identidad (`NOTAS-COTIZACIONES.md` tiene el relevamiento). **Aún no se empieza**; su tabla en la nube conserva `contacto_id`/`direccion_id` por eso.
+  **Requisito futuro (indicado por el dueño el 22-oct-2026):** cuando se adapte Cotizaciones debe comportarse **como la OT**:
+  - Si el cliente fue eliminado, la cotización lo conserva igual (copia/snapshot) y se avisa "ya no vinculado"; se le puede asociar o re-vincular el cliente, y el **contacto** también se puede asociar aunque el cliente esté eliminado.
+  - Debe haber **cotización de empresa y de persona**, con la misma lógica que la OT: Tipo Empresa/Persona, la persona sin contacto y con su dirección vinculada, checks "En la OT", botones Editar/Registrar y buscador de cliente en el servidor.
+  - Hoy solo se evita el error 500 guardándola sin vínculo si el cliente ya no existe (v2.180).
 - Construir **Informes** y **Orden de Compra** (referencia: `BASE_DATOS_ANTIGUA.md`).
 - `POST /api/auth/setup-admin` ya se eliminó (v2.168); el primer admin se crea con `crear-admin.js`.
 - Opcional: importar datos históricos del sistema antiguo (14.581 OT, 5.698 contactos).
