@@ -1,5 +1,7 @@
 # Notas — Módulo de Cotizaciones (pendientes y relevamiento)
 
+> **Estado (22-oct-2026): Cotizaciones NO está adaptada** a los cambios de Clientes, Contactos, Direcciones y Equipos (Empresa/Persona, checks "En la OT", botones Editar/Registrar, vínculos, equipo solo identidad). Aún no se empieza; no probarla con esos cambios.
+
 > Documento de trabajo. Relevamiento hecho el 2026-09-07 para retomar el módulo de
 > Cotizaciones. NO es un registro de cambios de versión (eso va en `CAMBIOS.md`).
 

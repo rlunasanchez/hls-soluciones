@@ -9,6 +9,7 @@
 - **Publicado el 22-oct-2026:** Neon con `clientes.tipo` y `ordenes_trabajo.cliente_tipo`; eliminadas de `ordenes_trabajo` las 7 columnas heredadas (estaban vacías); `deploy/cloud` con el backend portado a PostgreSQL; `main` en Vercel (Production). Probado antes con 23 casos sobre PostgreSQL real.
 - **Fix en la web:** `GET /api/auth/perfil` seguía con sintaxis MySQL (`?` y `[rows]`) y fallaba en PostgreSQL; ya usa `$1` y `result.rows`.
 - **`equipos` en Neon:** `equipos.js` de `deploy/cloud` quedó igual que el de `main` (solo equipo, marca, modelo, serie; sin la ruta `reasignar`). Se eliminaron de la tabla `cliente_id`, `contador_pag`, `nivel_tintas`, `insumo1` a `insumo12`, `averia` y `tipo` (4 filas, todas vacías). Se conservan `actividad` y `observaciones`, que también existen en la base local.
+- **Cotizaciones NO está adaptada** a lo nuevo de Clientes, Contactos, Direcciones y Equipos; todavía no se empieza.
 - **`cotizaciones` conserva** `contacto_id`, `direccion_id` y similares porque aún se usan hasta adaptar el módulo.
 - **Windows:** el `git push` falla desde el shell Bash de Claude Code; usar PowerShell.
 

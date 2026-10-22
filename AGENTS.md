@@ -12,7 +12,7 @@ Idioma de trabajo: **español**. Respuestas directas y breves; hacer solo lo que
 | Contactos y Direcciones (catálogos propios) | Completo |
 | Equipos (solo identidad: equipo, marca, modelo, serie) | Completo |
 | Órdenes de Trabajo (OT) | Completo (PDF de Orden de Servicio, adjuntos imagen/PDF) |
-| Cotizaciones (PDF con folio) | Funciona; **falta adaptarla** a los checks "En la OT" y a los botones Editar/Registrar de contactos/direcciones |
+| Cotizaciones (PDF con folio) | Funciona con el diseño antiguo; **NO está adaptada** a lo nuevo de Clientes, Contactos, Direcciones y Equipos (Empresa/Persona, checks "En la OT" de un solo uso, botones Editar/Registrar, vínculos, equipo solo identidad). No probarla ni tocarla con esos cambios hasta que el dueño pida adaptarla |
 | Usuarios (admin / técnico) | Completo |
 | Informes y Orden de Compra | **Páginas vacías** (ver `BASE_DATOS_ANTIGUA.md` para el modelo del sistema original) |
 
@@ -95,7 +95,7 @@ Solo existen **dos ramas**:
 **v2.168 a v2.175 publicadas el 22-oct-2026** (Neon migrado, `deploy/cloud` en `4733e86`, `main` en `ea5297c`). La web está al día; `MIGRACION_PENDIENTE.md` quedó como registro histórico y se puede borrar. Los commits posteriores de solo documentación van únicamente a `main` local hasta que el dueño ordene un push. No hacer `git push` sin orden expresa.
 
 - **Neon:** migración de contactos/direcciones **corrida**, backend PostgreSQL **desplegado** y esquema antiguo **ya borrado** (`clientes_contactos`, `clientes_direcciones` y las columnas `clientes.contacto_*`). Neon tiene 9 tablas: `clientes`, `contactos`, `direcciones`, `cliente_contactos`, `cliente_direcciones`, `equipos`, `ordenes_trabajo`, `cotizaciones`, `usuarios`.
-- Adaptar **Cotizaciones** a los checks "En la OT" y a los botones Editar/Registrar (`NOTAS-COTIZACIONES.md` tiene el relevamiento).
+- Adaptar **Cotizaciones** a todo lo modificado en Clientes, Contactos, Direcciones y Equipos: tipo Empresa/Persona, checks "En la OT", botones Editar/Registrar, vínculos y equipo solo identidad (`NOTAS-COTIZACIONES.md` tiene el relevamiento). **Aún no se empieza**; su tabla en la nube conserva `contacto_id`/`direccion_id` por eso.
 - Construir **Informes** y **Orden de Compra** (referencia: `BASE_DATOS_ANTIGUA.md`).
 - `POST /api/auth/setup-admin` ya se eliminó (v2.168); el primer admin se crea con `crear-admin.js`.
 - Opcional: importar datos históricos del sistema antiguo (14.581 OT, 5.698 contactos).
