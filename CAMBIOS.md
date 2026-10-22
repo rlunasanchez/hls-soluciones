@@ -2,6 +2,17 @@
 
 ## Fecha: 2026-10-22 (continuación, solo local)
 
+### v2.181: `OrdenTrabajo.jsx` 633 → 560 líneas (paso A) y arreglo del cierre del formulario
+
+**Alcance:** Orden de Trabajo, solo frontend. Traslado de código sin cambiar comportamiento, salvo lo indicado. **Solo local.**
+
+- **Arreglo (error desde v2.173, ya publicado en la web):** `cerrarFormulario` llamaba a `setMostrarCotizacionesAsociadas`, que ya no existe en la página (se movió a `OrdenCotizaciones.jsx`). Al cerrar la OT con la X o Cancelar fallaba en esa línea y no se ejecutaba lo que seguía: no refrescaba el listado, no volvía a Clientes cuando la OT se abrió desde ahí y no restablecía el modo de solo lectura. Se quitó la línea (el contador se reinicia solo porque `OrdenCotizaciones` lleva `key={ordenIdActual}`).
+- **`utils/ordenFormato.js`:** ahora tiene `tecnicoDeSesion`, `datosDelTipo` y `datosAlElegirCliente(cliente, { editando, mismoCliente })` (qué campos cambian al elegir un cliente: en una OT guardada el equipo no se toca; en una nueva se limpian equipo y avería). `seleccionarCliente` quedó en 12 líneas.
+- **`hooks/useCotizacionesDeOrden.js`** (nuevo): cotizaciones asociadas a la orden abierta. **`components/ordenes/OrdenFormObservaciones.jsx`** (nuevo).
+- **Texto de ayuda de "Cambiar equipo":** ahora aclara que al elegir otro equipo del buscador la serie se borra (es el comportamiento de siempre) y que si se escribe el equipo a mano se conserva.
+- **Revisión automática:** se pasó una revisión de nombres sin definir (`no-undef` y `react/jsx-no-undef`) por todo `frontend/src`: limpia. Detecta errores como el `toUpper is not defined` que apareció y se corrigió durante este paso, que el build de Vite no ve. Se usa después de cada paso.
+- **Pruebas en pantalla:** cambiar cliente en una OT guardada (el equipo no se toca), cambiar equipo por modelo, Observaciones guardada, cotización creada desde la OT.
+
 ### v2.180: Crear o editar una cotización ya no falla si el cliente de la OT fue borrado y vuelto a registrar
 
 **Alcance:** backend de Cotizaciones (`routes/cotizaciones.js`), solo el vínculo al cliente. El módulo Cotizaciones sigue **sin adaptarse** a los cambios de Clientes, Contactos, Direcciones y Equipos. **Solo local: falta portarlo a `deploy/cloud`** (mismo cambio con `$N`).

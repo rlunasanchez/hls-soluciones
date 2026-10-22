@@ -198,7 +198,7 @@ function OrdenFormEquipo({
             className="btn-mini btn-mini--principal"
             style={{ alignSelf: 'end' }}
             onClick={() => setNuevaOrden({ ...nuevaOrden, equipo: "", marca: "", modelo: "" })}
-            title="Quitar el equipo para elegir otro o escribir uno nuevo (la serie se conserva)"
+            title="Quita el equipo para elegir otro. Al elegir uno del buscador la serie se borra; si escribes el equipo a mano se conserva."
           >
             Cambiar equipo
           </button>

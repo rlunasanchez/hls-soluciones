@@ -1,5 +1,5 @@
 // Conversión de una orden guardada (fila de ordenes_trabajo) al estado del formulario de la OT.
-import { toUpper } from "./helpers";
+import { toUpper, parseToken } from "./helpers";
 
 const fmtDate = (d) => {
   if (!d) return "";
@@ -131,5 +131,54 @@ export function ordenParaCliente(cliente) {
     emailContacto: cliente.contacto_email || "",
     cargoContacto: toUpper(cliente.contacto_cargo),
     clienteTipo: cliente.tipo === "PERSONA" ? "PERSONA" : "EMPRESA"
+  };
+}
+
+// Nombre y apellido de la sesión actual, para precargar el Técnico Asignado en una OT nueva (mismo
+// formato que el resto del campo: mayúsculas, sin caracteres que no sean letras/espacios). El campo
+// no es editable en el formulario, así que si todavía no se cargó el Nombre del usuario se usa el
+// nombre de usuario de login como respaldo (nunca debe quedar vacío).
+export const tecnicoDeSesion = () => {
+  const { nombre, usuario } = parseToken();
+  return toUpper(nombre || usuario || "").replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "");
+};
+
+// Una persona no tiene contacto: va sin datos de contacto y con la dirección que tiene vinculada
+// (copia, snapshot). En una empresa el contacto y la dirección se eligen aparte.
+export const datosDelTipo = (cliente) => cliente.tipo === "PERSONA"
+  ? {
+      clienteTipo: "PERSONA",
+      contacto: "", fonoContacto: "", emailContacto: "", cargoContacto: "",
+      // Su dirección es la que tiene vinculada en el mantenedor de Direcciones
+      direccion: toUpper(cliente.ot_direccion),
+      ciudad: toUpper(cliente.ot_ciudad),
+      comuna: toUpper(cliente.ot_comuna)
+    }
+  : { clienteTipo: "EMPRESA" };
+
+// Campos de la OT que cambian al elegir un cliente (se mezclan con el estado anterior).
+// Solo se llevan sus datos propios (razón social, RUT, fono, email); el contacto y la dirección salen
+// y se eligen con sus buscadores (una persona trae los suyos, ver datosDelTipo).
+// - OT guardada (editando): el equipo no se toca; si es el mismo cliente se conservan sus contactos y
+//   direcciones adicionales, si es otro se limpian.
+// - OT desde cero: además se limpian el equipo y la avería.
+export function datosAlElegirCliente(cliente, { editando, mismoCliente }) {
+  const datosCliente = {
+    cliente: toUpper(cliente.razon_social),
+    direccion: "", ciudad: "", comuna: "",
+    rut: cliente.rut || "",
+    email: cliente.email || "",
+    fonoPrincipal: cliente.telefono || "",
+    contacto: "", fonoContacto: "", emailContacto: "", cargoContacto: ""
+  };
+  if (editando) {
+    return { ...datosCliente, ...(mismoCliente ? {} : { contactosExtra: [], direccionesExtra: [] }), ...datosDelTipo(cliente) };
+  }
+  return {
+    ...datosCliente,
+    contactosExtra: [], direccionesExtra: [],
+    equipo: "", modelo: "", marca: "", serie: "", nivelTinta: "", contadorPagOut: "",
+    averia: "", actividad: "", observaciones: "",
+    ...datosDelTipo(cliente)
   };
 }

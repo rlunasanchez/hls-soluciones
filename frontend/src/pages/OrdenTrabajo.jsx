@@ -7,8 +7,8 @@ import api from "../services/api";
 import { getCached } from "../services/cache";
 import useBusquedaApi from "../hooks/useBusquedaApi";
 import { verificarCliente, clienteDeOrden } from "../utils/clientesApi";
-import { toUpper, cerrarSesion, upperInput, parseToken } from "../utils/helpers";
-import { ordenAFormulario, buscarEquipoDeOrden, insumosDeOrden, ordenVacia, insumosVacios, ordenParaCliente } from "../utils/ordenFormato";
+import { toUpper, cerrarSesion } from "../utils/helpers";
+import { ordenAFormulario, buscarEquipoDeOrden, insumosDeOrden, ordenVacia, insumosVacios, ordenParaCliente, tecnicoDeSesion, datosAlElegirCliente } from "../utils/ordenFormato";
 import { validarOrden, armarPayloadOrden } from "../utils/validarOrden";
 import '../styles/OrdenTrabajo.css';
 import "../styles/ordenes-componentes.css";
@@ -23,18 +23,10 @@ import ModalOpcionesPDF from "../components/ordenes/ModalOpcionesPDF";
 import OrdenFormCabecera from "../components/ordenes/OrdenFormCabecera";
 import OrdenCotizaciones from "../components/ordenes/OrdenCotizaciones";
 import OrdenFormBotones from "../components/ordenes/OrdenFormBotones";
+import OrdenFormObservaciones from "../components/ordenes/OrdenFormObservaciones";
+import useCotizacionesDeOrden from "../hooks/useCotizacionesDeOrden";
 import useOrdenesListado from "../hooks/useOrdenesListado";
 
-
-// Nombre y apellido de la sesión actual, para precargar el Técnico Asignado
-// en una OT nueva (mismo formato que el resto del campo: mayúsculas, sin
-// caracteres que no sean letras/espacios). El campo ya no es editable en el
-// formulario, así que si todavía no se cargó el Nombre del usuario, se usa
-// el nombre de usuario de login como respaldo (nunca debe quedar vacío).
-const tecnicoDeSesion = () => {
-  const { nombre, usuario } = parseToken();
-  return toUpper(nombre || usuario || "").replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '');
-};
 
 function OrdenTrabajo() {
   const navigate = useNavigate();
@@ -55,7 +47,7 @@ function OrdenTrabajo() {
   // Ver (a diferencia de editingId, que en modo Ver queda en null). Sirve para
   // consultar las cotizaciones asociadas sin importar el modo.
   const [ordenIdActual, setOrdenIdActual] = useState(null);
-  const [cotizacionesDeOrden, setCotizacionesDeOrden] = useState([]);
+  const cotizacionesDeOrden = useCotizacionesDeOrden(ordenIdActual);
 
   // Estado para autocompletar equipos (los clientes se buscan en el servidor al escribir)
   const [equipos, setEquipos] = useState([]);
@@ -175,17 +167,6 @@ function OrdenTrabajo() {
     if (clienteSeleccionado) setClienteInactivo(false);
   }, [clienteSeleccionado]);
 
-  // Cotizaciones asociadas a la orden abierta (solo lectura, para el badge y
-  // los chips del header). Se re-consulta cada vez que cambia la orden abierta.
-  useEffect(() => {
-    if (!ordenIdActual) { setCotizacionesDeOrden([]); return; }
-    const controller = new AbortController();
-    api.get(`/api/cotizaciones?orden_id=${ordenIdActual}&limit=100`, { signal: controller.signal })
-      .then((res) => setCotizacionesDeOrden(res.data.cotizaciones || []))
-      .catch((err) => { if (err.name !== "CanceledError") setCotizacionesDeOrden([]); });
-    return () => controller.abort();
-  }, [ordenIdActual]);
-
   // Buscar equipos por modelo via API
   useEffect(() => {
     if (busquedaModelo.length < 2) { setEquiposModeloSugeridos([]); return; }
@@ -268,64 +249,19 @@ function OrdenTrabajo() {
     }
   };
 
-  // Seleccionar cliente y cargar sus datos
-  // Una persona no tiene contacto: va sin datos de contacto y con la dirección que tiene vinculada
-  // (copia, snapshot). En una empresa el contacto y la dirección se eligen aparte.
-  const datosDelTipo = (cliente) => cliente.tipo === "PERSONA"
-    ? {
-        clienteTipo: "PERSONA",
-        contacto: "",
-        fonoContacto: "",
-        emailContacto: "",
-        cargoContacto: "",
-        // Su dirección es la que tiene vinculada en el mantenedor de Direcciones
-        direccion: toUpper(cliente.ot_direccion),
-        ciudad: toUpper(cliente.ot_ciudad),
-        comuna: toUpper(cliente.ot_comuna)
-      }
-    : { clienteTipo: "EMPRESA" };
-
+  // Seleccionar cliente y cargar sus datos (qué campos cambian: ver datosAlElegirCliente)
   const seleccionarCliente = (cliente) => {
     const mismoCliente = clienteSeleccionado?.id === cliente.id;
     setClienteSeleccionado(cliente);
     setClienteInactivo(false);
     setBusquedaCliente("");
     setMostrarDropdownClientes(false);
-
-    // Al elegir un cliente solo se llevan sus datos propios (razón social, RUT, fono, email). El contacto
-    // y la dirección salen y se eligen con sus buscadores (una persona trae los suyos, ver datosDelTipo).
-    const datosCliente = {
-      cliente: toUpper(cliente.razon_social),
-      direccion: "", ciudad: "", comuna: "",
-      rut: cliente.rut || "",
-      email: cliente.email || "",
-      fonoPrincipal: cliente.telefono || "",
-      contacto: "", fonoContacto: "", emailContacto: "", cargoContacto: ""
-    };
-
-    // Cliente (re)seleccionado en una OT guardada: el equipo no se toca. Si es el mismo cliente se
-    // conservan sus contactos y direcciones adicionales; si es otro, se limpian.
-    if (editingId) {
-      setNuevaOrden(prev => ({
-        ...prev,
-        ...datosCliente,
-        ...(mismoCliente ? {} : { contactosExtra: [], direccionesExtra: [] }),
-        ...datosDelTipo(cliente)
-      }));
-      return;
+    // OT desde cero: además se limpia el equipo elegido
+    if (!editingId) {
+      setEquipoSeleccionado(null);
+      setBusquedaModelo("");
     }
-
-    // OT desde cero: además se limpia el equipo y la avería.
-    setEquipoSeleccionado(null);
-    setBusquedaModelo("");
-    setNuevaOrden(prev => ({
-      ...prev,
-      ...datosCliente,
-      contactosExtra: [], direccionesExtra: [],
-      equipo: "", modelo: "", marca: "", serie: "", nivelTinta: "", contadorPagOut: "",
-      averia: "", actividad: "", observaciones: "",
-      ...datosDelTipo(cliente)
-    }));
+    setNuevaOrden(prev => ({ ...prev, ...datosAlElegirCliente(cliente, { editando: !!editingId, mismoCliente }) }));
   };
 
   // Seleccionar solo el modelo - NO vincula serie ni equipo (solo rellena los datos del modelo)
@@ -464,7 +400,6 @@ function OrdenTrabajo() {
     resetFormulario();
     setEditingId(null);
     setOrdenIdActual(null);
-    setMostrarCotizacionesAsociadas(false);
     setSoloLectura(false);
     window.history.replaceState({}, document.title);
     if (vinoDeCliente) {
@@ -598,18 +533,11 @@ function OrdenTrabajo() {
                     readOnly={soloLectura}
                   />
 
-                  <div className="of-sec muted">
-                    <div className="of-st primary">Observaciones</div>
-                    <div className="of-f">
-                      <textarea
-                        placeholder="Observaciones adicionales..."
-                        value={nuevaOrden.observaciones}
-                        onChange={(e) => setNuevaOrden({...nuevaOrden, observaciones: upperInput(e)})}
-                        rows={4}
-                        disabled={soloLectura}
-                      />
-                    </div>
-                  </div>
+                  <OrdenFormObservaciones
+                    nuevaOrden={nuevaOrden}
+                    setNuevaOrden={setNuevaOrden}
+                    readOnly={soloLectura}
+                  />
                 </div>
               </div>
 
