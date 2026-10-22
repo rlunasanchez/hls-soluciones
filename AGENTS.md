@@ -89,6 +89,7 @@ Solo existen **dos ramas**:
 - No descartar contactos "repetidos" por email: dos contactos pueden compartir correo (causó un aviso falso).
 - Los efectos que cargan los vínculos de la ficha dependen del **objeto** `clienteEditando`, no solo del id, para recargar tras "Guardar Cambios".
 - En el SQL Editor de Neon se puede perder la primera letra al pegar: empezar con una línea en blanco y revisar la primera palabra. Pegar scripts largos sin `BEGIN`/tablas temporales (el editor puede no mantener la sesión).
+- **Un `git merge main` en `deploy/cloud` puede mezclar sin avisar código MySQL dentro de un archivo PostgreSQL** (pasó el 22-oct-2026 con `cotizaciones.js`: entró `const [rows] = await db.query(... ?)` y una variable `connection` que en PostgreSQL se llama `client`; habría dado error 500 en la web). Tras cada merge, **abrir y revisar a mano los `routes/*.js` que cambiaron** y probar con `embedded-postgres` incluyendo las claves foráneas del esquema real (la tabla `cotizaciones` tiene FK a `clientes`).
 - Windows: en el shell de Claude Code los heredocs largos con comillas fallan; usar la herramienta de escritura de archivos. Los archivos del repo están en LF y Git avisa de CRLF; es normal.
 - El backend local no se recarga solo; reiniciarlo tras cambiar código. En el navegador, **Ctrl+F5** tras un cambio de frontend si ves comportamiento viejo.
 
