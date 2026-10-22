@@ -2,13 +2,57 @@
 
 ## Fecha: 2026-10-22 (continuación, solo local)
 
+### v2.184: `OrdenTrabajo.jsx` 434 → 377 líneas (paso D): hook del guardado de la OT. Meta de ~400 líneas cumplida
+
+**Alcance:** Orden de Trabajo, solo frontend. Traslado de código sin cambiar comportamiento. **Solo local.**
+
+- **`hooks/useGuardarOrden.js`** (nuevo, 79 líneas): guardar la orden (crear o actualizar, con la verificación del cliente y las validaciones), generar su PDF e ir a crear una cotización desde ella. La página le indica qué hacer al terminar (`alTerminar`: cerrar el formulario, volver al listado y saltar a la página 1 si la OT es nueva).
+- **Tamaños de la OT:** `OrdenTrabajo.jsx` 1.243 (inicio de la reducción) → 633 → **377**; el siguiente archivo más grande es `OrdenFormEquipo.jsx` con 326, luego `ordenServicioDoc.js` (el PDF) con 292 y `OrdenFormCliente.jsx` con 275. Ninguno pasa de 400.
+- **Pruebas en pantalla:** guardar una OT nueva, Guardar Cambios, guardar y salir (misma página del listado), validaciones, PDF, cotización y doble clic.
+
+### v2.183: `OrdenTrabajo.jsx` 489 → 434 líneas (paso C): hook del arranque desde otras pantallas y menú en su encabezado
+
+**Alcance:** Orden de Trabajo, solo frontend. Traslado de código sin cambiar comportamiento. **Solo local.**
+
+- **`hooks/useOrdenDesdeNavegacion.js`** (nuevo, 38 líneas): lo que la OT abre al llegar desde otra pantalla: una orden a editar, volver a una OT (Ver o Editar) desde una cotización asociada, o una OT nueva con los datos de un cliente (botón "OT" de Clientes). Se llama después de definir `editarOrden`, `verOrden` y `abrirNuevaOrden`.
+- **`HeaderOrdenTrabajo.jsx`:** arma su propio menú de 9 botones con `useNavigate` (como `HeaderCliente`); la página ya no le pasa `navItems`.
+- **Pruebas en pantalla:** menú, botón OT de Clientes y Cancelar, volver a la OT desde una cotización asociada (Ver y Editar), botón de cotización del listado, F5 en el listado. Revisión automática de nombres sin definir: limpia.
+
+### v2.182: `OrdenTrabajo.jsx` 560 → 489 líneas (paso B): hooks de equipos y de clic fuera
+
+**Alcance:** Orden de Trabajo, solo frontend. Traslado de código sin cambiar comportamiento, salvo lo indicado. **Solo local.**
+
+- **`hooks/useEquiposOT.js`** (nuevo, 82 líneas): lista de equipos del mantenedor, buscador por modelo con sus sugerencias, elegir un equipo (copia equipo/marca/modelo y borra la serie) y registrar el equipo de la OT en el mantenedor. **`hooks/useClicFuera.js`** (nuevo): cierra un desplegable al hacer clic fuera; lo usan el de modelo y el de clientes.
+- **Mejora:** el botón **Cambiar equipo** ahora también vacía la caja "Buscar por Modelo" y cierra su lista (antes el modelo anterior quedaba escrito ahí).
+- **Pruebas en pantalla:** buscar por modelo, clic fuera de los dos desplegables, botones Editar / Cambiar equipo / Registrar según el equipo, editar un equipo desde la OT, nueva OT con buscadores limpios. Revisión automática de nombres sin definir: limpia.
+
+### v2.181: `OrdenTrabajo.jsx` 633 → 560 líneas (paso A) y arreglo del cierre del formulario
+
+**Alcance:** Orden de Trabajo, solo frontend. Traslado de código sin cambiar comportamiento, salvo lo indicado. **Solo local.**
+
+- **Arreglo (error desde v2.173, ya publicado en la web):** `cerrarFormulario` llamaba a `setMostrarCotizacionesAsociadas`, que ya no existe en la página (se movió a `OrdenCotizaciones.jsx`). Al cerrar la OT con la X o Cancelar fallaba en esa línea y no se ejecutaba lo que seguía: no refrescaba el listado, no volvía a Clientes cuando la OT se abrió desde ahí y no restablecía el modo de solo lectura. Se quitó la línea (el contador se reinicia solo porque `OrdenCotizaciones` lleva `key={ordenIdActual}`).
+- **`utils/ordenFormato.js`:** ahora tiene `tecnicoDeSesion`, `datosDelTipo` y `datosAlElegirCliente(cliente, { editando, mismoCliente })` (qué campos cambian al elegir un cliente: en una OT guardada el equipo no se toca; en una nueva se limpian equipo y avería). `seleccionarCliente` quedó en 12 líneas.
+- **`hooks/useCotizacionesDeOrden.js`** (nuevo): cotizaciones asociadas a la orden abierta. **`components/ordenes/OrdenFormObservaciones.jsx`** (nuevo).
+- **Texto de ayuda de "Cambiar equipo":** ahora aclara que al elegir otro equipo del buscador la serie se borra (es el comportamiento de siempre) y que si se escribe el equipo a mano se conserva.
+- **Revisión automática:** se pasó una revisión de nombres sin definir (`no-undef` y `react/jsx-no-undef`) por todo `frontend/src`: limpia. Detecta errores como el `toUpper is not defined` que apareció y se corrigió durante este paso, que el build de Vite no ve. Se usa después de cada paso.
+- **Pruebas en pantalla:** cambiar cliente en una OT guardada (el equipo no se toca), cambiar equipo por modelo, Observaciones guardada, cotización creada desde la OT.
+
+### v2.180: Crear o editar una cotización ya no falla si el cliente de la OT fue borrado y vuelto a registrar
+
+**Alcance:** backend de Cotizaciones (`routes/cotizaciones.js`), solo el vínculo al cliente. El módulo Cotizaciones sigue **sin adaptarse** a los cambios de Clientes, Contactos, Direcciones y Equipos. **Solo local: falta portarlo a `deploy/cloud`** (mismo cambio con `$N`).
+
+- **Causa:** una OT cuyo cliente se borró y se registró de nuevo conserva el id viejo (`cliente_id`). Al crear una cotización desde esa OT, el id viejo se copiaba y MySQL/PostgreSQL rechazaban el guardado por la clave foránea (`cotizaciones_ibfk_1`): "Error del servidor".
+- **Arreglo:** `clienteIdExistente(db, clienteId)`: si el cliente no existe, la cotización se guarda sin vínculo (`cliente_id` NULL) tanto en `POST` como en `PUT`; los datos del cliente (razón social, RUT, etc.) quedan igual en la cotización.
+- **Pruebas:** MySQL 8/8 (cliente existente, inexistente, sin cliente; crear y editar).
+- **Dato local corregido:** la `OT-2026-02802` apuntaba al cliente id 8 (ya inexistente); se apuntó al id 10 (`GABYY`, `CL-0002`).
+
 ### v2.179: `ordenes.js` arma el INSERT y el UPDATE desde una sola lista de campos
 
 **Alcance:** backend de Órdenes de Trabajo; traslado de código sin cambiar comportamiento ni base de datos. **Solo local, sin publicar** (la web sigue en v2.178).
 
 - **Nuevo `backend/utils/camposOrden.js` (83 líneas):** lista `CAMPOS` con `[columna, dato del formulario, conversión]` y las funciones `armarInsertOrden` / `armarUpdateOrden`. Agregar o quitar una columna es editar una línea de esa lista; ya no hay que contar 50 marcadores ni renumerar `$N` a mano. Idéntico en `main` (MySQL) y `deploy/cloud` (PostgreSQL): el SQL usa `?` y `numerarMarcadores` lo vuelve `$1, $2…` solo en PostgreSQL. `toDateMySQL` se movió ahí.
 - **`routes/ordenes.js`:** 215 → 132 líneas. Desaparecieron la desestructuración de 50 variables y las dos líneas largas de SQL y parámetros del `POST` y el `PUT`.
-- **Pruebas:** el SQL y los parámetros generados son **idénticos** a los del código anterior (comparados con la versión de git, con un cuerpo completo, uno mínimo y uno con valores raros: vacíos, `0`, `null`, tipo inválido, fecha inválida). Ruta real en MySQL 9/9 (crear, leer, editar, listar, borrar, número siguiente, vacíos en NULL, adjuntos y contactos extra como JSON). PostgreSQL: se prueba al portar.
+- **Pruebas:** el SQL y los parámetros generados son **idénticos** a los del código anterior (comparados con la versión de git, con un cuerpo completo, uno mínimo y uno con valores raros: vacíos, `0`, `null`, tipo inválido, fecha inválida). Ruta real en MySQL 9/9 (crear, leer, editar, listar, borrar, número siguiente, vacíos en NULL, adjuntos y contactos extra como JSON). PostgreSQL: 40/40 con el backend ya portado en `deploy/cloud` (merge local `Merge main -> deploy/cloud: v2.179`, **sin push**; en `deploy/cloud` el `INSERT` usa `numerarMarcadores(sql + " RETURNING id")`).
 
 ### v2.178: Buscador de cliente de la OT en el servidor (la OT ya no carga todos los clientes)
 

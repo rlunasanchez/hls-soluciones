@@ -51,7 +51,7 @@ Solo existen **dos ramas**:
 - `components/comunes/CampoCatalogo.jsx` (buscador de contacto/dirección con Editar/Registrar/ "(ya es de CL-X)"), `ModalEditarCatalogo.jsx`, `BotonQuitar.jsx`, `AccionesFicha.jsx`.
 - `hooks/usePaginacion.js` (`usePaginaPersistente`, `useClampPagina`), `useBusquedaApi.js` (busca en el servidor mientras se escribe), `useValorRetrasado.js` (espera 300 ms antes de consultar), `useGuardar.js` (evita doble envío).
 - `utils/clientesApi.js` (consultas puntuales de clientes: `verificarCliente`, `clientePorId`, `clienteDeOrden`; **la OT ya no carga la lista completa de clientes**).
-- **Backend `backend/utils/`** (mismo archivo en `main` y `deploy/cloud`, usan `?` y `numerarMarcadores` los vuelve `$1…` solo en PostgreSQL): `filtrosOrdenes.js` (filtros y paginación del listado de OT), `busquedaClientes.js` (buscador de cliente), `validaciones.js` (RUT y email).
+- **Backend `backend/utils/`** (mismo archivo en `main` y `deploy/cloud`, usan `?` y `numerarMarcadores` los vuelve `$1…` solo en PostgreSQL): `filtrosOrdenes.js` (filtros y paginación del listado de OT), `busquedaClientes.js` (buscador de cliente), `validaciones.js` (RUT y email), `camposOrden.js` (lista `CAMPOS` de la OT de la que salen el INSERT y el UPDATE: para agregar una columna a la OT se edita esa lista, sin contar marcadores).
 - `utils/helpers.js` (`toUpper`, `upperInput`, `validarRUT`, `formatearRutInput`, `parseToken`, `cerrarSesion`), `cotizacionDoc.js` y `ordenServicioDoc.js` (PDF por HTML + `imprimir.js`), `empresa.js` (datos de la empresa).
 
 ## 4. Modelo de datos y reglas de diseño
@@ -98,6 +98,10 @@ Solo existen **dos ramas**:
 
 - **Neon:** migración de contactos/direcciones **corrida**, backend PostgreSQL **desplegado** y esquema antiguo **ya borrado** (`clientes_contactos`, `clientes_direcciones` y las columnas `clientes.contacto_*`). Neon tiene 9 tablas: `clientes`, `contactos`, `direcciones`, `cliente_contactos`, `cliente_direcciones`, `equipos`, `ordenes_trabajo`, `cotizaciones`, `usuarios`.
 - Adaptar **Cotizaciones** a todo lo modificado en Clientes, Contactos, Direcciones y Equipos: tipo Empresa/Persona, checks "En la OT", botones Editar/Registrar, vínculos y equipo solo identidad (`NOTAS-COTIZACIONES.md` tiene el relevamiento). **Aún no se empieza**; su tabla en la nube conserva `contacto_id`/`direccion_id` por eso.
+  **Requisito futuro (indicado por el dueño el 22-oct-2026):** cuando se adapte Cotizaciones debe comportarse **como la OT**:
+  - Si el cliente fue eliminado, la cotización lo conserva igual (copia/snapshot) y se avisa "ya no vinculado"; se le puede asociar o re-vincular el cliente, y el **contacto** también se puede asociar aunque el cliente esté eliminado.
+  - Debe haber **cotización de empresa y de persona**, con la misma lógica que la OT: Tipo Empresa/Persona, la persona sin contacto y con su dirección vinculada, checks "En la OT", botones Editar/Registrar y buscador de cliente en el servidor.
+  - Hoy solo se evita el error 500 guardándola sin vínculo si el cliente ya no existe (v2.180).
 - Construir **Informes** y **Orden de Compra** (referencia: `BASE_DATOS_ANTIGUA.md`).
 - `POST /api/auth/setup-admin` ya se eliminó (v2.168); el primer admin se crea con `crear-admin.js`.
 - Opcional: importar datos históricos del sistema antiguo (14.581 OT, 5.698 contactos).
@@ -112,7 +116,8 @@ Este sistema reemplaza uno que tenía **14.581 órdenes de servicio, 6.420 empre
 Avance:
 1. **HECHO y publicado (v2.176):** listado de OT paginado y filtrado en el servidor (`utils/filtrosOrdenes.js`, `useOrdenesListado.js`).
 2. **HECHO en local, sin publicar (v2.178):** buscador de cliente de la OT en el servidor (`GET /api/clientes?q=`, `GET /api/clientes/verificar`, `utils/busquedaClientes.js`, `utils/clientesApi.js`). El merge a `deploy/cloud` ya está hecho y probado en PostgreSQL (40/40); falta la orden de push (Render primero, Vercel después).
-3. **Pendiente de la OT:** ordenar el `INSERT`/`UPDATE` de 50 columnas de `ordenes.js` (lista de campos que genere el SQL y los parámetros, sin `$N` a mano) y bajar `OrdenTrabajo.jsx` (hoy ~630 líneas) hacia 400, incluido el PDF (`ordenServicioDoc.js`).
+3. **HECHO en local, sin publicar (v2.179):** `ordenes.js` arma el `INSERT`/`UPDATE` desde la lista `CAMPOS` (`utils/camposOrden.js`); probado igual al código anterior y en MySQL y PostgreSQL; merge a `deploy/cloud` hecho y sin push.
+4. **HECHO en local (v2.181 a v2.184):** `OrdenTrabajo.jsx` quedó en 377 líneas y el PDF (292) ya estaba bajo la meta. **Con esto queda cerrado el alcance acordado hasta la OT.** Todo lo de v2.179 a v2.184 y el arreglo de Cotizaciones (v2.180) están solo en local.
 
 Qué no escala todavía (después de la OT):
 1. Listados de Clientes (`Clientes.jsx`) y de Equipos (`Equipos.jsx`): cargan todo y filtran en el navegador.
@@ -122,24 +127,19 @@ Qué no escala todavía (después de la OT):
 
 Cómo resolverlo (no con un tope de cantidad, que ocultaría registros): **paginación y filtros en el servidor** (`pagina`, `limite` y filtros en la consulta con `WHERE` y `LIMIT/OFFSET`, la respuesta trae la página y el `total`); el buscador de cliente consulta al servidor desde 2 letras y devuelve ~10 resultados; `enriquecerClientes` solo para los clientes de la página. Los buscadores de Contactos y Direcciones ya consultan al servidor (`useBusquedaApi`): usar ese patrón. Orden sugerido: 1) OT, 2) buscador de cliente, 3) Clientes, 4) Equipos. Hacerlo en pasos chicos, probando cada uno; crear datos de prueba temporales (como se hizo con la paginación) y borrarlos al terminar. Considerar índices en `ordenes_trabajo` (número, cliente, fecha) y `clientes` (razón social, RUT).
 
-## 7b. Próxima sesión: seguir reduciendo la OT a ~400 líneas por archivo (plan acordado)
+## 7b. Reducción de tamaño de la OT (HECHA el 22-oct-2026, v2.169 a v2.184)
 
-Meta del dueño: ningún archivo de pantalla con miles de líneas; que el código sea escalable. Alcance: **solo Clientes, Contactos, Direcciones y OT** (no Cotizaciones, Informes ni Orden de Compra todavía). **Todo local**: no hacer `git push` ni tocar `deploy/cloud`/Neon hasta que el dueño lo ordene. Hacer los pasos **de a uno**: extraer, `npx vite build`, y que el dueño pruebe en pantalla antes del siguiente. Es traslado de código: no cambiar comportamiento.
+Meta del dueño: ningún archivo de pantalla con miles de líneas. **Cumplida para Clientes, Contactos, Direcciones y OT.** Tamaños al cierre: `OrdenTrabajo.jsx` 377, `OrdenFormEquipo.jsx` 326, `ordenServicioDoc.js` (PDF) 292, `OrdenFormCliente.jsx` 275, `OrdenAdjuntos.jsx` 257, `useClienteOT.jsx` 249.
 
-El foco tenue de Tab en botones (v2.170) ya fue confirmado por el dueño.
+Cómo quedó repartida `OrdenTrabajo.jsx`: `utils/ordenFormato.js` (formulario vacío, orden guardada → formulario, `datosAlElegirCliente`), `hooks/useOrdenesListado.js` (listado), `useEquiposOT.js` (equipos y buscador por modelo), `useOrdenDesdeNavegacion.js` (abrir lo que viene de Clientes o Cotizaciones), `useGuardarOrden.js` (guardar, PDF, cotización), `useCotizacionesDeOrden.js`, `useClicFuera.js`, más los componentes `OrdenForm*`, `OrdenBuscadorCliente`, `OrdenCotizaciones`, `OrdenFormObservaciones` y `HeaderOrdenTrabajo` (con su propio menú).
 
-Estado de tamaños (líneas): `OrdenTrabajo.jsx` 658, `OrdenFormCliente.jsx` 280 (ya hecho), `OrdenFormEquipo.jsx` 320, `ordenServicioDoc.js` 292, `OrdenAdjuntos.jsx` 257, `useClienteOT.jsx` 246, `ClienteFormulario.jsx` 252.
+**Revisión que conviene pasar tras cada refactor:** el build de Vite NO detecta nombres sin definir (pasó con `toUpper` y con `setMostrarCotizacionesAsociadas`). Revisar con ESLint (`no-undef` y `react/jsx-no-undef`) sobre `frontend/src`, o probar en pantalla cada flujo tocado.
 
-1. **HECHO (v2.171–v2.172): `OrdenFormCliente.jsx` quedó en 280 líneas** (antes 739). Plan original:  Sacar a componentes propios (en `components/ordenes/`): `OrdenBuscadorCliente.jsx` (buscador de cliente y sus tarjetas, ~210), `OrdenDatosCliente.jsx` (cliente, RUT, fono, email, ~100), `OrdenAvisosVinculo.jsx` (buscadores de contacto/dirección y avisos "ya no vinculado", ~65), `OrdenDatosContacto.jsx` (~80) y `OrdenDatosDireccion.jsx` (~90). Se queda la lógica (RUT, `contactosDisponibles`, `vincularAlCliente`, `refrescarClienteSeleccionado`).
-2. **`OrdenTrabajo.jsx` → ~450.** Sacar: `OrdenCotizaciones.jsx` (chips y contador de cotizaciones asociadas, ~70), `OrdenFormCabecera.jsx` (título, técnico y cerrar, ~40), un hook `useOrdenDesdeNavegacion` (el `init` que recibe cliente/orden desde Clientes o Cotizaciones, ~75) y unificar las 3 ramas casi iguales de `seleccionarCliente` (~110) usando `datosDelTipo`.
-3. Para bajar de 450 a 400 habría que mover el estado del formulario a un hook propio (lo más delicado: más de 40 `useState`).
-4. Después, revisar `OrdenFormEquipo.jsx` (309) y `ordenServicioDoc.js` (292), que ya están cerca de la meta.
-
-Antes de publicar algún día (no ahora): migración de Neon y portar `clientes.js`, `ordenes.js` y `auth.js` a PostgreSQL, ver `CAMBIOS.md` v2.168.
+Siguiente alcance (aún no): Clientes y Equipos en el servidor (ver 7a), Cotizaciones adaptada como la OT, Informes y Orden de Compra.
 
 ## 8. Cómo trabajar con el dueño
 
-- **Regla permanente: código escalable, nunca archivos de miles de líneas.** Lo pidió el dueño el 15-oct-2026 ("no me sirven miles de líneas en el mismo código") y lo retomó el 16-oct-2026 ("continuemos con el código escalable"). Todo código nuevo o modificado debe quedar repartido: **un archivo de pantalla o componente no debería pasar de unas 400 líneas**. Antes de agregar algo a un archivo grande (hoy `OrdenTrabajo.jsx` 658, `OrdenFormEquipo.jsx` 320), extraer a un componente, un hook (`hooks/use*.js`) o una utilidad (`utils/`). La lógica sin interfaz (validar, convertir, armar datos) va en `utils/`. No repetir el mismo bloque (formulario vacío, ramas casi iguales): unificarlo en una función. Si un cambio obliga a pasar de ese tamaño, partir primero y luego agregar. Aplica a todo módulo nuevo (Cotizaciones, Informes, Orden de Compra) desde el inicio.
+- **Regla permanente: código escalable, nunca archivos de miles de líneas.** Lo pidió el dueño el 15-oct-2026 ("no me sirven miles de líneas en el mismo código") y lo retomó el 16-oct-2026 ("continuemos con el código escalable"). Todo código nuevo o modificado debe quedar repartido: **un archivo de pantalla o componente no debería pasar de unas 400 líneas**. Antes de agregar algo a un archivo grande (hoy `OrdenTrabajo.jsx` 377, `OrdenFormEquipo.jsx` 326), extraer a un componente, un hook (`hooks/use*.js`) o una utilidad (`utils/`). La lógica sin interfaz (validar, convertir, armar datos) va en `utils/`. No repetir el mismo bloque (formulario vacío, ramas casi iguales): unificarlo en una función. Si un cambio obliga a pasar de ese tamaño, partir primero y luego agregar. Aplica a todo módulo nuevo (Cotizaciones, Informes, Orden de Compra) desde el inicio.
 - **Hacer solo lo que se pide**; si algo parece necesario pero no fue pedido, preguntar. No crear carpetas, scripts, ramas ni worktrees extra sin avisar.
 - **No hacer `git push` ni cambiar de rama sin orden expresa**, porque publica en producción. Los commits locales sí. No usar `--force` sin permiso.
 - **No borrar datos de producción ni bases** sin confirmar qué se borra; el dueño ejecuta él mismo lo que toque Neon (Claude no tiene acceso a Neon ni sus credenciales). En Windows, `git push` falla desde el shell Bash de Claude Code ("cannot spawn sh"): usar PowerShell.
