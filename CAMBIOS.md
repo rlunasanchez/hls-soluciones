@@ -44,6 +44,7 @@
 - **Causa:** una OT cuyo cliente se borró y se registró de nuevo conserva el id viejo (`cliente_id`). Al crear una cotización desde esa OT, el id viejo se copiaba y MySQL/PostgreSQL rechazaban el guardado por la clave foránea (`cotizaciones_ibfk_1`): "Error del servidor".
 - **Arreglo:** `clienteIdExistente(db, clienteId)`: si el cliente no existe, la cotización se guarda sin vínculo (`cliente_id` NULL) tanto en `POST` como en `PUT`; los datos del cliente (razón social, RUT, etc.) quedan igual en la cotización.
 - **Pruebas:** MySQL 8/8 (cliente existente, inexistente, sin cliente; crear y editar).
+- **Port a `deploy/cloud` (22-oct-2026):** el merge automático metió en la versión PostgreSQL la sintaxis MySQL del arreglo (`const [rows]`, `?`) y una variable `connection` inexistente (en PostgreSQL es `client`); se tradujo a mano (`clienteIdExistente` con `$1` y `result.rows`). Probado en PostgreSQL 46/46, ahora incluyendo cotizaciones con cliente existente, inexistente y edición, con la clave foránea del esquema real.
 - **Dato local corregido:** la `OT-2026-02802` apuntaba al cliente id 8 (ya inexistente); se apuntó al id 10 (`GABYY`, `CL-0002`).
 
 ### v2.179: `ordenes.js` arma el INSERT y el UPDATE desde una sola lista de campos
