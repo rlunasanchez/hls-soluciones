@@ -51,7 +51,7 @@ Solo existen **dos ramas**:
 - `components/comunes/CampoCatalogo.jsx` (buscador de contacto/dirección con Editar/Registrar/ "(ya es de CL-X)"), `ModalEditarCatalogo.jsx`, `BotonQuitar.jsx`, `AccionesFicha.jsx`.
 - `hooks/usePaginacion.js` (`usePaginaPersistente`, `useClampPagina`), `useBusquedaApi.js` (busca en el servidor mientras se escribe), `useValorRetrasado.js` (espera 300 ms antes de consultar), `useGuardar.js` (evita doble envío).
 - `utils/clientesApi.js` (consultas puntuales de clientes: `verificarCliente`, `clientePorId`, `clienteDeOrden`; **la OT ya no carga la lista completa de clientes**).
-- **Backend `backend/utils/`** (mismo archivo en `main` y `deploy/cloud`, usan `?` y `numerarMarcadores` los vuelve `$1…` solo en PostgreSQL): `filtrosOrdenes.js` (filtros y paginación del listado de OT), `busquedaClientes.js` (buscador de cliente), `validaciones.js` (RUT y email).
+- **Backend `backend/utils/`** (mismo archivo en `main` y `deploy/cloud`, usan `?` y `numerarMarcadores` los vuelve `$1…` solo en PostgreSQL): `filtrosOrdenes.js` (filtros y paginación del listado de OT), `busquedaClientes.js` (buscador de cliente), `validaciones.js` (RUT y email), `camposOrden.js` (lista `CAMPOS` de la OT de la que salen el INSERT y el UPDATE: para agregar una columna a la OT se edita esa lista, sin contar marcadores).
 - `utils/helpers.js` (`toUpper`, `upperInput`, `validarRUT`, `formatearRutInput`, `parseToken`, `cerrarSesion`), `cotizacionDoc.js` y `ordenServicioDoc.js` (PDF por HTML + `imprimir.js`), `empresa.js` (datos de la empresa).
 
 ## 4. Modelo de datos y reglas de diseño
@@ -112,7 +112,8 @@ Este sistema reemplaza uno que tenía **14.581 órdenes de servicio, 6.420 empre
 Avance:
 1. **HECHO y publicado (v2.176):** listado de OT paginado y filtrado en el servidor (`utils/filtrosOrdenes.js`, `useOrdenesListado.js`).
 2. **HECHO en local, sin publicar (v2.178):** buscador de cliente de la OT en el servidor (`GET /api/clientes?q=`, `GET /api/clientes/verificar`, `utils/busquedaClientes.js`, `utils/clientesApi.js`). El merge a `deploy/cloud` ya está hecho y probado en PostgreSQL (40/40); falta la orden de push (Render primero, Vercel después).
-3. **Pendiente de la OT:** ordenar el `INSERT`/`UPDATE` de 50 columnas de `ordenes.js` (lista de campos que genere el SQL y los parámetros, sin `$N` a mano) y bajar `OrdenTrabajo.jsx` (hoy ~630 líneas) hacia 400, incluido el PDF (`ordenServicioDoc.js`).
+3. **HECHO en local, sin publicar (v2.179):** `ordenes.js` arma el `INSERT`/`UPDATE` desde la lista `CAMPOS` (`utils/camposOrden.js`); probado igual al código anterior y en MySQL y PostgreSQL; merge a `deploy/cloud` hecho y sin push.
+4. **Pendiente de la OT:** bajar `OrdenTrabajo.jsx` (hoy ~630 líneas) hacia 400, incluido revisar el PDF (`ordenServicioDoc.js`).
 
 Qué no escala todavía (después de la OT):
 1. Listados de Clientes (`Clientes.jsx`) y de Equipos (`Equipos.jsx`): cargan todo y filtran en el navegador.

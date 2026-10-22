@@ -8,7 +8,7 @@
 
 - **Nuevo `backend/utils/camposOrden.js` (83 líneas):** lista `CAMPOS` con `[columna, dato del formulario, conversión]` y las funciones `armarInsertOrden` / `armarUpdateOrden`. Agregar o quitar una columna es editar una línea de esa lista; ya no hay que contar 50 marcadores ni renumerar `$N` a mano. Idéntico en `main` (MySQL) y `deploy/cloud` (PostgreSQL): el SQL usa `?` y `numerarMarcadores` lo vuelve `$1, $2…` solo en PostgreSQL. `toDateMySQL` se movió ahí.
 - **`routes/ordenes.js`:** 215 → 132 líneas. Desaparecieron la desestructuración de 50 variables y las dos líneas largas de SQL y parámetros del `POST` y el `PUT`.
-- **Pruebas:** el SQL y los parámetros generados son **idénticos** a los del código anterior (comparados con la versión de git, con un cuerpo completo, uno mínimo y uno con valores raros: vacíos, `0`, `null`, tipo inválido, fecha inválida). Ruta real en MySQL 9/9 (crear, leer, editar, listar, borrar, número siguiente, vacíos en NULL, adjuntos y contactos extra como JSON). PostgreSQL: se prueba al portar.
+- **Pruebas:** el SQL y los parámetros generados son **idénticos** a los del código anterior (comparados con la versión de git, con un cuerpo completo, uno mínimo y uno con valores raros: vacíos, `0`, `null`, tipo inválido, fecha inválida). Ruta real en MySQL 9/9 (crear, leer, editar, listar, borrar, número siguiente, vacíos en NULL, adjuntos y contactos extra como JSON). PostgreSQL: 40/40 con el backend ya portado en `deploy/cloud` (merge local `Merge main -> deploy/cloud: v2.179`, **sin push**; en `deploy/cloud` el `INSERT` usa `numerarMarcadores(sql + " RETURNING id")`).
 
 ### v2.178: Buscador de cliente de la OT en el servidor (la OT ya no carga todos los clientes)
 
