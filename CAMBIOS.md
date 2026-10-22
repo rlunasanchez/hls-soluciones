@@ -2,6 +2,14 @@
 
 ## Fecha: 2026-10-22 (continuación, solo local)
 
+### v2.183: `OrdenTrabajo.jsx` 489 → 434 líneas (paso C): hook del arranque desde otras pantallas y menú en su encabezado
+
+**Alcance:** Orden de Trabajo, solo frontend. Traslado de código sin cambiar comportamiento. **Solo local.**
+
+- **`hooks/useOrdenDesdeNavegacion.js`** (nuevo, 38 líneas): lo que la OT abre al llegar desde otra pantalla: una orden a editar, volver a una OT (Ver o Editar) desde una cotización asociada, o una OT nueva con los datos de un cliente (botón "OT" de Clientes). Se llama después de definir `editarOrden`, `verOrden` y `abrirNuevaOrden`.
+- **`HeaderOrdenTrabajo.jsx`:** arma su propio menú de 9 botones con `useNavigate` (como `HeaderCliente`); la página ya no le pasa `navItems`.
+- **Pruebas en pantalla:** menú, botón OT de Clientes y Cancelar, volver a la OT desde una cotización asociada (Ver y Editar), botón de cotización del listado, F5 en el listado. Revisión automática de nombres sin definir: limpia.
+
 ### v2.182: `OrdenTrabajo.jsx` 560 → 489 líneas (paso B): hooks de equipos y de clic fuera
 
 **Alcance:** Orden de Trabajo, solo frontend. Traslado de código sin cambiar comportamiento, salvo lo indicado. **Solo local.**

@@ -1,8 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Home, Users, Contact, MapPin, Package, FileText, FileSpreadsheet, ShoppingCart, UserCog
-} from "lucide-react";
 import api from "../services/api";
 import useBusquedaApi from "../hooks/useBusquedaApi";
 import { verificarCliente, clienteDeOrden } from "../utils/clientesApi";
@@ -26,6 +23,7 @@ import OrdenFormObservaciones from "../components/ordenes/OrdenFormObservaciones
 import useCotizacionesDeOrden from "../hooks/useCotizacionesDeOrden";
 import useEquiposOT from "../hooks/useEquiposOT";
 import useClicFuera from "../hooks/useClicFuera";
+import useOrdenDesdeNavegacion from "../hooks/useOrdenDesdeNavegacion";
 import useOrdenesListado from "../hooks/useOrdenesListado";
 
 
@@ -77,48 +75,6 @@ function OrdenTrabajo() {
     setEquiposModeloSugeridos, equiposModeloFiltrados, equipoModeloDropdownRef,
     seleccionarEquipoPorModelo, registrarEquipoEnMantenedor
   } = useEquiposOT({ nuevaOrden, setNuevaOrden });
-
-  // Recibir cliente u orden desde Clientes
-  useEffect(() => {
-    const init = async () => {
-      const navState = window.history.state?.usr;
-      
-      // Limpiar siempre al inicio
-      setMostrarFormulario(false);
-      setEditingId(null);
-      
-      // Solo procesar si hay datos de cliente, orden, o una orden puntual a reabrir
-      if (!navState || (!navState?.cliente && !navState?.orden && !navState?.verOrdenId)) return;
-
-      const ordenFromNav = navState?.orden;
-      const clienteFromNav = navState?.cliente;
-      const verOrdenId = navState?.verOrdenId;
-      const verOrdenSoloLectura = navState?.verOrdenSoloLectura;
-
-      if (ordenFromNav) {
-        // Cargar equipos frescos antes de editar la orden
-        await fetchEquipos();
-        editarOrden(ordenFromNav);
-        window.history.replaceState({}, document.title);
-      }
-
-      // Volver a la OT desde la que se abrió una cotización asociada (chip
-      // "Cotizaciones Asociadas" → Cancelar/Cerrar en la Cotización), en el
-      // mismo modo en que estaba: Ver o Editar.
-      if (verOrdenId) {
-        await fetchEquipos();
-        if (verOrdenSoloLectura) {
-          verOrden({ id: verOrdenId });
-        } else {
-          editarOrden({ id: verOrdenId });
-        }
-        window.history.replaceState({}, document.title);
-      }
-
-      if (clienteFromNav) await abrirNuevaOrden(clienteFromNav);
-    };
-    init();
-  }, []);
 
   // Función para calcular siguiente número de OT correlativo
   const calcularSiguienteNumeroOrden = async () => {
@@ -199,6 +155,9 @@ function OrdenTrabajo() {
 
   const editarOrden = (orden) => cargarOrden(orden, "editar");
   const verOrden = (orden) => cargarOrden(orden, "ver");
+
+  // Abrir lo que viene desde Clientes o Cotizaciones (orden a editar, volver a una OT, OT nueva de un cliente)
+  useOrdenDesdeNavegacion({ setMostrarFormulario, setEditingId, fetchEquipos, editarOrden, verOrden, abrirNuevaOrden });
 
   const eliminarOrden = async (id) => {
     if (!window.confirm("¿Está seguro de eliminar esta orden de trabajo?")) return;
@@ -337,23 +296,9 @@ function OrdenTrabajo() {
       fetchOrdenes();
     }
   };
-  // Funciones de navegación eliminadas (accesos desde el menú)
-
-  const navItems = [
-    { label: "Inicio", icon: Home, onClick: () => navigate("/home"), color: "var(--gradient)" },
-    { label: "Clientes", icon: Users, onClick: () => navigate("/clientes"), color: "var(--primary)" },
-    { label: "Contactos", icon: Contact, onClick: () => navigate("/contactos"), color: "#7C3AED" },
-    { label: "Direcciones", icon: MapPin, onClick: () => navigate("/direcciones"), color: "#0891B2" },
-    { label: "Equipos", icon: Package, onClick: () => navigate("/equipos"), color: "var(--success)" },
-    { label: "Informes Técnicos", icon: FileText, onClick: () => navigate("/informes"), color: "#EA580C" },
-    { label: "Cotizaciones", icon: FileSpreadsheet, onClick: () => navigate("/cotizaciones"), color: "#DB2777" },
-    { label: "Orden de Compra", icon: ShoppingCart, onClick: () => navigate("/orden-compra"), color: "#1E40AF" },
-    { label: "Usuarios", icon: UserCog, onClick: () => navigate("/usuarios"), color: "#0D9488" },
-  ];
-
   return (
     <div className="container" style={{ background: 'var(--bg)', minHeight: '100vh' }}>
-      <HeaderOrdenTrabajo navItems={navItems} onLogout={cerrarSesion} />
+      <HeaderOrdenTrabajo onLogout={cerrarSesion} />
 
       {!mostrarFormulario ? (
           <div className="ot-list-wrap">
