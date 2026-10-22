@@ -2,10 +2,9 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import useBusquedaApi from "../hooks/useBusquedaApi";
-import { verificarCliente, clienteDeOrden } from "../utils/clientesApi";
+import { clienteDeOrden } from "../utils/clientesApi";
 import { cerrarSesion } from "../utils/helpers";
 import { ordenAFormulario, buscarEquipoDeOrden, insumosDeOrden, ordenVacia, insumosVacios, ordenParaCliente, tecnicoDeSesion, datosAlElegirCliente } from "../utils/ordenFormato";
-import { validarOrden, armarPayloadOrden } from "../utils/validarOrden";
 import '../styles/OrdenTrabajo.css';
 import "../styles/ordenes-componentes.css";
 import HeaderOrdenTrabajo from "../components/ordenes/HeaderOrdenTrabajo";
@@ -24,6 +23,7 @@ import useCotizacionesDeOrden from "../hooks/useCotizacionesDeOrden";
 import useEquiposOT from "../hooks/useEquiposOT";
 import useClicFuera from "../hooks/useClicFuera";
 import useOrdenDesdeNavegacion from "../hooks/useOrdenDesdeNavegacion";
+import useGuardarOrden from "../hooks/useGuardarOrden";
 import useOrdenesListado from "../hooks/useOrdenesListado";
 
 
@@ -39,8 +39,6 @@ function OrdenTrabajo() {
     filtroFechaDesde, setFiltroFechaDesde, filtroFechaHasta, setFiltroFechaHasta
   } = useOrdenesListado();
   const [editingId, setEditingId] = useState(null);
-  const [guardando, setGuardando] = useState(false);
-  const guardandoRef = useRef(false);
 
   // Id de la orden abierta en el formulario, tanto en modo Editar como en modo
   // Ver (a diferencia de editingId, que en modo Ver queda en null). Sirve para
@@ -190,78 +188,23 @@ function OrdenTrabajo() {
   const [resultadosCliente] = useBusquedaApi("/api/clientes", busquedaCliente);
   const clientesFiltrados = busquedaCliente.length >= 2 ? resultadosCliente : [];
 
-  // PDF y Cotización de la orden que está abierta en el formulario (ya
-  // guardada al menos una vez, con editingId). Traen los datos frescos de
-  // la orden para no trabajar con lo que quedó en el estado del formulario.
-  const generarPDFOrdenActual = async () => {
-    if (!editingId) return;
-    const res = await api.get(`/api/ordenes/${editingId}`);
-    setOrdenParaPDF(res.data);
-  };
-
-  const irACotizacionOrdenActual = async () => {
-    if (!editingId) return;
-    const res = await api.get(`/api/ordenes/${editingId}`);
-    navigate('/cotizaciones', { state: { orden: res.data } });
-  };
-
-  const guardarOrden = async (e, mantener = false) => {
-    e.preventDefault();
-    if (guardandoRef.current) return;
-
-    let verificacion;
-    try {
-      verificacion = await verificarCliente({ rut: nuevaOrden.rut, razon_social: nuevaOrden.cliente });
-    } catch {
-      alert("No se pudo comprobar el cliente. Revise la conexión e intente de nuevo.");
-      return;
+  // Guardar la orden, y generar su PDF o ir a crear una cotización
+  const { guardando, guardarOrden, generarPDFOrdenActual, irACotizacionOrdenActual } = useGuardarOrden({
+    nuevaOrden, insumos, clienteSeleccionado, editingId, setEditingId, editarOrden,
+    abrirPDF: setOrdenParaPDF,
+    irACotizacion: (orden) => navigate('/cotizaciones', { state: { orden } }),
+    // Guardar (a diferencia de Cancelar/X) siempre deja en el mantenedor de OT, aunque se haya creado
+    // desde Clientes — para eso está el listado de OT. Una orden nueva queda primera (el backend ordena
+    // por id DESC): saltar a la página 1 para verla. Al editar se conserva la página del usuario.
+    alTerminar: (eraOrdenNueva) => {
+      setMostrarFormulario(false);
+      resetFormulario();
+      setSoloLectura(false);
+      window.history.replaceState({}, document.title);
+      if (eraOrdenNueva) setPaginaActual(1);
+      fetchOrdenes();
     }
-    const mensajeError = validarOrden(nuevaOrden, { verificacion, clienteSeleccionado });
-    if (mensajeError) {
-      alert(mensajeError);
-      return;
-    }
-
-    const payload = armarPayloadOrden(nuevaOrden, insumos, clienteSeleccionado);
-
-    const eraOrdenNueva = !editingId;
-    guardandoRef.current = true;
-    setGuardando(true);
-    try {
-      let idActual = editingId;
-      if (editingId) {
-        await api.put(`/api/ordenes/${editingId}`, payload);
-      } else {
-        const res = await api.post("/api/ordenes", payload);
-        idActual = res.data.id;
-        setEditingId(idActual);
-      }
-
-      if (mantener) {
-        // "Guardar Cambios"/"Guardar": guarda y se mantiene en la OT para seguir editando o generar el PDF
-        const res = await api.get(`/api/ordenes/${idActual}`);
-        await editarOrden(res.data);
-      } else {
-        alert(eraOrdenNueva ? "Orden guardada exitosamente" : "Orden actualizada exitosamente");
-        setMostrarFormulario(false);
-        resetFormulario();
-        setSoloLectura(false);
-        window.history.replaceState({}, document.title);
-        // Guardar (a diferencia de Cancelar/X) siempre deja en el mantenedor de OT,
-        // aunque se haya creado desde Clientes — para eso está el listado de OT.
-        // Una orden nueva queda primera (backend ordena por id DESC): saltar a la página 1 para verla.
-        // Al editar se conserva la página en la que estaba el usuario.
-        if (eraOrdenNueva) setPaginaActual(1);
-        fetchOrdenes();
-      }
-    } catch (err) {
-      console.error("Error al guardar orden:", err);
-      alert("Error al guardar la orden");
-    } finally {
-      guardandoRef.current = false;
-      setGuardando(false);
-    }
-  };
+  });
 
   const resetFormulario = () => {
     setNuevaOrden(ordenVacia(tecnicoDeSesion()));

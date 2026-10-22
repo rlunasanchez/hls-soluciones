@@ -2,6 +2,14 @@
 
 ## Fecha: 2026-10-22 (continuación, solo local)
 
+### v2.184: `OrdenTrabajo.jsx` 434 → 377 líneas (paso D): hook del guardado de la OT. Meta de ~400 líneas cumplida
+
+**Alcance:** Orden de Trabajo, solo frontend. Traslado de código sin cambiar comportamiento. **Solo local.**
+
+- **`hooks/useGuardarOrden.js`** (nuevo, 79 líneas): guardar la orden (crear o actualizar, con la verificación del cliente y las validaciones), generar su PDF e ir a crear una cotización desde ella. La página le indica qué hacer al terminar (`alTerminar`: cerrar el formulario, volver al listado y saltar a la página 1 si la OT es nueva).
+- **Tamaños de la OT:** `OrdenTrabajo.jsx` 1.243 (inicio de la reducción) → 633 → **377**; el siguiente archivo más grande es `OrdenFormEquipo.jsx` con 326, luego `ordenServicioDoc.js` (el PDF) con 292 y `OrdenFormCliente.jsx` con 275. Ninguno pasa de 400.
+- **Pruebas en pantalla:** guardar una OT nueva, Guardar Cambios, guardar y salir (misma página del listado), validaciones, PDF, cotización y doble clic.
+
 ### v2.183: `OrdenTrabajo.jsx` 489 → 434 líneas (paso C): hook del arranque desde otras pantallas y menú en su encabezado
 
 **Alcance:** Orden de Trabajo, solo frontend. Traslado de código sin cambiar comportamiento. **Solo local.**
