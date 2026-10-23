@@ -35,6 +35,7 @@ export function ordenAFormulario(orden) {
   return {
     numeroOrden: orden.numero_orden || "",
     fecha: fmtDate(orden.fecha),
+    fechaCreacion: orden.fecha_creacion || "",
     esGarantia: orden.es_garantia || false,
     fechaIngreso: fmtDate(orden.fecha_ingreso),
     fechaIngresoCheck: orden.fecha_ingreso_check || false,
@@ -98,7 +99,7 @@ export function insumosDeOrden(orden) {
 // Formulario de una OT nueva, sin datos. El técnico viene de la sesión.
 export function ordenVacia(tecnicoAsignado = "") {
   return {
-    numeroOrden: "", fecha: "", esGarantia: false,
+    numeroOrden: "", fecha: "", fechaCreacion: "", esGarantia: false,
     fechaIngreso: "", fechaIngresoCheck: false,
     fechaTermino: "", fechaTerminoCheck: false,
     fechaEntrega: "", fechaEntregaCheck: false,

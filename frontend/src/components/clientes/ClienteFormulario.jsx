@@ -5,6 +5,7 @@ import api from "../../services/api";
 import VinculosCliente from "./VinculosCliente";
 import useGuardar from "../../hooks/useGuardar";
 import AccionesFicha from "../comunes/AccionesFicha";
+import { fechaCL } from "../../utils/fechas";
 
 // Contactos y Direcciones viven en sus propios mantenedores (catálogos
 // globales). Acá solo se buscan y se vinculan al cliente (muchos a muchos);
@@ -162,7 +163,14 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
         <form onSubmit={handleSubmit} className="cf" noValidate>
           <div className={unaColumna && !personaConDireccion ? "cf-grid" : "cf-grid cf-grid-3"}>
             <div className="cf-sec cf-sec-empresa">
-              <h3>Empresa o Persona</h3>
+              <h3 style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
+                Empresa o Persona
+                {clienteEditando?.fecha_creacion && (
+                  <span style={{ fontWeight: 400, fontSize: ".7rem", color: "#64748b" }} title="Fecha en que se creó el cliente">
+                    Creado el {fechaCL(clienteEditando.fecha_creacion)}
+                  </span>
+                )}
+              </h3>
               <div style={{ display: "grid", gridTemplateColumns: "200px 200px", gap: 6 }}>
                 <div className="cf-field">
                   <label>Tipo</label>

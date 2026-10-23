@@ -1,3 +1,5 @@
+import { fechaHoraCL } from "../../utils/fechas";
+
 function OrdenFormDatos({ nuevaOrden, setNuevaOrden, readOnly }) {
   return (
     <div className="of-sec primary">
@@ -25,6 +27,13 @@ function OrdenFormDatos({ nuevaOrden, setNuevaOrden, readOnly }) {
               required
             />
           </div>
+
+          {nuevaOrden.fechaCreacion && (
+            <div className="of-f of-f-inline">
+              <label>Creada</label>
+              <input type="text" value={fechaHoraCL(nuevaOrden.fechaCreacion)} disabled title="Fecha y hora en que se creó la orden" />
+            </div>
+          )}
         </div>
 
         <div className="of-dates">

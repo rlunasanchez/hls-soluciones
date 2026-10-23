@@ -2,6 +2,15 @@
 
 ## Fecha: 2026-10-23 (solo local)
 
+### v2.187: Fechas de creación, pantalla de Inicio más compacta, menú más chico y encabezado fijo
+
+**Alcance:** solo frontend, sin cambios de backend ni de base de datos.
+
+- **Fecha de creación:** en la **OT**, un campo bloqueado **Creada** (fecha y hora, p. ej. `23-10-2026 14:35`) en la misma fila que N° Orden y Fecha (`OrdenFormDatos.jsx`; la grilla de `.of-head-row` pasó de 2 a 3 columnas y la fila puede bajar de línea si no cabe). En el **cliente**, `Creado el 22-10-2026` en letra chica a la derecha del título de la sección "Empresa o Persona" (`ClienteFormulario.jsx`). Ambas salen de `fecha_creacion`, que la base ya guardaba; se muestran en hora de Chile con `utils/fechas.js` (`fechaCL`, `fechaHoraCL`). En registros nuevos aparecen al guardar.
+- **Pantalla de Inicio** (`Home.jsx`): tarjetas compactas (círculo de 46 px, título de 1 rem, sin la flecha, línea de color del módulo arriba), 4 por fila en pantalla normal y 2 en celular. Los colores de cada módulo son un dato de la lista. Se eliminaron 15 reglas antiguas de `index.css` que forzaban tamaños grandes en cada ancho.
+- **Menú superior más chico:** botones de `.logout-btn` con menos relleno, letra de 0,70 rem e iconos de 14 px, en todas las pantallas.
+- **Encabezado fijo:** el nombre de la pantalla arriba y el menú en una fila debajo en todos los mantenedores (`.header > .header-left { flex-basis: 100% }`); antes los botones solo bajaban si no cabían y la OT se veía distinta de las demás. Inicio conserva su encabezado en una línea.
+
 ### v2.186: Adjuntos de la OT: hasta 10 imágenes y 10 PDF, guardados aparte y con miniaturas
 
 **Alcance:** Orden de Trabajo. Backend (tabla y rutas nuevas) y frontend. **Solo local, sin publicar.** Antes de publicar hay que crear la tabla en Neon y portar el backend a PostgreSQL (ver al final).
