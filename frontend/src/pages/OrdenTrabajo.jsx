@@ -24,6 +24,7 @@ import useEquiposOT from "../hooks/useEquiposOT";
 import useClicFuera from "../hooks/useClicFuera";
 import useOrdenDesdeNavegacion from "../hooks/useOrdenDesdeNavegacion";
 import useGuardarOrden from "../hooks/useGuardarOrden";
+import useAdjuntosOrden from "../hooks/useAdjuntosOrden";
 import useOrdenesListado from "../hooks/useOrdenesListado";
 
 
@@ -154,6 +155,12 @@ function OrdenTrabajo() {
   const editarOrden = (orden) => cargarOrden(orden, "editar");
   const verOrden = (orden) => cargarOrden(orden, "ver");
 
+  // Adjuntos de la orden abierta (archivos aparte de la OT; los antiguos se migran al abrirla en Editar)
+  const adjuntos = useAdjuntosOrden({
+    ordenId: ordenIdActual, activo: mostrarFormulario, soloLectura, antiguos: nuevaOrden.adjuntosAntiguos,
+    alMigrar: () => setNuevaOrden((prev) => ({ ...prev, adjuntosAntiguos: [] }))
+  });
+
   // Abrir lo que viene desde Clientes o Cotizaciones (orden a editar, volver a una OT, OT nueva de un cliente)
   useOrdenDesdeNavegacion({ setMostrarFormulario, setEditingId, fetchEquipos, editarOrden, verOrden, abrirNuevaOrden });
 
@@ -192,6 +199,7 @@ function OrdenTrabajo() {
   const { guardando, guardarOrden, generarPDFOrdenActual, irACotizacionOrdenActual } = useGuardarOrden({
     nuevaOrden, insumos, clienteSeleccionado, editingId, setEditingId, editarOrden,
     abrirPDF: setOrdenParaPDF,
+    subirAdjuntos: adjuntos.subirPendientes,
     irACotizacion: (orden) => navigate('/cotizaciones', { state: { orden } }),
     // Guardar (a diferencia de Cancelar/X) siempre deja en el mantenedor de OT, aunque se haya creado
     // desde Clientes — para eso está el listado de OT. Una orden nueva queda primera (el backend ordena
@@ -311,6 +319,7 @@ function OrdenTrabajo() {
                   clienteFijo={clienteFijo}
                   readOnly={soloLectura}
                   setClienteSeleccionado={setClienteSeleccionado}
+                  adjuntos={adjuntos}
                 />
 
                 <OrdenCotizaciones key={ordenIdActual} cotizaciones={cotizacionesDeOrden} ordenIdActual={ordenIdActual} soloLectura={soloLectura} />

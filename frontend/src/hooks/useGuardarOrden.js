@@ -8,8 +8,9 @@ import { validarOrden, armarPayloadOrden } from "../utils/validarOrden";
 //  - `editarOrden(orden)`: reabre la orden en el formulario (para "Guardar", que se queda).
 //  - `alTerminar(eraOrdenNueva)`: qué hacer al guardar y salir (cerrar el formulario, volver al listado).
 //  - `abrirPDF(orden)` y `irACotizacion(orden)`: reciben la orden fresca del servidor.
+//  - `subirAdjuntos(id)`: sube los archivos que se eligieron en una OT nueva; devuelve los que fallaron.
 export default function useGuardarOrden({
-  nuevaOrden, insumos, clienteSeleccionado, editingId, setEditingId, editarOrden, alTerminar, abrirPDF, irACotizacion
+  nuevaOrden, insumos, clienteSeleccionado, editingId, setEditingId, editarOrden, alTerminar, abrirPDF, irACotizacion, subirAdjuntos
 }) {
   const [guardando, setGuardando] = useState(false);
   const guardandoRef = useRef(false);
@@ -56,6 +57,11 @@ export default function useGuardarOrden({
         const res = await api.post("/api/ordenes", payload);
         idActual = res.data.id;
         setEditingId(idActual);
+        const fallos = await subirAdjuntos(idActual);
+        if (fallos.length > 0) {
+          const lista = fallos.map((f) => `- ${f}`).join("\n");
+          alert(`La orden se guardó, pero no se pudieron subir estos archivos:\n${lista}\nPuede agregarlos de nuevo editando la orden.`);
+        }
       }
 
       if (mantener) {

@@ -221,3 +221,22 @@ CREATE TABLE IF NOT EXISTS cotizaciones (
   FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE SET NULL,
   FOREIGN KEY (orden_id) REFERENCES ordenes_trabajo(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================
+-- ADJUNTOS DE LA ORDEN DE TRABAJO (v2.186)
+-- ============================================
+-- Un registro por archivo (imagen o PDF), aparte de la OT: se suben y se bajan de a uno y guardar la OT
+-- no los vuelve a enviar. `miniatura` es una imagen pequena (data URL) para mostrar sin bajar el archivo.
+-- Antes iban como JSON base64 en ordenes_trabajo.adjunto (se migran al abrir la OT en Editar).
+CREATE TABLE IF NOT EXISTS orden_adjuntos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  orden_id INT NOT NULL,
+  nombre VARCHAR(255) NOT NULL,
+  tipo VARCHAR(100) NOT NULL,
+  tamano INT NOT NULL,
+  miniatura TEXT,
+  archivo LONGBLOB NOT NULL,
+  fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_oa_orden (orden_id),
+  FOREIGN KEY (orden_id) REFERENCES ordenes_trabajo(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

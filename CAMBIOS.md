@@ -2,6 +2,35 @@
 
 ## Fecha: 2026-10-23 (solo local)
 
+### v2.186: Adjuntos de la OT: hasta 10 imágenes y 10 PDF, guardados aparte y con miniaturas
+
+**Alcance:** Orden de Trabajo. Backend (tabla y rutas nuevas) y frontend. **Solo local, sin publicar.** Antes de publicar hay que crear la tabla en Neon y portar el backend a PostgreSQL (ver al final).
+
+- **Por qué:** antes eran 2 archivos de 5 MB guardados como texto base64 dentro de la propia OT (columna `ordenes_trabajo.adjunto`), y cada vez que se guardaba la OT se reenviaban. Con 10 + 10 archivos habría superado el límite de 20 MB de la petición, hecho lentísimo cada guardado y llenado rápido el espacio de Neon. El cliente pidió hasta 10 + 10 aunque lo habitual serán pocos: el diseño es liviano con pocos archivos y aguanta el máximo.
+- **Tabla nueva `orden_adjuntos`** (una fila por archivo: `nombre`, `tipo`, `tamano`, `miniatura` data URL chica, `archivo` LONGBLOB/BYTEA, `ON DELETE CASCADE` desde la OT). Rutas `/api/adjuntos` (`backend/routes/adjuntos.js`): listar `?orden_id=` (sin el archivo), subir de a uno, bajar `/:id/archivo`, borrar y `POST /migrado`. Límites en `backend/utils/limitesAdjuntos.js` y los mismos en `frontend/src/utils/adjuntos.js`: 10 imágenes, 10 PDF, imagen hasta 5 MB, PDF hasta 10 MB, 60 MB en total por OT. El servidor valida que los primeros bytes correspondan al tipo declarado y no acepta SVG.
+- **La OT ya no guarda ni envía adjuntos:** se quitó `adjunto` de `utils/camposOrden.js` (guardar la OT no toca la columna antigua) y `armarPayloadOrden` ya no manda `adjuntosAntiguos`. Se eliminó el control de peso de adjuntos de `validarOrden`.
+- **Frontend:** `hooks/useAdjuntosOrden.js` (OT guardada: cada archivo se sube al elegirlo; OT nueva: quedan en memoria y se suben al guardar, con aviso si alguno falla; migra los antiguos), `components/ordenes/OrdenAdjuntos.jsx` (113 líneas: apartado plegado con resumen "2 imágenes · 1 PDF", filtros Todos / Imágenes n/10 / PDF n/10, cuadrícula de miniaturas de altura fija con scroll, agregar varios o arrastrar, X roja para eliminar), `components/ordenes/AdjuntoVisor.jsx` (visor con flechas y teclado, Imprimir en imágenes y Descargar) y `utils/adjuntos.js` (validación previa, reducción de imágenes de más de 1,5 MB o 1600 px a JPEG, miniaturas, GIF sin tocar).
+- **Migración de los adjuntos antiguos:** al abrir la OT en **Editar** se pasan a la tabla nueva (sin duplicar por nombre y tipo) y se vacía la columna `adjunto` con `POST /api/adjuntos/migrado`; en **Ver** se muestran desde la propia OT. Probado con la `OT-2026-02800` (un PDF de 929 KB y un PNG).
+- **Pruebas:** MySQL 29/29 con base temporal (subir y bajar con los mismos bytes, rechazos por tipo falso, SVG, tamaño, cantidad y total, 20 adjuntos en una orden, miniatura demasiado grande, cascada al borrar la OT, guardar la OT no borra el adjunto antiguo). En pantalla: migración, visor, varios archivos a la vez, OT nueva con archivos, límites y eliminar, con una imagen de 12 MB (se reduce sola), un PDF de 8 MB (se acepta), uno de 12 MB y un `.txt` (se rechazan).
+- **Para publicar (pendiente):** (1) el dueño corre en Neon el SQL de abajo; (2) portar `routes/adjuntos.js` a PostgreSQL (`$N`, `result.rows`, `RETURNING id`, `BYTEA` llega como `Buffer`) y registrarla en `server.js`; `ordenes.js` ya no escribe `adjunto`; (3) probar con `embedded-postgres` incluyendo la FK con `ON DELETE CASCADE`; (4) orden: Neon → `deploy/cloud` → `main`. El límite de 20 MB de `express.json` alcanza (un PDF de 10 MB en base64 pesa unos 13,4 MB). Ojo con el espacio de Neon (plan gratis, 0,5 GB): cada OT con adjuntos puede ocupar varios MB; si se acerca al límite, mover los archivos a un almacenamiento de archivos externo (Fase 4 del plan).
+
+SQL para Neon (empezar con una línea en blanco al pegar):
+
+```sql
+CREATE TABLE IF NOT EXISTS orden_adjuntos (
+  id SERIAL PRIMARY KEY,
+  orden_id INTEGER NOT NULL REFERENCES ordenes_trabajo(id) ON DELETE CASCADE,
+  nombre VARCHAR(255) NOT NULL,
+  tipo VARCHAR(100) NOT NULL,
+  tamano INTEGER NOT NULL,
+  miniatura TEXT,
+  archivo BYTEA NOT NULL,
+  fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_oa_orden ON orden_adjuntos (orden_id);
+```
+
+
 ### v2.185: Botones "Guardar" y "Guardar y salir" en todo el sistema; ficha de cliente persona con la dirección al lado
 
 **Alcance:** solo frontend, sin cambios de backend ni de base de datos. **Solo local, sin publicar.**

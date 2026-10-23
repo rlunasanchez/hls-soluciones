@@ -43,24 +43,15 @@ export function validarOrden(orden, { verificacion = {}, clienteSeleccionado = n
     }
   }
 
-  // Peso total de adjuntos: data URL base64 ≈ 33% más pesada que el archivo original (límite del servidor: 20 MB)
-  const adjuntos = orden.adjuntos || [];
-  if (adjuntos.length > 0) {
-    const bytes = adjuntos.reduce((acc, a) => acc + (a.data?.length || 0), 0);
-    const mb = (bytes * 0.75) / (1024 * 1024);
-    if (mb > 18) {
-      return `Las imágenes adjuntas suman aproximadamente ${mb.toFixed(1)} MB.
-El límite es 20 MB. Reducí el tamaño de las imágenes o eliminá algunas antes de guardar.`;
-    }
-  }
-
   return null;
 }
 
 // Cuerpo que se envía al servidor: los datos del formulario + el cliente vinculado + insumo1..insumo12.
 export function armarPayloadOrden(orden, insumos, clienteSeleccionado) {
   const nombres = insumos.filter((i) => i.nombre.trim() !== "").map((i) => i.nombre);
-  const payload = { ...orden, clienteId: clienteSeleccionado?.id || null };
+  // Los adjuntos no viajan con la OT: se suben aparte (ver useAdjuntosOrden)
+  const { adjuntosAntiguos, ...datos } = orden;
+  const payload = { ...datos, clienteId: clienteSeleccionado?.id || null };
   for (let n = 1; n <= 12; n++) payload[`insumo${n}`] = nombres[n - 1] || "";
   return payload;
 }

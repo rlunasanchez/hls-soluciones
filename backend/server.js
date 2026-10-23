@@ -12,6 +12,7 @@ import direccionesRoutes from "./routes/direcciones.js";
 import clientesRoutes from "./routes/clientes.js";
 import ordenesRoutes from "./routes/ordenes.js";
 import cotizacionesRoutes from "./routes/cotizaciones.js";
+import adjuntosRoutes from "./routes/adjuntos.js";
 
 dotenv.config();
 
@@ -58,6 +59,7 @@ app.use("/api/direcciones", direccionesRoutes);
 app.use("/api/clientes", clientesRoutes);
 app.use("/api/ordenes", ordenesRoutes);
 app.use("/api/cotizaciones", cotizacionesRoutes);
+app.use("/api/adjuntos", adjuntosRoutes);
 
 app.get("*", (req, res) => {
   res.sendFile(path.join(frontendPath, "index.html"));

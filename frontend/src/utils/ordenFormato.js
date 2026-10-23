@@ -67,7 +67,8 @@ export function ordenAFormulario(orden) {
     observaciones: toUpper(orden.observaciones),
     infoInterna: toUpper(orden.info_interna),
     clienteTipo: orden.cliente_tipo === "PERSONA" ? "PERSONA" : "EMPRESA",
-    adjuntos: parseAdjuntos(orden.adjunto),
+    // Adjuntos antiguos (JSON en la propia OT): se pasan a la tabla orden_adjuntos al abrir la OT en Editar
+    adjuntosAntiguos: parseAdjuntos(orden.adjunto),
     contactosExtra: parseExtra(orden.contactos_extra),
     direccionesExtra: parseExtra(orden.direcciones_extra)
   };
@@ -108,7 +109,7 @@ export function ordenVacia(tecnicoAsignado = "") {
     equipo: "", modelo: "", marca: "", serie: "", contadorPagOut: "", nivelTinta: "",
     averia: "", actividad: "", observaciones: "", infoInterna: "",
     clienteTipo: "EMPRESA",
-    adjuntos: [], contactosExtra: [], direccionesExtra: []
+    adjuntosAntiguos: [], contactosExtra: [], direccionesExtra: []
   };
 }
 
