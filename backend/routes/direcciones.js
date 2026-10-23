@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import pool from "../config/db.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
+import { sincronizarOrdenesDeDireccion, desvincularOrdenes } from "./ordenesVinculos.js";
 
 dotenv.config();
 const router = express.Router();
@@ -104,6 +105,8 @@ router.put("/:id", authMiddleware, async (req, res) => {
       `UPDATE direcciones SET codigo = $1, direccion = $2, ciudad = $3, comuna = $4 WHERE id = $5`,
       [codigo, direccion.trim(), ciudad || null, comuna || null, id]
     );
+    // Las OT vinculadas a esta dirección toman sus datos nuevos
+    await sincronizarOrdenesDeDireccion(pool, id, { direccion: direccion.trim(), ciudad, comuna });
     res.json({ msg: "Dirección actualizada", codigo });
   } catch (err) {
     console.error(err);
@@ -125,6 +128,7 @@ router.delete("/:id", authMiddleware, async (req, res) => {
       }
     }
     await pool.query("DELETE FROM direcciones WHERE id = $1", [id]);
+    await desvincularOrdenes(pool, "direccion", id);
     res.json({ msg: "Dirección eliminada" });
   } catch (err) {
     console.error(err);

@@ -4,6 +4,7 @@ import pool from "../config/db.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { filtrosOrdenes, leerPaginacion, numerarMarcadores } from "../utils/filtrosOrdenes.js";
 import { armarInsertOrden, armarUpdateOrden } from "../utils/camposOrden.js";
+import { resolverVinculos } from "./ordenesVinculos.js";
 
 dotenv.config();
 const router = express.Router();
@@ -83,7 +84,7 @@ router.post("/", authMiddleware, async (req, res) => {
       return res.status(400).json({ msg: "El número de orden ya existe" });
     }
 
-    const { sql, params } = armarInsertOrden(req.body, numeroOrden);
+    const { sql, params } = armarInsertOrden({ ...req.body, ...(await resolverVinculos(client, req.body)) }, numeroOrden);
     const resultado = await client.query(numerarMarcadores(`${sql} RETURNING id`), params);
 
     await client.query("COMMIT");
@@ -103,7 +104,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
   try {
     await client.query("BEGIN");
 
-    const { sql, params } = armarUpdateOrden(req.body, id);
+    const { sql, params } = armarUpdateOrden({ ...req.body, ...(await resolverVinculos(client, req.body)) }, id);
     await client.query(numerarMarcadores(sql), params);
 
     await client.query("COMMIT");
