@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import useBusquedaApi from "../hooks/useBusquedaApi";
 import { clienteDeOrden } from "../utils/clientesApi";
+import { verificarEquipo } from "../utils/equiposApi";
 import { cerrarSesion } from "../utils/helpers";
-import { ordenAFormulario, buscarEquipoDeOrden, insumosDeOrden, ordenVacia, insumosVacios, ordenParaCliente, tecnicoDeSesion, datosAlElegirCliente } from "../utils/ordenFormato";
+import { ordenAFormulario, insumosDeOrden, ordenVacia, insumosVacios, ordenParaCliente, tecnicoDeSesion, datosAlElegirCliente } from "../utils/ordenFormato";
 import '../styles/OrdenTrabajo.css';
 import "../styles/ordenes-componentes.css";
 import HeaderOrdenTrabajo from "../components/ordenes/HeaderOrdenTrabajo";
@@ -49,7 +50,6 @@ function OrdenTrabajo() {
 
   const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
   const [clienteFijo, setClienteFijo] = useState(false);
-  const [equipoSeleccionado, setEquipoSeleccionado] = useState(null);
   const [equipoFijo, setEquipoFijo] = useState(false);
   const [busquedaCliente, setBusquedaCliente] = useState("");
   const [mostrarDropdownClientes, setMostrarDropdownClientes] = useState(false);
@@ -69,7 +69,7 @@ function OrdenTrabajo() {
 
   // Equipos: lista del mantenedor, buscador por modelo, elegir y registrar equipo
   const {
-    equipos, setEquipos, fetchEquipos,
+    equipoExistente, refrescarEquipo,
     busquedaModelo, setBusquedaModelo, mostrarDropdownModelo, setMostrarDropdownModelo,
     setEquiposModeloSugeridos, equiposModeloFiltrados, equipoModeloDropdownRef,
     seleccionarEquipoPorModelo, registrarEquipoEnMantenedor
@@ -101,7 +101,6 @@ function OrdenTrabajo() {
     setSoloLectura(false);
     setClienteSeleccionado(clienteInicial);
     setClienteFijo(false);
-    setEquipoSeleccionado(null);
     setEquipoFijo(false);
     setClienteInactivo(false);
     setBusquedaCliente("");
@@ -125,6 +124,9 @@ function OrdenTrabajo() {
   // El listado no trae "adjunto" (es pesado): la orden completa se pide recién al abrirla.
   const cargarOrden = async (ordenListado, modo) => {
     const { data: orden } = await api.get(`/api/ordenes/${ordenListado.id}`);
+    // ¿El equipo de la OT está en el mantenedor? Se comprueba antes de abrirla para que sus campos
+    // aparezcan ya bloqueados (sin un instante editable).
+    const equipoDelMantenedor = await verificarEquipo(orden);
 
     setSoloLectura(modo === "ver");
     setEditingId(modo === "editar" ? orden.id : null);
@@ -135,10 +137,7 @@ function OrdenTrabajo() {
 
     // Los campos de la OT son una copia (snapshot): no se pisan con datos frescos del cliente/equipo
     setNuevaOrden(ordenAFormulario(orden));
-
-    // Si el equipo coincide con un registro del mantenedor se marca como seleccionado
-    // (habilita los botones Ver/Editar del equipo)
-    setEquipoSeleccionado(buscarEquipoDeOrden(orden, equipos));
+    refrescarEquipo(equipoDelMantenedor);
 
     // Cliente asociado: solo para badge/estado. Se busca en el servidor por id o, si ese id ya no
     // existe (el cliente se borró y se registró de nuevo), por nombre.
@@ -162,7 +161,7 @@ function OrdenTrabajo() {
   });
 
   // Abrir lo que viene desde Clientes o Cotizaciones (orden a editar, volver a una OT, OT nueva de un cliente)
-  useOrdenDesdeNavegacion({ setMostrarFormulario, setEditingId, fetchEquipos, editarOrden, verOrden, abrirNuevaOrden });
+  useOrdenDesdeNavegacion({ setMostrarFormulario, setEditingId, editarOrden, verOrden, abrirNuevaOrden });
 
   const eliminarOrden = async (id) => {
     if (!window.confirm("¿Está seguro de eliminar esta orden de trabajo?")) return;
@@ -184,7 +183,6 @@ function OrdenTrabajo() {
     setMostrarDropdownClientes(false);
     // OT desde cero: además se limpia el equipo elegido
     if (!editingId) {
-      setEquipoSeleccionado(null);
       setBusquedaModelo("");
     }
     setNuevaOrden(prev => ({ ...prev, ...datosAlElegirCliente(cliente, { editando: !!editingId, mismoCliente }) }));
@@ -220,7 +218,6 @@ function OrdenTrabajo() {
     setInsumosVisibles(2);
     setClienteSeleccionado(null);
     setClienteFijo(false);
-    setEquipoSeleccionado(null);
     setEquipoFijo(false);
     setBusquedaCliente("");
     setBusquedaModelo("");
@@ -334,15 +331,14 @@ function OrdenTrabajo() {
                   equiposModeloFiltrados={equiposModeloFiltrados}
                   equipoModeloDropdownRef={equipoModeloDropdownRef}
                   seleccionarEquipoPorModelo={seleccionarEquipoPorModelo}
-                  equipoSeleccionado={equipoSeleccionado}
                   nuevaOrden={nuevaOrden}
                   setNuevaOrden={setNuevaOrden}
                   readOnly={soloLectura}
-                  equipos={equipos}
                   equipoFijo={equipoFijo}
                   editingId={editingId}
                   onRegistrarEquipo={registrarEquipoEnMantenedor}
-                  onEquiposRefresh={(lista) => setEquipos(lista)}
+                  equipoExistente={equipoExistente}
+                  onEquipoCambiado={refrescarEquipo}
                 />
 
                 <OrdenFormInsumos

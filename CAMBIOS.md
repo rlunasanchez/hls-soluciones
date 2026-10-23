@@ -1,5 +1,31 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-10-24 (solo local)
+
+### v2.190: Ficha de cliente persona con las columnas del mismo ancho que la de empresa
+
+**Alcance:** solo frontend (`ClienteFormulario.jsx`). La ficha de persona (datos a la izquierda, dirección al lado) tenía 820 px en total, de modo que cada columna medía unos 380 px: **Tipo** y **RUT** (200 px cada uno) no cabían, el RUT se deformaba y la tabla de direcciones salía más chica que en empresa. Ahora son 1000 px (dos columnas de unos 475 px, el mismo ancho que cada columna de la ficha de empresa).
+
+### v2.189: Listado de Equipos paginado en el servidor; la OT ya no carga todos los equipos
+
+**Alcance:** Equipos y Orden de Trabajo, backend y frontend; sin cambios de base de datos. **Solo local: falta portar `equipos.js`, `equiposConsulta.js` a `deploy/cloud`.** Cuarto paso de la prioridad de volumen (`AGENTS.md` 7a).
+
+- **Backend:** `GET /api/equipos?pagina=&limite=&modelo=` devuelve `{ equipos, pagination }` (el modelo contiene el texto); `?q=` (sugerencias de la OT) ahora devuelve como máximo 20 (`limite`, máximo 50) y ordena primero los equipos cuyo modelo empieza con el texto, luego los que lo contienen y al final el resto; nuevo `GET /api/equipos/verificar?equipo=&marca=&modelo=` -> `{ equipo | null }`. Sin parámetros devuelve todos. Filtros en `utils/filtrosEquipos.js` (idéntico en MySQL y PostgreSQL). Las consultas pasaron a `routes/equiposConsulta.js` (61 líneas) y `routes/equipos.js` quedó en 109.
+- **Frontend:** `hooks/useEquiposListado.js` (mismo patrón que Clientes y OT); `pages/Equipos.jsx` 186 → 152 líneas. **La OT ya no carga la lista completa de equipos:** `hooks/useEquipoExistente.js` + `utils/equiposApi.js` preguntan al servidor si el Equipo + Marca + Modelo escrito existe (con 300 ms de espera al escribir) para decidir entre **Editar / Cambiar equipo** y **Registrar en Equipos**. Al abrir una OT se comprueba antes de mostrarla (los campos salen ya bloqueados) y al elegir, editar o registrar un equipo se usa el resultado ya conocido, sin esperar. Se quitaron `equipoSeleccionado`, `buscarEquipoDeOrden` y la prop `equipos` (que `EquipoFormulario` ni usaba).
+- **Arreglos:** las sugerencias del buscador de modelo ya no esconden equipos con el mismo modelo y distinta marca (se distinguen por Equipo + Marca + Modelo; antes solo por modelo, resto de cuando la serie estaba en el equipo); **Cambiar equipo** también vacía la caja de búsqueda; en una OT guardada cuyo equipo no está en el mantenedor aparece el aviso "Este equipo no está en el mantenedor. Si fue renombrado, búsquelo arriba por modelo; si es nuevo, use Registrar en Equipos".
+- **Datos locales corregidos** (marca correcta HP): `EQ-0003` pasó de `HPDSA` a `HP`, se eliminaron `EQ-0002` (`HPA`, duplicado mal escrito) y `EQ-0004` (prueba) y la OT-2026-02803 pasó de `HPDSA` a `HP`. Pendiente de decidir: `EQ-0001` (`HPPA`).
+- **Pruebas:** MySQL 33/33 con 6.044 equipos en una base temporal (filtro de modelo contra la lógica antigua del navegador, páginas intermedias, última y fuera de rango, `%`, `_` y `ñ`, límite, inyección, orden por relevancia, `verificar`). En pantalla con 150 equipos temporales. Revisión automática de nombres sin definir: limpia.
+
+### v2.188: Listado de Clientes paginado y filtrado en el servidor; `clientes.js` dividido
+
+**Alcance:** Clientes, backend y frontend; sin cambios de base de datos. **Solo local: falta portar `clientes.js` y `clientesConsulta.js` a `deploy/cloud`.** Tercer paso de la prioridad de volumen (`AGENTS.md` 7a).
+
+- **Backend:** `GET /api/clientes?pagina=&limite=&nombre=&rut=` devuelve `{ clientes, pagination }` con una sola página (máximo 100). `nombre`: la razón social empieza con el texto o alguna palabra empieza con él; `rut`: solo los dígitos desde el comienzo (se ignoran puntos, guion y DV). Sin parámetros devuelve todos (Cotizaciones) y `?q=` sigue siendo el buscador de la OT. `enriquecerClientes` solo se arma para los clientes de la página. Filtros en `utils/busquedaClientes.js` (`filtrosListadoClientes`, idéntico en MySQL y PostgreSQL).
+- **Código escalable:** `routes/clientes.js` 408 → **311** líneas. Las consultas (listado, buscador, `GET /verificar`, `buscarDuplicadoRut` y `enriquecerClientes`) están ahora en `routes/clientesConsulta.js` (125 líneas), que `clientes.js` monta con `router.use("/", consultaRouter)` antes de sus rutas `/:id`. En PostgreSQL ambos archivos difieren de MySQL (sintaxis), igual que el resto de `routes/*.js`.
+- **Frontend:** `hooks/useClientesListado.js` (63 líneas; mismo patrón que el de la OT: textos con 300 ms de espera, página persistente, una respuesta vieja nunca pisa a una nueva). `pages/Clientes.jsx` 184 → **149** líneas. `ClienteFormulario` ya no recibe la lista completa de clientes: el RUT repetido lo rechaza el servidor al guardar (`El cliente ya existe (CL-XXXX)` al crear y `El RUT ya existe (CL-XXXX)` al editar).
+- **Pruebas:** MySQL 45/45 con 13.539 clientes en una base temporal (14 combinaciones de filtros contra la lógica antigua del navegador, páginas intermedias, última y fuera de rango, `%` y `_`, `ñ`, límite, inyección; cada consulta de 12 a 42 ms). En pantalla con 150 clientes temporales (38 páginas), ya borrados: paginación, filtros de nombre y RUT, limpiar, volver a la página 1 al cambiar un filtro, crear, editar, ver, eliminar y RUT repetido. Revisión automática de nombres sin definir: limpia.
+- **Pendiente:** `buscarDuplicadoRut` sigue leyendo todos los clientes en cada alta o edición (funciona bien con miles; se puede pasar a una columna de RUT normalizado con índice si crece). Equipos y Cotizaciones siguen cargando todo.
+
 ## Fecha: 2026-10-23 (solo local)
 
 ### v2.187: Fechas de creación, pantalla de Inicio más compacta, menú más chico y encabezado fijo
