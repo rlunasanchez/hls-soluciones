@@ -26,7 +26,8 @@ function OrdenFormCliente({
   clienteInactivo = false,
   clienteFijo = false,
   readOnly = false,
-  setClienteSeleccionado
+  setClienteSeleccionado,
+  adjuntos
 }) {
   const contactosDisponibles = (() => {
     if (!clienteSeleccionado) return [];
@@ -264,7 +265,7 @@ function OrdenFormCliente({
 
     </div>
 
-      <OrdenAdjuntos nuevaOrden={nuevaOrden} setNuevaOrden={setNuevaOrden} readOnly={readOnly} />
+      <OrdenAdjuntos adjuntos={adjuntos} readOnly={readOnly} />
 
       <OrdenInfoInterna nuevaOrden={nuevaOrden} setNuevaOrden={setNuevaOrden} readOnly={readOnly} />
 

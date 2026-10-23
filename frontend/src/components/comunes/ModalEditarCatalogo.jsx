@@ -14,7 +14,7 @@ const FICHAS = {
 
 // Ventana para editar un contacto o una dirección en su ficha del mantenedor (la misma de
 // Contactos / Direcciones). Al guardar actualiza el registro en el catálogo y avisa con
-// onGuardado(registroActualizado); "Guardar Cambios" la deja abierta, "Cerrar" la cierra.
+// onGuardado(registroActualizado); "Guardar" la deja abierta, "Guardar y salir" la cierra.
 function ModalEditarCatalogo({ tipo, registro, onGuardado, onCerrar }) {
   const cfg = FICHAS[tipo];
   const [actual, setActual] = useState(registro);

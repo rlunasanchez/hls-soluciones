@@ -1,7 +1,7 @@
 import { Save, X } from "lucide-react";
 import "../../styles/botones.css";
 
-// Pie común de las fichas (Cliente, Contacto, Dirección): Cancelar / Guardar Cambios / Guardar o Cerrar.
+// Pie común de las fichas (Cliente, Contacto, Dirección): Cancelar / Guardar (se queda) / Guardar y salir.
 //  clase: prefijo de estilos de la ficha ("cf", "cof", "dif").
 //  textoSeguir: texto del botón que guarda y sigue en la ficha (null = no se muestra).
 //  onGuardar: si se omite, el botón principal es el submit del formulario.

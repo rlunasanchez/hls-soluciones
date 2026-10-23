@@ -35,6 +35,7 @@ export function ordenAFormulario(orden) {
   return {
     numeroOrden: orden.numero_orden || "",
     fecha: fmtDate(orden.fecha),
+    fechaCreacion: orden.fecha_creacion || "",
     esGarantia: orden.es_garantia || false,
     fechaIngreso: fmtDate(orden.fecha_ingreso),
     fechaIngresoCheck: orden.fecha_ingreso_check || false,
@@ -67,7 +68,8 @@ export function ordenAFormulario(orden) {
     observaciones: toUpper(orden.observaciones),
     infoInterna: toUpper(orden.info_interna),
     clienteTipo: orden.cliente_tipo === "PERSONA" ? "PERSONA" : "EMPRESA",
-    adjuntos: parseAdjuntos(orden.adjunto),
+    // Adjuntos antiguos (JSON en la propia OT): se pasan a la tabla orden_adjuntos al abrir la OT en Editar
+    adjuntosAntiguos: parseAdjuntos(orden.adjunto),
     contactosExtra: parseExtra(orden.contactos_extra),
     direccionesExtra: parseExtra(orden.direcciones_extra)
   };
@@ -97,7 +99,7 @@ export function insumosDeOrden(orden) {
 // Formulario de una OT nueva, sin datos. El técnico viene de la sesión.
 export function ordenVacia(tecnicoAsignado = "") {
   return {
-    numeroOrden: "", fecha: "", esGarantia: false,
+    numeroOrden: "", fecha: "", fechaCreacion: "", esGarantia: false,
     fechaIngreso: "", fechaIngresoCheck: false,
     fechaTermino: "", fechaTerminoCheck: false,
     fechaEntrega: "", fechaEntregaCheck: false,
@@ -108,7 +110,7 @@ export function ordenVacia(tecnicoAsignado = "") {
     equipo: "", modelo: "", marca: "", serie: "", contadorPagOut: "", nivelTinta: "",
     averia: "", actividad: "", observaciones: "", infoInterna: "",
     clienteTipo: "EMPRESA",
-    adjuntos: [], contactosExtra: [], direccionesExtra: []
+    adjuntosAntiguos: [], contactosExtra: [], direccionesExtra: []
   };
 }
 

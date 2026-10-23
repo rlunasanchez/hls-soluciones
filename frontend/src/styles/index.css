@@ -131,6 +131,12 @@ html, body {
   gap: 12px;
 }
 
+/* Encabezado de los mantenedores: el título arriba y el menú en una fila debajo, en todos los anchos
+   (si no, bajaba solo cuando los botones no cabían y cada pantalla se veía distinta) */
+.header > .header-left {
+  flex-basis: 100%;
+}
+
 .header h1 {
   font-size: 1.2rem;
   font-weight: 700;
@@ -144,14 +150,14 @@ html, body {
 .logout-btn {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   background: var(--danger-light);
   color: var(--danger);
   border: none;
-  padding: 6px 10px;
+  padding: 4px 8px;
   border-radius: 6px;
   font-weight: 600;
-  font-size: .75rem;
+  font-size: .7rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -599,6 +605,12 @@ table tr:last-child td {
   justify-content: flex-end;
 }
 
+/* Iconos del menú superior más chicos (en pantallas angostas lo ajustan las reglas de abajo) */
+.nav-buttons .logout-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
 /* =========================
    RESPONSIVE CARDS TABLE
  ========================= */
@@ -651,10 +663,10 @@ table tr:last-child td {
 
 .home-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
-  margin: 32px auto;
-  max-width: 1200px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+  margin: 24px auto;
+  max-width: 1100px;
   padding: 0 clamp(12px, 3vw, 24px);
 }
 
@@ -667,8 +679,8 @@ table tr:last-child td {
   }
   
   .home-grid {
-    grid-template-columns: repeat(3, 1fr);
-    max-width: 1500px;
+    grid-template-columns: repeat(4, 1fr);
+    max-width: 1300px;
   }
   
   .page-content {
@@ -698,8 +710,8 @@ table tr:last-child td {
   }
   
   .home-grid {
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px;
   }
 }
 
@@ -725,32 +737,14 @@ table tr:last-child td {
   }
   
   .nav-buttons .logout-btn svg {
-    width: 16px !important;
-    height: 16px !important;
+    width: 14px !important;
+    height: 14px !important;
   }
   
   .home-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    margin: 24px auto;
-  }
-  
-  .home-grid > div {
-    padding: 28px 24px;
-  }
-  
-  .home-grid > div > div:first-child {
-    width: 64px !important;
-    height: 64px !important;
-  }
-  
-  .home-grid > div > div:first-child svg {
-    width: 32px !important;
-    height: 32px !important;
-  }
-  
-  .home-grid > div h2 {
-    font-size: 1.25rem !important;
+    gap: 12px;
+    margin: 20px auto;
   }
   
   .page-content {
@@ -813,42 +807,10 @@ table tr:last-child td {
   }
   
   .home-grid {
-    grid-template-columns: 1fr;
-    gap: 14px;
-    margin: 20px auto;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin: 16px auto;
     padding: 0 16px;
-  }
-  
-  .home-grid > div {
-    padding: 24px 20px;
-    flex-direction: row !important;
-    text-align: left !important;
-    align-items: center !important;
-    gap: 16px !important;
-  }
-  
-  .home-grid > div > div:first-child {
-    width: 56px !important;
-    height: 56px !important;
-    flex-shrink: 0;
-  }
-  
-  .home-grid > div > div:first-child svg {
-    width: 28px !important;
-    height: 28px !important;
-  }
-  
-  .home-grid > div h2 {
-    font-size: 1.1rem !important;
-    margin-bottom: 2px !important;
-  }
-  
-  .home-grid > div p {
-    font-size: 0.8rem !important;
-  }
-  
-  .home-grid > div svg:last-child {
-    display: none;
   }
   
   .equipos-asociados table,
@@ -999,30 +961,6 @@ table tr:last-child td {
     gap: 10px;
     margin: 14px auto;
     padding: 0 10px;
-  }
-  
-  .home-grid > div {
-    padding: 16px 14px;
-    border-radius: 12px;
-  }
-  
-  .home-grid > div > div:first-child {
-    width: 48px !important;
-    height: 48px !important;
-    border-radius: 12px;
-  }
-  
-  .home-grid > div > div:first-child svg {
-    width: 24px !important;
-    height: 24px !important;
-  }
-  
-  .home-grid > div h2 {
-    font-size: 0.95rem !important;
-  }
-  
-  .home-grid > div p {
-    font-size: 0.75rem !important;
   }
   
   .data-card {

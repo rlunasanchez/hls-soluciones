@@ -77,8 +77,8 @@ function ContactoFormulario({ contactoEditando, onCancel, onSave, contactos, rea
             </div>
           </div>
           <AccionesFicha clase="cof" readOnly={readOnly} guardando={guardando} onCancelar={onCancel}
-            textoSeguir={contactoEditando ? "Guardar Cambios" : null} onSeguir={(e) => handleSubmit(e, true)}
-            textoGuardar={contactoEditando ? "Cerrar" : "Guardar Contacto"} />
+            textoSeguir={contactoEditando ? "Guardar" : null} onSeguir={(e) => handleSubmit(e, true)}
+            textoGuardar="Guardar y salir" />
         </form>
       </div>
     </div>

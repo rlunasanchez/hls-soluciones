@@ -64,8 +64,8 @@ function DireccionFormulario({ direccionEditando, onCancel, onSave, direcciones,
             </div>
           </div>
           <AccionesFicha clase="dif" readOnly={readOnly} guardando={guardando} onCancelar={onCancel}
-            textoSeguir={direccionEditando ? "Guardar Cambios" : null} onSeguir={(e) => handleSubmit(e, true)}
-            textoGuardar={direccionEditando ? "Cerrar" : "Guardar Dirección"} />
+            textoSeguir={direccionEditando ? "Guardar" : null} onSeguir={(e) => handleSubmit(e, true)}
+            textoGuardar="Guardar y salir" />
         </form>
       </div>
     </div>

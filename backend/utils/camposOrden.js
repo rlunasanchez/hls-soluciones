@@ -15,13 +15,13 @@ const tal = (v) => v;                                   // obligatorios: se guar
 const texto = (v) => v || null;                         // vacío -> NULL
 const marca = (v) => v || false;                        // casilla -> false si no viene
 const fecha = toDateMySQL;
-const listaJson = (v) => (v && v.length ? JSON.stringify(v) : null);   // adjuntos
 const objetoJson = (v) => (v ? JSON.stringify(v) : null);              // contactos / direcciones extra
 const tipoCliente = (v) => (v === "PERSONA" ? "PERSONA" : "EMPRESA");
 
 // [columna de la base, clave que llega del formulario, conversión]. El orden es el del INSERT.
 // La OT se vincula al cliente SOLO si se eligió del buscador (clienteId); si se escribió a mano
-// los datos quedan solo en la OT.
+// los datos quedan solo en la OT. Los adjuntos ya NO se guardan aquí (tabla orden_adjuntos, ver
+// routes/adjuntos.js); la columna antigua `adjunto` no se toca al guardar la OT.
 export const CAMPOS = [
   ["fecha", "fecha", fecha],
   ["es_garantia", "esGarantia", marca],
@@ -56,7 +56,6 @@ export const CAMPOS = [
   ["actividad", "actividad", texto],
   ["observaciones", "observaciones", texto],
   ["info_interna", "infoInterna", texto],
-  ["adjunto", "adjuntos", listaJson],
   ["contactos_extra", "contactosExtra", objetoJson],
   ["direcciones_extra", "direccionesExtra", objetoJson],
   ["cliente_id", "clienteId", texto],

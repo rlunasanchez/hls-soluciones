@@ -45,7 +45,7 @@ Solo existen **dos ramas**:
 - `pages/` una por módulo (`Clientes`, `Contactos`, `Direcciones`, `Equipos`, `OrdenTrabajo`, `Cotizaciones`, `GestionUsuarios`, `Home`, `Login`, `Informes`, `OrdenCompra`).
 - `components/clientes/ClienteFormulario.jsx` (ficha de 3 columnas: cliente | contactos | direcciones) y `VinculosCliente.jsx` (tabla de vínculos con check "En la OT").
 - `components/ordenes/OrdenFormCliente.jsx` (cliente, contacto, dirección, aviso "ya no vinculado", Adjunto, Información Interna), `OrdenFormEquipo.jsx`, `OrdenFormInsumos.jsx`, `OrdenFormAveria.jsx`, `OrdenFormDatos.jsx`.
-- `components/ordenes/OrdenAdjuntos.jsx` (apartado Adjunto de la OT: archivos, menú y visor) y `components/ordenes/useClienteOT.jsx` (hook: ver / editar / registrar el cliente desde la OT con sus modales). `OrdenFormCliente.jsx` los usa; **no volver a meter esa lógica dentro de un archivo grande**.
+- **Adjuntos de la OT (v2.186):** `components/ordenes/OrdenAdjuntos.jsx` (apartado plegado con miniaturas), `AdjuntoVisor.jsx` (visor con flechas), `hooks/useAdjuntosOrden.js` y `utils/adjuntos.js`; en el backend `routes/adjuntos.js`, `utils/limitesAdjuntos.js` y la tabla `orden_adjuntos` (un registro por archivo; hasta 10 imágenes y 10 PDF). Los archivos ya no viajan con la OT. Y `components/ordenes/useClienteOT.jsx` (hook: ver / editar / registrar el cliente desde la OT con sus modales). `OrdenFormCliente.jsx` los usa; **no volver a meter esa lógica dentro de un archivo grande**.
 - `hooks/useOrdenesListado.js` (listado de OT: carga, filtros y paginación).
 - `utils/ordenFormato.js` (orden guardada → estado del formulario, `ordenVacia`, equipo e insumos) y `utils/validarOrden.js` (validaciones previas a guardar y payload). `OrdenTrabajo.jsx` abre una orden con una sola función `cargarOrden(orden, "editar" | "ver")`.
 - `components/comunes/CampoCatalogo.jsx` (buscador de contacto/dirección con Editar/Registrar/ "(ya es de CL-X)"), `ModalEditarCatalogo.jsx`, `BotonQuitar.jsx`, `AccionesFicha.jsx`.
@@ -71,7 +71,7 @@ Solo existen **dos ramas**:
 - Todo el texto de formularios va en **MAYÚSCULAS** (`upperInput(e)` conserva la posición del cursor; el email y los números no). Fono: solo `[0-9+]`.
 - Dropdowns: `useRef` + `mousedown` para cerrar al hacer clic fuera, z-index alto, buscan con 2+ caracteres.
 - Listados paginados de **4** ítems con `usePaginaPersistente` y `useClampPagina`; filtrado con `slice()` en el frontend.
-- Botones de formularios con 3 opciones al editar: **Guardar Cambios** (se queda), **Cerrar** (guarda y sale), **Cancelar**. Protección anti doble envío con `useGuardar`.
+- Botones de formularios, iguales en todas las pantallas: **Guardar** (guarda y se queda), **Guardar y salir** (guarda y vuelve al listado) y **Cancelar** (sale sin guardar; en modo Ver, **Cerrar**). Al crear uno nuevo en Contactos, Direcciones y Equipos solo hay **Guardar y salir**. Protección anti doble envío con `useGuardar`.
 - Botones pequeños de acción (Editar, Registrar, Vincular…): clase compartida `btn-mini` de `styles/botones.css` con icono de `lucide-react`. **Naranja (`--warning`) = editar; verde (`--success`) = crear / registrar / vincular.** No crear estilos en línea para botones nuevos.
 - **Menú superior:** cada pantalla enlaza a las otras 9 (Inicio, Clientes, Contactos, Direcciones, Equipos, Orden de Trabajo, Informes, Cotizaciones, Orden de Compra, Usuarios), sin su propio botón, con el mismo orden, icono y color. Está repetido en 6 componentes `Header*` y en las páginas `Home`, `Informes`, `OrdenCompra` y `Cotizaciones`: **al agregar un módulo hay que sumar su botón en todos** (ver `CAMBIOS.md` v2.163).
 - **Ancho de los campos de los formularios de mantenedor** (Equipos, Contactos, Direcciones): el estándar es un tercio de la fila (~220 px en el formulario de 740 px, como en Equipos). Con 2 campos por fila se usa `repeat(2, calc((100% - 16px) / 3))`, nunca `1fr 1fr`. Solo la dirección puede ocupar 2 columnas (clase existente `of-col-full`). Ver `CAMBIOS.md` v2.164.
@@ -93,9 +93,11 @@ Solo existen **dos ramas**:
 - Windows: en el shell de Claude Code los heredocs largos con comillas fallan; usar la herramienta de escritura de archivos. Los archivos del repo están en LF y Git avisa de CRLF; es normal.
 - El backend local no se recarga solo; reiniciarlo tras cambiar código. En el navegador, **Ctrl+F5** tras un cambio de frontend si ves comportamiento viejo.
 
-## 7. Estado y pendientes (22-oct-2026)
+## 7. Estado y pendientes (23-oct-2026)
 
-**v2.168 a v2.175 publicadas el 22-oct-2026** (Neon migrado, `deploy/cloud` en `4733e86`, `main` en `ea5297c`). La web está al día; `MIGRACION_PENDIENTE.md` quedó como registro histórico y se puede borrar. Los commits posteriores de solo documentación van únicamente a `main` local hasta que el dueño ordene un push. No hacer `git push` sin orden expresa.
+**Publicado en la web hasta v2.184** (22-oct-2026: Neon migrado, `deploy/cloud` en `a4056fd`, `main` en `2882d74`). `MIGRACION_PENDIENTE.md` es solo histórico y se puede borrar.
+
+**Solo en local, sin publicar:** v2.185 (botones Guardar / Guardar y salir en todo el sistema y ficha de cliente persona con la dirección al lado: solo frontend, se publica con un push a `main`) y **v2.186 (adjuntos de la OT: requiere crear la tabla `orden_adjuntos` en Neon y portar `routes/adjuntos.js` a PostgreSQL; el SQL de Neon y los pasos están en `CAMBIOS.md` v2.186)**. Orden para publicar v2.186: Neon → `deploy/cloud` → `main`. No hacer `git push` sin orden expresa; preguntar antes de publicar.
 
 - **Neon:** migración de contactos/direcciones **corrida**, backend PostgreSQL **desplegado** y esquema antiguo **ya borrado** (`clientes_contactos`, `clientes_direcciones` y las columnas `clientes.contacto_*`). Neon tiene 9 tablas: `clientes`, `contactos`, `direcciones`, `cliente_contactos`, `cliente_direcciones`, `equipos`, `ordenes_trabajo`, `cotizaciones`, `usuarios`.
 - Adaptar **Cotizaciones** a todo lo modificado en Clientes, Contactos, Direcciones y Equipos: tipo Empresa/Persona, checks "En la OT", botones Editar/Registrar, vínculos y equipo solo identidad (`NOTAS-COTIZACIONES.md` tiene el relevamiento). **Aún no se empieza**; su tabla en la nube conserva `contacto_id`/`direccion_id` por eso.
@@ -130,7 +132,7 @@ Cómo resolverlo (no con un tope de cantidad, que ocultaría registros): **pagin
 
 ## 7b. Reducción de tamaño de la OT (HECHA el 22-oct-2026, v2.169 a v2.184)
 
-Meta del dueño: ningún archivo de pantalla con miles de líneas. **Cumplida para Clientes, Contactos, Direcciones y OT.** Tamaños al cierre: `OrdenTrabajo.jsx` 377, `OrdenFormEquipo.jsx` 326, `ordenServicioDoc.js` (PDF) 292, `OrdenFormCliente.jsx` 275, `OrdenAdjuntos.jsx` 257, `useClienteOT.jsx` 249.
+Meta del dueño: ningún archivo de pantalla con miles de líneas. **Cumplida para Clientes, Contactos, Direcciones y OT.** Tamaños al cierre: `OrdenTrabajo.jsx` 377, `OrdenFormEquipo.jsx` 326, `ordenServicioDoc.js` (PDF) 292, `OrdenFormCliente.jsx` 275, `OrdenAdjuntos.jsx` 113, `useClienteOT.jsx` 249.
 
 Cómo quedó repartida `OrdenTrabajo.jsx`: `utils/ordenFormato.js` (formulario vacío, orden guardada → formulario, `datosAlElegirCliente`), `hooks/useOrdenesListado.js` (listado), `useEquiposOT.js` (equipos y buscador por modelo), `useOrdenDesdeNavegacion.js` (abrir lo que viene de Clientes o Cotizaciones), `useGuardarOrden.js` (guardar, PDF, cotización), `useCotizacionesDeOrden.js`, `useClicFuera.js`, más los componentes `OrdenForm*`, `OrdenBuscadorCliente`, `OrdenCotizaciones`, `OrdenFormObservaciones` y `HeaderOrdenTrabajo` (con su propio menú).
 
