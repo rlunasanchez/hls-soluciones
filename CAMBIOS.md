@@ -4,7 +4,7 @@
 
 ### v2.191: La OT queda vinculada a su equipo, contacto y dirección del mantenedor: editar uno actualiza todas las OT que lo usan
 
-**Alcance:** backend (columnas nuevas, enlace al guardar y sincronización al editar); la pantalla no cambió. **Solo local, sin publicar: falta la migración de Neon y portar el backend a PostgreSQL.**
+**Alcance:** backend (columnas nuevas, enlace al guardar y sincronización al editar); la pantalla no cambió. **Portado a `deploy/cloud` y probado en PostgreSQL (merge local, sin publicar); falta correr el SQL de Neon.**
 
 - **Por qué:** la OT solo toma datos de sus mantenedores (Clientes, Equipos, Contactos, Direcciones) y un mismo registro puede estar en muchas OT. Antes solo el cliente se actualizaba en todas sus OT (`cliente_id`); equipo, contacto y dirección eran copias sin vínculo, así que al renombrar un equipo las demás OT quedaban con el nombre viejo y pedían "Registrar" (pasó el 23-oct-2026 con `NOTE HP 445 G9`).
 - **Base de datos:** `ordenes_trabajo.equipo_id`, `contacto_id` y `direccion_id` (INT, con índices). Se agregaron a `crear_tablas.sql`. Las OT siguen guardando la copia de los textos.
@@ -12,6 +12,7 @@
 - **Al editar un registro del mantenedor** (`equipos.js`, `contactos.js`, `direcciones.js`): se actualizan los textos en todas las OT vinculadas: Equipo, Marca y Modelo (la **serie** es de cada OT y no se toca); nombre, fono, email y cargo del contacto; dirección, ciudad y comuna. **Al eliminarlo:** las OT conservan su copia y pierden el vínculo (`desvincularOrdenes`), y la OT lo muestra como "no está en el mantenedor".
 - **Migración local (23-oct-2026):** columnas e índices agregados a `soporte_tecnico_db` y OT existentes vinculadas por coincidencia de texto (6 de equipo, 1 de contacto, 4 de dirección).
 - **Pruebas:** MySQL 21/21 en una base temporal: dos OT con el mismo equipo (escrito con otras mayúsculas) y series distintas quedan vinculadas; al editar el equipo, el contacto o la dirección en el mantenedor las dos OT toman los datos nuevos y la serie no cambia; una OT de otro equipo o con datos a mano no cambia; guardar la OT mantiene los vínculos y los reenlaza si cambia el texto; eliminar un registro deja la copia sin vínculo; OT sin equipo, contacto ni dirección no da error.
+- **Port a PostgreSQL (23-oct-2026):** `routes/ordenesVinculos.js` (con `$N` y `result.rows`), `ordenes.js`, `equipos.js`, `contactos.js` y `direcciones.js` de `deploy/cloud`; el `git merge main` dio conflicto en esos cuatro archivos y se resolvió tomando la versión PostgreSQL y reaplicando los cambios. Probado con `embedded-postgres` usando el SQL de Neon de abajo: 104/104 (suite completa + vinculación de OT existentes con ese SQL, OT nueva enlazada sola, editar equipo/contacto/dirección actualiza las tres OT conservando su serie, guardar la OT mantiene los vínculos, eliminar deja la copia sin vínculo). Si hubiera repetidos en un mantenedor, el enlace elige siempre el de menor id.
 - **SQL para Neon (empezar con una línea en blanco al pegar):**
 
 ```sql

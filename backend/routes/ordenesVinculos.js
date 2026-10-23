@@ -18,10 +18,10 @@ export async function resolverVinculos(db, orden) {
   const equipo = norm(orden.equipo), contacto = norm(orden.contacto), direccion = norm(orden.direccion);
   return {
     equipoId: equipo ? await idDe(db,
-      `SELECT id FROM equipos WHERE LOWER(TRIM(equipo)) = LOWER(?) AND LOWER(TRIM(IFNULL(marca,''))) = LOWER(?) AND LOWER(TRIM(IFNULL(modelo,''))) = LOWER(?) LIMIT 1`,
+      `SELECT id FROM equipos WHERE LOWER(TRIM(equipo)) = LOWER(?) AND LOWER(TRIM(IFNULL(marca,''))) = LOWER(?) AND LOWER(TRIM(IFNULL(modelo,''))) = LOWER(?) ORDER BY id LIMIT 1`,
       [equipo, norm(orden.marca), norm(orden.modelo)]) : null,
-    contactoId: contacto ? await idDe(db, `SELECT id FROM contactos WHERE LOWER(TRIM(nombre)) = LOWER(?) LIMIT 1`, [contacto]) : null,
-    direccionId: direccion ? await idDe(db, `SELECT id FROM direcciones WHERE LOWER(TRIM(direccion)) = LOWER(?) LIMIT 1`, [direccion]) : null,
+    contactoId: contacto ? await idDe(db, `SELECT id FROM contactos WHERE LOWER(TRIM(nombre)) = LOWER(?) ORDER BY id LIMIT 1`, [contacto]) : null,
+    direccionId: direccion ? await idDe(db, `SELECT id FROM direcciones WHERE LOWER(TRIM(direccion)) = LOWER(?) ORDER BY id LIMIT 1`, [direccion]) : null,
   };
 }
 
