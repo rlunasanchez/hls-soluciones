@@ -2,6 +2,10 @@
 
 ## Fecha: 2026-10-24 (solo local)
 
+### v2.190: Ficha de cliente persona con las columnas del mismo ancho que la de empresa
+
+**Alcance:** solo frontend (`ClienteFormulario.jsx`). La ficha de persona (datos a la izquierda, dirección al lado) tenía 820 px en total, de modo que cada columna medía unos 380 px: **Tipo** y **RUT** (200 px cada uno) no cabían, el RUT se deformaba y la tabla de direcciones salía más chica que en empresa. Ahora son 1000 px (dos columnas de unos 475 px, el mismo ancho que cada columna de la ficha de empresa).
+
 ### v2.189: Listado de Equipos paginado en el servidor; la OT ya no carga todos los equipos
 
 **Alcance:** Equipos y Orden de Trabajo, backend y frontend; sin cambios de base de datos. **Solo local: falta portar `equipos.js`, `equiposConsulta.js` a `deploy/cloud`.** Cuarto paso de la prioridad de volumen (`AGENTS.md` 7a).

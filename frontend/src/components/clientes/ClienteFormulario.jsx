@@ -143,11 +143,12 @@ function ClienteFormulario({ clienteEditando, onSave, onCancel, titulo, readOnly
 
   const esPersona = nuevoCliente.tipo === "PERSONA";
   const unaColumna = soloCliente || esPersona;
-  // Persona: sus datos y su dirección van lado a lado (ficha de dos columnas, más angosta que la de empresa)
+  // Persona: sus datos y su dirección van lado a lado. Dos columnas del mismo ancho que las de la ficha de
+  // empresa (unos 475 px cada una, 1000 px en total); más angostas deforman el RUT.
   const personaConDireccion = esPersona && !soloCliente;
 
   return (
-    <div className={unaColumna && !personaConDireccion ? "cf-wrap" : "cf-wrap cf-wrap-ancho"} style={personaConDireccion ? { maxWidth: "820px" } : undefined}>
+    <div className={unaColumna && !personaConDireccion ? "cf-wrap" : "cf-wrap cf-wrap-ancho"} style={personaConDireccion ? { maxWidth: "1000px" } : undefined}>
       <div className="cf-card">
         <div className="cf-head">
           <h2>{titulo || (readOnly ? "Ver Cliente" : clienteEditando ? "Editar Cliente" : "Nuevo Cliente")}</h2>
