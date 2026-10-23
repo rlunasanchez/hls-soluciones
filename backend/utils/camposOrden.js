@@ -60,6 +60,10 @@ export const CAMPOS = [
   ["direcciones_extra", "direccionesExtra", objetoJson],
   ["cliente_id", "clienteId", texto],
   ["cliente_tipo", "clienteTipo", tipoCliente],
+  // Vínculos con el mantenedor: los resuelve el servidor al guardar (routes/ordenesVinculos.js)
+  ["equipo_id", "equipoId", texto],
+  ["contacto_id", "contactoId", texto],
+  ["direccion_id", "direccionId", texto],
 ];
 
 const valores = (body) => CAMPOS.map(([, clave, convertir]) => convertir(body[clave]));

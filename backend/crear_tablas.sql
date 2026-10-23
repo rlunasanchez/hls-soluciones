@@ -147,6 +147,11 @@ CREATE TABLE IF NOT EXISTS ordenes_trabajo (
   -- Relaciones
   cliente_id INT,
   cliente_tipo VARCHAR(10) DEFAULT 'EMPRESA',  -- copia del tipo del cliente al guardar la OT
+  -- Vínculos con el mantenedor (se enlazan al guardar la OT por Equipo+Marca+Modelo, nombre y texto de la dirección):
+  -- al editar el registro del mantenedor se actualizan los textos de todas las OT vinculadas
+  equipo_id INT,
+  contacto_id INT,
+  direccion_id INT,
 
   fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -154,7 +159,10 @@ CREATE TABLE IF NOT EXISTS ordenes_trabajo (
   INDEX idx_numero_orden (numero_orden),
   INDEX idx_cliente (cliente),
   INDEX idx_fecha (fecha),
-  INDEX idx_tecnico (tecnico_asignado)
+  INDEX idx_tecnico (tecnico_asignado),
+  INDEX idx_ot_equipo (equipo_id),
+  INDEX idx_ot_contacto (contacto_id),
+  INDEX idx_ot_direccion (direccion_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS usuarios (

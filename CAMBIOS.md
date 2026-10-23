@@ -2,6 +2,40 @@
 
 ## Fecha: 2026-10-24 (solo local)
 
+### v2.191: La OT queda vinculada a su equipo, contacto y dirección del mantenedor: editar uno actualiza todas las OT que lo usan
+
+**Alcance:** backend (columnas nuevas, enlace al guardar y sincronización al editar); la pantalla no cambió. **Solo local, sin publicar: falta la migración de Neon y portar el backend a PostgreSQL.**
+
+- **Por qué:** la OT solo toma datos de sus mantenedores (Clientes, Equipos, Contactos, Direcciones) y un mismo registro puede estar en muchas OT. Antes solo el cliente se actualizaba en todas sus OT (`cliente_id`); equipo, contacto y dirección eran copias sin vínculo, así que al renombrar un equipo las demás OT quedaban con el nombre viejo y pedían "Registrar" (pasó el 23-oct-2026 con `NOTE HP 445 G9`).
+- **Base de datos:** `ordenes_trabajo.equipo_id`, `contacto_id` y `direccion_id` (INT, con índices). Se agregaron a `crear_tablas.sql`. Las OT siguen guardando la copia de los textos.
+- **Enlace al guardar la OT:** `routes/ordenesVinculos.js` (`resolverVinculos`) busca en el mantenedor el registro que identifica a cada dato, igual que al detectar repetidos: equipo = Equipo + Marca + Modelo, contacto = su nombre, dirección = su texto (sin distinguir mayúsculas ni espacios). Lo escrito a mano que no existe queda sin vínculo. Los ids se agregan en `utils/camposOrden.js`. **No hubo que tocar los buscadores de la pantalla.**
+- **Al editar un registro del mantenedor** (`equipos.js`, `contactos.js`, `direcciones.js`): se actualizan los textos en todas las OT vinculadas: Equipo, Marca y Modelo (la **serie** es de cada OT y no se toca); nombre, fono, email y cargo del contacto; dirección, ciudad y comuna. **Al eliminarlo:** las OT conservan su copia y pierden el vínculo (`desvincularOrdenes`), y la OT lo muestra como "no está en el mantenedor".
+- **Migración local (23-oct-2026):** columnas e índices agregados a `soporte_tecnico_db` y OT existentes vinculadas por coincidencia de texto (6 de equipo, 1 de contacto, 4 de dirección).
+- **Pruebas:** MySQL 21/21 en una base temporal: dos OT con el mismo equipo (escrito con otras mayúsculas) y series distintas quedan vinculadas; al editar el equipo, el contacto o la dirección en el mantenedor las dos OT toman los datos nuevos y la serie no cambia; una OT de otro equipo o con datos a mano no cambia; guardar la OT mantiene los vínculos y los reenlaza si cambia el texto; eliminar un registro deja la copia sin vínculo; OT sin equipo, contacto ni dirección no da error.
+- **SQL para Neon (empezar con una línea en blanco al pegar):**
+
+```sql
+ALTER TABLE ordenes_trabajo ADD COLUMN IF NOT EXISTS equipo_id INTEGER;
+ALTER TABLE ordenes_trabajo ADD COLUMN IF NOT EXISTS contacto_id INTEGER;
+ALTER TABLE ordenes_trabajo ADD COLUMN IF NOT EXISTS direccion_id INTEGER;
+CREATE INDEX IF NOT EXISTS idx_ot_equipo ON ordenes_trabajo (equipo_id);
+CREATE INDEX IF NOT EXISTS idx_ot_contacto ON ordenes_trabajo (contacto_id);
+CREATE INDEX IF NOT EXISTS idx_ot_direccion ON ordenes_trabajo (direccion_id);
+
+UPDATE ordenes_trabajo o SET equipo_id = e.id FROM equipos e
+ WHERE o.equipo_id IS NULL AND TRIM(COALESCE(o.equipo,'')) <> ''
+   AND LOWER(TRIM(o.equipo)) = LOWER(TRIM(e.equipo))
+   AND LOWER(TRIM(COALESCE(o.marca,''))) = LOWER(TRIM(COALESCE(e.marca,'')))
+   AND LOWER(TRIM(COALESCE(o.modelo,''))) = LOWER(TRIM(COALESCE(e.modelo,'')));
+UPDATE ordenes_trabajo o SET contacto_id = c.id FROM contactos c
+ WHERE o.contacto_id IS NULL AND TRIM(COALESCE(o.contacto,'')) <> ''
+   AND LOWER(TRIM(o.contacto)) = LOWER(TRIM(c.nombre));
+UPDATE ordenes_trabajo o SET direccion_id = d.id FROM direcciones d
+ WHERE o.direccion_id IS NULL AND TRIM(COALESCE(o.direccion,'')) <> ''
+   AND LOWER(TRIM(o.direccion)) = LOWER(TRIM(d.direccion));
+```
+
+
 ### v2.190: Ficha de cliente persona con las columnas del mismo ancho que la de empresa
 
 **Alcance:** solo frontend (`ClienteFormulario.jsx`). La ficha de persona (datos a la izquierda, dirección al lado) tenía 820 px en total, de modo que cada columna medía unos 380 px: **Tipo** y **RUT** (200 px cada uno) no cabían, el RUT se deformaba y la tabla de direcciones salía más chica que en empresa. Ahora son 1000 px (dos columnas de unos 475 px, el mismo ancho que cada columna de la ficha de empresa).

@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import pool from "../config/db.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
+import { sincronizarOrdenesDeContacto, desvincularOrdenes } from "./ordenesVinculos.js";
 
 dotenv.config();
 const router = express.Router();
@@ -108,6 +109,8 @@ router.put("/:id", authMiddleware, async (req, res) => {
       `UPDATE contactos SET codigo = ?, nombre = ?, email = ?, fono = ?, cargo = ? WHERE id = ?`,
       [codigo, nombre.trim(), email || null, fono || null, cargo || null, id]
     );
+    // Las OT vinculadas a este contacto toman sus datos nuevos
+    await sincronizarOrdenesDeContacto(pool, id, { nombre: nombre.trim(), email, fono, cargo });
     res.json({ msg: "Contacto actualizado", codigo });
   } catch (err) {
     console.error(err);
@@ -129,6 +132,7 @@ router.delete("/:id", authMiddleware, async (req, res) => {
       }
     }
     await pool.query("DELETE FROM contactos WHERE id = ?", [id]);
+    await desvincularOrdenes(pool, "contacto", id);
     res.json({ msg: "Contacto eliminado" });
   } catch (err) {
     console.error(err);
