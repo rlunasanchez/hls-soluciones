@@ -1,8 +1,8 @@
 import { Save, X } from "lucide-react";
 import OrdenFormAcciones from "./OrdenFormAcciones";
 
-// Botones al pie del formulario de la OT. "Guardar Cambios" guarda y se queda; el botón principal
-// (submit) guarda y sale; Cancelar/Cerrar solo cierra. Con la orden ya guardada suma PDF y Cotización.
+// Botones al pie del formulario de la OT. "Guardar" guarda y se queda; "Guardar y salir" (submit)
+// guarda y sale; Cancelar/Cerrar solo cierra sin guardar. Con la orden ya guardada suma PDF y Cotización.
 function OrdenFormBotones({ soloLectura, editingId, guardando, onCerrar, onGuardarCambios, onPDF, onCotizacion }) {
   return (
     <div className="of-sub">
@@ -11,12 +11,12 @@ function OrdenFormBotones({ soloLectura, editingId, guardando, onCerrar, onGuard
       </button>
       {!soloLectura && (
         <button type="button" className="of-btn-s" onClick={onGuardarCambios} disabled={guardando}>
-          <Save size={16} /> {guardando ? "Guardando..." : (editingId ? "Guardar Cambios" : "Guardar")}
+          <Save size={16} /> {guardando ? "Guardando..." : "Guardar"}
         </button>
       )}
       {!soloLectura && (
         <button type="submit" className="of-btn-p" disabled={guardando}>
-          <Save size={16} /> {guardando ? "Guardando..." : (editingId ? "Cerrar" : "Guardar Orden")}
+          <Save size={16} /> {guardando ? "Guardando..." : "Guardar y salir"}
         </button>
       )}
       {editingId && <OrdenFormAcciones onPDF={onPDF} onCotizacion={onCotizacion} />}

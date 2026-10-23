@@ -149,16 +149,18 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
 
   const esPersona = nuevoCliente.tipo === "PERSONA";
   const unaColumna = soloCliente || esPersona;
+  // Persona: sus datos y su dirección van lado a lado (ficha de dos columnas, más angosta que la de empresa)
+  const personaConDireccion = esPersona && !soloCliente;
 
   return (
-    <div className={unaColumna ? "cf-wrap" : "cf-wrap cf-wrap-ancho"}>
+    <div className={unaColumna && !personaConDireccion ? "cf-wrap" : "cf-wrap cf-wrap-ancho"} style={personaConDireccion ? { maxWidth: "820px" } : undefined}>
       <div className="cf-card">
         <div className="cf-head">
           <h2>{titulo || (readOnly ? "Ver Cliente" : clienteEditando ? "Editar Cliente" : "Nuevo Cliente")}</h2>
           <button type="button" onClick={() => { resetFormulario(); onCancel(); }}><X size={20} /></button>
         </div>
         <form onSubmit={handleSubmit} className="cf" noValidate>
-          <div className={unaColumna ? "cf-grid" : "cf-grid cf-grid-3"}>
+          <div className={unaColumna && !personaConDireccion ? "cf-grid" : "cf-grid cf-grid-3"}>
             <div className="cf-sec cf-sec-empresa">
               <h3>Empresa o Persona</h3>
               <div style={{ display: "grid", gridTemplateColumns: "200px 200px", gap: 6 }}>
@@ -241,8 +243,8 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
 
           <AccionesFicha clase="cf" readOnly={readOnly} guardando={guardando}
             onCancelar={() => { resetFormulario(); onCancel(); }}
-            textoSeguir={modoRegistro ? null : (clienteEditando ? "Guardar Cambios" : "Guardar")} onSeguir={(e) => handleSubmit(e, true)}
-            textoGuardar={(clienteEditando && !modoRegistro) ? "Cerrar" : "Guardar Cliente"} onGuardar={(e) => handleSubmit(e, false)} />
+            textoSeguir={modoRegistro ? null : "Guardar"} onSeguir={(e) => handleSubmit(e, true)}
+            textoGuardar="Guardar y salir" onGuardar={(e) => handleSubmit(e, false)} />
         </form>
       </div>
     </div>

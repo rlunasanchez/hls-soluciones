@@ -1,5 +1,19 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-10-23 (solo local)
+
+### v2.185: Botones "Guardar" y "Guardar y salir" en todo el sistema; ficha de cliente persona con la dirección al lado
+
+**Alcance:** solo frontend, sin cambios de backend ni de base de datos. **Solo local, sin publicar.**
+
+- **Nombres de los botones al pie de los formularios**, iguales en todas las pantallas (antes cambiaban según el caso: Guardar / Guardar Orden / Guardar Cambios / Cerrar / Guardar Cliente / Guardar Contacto / Guardar Dirección / Guardar Equipo):
+  - **Guardar**: guarda y se queda en el formulario (al crear en Clientes y la OT, y al editar en todas).
+  - **Guardar y salir**: guarda y vuelve al listado.
+  - **Cancelar** sale sin guardar; en modo Ver el botón se llama **Cerrar**.
+  - Archivos: `OrdenFormBotones.jsx` (OT), `ClienteFormulario.jsx`, `ContactoFormulario.jsx`, `DireccionFormulario.jsx`, `EquipoFormulario.jsx`. En Contactos, Direcciones y Equipos al crear uno nuevo solo hay "Guardar y salir"; al registrar un cliente desde la OT también. Cotizaciones no se tocó.
+- **Ficha de cliente persona:** la dirección ahora va **al lado** de los datos (dos columnas, ancho de 820 px) en vez de debajo. La de empresa sigue con tres columnas (cliente, contactos, direcciones) y el celular las apila. Cambio en `ClienteFormulario.jsx` reutilizando `cf-wrap-ancho` y `cf-grid-3` (sin clases nuevas).
+- **Pruebas en pantalla:** botones en las cinco pantallas (guardar y quedarse, guardar y salir, cancelar), ficha de persona y de empresa, registrar un cliente desde la OT. Revisión automática de nombres sin definir: limpia.
+
 ## Fecha: 2026-10-22 (continuación, solo local)
 
 ### v2.184: `OrdenTrabajo.jsx` 434 → 377 líneas (paso D): hook del guardado de la OT. Meta de ~400 líneas cumplida
