@@ -2,6 +2,16 @@
 
 ## Fecha: 2026-10-24 (solo local)
 
+### v2.189: Listado de Equipos paginado en el servidor; la OT ya no carga todos los equipos
+
+**Alcance:** Equipos y Orden de Trabajo, backend y frontend; sin cambios de base de datos. **Solo local: falta portar `equipos.js`, `equiposConsulta.js` a `deploy/cloud`.** Cuarto paso de la prioridad de volumen (`AGENTS.md` 7a).
+
+- **Backend:** `GET /api/equipos?pagina=&limite=&modelo=` devuelve `{ equipos, pagination }` (el modelo contiene el texto); `?q=` (sugerencias de la OT) ahora devuelve como máximo 20 (`limite`, máximo 50) y ordena primero los equipos cuyo modelo empieza con el texto, luego los que lo contienen y al final el resto; nuevo `GET /api/equipos/verificar?equipo=&marca=&modelo=` -> `{ equipo | null }`. Sin parámetros devuelve todos. Filtros en `utils/filtrosEquipos.js` (idéntico en MySQL y PostgreSQL). Las consultas pasaron a `routes/equiposConsulta.js` (61 líneas) y `routes/equipos.js` quedó en 109.
+- **Frontend:** `hooks/useEquiposListado.js` (mismo patrón que Clientes y OT); `pages/Equipos.jsx` 186 → 152 líneas. **La OT ya no carga la lista completa de equipos:** `hooks/useEquipoExistente.js` + `utils/equiposApi.js` preguntan al servidor si el Equipo + Marca + Modelo escrito existe (con 300 ms de espera al escribir) para decidir entre **Editar / Cambiar equipo** y **Registrar en Equipos**. Al abrir una OT se comprueba antes de mostrarla (los campos salen ya bloqueados) y al elegir, editar o registrar un equipo se usa el resultado ya conocido, sin esperar. Se quitaron `equipoSeleccionado`, `buscarEquipoDeOrden` y la prop `equipos` (que `EquipoFormulario` ni usaba).
+- **Arreglos:** las sugerencias del buscador de modelo ya no esconden equipos con el mismo modelo y distinta marca (se distinguen por Equipo + Marca + Modelo; antes solo por modelo, resto de cuando la serie estaba en el equipo); **Cambiar equipo** también vacía la caja de búsqueda; en una OT guardada cuyo equipo no está en el mantenedor aparece el aviso "Este equipo no está en el mantenedor. Si fue renombrado, búsquelo arriba por modelo; si es nuevo, use Registrar en Equipos".
+- **Datos locales corregidos** (marca correcta HP): `EQ-0003` pasó de `HPDSA` a `HP`, se eliminaron `EQ-0002` (`HPA`, duplicado mal escrito) y `EQ-0004` (prueba) y la OT-2026-02803 pasó de `HPDSA` a `HP`. Pendiente de decidir: `EQ-0001` (`HPPA`).
+- **Pruebas:** MySQL 33/33 con 6.044 equipos en una base temporal (filtro de modelo contra la lógica antigua del navegador, páginas intermedias, última y fuera de rango, `%`, `_` y `ñ`, límite, inyección, orden por relevancia, `verificar`). En pantalla con 150 equipos temporales. Revisión automática de nombres sin definir: limpia.
+
 ### v2.188: Listado de Clientes paginado y filtrado en el servidor; `clientes.js` dividido
 
 **Alcance:** Clientes, backend y frontend; sin cambios de base de datos. **Solo local: falta portar `clientes.js` y `clientesConsulta.js` a `deploy/cloud`.** Tercer paso de la prioridad de volumen (`AGENTS.md` 7a).

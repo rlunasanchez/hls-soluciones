@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Package, Plus } from "lucide-react";
 import api from "../services/api";
-import { getCached } from "../services/cache";
 import '../styles/Equipos.css';
 import { cerrarSesion } from "../utils/helpers";
 import HeaderEquipo from "../components/equipos/HeaderEquipo";
@@ -11,49 +10,19 @@ import EquipoFormulario from "../components/equipos/EquipoFormulario";
 import EquipoTabla from "../components/equipos/EquipoTabla";
 import EquipoCard from "../components/equipos/EquipoCard";
 import Pagination from "../components/Pagination";
-import { usePaginaPersistente, useClampPagina } from "../hooks/usePaginacion";
+import useEquiposListado from "../hooks/useEquiposListado";
 
 function Equipos() {
   const navigate = useNavigate();
-  const [equipos, setEquipos] = useState([]);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [equipoEditando, setEquipoEditando] = useState(null);
-  const [filtroModelo, setFiltroModelo] = useState("");
-  const [paginaActual, setPaginaActual] = usePaginaPersistente("pagEquipos", [filtroModelo]);
-  const equiposPorPagina = 4;
   const [soloLectura, setSoloLectura] = useState(false);
-  const [loading, setLoading] = useState(false);
 
-  const fetchEquipos = async (signal) => {
-    setLoading(true);
-    try {
-      const res = await getCached("/api/equipos", { signal });
-      setEquipos(res.data);
-    } catch (err) {
-      if (err.name !== "CanceledError") console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const controller = new AbortController();
-    fetchEquipos(controller.signal);
-    return () => controller.abort();
-  }, []);
-
-  const equiposFiltrados = equipos.filter(eq => {
-    if (filtroModelo) {
-      const m = filtroModelo.toLowerCase();
-      if (!eq.modelo?.toLowerCase().includes(m)) return false;
-    }
-    return true;
-  });
-
-  const totalPaginas = Math.ceil(equiposFiltrados.length / equiposPorPagina);
-  useClampPagina(paginaActual, setPaginaActual, totalPaginas);
-  const indiceInicio = (paginaActual - 1) * equiposPorPagina;
-  const equiposPagina = equiposFiltrados.slice(indiceInicio, indiceInicio + equiposPorPagina);
+  // Listado: el servidor filtra por modelo y entrega una página de 4 equipos
+  const {
+    equipos: equiposPagina, loading, fetchEquipos, totalPaginas, totalEquipos, paginaActual, setPaginaActual,
+    filtroModelo, setFiltroModelo
+  } = useEquiposListado();
 
   const editarEquipo = (eq) => {
     setEquipoEditando(eq);
@@ -96,15 +65,13 @@ function Equipos() {
         // "Guardar Cambios": guarda y se mantiene en el form para seguir editando
         const res = await api.get(`/api/equipos/${id}`);
         setEquipoEditando(res.data);
-        const lista = await getCached("/api/equipos");
-        setEquipos(lista.data);
+        fetchEquipos();
       } else {
         setMostrarFormulario(false);
         setEquipoEditando(null);
         setSoloLectura(false);
         navigate('/equipos', { replace: true });
-        const res = await getCached("/api/equipos");
-        setEquipos(res.data);
+        fetchEquipos();
       }
       return "ok";
     } catch (err) {
@@ -119,7 +86,6 @@ function Equipos() {
       <div className="container">
       <EquipoFormulario
         equipoEditando={equipoEditando}
-        equipos={equipos}
         onCancel={() => {
           setMostrarFormulario(false);
           setEquipoEditando(null);
@@ -169,7 +135,7 @@ function Equipos() {
             ))}
           </div>
 
-          {equiposFiltrados.length === 0 && (
+          {totalEquipos === 0 && (
             <div className="empty-state">
               <Package size={48} />
               <p>No hay equipos que coincidan con la búsqueda</p>

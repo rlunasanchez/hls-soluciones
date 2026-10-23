@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Package, Save, X } from "lucide-react";
 import { toUpper, upperInput } from "../../utils/helpers";
 
-function EquipoFormulario({ equipoEditando, onCancel, onSave, equipos, readOnly = false }) {
+function EquipoFormulario({ equipoEditando, onCancel, onSave, readOnly = false }) {
   const [nuevoEquipo, setNuevoEquipo] = useState({
     codigo: "", equipo: "", modelo: "", marca: "", serie: ""
   });

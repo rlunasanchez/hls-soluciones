@@ -75,15 +75,6 @@ export function ordenAFormulario(orden) {
   };
 }
 
-// Registro del mantenedor de Equipos que coincide con Equipo + Marca + Modelo de la orden (o null).
-export function buscarEquipoDeOrden(orden, equipos = []) {
-  const norm = (v) => String(v || "").trim().toUpperCase();
-  if (!(orden.equipo && orden.marca && orden.modelo)) return null;
-  return equipos.find((e) =>
-    norm(e.equipo) === norm(orden.equipo) && norm(e.marca) === norm(orden.marca) && norm(e.modelo) === norm(orden.modelo)
-  ) || null;
-}
-
 // Los 12 insumos de la orden como lista de { nombre } y cuántos mostrar (mínimo 2).
 export function insumosDeOrden(orden) {
   const usados = [];

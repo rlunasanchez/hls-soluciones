@@ -9,18 +9,17 @@ import { upperInput, toUpper } from "../../utils/helpers";
 function OrdenFormEquipo({
   children,
   seleccionarEquipoPorModelo,
-  equipoSeleccionado,
   nuevaOrden, setNuevaOrden,
   readOnly = false,
   busquedaModelo, setBusquedaModelo,
   mostrarDropdownModelo, setMostrarDropdownModelo,
   equiposModeloFiltrados,
   equipoModeloDropdownRef,
-  equipos = [],
   equipoFijo = false,
   editingId = null,
   onRegistrarEquipo = null,
-  onEquiposRefresh = null
+  equipoExistente = null,
+  onEquipoCambiado = null
 }) {
   const [mostrarDetalleEquipo, setMostrarDetalleEquipo] = useState(false);
   const [mostrarEditarEquipo, setMostrarEditarEquipo] = useState(false);
@@ -39,13 +38,6 @@ function OrdenFormEquipo({
     serie: nuevaOrden.serie || ""
   };
   const hayDatosEquipo = !!(nuevaOrden.equipo || nuevaOrden.marca || nuevaOrden.modelo || nuevaOrden.serie);
-  const normEq = (v) => (v || "").trim().toLowerCase();
-  const equipoExistente = (equipos || []).find(eq =>
-    normEq(eq.equipo) === normEq(nuevaOrden.equipo) &&
-    normEq(eq.marca) === normEq(nuevaOrden.marca) &&
-    normEq(eq.modelo) === normEq(nuevaOrden.modelo)
-  );
-
   const abrirEditarEquipo = () => {
     if (!equipoExistente) return;
     setEquipoEnEdicion(equipoExistente);
@@ -55,9 +47,8 @@ function OrdenFormEquipo({
   const handleGuardarEdicionEquipo = async (payload, id, mantener = false) => {
     try {
       await api.put(`/api/equipos/${id}`, payload);
-      const lista = await api.get("/api/equipos");
-      if (onEquiposRefresh) onEquiposRefresh(lista.data);
       const res = await api.get(`/api/equipos/${id}`);
+      if (onEquipoCambiado) onEquipoCambiado(res.data);
       setNuevaOrden(prev => ({
         ...prev,
         equipo: toUpper(res.data.equipo),
@@ -82,7 +73,7 @@ function OrdenFormEquipo({
     <div className="of-sec primary">
       <div className="of-st primary">Datos del Equipo</div>
 
-      {equipoFijo && equipoSeleccionado && (
+      {equipoFijo && equipoExistente && (
         <div style={{
           flex: 1,
           background: '#DCFCE7', border: '1.5px solid var(--success)',
@@ -91,18 +82,18 @@ function OrdenFormEquipo({
           marginBottom: '10px'
         }}>
           <span style={{ background: 'var(--success)', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' }}>
-            {equipoSeleccionado.codigo || 'EQ-XXXX'}
+            {equipoExistente.codigo || 'EQ-XXXX'}
           </span>
           <span style={{ fontWeight: '600', color: 'var(--text)', fontSize: '0.85rem' }}>
-            {equipoSeleccionado.equipo} {equipoSeleccionado.marca} {equipoSeleccionado.modelo}
+            {equipoExistente.equipo} {equipoExistente.marca} {equipoExistente.modelo}
           </span>
           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-            Serie: {equipoSeleccionado.serie || 'N/A'}
+            Serie: {equipoExistente.serie || 'N/A'}
           </span>
         </div>
       )}
 
-      {equipoFijo && equipoSeleccionado ? null : (
+      {equipoFijo && equipoExistente ? null : (
       <div className="of-r3" style={{ gap: '20px', marginBottom: '8px' }}>
         <div>
           <div ref={equipoModeloDropdownRef} style={{ position: 'relative' }}>
@@ -127,7 +118,7 @@ function OrdenFormEquipo({
                 style={{
                   width: '100%', padding: '2px 8px',
                   border: '1.5px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '.82rem',
-                  background: equipoSeleccionado ? '#E0F2FE' : 'white'
+                  background: equipoExistente ? '#E0F2FE' : 'white'
                 }}
               />
             </div>
@@ -226,6 +217,12 @@ function OrdenFormEquipo({
       </div>
       )}
 
+      {!readOnly && editingId && hayDatosEquipo && !equipoExistente && (
+        <div style={{ fontSize: '.7rem', color: 'var(--text-muted)', margin: '-4px 0 6px' }}>
+          Este equipo no está en el mantenedor. Si fue renombrado, búsquelo arriba por modelo; si es nuevo, use Registrar en Equipos.
+        </div>
+      )}
+
       <div className="of-r3" style={{ columnGap: '20px', rowGap: '6px', marginBottom: '20px' }}>
         <div className="of-f">
           <label>Equipo *</label>
@@ -279,7 +276,7 @@ function OrdenFormEquipo({
       </div>
 
       {/* Modal Detalle Equipo (solo lectura) — portal fuera del form de la OT */}
-      {mostrarDetalleEquipo && (equipoSeleccionado || hayDatosEquipo) && createPortal(
+      {mostrarDetalleEquipo && (equipoExistente || hayDatosEquipo) && createPortal(
         <div style={{
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999,
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
@@ -287,8 +284,7 @@ function OrdenFormEquipo({
         >
           <div style={{ maxHeight: '90vh', overflow: 'auto', width: '100%', maxWidth: '900px' }}>
             <EquipoFormulario
-              equipoEditando={equipoSeleccionado || equipoSnapshot}
-              equipos={equipos}
+              equipoEditando={equipoExistente || equipoSnapshot}
               onSave={() => {}}
               onCancel={() => setMostrarDetalleEquipo(false)}
               readOnly
@@ -308,7 +304,6 @@ function OrdenFormEquipo({
           <div style={{ maxHeight: '90vh', overflow: 'auto', width: '100%', maxWidth: '900px' }}>
             <EquipoFormulario
               equipoEditando={equipoEnEdicion}
-              equipos={equipos}
               onSave={handleGuardarEdicionEquipo}
               onCancel={() => { setMostrarEditarEquipo(false); setEquipoEnEdicion(null); }}
             />

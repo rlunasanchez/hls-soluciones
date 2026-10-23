@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import pool from "../config/db.js";
 import { authMiddleware, adminOnly } from "../middleware/authMiddleware.js";
+import consultaRouter from "./equiposConsulta.js";
 
 dotenv.config();
 const router = express.Router();
@@ -14,28 +15,8 @@ async function generarCodigo() {
   return `EQ-${String(num + 1).padStart(4, "0")}`;
 }
 
-router.get("/", authMiddleware, async (req, res) => {
-  try {
-    const { q } = req.query;
-    let sql = `SELECT * FROM equipos`;
-    let conditions = [];
-    let params = [];
-    if (q && q.trim()) {
-      const term = `%${q.trim()}%`;
-      conditions.push(`(LOWER(codigo) LIKE LOWER(?) OR LOWER(serie) LIKE LOWER(?) OR LOWER(equipo) LIKE LOWER(?) OR LOWER(marca) LIKE LOWER(?) OR LOWER(modelo) LIKE LOWER(?))`);
-      params.push(term, term, term, term, term);
-    }
-    if (conditions.length > 0) {
-      sql += ` WHERE ${conditions.join(' AND ')}`;
-    }
-    sql += ` ORDER BY id DESC`;
-    const [rows] = await pool.query(sql, params);
-    res.json(rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Error del servidor" });
-  }
-});
+// Consultas: listado, búsqueda y verificación (ver equiposConsulta.js). Va antes de las rutas con /:id.
+router.use("/", consultaRouter);
 
 router.get("/:id", authMiddleware, async (req, res) => {
   try {

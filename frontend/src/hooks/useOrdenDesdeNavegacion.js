@@ -6,7 +6,7 @@ import { useEffect } from "react";
 //   Asociadas" → Cancelar/Cerrar en la Cotización), en el mismo modo en que estaba: Ver o Editar.
 // - `cliente`: una OT nueva con los datos de ese cliente (botón "OT" de Clientes).
 // Sin nada de eso, la página arranca en el listado.
-export default function useOrdenDesdeNavegacion({ setMostrarFormulario, setEditingId, fetchEquipos, editarOrden, verOrden, abrirNuevaOrden }) {
+export default function useOrdenDesdeNavegacion({ setMostrarFormulario, setEditingId, editarOrden, verOrden, abrirNuevaOrden }) {
   useEffect(() => {
     const init = async () => {
       const navState = window.history.state?.usr;
@@ -21,14 +21,11 @@ export default function useOrdenDesdeNavegacion({ setMostrarFormulario, setEditi
       const { orden, cliente, verOrdenId, verOrdenSoloLectura } = navState;
 
       if (orden) {
-        // Cargar equipos frescos antes de editar la orden
-        await fetchEquipos();
         editarOrden(orden);
         window.history.replaceState({}, document.title);
       }
 
       if (verOrdenId) {
-        await fetchEquipos();
         if (verOrdenSoloLectura) verOrden({ id: verOrdenId });
         else editarOrden({ id: verOrdenId });
         window.history.replaceState({}, document.title);
