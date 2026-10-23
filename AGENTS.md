@@ -95,9 +95,13 @@ Solo existen **dos ramas**:
 
 ## 7. Estado y pendientes (23-oct-2026)
 
-**Publicado en la web hasta v2.184** (22-oct-2026: Neon migrado, `deploy/cloud` en `a4056fd`, `main` en `2882d74`). `MIGRACION_PENDIENTE.md` es solo histórico y se puede borrar.
+**Publicado en la web hasta v2.187** (23-oct-2026: Neon con la tabla nueva `orden_adjuntos`, `deploy/cloud` en `cfbefc8`, `main` en `35b9bea`). Local y web están sincronizados. `MIGRACION_PENDIENTE.md` es solo histórico y se puede borrar. No hacer `git push` sin orden expresa; preguntar antes de publicar.
 
-**Solo en local, sin publicar:** v2.185 (botones Guardar / Guardar y salir en todo el sistema y ficha de cliente persona con la dirección al lado: solo frontend, se publica con un push a `main`) y **v2.186 (adjuntos de la OT: requiere crear la tabla `orden_adjuntos` en Neon y portar `routes/adjuntos.js` a PostgreSQL; el SQL de Neon y los pasos están en `CAMBIOS.md` v2.186)**. Orden para publicar v2.186: Neon → `deploy/cloud` → `main`. No hacer `git push` sin orden expresa; preguntar antes de publicar.
+**Próximo cambio acordado (semana del 26-oct-2026): historial de la OT** (quién creó, modificó y entregó). Propuesta aprobada en lo general, aún sin construir:
+- Tabla `orden_historial`: `orden_id`, usuario (nombre y login del token), fecha y hora, acción (creó, modificó, registró entrega/ingreso/término, cambió de cliente, agregó o quitó un adjunto, eliminó) y los cambios campo por campo con valor anterior y nuevo (JSON). El servidor lo calcula comparando la fila anterior con la nueva usando la lista `CAMPOS` de `utils/camposOrden.js`.
+- Apartado **Historial** plegado y de solo lectura en la OT, junto a Adjuntos.
+- A decidir con el dueño: historial completo o solo "creada por" y "última modificación por" (se recomienda el completo); registrar adjuntos y eliminaciones; aviso cuando otro usuario modificó la OT mientras se editaba (comparar `fecha_actualizacion`); si eliminar una OT debe dejar rastro (quién y cuándo) o pasar a "eliminada" sin borrarse; extender luego a Clientes, Contactos y Equipos.
+- Hoy el sistema solo guarda `fecha_creacion` y `fecha_actualizacion`, sin el usuario.
 
 - **Neon:** migración de contactos/direcciones **corrida**, backend PostgreSQL **desplegado** y esquema antiguo **ya borrado** (`clientes_contactos`, `clientes_direcciones` y las columnas `clientes.contacto_*`). Neon tiene 9 tablas: `clientes`, `contactos`, `direcciones`, `cliente_contactos`, `cliente_direcciones`, `equipos`, `ordenes_trabajo`, `cotizaciones`, `usuarios`.
 - Adaptar **Cotizaciones** a todo lo modificado en Clientes, Contactos, Direcciones y Equipos: tipo Empresa/Persona, checks "En la OT", botones Editar/Registrar, vínculos y equipo solo identidad (`NOTAS-COTIZACIONES.md` tiene el relevamiento). **Aún no se empieza**; su tabla en la nube conserva `contacto_id`/`direccion_id` por eso.
