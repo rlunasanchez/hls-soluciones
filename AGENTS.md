@@ -95,7 +95,7 @@ Solo existen **dos ramas**:
 
 ## 7. Estado y pendientes (23-oct-2026)
 
-**Publicado en la web hasta v2.187** (23-oct-2026: Neon con la tabla nueva `orden_adjuntos`, `deploy/cloud` en `cfbefc8`, `main` en `35b9bea`). Local y web están sincronizados. `MIGRACION_PENDIENTE.md` es solo histórico y se puede borrar. No hacer `git push` sin orden expresa; preguntar antes de publicar.
+**Publicado en la web hasta v2.190** (23-oct-2026: Neon con la tabla `orden_adjuntos`, `deploy/cloud` en `a2ddbd0`, `main` en `d9b8ff8`). **Solo en local, sin publicar: v2.191** (la OT vinculada a equipo, contacto y dirección del mantenedor; requiere correr el SQL de Neon de `CAMBIOS.md` v2.191, luego `deploy/cloud` y luego `main`; el merge de `deploy/cloud` ya está hecho y probado en `eb5a1e7`). **Para retomar el trabajo, leer `CONTINUAR_LUNES.md`.** `MIGRACION_PENDIENTE.md` es solo histórico y se puede borrar. No hacer `git push` sin orden expresa; preguntar antes de publicar.
 
 **Próximo cambio acordado (semana del 26-oct-2026): historial de la OT** (quién creó, modificó y entregó). Propuesta aprobada en lo general, aún sin construir:
 - Tabla `orden_historial`: `orden_id`, usuario (nombre y login del token), fecha y hora, acción (creó, modificó, registró entrega/ingreso/término, cambió de cliente, agregó o quitó un adjunto, eliminó) y los cambios campo por campo con valor anterior y nuevo (JSON). El servidor lo calcula comparando la fila anterior con la nueva usando la lista `CAMPOS` de `utils/camposOrden.js`.
@@ -160,6 +160,7 @@ Siguiente alcance (aún no): Clientes y Equipos en el servidor (ver 7a), Cotizac
 
 | Archivo | Para qué |
 |---|---|
+| `CONTINUAR_LUNES.md` | Dónde quedó el trabajo el 23-oct-2026 y cómo retomarlo (borrar cuando ya no haga falta) |
 | `CAMBIOS.md` | Registro detallado de cambios, más reciente arriba (de 2026-10-13 hacia atrás) |
 | `docs/HISTORIAL.md` | Documentación histórica completa (antes era este archivo): decisiones de versiones 1.0 a 2.17, deploy en la nube, bugs resueltos |
 | `BASE_DATOS_ANTIGUA.md` | Esquema del sistema original (SQL Server `ods`), hallazgos y equivalencias con el sistema nuevo |
