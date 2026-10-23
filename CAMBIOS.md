@@ -1,5 +1,17 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-10-24 (solo local)
+
+### v2.188: Listado de Clientes paginado y filtrado en el servidor; `clientes.js` dividido
+
+**Alcance:** Clientes, backend y frontend; sin cambios de base de datos. **Solo local: falta portar `clientes.js` y `clientesConsulta.js` a `deploy/cloud`.** Tercer paso de la prioridad de volumen (`AGENTS.md` 7a).
+
+- **Backend:** `GET /api/clientes?pagina=&limite=&nombre=&rut=` devuelve `{ clientes, pagination }` con una sola página (máximo 100). `nombre`: la razón social empieza con el texto o alguna palabra empieza con él; `rut`: solo los dígitos desde el comienzo (se ignoran puntos, guion y DV). Sin parámetros devuelve todos (Cotizaciones) y `?q=` sigue siendo el buscador de la OT. `enriquecerClientes` solo se arma para los clientes de la página. Filtros en `utils/busquedaClientes.js` (`filtrosListadoClientes`, idéntico en MySQL y PostgreSQL).
+- **Código escalable:** `routes/clientes.js` 408 → **311** líneas. Las consultas (listado, buscador, `GET /verificar`, `buscarDuplicadoRut` y `enriquecerClientes`) están ahora en `routes/clientesConsulta.js` (125 líneas), que `clientes.js` monta con `router.use("/", consultaRouter)` antes de sus rutas `/:id`. En PostgreSQL ambos archivos difieren de MySQL (sintaxis), igual que el resto de `routes/*.js`.
+- **Frontend:** `hooks/useClientesListado.js` (63 líneas; mismo patrón que el de la OT: textos con 300 ms de espera, página persistente, una respuesta vieja nunca pisa a una nueva). `pages/Clientes.jsx` 184 → **149** líneas. `ClienteFormulario` ya no recibe la lista completa de clientes: el RUT repetido lo rechaza el servidor al guardar (`El cliente ya existe (CL-XXXX)` al crear y `El RUT ya existe (CL-XXXX)` al editar).
+- **Pruebas:** MySQL 45/45 con 13.539 clientes en una base temporal (14 combinaciones de filtros contra la lógica antigua del navegador, páginas intermedias, última y fuera de rango, `%` y `_`, `ñ`, límite, inyección; cada consulta de 12 a 42 ms). En pantalla con 150 clientes temporales (38 páginas), ya borrados: paginación, filtros de nombre y RUT, limpiar, volver a la página 1 al cambiar un filtro, crear, editar, ver, eliminar y RUT repetido. Revisión automática de nombres sin definir: limpia.
+- **Pendiente:** `buscarDuplicadoRut` sigue leyendo todos los clientes en cada alta o edición (funciona bien con miles; se puede pasar a una columna de RUT normalizado con índice si crece). Equipos y Cotizaciones siguen cargando todo.
+
 ## Fecha: 2026-10-23 (solo local)
 
 ### v2.187: Fechas de creación, pantalla de Inicio más compacta, menú más chico y encabezado fijo

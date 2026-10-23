@@ -1,7 +1,7 @@
 // Búsqueda de clientes en el servidor (buscador de cliente de la OT). Idéntico en `main` (MySQL)
 // y en `deploy/cloud` (PostgreSQL): usa "?" y `numerarMarcadores` (de filtrosOrdenes.js) los
 // convierte a $1, $2… solo en PostgreSQL.
-import { comoLike } from "./filtrosOrdenes.js";
+import { comoLike, escaparLike } from "./filtrosOrdenes.js";
 
 export const MIN_BUSQUEDA = 2;
 
@@ -20,4 +20,23 @@ export function buscarClientesSql(q) {
     params.push(`%${digitos}%`);
   }
   return { where: `WHERE (${condiciones.join(" OR ")})`, params };
+}
+
+// Filtros del listado de Clientes (con paginación en el servidor): ?nombre=&rut=
+//  - nombre: la razón social empieza con el texto o alguna de sus palabras empieza con él.
+//  - rut: solo los dígitos, desde el comienzo ("14900" encuentra "14.900.665-6"; se ignoran puntos, guion y DV).
+export function filtrosListadoClientes(query) {
+  const condiciones = [];
+  const params = [];
+  const nombre = String(query.nombre || "").trim();
+  if (nombre) {
+    condiciones.push("(LOWER(razon_social) LIKE LOWER(?) OR LOWER(razon_social) LIKE LOWER(?))");
+    params.push(`${escaparLike(nombre)}%`, `% ${escaparLike(nombre)}%`);
+  }
+  const digitos = String(query.rut || "").replace(/[^0-9]/g, "");
+  if (digitos) {
+    condiciones.push("REPLACE(REPLACE(REPLACE(REPLACE(UPPER(rut), '.', ''), '-', ''), ' ', ''), 'K', '') LIKE ?");
+    params.push(`${digitos}%`);
+  }
+  return { where: condiciones.length ? `WHERE ${condiciones.join(" AND ")}` : "", params };
 }

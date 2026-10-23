@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Users, Plus } from "lucide-react";
 import api from "../services/api";
-import { getCached } from "../services/cache";
 import { parseToken } from "../utils/helpers";
 import "../styles/Clientes.css";
 import "../styles/clientes-componentes.css";
@@ -11,54 +10,21 @@ import Pagination from "../components/Pagination";
 import FiltrosCliente from "../components/clientes/FiltrosCliente";
 import ClienteLista from "../components/clientes/ClienteLista";
 import ClienteFormulario from "../components/clientes/ClienteFormulario";
-import { usePaginaPersistente, useClampPagina } from "../hooks/usePaginacion";
+import useClientesListado from "../hooks/useClientesListado";
 
 function Clientes() {
   const navigate = useNavigate();
-  const [clientes, setClientes] = useState([]);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [clienteEditando, setClienteEditando] = useState(null);
-  const [busqueda, setBusqueda] = useState("");
-  const [filtroRut, setFiltroRut] = useState("");
-  const [paginaActual, setPaginaActual] = usePaginaPersistente("pagClientes", [busqueda, filtroRut]);
-  const clientesPorPagina = 4;
   const [soloLectura, setSoloLectura] = useState(false);
-  const [loading, setLoading] = useState(false);
+
+  // Listado: el servidor filtra por nombre y RUT y entrega una página de 4 clientes
+  const {
+    clientes: clientesPagina, loading, fetchClientes, totalPaginas, totalClientes, paginaActual, setPaginaActual,
+    busqueda, setBusqueda, filtroRut, setFiltroRut
+  } = useClientesListado();
 
   const { usuarioActual } = parseToken();
-
-  const fetchClientes = async (signal) => {
-    setLoading(true);
-    try {
-      const res = await getCached("/api/clientes", { signal });
-      setClientes(res.data);
-    } catch (err) {
-      if (err.name !== "CanceledError") console.error("Error al cargar clientes:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const controller = new AbortController();
-    fetchClientes(controller.signal);
-    return () => controller.abort();
-  }, []);
-
-  const clientesFiltrados = clientes.filter((c) => {
-    const texto = busqueda.toLowerCase();
-    const razon = (c.razon_social || "").toLowerCase();
-    const matchBusqueda = !texto || razon.startsWith(texto) || razon.includes(" " + texto);
-    // RUT comparado por dígitos (ignora puntos, guion y DV): "14900" encuentra "14.900.665-6"
-    const digRut = (v) => (v || "").replace(/[^0-9]/g, "");
-    const matchRut = !filtroRut || digRut(c.rut).startsWith(digRut(filtroRut));
-    return matchBusqueda && matchRut;
-  });
-
-  const totalPaginas = Math.ceil(clientesFiltrados.length / clientesPorPagina);
-  useClampPagina(paginaActual, setPaginaActual, totalPaginas);
-  const indiceInicio = (paginaActual - 1) * clientesPorPagina;
-  const clientesPagina = clientesFiltrados.slice(indiceInicio, indiceInicio + clientesPorPagina);
 
   const guardarCliente = async (clienteData, resetFormulario, mantener = false) => {
     try {
@@ -120,7 +86,6 @@ function Clientes() {
       <div className="container">
         <ClienteFormulario
           clienteEditando={clienteEditando}
-          clientes={clientes}
           onSave={guardarCliente}
           onCancel={() => {
             setClienteEditando(null);
@@ -167,7 +132,7 @@ function Clientes() {
             onEliminar={eliminarCliente}
           />
 
-          {clientesFiltrados.length === 0 && (
+          {totalClientes === 0 && (
             <div className="empty-state">
               <Users size={48} />
               <p>No hay clientes que coincidan con la búsqueda</p>

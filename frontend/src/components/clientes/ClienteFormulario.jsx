@@ -17,7 +17,7 @@ const ESTADO_INICIAL_CLIENTE = {
 
 // soloCliente: ficha con únicamente los datos del cliente (razón social, RUT, fono, email),
 // sin las tablas de contactos y direcciones; no toca sus vínculos ni sus checks.
-function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, titulo, readOnly = false, modoRegistro = false, soloCliente = false }) {
+function ClienteFormulario({ clienteEditando, onSave, onCancel, titulo, readOnly = false, modoRegistro = false, soloCliente = false }) {
   const [nuevoCliente, setNuevoCliente] = useState(ESTADO_INICIAL_CLIENTE);
   const [rutError, setRutError] = useState("");
   const [guardando, guardar] = useGuardar();
@@ -91,14 +91,7 @@ function ClienteFormulario({ clienteEditando, clientes = [], onSave, onCancel, t
         alert("RUT inválido.");
         return;
       }
-      const clienteConRut = (clientes || []).find((c) => {
-        if (clienteEditando && c.id === clienteEditando.id) return false;
-        return normalizarRut(c.rut) === rutNormalizado;
-      });
-      if (clienteConRut) {
-        alert(`El RUT ya existe (${clienteConRut.codigo || "CL-????"}).`);
-        return;
-      }
+      // Si el RUT ya pertenece a otro cliente, el servidor lo rechaza al guardar y avisa con su código
     }
     if (String(nuevoCliente.email || "").trim() && !validarEmail(nuevoCliente.email)) {
       alert("Email inválido.");
