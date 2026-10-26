@@ -30,6 +30,8 @@ api.interceptors.response.use(
       // Contactos y Direcciones están vinculados a los clientes (borrar o cambiar uno
       // modifica la ficha de sus clientes): el listado de clientes también queda viejo.
       if (prefijo === '/api/contactos' || prefijo === '/api/direcciones') invalidar('/api/clientes');
+      // Equipos, Contactos y Direcciones se copian a las OT vinculadas (v2.191): el listado de OT también queda viejo.
+      if (prefijo === '/api/equipos' || prefijo === '/api/contactos' || prefijo === '/api/direcciones') invalidar('/api/ordenes');
     }
     return response;
   },
