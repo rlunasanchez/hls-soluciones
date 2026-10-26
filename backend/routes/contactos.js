@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import pool from "../config/db.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
-import { sincronizarOrdenesDeContacto, desvincularOrdenes } from "./ordenesVinculos.js";
+import { sincronizarOrdenesDeContacto, reenlazarOrdenesDeContacto, desvincularOrdenes } from "./ordenesVinculos.js";
 
 dotenv.config();
 const router = express.Router();
@@ -86,6 +86,7 @@ router.post("/", authMiddleware, async (req, res) => {
       VALUES (?, ?, ?, ?, ?)`,
       [codigo, nombre.trim(), email || null, fono || null, cargo || null]
     );
+    await reenlazarOrdenesDeContacto(pool, ins.insertId, nombre);
     res.status(201).json({ msg: "Contacto creado", id: ins.insertId, codigo });
   } catch (err) {
     console.error(err);

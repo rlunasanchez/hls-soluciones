@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import pool from "../config/db.js";
 import { authMiddleware, adminOnly } from "../middleware/authMiddleware.js";
 import consultaRouter from "./equiposConsulta.js";
-import { sincronizarOrdenesDeEquipo, desvincularOrdenes } from "./ordenesVinculos.js";
+import { sincronizarOrdenesDeEquipo, reenlazarOrdenesDeEquipo, desvincularOrdenes } from "./ordenesVinculos.js";
 
 dotenv.config();
 const router = express.Router();
@@ -51,11 +51,12 @@ router.post("/", authMiddleware, async (req, res) => {
       return res.status(400).json({ msg: `El equipo ${equipo.trim()} ${(marca || '').trim()} ${(modelo || '').trim()} ya existe en el mantenedor con el código ${dup[0].codigo}. No se creó un nuevo registro.` });
     }
     const codigo = await generarCodigo();
-    await pool.query(
+    const [ins] = await pool.query(
       `INSERT INTO equipos (codigo, equipo, modelo, marca, serie)
       VALUES (?, ?, ?, ?, ?)`,
       [codigo, equipo.trim(), modelo || '', marca || '', serie || null]
     );
+    await reenlazarOrdenesDeEquipo(pool, ins.insertId, { equipo, marca, modelo });
     res.status(201).json({ msg: "Equipo creado", codigo });
   } catch (err) {
     console.error(err);
