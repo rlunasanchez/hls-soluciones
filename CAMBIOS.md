@@ -2,6 +2,14 @@
 
 ## Fecha: 2026-10-26 (publicado)
 
+### v2.193: Editar o eliminar un equipo, contacto o dirección refresca el listado de OT; editar el equipo desde la OT ya no borra la serie
+
+**Alcance:** solo frontend (sin cambios de backend ni de base de datos). Probado en pantalla por el dueño en local.
+
+- **Listado de OT viejo:** `services/api.js` guarda los listados 60 s y al escribir en Equipos, Contactos o Direcciones no invalidaba el de OT, así que la OT se abría con el texto anterior aunque el servidor ya la hubiera actualizado (v2.191). Ahora esas escrituras también invalidan `/api/ordenes`.
+- **Serie borrada:** al guardar el botón **Editar** del equipo dentro de la OT, `OrdenFormEquipo.jsx` volvía a escribir la serie con la del mantenedor (que no guarda serie) y borraba la de la OT. Ahora solo se actualizan Equipo, Marca y Modelo.
+- **Trampa para probar en local:** el backend local no se recarga solo; tras cambios de `routes/*.js` hay que reiniciarlo. El reenlace de v2.192 ocurre solo al **crear** el registro: si las OT quedaron sin vínculo con un backend viejo, reiniciar después no las enlaza (eliminar y volver a crear el equipo).
+
 ### v2.192: Al crear un equipo, contacto o dirección se reenlazan las OT sin vínculo con el mismo texto
 
 **Alcance:** backend, sin cambios de base de datos ni de pantalla. **Publicado el 26-oct-2026** (`deploy/cloud` en `6e744d1`, `main` en `4b2ab78`).
