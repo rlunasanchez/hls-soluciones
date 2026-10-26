@@ -1,10 +1,21 @@
 # Registro de Cambios - HLS Soluciones
 
-## Fecha: 2026-10-24 (solo local)
+## Fecha: 2026-10-26 (publicado)
+
+### v2.192: Al crear un equipo, contacto o dirección se reenlazan las OT sin vínculo con el mismo texto
+
+**Alcance:** backend, sin cambios de base de datos ni de pantalla. **Publicado el 26-oct-2026** (`deploy/cloud` en `6e744d1`, `main` en `4b2ab78`).
+
+- **Por qué:** si se eliminaba un equipo, contacto o dirección compartido por varias OT y se volvía a registrar, solo se enlazaba la OT que se guardaba; las otras se veían bien pero seguían sin vínculo y no se actualizaban al editar el registro.
+- **Qué hace:** `ordenesVinculos.js` tiene `reenlazarOrdenesDeEquipo`, `reenlazarOrdenesDeContacto` y `reenlazarOrdenesDeDireccion`, que se llaman en el alta de `equipos.js`, `contactos.js` y `direcciones.js`. Actualizan las OT con el vínculo vacío y el mismo texto (sin distinguir mayúsculas ni espacios; equipo = Equipo + Marca + Modelo). Una OT ya vinculada no se toca.
+- **Pruebas:** PostgreSQL real (`embedded-postgres`) 7/7 y MySQL en base temporal OK. Se probaron las funciones directamente; no se repitió la suite completa de 104 pruebas.
+- **No cubierto:** si el contacto o la dirección ya existe y se registra con `reutilizar`, solo se enlaza la OT que se guarda. Equipos da error en ese caso. Considerarlo al importar el histórico (pasada masiva de enlace).
+
+## Fecha: 2026-10-24 (publicado el 26-oct-2026)
 
 ### v2.191: La OT queda vinculada a su equipo, contacto y dirección del mantenedor: editar uno actualiza todas las OT que lo usan
 
-**Alcance:** backend (columnas nuevas, enlace al guardar y sincronización al editar); la pantalla no cambió. **Portado a `deploy/cloud` y probado en PostgreSQL (merge local, sin publicar); falta correr el SQL de Neon.**
+**Alcance:** backend (columnas nuevas, enlace al guardar y sincronización al editar); la pantalla no cambió. **Publicado el 26-oct-2026** (SQL de Neon corrido, `deploy/cloud` en `eb5a1e7`, `main` en `5ae0322`).
 
 - **Por qué:** la OT solo toma datos de sus mantenedores (Clientes, Equipos, Contactos, Direcciones) y un mismo registro puede estar en muchas OT. Antes solo el cliente se actualizaba en todas sus OT (`cliente_id`); equipo, contacto y dirección eran copias sin vínculo, así que al renombrar un equipo las demás OT quedaban con el nombre viejo y pedían "Registrar" (pasó el 23-oct-2026 con `NOTE HP 445 G9`).
 - **Base de datos:** `ordenes_trabajo.equipo_id`, `contacto_id` y `direccion_id` (INT, con índices). Se agregaron a `crear_tablas.sql`. Las OT siguen guardando la copia de los textos.
