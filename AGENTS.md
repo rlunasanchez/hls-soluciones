@@ -95,7 +95,7 @@ Solo existen **dos ramas**:
 
 ## 7. Estado y pendientes (23-oct-2026)
 
-**Publicado en la web hasta v2.192** (26-oct-2026: Neon con las columnas `equipo_id`, `contacto_id` y `direccion_id` en `ordenes_trabajo`, `deploy/cloud` en `6e744d1`, `main` en `4b2ab78`). No hay cambios locales sin publicar salvo esta documentación. **Para retomar el trabajo, leer `CONTINUAR_LUNES.md`.** `MIGRACION_PENDIENTE.md` es solo histórico y se puede borrar. No hacer `git push` sin orden expresa; preguntar antes de publicar.
+**Publicado en la web hasta v2.193** (26-oct-2026: Neon con las columnas `equipo_id`, `contacto_id` y `direccion_id` en `ordenes_trabajo`; v2.193 es solo frontend). No hay cambios locales sin publicar. **Para retomar el trabajo, leer `CONTINUAR_LUNES.md`.** `MIGRACION_PENDIENTE.md` es solo histórico y se puede borrar. No hacer `git push` sin orden expresa; preguntar antes de publicar.
 
 **Próximo cambio acordado (semana del 26-oct-2026): historial de la OT** (quién creó, modificó y entregó). Propuesta aprobada en lo general, aún sin construir:
 - Tabla `orden_historial`: `orden_id`, usuario (nombre y login del token), fecha y hora, acción (creó, modificó, registró entrega/ingreso/término, cambió de cliente, agregó o quitó un adjunto, eliminó) y los cambios campo por campo con valor anterior y nuevo (JSON). El servidor lo calcula comparando la fila anterior con la nueva usando la lista `CAMPOS` de `utils/camposOrden.js`.

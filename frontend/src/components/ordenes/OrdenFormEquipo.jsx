@@ -53,8 +53,8 @@ function OrdenFormEquipo({
         ...prev,
         equipo: toUpper(res.data.equipo),
         marca: toUpper(res.data.marca),
-        modelo: toUpper(res.data.modelo),
-        serie: res.data.serie ? toUpper(res.data.serie) : ""
+        modelo: toUpper(res.data.modelo)
+        // La serie es de cada OT (el mantenedor no la guarda): no se toca al editar el equipo
       }));
       if (mantener && id) {
         setEquipoEnEdicion(res.data);
