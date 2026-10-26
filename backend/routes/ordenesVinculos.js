@@ -36,6 +36,19 @@ export const sincronizarOrdenesDeContacto = (db, id, c) => db.query(
 export const sincronizarOrdenesDeDireccion = (db, id, d) => db.query(
   "UPDATE ordenes_trabajo SET direccion = $1, ciudad = $2, comuna = $3 WHERE direccion_id = $4", [d.direccion, d.ciudad || null, d.comuna || null, id]);
 
+// Tras crear un registro del mantenedor: las OT sin vínculo cuyo texto lo identifica quedan enlazadas a él
+// (p. ej. se eliminó un equipo y se volvió a registrar: todas sus OT lo recuperan sin abrirlas una a una).
+export const reenlazarOrdenesDeEquipo = (db, id, e) => db.query(
+  `UPDATE ordenes_trabajo SET equipo_id = $1 WHERE equipo_id IS NULL AND LOWER(TRIM(equipo)) = LOWER($2)
+   AND LOWER(TRIM(COALESCE(marca,''))) = LOWER($3) AND LOWER(TRIM(COALESCE(modelo,''))) = LOWER($4)`,
+  [id, norm(e.equipo), norm(e.marca), norm(e.modelo)]);
+
+export const reenlazarOrdenesDeContacto = (db, id, nombre) => db.query(
+  "UPDATE ordenes_trabajo SET contacto_id = $1 WHERE contacto_id IS NULL AND LOWER(TRIM(contacto)) = LOWER($2)", [id, norm(nombre)]);
+
+export const reenlazarOrdenesDeDireccion = (db, id, direccion) => db.query(
+  "UPDATE ordenes_trabajo SET direccion_id = $1 WHERE direccion_id IS NULL AND LOWER(TRIM(direccion)) = LOWER($2)", [id, norm(direccion)]);
+
 // Tras eliminar un registro del mantenedor: las OT conservan su copia y pierden el vínculo.
 const COLUMNA = { equipo: "equipo_id", contacto: "contacto_id", direccion: "direccion_id" };
 export const desvincularOrdenes = (db, tipo, id) => {

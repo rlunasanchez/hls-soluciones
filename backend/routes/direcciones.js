@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import pool from "../config/db.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
-import { sincronizarOrdenesDeDireccion, desvincularOrdenes } from "./ordenesVinculos.js";
+import { sincronizarOrdenesDeDireccion, reenlazarOrdenesDeDireccion, desvincularOrdenes } from "./ordenesVinculos.js";
 
 dotenv.config();
 const router = express.Router();
@@ -82,6 +82,7 @@ router.post("/", authMiddleware, async (req, res) => {
       VALUES ($1, $2, $3, $4) RETURNING id`,
       [codigo, direccion.trim(), ciudad || null, comuna || null]
     );
+    await reenlazarOrdenesDeDireccion(pool, ins.rows[0].id, direccion);
     res.status(201).json({ msg: "Dirección creada", id: ins.rows[0].id, codigo });
   } catch (err) {
     console.error(err);
