@@ -8,14 +8,17 @@ Este archivo resume dónde quedó el trabajo al terminar el viernes 23-oct-2026.
 
 | | Versión | Commit |
 |---|---|---|
-| **Web publicada** (Render + Vercel + Neon) | **v2.190** | `main` = `d9b8ff8`, `deploy/cloud` = `a2ddbd0` |
-| **Local, sin publicar** | **v2.191** | `main` = `ce89a15` (2 commits por delante de `origin/main`) |
-| `deploy/cloud` local, ya fusionado y probado, **sin subir** | v2.191 | `eb5a1e7` |
+| **Web publicada** (Render + Vercel + Neon) | **v2.192** (26-oct-2026) | `main` = `4b2ab78`, `deploy/cloud` = `6e744d1` |
 
-- Árbol de trabajo limpio (solo `.claude/` sin versionar). No hay worktrees abiertos.
-- **Nada de lo del lunes está publicado todavía**: ver sección 2.
+- Árbol de trabajo limpio (solo `.claude/` sin versionar). No hay worktrees abiertos. Neon ya tiene las columnas de v2.191.
+- **Ya no hay nada pendiente de publicar** salvo esta documentación. El siguiente trabajo es el historial de la OT (sección 3).
+- Para que Claude pueda hacer `git push`, el dueño creó `.claude/settings.local.json` con reglas para `git push origin deploy/cloud` y `git push origin main`; si el clasificador lo bloquea, el dueño lo escribe con `! git push …`.
 
-## 2. Pendiente de publicar: v2.191 (la OT vinculada a equipo, contacto y dirección)
+## 2. Publicado el 26-oct-2026: v2.191 y v2.192 (la OT vinculada a equipo, contacto y dirección)
+
+v2.192: al crear un equipo, contacto o dirección se reenlazan las OT sin vínculo con el mismo texto (`CAMBIOS.md` v2.192). Nota para la importación del histórico: hacer una pasada masiva de enlace, porque contactos y direcciones ya existentes no reenlazan las demás OT.
+
+Lo que sigue es el detalle de v2.191, ya publicado (se conserva como referencia).
 
 Qué hace: la OT guarda `equipo_id`, `contacto_id` y `direccion_id`. Al editar un equipo, contacto o dirección en su mantenedor, **todas las OT que lo usan se actualizan** (igual que el cliente); la **serie** es de cada OT y no se toca. Al eliminarlo, la OT conserva su copia sin vínculo. El servidor enlaza al guardar la OT (`backend/routes/ordenesVinculos.js`); la pantalla no cambió. Detalle completo y pruebas: `CAMBIOS.md` v2.191.
 
@@ -31,7 +34,7 @@ No hay otros cambios de base de datos pendientes.
 
 ## 3. Lo que sigue (orden acordado con el dueño)
 
-1. **Publicar v2.191** (sección 2).
+1. ~~Publicar v2.191~~ (hecho, junto con v2.192).
 2. **Historial de la OT** (quién creó, modificó y entregó): propuesta en `AGENTS.md` sección 7, "Próximo cambio acordado". Decisiones por tomar con el dueño: historial completo (recomendado) o solo "creada por / última modificación por"; si registrar adjuntos y eliminaciones; aviso de edición simultánea (comparar `fecha_actualizacion`); si eliminar una OT deja rastro o pasa a "eliminada". Hoy el sistema solo guarda `fecha_creacion` y `fecha_actualizacion`, sin el usuario.
 3. **Después, sin fecha** (ver `AGENTS.md`): corrección masiva opcional con confirmación (ligada al historial); si dirección y contacto de OT antiguas deberían quedar congelados; Cotizaciones adaptada como la OT (empresa/persona, cliente eliminado, contacto asociable; `NOTAS-COTIZACIONES.md`); Informes y Orden de Compra (páginas vacías); importar el histórico del sistema antiguo (`BASE_DATOS_ANTIGUA.md`).
 
