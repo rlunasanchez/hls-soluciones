@@ -1,5 +1,14 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-11-05
+
+### v2.194: OT sin el texto "Datos de la Orden" para dar espacio a la fecha de creación
+
+**Alcance:** solo frontend (`OrdenFormDatos.jsx`), sin cambios de backend ni de base de datos.
+
+- **Por qué:** con las 5 casillas marcadas (Ingreso, Término, Entrega, Compra, Garantía) la fila de datos no alcanzaba y la fecha de creación ("Creada") se perdía.
+- **Qué cambió:** se quitó el título "Datos de la Orden" de la cabecera de la OT; la fila ya no reserva los 110 px de ese título.
+
 ## Fecha: 2026-10-26 (publicado)
 
 ### v2.193: Editar o eliminar un equipo, contacto o dirección refresca el listado de OT; editar el equipo desde la OT ya no borra la serie
