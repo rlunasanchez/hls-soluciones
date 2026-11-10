@@ -4,8 +4,6 @@ function OrdenFormDatos({ nuevaOrden, setNuevaOrden, readOnly }) {
   return (
     <div className="of-sec primary">
       <div className="of-head-row">
-        <div className="of-st primary">Datos de la Orden</div>
-
         <div className="of-grid">
           <div className="of-f of-f-inline of-f-num">
             <label>N° Orden *</label>
