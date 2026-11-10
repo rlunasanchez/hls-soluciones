@@ -1,5 +1,14 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-11-10
+
+### v2.195: Aviso de contacto/dirección no registrado ya no dice "ya no"
+
+**Alcance:** solo frontend (`OrdenFormCliente.jsx`), sin cambios de backend ni de base de datos.
+
+- **Por qué:** si el contacto o la dirección de la OT todavía no está en el catálogo, el aviso decía "ya no está vinculado al cliente", pero nunca lo estuvo.
+- **Qué cambió:** en ese caso (editable y sin registrar) dice "Este contacto no está vinculado al cliente (primero Regístralo)" y lo mismo para la dirección. Si ya está registrado, o en modo Ver, sigue "ya no está vinculado" (con el botón Vincular al cliente).
+
 ## Fecha: 2026-11-05
 
 ### v2.194: OT sin el texto "Datos de la Orden" para dar espacio a la fecha de creación

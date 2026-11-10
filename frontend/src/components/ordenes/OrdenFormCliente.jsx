@@ -229,8 +229,9 @@ function OrdenFormCliente({
           {contactoDesvinculado && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span style={avisoDesvinculado}>
-                ⚠ Este contacto ya no está vinculado al cliente
-                {!readOnly && contactoRegistrado === false && " (primero Regístralo)"}
+                {!readOnly && contactoRegistrado === false
+                  ? "⚠ Este contacto no está vinculado al cliente (primero Regístralo)"
+                  : "⚠ Este contacto ya no está vinculado al cliente"}
               </span>
               {!readOnly && contactoRegistrado === true && (
                 <button type="button" className="btn-mini btn-mini--success" disabled={vinculando}
@@ -243,8 +244,9 @@ function OrdenFormCliente({
           {direccionDesvinculada && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span style={avisoDesvinculado}>
-                ⚠ Esta dirección ya no está vinculada al cliente
-                {!readOnly && direccionRegistrada === false && " (primero Regístrala)"}
+                {!readOnly && direccionRegistrada === false
+                  ? "⚠ Esta dirección no está vinculada al cliente (primero Regístrala)"
+                  : "⚠ Esta dirección ya no está vinculada al cliente"}
               </span>
               {!readOnly && direccionRegistrada === true && (
                 <button type="button" className="btn-mini btn-mini--success" disabled={vinculando}
