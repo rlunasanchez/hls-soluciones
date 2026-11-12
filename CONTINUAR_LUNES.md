@@ -1,6 +1,6 @@
-# Para continuar el lunes 26-oct-2026
+# Para continuar mañana (13-nov-2026)
 
-Este archivo resume dónde quedó el trabajo al terminar el viernes 23-oct-2026. Se puede borrar cuando ya no haga falta.
+Este archivo resume dónde quedó el trabajo al terminar el jueves 12-nov-2026. Se puede borrar cuando ya no haga falta.
 
 **Frase para retomar:** "Lee AGENTS.md, CAMBIOS.md y CONTINUAR_LUNES.md; seguimos con …"
 
@@ -8,33 +8,28 @@ Este archivo resume dónde quedó el trabajo al terminar el viernes 23-oct-2026.
 
 | | Versión | Commit |
 |---|---|---|
-| **Web publicada** (Render + Vercel + Neon) | **v2.199** (12-nov-2026; v2.197 y v2.198 sin probar en pantalla; v2.199 es solo backend, sin SQL de Neon) | ver `git log` de `main` y `deploy/cloud` |
+| **Web publicada** (Render + Vercel + Neon) | **v2.199** (12-nov-2026) | ver `git log` de `main` y `deploy/cloud` |
 
-- Árbol de trabajo limpio (solo `.claude/` sin versionar). No hay worktrees abiertos. Neon ya tiene las columnas de v2.191.
-- **Ya no hay nada pendiente de publicar** salvo esta documentación. El siguiente trabajo es el historial de la OT (sección 3).
-- Para que Claude pueda hacer `git push`, el dueño creó `.claude/settings.local.json` con reglas para `git push origin deploy/cloud` y `git push origin main`; si el clasificador lo bloquea, el dueño lo escribe con `! git push …`.
+- Árbol de trabajo limpio (solo `.claude/` sin versionar). No hay worktrees abiertos. **Neon no necesita SQL nuevo**: v2.195 a v2.199 no tocan la base de datos.
+- Las dos ramas se publican con una carpeta temporal (`git worktree add "$env:TEMP\hls-cloud" deploy/cloud`, `git merge main`, push de `deploy/cloud` y luego de `main`, y quitar la carpeta), para no cambiar la rama de la carpeta del dueño. Los `git push` se hacen desde **PowerShell**.
+- Para que Claude pueda hacer `git push`, el dueño creó `.claude/settings.local.json` con reglas para `git push origin deploy/cloud` y `git push origin main`; si el clasificador lo bloquea, el dueño lo escribe con `! git push …`. Aun así, **solo se publica con la orden expresa del dueño**.
+- Los datos de la base de **producción (Neon) y la local se borraron**: eran de prueba. Los usuarios (`admin`, `rluna`, `rzuniga`) se conservan. La numeración de OT parte de `OT-2026-02800` y los códigos de `CL-0001`.
+- La contraseña de `admin` en Neon se restableció a `admin123` el 10-nov-2026 (el dueño debe cambiarla desde Gestión de Usuarios). La de la base local es la de `ADMIN_PASSWORD` del `.env`.
 
-## 2. Publicado el 26-oct-2026: v2.191 y v2.192 (la OT vinculada a equipo, contacto y dirección)
+## 2. Publicado el 10, 11 y 12-nov-2026 (v2.195 a v2.199) y qué falta probar
 
-v2.192: al crear un equipo, contacto o dirección se reenlazan las OT sin vínculo con el mismo texto (`CAMBIOS.md` v2.192). Nota para la importación del histórico: hacer una pasada masiva de enlace, porque contactos y direcciones ya existentes no reenlazan las demás OT.
+Detalle de cada uno en `CAMBIOS.md`. Todo subido a la web; **lo marcado "sin probar" lo tiene que probar el dueño en pantalla (en la web, con Ctrl+F5)**.
 
-Lo que sigue es el detalle de v2.191, ya publicado (se conserva como referencia).
-
-Qué hace: la OT guarda `equipo_id`, `contacto_id` y `direccion_id`. Al editar un equipo, contacto o dirección en su mantenedor, **todas las OT que lo usan se actualizan** (igual que el cliente); la **serie** es de cada OT y no se toca. Al eliminarlo, la OT conserva su copia sin vínculo. El servidor enlaza al guardar la OT (`backend/routes/ordenesVinculos.js`); la pantalla no cambió. Detalle completo y pruebas: `CAMBIOS.md` v2.191.
-
-Probado: MySQL 21/21 y PostgreSQL 104/104. El dueño lo probó en pantalla en local y funciona.
-
-**Para publicarlo (en este orden; preguntar al dueño antes):**
-1. El dueño corre en el SQL Editor de Neon el SQL que está en `CAMBIOS.md` en la entrada **v2.191** (3 columnas, 3 índices y la vinculación de las OT existentes). Empezar con una línea en blanco al pegar y revisar la primera palabra. Verificar con: `SELECT column_name FROM information_schema.columns WHERE table_name='ordenes_trabajo' AND column_name IN ('equipo_id','contacto_id','direccion_id');` (deben salir las 3).
-2. `git push origin deploy/cloud` (Render). Esperar a que el dueño confirme **Live** con el commit `eb5a1e7`.
-3. `git push origin main` (Vercel). Verificar el deployment con `gh api repos/rlunasanchez/hls-soluciones/deployments`.
-4. Hacer los `git push` desde **PowerShell** (desde el shell Bash de Claude Code falla con "cannot spawn sh").
-
-No hay otros cambios de base de datos pendientes.
+- **v2.195:** aviso del contacto/dirección no registrado ya no dice "ya no está vinculado" (dice "no está vinculado… primero Regístralo").
+- **v2.196:** Registrar cliente desde la OT abre con el tipo elegido (Persona/Empresa) y una persona conserva la dirección de la OT (se vincula desde Direcciones). **Persona: probada y funciona. Sin probar:** Empresa, y cambiar el tipo dentro de la ficha (la dirección aparece al pasar a Persona; si se quita no vuelve).
+- **v2.197 (sin probar):** contacto, dirección y equipo escritos a mano ya no se bloquean mientras se escribe; solo se bloquean si vienen del buscador o de una OT guardada. Si el dato elegido está en el catálogo se completan los campos vacíos (ciudad, comuna, email, fono, cargo). Pruebas: escribir a mano una dirección, un contacto y un equipo que ya existen y completar los demás campos; elegirlos del buscador (deben bloquearse con **Editar**); guardar y reabrir la OT (deben verse bloqueados). Riesgo conocido: lo escrito a mano que difiere del registro queda enlazado y se pisa si luego se edita el registro en el mantenedor (v2.191).
+- **v2.198 (sin probar):** los correos se ven como se escribieron (no en mayúscula) en Clientes, Contactos, Usuarios y en la tabla de contactos de la ficha del cliente. Los ya guardados en mayúscula se siguen viendo así.
+- **v2.199 (backend):** el número de OT ya no falla con guardados simultáneos (cola + reintento, probado en MySQL y PostgreSQL) y el backend en la nube responde 404 en vez de `ENOENT` por `index.html`. **El backend local del dueño no se recarga solo: hay que reiniciarlo** (`node server.js` en `backend/`).
+- **Aprendido:** los fallos raros en la web pueden ser Render/Neon gratis despertando o reiniciándose tras un push (esperar y repetir). El log se ve en el panel de Render → servicio → **Logs**.
 
 ## 3. Lo que sigue (orden acordado con el dueño)
 
-1. ~~Publicar v2.191~~ (hecho, junto con v2.192).
+1. **Probar en la web** lo marcado "sin probar" de la sección 2 y avisar si algo falla.
 2. **Historial de la OT** (quién creó, modificó y entregó): propuesta en `AGENTS.md` sección 7, "Próximo cambio acordado". Decisiones por tomar con el dueño: historial completo (recomendado) o solo "creada por / última modificación por"; si registrar adjuntos y eliminaciones; aviso de edición simultánea (comparar `fecha_actualizacion`); si eliminar una OT deja rastro o pasa a "eliminada". Hoy el sistema solo guarda `fecha_creacion` y `fecha_actualizacion`, sin el usuario.
 3. **Después, sin fecha** (ver `AGENTS.md`): corrección masiva opcional con confirmación (ligada al historial); si dirección y contacto de OT antiguas deberían quedar congelados; Cotizaciones adaptada como la OT (empresa/persona, cliente eliminado, contacto asociable; `NOTAS-COTIZACIONES.md`); Informes y Orden de Compra (páginas vacías); importar el histórico del sistema antiguo (`BASE_DATOS_ANTIGUA.md`).
 
