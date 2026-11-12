@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { X } from "lucide-react";
 import { toUpper, validarRUT, upperInput, normalizarRut, validarEmail } from "../../utils/helpers";
 import api from "../../services/api";
@@ -142,6 +142,29 @@ function ClienteFormulario({ clienteEditando, onSave, onCancel, titulo, readOnly
   };
 
   const esPersona = nuevoCliente.tipo === "PERSONA";
+
+  // Registrar desde la OT como persona: su dirección es una del mantenedor de Direcciones, así que la
+  // que está escrita en la OT se registra (o se reutiliza si ya existe) y queda vinculada. Una sola vez:
+  // si el usuario la quita, no se vuelve a poner.
+  const direccionSembrada = useRef(false);
+  useEffect(() => {
+    const texto = String(clienteEditando?.direccion || "").trim();
+    if (!modoRegistro || !esPersona || clienteEditando?.id || direccionSembrada.current || texto.length < 5) return;
+    direccionSembrada.current = true;
+    (async () => {
+      try {
+        const res = await api.post("/api/direcciones", {
+          direccion: texto, ciudad: clienteEditando.ciudad || "", comuna: clienteEditando.comuna || "", reutilizar: true
+        });
+        const registro = (await api.get(`/api/direcciones/${res.data.id}`)).data;
+        setDirecciones((prev) => (prev.length ? prev : [registro]));
+      } catch (err) {
+        console.error("No se pudo vincular la dirección de la OT:", err);
+        direccionSembrada.current = false;
+      }
+    })();
+  }, [esPersona, modoRegistro, clienteEditando]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const unaColumna = soloCliente || esPersona;
   // Persona: sus datos y su dirección van lado a lado. Dos columnas del mismo ancho que las de la ficha de
   // empresa (unos 475 px cada una, 1000 px en total); más angostas deforman el RUT.
