@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Eye, PackagePlus, Pencil } from "lucide-react";
 import EquipoFormulario from "../equipos/EquipoFormulario";
 import { createPortal } from "react-dom";
@@ -24,6 +24,12 @@ function OrdenFormEquipo({
   const [mostrarDetalleEquipo, setMostrarDetalleEquipo] = useState(false);
   const [mostrarEditarEquipo, setMostrarEditarEquipo] = useState(false);
   const [equipoEnEdicion, setEquipoEnEdicion] = useState(null);
+  // Equipo, Marca y Modelo solo se bloquean cuando el equipo viene del buscador o de una OT guardada, no
+  // mientras se escribe a mano (un equipo existente sin marca ni modelo, o más corto que lo escrito, los trababa).
+  const [equipoAMano, setEquipoAMano] = useState(false);
+  useEffect(() => { setEquipoAMano(false); }, [nuevaOrden.numeroOrden]);
+  const equipoBloqueado = readOnly || (!!equipoExistente && !equipoAMano);
+  const escribirEquipo = (campo) => (e) => { setEquipoAMano(true); setNuevaOrden({ ...nuevaOrden, [campo]: upperInput(e) }); };
 
   const inputStyle = {
     width: '100%', padding: '2px 8px',
@@ -132,7 +138,7 @@ function OrdenFormEquipo({
               }}>
                 {equiposModeloFiltrados.length > 0 ? (
                   equiposModeloFiltrados.map((equipo) => (
-                    <div key={equipo.id} onClick={() => seleccionarEquipoPorModelo(equipo)}
+                    <div key={equipo.id} onClick={() => { setEquipoAMano(false); seleccionarEquipoPorModelo(equipo); }}
                       style={{ padding: '2px 8px', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}
                       onMouseEnter={(e) => e.currentTarget.style.background = 'var(--primary-light)'}
                       onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
@@ -227,22 +233,22 @@ function OrdenFormEquipo({
         <div className="of-f">
           <label>Equipo *</label>
           <input type="text" placeholder="Tipo de equipo" value={nuevaOrden.equipo}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, equipo: upperInput(e)})}
-            disabled={readOnly || !!equipoExistente}
+            onChange={escribirEquipo("equipo")}
+            disabled={equipoBloqueado}
             required style={inputStyle} />
         </div>
         <div className="of-f">
           <label>Marca *</label>
           <input type="text" placeholder="Marca del equipo" value={nuevaOrden.marca}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, marca: upperInput(e)})}
-            disabled={readOnly || !!equipoExistente}
+            onChange={escribirEquipo("marca")}
+            disabled={equipoBloqueado}
             required style={inputStyle} />
         </div>
         <div className="of-f">
           <label>Modelo *</label>
           <input type="text" placeholder="Modelo del equipo" value={nuevaOrden.modelo}
-            onChange={(e) => setNuevaOrden({...nuevaOrden, modelo: upperInput(e)})}
-            disabled={readOnly || !!equipoExistente}
+            onChange={escribirEquipo("modelo")}
+            disabled={equipoBloqueado}
             required style={inputStyle} />
         </div>
         <div className="of-f">
