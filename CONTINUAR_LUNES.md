@@ -8,7 +8,7 @@ Este archivo resume dónde quedó el trabajo al terminar el viernes 23-oct-2026.
 
 | | Versión | Commit |
 |---|---|---|
-| **Web publicada** (Render + Vercel + Neon) | **v2.197** (12-nov-2026, sin probar en pantalla; v2.193 a v2.197 son solo frontend) | ver `git log` de `main` y `deploy/cloud` |
+| **Web publicada** (Render + Vercel + Neon) | **v2.198** (12-nov-2026, v2.197 y v2.198 sin probar en pantalla; v2.193 a v2.198 son solo frontend) | ver `git log` de `main` y `deploy/cloud` |
 
 - Árbol de trabajo limpio (solo `.claude/` sin versionar). No hay worktrees abiertos. Neon ya tiene las columnas de v2.191.
 - **Ya no hay nada pendiente de publicar** salvo esta documentación. El siguiente trabajo es el historial de la OT (sección 3).

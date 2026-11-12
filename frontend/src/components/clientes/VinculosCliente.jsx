@@ -158,7 +158,7 @@ function VinculosCliente({ tipo, vinculados, onChange, clienteId = null, readOnl
               <tr key={v.id}>
                 <td data-label="N°">{i + 1}</td>
                 {cfg.columnas.map(([label, campo]) => (
-                  <td key={label} data-label={label}>
+                  <td key={label} data-label={label} style={campo === "email" ? { textTransform: "none" } : undefined}>
                     {v[campo]}
                   </td>
                 ))}

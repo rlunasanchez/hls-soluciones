@@ -14,7 +14,7 @@ function ContactoCard({ contacto, onVer, onEditar, onEliminar }) {
       {contacto.email && (
         <div className="data-card-row">
           <span className="data-card-label">Email</span>
-          <span className="data-card-value">{contacto.email}</span>
+          <span className="data-card-value" style={{ textTransform: "none" }}>{contacto.email}</span>
         </div>
       )}
       {contacto.fono && (

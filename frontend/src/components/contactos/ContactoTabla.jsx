@@ -18,7 +18,7 @@ function ContactoTabla({ contactos, onVer, onEditar, onEliminar }) {
             <tr key={c.id}>
               <td data-label="Nombre">{c.nombre}</td>
               <td data-label="Cargo">{c.cargo}</td>
-              <td data-label="Email">{c.email}</td>
+              <td data-label="Email" style={{ textTransform: "none" }}>{c.email}</td>
               <td data-label="Fono">{c.fono}</td>
               <td data-label="Acciones">
                 <ContactoAcciones contacto={c} onVer={onVer} onEditar={onEditar} onEliminar={onEliminar} />
