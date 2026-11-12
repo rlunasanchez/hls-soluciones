@@ -5,6 +5,7 @@ import { authMiddleware } from "../middleware/authMiddleware.js";
 import { filtrosOrdenes, leerPaginacion, numerarMarcadores } from "../utils/filtrosOrdenes.js";
 import { armarInsertOrden, armarUpdateOrden } from "../utils/camposOrden.js";
 import { resolverVinculos } from "./ordenesVinculos.js";
+import { esNumeroRepetido } from "../utils/numeroRepetido.js";
 
 dotenv.config();
 const router = express.Router();
@@ -72,29 +73,45 @@ router.get("/:id", authMiddleware, async (req, res) => {
   }
 });
 
-router.post("/", authMiddleware, async (req, res) => {
-  const client = await pool.connect();
-  try {
-    await client.query("BEGIN");
+// El número es "último + 1". Dos guardados simultáneos calculaban el mismo y el segundo fallaba con error
+// del servidor. Ahora los guardados se numeran de a uno (cola en este servidor) y, por si hubiera otro
+// proceso, si la base rechaza un número repetido se reintenta con el siguiente.
+const INTENTOS_NUMERO = 5;
+let colaNumeracion = Promise.resolve();
+const enCola = (tarea) => {
+  const turno = colaNumeracion.then(tarea, tarea);
+  colaNumeracion = turno.catch(() => {});
+  return turno;
+};
 
-    const numeroOrden = await calcularSiguienteNumero();
-    const existe = await client.query("SELECT id FROM ordenes_trabajo WHERE numero_orden = $1", [numeroOrden]);
-    if (existe.rows.length > 0) {
+async function crearOrden(body) {
+  for (let intento = 1; ; intento++) {
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+
+      const numeroOrden = await calcularSiguienteNumero();
+      const { sql, params } = armarInsertOrden({ ...body, ...(await resolverVinculos(client, body)) }, numeroOrden);
+      const resultado = await client.query(numerarMarcadores(`${sql} RETURNING id`), params);
+
+      await client.query("COMMIT");
+      return { id: resultado.rows[0].id, numeroOrden };
+    } catch (err) {
       await client.query("ROLLBACK");
-      return res.status(400).json({ msg: "El número de orden ya existe" });
+      if (!esNumeroRepetido(err) || intento >= INTENTOS_NUMERO) throw err;
+    } finally {
+      client.release();
     }
+  }
+}
 
-    const { sql, params } = armarInsertOrden({ ...req.body, ...(await resolverVinculos(client, req.body)) }, numeroOrden);
-    const resultado = await client.query(numerarMarcadores(`${sql} RETURNING id`), params);
-
-    await client.query("COMMIT");
-    res.status(201).json({ msg: "Orden creada", id: resultado.rows[0].id, numeroOrden });
+router.post("/", authMiddleware, async (req, res) => {
+  try {
+    const { id, numeroOrden } = await enCola(() => crearOrden(req.body));
+    res.status(201).json({ msg: "Orden creada", id, numeroOrden });
   } catch (err) {
-    await client.query("ROLLBACK");
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
-  } finally {
-    client.release();
   }
 });
 
