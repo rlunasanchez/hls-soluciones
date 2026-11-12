@@ -197,7 +197,7 @@ function GestionUsuarios() {
                     <td data-label="ID">{u.id}</td>
                     <td data-label="Nombre">{u.nombre || '-'}</td>
                     <td data-label="Usuario"><strong>{u.usuario}</strong></td>
-                    <td data-label="Correo">{u.email || '-'}</td>
+                    <td data-label="Correo" style={{ textTransform: 'none' }}>{u.email || '-'}</td>
                     <td data-label="Rol">
                       <span className={`badge ${u.rol === 'admin' ? 'badge-primary' : 'badge-info'}`}>{u.rol}</span>
                     </td>
@@ -240,7 +240,7 @@ function GestionUsuarios() {
                 </div>
                 <div className="data-card-row">
                   <span className="data-card-label">Correo</span>
-                  <span className="data-card-value">{u.email || '-'}</span>
+                  <span className="data-card-value" style={{ textTransform: 'none' }}>{u.email || '-'}</span>
                 </div>
                 <div className="data-card-row">
                   <span className="data-card-label">Estado</span>

@@ -2,6 +2,14 @@
 
 ## Fecha: 2026-11-12
 
+### v2.198: Los correos se muestran como se escribieron (no en mayúscula) en los listados
+
+**Alcance:** solo frontend, sin cambios de backend ni de base de datos. Sin probar en pantalla (build OK).
+
+- **Por qué:** los correos se guardan tal como se escriben, pero las celdas de tablas y tarjetas tienen `text-transform: uppercase` (`.table-wrapper td`, `.data-card-value`, `.data-card-row .value`) y los mostraban en mayúscula.
+- **Qué cambió:** estilo puntual `textTransform: none` en la celda del correo en `ClienteLista.jsx` (tabla y tarjeta), `ContactoTabla.jsx`, `ContactoCard.jsx`, `GestionUsuarios.jsx` (tabla y tarjeta) y la columna Email de `VinculosCliente.jsx`. Sin clases CSS nuevas.
+- **No cambia:** los PDF y el desplegable del buscador ya mostraban el correo tal cual. Los correos ya guardados en mayúscula se siguen viendo así; solo cambian los nuevos o corregidos a mano.
+
 ### v2.197: Contacto, dirección y equipo escritos a mano ya no se bloquean mientras se escribe
 
 **Alcance:** solo frontend (`OrdenFormCliente.jsx`, `OrdenFormEquipo.jsx`, `CampoCatalogo.jsx`), sin cambios de backend ni de base de datos. Subido para probar en la web; **sin probar en pantalla** (build OK, ESLint no se pudo correr).

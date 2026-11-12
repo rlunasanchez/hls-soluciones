@@ -31,7 +31,7 @@ function ClienteLista({ clientes, onVer, onEditar, onEliminar }) {
                 <td>{c.razon_social}</td>
                 <td>{c.rut}</td>
                 <td>{c.telefono}</td>
-                <td>{c.email}</td>
+                <td style={{ textTransform: "none" }}>{c.email}</td>
                 <td>
                   <ClienteAcciones
                     cliente={c}
@@ -64,7 +64,7 @@ function ClienteLista({ clientes, onVer, onEditar, onEliminar }) {
             </div>
             <div className="data-card-row">
               <span className="label">Email</span>
-              <span className="value">{c.email}</span>
+              <span className="value" style={{ textTransform: "none" }}>{c.email}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px' }}>
               <ClienteAcciones
