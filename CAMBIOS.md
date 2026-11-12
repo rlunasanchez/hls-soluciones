@@ -2,6 +2,16 @@
 
 ## Fecha: 2026-11-12
 
+### v2.197: Contacto, dirección y equipo escritos a mano ya no se bloquean mientras se escribe
+
+**Alcance:** solo frontend (`OrdenFormCliente.jsx`, `OrdenFormEquipo.jsx`, `CampoCatalogo.jsx`), sin cambios de backend ni de base de datos. Subido para probar en la web; **sin probar en pantalla** (build OK, ESLint no se pudo correr).
+
+- **Por qué:** al escribir a mano una dirección que ya existía en Direcciones (`GARCIA REYES 55`), los campos Dirección, Ciudad y Comuna se bloqueaban juntos sin traer la ciudad ni la comuna del registro, y no se podía seguir. El contacto (nombre, fono, email, cargo) y el equipo (Equipo, Marca y Modelo, que son opcionales) tenían el mismo defecto. Además la coincidencia se revisa 300 ms después de escribir y es exacta, así que un registro más corto que lo escrito (`NOTE` mientras se escribe `NOTEBOOK`, `ROBERTO` mientras se escribe `ROBERTO SEGUNDO`) bloqueaba a mitad de escritura.
+- **Regla nueva:** los campos solo se bloquean cuando el dato viene **del buscador o de una OT guardada**; lo escrito a mano queda libre aunque ya exista (aparece **Editar** y no **Registrar**, así que no se duplica). Los estados `contactoAMano`, `direccionAMano` (OrdenFormCliente) y `equipoAMano` (OrdenFormEquipo) se reinician al cambiar de OT (`numeroOrden`) o de cliente.
+- **Autofill de respaldo:** si el dato elegido o guardado está en el catálogo y quedan campos vacíos, se completan con los del registro (dirección: ciudad y comuna; contacto: email, fono y cargo). `CampoCatalogo` ahora entrega el registro como segundo argumento de `onEnCatalogo(valor, registro)`. Lo escrito a mano no se toca.
+- **Lo que no cambia:** al guardar, el servidor enlaza lo escrito con el registro existente por nombre, texto o Equipo+Marca+Modelo (v2.191). Si lo escrito difiere del registro, la OT conserva su copia, pero al editar el registro en el mantenedor se reescriben los textos de todas las OT enlazadas.
+- **Pendiente de probar:** escribir a mano una dirección, un contacto y un equipo que ya existen y completar los demás campos; elegir los mismos desde el buscador (deben bloquearse con **Editar**); guardar y reabrir la OT (deben verse bloqueados).
+
 ### v2.196: Registrar cliente desde la OT respeta el tipo elegido y conserva la dirección de la persona
 
 **Alcance:** solo frontend (`useClienteOT.jsx`, `ClienteFormulario.jsx`), sin cambios de backend ni de base de datos. Probado en pantalla por el dueño en local para Persona; la prueba de Empresa y del cambio de tipo dentro de la ficha quedó pendiente.

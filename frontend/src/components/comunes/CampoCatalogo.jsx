@@ -64,9 +64,10 @@ function CampoCatalogo({ tipo, etiqueta, placeholder, deCliente = [], actual, da
     ? (existentes.find((r) => cfg.clave(r) === claveActual) || null)
     : undefined;
 
-  // Avisa al padre si lo de la OT ya está en el catálogo (true), no está (false) o aún se comprueba (null)
+  // Avisa al padre si lo de la OT ya está en el catálogo (true), no está (false) o aún se comprueba (null);
+  // si está, le pasa también el registro para que complete lo que falte en la OT
   useEffect(() => {
-    if (onEnCatalogo) onEnCatalogo(enCatalogo === undefined ? null : !!enCatalogo);
+    if (onEnCatalogo) onEnCatalogo(enCatalogo === undefined ? null : !!enCatalogo, enCatalogo || null);
   }, [enCatalogo]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const propios = deCliente.filter((r) => !q || cfg.busqueda(r).includes(q));

@@ -65,16 +65,30 @@ function OrdenFormCliente({
   // Contacto y dirección de la OT: se eligen (o se corrigen en su ficha) con CampoCatalogo.
   // La OT muestra un contacto y una dirección; si lo elegido estaba entre los "adicionales"
   // de una OT antigua, se saca de ahí.
-  const contactoEnOT = (c) => setNuevaOrden((prev) => ({
-    ...prev,
-    contacto: toUpper(c.nombre), emailContacto: c.email || "", fonoContacto: c.fono || "", cargoContacto: toUpper(c.cargo || ""),
-    contactosExtra: (prev.contactosExtra || []).filter((x) => normTxt(x.nombre) !== normTxt(c.nombre))
-  }));
-  const direccionEnOT = (d) => setNuevaOrden((prev) => ({
-    ...prev,
-    direccion: toUpper(d.direccion), ciudad: toUpper(d.ciudad || ""), comuna: toUpper(d.comuna || ""),
-    direccionesExtra: (prev.direccionesExtra || []).filter((x) => normTxt(x.direccion) !== normTxt(d.direccion))
-  }));
+  // Los campos del contacto / la dirección solo se bloquean cuando el dato viene del buscador o de una OT
+  // guardada. Mientras se escribe a mano nunca se bloquean (si no, un registro más corto que lo escrito, o
+  // sin ciudad y comuna, dejaba el formulario trabado a la mitad).
+  const [contactoAMano, setContactoAMano] = useState(false);
+  const [direccionAMano, setDireccionAMano] = useState(false);
+  useEffect(() => { setContactoAMano(false); setDireccionAMano(false); }, [nuevaOrden.numeroOrden, clienteSeleccionado?.id]);
+  const marcarAMano = (marcar) => (valor) => { marcar(true); setNuevaOrden(valor); };
+
+  const contactoEnOT = (c) => {
+    setContactoAMano(false);
+    setNuevaOrden((prev) => ({
+      ...prev,
+      contacto: toUpper(c.nombre), emailContacto: c.email || "", fonoContacto: c.fono || "", cargoContacto: toUpper(c.cargo || ""),
+      contactosExtra: (prev.contactosExtra || []).filter((x) => normTxt(x.nombre) !== normTxt(c.nombre))
+    }));
+  };
+  const direccionEnOT = (d) => {
+    setDireccionAMano(false);
+    setNuevaOrden((prev) => ({
+      ...prev,
+      direccion: toUpper(d.direccion), ciudad: toUpper(d.ciudad || ""), comuna: toUpper(d.comuna || ""),
+      direccionesExtra: (prev.direccionesExtra || []).filter((x) => normTxt(x.direccion) !== normTxt(d.direccion))
+    }));
+  };
 
   // Tras editar un contacto/dirección en el catálogo, las listas del cliente seleccionado quedan
   // viejas y el aviso "ya no está vinculado" salta aunque sea el mismo registro: se recargan.
@@ -136,11 +150,32 @@ function OrdenFormCliente({
   // ¿Lo que tiene la OT ya está en el catálogo? Vincular solo se ofrece después de Registrar.
   const [contactoRegistrado, setContactoRegistrado] = useState(null);
   const [direccionRegistrada, setDireccionRegistrada] = useState(null);
-  // Lo traído del buscador (está en el catálogo o vinculado al cliente) no se escribe a mano: para
-  // cambiarlo se usa "Editar" o se busca otro. Lo que no está en ningún lado queda libre.
-  const contactoBloqueado = !esPersona && !!normTxt(nuevaOrden.contacto)
+  // Si lo que trae la OT (elegido o guardado) está en el catálogo y quedan campos vacíos, se completan con
+  // los del registro: los campos quedan bloqueados y no se podrían llenar a mano. Lo escrito a mano no se toca.
+  const contactoEnCatalogo = (registrado, reg) => {
+    setContactoRegistrado(registrado);
+    if (!registrado || !reg || contactoAMano) return;
+    setNuevaOrden((prev) => ({
+      ...prev,
+      emailContacto: prev.emailContacto || reg.email || "",
+      fonoContacto: prev.fonoContacto || reg.fono || "",
+      cargoContacto: prev.cargoContacto || toUpper(reg.cargo || "")
+    }));
+  };
+  const direccionEnCatalogo = (registrada, reg) => {
+    setDireccionRegistrada(registrada);
+    if (!registrada || !reg || direccionAMano) return;
+    setNuevaOrden((prev) => ({
+      ...prev,
+      ciudad: prev.ciudad || toUpper(reg.ciudad || ""),
+      comuna: prev.comuna || toUpper(reg.comuna || "")
+    }));
+  };
+  // Lo traído del buscador o de una OT guardada (está en el catálogo o vinculado al cliente) no se escribe a
+  // mano: para cambiarlo se usa "Editar" o se busca otro. Lo escrito a mano queda libre mientras se escribe.
+  const contactoBloqueado = !esPersona && !contactoAMano && !!normTxt(nuevaOrden.contacto)
     && (contactoRegistrado === true || (!!clienteSeleccionado && !contactoDesvinculado));
-  const direccionBloqueada = !!normTxt(nuevaOrden.direccion)
+  const direccionBloqueada = !direccionAMano && !!normTxt(nuevaOrden.direccion)
     && (direccionRegistrada === true || (!!clienteSeleccionado && !direccionDesvinculada));
   // Datos propios del cliente: bloqueados mientras coincidan con su ficha (para cambiarlos, "Editar")
   const dig = (v) => String(v || "").replace(/\D/g, "");
@@ -205,7 +240,7 @@ function OrdenFormCliente({
             datosRegistro={{ nombre: nuevaOrden.contacto, email: nuevaOrden.emailContacto, fono: nuevaOrden.fonoContacto, cargo: nuevaOrden.cargoContacto }}
             onElegir={contactoEnOT}
             onActualizado={contactoEditadoEnOT}
-            onEnCatalogo={setContactoRegistrado}
+            onEnCatalogo={contactoEnCatalogo}
           />}
         <CampoCatalogo
           key={`direcciones-${clienteSeleccionado?.id || "sin-cliente"}`}
@@ -218,7 +253,7 @@ function OrdenFormCliente({
           datosRegistro={{ direccion: nuevaOrden.direccion, ciudad: nuevaOrden.ciudad, comuna: nuevaOrden.comuna }}
           onElegir={direccionEnOT}
           onActualizado={direccionEditadaEnOT}
-          onEnCatalogo={setDireccionRegistrada}
+          onEnCatalogo={direccionEnCatalogo}
         />
       </div>
 
@@ -259,9 +294,9 @@ function OrdenFormCliente({
         </div>
       )}
 
-      <OrdenDatosContacto nuevaOrden={nuevaOrden} setNuevaOrden={setNuevaOrden} deshabilitado={readOnly || esPersona || contactoBloqueado} />
+      <OrdenDatosContacto nuevaOrden={nuevaOrden} setNuevaOrden={marcarAMano(setContactoAMano)} deshabilitado={readOnly || esPersona || contactoBloqueado} />
 
-      <OrdenDatosDireccion nuevaOrden={nuevaOrden} setNuevaOrden={setNuevaOrden} deshabilitado={readOnly || direccionBloqueada} />
+      <OrdenDatosDireccion nuevaOrden={nuevaOrden} setNuevaOrden={marcarAMano(setDireccionAMano)} deshabilitado={readOnly || direccionBloqueada} />
 
 
 
