@@ -61,8 +61,11 @@ app.use("/api/ordenes", ordenesRoutes);
 app.use("/api/cotizaciones", cotizacionesRoutes);
 app.use("/api/adjuntos", adjuntosRoutes);
 
+// En la nube el frontend está en Vercel: si no hay carpeta dist, responde 404 en vez de un error en el log
 app.get("*", (req, res) => {
-  res.sendFile(path.join(frontendPath, "index.html"));
+  res.sendFile(path.join(frontendPath, "index.html"), (err) => {
+    if (err && !res.headersSent) res.status(404).json({ msg: "No encontrado" });
+  });
 });
 
 app.listen(5001, () => {
