@@ -91,22 +91,26 @@ export default function useClienteOT({
     </>
   );
 
+  // Lo escrito en la OT que se lleva a la ficha de "Registrar cliente" (incluye el tipo elegido en la OT).
+  const prefillDeOrden = () => ({
+    tipo: nuevaOrden.clienteTipo === "PERSONA" ? "PERSONA" : "EMPRESA",
+    razon_social: nuevaOrden.cliente || "",
+    rut: nuevaOrden.rut || "",
+    direccion: nuevaOrden.direccion || "",
+    ciudad: nuevaOrden.ciudad || "",
+    comuna: nuevaOrden.comuna || "",
+    telefono: nuevaOrden.fonoPrincipal || "",
+    email: nuevaOrden.email || "",
+    contacto_nombre: nuevaOrden.contacto || "",
+    contacto_email: nuevaOrden.emailContacto || "",
+    contacto_fono: nuevaOrden.fonoContacto || "",
+    contacto_cargo: nuevaOrden.cargoContacto || ""
+  });
+
   const abrirRegistrarCliente = async () => {
     // Con el comodín "19" se permite crear aunque el RUT o la razón social ya existan
     if (normalizarRut(nuevaOrden.rut) === "19") {
-      setPrefillCliente({
-        razon_social: nuevaOrden.cliente || "",
-        rut: nuevaOrden.rut || "",
-        direccion: nuevaOrden.direccion || "",
-        ciudad: nuevaOrden.ciudad || "",
-        comuna: nuevaOrden.comuna || "",
-        telefono: nuevaOrden.fonoPrincipal || "",
-        email: nuevaOrden.email || "",
-        contacto_nombre: nuevaOrden.contacto || "",
-        contacto_email: nuevaOrden.emailContacto || "",
-        contacto_fono: nuevaOrden.fonoContacto || "",
-        contacto_cargo: nuevaOrden.cargoContacto || ""
-      });
+      setPrefillCliente(prefillDeOrden());
       setMostrarRegistrarCliente(true);
       return;
     }
@@ -124,19 +128,7 @@ export default function useClienteOT({
       setNuevaOrden((prev) => ({ ...prev, rut: "" }));
       return;
     }
-    setPrefillCliente({
-      razon_social: nuevaOrden.cliente || "",
-      rut: nuevaOrden.rut || "",
-      direccion: nuevaOrden.direccion || "",
-      ciudad: nuevaOrden.ciudad || "",
-      comuna: nuevaOrden.comuna || "",
-      telefono: nuevaOrden.fonoPrincipal || "",
-      email: nuevaOrden.email || "",
-      contacto_nombre: nuevaOrden.contacto || "",
-      contacto_email: nuevaOrden.emailContacto || "",
-      contacto_fono: nuevaOrden.fonoContacto || "",
-      contacto_cargo: nuevaOrden.cargoContacto || ""
-    });
+    setPrefillCliente(prefillDeOrden());
     setMostrarRegistrarCliente(true);
   };
 

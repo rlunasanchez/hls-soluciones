@@ -1,5 +1,15 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-11-12
+
+### v2.196: Registrar cliente desde la OT respeta el tipo elegido y conserva la dirección de la persona
+
+**Alcance:** solo frontend (`useClienteOT.jsx`, `ClienteFormulario.jsx`), sin cambios de backend ni de base de datos. Probado en pantalla por el dueño en local para Persona; la prueba de Empresa y del cambio de tipo dentro de la ficha quedó pendiente.
+
+- **Tipo por defecto:** al pulsar **Registrar** en la OT, la ficha siempre abría como Empresa. Ahora el prefill (`prefillDeOrden`, antes duplicado en dos bloques) lleva `tipo` desde `nuevaOrden.clienteTipo`.
+- **Dirección que se perdía:** una persona no usa los campos de dirección propios del cliente sino una dirección vinculada de Direcciones, así que al ser Persona la dirección escrita en la OT desaparecía. Ahora, al registrar una persona desde la OT, la ficha registra esa dirección en Direcciones (o reutiliza la existente con `reutilizar: true`) y la vincula. Ocurre una sola vez por ficha: si el usuario la quita, no vuelve.
+- **Efecto secundario conocido:** si se cancela la ficha después de que apareció la dirección, esa dirección queda registrada en Direcciones.
+
 ## Fecha: 2026-11-10
 
 ### v2.195: Aviso de contacto/dirección no registrado ya no dice "ya no"
