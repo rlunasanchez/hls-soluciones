@@ -2,6 +2,16 @@
 
 ## Fecha: 2026-11-12
 
+### v2.199: El número de OT ya no falla con guardados simultáneos; el backend en la nube ya no llena el log con errores de `index.html`
+
+**Alcance:** solo backend (`routes/ordenes.js`, `server.js` y `utils/numeroRepetido.js` nuevo), sin cambios de base de datos ni de pantalla. Hay que publicar `deploy/cloud` (Render) y `main`.
+
+- **Por qué (log de Render):** el servidor asigna el número como "último + 1" al guardar. Dos guardados casi simultáneos (doble clic, o reintento mientras Render despertaba) calculaban el mismo y el segundo fallaba con `duplicate key ... ordenes_trabajo_numero_orden_key (OT-2026-02806)` y el usuario veía "Error del servidor". La OT sí se había creado con el primer intento.
+- **Qué hace ahora:** `POST /api/ordenes` crea la OT dentro de `crearOrden`, y las llamadas pasan por una cola (`enCola`) que numera de a una en cada proceso del servidor. Por si hubiera otro proceso, si la base rechaza un número repetido se reintenta con el siguiente (hasta 5 veces). `utils/numeroRepetido.js` (`esNumeroRepetido`, igual en las dos ramas) reconoce el error en MySQL (`ER_DUP_ENTRY`) y en PostgreSQL (`23505`). Se quitó la comprobación previa "El número de orden ya existe", que quedaba redundante.
+- **`index.html` en Render:** `server.js` respondía cualquier ruta que no es de la API con `frontend/dist/index.html`, que en Render no existe (el frontend está en Vercel) y llenaba el log de `ENOENT`. Ahora responde 404 `{ msg: "No encontrado" }` si el archivo no existe.
+- **Pruebas:** MySQL local, 12 guardados simultáneos: 12 con 201 y 12 números distintos (con solo reintento, 6 simultáneos dejaban uno con error; por eso se agregó la cola). PostgreSQL real (`embedded-postgres`, esquema con booleanos como en Neon): 12 simultáneos en un servidor, 12/12; y dos servidores a la vez (6 + 6, fuerza el reintento), 12/12 con 12 números distintos. Datos de prueba borrados.
+- **Portado a mano:** en `deploy/cloud`, `ordenes.js` se resolvió tomando la versión PostgreSQL y reaplicando el cambio (`pool.connect()`, `BEGIN/COMMIT`, `RETURNING id`); `server.js` y `numeroRepetido.js` son idénticos en las dos ramas.
+
 ### v2.198: Los correos se muestran como se escribieron (no en mayúscula) en los listados
 
 **Alcance:** solo frontend, sin cambios de backend ni de base de datos. Sin probar en pantalla (build OK).

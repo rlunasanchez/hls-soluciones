@@ -51,7 +51,7 @@ Solo existen **dos ramas**:
 - `components/comunes/CampoCatalogo.jsx` (buscador de contacto/dirección con Editar/Registrar/ "(ya es de CL-X)"), `ModalEditarCatalogo.jsx`, `BotonQuitar.jsx`, `AccionesFicha.jsx`.
 - `hooks/usePaginacion.js` (`usePaginaPersistente`, `useClampPagina`), `useBusquedaApi.js` (busca en el servidor mientras se escribe), `useValorRetrasado.js` (espera 300 ms antes de consultar), `useGuardar.js` (evita doble envío).
 - `utils/clientesApi.js` (consultas puntuales de clientes: `verificarCliente`, `clientePorId`, `clienteDeOrden`; **la OT ya no carga la lista completa de clientes**).
-- **Backend `backend/utils/`** (mismo archivo en `main` y `deploy/cloud`, usan `?` y `numerarMarcadores` los vuelve `$1…` solo en PostgreSQL): `filtrosOrdenes.js` (filtros y paginación del listado de OT), `busquedaClientes.js` (buscador de cliente), `validaciones.js` (RUT y email), `camposOrden.js` (lista `CAMPOS` de la OT de la que salen el INSERT y el UPDATE: para agregar una columna a la OT se edita esa lista, sin contar marcadores).
+- **Backend `backend/utils/`** (mismo archivo en `main` y `deploy/cloud`, usan `?` y `numerarMarcadores` los vuelve `$1…` solo en PostgreSQL): `filtrosOrdenes.js` (filtros y paginación del listado de OT), `busquedaClientes.js` (buscador de cliente), `validaciones.js` (RUT y email), `camposOrden.js` (lista `CAMPOS` de la OT de la que salen el INSERT y el UPDATE: para agregar una columna a la OT se edita esa lista, sin contar marcadores), `numeroRepetido.js` (reconoce el error de número de OT repetido en MySQL y PostgreSQL; `POST /api/ordenes` numera de a una con una cola y reintenta si se repite, v2.199).
 - `utils/helpers.js` (`toUpper`, `upperInput`, `validarRUT`, `formatearRutInput`, `parseToken`, `cerrarSesion`), `cotizacionDoc.js` y `ordenServicioDoc.js` (PDF por HTML + `imprimir.js`), `empresa.js` (datos de la empresa).
 
 ## 4. Modelo de datos y reglas de diseño
@@ -95,7 +95,7 @@ Solo existen **dos ramas**:
 
 ## 7. Estado y pendientes (23-oct-2026)
 
-**Publicado en la web hasta v2.198** (v2.197 y v2.198 subidas el 12-nov-2026, sin probar en pantalla) (26-oct-2026: Neon con las columnas `equipo_id`, `contacto_id` y `direccion_id` en `ordenes_trabajo`; v2.193 a v2.198 son solo frontend). **Para retomar el trabajo, leer `CONTINUAR_LUNES.md`.** `MIGRACION_PENDIENTE.md` es solo histórico y se puede borrar. No hacer `git push` sin orden expresa; preguntar antes de publicar.
+**Publicado en la web hasta v2.199** (v2.197 a v2.199 subidas el 12-nov-2026; v2.197 y v2.198 sin probar en pantalla; v2.199 es backend, sin SQL de Neon) (26-oct-2026: Neon con las columnas `equipo_id`, `contacto_id` y `direccion_id` en `ordenes_trabajo`; v2.193 a v2.198 son solo frontend; v2.199 es solo backend). **Para retomar el trabajo, leer `CONTINUAR_LUNES.md`.** `MIGRACION_PENDIENTE.md` es solo histórico y se puede borrar. No hacer `git push` sin orden expresa; preguntar antes de publicar.
 
 **Próximo cambio acordado (semana del 26-oct-2026): historial de la OT** (quién creó, modificó y entregó). Propuesta aprobada en lo general, aún sin construir:
 - Tabla `orden_historial`: `orden_id`, usuario (nombre y login del token), fecha y hora, acción (creó, modificó, registró entrega/ingreso/término, cambió de cliente, agregó o quitó un adjunto, eliminó) y los cambios campo por campo con valor anterior y nuevo (JSON). El servidor lo calcula comparando la fila anterior con la nueva usando la lista `CAMPOS` de `utils/camposOrden.js`.
