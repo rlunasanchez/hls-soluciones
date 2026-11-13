@@ -1,6 +1,6 @@
-# Para continuar mañana (13-nov-2026)
+# Para continuar el lunes 16-nov-2026
 
-Este archivo resume dónde quedó el trabajo al terminar el jueves 12-nov-2026. Se puede borrar cuando ya no haga falta.
+Este archivo resume dónde quedó el trabajo al terminar el viernes 13-nov-2026. Se puede borrar cuando ya no haga falta.
 
 **Frase para retomar:** "Lee AGENTS.md, CAMBIOS.md y CONTINUAR_LUNES.md; seguimos con …"
 
@@ -29,7 +29,9 @@ Detalle de cada uno en `CAMBIOS.md`. Todo subido a la web; **lo marcado "sin pro
 
 ## 3. Lo que sigue (orden acordado con el dueño)
 
-1. **Probar en la web** lo marcado "sin probar" de la sección 2 y avisar si algo falla.
+1. **Probar en la web** lo marcado "sin probar" de la sección 2 y avisar si algo falla. **v2.199 ya está publicado y verificado el 13-nov** (Render responde 404 `No encontrado` en rutas inexistentes; Vercel con `8eb5037`; `main` y `deploy/cloud` iguales a lo local, sin carpetas temporales).
+   - **Pendiente de arreglar: permiso de `git push`.** El 12 y 13-nov el clasificador de permisos de Claude Code bloqueó los `git push` de Claude ("Credential Leakage") aunque el dueño lo ordenó, y los hizo el dueño a mano en PowerShell. Para que Claude vuelva a poder subir hay que revisar o volver a crear las reglas `git push origin deploy/cloud` y `git push origin main` en `.claude/settings.local.json`. Mientras tanto Claude prepara todo (commit y merge en `%TEMP%\hls-cloud`) y el dueño ejecuta los dos push en PowerShell: primero `deploy/cloud`, luego `main`.
+   - **Pendiente de decidir:** las cuatro decisiones del historial de la OT (punto 2).
 2. **Historial de la OT** (quién creó, modificó y entregó): propuesta en `AGENTS.md` sección 7, "Próximo cambio acordado". Decisiones por tomar con el dueño: historial completo (recomendado) o solo "creada por / última modificación por"; si registrar adjuntos y eliminaciones; aviso de edición simultánea (comparar `fecha_actualizacion`); si eliminar una OT deja rastro o pasa a "eliminada". Hoy el sistema solo guarda `fecha_creacion` y `fecha_actualizacion`, sin el usuario.
 3. **Después, sin fecha** (ver `AGENTS.md`): corrección masiva opcional con confirmación (ligada al historial); si dirección y contacto de OT antiguas deberían quedar congelados; Cotizaciones adaptada como la OT (empresa/persona, cliente eliminado, contacto asociable; `NOTAS-COTIZACIONES.md`); Informes y Orden de Compra (páginas vacías); importar el histórico del sistema antiguo (`BASE_DATOS_ANTIGUA.md`).
 
