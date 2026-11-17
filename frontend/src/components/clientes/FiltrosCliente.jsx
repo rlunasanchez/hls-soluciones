@@ -1,7 +1,8 @@
 import { Search, RotateCcw, Plus } from "lucide-react";
+import Pagination from "../Pagination";
 import { formatearRutInput } from "../../utils/helpers";
 
-function FiltrosCliente({ busqueda, onBusquedaChange, filtroRut, onFiltroRutChange, onLimpiar, onNuevo }) {
+function FiltrosCliente({ busqueda, onBusquedaChange, filtroRut, onFiltroRutChange, onLimpiar, onNuevo, paginaActual, totalPaginas, onPageChange }) {
   return (
     <div className="filtros-cliente">
       <button className="main-btn" onClick={onNuevo}>
@@ -28,6 +29,7 @@ function FiltrosCliente({ busqueda, onBusquedaChange, filtroRut, onFiltroRutChan
       <button className="btn-limpiar-equipos" onClick={onLimpiar} title="Limpiar filtros">
         <RotateCcw size={14} /> Limpiar
       </button>
+      <Pagination enLinea currentPage={paginaActual} totalPages={totalPaginas} onPageChange={onPageChange} />
     </div>
   );
 }

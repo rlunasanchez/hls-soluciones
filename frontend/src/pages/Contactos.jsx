@@ -10,7 +10,6 @@ import FiltrosContacto from "../components/contactos/FiltrosContacto";
 import ContactoFormulario from "../components/contactos/ContactoFormulario";
 import ContactoTabla from "../components/contactos/ContactoTabla";
 import ContactoCard from "../components/contactos/ContactoCard";
-import Pagination from "../components/Pagination";
 import { usePaginaPersistente, useClampPagina } from "../hooks/usePaginacion";
 
 function Contactos() {
@@ -145,6 +144,9 @@ function Contactos() {
         onFiltroNombreChange={setFiltroNombre}
         onLimpiar={() => { setFiltroNombre(""); }}
         onNuevo={nuevoContacto}
+        paginaActual={paginaActual}
+        totalPaginas={totalPaginas}
+        onPageChange={setPaginaActual}
       />
 
       {loading ? (
@@ -173,8 +175,6 @@ function Contactos() {
               <p>No hay contactos que coincidan con la búsqueda</p>
             </div>
           )}
-
-          <Pagination currentPage={paginaActual} totalPages={totalPaginas} onPageChange={setPaginaActual} />
         </>
       )}
     </div>

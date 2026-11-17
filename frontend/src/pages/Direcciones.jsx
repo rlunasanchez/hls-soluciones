@@ -10,7 +10,6 @@ import FiltrosDireccion from "../components/direcciones/FiltrosDireccion";
 import DireccionFormulario from "../components/direcciones/DireccionFormulario";
 import DireccionTabla from "../components/direcciones/DireccionTabla";
 import DireccionCard from "../components/direcciones/DireccionCard";
-import Pagination from "../components/Pagination";
 import { usePaginaPersistente, useClampPagina } from "../hooks/usePaginacion";
 
 function Direcciones() {
@@ -145,6 +144,9 @@ function Direcciones() {
         onFiltroDireccionChange={setFiltroDireccion}
         onLimpiar={() => { setFiltroDireccion(""); }}
         onNuevo={nuevaDireccion}
+        paginaActual={paginaActual}
+        totalPaginas={totalPaginas}
+        onPageChange={setPaginaActual}
       />
 
       {loading ? (
@@ -173,8 +175,6 @@ function Direcciones() {
               <p>No hay direcciones que coincidan con la búsqueda</p>
             </div>
           )}
-
-          <Pagination currentPage={paginaActual} totalPages={totalPaginas} onPageChange={setPaginaActual} />
         </>
       )}
     </div>

@@ -2,6 +2,14 @@
 
 ## Fecha: 2026-11-17
 
+### v2.201: La paginación sube a la fila de filtros, al lado de Limpiar
+
+**Alcance:** solo frontend, sin cambios de backend ni de base de datos. Build OK; sin probar en pantalla (se vio con 10 registros de ejemplo en local, ya no son parte del código).
+
+- **Qué cambió:** en la lista de OT, Clientes, Contactos, Direcciones y Equipos, los botones de página (‹ 1 2 3 … ›) van en la misma fila que el botón de nuevo, los filtros y **Limpiar**, justo después de este. Desaparecen el texto «Mostrando página X de Y» y la barra de abajo. Si hay una sola página no se muestra nada.
+- **Cómo:** `Pagination.jsx` tiene la variante `enLinea` (solo los botones); cada `Filtros*` y `OrdenLista.jsx` la reciben (`paginaActual`, `totalPaginas`, `onPageChange`). Botones más compactos (padding 4×10) para calzar con los filtros de 30 px; en móvil quedan centrados en su propia línea (bloque en `index.css`).
+- **No cambia:** Cotizaciones y Usuarios siguen con la paginación abajo.
+
 ### v2.200: No se borran fono/RUT/email de la OT al editar un cliente; sin textos de referencia; botón "nuevo" en la fila de filtros
 
 **Alcance:** backend (`routes/clientes.js`, sin cambios de base de datos ni SQL de Neon) y frontend. Hay que publicar `deploy/cloud` (Render) y luego `main` (Vercel). Build OK; sin probar en pantalla.

@@ -174,6 +174,18 @@ html, body {
   align-items: flex-end;
 }
 
+/* Paginación en la fila de filtros, al lado de Limpiar */
+.filtros-cliente > div > .pagination-controls,
+.filters-content > div > .pagination-controls,
+.filtro-fila-selects > div > .pagination-controls { margin-left: 12px; }
+.filtros-cliente .pagination-controls button,
+.filters-content .pagination-controls button,
+.filtro-fila-selects .pagination-controls button { padding: 4px 10px; font-size: 0.8rem; }
+@media (max-width: 768px) {
+  .filters-content > div:has(> .pagination-controls),
+  .filtro-fila-selects > div:has(> .pagination-controls) { grid-column: 1 / -1; display: flex; justify-content: center; }
+}
+
 /* Inputs de filtro de los mantenedores con la misma altura que los de la OT */
 @media (min-width: 769px) {
   .filtros-cliente .filtro-grupo input,

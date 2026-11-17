@@ -9,7 +9,6 @@ import FiltrosEquipo from "../components/equipos/FiltrosEquipo";
 import EquipoFormulario from "../components/equipos/EquipoFormulario";
 import EquipoTabla from "../components/equipos/EquipoTabla";
 import EquipoCard from "../components/equipos/EquipoCard";
-import Pagination from "../components/Pagination";
 import useEquiposListado from "../hooks/useEquiposListado";
 
 function Equipos() {
@@ -108,6 +107,9 @@ function Equipos() {
           onFiltroModeloChange={setFiltroModelo}
           onLimpiar={() => { setFiltroModelo(""); }}
           onNuevo={nuevaEquipo}
+          paginaActual={paginaActual}
+          totalPaginas={totalPaginas}
+          onPageChange={setPaginaActual}
         />
 
       {loading ? (
@@ -136,8 +138,6 @@ function Equipos() {
               <p>No hay equipos que coincidan con la búsqueda</p>
             </div>
           )}
-
-          <Pagination currentPage={paginaActual} totalPages={totalPaginas} onPageChange={setPaginaActual} />
         </>
       )}
     </div>
