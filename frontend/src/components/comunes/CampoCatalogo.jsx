@@ -42,7 +42,7 @@ const CONFIG = {
 // Para reiniciarlo al cambiar de cliente, el padre le pasa una key distinta.
 // En la ficha del cliente se usa para vincular: excluirIds oculta lo ya vinculado y accionExtra
 // agrega un botón al lado ("Nuevo").
-function CampoCatalogo({ tipo, etiqueta, deCliente = [], actual, datosRegistro, onElegir, onActualizado = () => {}, onEnCatalogo = null, ajeno = null, excluirIds = [], accionExtra = null, readOnly = false }) {
+function CampoCatalogo({ tipo, etiqueta, placeholder, deCliente = [], actual, datosRegistro, onElegir, onActualizado = () => {}, onEnCatalogo = null, ajeno = null, excluirIds = [], accionExtra = null, readOnly = false }) {
   const cfg = CONFIG[tipo];
   const [texto, setTexto] = useState("");
   const [abierto, setAbierto] = useState(false);
@@ -100,6 +100,7 @@ function CampoCatalogo({ tipo, etiqueta, deCliente = [], actual, datosRegistro, 
         <input
           type="text"
           className="ot-search bc-input"
+          placeholder={placeholder}
           value={texto}
           onChange={(e) => { setTexto(e.target.value); setAbierto(true); }}
           onFocus={abrir}

@@ -2,6 +2,14 @@
 
 ## Fecha: 2026-11-17
 
+### v2.202: Vuelven los textos de referencia de las altas rápidas de la ficha del cliente
+
+**Alcance:** solo frontend (`VinculosCliente.jsx`, `CampoCatalogo.jsx`), sin cambios de backend ni de base de datos. Build OK; sin probar en pantalla.
+
+- **Por qué:** en v2.200 se quitaron los placeholders de todos los formularios, pero en el «Nuevo cliente» (y al editarlo) los campos de alta rápida de contacto y dirección no tienen etiqueta, así que quedaron sin nombre.
+- **Qué vuelve:** Nombre *, Cargo, Email y Fono (contacto); Dirección *, Ciudad y Comuna (dirección); y los textos de los buscadores «Buscar contacto por nombre, email, fono o cargo…» y «Buscar dirección, ciudad o comuna…». `CampoCatalogo` vuelve a aceptar `placeholder`.
+- **Sigue sin textos de referencia:** la OT, los formularios y filtros de los mantenedores y los campos propios de la ficha del cliente (todos tienen etiqueta).
+
 ### v2.201: La paginación sube a la fila de filtros, al lado de Limpiar
 
 **Alcance:** solo frontend, sin cambios de backend ni de base de datos. Build OK; sin probar en pantalla (se vio con 10 registros de ejemplo en local, ya no son parte del código).
