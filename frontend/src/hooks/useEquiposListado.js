@@ -3,7 +3,7 @@ import { getCached } from "../services/cache";
 import { usePaginaPersistente, useClampPagina } from "./usePaginacion";
 import useValorRetrasado from "./useValorRetrasado";
 
-const EQUIPOS_POR_PAGINA = 4;
+const EQUIPOS_POR_PAGINA = 6;
 
 // Listado de Equipos: el filtro por modelo y la paginación se resuelven en el servidor
 // (GET /api/equipos?pagina=&limite=&modelo=); aquí solo se guarda la página en pantalla.

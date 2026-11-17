@@ -2,6 +2,14 @@
 
 ## Fecha: 2026-11-17
 
+### v2.203: Altas rápidas con etiqueta en la ficha del cliente, etiquetas en mayúsculas y 6 registros por página en los mantenedores
+
+**Alcance:** solo frontend, sin cambios de backend ni de base de datos. Build OK; sin probar en pantalla (se vio con 14 registros de ejemplo en local, ya fuera del código).
+
+- **Altas rápidas de la ficha del cliente** (`VinculosCliente.jsx`): los campos de «Nuevo» contacto (Nombre *, Cargo, Email, Fono) y dirección (Dirección *, Ciudad, Comuna) ya no usan texto gris adentro, sino su nombre como etiqueta arriba (`cf-field` + `label`), igual que Empresa/Persona. Los buscadores «Buscar contacto…» / «Buscar dirección…» conservan su texto de ayuda.
+- **Etiquetas en mayúsculas:** `.cf-field label` (`Clientes.css`) toma el estilo de los otros mantenedores (10 px, negrita, gris, mayúsculas, `letter-spacing .3px`; también en móvil).
+- **6 registros por página** (antes 4) en Clientes, Contactos, Direcciones y Equipos, al haberse liberado espacio con la paginación en la fila de filtros: `CLIENTES_POR_PAGINA` y `EQUIPOS_POR_PAGINA` (piden la página al servidor, límite máximo 100) y `contactosPorPagina` / `direccionesPorPagina`. La OT, Cotizaciones y Usuarios siguen en 4.
+
 ### v2.202: Vuelven los textos de referencia de las altas rápidas de la ficha del cliente
 
 **Alcance:** solo frontend (`VinculosCliente.jsx`, `CampoCatalogo.jsx`), sin cambios de backend ni de base de datos. Build OK; sin probar en pantalla.

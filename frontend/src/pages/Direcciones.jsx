@@ -19,7 +19,7 @@ function Direcciones() {
   const [direccionEditando, setDireccionEditando] = useState(null);
   const [filtroDireccion, setFiltroDireccion] = useState("");
   const [paginaActual, setPaginaActual] = usePaginaPersistente("pagDirecciones", [filtroDireccion]);
-  const direccionesPorPagina = 4;
+  const direccionesPorPagina = 6;
   const [soloLectura, setSoloLectura] = useState(false);
   const [loading, setLoading] = useState(false);
 

@@ -119,16 +119,16 @@ function VinculosCliente({ tipo, vinculados, onChange, clienteId = null, readOnl
             <div className="cf-r2" style={{ margin: "8px 0 12px" }}>
               {tipo === "contactos" ? (
                 <>
-                  <input placeholder="Nombre *" value={nuevo.nombre} onChange={(e) => setNuevo({ ...nuevo, nombre: soloLetras(e) })} />
-                  <input placeholder="Cargo" value={nuevo.cargo} onChange={(e) => setNuevo({ ...nuevo, cargo: soloLetras(e) })} />
-                  <input type="email" placeholder="Email" value={nuevo.email} onChange={(e) => setNuevo({ ...nuevo, email: e.target.value })} />
-                  <input placeholder="Fono" value={nuevo.fono} onChange={(e) => setNuevo({ ...nuevo, fono: e.target.value.replace(/[^0-9+]/g, "") })} />
+                  <div className="cf-field"><label>Nombre *</label><input value={nuevo.nombre} onChange={(e) => setNuevo({ ...nuevo, nombre: soloLetras(e) })} /></div>
+                  <div className="cf-field"><label>Cargo</label><input value={nuevo.cargo} onChange={(e) => setNuevo({ ...nuevo, cargo: soloLetras(e) })} /></div>
+                  <div className="cf-field"><label>Email</label><input type="email" value={nuevo.email} onChange={(e) => setNuevo({ ...nuevo, email: e.target.value })} /></div>
+                  <div className="cf-field"><label>Fono</label><input value={nuevo.fono} onChange={(e) => setNuevo({ ...nuevo, fono: e.target.value.replace(/[^0-9+]/g, "") })} /></div>
                 </>
               ) : (
                 <>
-                  <input className="of-col-full" placeholder="Dirección *" value={nuevo.direccion} onChange={(e) => setNuevo({ ...nuevo, direccion: upperInput(e) })} />
-                  <input placeholder="Ciudad" value={nuevo.ciudad} onChange={(e) => setNuevo({ ...nuevo, ciudad: soloLetras(e) })} />
-                  <input placeholder="Comuna" value={nuevo.comuna} onChange={(e) => setNuevo({ ...nuevo, comuna: soloLetras(e) })} />
+                  <div className="cf-field of-col-full"><label>Dirección *</label><input value={nuevo.direccion} onChange={(e) => setNuevo({ ...nuevo, direccion: upperInput(e) })} /></div>
+                  <div className="cf-field"><label>Ciudad</label><input value={nuevo.ciudad} onChange={(e) => setNuevo({ ...nuevo, ciudad: soloLetras(e) })} /></div>
+                  <div className="cf-field"><label>Comuna</label><input value={nuevo.comuna} onChange={(e) => setNuevo({ ...nuevo, comuna: soloLetras(e) })} /></div>
                 </>
               )}
               <button type="button" className="btn-mini btn-mini--success" onClick={crear} disabled={guardando}>
