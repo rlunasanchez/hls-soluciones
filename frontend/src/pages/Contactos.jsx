@@ -19,7 +19,7 @@ function Contactos() {
   const [contactoEditando, setContactoEditando] = useState(null);
   const [filtroNombre, setFiltroNombre] = useState("");
   const [paginaActual, setPaginaActual] = usePaginaPersistente("pagContactos", [filtroNombre]);
-  const contactosPorPagina = 4;
+  const contactosPorPagina = 6;
   const [soloLectura, setSoloLectura] = useState(false);
   const [loading, setLoading] = useState(false);
 

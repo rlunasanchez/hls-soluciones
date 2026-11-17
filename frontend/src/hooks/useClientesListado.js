@@ -3,7 +3,7 @@ import { getCached } from "../services/cache";
 import { usePaginaPersistente, useClampPagina } from "./usePaginacion";
 import useValorRetrasado from "./useValorRetrasado";
 
-const CLIENTES_POR_PAGINA = 4;
+const CLIENTES_POR_PAGINA = 6;
 
 // Listado de Clientes: el filtro por nombre y por RUT y la paginación se resuelven en el servidor
 // (GET /api/clientes?pagina=&limite=&nombre=&rut=); aquí solo se guarda la página en pantalla.
