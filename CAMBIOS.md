@@ -2,6 +2,13 @@
 
 ## Fecha: 2026-11-17
 
+### v2.204: Títulos de columna de la lista de Clientes en mayúsculas
+
+**Alcance:** solo frontend (`Clientes.css`), sin cambios de backend ni de base de datos. Build OK; sin probar en pantalla.
+
+- **Qué cambió:** la tabla de Clientes mostraba sus títulos (Razón social / Nombre, RUT, Teléfono, Email, Acciones) en minúscula por la regla `.table-wrapper.tabla-clientes th`; se quitó para que tomen el estilo general de las tablas (mayúsculas), como Contactos, Direcciones y Equipos.
+- **No cambia:** la tabla de contactos y direcciones dentro de la ficha del cliente (`.cf-vinc .table-wrapper th`) conserva sus títulos normales.
+
 ### v2.203: Altas rápidas con etiqueta en la ficha del cliente, etiquetas en mayúsculas y 6 registros por página en los mantenedores
 
 **Alcance:** solo frontend, sin cambios de backend ni de base de datos. Build OK; sin probar en pantalla (se vio con 14 registros de ejemplo en local, ya fuera del código).
