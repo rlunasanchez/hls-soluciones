@@ -58,7 +58,7 @@
   .modal-contactos-foot-actions .cf-btn-c,.modal-contactos-foot-actions .cf-btn-p{flex:1}
 }
 /* Vista de Clientes: encabezados con solo la primera letra en mayúscula */
-.table-wrapper.tabla-clientes th,.cf-vinc .table-wrapper th{text-transform:none;letter-spacing:normal}
+.cf-vinc .table-wrapper th{text-transform:none;letter-spacing:normal}
 /* Lupa centrada con su texto en los filtros del listado de Clientes */
 .filtros-cliente .filtro-grupo label{display:flex;align-items:center;gap:4px}
 /* Mensaje de tabla vacía con solo la primera letra en mayúscula */
