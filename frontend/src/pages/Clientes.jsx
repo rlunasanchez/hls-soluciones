@@ -6,7 +6,6 @@ import { parseToken } from "../utils/helpers";
 import "../styles/Clientes.css";
 import "../styles/clientes-componentes.css";
 import HeaderCliente from "../components/clientes/HeaderCliente";
-import Pagination from "../components/Pagination";
 import FiltrosCliente from "../components/clientes/FiltrosCliente";
 import ClienteLista from "../components/clientes/ClienteLista";
 import ClienteFormulario from "../components/clientes/ClienteFormulario";
@@ -109,6 +108,9 @@ function Clientes() {
         onFiltroRutChange={setFiltroRut}
         onLimpiar={() => { setBusqueda(""); setFiltroRut(""); }}
         onNuevo={() => { setClienteEditando(null); setSoloLectura(false); setMostrarFormulario(true); }}
+        paginaActual={paginaActual}
+        totalPaginas={totalPaginas}
+        onPageChange={setPaginaActual}
       />
 
       {loading ? (
@@ -133,8 +135,6 @@ function Clientes() {
               <p>No hay clientes que coincidan con la búsqueda</p>
             </div>
           )}
-
-          <Pagination currentPage={paginaActual} totalPages={totalPaginas} onPageChange={setPaginaActual} />
         </>
       )}
     </div>

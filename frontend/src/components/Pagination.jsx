@@ -1,4 +1,4 @@
-function Pagination({ currentPage, totalPages, onPageChange, label }) {
+function Pagination({ currentPage, totalPages, onPageChange, label, enLinea = false }) {
   if (totalPages <= 1) return null;
 
   const pages = [];
@@ -19,10 +19,12 @@ function Pagination({ currentPage, totalPages, onPageChange, label }) {
   }
 
   return (
-    <div className="pagination">
-      <div className="pagination-info">
-        Mostrando página {currentPage} de {totalPages}
-      </div>
+    <div className={enLinea ? undefined : "pagination"}>
+      {!enLinea && (
+        <div className="pagination-info">
+          Mostrando página {currentPage} de {totalPages}
+        </div>
+      )}
       <div className="pagination-controls">
         <button
           className="page-btn-nav"

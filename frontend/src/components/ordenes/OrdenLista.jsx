@@ -87,6 +87,7 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
             <button onClick={onLimpiar} className="btn-limpiar-equipos" title="Limpiar filtros">
               <RotateCcw size={14} /> Limpiar
             </button>
+            <Pagination enLinea currentPage={paginaActual} totalPages={totalPaginas} onPageChange={onPageChange} />
           </div>
         </div>
       </div>
@@ -221,8 +222,6 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
               </div>
             ))}
           </div>
-
-          <Pagination currentPage={paginaActual} totalPages={totalPaginas} onPageChange={onPageChange} />
         </>
       )}
     </>
