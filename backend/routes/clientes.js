@@ -258,7 +258,8 @@ router.put("/:id", authMiddleware, async (req, res) => {
     if (String(email || "").trim() && !validarEmail(email)) {
       return res.status(400).json({ msg: "Email inválido" });
     }
-    const existing = await pool.query("SELECT codigo FROM clientes WHERE id = $1", [id]);
+    const existing = await pool.query("SELECT codigo, rut, telefono, email FROM clientes WHERE id = $1", [id]);
+    const antes = existing.rows[0] || {};
     let codigo = existing.rows[0]?.codigo;
     if (!codigo) codigo = await generarCodigo();
 
@@ -272,10 +273,17 @@ router.put("/:id", authMiddleware, async (req, res) => {
       // Sincroniza en las OT de este cliente solo sus datos propios (Contacto
       // ya no se deriva de Cliente — vive aparte en el catálogo de Contactos
       // y se administra por OT, no se pisa acá).
-      await client.query(
-        `UPDATE ordenes_trabajo SET cliente = $1, cliente_tipo = (SELECT tipo FROM clientes WHERE id = $2), rut = $3, fono_principal = $4, email = $5 WHERE cliente_id = $6`,
-        [razon_social, id, rut || null, telefono || null, email || null, id]
-      );
+      // RUT, fono y email solo se pisan en la OT si cambiaron en el cliente: así editar otro dato
+      // (o un cliente con el fono vacío) no borra lo que cada OT ya tenía.
+      const cambio = (nuevo, viejo) => (nuevo || '') !== (viejo || '');
+      const params = [razon_social, id];
+      const sets = ["cliente = $1", "cliente_tipo = (SELECT tipo FROM clientes WHERE id = $2)"];
+      const agregar = (col, valor) => { params.push(valor || null); sets.push(`${col} = $${params.length}`); };
+      if (cambio(rut, antes.rut)) agregar("rut", rut);
+      if (cambio(telefono, antes.telefono)) agregar("fono_principal", telefono);
+      if (cambio(email, antes.email)) agregar("email", email);
+      params.push(id);
+      await client.query(`UPDATE ordenes_trabajo SET ${sets.join(", ")} WHERE cliente_id = $${params.length}`, params);
       // Vínculos: solo si el formulario los envía (así otros llamados al PUT no los borran)
       const vinc = await idsDeVinculos(client, req.body);
       if (vinc.contactos) await sincronizarVinculos(client, id, "contactos", vinc.contactos, vinc.contactoAOt);

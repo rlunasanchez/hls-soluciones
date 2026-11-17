@@ -199,7 +199,7 @@ function ClienteFormulario({ clienteEditando, onSave, onCancel, titulo, readOnly
                 </div>
                 <div className="cf-field" style={{ position: "relative" }}>
                   <label>RUT {rutError && <span style={{ position: "absolute", right: 0, top: 0, whiteSpace: "nowrap", color: "#dc2626", fontSize: ".7rem" }}>{rutError}</span>}</label>
-                  <input placeholder="Ej: 12.345.678-9" value={nuevoCliente.rut}
+                  <input value={nuevoCliente.rut}
                     disabled={readOnly}
                     style={rutError ? { border: "1px solid #f87171", background: "#fef2f2" } : {}}
                     onChange={handleRutChange} onBlur={handleRutBlur} />
@@ -208,7 +208,7 @@ function ClienteFormulario({ clienteEditando, onSave, onCancel, titulo, readOnly
               <div className="cf-r1 cf-mt">
                 <div className="cf-field">
                   <label>{esPersona ? "Nombre *" : "Razón Social *"}</label>
-                  <input placeholder={esPersona ? "Nombre" : "Razón social"} value={nuevoCliente.razon_social}
+                  <input value={nuevoCliente.razon_social}
                     disabled={readOnly}
                     onChange={(e) => setNuevoCliente({ ...nuevoCliente, razon_social: upperInput(e) })} required />
                 </div>
@@ -216,7 +216,7 @@ function ClienteFormulario({ clienteEditando, onSave, onCancel, titulo, readOnly
               <div className="cf-r1" style={{ display: "none" }}>
                 <div className="cf-field">
                   <label>Giro</label>
-                  <input placeholder="Giro" value={nuevoCliente.giro}
+                  <input value={nuevoCliente.giro}
                     disabled={readOnly}
                     onChange={(e) => setNuevoCliente({ ...nuevoCliente, giro: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
                 </div>
@@ -224,13 +224,13 @@ function ClienteFormulario({ clienteEditando, onSave, onCancel, titulo, readOnly
               <div className="cf-r2 cf-mt">
                 <div className="cf-field">
                   <label>Fono</label>
-                  <input placeholder="Fono" value={nuevoCliente.telefono}
+                  <input value={nuevoCliente.telefono}
                     disabled={readOnly}
                     onChange={(e) => setNuevoCliente({ ...nuevoCliente, telefono: e.target.value.replace(/[^0-9+]/g, "") })} />
                 </div>
                 <div className="cf-field">
                   <label>Email</label>
-                  <input type="email" placeholder="Email" value={nuevoCliente.email}
+                  <input type="email" value={nuevoCliente.email}
                     disabled={readOnly}
                     onChange={(e) => setNuevoCliente({ ...nuevoCliente, email: e.target.value })} />
                 </div>
@@ -241,7 +241,7 @@ function ClienteFormulario({ clienteEditando, onSave, onCancel, titulo, readOnly
               <div className="cf-r1 cf-mt">
                 <div className="cf-field">
                   <label>Dirección</label>
-                  <input placeholder="Ingrese la dirección completa" value={nuevoCliente.direccion}
+                  <input value={nuevoCliente.direccion}
                     disabled={readOnly}
                     onChange={(e) => setNuevoCliente({ ...nuevoCliente, direccion: upperInput(e) })} />
                 </div>
@@ -249,13 +249,13 @@ function ClienteFormulario({ clienteEditando, onSave, onCancel, titulo, readOnly
               <div className="cf-r2">
                 <div className="cf-field">
                   <label>Ciudad</label>
-                  <input placeholder="Ciudad" value={nuevoCliente.ciudad}
+                  <input value={nuevoCliente.ciudad}
                     disabled={readOnly}
                     onChange={(e) => setNuevoCliente({ ...nuevoCliente, ciudad: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
                 </div>
                 <div className="cf-field">
                   <label>Comuna</label>
-                  <input placeholder="Comuna" value={nuevoCliente.comuna}
+                  <input value={nuevoCliente.comuna}
                     disabled={readOnly}
                     onChange={(e) => setNuevoCliente({ ...nuevoCliente, comuna: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
                 </div>

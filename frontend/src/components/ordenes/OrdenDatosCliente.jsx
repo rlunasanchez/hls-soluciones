@@ -61,7 +61,6 @@ function OrdenDatosCliente({ nuevaOrden, setNuevaOrden, readOnly = false, esPers
         <label>{esPersona ? "Nombre *" : "Cliente *"}</label>
         <input
           type="text"
-          placeholder="Nombre del cliente"
           value={nuevaOrden.cliente}
           onChange={(e) => setNuevaOrden({...nuevaOrden, cliente: upperInput(e)})}
           disabled={readOnly || bloqueados.cliente}
@@ -80,7 +79,6 @@ function OrdenDatosCliente({ nuevaOrden, setNuevaOrden, readOnly = false, esPers
         <label>RUT {rutError && <span style={{ position: 'absolute', right: 0, top: 0, whiteSpace: 'nowrap', color: '#dc2626', fontSize: '.7rem', textTransform: 'none', letterSpacing: 'normal' }}>{rutError}</span>}</label>
         <input
           type="text"
-          placeholder="Ej: 12.345.678-9"
           value={nuevaOrden.rut}
           onChange={handleRutChange}
           onBlur={handleRutBlur}
@@ -99,7 +97,6 @@ function OrdenDatosCliente({ nuevaOrden, setNuevaOrden, readOnly = false, esPers
         <label>Fono Principal</label>
         <input
           type="tel"
-          placeholder="Teléfono principal del cliente"
           value={nuevaOrden.fonoPrincipal}
           onChange={(e) => setNuevaOrden({...nuevaOrden, fonoPrincipal: e.target.value.replace(/[^0-9+]/g, '')})}
           disabled={readOnly || bloqueados.fono}
@@ -117,7 +114,6 @@ function OrdenDatosCliente({ nuevaOrden, setNuevaOrden, readOnly = false, esPers
         <label>Email</label>
         <input
           type="email"
-          placeholder="Email del cliente"
           value={nuevaOrden.email}
           onChange={(e) => setNuevaOrden({...nuevaOrden, email: e.target.value})}
           disabled={readOnly || bloqueados.email}

@@ -111,7 +111,6 @@ function OrdenFormEquipo({
               <input
                 type="text"
                 className="ot-search"
-                placeholder="Ej: IR2520"
                 value={busquedaModelo}
                 onChange={(e) => {
                   setBusquedaModelo(upperInput(e));
@@ -232,28 +231,28 @@ function OrdenFormEquipo({
       <div className="of-r3" style={{ columnGap: '20px', rowGap: '6px', marginBottom: '20px' }}>
         <div className="of-f">
           <label>Equipo *</label>
-          <input type="text" placeholder="Tipo de equipo" value={nuevaOrden.equipo}
+          <input type="text" value={nuevaOrden.equipo}
             onChange={escribirEquipo("equipo")}
             disabled={equipoBloqueado}
             required style={inputStyle} />
         </div>
         <div className="of-f">
           <label>Marca *</label>
-          <input type="text" placeholder="Marca del equipo" value={nuevaOrden.marca}
+          <input type="text" value={nuevaOrden.marca}
             onChange={escribirEquipo("marca")}
             disabled={equipoBloqueado}
             required style={inputStyle} />
         </div>
         <div className="of-f">
           <label>Modelo *</label>
-          <input type="text" placeholder="Modelo del equipo" value={nuevaOrden.modelo}
+          <input type="text" value={nuevaOrden.modelo}
             onChange={escribirEquipo("modelo")}
             disabled={equipoBloqueado}
             required style={inputStyle} />
         </div>
         <div className="of-f">
           <label>Serie</label>
-          <input type="text" placeholder="Número de serie" value={nuevaOrden.serie}
+          <input type="text" value={nuevaOrden.serie}
             onChange={(e) => setNuevaOrden({...nuevaOrden, serie: upperInput(e)})}
             disabled={readOnly}
             style={inputStyle} />
@@ -274,7 +273,7 @@ function OrdenFormEquipo({
         </div>
         <div className="of-f">
           <label>Contador Páginas OUT</label>
-          <input type="number" placeholder="0" value={nuevaOrden.contadorPagOut}
+          <input type="number" value={nuevaOrden.contadorPagOut}
             onChange={(e) => setNuevaOrden({...nuevaOrden, contadorPagOut: e.target.value})}
             disabled={readOnly}
             style={inputStyle} />

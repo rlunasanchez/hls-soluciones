@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, Plus } from "lucide-react";
+import { MapPin } from "lucide-react";
 import api from "../services/api";
 import { getCached } from "../services/cache";
 import '../styles/Direcciones.css';
@@ -144,13 +144,8 @@ function Direcciones() {
         filtroDireccion={filtroDireccion}
         onFiltroDireccionChange={setFiltroDireccion}
         onLimpiar={() => { setFiltroDireccion(""); }}
+        onNuevo={nuevaDireccion}
       />
-
-      <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 16 }}>
-        <button className="main-btn" onClick={nuevaDireccion}>
-          <Plus size={16} /> Nueva Dirección
-        </button>
-      </div>
 
       {loading ? (
         <div className="empty-state">

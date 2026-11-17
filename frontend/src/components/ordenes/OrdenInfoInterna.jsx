@@ -26,7 +26,6 @@ function OrdenInfoInterna({ nuevaOrden, setNuevaOrden, readOnly = false }) {
               <div className="of-f">
                 <textarea
                   rows={4}
-                  placeholder="Notas internas de la orden (no visibles para el cliente)..."
                   value={nuevaOrden.infoInterna || ""}
                   onChange={(e) => setNuevaOrden({...nuevaOrden, infoInterna: upperInput(e)})}
                   disabled={readOnly}

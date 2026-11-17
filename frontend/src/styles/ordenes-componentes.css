@@ -44,6 +44,12 @@ td.col-ot-dot {
   gap: 12px;
   align-items: flex-end;
   flex-wrap: wrap;
+  /* Recuadro blanco como el de los filtros de los mantenedores */
+  flex: 1;
+  background: var(--panel);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 10px 12px;
 }
 
 .filtro-garantia-select,
@@ -70,6 +76,34 @@ td.col-ot-dot {
   display: flex;
   gap: 12px;
   align-items: flex-end;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+/* Filtros según el ancho de pantalla:
+   - ≥1200px: todo en una línea (botón, filtros y Limpiar), los filtros se achican.
+   - 769–1199px: los filtros bajan de línea entre ellos; el botón queda a su izquierda.
+   - ≤768px: columna y cuadrícula (reglas móviles más abajo). */
+.filtro-fila-selects > button { flex-shrink: 0; margin-left: 20px; }
+/* Misma altura en todos los filtros (texto, lista y fecha) */
+@media (min-width: 769px) {
+  .filtro-fila-selects .filtro-garantia-select,
+  .filtro-fila-selects .filtro-fecha-input { height: 30px; box-sizing: border-box; }
+}
+@media (min-width: 1200px) {
+  .table-header-actions,
+  .filtro-fila-selects { flex-wrap: nowrap; }
+  .filtro-fila-selects > .filtro-grupo-select { flex: 1 1 0; min-width: 0; }
+  .filtro-fila-selects > .filtro-fechas-group { flex: 2 1 0; min-width: 0; }
+  /* N° de Orden, Cliente y Serie un poco más angostos para dar aire al botón */
+  .filtro-fila-selects > .filtro-grupo-select:nth-child(-n+3) { flex: 0.9 1 0; }
+  .filtro-fila-selects .filtro-garantia-select,
+  .filtro-fila-selects .filtro-fecha-input { min-width: 0; width: 100%; box-sizing: border-box; }
+}
+/* Pantallas anchas: hay espacio, esos tres campos se alargan más */
+@media (min-width: 1500px) {
+  .filtro-fila-selects > .filtro-grupo-select:nth-child(-n+3) { flex: 1.3 1 0; }
 }
 
 .filtro-grupo-select label {

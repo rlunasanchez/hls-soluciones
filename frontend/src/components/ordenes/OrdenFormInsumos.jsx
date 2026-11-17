@@ -31,7 +31,7 @@ function OrdenFormInsumos({ insumos, insumosVisibles, setInsumosVisibles, setIns
         {insumos.slice(0, insumosVisibles).map((ins, idx) => (
           <div key={idx} className="of-ins-item">
             <div>
-              <input type="text" placeholder={`Insumo ${idx + 1}`} value={ins.nombre} onChange={(e) => actualizarInsumo(idx, e.target.value)} disabled={readOnly} />
+              <input type="text" value={ins.nombre} onChange={(e) => actualizarInsumo(idx, e.target.value)} disabled={readOnly} />
             </div>
             {!readOnly && (
               <button type="button" className="of-ins-del" onClick={() => {

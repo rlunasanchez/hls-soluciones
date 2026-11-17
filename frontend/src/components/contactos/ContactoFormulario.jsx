@@ -50,13 +50,13 @@ function ContactoFormulario({ contactoEditando, onCancel, onSave, contactos, rea
             <div className="cof-r2" style={{ marginTop: '8px' }}>
               <div className="cof-f">
                 <label>Nombre *</label>
-                <input placeholder="Nombre del contacto" value={nuevoContacto.nombre}
+                <input value={nuevoContacto.nombre}
                   disabled={readOnly}
                   onChange={e => setNuevoContacto({ ...nuevoContacto, nombre: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '') })} required />
               </div>
               <div className="cof-f">
                 <label>Cargo</label>
-                <input placeholder="Cargo" value={nuevoContacto.cargo}
+                <input value={nuevoContacto.cargo}
                   disabled={readOnly}
                   onChange={e => setNuevoContacto({ ...nuevoContacto, cargo: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '') })} />
               </div>
@@ -64,13 +64,13 @@ function ContactoFormulario({ contactoEditando, onCancel, onSave, contactos, rea
             <div className="cof-r2" style={{ marginTop: '8px' }}>
               <div className="cof-f">
                 <label>Email</label>
-                <input type="email" placeholder="Email" value={nuevoContacto.email}
+                <input type="email" value={nuevoContacto.email}
                   disabled={readOnly}
                   onChange={e => setNuevoContacto({ ...nuevoContacto, email: e.target.value })} />
               </div>
               <div className="cof-f">
                 <label>Fono</label>
-                <input placeholder="Fono" value={nuevoContacto.fono}
+                <input value={nuevoContacto.fono}
                   disabled={readOnly}
                   onChange={e => setNuevoContacto({ ...nuevoContacto, fono: e.target.value.replace(/[^0-9+]/g, '') })} />
               </div>

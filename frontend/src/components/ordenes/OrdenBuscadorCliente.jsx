@@ -84,7 +84,6 @@ function OrdenBuscadorCliente({
           <input
             type="text"
             className="ot-search bc-input"
-            placeholder="Escriba para buscar cliente por nombre o RUT..."
             value={busquedaCliente}
             onChange={(e) => {
               // Si lo escrito parece RUT (puro número/K/guion/puntos) agrega los puntos;

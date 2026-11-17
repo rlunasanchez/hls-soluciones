@@ -18,7 +18,6 @@ function OrdenFormAveria({ nuevaOrden, setNuevaOrden, readOnly }) {
       </div>
       <div className="of-f">
         <textarea
-          placeholder="Describa la avería, falla o incidencia del equipo..."
           value={nuevaOrden.averia}
           onChange={(e) => setNuevaOrden({...nuevaOrden, averia: upperInput(e)})}
           rows={4}
@@ -29,7 +28,6 @@ function OrdenFormAveria({ nuevaOrden, setNuevaOrden, readOnly }) {
       <div className="of-st primary">Actividad</div>
       <div className="of-f">
         <textarea
-          placeholder="Describa la actividad realizada..."
           value={nuevaOrden.actividad}
           onChange={(e) => setNuevaOrden({...nuevaOrden, actividad: upperInput(e)})}
           rows={4}

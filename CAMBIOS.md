@@ -1,5 +1,17 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-11-17
+
+### v2.200: No se borran fono/RUT/email de la OT al editar un cliente; sin textos de referencia; botón "nuevo" en la fila de filtros
+
+**Alcance:** backend (`routes/clientes.js`, sin cambios de base de datos ni SQL de Neon) y frontend. Hay que publicar `deploy/cloud` (Render) y luego `main` (Vercel). Build OK; sin probar en pantalla.
+
+- **Datos que se borraban:** `PUT /api/clientes/:id` reescribía RUT, fono y email de **todas** las OT del cliente con los de la ficha; si la ficha tenía el fono vacío, las OT quedaban sin teléfono. Ahora solo se pisa el dato que **cambió** en el cliente (razón social y tipo se siguen sincronizando). En `useClienteOT.jsx`, al guardar la edición del cliente desde la OT, RUT, email y fono conservan lo escrito en la OT si la ficha no tiene ese dato (antes `|| ""`). Efecto: vaciar a propósito el fono del cliente no lo vacía en las OT ya guardadas.
+- **Sin placeholders:** se quitaron los textos grises de referencia de la OT, Clientes, Contactos, Direcciones y Equipos (formularios, filtros, buscadores y `CampoCatalogo`, que ya no acepta `placeholder`). Cotizaciones, Usuarios y Login no se tocaron.
+- **Filtros en una fila:** en Clientes, Contactos, Direcciones y Equipos, **Nuevo …** pasó a la fila de filtros, antes de **Limpiar** (prop `onNuevo` de los `Filtros*`). Sin cambiar el ancho de los campos.
+- **Lista de OT** (`ordenes-componentes.css`): filtros en recuadro blanco como los de los mantenedores; ≥1200 px todo en una línea (botón, filtros, Limpiar), 769–1199 px los filtros bajan entre ellos, ≤768 px sin cambios; N° de Orden, Cliente y Serie con ancho propio (0,9; 1,3 desde 1500 px); filtros de 30 px de alto; **Limpiar** con 20 px de separación. Cotizaciones comparte estas reglas y cambia igual.
+- **Altura de inputs de filtro** de los cuatro mantenedores: 30 px desde 769 px (bloque en `index.css`); en móvil 44 px como antes.
+
 ## Fecha: 2026-11-12
 
 ### v2.199: El número de OT ya no falla con guardados simultáneos; el backend en la nube ya no llena el log con errores de `index.html`

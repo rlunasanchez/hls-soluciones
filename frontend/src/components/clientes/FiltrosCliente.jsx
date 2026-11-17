@@ -1,16 +1,18 @@
-import { Search, RotateCcw } from "lucide-react";
+import { Search, RotateCcw, Plus } from "lucide-react";
 import { formatearRutInput } from "../../utils/helpers";
 
-function FiltrosCliente({ busqueda, onBusquedaChange, filtroRut, onFiltroRutChange, onLimpiar }) {
+function FiltrosCliente({ busqueda, onBusquedaChange, filtroRut, onFiltroRutChange, onLimpiar, onNuevo }) {
   return (
     <div className="filtros-cliente">
+      <button className="main-btn" onClick={onNuevo}>
+        <Plus size={16} /> Nuevo Cliente
+      </button>
       <div className="filtro-grupo">
         <label>
           <Search size={12} /> Razón Social / Nombre
         </label>
         <input
           type="text"
-          placeholder="Filtrar por razón social..."
           value={busqueda}
           onChange={(e) => onBusquedaChange(e.target.value)}
         />
@@ -19,7 +21,6 @@ function FiltrosCliente({ busqueda, onBusquedaChange, filtroRut, onFiltroRutChan
         <label>RUT</label>
         <input
           type="text"
-          placeholder="Filtrar por RUT..."
           value={filtroRut}
           onChange={(e) => onFiltroRutChange(formatearRutInput(e.target.value))}
         />

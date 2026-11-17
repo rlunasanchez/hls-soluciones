@@ -14,7 +14,6 @@ const CONFIG = {
   contactos: {
     titulo: "Contactos",
     etiqueta: "Buscar Contacto",
-    placeholder: "Buscar contacto por nombre, email, fono o cargo…",
     vacio: "Sin contactos vinculados",
     verbo: "contacto",
     mantenedor: "Contactos",
@@ -24,7 +23,6 @@ const CONFIG = {
   direcciones: {
     titulo: "Direcciones",
     etiqueta: "Buscar Dirección",
-    placeholder: "Buscar dirección, ciudad o comuna…",
     vacio: "Sin direcciones vinculadas",
     verbo: "dirección",
     mantenedor: "Direcciones",
@@ -105,7 +103,6 @@ function VinculosCliente({ tipo, vinculados, onChange, clienteId = null, readOnl
           <CampoCatalogo
             tipo={tipo}
             etiqueta={cfg.etiqueta}
-            placeholder={cfg.placeholder}
             excluirIds={vinculados.map((v) => v.id)}
             ajeno={duenoAjeno(clienteId)}
             onElegir={vincular}
@@ -119,16 +116,16 @@ function VinculosCliente({ tipo, vinculados, onChange, clienteId = null, readOnl
             <div className="cf-r2" style={{ margin: "8px 0 12px" }}>
               {tipo === "contactos" ? (
                 <>
-                  <input placeholder="Nombre *" value={nuevo.nombre} onChange={(e) => setNuevo({ ...nuevo, nombre: soloLetras(e) })} />
-                  <input placeholder="Cargo" value={nuevo.cargo} onChange={(e) => setNuevo({ ...nuevo, cargo: soloLetras(e) })} />
-                  <input type="email" placeholder="Email" value={nuevo.email} onChange={(e) => setNuevo({ ...nuevo, email: e.target.value })} />
-                  <input placeholder="Fono" value={nuevo.fono} onChange={(e) => setNuevo({ ...nuevo, fono: e.target.value.replace(/[^0-9+]/g, "") })} />
+                  <input value={nuevo.nombre} onChange={(e) => setNuevo({ ...nuevo, nombre: soloLetras(e) })} />
+                  <input value={nuevo.cargo} onChange={(e) => setNuevo({ ...nuevo, cargo: soloLetras(e) })} />
+                  <input type="email" value={nuevo.email} onChange={(e) => setNuevo({ ...nuevo, email: e.target.value })} />
+                  <input value={nuevo.fono} onChange={(e) => setNuevo({ ...nuevo, fono: e.target.value.replace(/[^0-9+]/g, "") })} />
                 </>
               ) : (
                 <>
-                  <input className="of-col-full" placeholder="Dirección *" value={nuevo.direccion} onChange={(e) => setNuevo({ ...nuevo, direccion: upperInput(e) })} />
-                  <input placeholder="Ciudad" value={nuevo.ciudad} onChange={(e) => setNuevo({ ...nuevo, ciudad: soloLetras(e) })} />
-                  <input placeholder="Comuna" value={nuevo.comuna} onChange={(e) => setNuevo({ ...nuevo, comuna: soloLetras(e) })} />
+                  <input className="of-col-full" value={nuevo.direccion} onChange={(e) => setNuevo({ ...nuevo, direccion: upperInput(e) })} />
+                  <input value={nuevo.ciudad} onChange={(e) => setNuevo({ ...nuevo, ciudad: soloLetras(e) })} />
+                  <input value={nuevo.comuna} onChange={(e) => setNuevo({ ...nuevo, comuna: soloLetras(e) })} />
                 </>
               )}
               <button type="button" className="btn-mini btn-mini--success" onClick={crear} disabled={guardando}>
