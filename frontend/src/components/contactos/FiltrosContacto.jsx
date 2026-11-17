@@ -1,15 +1,17 @@
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Plus } from "lucide-react";
 import { upperInput } from "../../utils/helpers";
 
-function FiltrosContacto({ filtroNombre, onFiltroNombreChange, onLimpiar }) {
+function FiltrosContacto({ filtroNombre, onFiltroNombreChange, onLimpiar, onNuevo }) {
   return (
     <div className="filters-section">
       <div className="filters-content">
+        <button className="main-btn" onClick={onNuevo}>
+          <Plus size={16} /> Nuevo Contacto
+        </button>
         <div className="filtro-grupo-contactos">
           <label>Nombre</label>
           <input
             type="text"
-            placeholder="Nombre..."
             value={filtroNombre}
             onChange={(e) => onFiltroNombreChange(upperInput(e))}
           />

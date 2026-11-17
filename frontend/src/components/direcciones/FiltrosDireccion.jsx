@@ -1,15 +1,17 @@
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Plus } from "lucide-react";
 import { upperInput } from "../../utils/helpers";
 
-function FiltrosDireccion({ filtroDireccion, onFiltroDireccionChange, onLimpiar }) {
+function FiltrosDireccion({ filtroDireccion, onFiltroDireccionChange, onLimpiar, onNuevo }) {
   return (
     <div className="filters-section">
       <div className="filters-content">
+        <button className="main-btn" onClick={onNuevo}>
+          <Plus size={16} /> Nueva Dirección
+        </button>
         <div className="filtro-grupo-direcciones">
           <label>Dirección</label>
           <input
             type="text"
-            placeholder="Dirección..."
             value={filtroDireccion}
             onChange={(e) => onFiltroDireccionChange(upperInput(e))}
           />

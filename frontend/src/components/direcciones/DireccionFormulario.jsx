@@ -45,19 +45,19 @@ function DireccionFormulario({ direccionEditando, onCancel, onSave, direcciones,
             <div className="dif-r2" style={{ marginTop: '8px' }}>
               <div className="dif-f of-col-full">
                 <label>Dirección *</label>
-                <input placeholder="Dirección" value={nuevaDireccion.direccion}
+                <input value={nuevaDireccion.direccion}
                   disabled={readOnly}
                   onChange={e => setNuevaDireccion({ ...nuevaDireccion, direccion: upperInput(e) })} required />
               </div>
               <div className="dif-f">
                 <label>Ciudad</label>
-                <input placeholder="Ciudad" value={nuevaDireccion.ciudad}
+                <input value={nuevaDireccion.ciudad}
                   disabled={readOnly}
                   onChange={e => setNuevaDireccion({ ...nuevaDireccion, ciudad: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '') })} />
               </div>
               <div className="dif-f">
                 <label>Comuna</label>
-                <input placeholder="Comuna" value={nuevaDireccion.comuna}
+                <input value={nuevaDireccion.comuna}
                   disabled={readOnly}
                   onChange={e => setNuevaDireccion({ ...nuevaDireccion, comuna: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '') })} />
               </div>

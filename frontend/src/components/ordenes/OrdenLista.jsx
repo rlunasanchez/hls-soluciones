@@ -17,7 +17,6 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
               <label>N° de Orden</label>
               <input
                 type="text"
-                placeholder="Buscar..."
                 value={filtroNumeroOrden}
                 onChange={(e) => onFiltroChange(e.target.value)}
                 className="filtro-garantia-select"
@@ -27,7 +26,6 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
               <label>Cliente</label>
               <input
                 type="text"
-                placeholder="Buscar..."
                 value={filtroCliente}
                 onChange={(e) => onFiltroClienteChange(e.target.value)}
                 className="filtro-garantia-select"
@@ -37,7 +35,6 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
               <label>Serie</label>
               <input
                 type="text"
-                placeholder="Buscar..."
                 value={filtroSerie}
                 onChange={(e) => onFiltroSerieChange(e.target.value)}
                 className="filtro-garantia-select"

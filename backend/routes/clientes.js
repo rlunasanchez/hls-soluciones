@@ -265,7 +265,8 @@ router.put("/:id", authMiddleware, async (req, res) => {
       connection.release();
       return res.status(400).json({ msg: "Email inválido" });
     }
-    const [existing] = await connection.query("SELECT codigo FROM clientes WHERE id = ?", [id]);
+    const [existing] = await connection.query("SELECT codigo, rut, telefono, email FROM clientes WHERE id = ?", [id]);
+    const antes = existing[0] || {};
     let codigo = existing[0]?.codigo;
     if (!codigo) codigo = await generarCodigo();
 
@@ -277,10 +278,15 @@ router.put("/:id", authMiddleware, async (req, res) => {
     // Sincroniza en las OT de este cliente solo sus datos propios (Contacto
     // ya no se deriva de Cliente — vive aparte en el catálogo de Contactos
     // y se administra por OT, no se pisa acá).
-    await connection.query(
-      `UPDATE ordenes_trabajo SET cliente = ?, cliente_tipo = (SELECT tipo FROM clientes WHERE id = ?), rut = ?, fono_principal = ?, email = ? WHERE cliente_id = ?`,
-      [razon_social, id, rut || null, telefono || null, email || null, id]
-    );
+    // RUT, fono y email solo se pisan en la OT si cambiaron en el cliente: así editar otro dato
+    // (o un cliente con el fono vacío) no borra lo que cada OT ya tenía.
+    const cambio = (nuevo, viejo) => (nuevo || '') !== (viejo || '');
+    const sets = ["cliente = ?", "cliente_tipo = (SELECT tipo FROM clientes WHERE id = ?)"];
+    const params = [razon_social, id];
+    if (cambio(rut, antes.rut)) { sets.push("rut = ?"); params.push(rut || null); }
+    if (cambio(telefono, antes.telefono)) { sets.push("fono_principal = ?"); params.push(telefono || null); }
+    if (cambio(email, antes.email)) { sets.push("email = ?"); params.push(email || null); }
+    await connection.query(`UPDATE ordenes_trabajo SET ${sets.join(", ")} WHERE cliente_id = ?`, [...params, id]);
     // Vínculos: solo si el formulario los envía (así otros llamados al PUT no los borran)
     const vinc = await idsDeVinculos(connection, req.body);
     if (vinc.contactos) await sincronizarVinculos(connection, id, "contactos", vinc.contactos, vinc.contactoAOt);

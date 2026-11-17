@@ -56,19 +56,19 @@ function EquipoFormulario({ equipoEditando, onCancel, onSave, readOnly = false }
               <div className="ef-r3" style={{ marginTop: '8px' }}>
                 <div className="ef-f">
                   <label>Equipo *</label>
-                  <input placeholder="Nombre del equipo" value={nuevoEquipo.equipo}
+                  <input value={nuevoEquipo.equipo}
                     disabled={readOnly}
                     onChange={e => setNuevoEquipo({...nuevoEquipo, equipo: upperInput(e)})} required />
                 </div>
                 <div className="ef-f">
                   <label>Marca</label>
-                  <input placeholder="Marca" value={nuevoEquipo.marca}
+                  <input value={nuevoEquipo.marca}
                     disabled={readOnly}
                     onChange={e => setNuevoEquipo({...nuevoEquipo, marca: upperInput(e)})} />
                 </div>
                 <div className="ef-f">
                   <label>Modelo</label>
-                  <input placeholder="Modelo" value={nuevoEquipo.modelo}
+                  <input value={nuevoEquipo.modelo}
                     disabled={readOnly}
                     onChange={e => setNuevoEquipo({...nuevoEquipo, modelo: upperInput(e)})} />
                 </div>

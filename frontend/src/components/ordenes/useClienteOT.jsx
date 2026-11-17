@@ -48,9 +48,10 @@ export default function useClienteOT({
         ...prev,
         cliente: toUpper(fresh.razon_social || ""),
         clienteTipo: esPersonaFresh ? "PERSONA" : "EMPRESA",
-        rut: fresh.rut || "",
-        email: fresh.email || "",
-        fonoPrincipal: fresh.telefono || "",
+        // Si el cliente no tiene ese dato, se conserva el que ya estaba escrito en la OT
+        rut: fresh.rut || prev.rut,
+        email: fresh.email || prev.email,
+        fonoPrincipal: fresh.telefono || prev.fonoPrincipal,
         ...(cambioContacto ? {
           contacto: toUpper(fresh.contacto_nombre),
           emailContacto: fresh.contacto_email || "",

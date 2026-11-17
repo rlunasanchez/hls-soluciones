@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Users, Plus } from "lucide-react";
+import { Users } from "lucide-react";
 import api from "../services/api";
 import { parseToken } from "../utils/helpers";
 import "../styles/Clientes.css";
@@ -108,13 +108,8 @@ function Clientes() {
         filtroRut={filtroRut}
         onFiltroRutChange={setFiltroRut}
         onLimpiar={() => { setBusqueda(""); setFiltroRut(""); }}
+        onNuevo={() => { setClienteEditando(null); setSoloLectura(false); setMostrarFormulario(true); }}
       />
-
-      <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 16 }}>
-        <button className="main-btn" onClick={() => { setClienteEditando(null); setSoloLectura(false); setMostrarFormulario(true); }}>
-          <Plus size={16} /> Nuevo Cliente
-        </button>
-      </div>
 
       {loading ? (
         <div className="empty-state">

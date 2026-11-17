@@ -233,7 +233,6 @@ function OrdenFormCliente({
             key={`contactos-${clienteSeleccionado?.id || "sin-cliente"}`}
             tipo="contactos"
             etiqueta="Buscar Contacto"
-            placeholder="Buscar contacto del cliente o de Contactos..."
             readOnly={readOnly}
             deCliente={contactosDisponibles}
             actual={nuevaOrden.contacto}
@@ -246,7 +245,6 @@ function OrdenFormCliente({
           key={`direcciones-${clienteSeleccionado?.id || "sin-cliente"}`}
           tipo="direcciones"
           etiqueta="Buscar Dirección"
-          placeholder="Buscar dirección del cliente o de Direcciones..."
           deCliente={direccionesDelCliente}
           actual={nuevaOrden.direccion}
           readOnly={readOnly}

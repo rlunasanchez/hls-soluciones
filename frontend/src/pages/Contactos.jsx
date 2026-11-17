@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Contact, Plus } from "lucide-react";
+import { Contact } from "lucide-react";
 import api from "../services/api";
 import { getCached } from "../services/cache";
 import '../styles/Contactos.css';
@@ -144,13 +144,8 @@ function Contactos() {
         filtroNombre={filtroNombre}
         onFiltroNombreChange={setFiltroNombre}
         onLimpiar={() => { setFiltroNombre(""); }}
+        onNuevo={nuevoContacto}
       />
-
-      <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 16 }}>
-        <button className="main-btn" onClick={nuevoContacto}>
-          <Plus size={16} /> Nuevo Contacto
-        </button>
-      </div>
 
       {loading ? (
         <div className="empty-state">

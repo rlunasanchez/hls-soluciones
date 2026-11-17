@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Package, Plus } from "lucide-react";
+import { Package } from "lucide-react";
 import api from "../services/api";
 import '../styles/Equipos.css';
 import { cerrarSesion } from "../utils/helpers";
@@ -107,13 +107,8 @@ function Equipos() {
           filtroModelo={filtroModelo}
           onFiltroModeloChange={setFiltroModelo}
           onLimpiar={() => { setFiltroModelo(""); }}
+          onNuevo={nuevaEquipo}
         />
-
-      <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 16 }}>
-        <button className="main-btn" onClick={nuevaEquipo}>
-          <Plus size={16} /> Nuevo Equipo
-        </button>
-      </div>
 
       {loading ? (
         <div className="empty-state">
