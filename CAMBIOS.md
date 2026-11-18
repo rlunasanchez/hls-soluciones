@@ -2,6 +2,14 @@
 
 ## Fecha: 2026-11-18
 
+### v2.206: PDF de la OT con fondo blanco y divisiones finas; «Con OT» en la lista de Cotizaciones
+
+**Alcance:** solo frontend, sin cambios de backend ni de base de datos. Build OK; sin probar en pantalla ni con el PDF generado.
+
+- **PDF de la Orden de Servicio** (`ordenServicioDoc.js`): el fondo de la página pasa de gris azulado (`#EEF2F7`) a blanco, y el borde del encabezado y de cada sección sube de `.5pt #E2E8F0` (casi invisible sobre blanco) a `.35pt #64748B`: línea **delgada pero oscura** para que se note la división por secciones (el dueño pidió «menos gruesa», no «menos clara»; con 1pt quedaba muy marcada). Sin otros cambios: sombras, azul `#0C4A8C` y logos igual.
+- **Cotizaciones:** el título de la columna del punto naranja de la lista (antes vacío) dice «Con OT»; `th.col-ot-dot` ya no tiene ancho fijo de 26 px (`ordenes-componentes.css`). El punto queda igual.
+- **Aprendido (PDF en blanco y negro al imprimir):** el HTML del PDF sigue trayendo los colores (azul de los textos y SVG azul del logo de Brother) y `print-color-adjust: exact`; si al imprimir sale en blanco y negro, es la opción **Color** del diálogo de impresión del navegador (que recuerda la última elección por destino/impresora). Se resuelve en el diálogo: Color = «Color», destino «Guardar como PDF», «Gráficos de fondo» marcado. No se cambió código por esto.
+
 ### v2.205: Filas por página según el alto de la pantalla y título «Cotizado» en la lista de OT
 
 **Alcance:** solo frontend, sin cambios de backend ni de base de datos. Build OK; sin probar en pantalla (se vio con 45 registros de ejemplo en local, ya borrados).
