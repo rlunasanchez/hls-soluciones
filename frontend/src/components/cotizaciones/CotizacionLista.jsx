@@ -62,7 +62,7 @@ function CotizacionLista({ cotizaciones, loading, filtroFolio, onFiltroFolioChan
                   <th>Emisión</th>
                   <th>Ejecutivo</th>
                   <th>Total</th>
-                  <th className="col-ot-dot" title="Tiene una OT asociada"></th>
+                  <th className="col-ot-dot" title="Tiene una OT asociada">Con OT</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
