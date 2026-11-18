@@ -1,6 +1,6 @@
-# Para continuar el miércoles 18-nov-2026
+# Para continuar el jueves 19-nov-2026
 
-Este archivo resume dónde quedó el trabajo al terminar el martes 17-nov-2026 (el nombre del archivo es histórico). Se puede borrar cuando ya no haga falta.
+Este archivo resume dónde quedó el trabajo al terminar el miércoles 18-nov-2026 (el nombre del archivo es histórico). Se puede borrar cuando ya no haga falta.
 
 **Frase para retomar:** "Lee AGENTS.md, CAMBIOS.md y CONTINUAR_LUNES.md; seguimos con …"
 
@@ -8,13 +8,24 @@ Este archivo resume dónde quedó el trabajo al terminar el martes 17-nov-2026 (
 
 | | Versión | Commit |
 |---|---|---|
-| **Web publicada** (Render + Vercel + Neon) | **v2.204** (17-nov-2026) | `main` `233fd09`, `deploy/cloud` `f1bb226` (iguales a lo local) |
+| **Web publicada** (Render + Vercel + Neon) | **v2.207** (18-nov-2026) | `main` `907a381`, `deploy/cloud` `e736952` (iguales a lo local) |
 
-- Árbol de trabajo limpio (solo `.claude/` sin versionar). No hay worktrees abiertos. **Neon no necesita SQL nuevo**: v2.195 a v2.204 no tocan la base de datos.
+- Árbol de trabajo limpio (solo `.claude/` sin versionar). No hay worktrees abiertos. **Neon no necesita SQL nuevo**: v2.195 a v2.207 no tocan la base de datos.
 - Las dos ramas se publican con una carpeta temporal (`git worktree add "$env:TEMP\hls-cloud" deploy/cloud`, `git merge main`, push de `deploy/cloud` y luego de `main`, y quitar la carpeta), para no cambiar la rama de la carpeta del dueño. Los `git push` se hacen desde **PowerShell**.
 - El 17-nov-2026 Claude pudo hacer `git push` desde PowerShell sin bloqueo (v2.200 a v2.204, cada vez con orden expresa del dueño: «documenta y sube»). Si el clasificador lo bloquea, el dueño lo escribe con `! git push …`. **Solo se publica con la orden expresa del dueño.**
 - Los datos de la base de **producción (Neon) y la local se borraron**: eran de prueba. Los usuarios (`admin`, `rluna`, `rzuniga`) se conservan. La numeración de OT parte de `OT-2026-02800` y los códigos de `CL-0001`.
 - La contraseña de `admin` en Neon se restableció a `admin123` el 10-nov-2026 (el dueño debe cambiarla desde Gestión de Usuarios). La de la base local es la de `ADMIN_PASSWORD` del `.env`.
+
+## 2b. Publicado el 18-nov-2026 (v2.205 a v2.207)
+
+Detalle en `CAMBIOS.md`. Solo frontend. El dueño vio v2.207 funcionando en su local; **v2.205 y v2.206 sin probar en la web**.
+
+- **v2.205:** las filas por página dependen del alto de la pantalla en Clientes, Contactos, Direcciones, Equipos y OT (`hooks/useFilasPorPantalla.js`: `(alto de ventana − 280) / 58`, 4 a 20 filas, 4 en móvil). **Los números 280 y 58 son estimaciones sin medir**: si sobra o falta espacio, ajustarlos en el hook. La columna del punto rojo de la lista de OT tiene el título «Cotizado» (el punto queda igual).
+- **v2.206:** en Cotizaciones la columna del punto naranja tiene el título «Con OT». PDF de la OT con el fondo de página blanco.
+- **v2.207:** línea de división del PDF de la OT fina: `box-shadow: 0 0 0 .4pt #64748B` en `.header-card` y `.sec` (sin `border`, porque Chrome/Edge no dibujan bordes menores a 1 px; sin la sombra suave de antes). Para cambiar el grosor se toca ese `.4pt`.
+- **Aprendido (PDF):** al imprimir con la vista previa del navegador sale en blanco y negro si la impresora es monocromática o sin color por defecto (menú «Color» del diálogo); con «Guardar como PDF» sale en color. No es del código: el SVG azul del logo de Brother y los azules de los textos siguen en el HTML y `print-color-adjust: exact` está puesto.
+- **Aprendido (trabajo con el dueño):** hacer **solo** el cambio pedido (en el PDF toqué bordes y sombras sin que me lo pidieran y hubo que revertir); si un mensaje es ambiguo o llega sin imagen, preguntar antes de tocar. «Más sutil/tenue» puede significar **más delgado**, no más claro.
+- **Datos de prueba:** se insertaron y borraron varias veces registros «PRUEBA PAG» (códigos 99xx, también 3 cotizaciones con folio 99xxx) en la base local; verificado que no queda ninguno.
 
 ## 2a. Publicado el 17-nov-2026 (v2.200 a v2.204): todo sin probar en pantalla
 
@@ -40,7 +51,7 @@ Detalle de cada uno en `CAMBIOS.md`. Todo subido a la web; **lo marcado "sin pro
 
 ## 3. Lo que sigue (orden acordado con el dueño)
 
-1. **Probar en la web** lo marcado "sin probar" de las secciones 2a y 2 y avisar si algo falla. Verificar también que Render terminó de desplegar `f1bb226` (`gh` solo muestra Vercel; Render se ve en su panel → Logs) y que **editar un cliente ya no vacía el fono de las OT** (v2.200, el arreglo original del día).
+1. **Probar en la web** (Ctrl+F5) lo marcado "sin probar" de las secciones 2b, 2a y 2 y avisar si algo falla; en especial las filas por página (v2.205) y los títulos «Cotizado» / «Con OT». Verificar también que Render terminó de desplegar `e736952` (`gh` solo muestra Vercel; Render se ve en su panel → Logs) y que **editar un cliente ya no vacía el fono de las OT** (v2.200, el arreglo original del día).
    - **Pendiente de probar a fondo:** el cambio de `routes/clientes.js` en PostgreSQL con `embedded-postgres` (`embedded-postgres` no está instalado en el PC del dueño; instalarlo en una carpeta temporal según la sección 7).
    - **Pendiente de decidir:** las cuatro decisiones del historial de la OT (punto 2).
 2. **Historial de la OT** (quién creó, modificó y entregó): propuesta en `AGENTS.md` sección 7, "Próximo cambio acordado". Decisiones por tomar con el dueño: historial completo (recomendado) o solo "creada por / última modificación por"; si registrar adjuntos y eliminaciones; aviso de edición simultánea (comparar `fecha_actualizacion`); si eliminar una OT deja rastro o pasa a "eliminada". Hoy el sistema solo guarda `fecha_creacion` y `fecha_actualizacion`, sin el usuario.
