@@ -2,8 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { getCached } from "../services/cache";
 import { usePaginaPersistente, useClampPagina } from "./usePaginacion";
 import useValorRetrasado from "./useValorRetrasado";
-
-const EQUIPOS_POR_PAGINA = 6;
+import useFilasPorPantalla from "./useFilasPorPantalla";
 
 // Listado de Equipos: el filtro por modelo y la paginación se resuelven en el servidor
 // (GET /api/equipos?pagina=&limite=&modelo=); aquí solo se guarda la página en pantalla.
@@ -14,11 +13,12 @@ export default function useEquiposListado() {
   const [totalEquipos, setTotalEquipos] = useState(0);
   const [loading, setLoading] = useState(false);
   const [filtroModelo, setFiltroModelo] = useState("");
+  const equiposPorPagina = useFilasPorPantalla();
   const [paginaActual, setPaginaActual] = usePaginaPersistente("pagEquipos", [filtroModelo]);
 
   const modelo = useValorRetrasado(filtroModelo).trim();
 
-  const params = new URLSearchParams({ pagina: paginaActual, limite: EQUIPOS_POR_PAGINA });
+  const params = new URLSearchParams({ pagina: paginaActual, limite: equiposPorPagina });
   if (modelo) params.set("modelo", modelo);
   const url = `/api/equipos?${params}`;
 

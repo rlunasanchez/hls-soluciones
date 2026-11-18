@@ -14,10 +14,10 @@
 
 th.col-cot-dot,
 td.col-cot-dot {
-  width: 26px;
   text-align: center;
   padding-left: 4px;
   padding-right: 4px;
+  white-space: nowrap;
 }
 
 /* Punto indicador: la Cotización tiene una OT asociada (color del modulo Orden de Trabajo) */

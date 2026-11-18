@@ -11,6 +11,7 @@ import ContactoFormulario from "../components/contactos/ContactoFormulario";
 import ContactoTabla from "../components/contactos/ContactoTabla";
 import ContactoCard from "../components/contactos/ContactoCard";
 import { usePaginaPersistente, useClampPagina } from "../hooks/usePaginacion";
+import useFilasPorPantalla from "../hooks/useFilasPorPantalla";
 
 function Contactos() {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ function Contactos() {
   const [contactoEditando, setContactoEditando] = useState(null);
   const [filtroNombre, setFiltroNombre] = useState("");
   const [paginaActual, setPaginaActual] = usePaginaPersistente("pagContactos", [filtroNombre]);
-  const contactosPorPagina = 6;
+  const contactosPorPagina = useFilasPorPantalla();
   const [soloLectura, setSoloLectura] = useState(false);
   const [loading, setLoading] = useState(false);
 

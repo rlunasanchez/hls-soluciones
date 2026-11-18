@@ -11,6 +11,7 @@ import DireccionFormulario from "../components/direcciones/DireccionFormulario";
 import DireccionTabla from "../components/direcciones/DireccionTabla";
 import DireccionCard from "../components/direcciones/DireccionCard";
 import { usePaginaPersistente, useClampPagina } from "../hooks/usePaginacion";
+import useFilasPorPantalla from "../hooks/useFilasPorPantalla";
 
 function Direcciones() {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ function Direcciones() {
   const [direccionEditando, setDireccionEditando] = useState(null);
   const [filtroDireccion, setFiltroDireccion] = useState("");
   const [paginaActual, setPaginaActual] = usePaginaPersistente("pagDirecciones", [filtroDireccion]);
-  const direccionesPorPagina = 6;
+  const direccionesPorPagina = useFilasPorPantalla();
   const [soloLectura, setSoloLectura] = useState(false);
   const [loading, setLoading] = useState(false);
 
