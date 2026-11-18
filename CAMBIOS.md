@@ -2,6 +2,14 @@
 
 ## Fecha: 2026-11-18
 
+### v2.207: Línea de división del PDF de la OT más fina
+
+**Alcance:** solo frontend (`ordenServicioDoc.js`), sin cambios de backend ni de base de datos. Probado por el dueño en pantalla con el PDF generado.
+
+- **Qué cambió:** el encabezado y cada sección del PDF de la Orden de Servicio dejan de usar `border` y dibujan su línea con `box-shadow: 0 0 0 .4pt #64748B` (sin desenfoque), y se quita la sombra suave de las tarjetas. Gris oscuro, delgada pero visible; el fondo de página sigue blanco (v2.206).
+- **Por qué `box-shadow` y no `border`:** Chrome y Edge redondean cualquier `border` menor a 1 px hacia arriba, así que bajar de 1 pt a 0,5, 0,35 o 0,2 pt no cambiaba nada en el PDF. El spread del `box-shadow` sí admite valores fraccionarios. Ajustar el grosor: cambiar el `.4pt` (queda en `.header-card` y `.sec`).
+- **Aprendido (no es del código):** al imprimir con la vista previa del navegador el PDF sale en blanco y negro si el destino es una impresora monocromática o sin color por defecto (menú «Color» del diálogo); con «Guardar como PDF» sale en color. El código y el SVG azul del logo de Brother no cambiaron.
+
 ### v2.206: PDF de la OT con fondo blanco y divisiones finas; «Con OT» en la lista de Cotizaciones
 
 **Alcance:** solo frontend, sin cambios de backend ni de base de datos. Build OK; sin probar en pantalla ni con el PDF generado.
