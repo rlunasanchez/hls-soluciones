@@ -1,6 +1,6 @@
-# Para continuar el lunes 16-nov-2026
+# Para continuar el miércoles 18-nov-2026
 
-Este archivo resume dónde quedó el trabajo al terminar el viernes 13-nov-2026. Se puede borrar cuando ya no haga falta.
+Este archivo resume dónde quedó el trabajo al terminar el martes 17-nov-2026 (el nombre del archivo es histórico). Se puede borrar cuando ya no haga falta.
 
 **Frase para retomar:** "Lee AGENTS.md, CAMBIOS.md y CONTINUAR_LUNES.md; seguimos con …"
 
@@ -8,13 +8,24 @@ Este archivo resume dónde quedó el trabajo al terminar el viernes 13-nov-2026.
 
 | | Versión | Commit |
 |---|---|---|
-| **Web publicada** (Render + Vercel + Neon) | **v2.199** (12-nov-2026) | ver `git log` de `main` y `deploy/cloud` |
+| **Web publicada** (Render + Vercel + Neon) | **v2.204** (17-nov-2026) | `main` `233fd09`, `deploy/cloud` `f1bb226` (iguales a lo local) |
 
-- Árbol de trabajo limpio (solo `.claude/` sin versionar). No hay worktrees abiertos. **Neon no necesita SQL nuevo**: v2.195 a v2.199 no tocan la base de datos.
+- Árbol de trabajo limpio (solo `.claude/` sin versionar). No hay worktrees abiertos. **Neon no necesita SQL nuevo**: v2.195 a v2.204 no tocan la base de datos.
 - Las dos ramas se publican con una carpeta temporal (`git worktree add "$env:TEMP\hls-cloud" deploy/cloud`, `git merge main`, push de `deploy/cloud` y luego de `main`, y quitar la carpeta), para no cambiar la rama de la carpeta del dueño. Los `git push` se hacen desde **PowerShell**.
-- Para que Claude pueda hacer `git push`, el dueño creó `.claude/settings.local.json` con reglas para `git push origin deploy/cloud` y `git push origin main`; si el clasificador lo bloquea, el dueño lo escribe con `! git push …`. Aun así, **solo se publica con la orden expresa del dueño**.
+- El 17-nov-2026 Claude pudo hacer `git push` desde PowerShell sin bloqueo (v2.200 a v2.204, cada vez con orden expresa del dueño: «documenta y sube»). Si el clasificador lo bloquea, el dueño lo escribe con `! git push …`. **Solo se publica con la orden expresa del dueño.**
 - Los datos de la base de **producción (Neon) y la local se borraron**: eran de prueba. Los usuarios (`admin`, `rluna`, `rzuniga`) se conservan. La numeración de OT parte de `OT-2026-02800` y los códigos de `CL-0001`.
 - La contraseña de `admin` en Neon se restableció a `admin123` el 10-nov-2026 (el dueño debe cambiarla desde Gestión de Usuarios). La de la base local es la de `ADMIN_PASSWORD` del `.env`.
+
+## 2a. Publicado el 17-nov-2026 (v2.200 a v2.204): todo sin probar en pantalla
+
+Detalle en `CAMBIOS.md`. Build OK en todas; **el dueño debe probarlas en la web con Ctrl+F5**. Se vieron en local con datos de ejemplo («PRUEBA PAG», ya borrados).
+
+- **v2.200 (backend + frontend):** editar un cliente ya no borra fono/RUT/email de sus OT (solo se pisa el dato que cambió; `routes/clientes.js` portado a PostgreSQL, probado solo por revisión del SQL, **no** con `embedded-postgres`). Sin textos grises de referencia (placeholders) en la OT, Clientes, Contactos, Direcciones y Equipos. Botón «Nuevo …» dentro de la fila de filtros. Filtros de la lista de OT en recuadro blanco, una línea desde 1200 px, alto 30 px.
+- **v2.201:** la paginación (solo los botones) sube a la fila de filtros, al lado de **Limpiar**, en OT y los cuatro mantenedores (`Pagination enLinea`).
+- **v2.202 y v2.203:** vuelven los textos de ayuda de los buscadores de la ficha del cliente; las altas rápidas de contacto y dirección de la ficha usan etiqueta arriba (sin texto adentro); etiquetas de la ficha del cliente en mayúsculas; **6 registros por página** en Clientes, Contactos, Direcciones y Equipos (OT, Cotizaciones y Usuarios siguen en 4).
+- **v2.204:** títulos de columna de la lista de Clientes en mayúsculas.
+- **Qué mirar:** que **Limpiar** no quede pegado a «Hasta» en la OT, que los filtros no se amontonen entre 769 y 1199 px, que la paginación en línea se vea bien en móvil, y cuántas filas caben realmente (si 6 es poco o mucho: una constante por módulo, ver v2.203). Cotizaciones comparte las clases de filtros de la OT y también cambió (recuadro, una línea): revisarla.
+- **Aprendido:** la base local lleva códigos «máximo + 1»; los datos de ejemplo con código 99xx se borran con una consulta acotada (código **y** nombre «PRUEBA PAG»); no crear registros reales mientras estén cargados.
 
 ## 2. Publicado el 10, 11 y 12-nov-2026 (v2.195 a v2.199) y qué falta probar
 
@@ -29,8 +40,8 @@ Detalle de cada uno en `CAMBIOS.md`. Todo subido a la web; **lo marcado "sin pro
 
 ## 3. Lo que sigue (orden acordado con el dueño)
 
-1. **Probar en la web** lo marcado "sin probar" de la sección 2 y avisar si algo falla. **v2.199 ya está publicado y verificado el 13-nov** (Render responde 404 `No encontrado` en rutas inexistentes; Vercel con `8eb5037`; `main` y `deploy/cloud` iguales a lo local, sin carpetas temporales).
-   - **Pendiente de arreglar: permiso de `git push`.** El 12 y 13-nov el clasificador de permisos de Claude Code bloqueó los `git push` de Claude ("Credential Leakage") aunque el dueño lo ordenó, y los hizo el dueño a mano en PowerShell. Para que Claude vuelva a poder subir hay que revisar o volver a crear las reglas `git push origin deploy/cloud` y `git push origin main` en `.claude/settings.local.json`. Mientras tanto Claude prepara todo (commit y merge en `%TEMP%\hls-cloud`) y el dueño ejecuta los dos push en PowerShell: primero `deploy/cloud`, luego `main`.
+1. **Probar en la web** lo marcado "sin probar" de las secciones 2a y 2 y avisar si algo falla. Verificar también que Render terminó de desplegar `f1bb226` (`gh` solo muestra Vercel; Render se ve en su panel → Logs) y que **editar un cliente ya no vacía el fono de las OT** (v2.200, el arreglo original del día).
+   - **Pendiente de probar a fondo:** el cambio de `routes/clientes.js` en PostgreSQL con `embedded-postgres` (`embedded-postgres` no está instalado en el PC del dueño; instalarlo en una carpeta temporal según la sección 7).
    - **Pendiente de decidir:** las cuatro decisiones del historial de la OT (punto 2).
 2. **Historial de la OT** (quién creó, modificó y entregó): propuesta en `AGENTS.md` sección 7, "Próximo cambio acordado". Decisiones por tomar con el dueño: historial completo (recomendado) o solo "creada por / última modificación por"; si registrar adjuntos y eliminaciones; aviso de edición simultánea (comparar `fecha_actualizacion`); si eliminar una OT deja rastro o pasa a "eliminada". Hoy el sistema solo guarda `fecha_creacion` y `fecha_actualizacion`, sin el usuario.
 3. **Después, sin fecha** (ver `AGENTS.md`): corrección masiva opcional con confirmación (ligada al historial); si dirección y contacto de OT antiguas deberían quedar congelados; Cotizaciones adaptada como la OT (empresa/persona, cliente eliminado, contacto asociable; `NOTAS-COTIZACIONES.md`); Informes y Orden de Compra (páginas vacías); importar el histórico del sistema antiguo (`BASE_DATOS_ANTIGUA.md`).
@@ -52,7 +63,7 @@ Todo está en `CAMBIOS.md` (más reciente arriba). En una línea cada uno:
 - Datos reales: 3 clientes, 2 equipos (`EQ-0001` NOTEBOOK HP 445 G8 y `EQ-0003` NOTE HP 445 G9), 8 OT (02800 a 02807).
 - Ya tiene las columnas `equipo_id`, `contacto_id`, `direccion_id` (con índices) y las OT vinculadas por coincidencia de texto.
 - La tabla `orden_adjuntos` existe y tiene archivos de prueba subidos a algunas OT por el dueño.
-- **Sin datos de prueba** de clientes ni equipos (se borraron). Quedan a propósito, a pedido del dueño: la carpeta `Escritorio\prueba_adjuntos` (4 archivos de prueba) y los adjuntos que subió a sus OT.
+- **Sin datos de prueba** de clientes ni equipos (los «PRUEBA PAG» del 17-nov se borraron; verificado). Quedan a propósito, a pedido del dueño: la carpeta `Escritorio\prueba_adjuntos` (4 archivos de prueba) y los adjuntos que subió a sus OT.
 
 ## 6. Reglas de trabajo que hay que respetar
 

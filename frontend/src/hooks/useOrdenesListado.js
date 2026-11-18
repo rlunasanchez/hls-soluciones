@@ -2,8 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { getCached } from "../services/cache";
 import { usePaginaPersistente, useClampPagina } from "./usePaginacion";
 import useValorRetrasado from "./useValorRetrasado";
-
-const ITEMS_POR_PAG = 4;
+import useFilasPorPantalla from "./useFilasPorPantalla";
 
 // Listado de órdenes de trabajo: filtros y paginación se resuelven en el servidor
 // (GET /api/ordenes?pagina=&limite=&numero=…); aquí solo se guarda la página en pantalla.
@@ -19,6 +18,7 @@ export default function useOrdenesListado() {
   const [filtroGarantia, setFiltroGarantia] = useState("todos");
   const [filtroFechaDesde, setFiltroFechaDesde] = useState("");
   const [filtroFechaHasta, setFiltroFechaHasta] = useState("");
+  const itemsPorPagina = useFilasPorPantalla();
   const [paginaActual, setPaginaActual] = usePaginaPersistente("pagOrdenes", [
     filtroNumeroOrden, filtroCliente, filtroSerie, filtroEstado, filtroGarantia, filtroFechaDesde, filtroFechaHasta
   ]);
@@ -28,7 +28,7 @@ export default function useOrdenesListado() {
   const cliente = useValorRetrasado(filtroCliente);
   const serie = useValorRetrasado(filtroSerie);
 
-  const params = new URLSearchParams({ pagina: paginaActual, limite: ITEMS_POR_PAG });
+  const params = new URLSearchParams({ pagina: paginaActual, limite: itemsPorPagina });
   if (numero.trim()) params.set("numero", numero.trim());
   if (cliente.trim()) params.set("cliente", cliente.trim());
   if (serie.trim()) params.set("serie", serie.trim());

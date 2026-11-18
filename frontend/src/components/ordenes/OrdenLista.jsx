@@ -114,7 +114,7 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                   <th>Equipo</th>
                   <th>Técnico</th>
                   <th>Estado</th>
-                  <th className="col-cot-dot" title="Tiene cotizaciones asociadas"></th>
+                  <th className="col-cot-dot" title="Tiene cotizaciones asociadas">Cotizado</th>
                   <th>Acciones</th>
                 </tr>
               </thead>

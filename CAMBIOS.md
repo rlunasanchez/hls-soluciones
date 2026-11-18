@@ -1,5 +1,15 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-11-18
+
+### v2.205: Filas por página según el alto de la pantalla y título «Cotizado» en la lista de OT
+
+**Alcance:** solo frontend, sin cambios de backend ni de base de datos. Build OK; sin probar en pantalla (se vio con 45 registros de ejemplo en local, ya borrados).
+
+- **Filas según la pantalla:** nuevo hook `hooks/useFilasPorPantalla.js`: `(alto de la ventana − 280 px) / 58 px`, mínimo 4 y máximo 20 (en móvil, ≤768 px, queda en 4); se recalcula al cambiar el tamaño de la ventana. Lo usan Clientes, Equipos y OT (piden esa cantidad al servidor, `limite` máximo 100) y Contactos y Direcciones (`slice` en el navegador). Reemplaza los 6 fijos de v2.203 y los 4 de la OT. Los dos números (280 y 58) son estimaciones: si sobra o falta espacio, se ajustan en el hook.
+- **Cotizado:** el título de la columna del punto de cotizaciones en la lista de OT (antes vacío) ahora dice «Cotizado». El punto queda igual. `th.col-cot-dot` ya no tiene ancho fijo de 26 px (`ordenes-componentes.css`).
+- **No cambia:** Cotizaciones y Usuarios siguen con 4 por página.
+
 ## Fecha: 2026-11-17
 
 ### v2.204: Títulos de columna de la lista de Clientes en mayúsculas

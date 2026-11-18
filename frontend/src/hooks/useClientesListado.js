@@ -2,8 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { getCached } from "../services/cache";
 import { usePaginaPersistente, useClampPagina } from "./usePaginacion";
 import useValorRetrasado from "./useValorRetrasado";
-
-const CLIENTES_POR_PAGINA = 6;
+import useFilasPorPantalla from "./useFilasPorPantalla";
 
 // Listado de Clientes: el filtro por nombre y por RUT y la paginación se resuelven en el servidor
 // (GET /api/clientes?pagina=&limite=&nombre=&rut=); aquí solo se guarda la página en pantalla.
@@ -15,12 +14,13 @@ export default function useClientesListado() {
   const [loading, setLoading] = useState(false);
   const [busqueda, setBusqueda] = useState("");
   const [filtroRut, setFiltroRut] = useState("");
+  const clientesPorPagina = useFilasPorPantalla();
   const [paginaActual, setPaginaActual] = usePaginaPersistente("pagClientes", [busqueda, filtroRut]);
 
   const nombre = useValorRetrasado(busqueda).trim();
   const rut = useValorRetrasado(filtroRut).trim();
 
-  const params = new URLSearchParams({ pagina: paginaActual, limite: CLIENTES_POR_PAGINA });
+  const params = new URLSearchParams({ pagina: paginaActual, limite: clientesPorPagina });
   if (nombre) params.set("nombre", nombre);
   if (rut) params.set("rut", rut);
   const url = `/api/clientes?${params}`;
