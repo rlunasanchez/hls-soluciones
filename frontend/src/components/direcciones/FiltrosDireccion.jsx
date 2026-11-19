@@ -10,9 +10,10 @@ function FiltrosDireccion({ filtroDireccion, onFiltroDireccionChange, onLimpiar,
           <Plus size={16} /> Nueva Dirección
         </button>
         <div className="filtro-grupo-direcciones">
-          <label>Dirección</label>
           <input
             type="text"
+            placeholder="Dirección"
+            aria-label="Dirección"
             value={filtroDireccion}
             onChange={(e) => onFiltroDireccionChange(upperInput(e))}
           />
