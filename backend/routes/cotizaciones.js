@@ -18,6 +18,9 @@ async function clienteIdExistente(db, clienteId) {
   return rows.length > 0 ? clienteId : null;
 }
 
+// Tipo del cliente al guardar la cotización (copia, como cliente_tipo de la OT): EMPRESA o PERSONA.
+const tipoCliente = (tipo) => (tipo === 'PERSONA' ? 'PERSONA' : 'EMPRESA');
+
 router.get("/", authMiddleware, async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
@@ -29,7 +32,7 @@ router.get("/", authMiddleware, async (req, res) => {
   try {
     const [cotizaciones] = await pool.query(
       `SELECT id, folio, fecha_emision, fecha_valido_hasta, condicion, glosa,
-        cliente_id, cliente_rut, cliente_razon_social,
+        cliente_id, cliente_tipo, cliente_rut, cliente_razon_social,
         cliente_direccion, cliente_ciudad, cliente_comuna, cliente_telefono, cliente_email,
         contacto_nombre, contacto_fono, contacto_email, contacto_cargo, contactos_extra,
         ejecutivo, ejecutivo_fono, ejecutivo_email,
@@ -67,7 +70,7 @@ router.get("/:id", authMiddleware, async (req, res) => {
 router.post("/", authMiddleware, async (req, res) => {
   const {
     fechaEmision, fechaValidoHasta, condicion, glosa,
-    clienteId, clienteRut, clienteRazonSocial,
+    clienteId, clienteTipo, clienteRut, clienteRazonSocial,
     clienteDireccion, clienteCiudad, clienteComuna, clienteDireccionId, clienteTelefono, clienteEmail,
     contactoNombre, contactoFono, contactoEmail, contactoCargo, contactoId, contactoDireccion, contactoCiudad, contactoComuna, direccionId, contactosExtra,
     ejecutivoFono, ejecutivoEmail,
@@ -91,15 +94,15 @@ router.post("/", authMiddleware, async (req, res) => {
 
     const [resultado] = await connection.query(
       `INSERT INTO cotizaciones (folio, fecha_emision, fecha_valido_hasta, condicion, glosa,
-        cliente_id, cliente_rut, cliente_razon_social,
+        cliente_id, cliente_tipo, cliente_rut, cliente_razon_social,
         cliente_direccion, cliente_ciudad, cliente_comuna, cliente_direccion_id, cliente_telefono, cliente_email,
         contacto_nombre, contacto_fono, contacto_email, contacto_cargo, contacto_id, contacto_direccion, contacto_ciudad, contacto_comuna, direccion_id, contactos_extra,
         ejecutivo, ejecutivo_fono, ejecutivo_email,
         items, orden_id, orden_numero)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         folio, fechaEmision, fechaValidoHasta || null, condicion || null, glosa || null,
-        await clienteIdExistente(connection, clienteId), clienteRut || null, clienteRazonSocial || '',
+        await clienteIdExistente(connection, clienteId), tipoCliente(clienteTipo), clienteRut || null, clienteRazonSocial || '',
         clienteDireccion || null, clienteCiudad || null, clienteComuna || null, clienteDireccionId || null, clienteTelefono || null, clienteEmail || null,
         contactoNombre || null, contactoFono || null, contactoEmail || null, contactoCargo || null, contactoId || null, contactoDireccion || null, contactoCiudad || null, contactoComuna || null, direccionId || null,
         contactosExtra ? JSON.stringify(contactosExtra) : null,
@@ -123,7 +126,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
   const {
     fechaEmision, fechaValidoHasta, condicion, glosa,
-    clienteId, clienteRut, clienteRazonSocial,
+    clienteId, clienteTipo, clienteRut, clienteRazonSocial,
     clienteDireccion, clienteCiudad, clienteComuna, clienteDireccionId, clienteTelefono, clienteEmail,
     contactoNombre, contactoFono, contactoEmail, contactoCargo, contactoId, contactoDireccion, contactoCiudad, contactoComuna, direccionId, contactosExtra,
     ejecutivo, ejecutivoFono, ejecutivoEmail,
@@ -136,7 +139,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
   try {
     await pool.query(
       `UPDATE cotizaciones SET fecha_emision = ?, fecha_valido_hasta = ?, condicion = ?, glosa = ?,
-        cliente_id = ?, cliente_rut = ?, cliente_razon_social = ?,
+        cliente_id = ?, cliente_tipo = ?, cliente_rut = ?, cliente_razon_social = ?,
         cliente_direccion = ?, cliente_ciudad = ?, cliente_comuna = ?, cliente_direccion_id = ?, cliente_telefono = ?, cliente_email = ?,
         contacto_nombre = ?, contacto_fono = ?, contacto_email = ?, contacto_cargo = ?, contacto_id = ?, contacto_direccion = ?, contacto_ciudad = ?, contacto_comuna = ?, direccion_id = ?, contactos_extra = ?,
         ejecutivo = ?, ejecutivo_fono = ?, ejecutivo_email = ?,
@@ -144,7 +147,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
        WHERE id = ?`,
       [
         fechaEmision, fechaValidoHasta || null, condicion || null, glosa || null,
-        await clienteIdExistente(pool, clienteId), clienteRut || null, clienteRazonSocial || '',
+        await clienteIdExistente(pool, clienteId), tipoCliente(clienteTipo), clienteRut || null, clienteRazonSocial || '',
         clienteDireccion || null, clienteCiudad || null, clienteComuna || null, clienteDireccionId || null, clienteTelefono || null, clienteEmail || null,
         contactoNombre || null, contactoFono || null, contactoEmail || null, contactoCargo || null, contactoId || null, contactoDireccion || null, contactoCiudad || null, contactoComuna || null, direccionId || null,
         contactosExtra ? JSON.stringify(contactosExtra) : null,

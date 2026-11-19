@@ -191,6 +191,7 @@ CREATE TABLE IF NOT EXISTS cotizaciones (
   glosa TEXT,
 
   cliente_id INT,
+  cliente_tipo VARCHAR(10) DEFAULT 'EMPRESA',  -- copia del tipo del cliente al guardar la cotización
   cliente_rut VARCHAR(20),
   cliente_razon_social VARCHAR(255) NOT NULL,
   cliente_direccion VARCHAR(255),

@@ -300,9 +300,10 @@ function OrdenFormCliente({
 
     </div>
 
-      <OrdenAdjuntos adjuntos={adjuntos} readOnly={readOnly} />
+      {/* Adjuntos e Información Interna son de la OT; la cotización reutiliza este bloque sin ellos */}
+      {adjuntos && <OrdenAdjuntos adjuntos={adjuntos} readOnly={readOnly} />}
 
-      <OrdenInfoInterna nuevaOrden={nuevaOrden} setNuevaOrden={setNuevaOrden} readOnly={readOnly} />
+      {adjuntos && <OrdenInfoInterna nuevaOrden={nuevaOrden} setNuevaOrden={setNuevaOrden} readOnly={readOnly} />}
 
     </>
   );

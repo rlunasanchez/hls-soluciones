@@ -1,36 +1,11 @@
 // Generador del documento "Cotización" (HTML listo para imprimir/guardar como PDF).
 // Función pura: no toca el DOM ni React. La impresión la dispara utils/imprimir.js.
-// Mismo lenguaje visual que ordenServicioDoc.js (tarjetas, acento #0C4A8C).
+// Mismo estilo que la Orden de Servicio (ordenServicioDoc.js): comparten pdfEstilos.js y pdfHelpers.js.
 import { EMPRESA, EMPRESA_RUT, EMPRESA_RAZON_SOCIAL, LOGO_HLS, DATOS_BANCARIOS, CONDICIONES_COTIZACION } from "./empresa";
-
-const esc = (v) => String(v ?? "").replace(/[&<>"]/g, (c) => (
-  { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]
-));
-
-const fecha = (v) => {
-  const [y, m, d] = String(v ?? "").substring(0, 10).split("-");
-  return y && m && d ? `${d}/${m}/${y}` : "";
-};
+import { ESTILOS_COMUNES } from "./pdfEstilos";
+import { esc, fecha, campo, h2, slotLogo, unir } from "./pdfHelpers";
 
 const clp = (n) => Math.round(Number(n) || 0).toLocaleString("es-CL");
-
-const campo = (label, valor) => (
-  valor ? `<div class="f"><span class="l">${esc(label)}</span><span class="v">${esc(valor)}</span></div>` : ""
-);
-
-const h2 = (titulo) => `<h2>${esc(titulo)}</h2>`;
-
-const slotLogo = (src, alt, cls) => (
-  src
-    ? `<img class="logo ${cls}" src="${src}" alt="${esc(alt)}">`
-    : `<div class="logo ${cls} logo--ph">${esc(alt)}</div>`
-);
-
-function contactoExtraHtml(c) {
-  const direccion = [c.direccion, c.ciudad, c.comuna].filter((v) => String(v || "").trim()).join(", ");
-  const detalle = [c.cargo, c.fono, c.email, direccion].filter((v) => String(v || "").trim()).map(esc).join(" · ");
-  return `<div class="extra-item"><span class="nom">${esc(c.nombre)}</span>${detalle ? ` <span class="det">${detalle}</span>` : ""}</div>`;
-}
 
 const parseJsonArray = (val) => {
   if (Array.isArray(val)) return val;
@@ -41,6 +16,12 @@ const parseJsonArray = (val) => {
     return [];
   }
 };
+
+function contactoExtraHtml(c) {
+  const direccion = unir([c.direccion, c.ciudad, c.comuna], ", ");
+  const detalle = [c.cargo, c.fono, c.email, direccion].filter((v) => String(v || "").trim()).map(esc).join(" · ");
+  return `<div class="extra-item"><span class="nom">${esc(c.nombre)}</span>${detalle ? ` <span class="det">${detalle}</span>` : ""}</div>`;
+}
 
 // Exportado para que el formulario calcule los mismos totales que el PDF
 // (una sola fuente de verdad para Neto/IVA/Total). Sin filtrar por "detalle":
@@ -74,49 +55,13 @@ function filaItem(item) {
     </tr>`;
 }
 
-const ESTILOS = `
-@page { size: A4 portrait; margin: 0; }
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  color: #1F2937;
-  font-size: 9pt;
-  line-height: 1.28;
-  -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
-}
+// Lo propio de la cotización, encima de los estilos comunes: cuadro de la empresa en el encabezado,
+// contactos adicionales, tabla de ítems, condiciones, totales y datos bancarios.
+const ESTILOS = `${ESTILOS_COMUNES}
+.emp-rut { text-align: center; align-self: flex-end; }
+.emp-rut .rs { font-size: 8pt; font-weight: 700; color: #374151; }
+.emp-rut .rut { margin-top: .5mm; font-size: 6.5pt; font-weight: 700; color: #374151; }
 
-.page { width: 210mm; min-height: 297mm; padding: 9mm 12mm 8mm; background: #EEF2F7; }
-
-.header-card { background: #FFFFFF; border: .5pt solid #E2E8F0; border-radius: 7pt; padding: 2.2mm 4mm 1.6mm; box-shadow: 0 1px 4px rgba(15,23,42,.15); break-inside: avoid; }
-.enc { display: grid; grid-template-columns: 28mm 1fr auto; align-items: center; gap: 5mm; break-inside: avoid; }
-.logo { display: flex; align-items: center; justify-content: center; }
-.logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
-.logo-hls { width: 28mm; height: 13.1mm; align-self: flex-end; }
-.logo--ph { border: .5pt dashed #CBD5E1; border-radius: 999px; color: #94A3B8; font-size: 6pt; text-align: center; padding: 2pt; }
-.emp-datos { text-align: center; }
-.emp-datos h1 { margin: 0; font-size: 13pt; font-weight: 800; letter-spacing: -.01em; color: #0C4A8C; }
-.emp-datos p { margin: 1pt 0 0; font-size: 8.5pt; color: #6B7280; }
-
-.filete-1 { margin-top: 4pt; height: 2pt; border-radius: 2pt; background: #0C4A8C; }
-.filete-2 { height: .5pt; background: #E5E7EB; margin-top: .8mm; }
-
-.folio-box { text-align: center; align-self: flex-end; background: #FFFFFF; border: 1pt solid #0C4A8C; border-radius: 7pt; padding: 1.4mm 5mm; }
-.folio-box h1 { margin: 0; font-size: 10pt; font-weight: 800; letter-spacing: .04em; color: #0C4A8C; }
-.folio-box .folio-n { font-size: 12pt; font-weight: 700; color: #111827; }
-.folio-box .rut-emp { margin-top: .5mm; font-size: 6.5pt; font-weight: 700; color: #374151; }
-.folio-box .razon-emp { font-size: 8pt; font-weight: 700; color: #374151; }
-
-.sec { margin-top: 2mm; break-inside: avoid; background: #FFFFFF; border: .5pt solid #E2E8F0; border-radius: 7pt; padding: 1.8mm 4mm; box-shadow: 0 1px 4px rgba(15,23,42,.15); }
-.sec h2 { margin: 0 0 1.2mm; padding-left: 6pt; border-left: 5pt solid #0C4A8C; border-radius: 2pt; font-size: 7pt; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #0C4A8C; break-after: avoid; }
-
-.grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 8mm; row-gap: 1.2mm; }
-.grid-3 { grid-template-columns: 1fr 1fr 1fr; }
-.f .l { display: block; font-size: 6pt; text-transform: uppercase; letter-spacing: .07em; color: #6B7280; }
-.f .v { display: block; padding-bottom: .5mm; border-bottom: .5pt solid #E2E8F0; font-size: 9pt; font-weight: 600; color: #111827; overflow-wrap: anywhere; }
-
-.sub { margin-top: 2.5mm; font-size: 6pt; text-transform: uppercase; letter-spacing: .06em; color: #6B7280; }
 .extra-item { margin-top: 1.2mm; overflow-wrap: anywhere; }
 .extra-item .nom { font-size: 9pt; font-weight: 600; }
 .extra-item .det { font-size: 9pt; font-weight: 600; color: #111827; }
@@ -143,7 +88,7 @@ table.items td.detalle { font-weight: 600; color: #111827; white-space: pre-wrap
 .totales .fila.total { border-top: 1pt solid #0C4A8C; margin-top: 1mm; padding-top: 2mm; font-weight: 800; font-size: 10pt; color: #0C4A8C; }
 .totales .fila span:last-child { font-variant-numeric: tabular-nums; }
 
-.bancarios { margin-top: 3mm; font-size: 9pt; color: #374151; }
+.bancarios { font-size: 9pt; color: #374151; }
 .bancarios b { color: #111827; }
 `;
 
@@ -153,9 +98,44 @@ export function contactosExtraDe(cot) {
   return parseJsonArray(cot.contactos_extra).filter((c) => String(c?.nombre || "").trim());
 }
 
+// Secciones de cliente y contacto como en la OT: una empresa lleva su contacto y la dirección en la sección
+// Contacto; una persona no tiene contacto y su dirección va en Datos de Cliente.
+function seccionesCliente(cot, contactosExtra) {
+  const esPersona = cot.cliente_tipo === "PERSONA";
+  // La dirección es la elegida en el mantenedor de Direcciones (como en la OT). La dirección propia de la
+  // ficha del cliente (cliente_direccion*) no se toma: en una empresa no viaja al documento.
+  const { contacto_direccion: direccion, contacto_ciudad: ciudad, contacto_comuna: comuna } = cot;
+  const camposDireccion = `
+      ${campo("Dirección", direccion)}
+      ${campo("Ciudad - Comuna", unir([ciudad, comuna], " - "))}`;
+
+  const hayContacto = [cot.contacto_nombre, cot.contacto_cargo, cot.contacto_email, cot.contacto_fono, direccion].some((v) => String(v || "").trim());
+  const seccionContacto = (esPersona || (!hayContacto && !contactosExtra.length)) ? "" : `
+  <section class="sec">
+    ${h2("Contacto")}
+    <div class="grid grid-3">
+      ${campo("Contacto", cot.contacto_nombre)}
+      ${campo("Cargo Contacto", cot.contacto_cargo)}
+      ${campo("Email Contacto", cot.contacto_email)}
+      ${campo("Fono Contacto", cot.contacto_fono, true)}${camposDireccion}
+    </div>
+    ${contactosExtra.length ? `<div class="sub">› Contactos adicionales</div>${contactosExtra.map(contactoExtraHtml).join("")}` : ""}
+  </section>`;
+
+  return `
+  <section class="sec">
+    ${h2("Datos de Cliente")}
+    <div class="grid grid-3">
+      ${campo("Cliente", cot.cliente_razon_social)}
+      ${campo("RUT", cot.cliente_rut, true)}${esPersona ? camposDireccion : ""}
+      ${campo("Teléfono", cot.cliente_telefono, true)}
+      ${campo("Email Cliente", cot.cliente_email)}
+    </div>
+  </section>${seccionContacto}`;
+}
+
 export function generarHtmlCotizacion(cot, opciones) {
-  // Mismo criterio que el guardado (Cotizaciones.jsx): un ítem con SKU o
-  // Neto cargado se imprime aunque todavía no tenga Detalle escrito.
+  // Mismo criterio que el guardado: un ítem con SKU o Neto cargado se imprime aunque no tenga Detalle.
   const items = parseJsonArray(cot.items).filter((i) =>
     String(i?.sku || "").trim() || String(i?.detalle || "").trim() || Number(i?.neto) > 0
   );
@@ -164,14 +144,6 @@ export function generarHtmlCotizacion(cot, opciones) {
     ? contactosExtraTodos.filter((_, i) => opciones.contactosExtra[i])
     : contactosExtraTodos;
   const { neto, iva, total } = calcularTotales(cot.items);
-
-  // Dirección del contacto (solo existe cuando se elige un contacto adicional
-  // como principal desde el modal de PDF — ver ModalOpcionesPDFCotizacion.jsx):
-  // se imprime únicamente si es distinta a la dirección del cliente.
-  const normDir = (...partes) => partes.filter((v) => String(v || "").trim()).map((v) => String(v).trim().toUpperCase()).join("|");
-  const direccionClienteNorm = normDir(cot.cliente_direccion, cot.cliente_ciudad, cot.cliente_comuna);
-  const direccionContactoNorm = normDir(cot.contacto_direccion, cot.contacto_ciudad, cot.contacto_comuna);
-  const mostrarDireccionContacto = !!direccionContactoNorm && direccionContactoNorm !== direccionClienteNorm;
 
   return `<!DOCTYPE html>
 <html lang="es">
@@ -182,7 +154,6 @@ export function generarHtmlCotizacion(cot, opciones) {
 </head>
 <body>
   <div class="page">
-
   <div class="header-card">
     <div class="enc">
       ${slotLogo(LOGO_HLS, "HLS", "logo-hls")}
@@ -191,51 +162,38 @@ export function generarHtmlCotizacion(cot, opciones) {
         <p>${esc(EMPRESA.direccion)}</p>
         <p>Fono: ${esc(EMPRESA.fono)} · ${esc(EMPRESA.email)} · ${esc(EMPRESA.web)}</p>
       </div>
-      <div class="folio-box">
-        <h1>COTIZACIÓN</h1>
-        <div class="folio-n">N° ${esc(cot.folio)}</div>
-        <div class="rut-emp">${esc(EMPRESA_RUT)}</div>
-        <div class="razon-emp">${esc(EMPRESA_RAZON_SOCIAL)}</div>
+      <div class="emp-rut">
+        <div class="rs">${esc(EMPRESA_RAZON_SOCIAL)}</div>
+        <div class="rut">${esc(EMPRESA_RUT)}</div>
       </div>
     </div>
     <div class="filete-1"></div>
     <div class="filete-2"></div>
   </div>
 
-  <div class="sec">
-    ${h2("Datos de Cliente")}
-    <div class="grid grid-3">
-      ${campo("Cliente", cot.cliente_razon_social)}
-      ${campo("RUT", cot.cliente_rut)}
-      ${campo("Dirección", cot.cliente_direccion)}
-      ${campo("Ciudad - Comuna", [cot.cliente_ciudad, cot.cliente_comuna].filter((v) => String(v || "").trim()).join(" - "))}
-      ${campo("Teléfono", cot.cliente_telefono)}
-      ${campo("Email Cliente", cot.cliente_email)}
+  <div class="titulo-barra">
+    <div>
+      <h1>Cotización <span class="folio-numero"><span class="l">N°</span><span class="v">${esc(cot.folio)}</span></span></h1>
+    </div>
+    <div class="folio">
+      <span class="l">Emisión</span>
+      <span class="v">${esc(fecha(cot.fecha_emision))}</span>
     </div>
   </div>
-  <div class="sec">
-    ${h2("Contacto")}
-    <div class="grid${mostrarDireccionContacto ? " grid-3" : ""}">
-      ${campo("Contacto", cot.contacto_nombre)}
-      ${campo("Cargo Contacto", cot.contacto_cargo)}
-      ${campo("Email Contacto", cot.contacto_email)}
-      ${campo("Fono Contacto", cot.contacto_fono)}
-      ${mostrarDireccionContacto ? campo("Dirección Contacto", cot.contacto_direccion) : ""}
-      ${mostrarDireccionContacto ? campo("Ciudad - Comuna Contacto", [cot.contacto_ciudad, cot.contacto_comuna].filter((v) => String(v || "").trim()).join(" - ")) : ""}
-    </div>
-    ${contactosExtra.length ? `<div class="sub">› Contactos adicionales</div>${contactosExtra.map(contactoExtraHtml).join("")}` : ""}
-  </div>
-  <div class="sec">
+  ${seccionesCliente(cot, contactosExtra)}
+
+  <section class="sec">
     ${h2("Ejecutivo")}
     <div class="grid grid-3">
       ${campo("Ejecutivo", cot.ejecutivo)}
-      ${campo("Fono Ejecutivo", cot.ejecutivo_fono)}
+      ${campo("Fono Ejecutivo", cot.ejecutivo_fono, true)}
       ${campo("Email Ejecutivo", cot.ejecutivo_email)}
     </div>
     ${cot.glosa ? `<div class="grid" style="margin-top:2mm"><div class="f" style="grid-column: 1 / -1"><span class="l">Glosa</span><span class="v">${esc(cot.glosa)}</span></div></div>` : ""}
-  </div>
+  </section>
 
-  <div class="sec">
+  <section class="sec">
+    ${h2("Detalle")}
     <table class="items">
       <thead>
         <tr>
@@ -256,7 +214,6 @@ export function generarHtmlCotizacion(cot, opciones) {
         ${CONDICIONES_COTIZACION.map((t) => `<p>${esc(t)}</p>`).join("")}
         <div class="grid cond-pie">
           ${campo("Condición", cot.condicion)}
-          ${campo("Emisión", fecha(cot.fecha_emision))}
           ${campo("Válido hasta", fecha(cot.fecha_valido_hasta))}
         </div>
       </div>
@@ -266,13 +223,13 @@ export function generarHtmlCotizacion(cot, opciones) {
         <div class="fila total"><span>Total:</span><span>${clp(total)} CLP</span></div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <div class="sec bancarios">
-    <b>Datos Bancarios:</b> ${esc(DATOS_BANCARIOS.tipoCuenta)} del ${esc(DATOS_BANCARIOS.banco)}, N° ${esc(DATOS_BANCARIOS.numero)}
+  <section class="sec bancarios">
+    ${h2("Datos Bancarios")}
+    ${esc(DATOS_BANCARIOS.tipoCuenta)} del ${esc(DATOS_BANCARIOS.banco)}, N° ${esc(DATOS_BANCARIOS.numero)}
     a nombre de ${esc(DATOS_BANCARIOS.titular)}<br>Email: ${esc(EMPRESA.email)}; RUT ${esc(EMPRESA_RUT)}
-  </div>
-
+  </section>
   </div>
 </body>
 </html>`;
