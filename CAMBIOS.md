@@ -1,5 +1,15 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-11-19
+
+### v2.208: Nombres de los filtros dentro del recuadro en Clientes, Contactos, Direcciones y Equipos
+
+**Alcance:** solo frontend, sin cambios de backend ni de base de datos. Build OK; sin probar en pantalla.
+
+- **Qué cambió:** para ahorrar altura, en los filtros de los mantenedores el nombre del campo pasó de la etiqueta de arriba al texto de referencia (`placeholder`) del recuadro: Clientes «Razón Social / Nombre» y «RUT» (sin el icono de lupa), Contactos «Nombre», Direcciones «Dirección» y Equipos «Modelo». Cada campo conserva `aria-label`.
+- **No cambia:** la lista de OT (sus etiquetas siguen arriba, a pedido del dueño), Cotizaciones y Usuarios. Los formularios Nuevo/Editar conservan sus etiquetas.
+- **Archivos:** `FiltrosCliente.jsx`, `FiltrosContacto.jsx`, `FiltrosDireccion.jsx`, `FiltrosEquipo.jsx`.
+
 ## Fecha: 2026-11-18
 
 ### v2.207: Línea de división del PDF de la OT más fina

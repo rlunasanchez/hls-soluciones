@@ -10,9 +10,10 @@ function FiltrosEquipo({ filtroModelo, onFiltroModeloChange, onLimpiar, onNuevo,
           <Plus size={16} /> Nuevo Equipo
         </button>
         <div className="filtro-grupo-equipos">
-          <label>Modelo</label>
           <input
             type="text"
+            placeholder="Modelo"
+            aria-label="Modelo"
             value={filtroModelo}
             onChange={(e) => onFiltroModeloChange(upperInput(e))}
           />

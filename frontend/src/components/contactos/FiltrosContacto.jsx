@@ -10,9 +10,10 @@ function FiltrosContacto({ filtroNombre, onFiltroNombreChange, onLimpiar, onNuev
           <Plus size={16} /> Nuevo Contacto
         </button>
         <div className="filtro-grupo-contactos">
-          <label>Nombre</label>
           <input
             type="text"
+            placeholder="Nombre"
+            aria-label="Nombre"
             value={filtroNombre}
             onChange={(e) => onFiltroNombreChange(upperInput(e))}
           />

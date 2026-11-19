@@ -1,4 +1,4 @@
-import { Search, RotateCcw, Plus } from "lucide-react";
+import { RotateCcw, Plus } from "lucide-react";
 import Pagination from "../Pagination";
 import { formatearRutInput } from "../../utils/helpers";
 
@@ -9,19 +9,19 @@ function FiltrosCliente({ busqueda, onBusquedaChange, filtroRut, onFiltroRutChan
         <Plus size={16} /> Nuevo Cliente
       </button>
       <div className="filtro-grupo">
-        <label>
-          <Search size={12} /> Razón Social / Nombre
-        </label>
         <input
           type="text"
+          placeholder="Razón Social / Nombre"
+          aria-label="Razón Social / Nombre"
           value={busqueda}
           onChange={(e) => onBusquedaChange(e.target.value)}
         />
       </div>
       <div className="filtro-grupo">
-        <label>RUT</label>
         <input
           type="text"
+          placeholder="RUT"
+          aria-label="RUT"
           value={filtroRut}
           onChange={(e) => onFiltroRutChange(formatearRutInput(e.target.value))}
         />
