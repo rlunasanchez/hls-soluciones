@@ -283,7 +283,10 @@ router.put("/:id", authMiddleware, async (req, res) => {
       if (cambio(telefono, antes.telefono)) agregar("fono_principal", telefono);
       if (cambio(email, antes.email)) agregar("email", email);
       params.push(id);
-      await client.query(`UPDATE ordenes_trabajo SET ${sets.join(", ")} WHERE cliente_id = $${params.length}`, params);
+      // La OT y la cotización guardan el cliente con las mismas columnas: las dos se sincronizan igual.
+      for (const tabla of ["ordenes_trabajo", "cotizaciones"]) {
+        await client.query(`UPDATE ${tabla} SET ${sets.join(", ")} WHERE cliente_id = $${params.length}`, params);
+      }
       // Vínculos: solo si el formulario los envía (así otros llamados al PUT no los borran)
       const vinc = await idsDeVinculos(client, req.body);
       if (vinc.contactos) await sincronizarVinculos(client, id, "contactos", vinc.contactos, vinc.contactoAOt);

@@ -1,6 +1,6 @@
-# Para continuar el jueves 19-nov-2026
+# Para continuar el viernes 20-nov-2026
 
-Este archivo resume dónde quedó el trabajo al terminar el miércoles 18-nov-2026 (el nombre del archivo es histórico). Se puede borrar cuando ya no haga falta.
+Este archivo resume dónde quedó el trabajo al terminar el jueves 19-nov-2026 (el nombre del archivo es histórico). Se puede borrar cuando ya no haga falta.
 
 **Frase para retomar:** "Lee AGENTS.md, CAMBIOS.md y CONTINUAR_LUNES.md; seguimos con …"
 
@@ -8,13 +8,40 @@ Este archivo resume dónde quedó el trabajo al terminar el miércoles 18-nov-20
 
 | | Versión | Commit |
 |---|---|---|
-| **Web publicada** (Render + Vercel + Neon) | **v2.207** (18-nov-2026) | `main` `907a381`, `deploy/cloud` `e736952` (iguales a lo local) |
+| **Web publicada** (Render + Vercel + Neon) | **v2.208** (19-nov-2026) | `main` `b8eb3f0`, `deploy/cloud` `bb32f4c` |
+| **Solo local, sin publicar** | Cotizaciones adaptada como la OT (en curso) | `main` local `7c1625a` (1 commit adelante de GitHub) |
 
-- Árbol de trabajo limpio (solo `.claude/` sin versionar). No hay worktrees abiertos. **Neon no necesita SQL nuevo**: v2.195 a v2.207 no tocan la base de datos.
+- Árbol de trabajo limpio (solo `.claude/` sin versionar). No hay worktrees abiertos. **Neon:** v2.195 a v2.208 no tocan la base de datos; el único cambio es la columna `cotizaciones.cliente_tipo` (ver 2c), que el dueño **ya corrió en Neon** el 19-nov.
 - Las dos ramas se publican con una carpeta temporal (`git worktree add "$env:TEMP\hls-cloud" deploy/cloud`, `git merge main`, push de `deploy/cloud` y luego de `main`, y quitar la carpeta), para no cambiar la rama de la carpeta del dueño. Los `git push` se hacen desde **PowerShell**.
 - El 17-nov-2026 Claude pudo hacer `git push` desde PowerShell sin bloqueo (v2.200 a v2.204, cada vez con orden expresa del dueño: «documenta y sube»). Si el clasificador lo bloquea, el dueño lo escribe con `! git push …`. **Solo se publica con la orden expresa del dueño.**
 - Los datos de la base de **producción (Neon) y la local se borraron**: eran de prueba. Los usuarios (`admin`, `rluna`, `rzuniga`) se conservan. La numeración de OT parte de `OT-2026-02800` y los códigos de `CL-0001`.
 - La contraseña de `admin` en Neon se restableció a `admin123` el 10-nov-2026 (el dueño debe cambiarla desde Gestión de Usuarios). La de la base local es la de `ADMIN_PASSWORD` del `.env`.
+
+## 2c. EN CURSO: Cotizaciones adaptada como la OT (solo local, commit `7c1625a`, sin publicar ni probar en pantalla)
+
+Pedido del dueño (19-nov-2026): la cotización debe seguir **las mismas reglas que la OT** (datos congruentes, código escalable, PDF al mismo estilo). Hecho en local (build OK, ESLint sin `no-undef`):
+
+- **`Cotizaciones.jsx` de 2.090 a 73 líneas.** Repartido en `components/cotizaciones/` (`HeaderCotizacion`, `CotizacionFormulario`, `CotizacionFormItems`, `CotizacionFormEjecutivo`), `hooks/` (`useCotizacionFormulario`, `useCotizacionDesdeNavegacion`, `useCotizacionesListado`) y `utils/cotizacionFormato.js` (formulario ⇄ servidor, con los mismos nombres de campo de la OT: `cliente`, `rut`, `fonoPrincipal`, `contacto`, `direccion`…). La copia del archivo antiguo no está en el repo (ver `git show b8eb3f0:frontend/src/pages/Cotizaciones.jsx`).
+- **Cliente, contacto y dirección = los componentes de la OT** (`OrdenFormCliente`, que ahora muestra Adjuntos e Información Interna solo si recibe `adjuntos`). Buscador de cliente en el servidor, Empresa/Persona, Editar/Registrar, «ya no vinculado». **Quitado** «Otros Contactos» y direcciones adicionales (modelo antiguo); `contactos_extra` solo se conserva al guardar.
+- **Dirección:** sale del catálogo de Direcciones y se guarda en `contacto_direccion*` + `direccion_id`; `cliente_direccion*` queda vacío y **no se usa** (en una empresa la dirección propia de la ficha no se toma).
+- **`cliente_tipo`** en `cotizaciones` (`crear_tablas.sql` y `routes/cotizaciones.js` MySQL). Local: columna agregada. **Neon: ya corrida** (`ALTER TABLE cotizaciones ADD COLUMN IF NOT EXISTS cliente_tipo VARCHAR(10) DEFAULT 'EMPRESA';`).
+- **PDF de la cotización al estilo de la OT** (`cotizacionDoc.js`): barra de título «Cotización N° …» y fecha de emisión, secciones como la OT, persona sin sección Contacto. Estilos y funciones comunes en `utils/pdfEstilos.js` y `utils/pdfHelpers.js` (también los usa `ordenServicioDoc.js`; verificado que el PDF de la OT no cambió: mismo cuerpo y mismas reglas CSS).
+- **Lo que trae desde una OT:** solo los campos que existen en la cotización y en la OT (cliente, contacto, dirección y el vínculo a la OT). No se agrega equipo, avería ni técnico (decisión del dueño).
+- **Duda abierta:** el dueño dijo que «a veces se va el contacto» al crear una cotización desde una OT. Se verificó por código que el contacto llega completo con una OT de empresa (`formularioDesdeOrden`); las OT de la **persona** no tienen contacto por diseño. Si se repite, pedir en qué OT y si falta el nombre o solo el email/fono/cargo.
+
+**Decisiones del dueño para lo que falta («todo con tablas» y congruencia con la OT):**
+1. Los **ítems** dejan de ir como JSON: tabla `cotizacion_items` (`cotizacion_id` con `ON DELETE CASCADE`, `orden`, `sku`, `detalle`, `cantidad`, `neto`, `descuento`).
+2. **Otros contactos** (`contactos_extra`): se eliminan, como en la OT. Los datos actuales se consideran de prueba (no hay que conservarlos).
+3. **Columnas idénticas a la OT** (renombrar): `cliente`, `rut`, `fono_principal`, `email`, `contacto`, `fono_contacto`, `email_contacto`, `cargo_contacto`, `direccion`, `ciudad`, `comuna`, `cliente_tipo`, y vínculos `cliente_id`, `contacto_id`, `direccion_id`. Quitar `cliente_direccion*`, `contacto_direccion*` y `contactos_extra`.
+4. **Mismos vínculos que la OT:** reutilizar `routes/ordenesVinculos.js` para enlazar al guardar y para que, al editar o eliminar un cliente, contacto o dirección, las cotizaciones vinculadas se actualicen igual que las OT.
+5. La cotización **no lleva equipo** (solo ítems).
+6. El OT mantiene `contactos_extra`/`direcciones_extra` como JSON; pasarlo a tablas es un cambio aparte que el dueño aún no pidió.
+
+**Pasos que siguen, en orden:**
+1. El dueño **prueba en local** (backend reiniciado, Ctrl+F5): cotización con empresa y con persona, reabrir/editar (las 3 cotizaciones que ya existen pueden mostrar la dirección vacía hasta elegirla), crear desde una OT y desde Clientes, PDF de empresa y de persona, cliente eliminado.
+2. Portar `routes/cotizaciones.js` a PostgreSQL (`deploy/cloud`) y probarlo con `embedded-postgres` (incluida la FK a `clientes`); luego publicar: **Neon (ya hecho) → `deploy/cloud` → `main`**, con orden expresa.
+3. Tabla `cotizacion_items`, columnas con los nombres de la OT y vínculos (puntos 1 a 4): backend, **SQL de migración de Neon** (lo corre el dueño) y frontend; actualizar el PDF y `ModalOpcionesPDFCotizacion.jsx`, que hoy lee los nombres antiguos (`cliente_razon_social`, `contacto_nombre`…).
+4. Lista de Cotizaciones como la OT (servidor, filas según la pantalla, paginación en la fila de filtros); hoy carga hasta 10.000 y filtra en el navegador.
 
 ## 2b. Publicado el 18-nov-2026 (v2.205 a v2.207)
 
@@ -51,6 +78,7 @@ Detalle de cada uno en `CAMBIOS.md`. Todo subido a la web; **lo marcado "sin pro
 
 ## 3. Lo que sigue (orden acordado con el dueño)
 
+0. **Primero Cotizaciones (sección 2c):** probar en local lo que hay y seguir con los pasos de esa sección.
 1. **Probar en la web** (Ctrl+F5) lo marcado "sin probar" de las secciones 2b, 2a y 2 y avisar si algo falla; en especial las filas por página (v2.205) y los títulos «Cotizado» / «Con OT». Verificar también que Render terminó de desplegar `e736952` (`gh` solo muestra Vercel; Render se ve en su panel → Logs) y que **editar un cliente ya no vacía el fono de las OT** (v2.200, el arreglo original del día).
    - **Pendiente de probar a fondo:** el cambio de `routes/clientes.js` en PostgreSQL con `embedded-postgres` (`embedded-postgres` no está instalado en el PC del dueño; instalarlo en una carpeta temporal según la sección 7).
    - **Pendiente de decidir:** las cuatro decisiones del historial de la OT (punto 2).
@@ -74,7 +102,7 @@ Todo está en `CAMBIOS.md` (más reciente arriba). En una línea cada uno:
 - Datos reales: 3 clientes, 2 equipos (`EQ-0001` NOTEBOOK HP 445 G8 y `EQ-0003` NOTE HP 445 G9), 8 OT (02800 a 02807).
 - Ya tiene las columnas `equipo_id`, `contacto_id`, `direccion_id` (con índices) y las OT vinculadas por coincidencia de texto.
 - La tabla `orden_adjuntos` existe y tiene archivos de prueba subidos a algunas OT por el dueño.
-- **Sin datos de prueba** de clientes ni equipos (los «PRUEBA PAG» del 17-nov se borraron; verificado). Quedan a propósito, a pedido del dueño: la carpeta `Escritorio\prueba_adjuntos` (4 archivos de prueba) y los adjuntos que subió a sus OT.
+- **Datos de prueba «PRUEBA PAG» cargados el 19-nov** para probar OT y Cotizaciones (script en una carpeta temporal que no viaja): 5 clientes (4 empresas y 1 persona, `CL-9901` a `9905`) con 6 contactos y 5 direcciones vinculados (`CO-9901`…, `DI-9901`…) y 12 OT (`OT-2026-9901` a `9912`; las de la persona no tienen contacto). **Hay que borrarlos al terminar** (código 99xx **y** nombre «PRUEBA PAG»; también las cotizaciones de esos clientes) y no crear registros reales mientras estén. Antes los «PRUEBA PAG» del 17-nov se borraron y se verificó. Existen además 3 cotizaciones del dueño en la base local (no tocar). Quedan a propósito, a pedido del dueño: la carpeta `Escritorio\prueba_adjuntos` (4 archivos de prueba) y los adjuntos que subió a sus OT.
 
 ## 6. Reglas de trabajo que hay que respetar
 
