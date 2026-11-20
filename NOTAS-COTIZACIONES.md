@@ -1,11 +1,6 @@
 # Notas — Módulo de Cotizaciones (pendientes y relevamiento)
 
-> **Estado (22-oct-2026): Cotizaciones NO está adaptada** a los cambios de Clientes, Contactos, Direcciones y Equipos (Empresa/Persona, checks "En la OT", botones Editar/Registrar, vínculos, equipo solo identidad). Aún no se empieza; no probarla con esos cambios.
-
-**Requisito futuro (indicado por el dueño el 22-oct-2026):** cuando se adapte Cotizaciones debe comportarse **como la OT**:
-- Si el cliente fue eliminado, la cotización lo conserva igual (copia/snapshot) y se avisa "ya no vinculado"; se le puede asociar o re-vincular el cliente, y el **contacto** también se puede asociar aunque el cliente esté eliminado.
-- Debe haber **cotización de empresa y de persona**, con la misma lógica que la OT: Tipo Empresa/Persona, la persona sin contacto y con su dirección vinculada, checks "En la OT", botones Editar/Registrar y buscador de cliente en el servidor.
-- Hoy solo se evita el error 500 guardándola sin vínculo si el cliente ya no existe (v2.180).
+> **Estado (20-nov-2026): Cotizaciones YA está adaptada como la OT (v2.209).** Todo lo de este archivo anterior al 20-nov es el relevamiento histórico del diseño antiguo (con JSON, `cliente_razon_social`, «Otros Contactos», etc.), que ya no existe: la cotización usa las mismas columnas que la OT, el detalle va en `cotizacion_items` y los montos en columnas. Ver `CAMBIOS.md` v2.209 y `AGENTS.md` sección 4. Pendiente: listado en el servidor.
 
 > Documento de trabajo. Relevamiento hecho el 2026-09-07 para retomar el módulo de
 > Cotizaciones. NO es un registro de cambios de versión (eso va en `CAMBIOS.md`).

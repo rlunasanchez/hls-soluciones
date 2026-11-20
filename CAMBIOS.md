@@ -1,5 +1,102 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-11-20
+
+### v2.209: Cotizaciones adaptada como la OT, todo en tablas (sin JSON) y PDF al estilo de la OT
+
+**Alcance:** backend + frontend + **migración de Neon** (SQL más abajo). Probado: backend en MySQL (12 pruebas) y en PostgreSQL real con `embedded-postgres` (18 pruebas: migración idempotente y rutas), PDF y totales por código (6 comprobaciones). **El formulario y el PDF no se vieron en pantalla.** Orden de publicación: **SQL en Neon → push `deploy/cloud` (Render) → push `main` (Vercel)**; entre el SQL y el despliegue de Render, Cotizaciones de la web falla unos minutos (el backend viejo no entiende las columnas nuevas).
+
+- **Formulario (`Cotizaciones.jsx` de 2.090 a 73 líneas):** repartido en `components/cotizaciones/` (`HeaderCotizacion`, `CotizacionFormulario`, `CotizacionFormItems`, `CotizacionFormEjecutivo`), `hooks/` (`useCotizacionFormulario`, `useCotizacionDesdeNavegacion`, `useCotizacionesListado`) y `utils/cotizacionFormato.js`. El cliente, el contacto y la dirección son los componentes de la OT (`OrdenFormCliente`, que muestra Adjuntos e Información Interna solo si recibe `adjuntos`): buscador de cliente en el servidor, Empresa/Persona, Editar/Registrar, «ya no vinculado». Se quitan «Otros Contactos» y las direcciones adicionales.
+- **Todo en tablas:** nueva tabla `cotizacion_items` (una fila por ítem con su `total`) y montos en columnas de `cotizaciones` (`neto`, `iva_porcentaje`, `iva`, `total`). Las columnas JSON `items` y `contactos_extra` desaparecen. **El servidor calcula y guarda los montos** (`backend/utils/cotizacionTotales.js`: total del ítem = cantidad × neto × (1 − descuento %) redondeado; neto = suma; IVA 19 % redondeado); el formulario solo muestra una vista previa con la misma regla (`calcularTotales` en `cotizacionDoc.js`) y el PDF lee lo guardado.
+- **Columnas idénticas a la OT:** `cliente`, `rut`, `fono_principal`, `email`, `cliente_tipo`, `cliente_id`, `contacto`, `fono_contacto`, `email_contacto`, `cargo_contacto`, `contacto_id`, `direccion`, `ciudad`, `comuna`, `direccion_id`. El INSERT/UPDATE sale de una lista (`backend/utils/camposCotizacion.js`, como `camposOrden.js`). La dirección es la elegida en el catálogo de Direcciones; la dirección propia de la ficha del cliente no se usa.
+- **Mismos vínculos que la OT:** al guardar, `resolverVinculos` enlaza el contacto y la dirección con el mantenedor; al editar o eliminar un cliente, contacto o dirección, las cotizaciones vinculadas se actualizan igual que las OT (`routes/ordenesVinculos.js` y `routes/clientes.js` cubren las dos tablas). Al eliminar, la cotización conserva su copia sin vínculo.
+- **Desde una OT** llegan solo los campos que existen en la cotización y en la OT (cliente, contacto, dirección y el vínculo a la OT); no se copian equipo, avería ni técnico.
+- **PDF al estilo de la OT:** barra «Cotización N° …» con la fecha de emisión, secciones como tarjetas, una persona sin sección Contacto. Estilos y funciones comunes en `utils/pdfEstilos.js` y `utils/pdfHelpers.js`, usados también por `ordenServicioDoc.js` (comprobado que el PDF de la OT no cambió). Se elimina `ModalOpcionesPDFCotizacion.jsx` (servía para elegir contactos adicionales); el botón PDF genera el documento directo.
+- **Esquema:** `crear_tablas.sql` con `cotizaciones` y `cotizacion_items` nuevos.
+
+**SQL de Neon** (lo corre el dueño en el SQL Editor; un solo bloque atómico, se puede correr más de una vez; antes ya se había corrido `ALTER TABLE cotizaciones ADD COLUMN IF NOT EXISTS cliente_tipo VARCHAR(10) DEFAULT 'EMPRESA';`). Empezar con una línea en blanco y revisar que no se perdió la primera letra:
+
+```sql
+DO $$
+BEGIN
+  -- Solo corre si la tabla todavía tiene el esquema antiguo (se puede ejecutar más de una vez sin riesgo).
+  IF EXISTS (SELECT 1 FROM information_schema.columns
+             WHERE table_schema = current_schema() AND table_name = 'cotizaciones' AND column_name = 'cliente_razon_social') THEN
+
+    -- 1) Tabla de ítems: una fila por ítem en vez del JSON
+    CREATE TABLE IF NOT EXISTS cotizacion_items (
+      id SERIAL PRIMARY KEY,
+      cotizacion_id INTEGER NOT NULL REFERENCES cotizaciones(id) ON DELETE CASCADE,
+      orden INTEGER NOT NULL DEFAULT 0,
+      sku VARCHAR(100),
+      detalle TEXT,
+      cantidad NUMERIC(12,2) NOT NULL DEFAULT 1,
+      neto INTEGER NOT NULL DEFAULT 0,
+      descuento NUMERIC(5,2) NOT NULL DEFAULT 0,
+      total INTEGER NOT NULL DEFAULT 0
+    );
+    CREATE INDEX IF NOT EXISTS idx_cot_items_cotizacion ON cotizacion_items (cotizacion_id);
+
+    -- 2) Columnas con los mismos nombres que la OT
+    ALTER TABLE cotizaciones RENAME COLUMN cliente_razon_social TO cliente;
+    ALTER TABLE cotizaciones RENAME COLUMN cliente_rut TO rut;
+    ALTER TABLE cotizaciones RENAME COLUMN cliente_telefono TO fono_principal;
+    ALTER TABLE cotizaciones RENAME COLUMN cliente_email TO email;
+    ALTER TABLE cotizaciones RENAME COLUMN contacto_nombre TO contacto;
+    ALTER TABLE cotizaciones RENAME COLUMN contacto_fono TO fono_contacto;
+    ALTER TABLE cotizaciones RENAME COLUMN contacto_email TO email_contacto;
+    ALTER TABLE cotizaciones RENAME COLUMN contacto_cargo TO cargo_contacto;
+    ALTER TABLE cotizaciones RENAME COLUMN contacto_direccion TO direccion;
+    ALTER TABLE cotizaciones RENAME COLUMN contacto_ciudad TO ciudad;
+    ALTER TABLE cotizaciones RENAME COLUMN contacto_comuna TO comuna;
+    ALTER TABLE cotizaciones ALTER COLUMN cliente TYPE VARCHAR(200);
+    ALTER TABLE cotizaciones ALTER COLUMN fono_principal TYPE VARCHAR(50);
+    ALTER TABLE cotizaciones ALTER COLUMN contacto TYPE VARCHAR(200);
+    ALTER TABLE cotizaciones ALTER COLUMN fono_contacto TYPE VARCHAR(50);
+    ALTER TABLE cotizaciones ALTER COLUMN direccion TYPE VARCHAR(300);
+
+    -- 3) Montos en columnas
+    ALTER TABLE cotizaciones ADD COLUMN IF NOT EXISTS neto INTEGER NOT NULL DEFAULT 0;
+    ALTER TABLE cotizaciones ADD COLUMN IF NOT EXISTS iva_porcentaje NUMERIC(5,2) NOT NULL DEFAULT 19;
+    ALTER TABLE cotizaciones ADD COLUMN IF NOT EXISTS iva INTEGER NOT NULL DEFAULT 0;
+    ALTER TABLE cotizaciones ADD COLUMN IF NOT EXISTS total INTEGER NOT NULL DEFAULT 0;
+    CREATE INDEX IF NOT EXISTS idx_cot_contacto ON cotizaciones (contacto_id);
+    CREATE INDEX IF NOT EXISTS idx_cot_direccion ON cotizaciones (direccion_id);
+
+    -- 4) Los ítems que ya estaban como JSON pasan a filas (con su total) y se calculan los montos
+    INSERT INTO cotizacion_items (cotizacion_id, orden, sku, detalle, cantidad, neto, descuento, total)
+    SELECT x.cotizacion_id, x.orden, x.sku, x.detalle, x.cantidad, x.neto, x.descuento,
+           ROUND(x.cantidad * x.neto * (1 - x.descuento / 100))::integer
+    FROM (
+      SELECT c.id AS cotizacion_id, (j.ord - 1)::integer AS orden,
+             NULLIF(TRIM(j.item->>'sku'), '') AS sku,
+             NULLIF(TRIM(j.item->>'detalle'), '') AS detalle,
+             GREATEST(0, COALESCE(NULLIF(j.item->>'cantidad', '')::numeric, 0)) AS cantidad,
+             GREATEST(0, ROUND(COALESCE(NULLIF(j.item->>'neto', '')::numeric, 0)))::integer AS neto,
+             LEAST(100, GREATEST(0, COALESCE(NULLIF(j.item->>'descuento', '')::numeric, 0))) AS descuento
+      FROM cotizaciones c,
+           LATERAL jsonb_array_elements(CASE WHEN c.items IS NULL OR TRIM(c.items) = '' THEN '[]'::jsonb ELSE c.items::jsonb END)
+             WITH ORDINALITY AS j(item, ord)
+    ) x
+    WHERE x.sku IS NOT NULL OR x.detalle IS NOT NULL OR x.neto > 0;
+
+    UPDATE cotizaciones c SET
+      neto = COALESCE((SELECT SUM(i.total) FROM cotizacion_items i WHERE i.cotizacion_id = c.id), 0);
+    UPDATE cotizaciones SET iva = ROUND(neto * iva_porcentaje / 100)::integer;
+    UPDATE cotizaciones SET total = neto + iva;
+
+    -- 5) Fuera el JSON y las columnas que ya no se usan
+    ALTER TABLE cotizaciones DROP COLUMN IF EXISTS items;
+    ALTER TABLE cotizaciones DROP COLUMN IF EXISTS contactos_extra;
+    ALTER TABLE cotizaciones DROP COLUMN IF EXISTS cliente_direccion;
+    ALTER TABLE cotizaciones DROP COLUMN IF EXISTS cliente_ciudad;
+    ALTER TABLE cotizaciones DROP COLUMN IF EXISTS cliente_comuna;
+    ALTER TABLE cotizaciones DROP COLUMN IF EXISTS cliente_direccion_id;
+  END IF;
+END
+$$;
+```
+
 ## Fecha: 2026-11-19
 
 ### v2.208: Nombres de los filtros dentro del recuadro en Clientes, Contactos, Direcciones y Equipos
