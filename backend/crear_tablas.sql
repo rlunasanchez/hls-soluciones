@@ -179,9 +179,10 @@ CREATE TABLE IF NOT EXISTS usuarios (
 -- ============================================
 -- TABLA DE COTIZACIONES
 -- ============================================
--- Puede o no estar asociada a una Orden de Trabajo (orden_id nulo = cotización
--- independiente). "items" guarda el detalle (SKU/detalle/cant/uni/neto) como
--- JSON, mismo patrón que contactos_extra/direcciones_extra en ordenes_trabajo.
+-- Puede o no estar asociada a una Orden de Trabajo (orden_id nulo = cotización independiente).
+-- Guarda una copia (snapshot) del cliente, contacto y dirección con las MISMAS columnas que la OT
+-- (cliente, rut, fono_principal, email, contacto, direccion, cliente_tipo y los vínculos cliente_id,
+-- contacto_id, direccion_id). El detalle va en cotizacion_items y los montos en columnas: nada en JSON.
 CREATE TABLE IF NOT EXISTS cotizaciones (
   id INT AUTO_INCREMENT PRIMARY KEY,
   folio INT NOT NULL UNIQUE,
@@ -190,33 +191,32 @@ CREATE TABLE IF NOT EXISTS cotizaciones (
   condicion VARCHAR(100),
   glosa TEXT,
 
-  cliente_id INT,
+  cliente VARCHAR(200) NOT NULL,
+  rut VARCHAR(20),
+  fono_principal VARCHAR(50),
+  email VARCHAR(100),
   cliente_tipo VARCHAR(10) DEFAULT 'EMPRESA',  -- copia del tipo del cliente al guardar la cotización
-  cliente_rut VARCHAR(20),
-  cliente_razon_social VARCHAR(255) NOT NULL,
-  cliente_direccion VARCHAR(255),
-  cliente_ciudad VARCHAR(100),
-  cliente_comuna VARCHAR(100),
-  cliente_direccion_id INT,
-  cliente_telefono VARCHAR(20),
-  cliente_email VARCHAR(100),
+  cliente_id INT,
 
-  contacto_nombre VARCHAR(100),
-  contacto_fono VARCHAR(20),
-  contacto_email VARCHAR(100),
-  contacto_cargo VARCHAR(100),
+  contacto VARCHAR(200),
+  fono_contacto VARCHAR(50),
+  email_contacto VARCHAR(100),
+  cargo_contacto VARCHAR(100),
   contacto_id INT,
-  contacto_direccion VARCHAR(255),
-  contacto_ciudad VARCHAR(100),
-  contacto_comuna VARCHAR(100),
+
+  direccion VARCHAR(300),
+  ciudad VARCHAR(100),
+  comuna VARCHAR(100),
   direccion_id INT,
-  contactos_extra TEXT,
 
   ejecutivo VARCHAR(100),
   ejecutivo_fono VARCHAR(20),
   ejecutivo_email VARCHAR(100),
 
-  items TEXT,
+  neto INT NOT NULL DEFAULT 0,
+  iva_porcentaje DECIMAL(5,2) NOT NULL DEFAULT 19,
+  iva INT NOT NULL DEFAULT 0,
+  total INT NOT NULL DEFAULT 0,
 
   orden_id INT,
   orden_numero VARCHAR(50),
@@ -227,8 +227,25 @@ CREATE TABLE IF NOT EXISTS cotizaciones (
   INDEX idx_folio (folio),
   INDEX idx_cliente_id (cliente_id),
   INDEX idx_orden_id (orden_id),
+  INDEX idx_cot_contacto (contacto_id),
+  INDEX idx_cot_direccion (direccion_id),
   FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE SET NULL,
   FOREIGN KEY (orden_id) REFERENCES ordenes_trabajo(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Una fila por ítem de la cotización; `total` = cantidad × neto con el descuento (porcentaje), en pesos.
+CREATE TABLE IF NOT EXISTS cotizacion_items (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  cotizacion_id INT NOT NULL,
+  orden INT NOT NULL DEFAULT 0,
+  sku VARCHAR(100),
+  detalle TEXT,
+  cantidad DECIMAL(12,2) NOT NULL DEFAULT 1,
+  neto INT NOT NULL DEFAULT 0,
+  descuento DECIMAL(5,2) NOT NULL DEFAULT 0,
+  total INT NOT NULL DEFAULT 0,
+  INDEX idx_cot_items_cotizacion (cotizacion_id),
+  FOREIGN KEY (cotizacion_id) REFERENCES cotizaciones(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================

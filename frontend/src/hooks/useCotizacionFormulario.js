@@ -88,7 +88,7 @@ export default function useCotizacionFormulario({ navigate, alGuardar }) {
 
   const cargarCotizacion = async (cot, readOnly) => {
     const c = (await api.get(`/api/cotizaciones/${cot.id}`)).data;
-    const { cliente, inactivo } = await clienteDeOrden({ cliente_id: c.cliente_id, cliente: c.cliente_razon_social });
+    const { cliente, inactivo } = await clienteDeOrden({ cliente_id: c.cliente_id, cliente: c.cliente });
     limpiarFormulario();
     setEditingId(c.id);
     setSoloLectura(readOnly);

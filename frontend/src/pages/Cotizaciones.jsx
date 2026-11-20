@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import api from "../services/api";
 import { invalidar } from "../services/cache";
@@ -7,7 +6,8 @@ import "../styles/ordenes-componentes.css";
 import HeaderCotizacion from "../components/cotizaciones/HeaderCotizacion";
 import CotizacionLista from "../components/cotizaciones/CotizacionLista";
 import CotizacionFormulario from "../components/cotizaciones/CotizacionFormulario";
-import ModalOpcionesPDFCotizacion from "../components/cotizaciones/ModalOpcionesPDFCotizacion";
+import { generarHtmlCotizacion, tituloDocumentoCotizacion } from "../utils/cotizacionDoc";
+import { imprimirHtml } from "../utils/imprimir";
 import useCotizacionesListado from "../hooks/useCotizacionesListado";
 import useCotizacionFormulario from "../hooks/useCotizacionFormulario";
 import useCotizacionDesdeNavegacion from "../hooks/useCotizacionDesdeNavegacion";
@@ -15,7 +15,6 @@ import useCotizacionDesdeNavegacion from "../hooks/useCotizacionDesdeNavegacion"
 function Cotizaciones() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [cotParaPDF, setCotParaPDF] = useState(null);
 
   const listado = useCotizacionesListado();
   const form = useCotizacionFormulario({
@@ -40,9 +39,16 @@ function Cotizaciones() {
     }
   };
 
-  const generarPDFActual = async () => {
-    if (!form.editingId) return;
-    setCotParaPDF((await api.get(`/api/cotizaciones/${form.editingId}`)).data);
+  // El PDF se arma con la cotización completa del servidor (ítems y montos guardados), no con la fila del listado.
+  const generarPDF = async (id) => {
+    if (!id) return;
+    try {
+      const cot = (await api.get(`/api/cotizaciones/${id}`)).data;
+      imprimirHtml(generarHtmlCotizacion(cot), tituloDocumentoCotizacion(cot));
+    } catch (err) {
+      console.error("Error al generar el PDF:", err);
+      alert("Error al generar el PDF de la cotización");
+    }
   };
 
   return (
@@ -66,14 +72,12 @@ function Cotizaciones() {
             onVer={(cot) => form.cargarCotizacion(cot, true)}
             onEditar={(cot) => form.cargarCotizacion(cot, false)}
             onEliminar={eliminarCotizacion}
-            onPDF={setCotParaPDF}
+            onPDF={(cot) => generarPDF(cot.id)}
           />
         </div>
       ) : (
-        <CotizacionFormulario form={form} onPDF={generarPDFActual} />
+        <CotizacionFormulario form={form} onPDF={() => generarPDF(form.editingId)} />
       )}
-
-      {cotParaPDF && <ModalOpcionesPDFCotizacion cot={cotParaPDF} onClose={() => setCotParaPDF(null)} />}
     </div>
   );
 }

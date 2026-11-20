@@ -1,11 +1,14 @@
 import express from "express";
 import pool from "../config/db.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
+import { armarInsertCotizacion, armarUpdateCotizacion } from "../utils/camposCotizacion.js";
+import { calcularMontos } from "../utils/cotizacionTotales.js";
+import { resolverVinculos } from "./ordenesVinculos.js";
 
 const router = express.Router();
 
-async function calcularSiguienteFolio() {
-  const [rows] = await pool.query("SELECT MAX(folio) AS maximo FROM cotizaciones");
+async function calcularSiguienteFolio(db) {
+  const [rows] = await db.query("SELECT MAX(folio) AS maximo FROM cotizaciones");
   const maximo = rows[0]?.maximo || 0;
   return Math.max(maximo + 1, 2800);
 }
@@ -18,8 +21,33 @@ async function clienteIdExistente(db, clienteId) {
   return rows.length > 0 ? clienteId : null;
 }
 
-// Tipo del cliente al guardar la cotización (copia, como cliente_tipo de la OT): EMPRESA o PERSONA.
-const tipoCliente = (tipo) => (tipo === 'PERSONA' ? 'PERSONA' : 'EMPRESA');
+// Datos que se guardan: lo que manda el formulario + los vínculos con el mantenedor (como la OT) + los
+// montos, que calcula el servidor a partir de los ítems.
+async function datosAGuardar(db, body) {
+  const montos = calcularMontos(body.items);
+  const vinculos = await resolverVinculos(db, { contacto: body.contacto, direccion: body.direccion });
+  return {
+    montos,
+    datos: {
+      ...body,
+      clienteId: await clienteIdExistente(db, body.clienteId),
+      contactoId: vinculos.contactoId,
+      direccionId: vinculos.direccionId,
+      neto: montos.neto, iva: montos.iva, total: montos.total, ivaPorcentaje: montos.ivaPorcentaje,
+    },
+  };
+}
+
+// Reemplaza los ítems de la cotización por los que llegan (una fila por ítem).
+async function guardarItems(db, cotizacionId, items) {
+  await db.query("DELETE FROM cotizacion_items WHERE cotizacion_id = ?", [cotizacionId]);
+  for (const [i, it] of items.entries()) {
+    await db.query(
+      "INSERT INTO cotizacion_items (cotizacion_id, orden, sku, detalle, cantidad, neto, descuento, total) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      [cotizacionId, i, it.sku || null, it.detalle || null, it.cantidad, it.neto, it.descuento, it.total]
+    );
+  }
+}
 
 router.get("/", authMiddleware, async (req, res) => {
   const page = parseInt(req.query.page) || 1;
@@ -32,11 +60,12 @@ router.get("/", authMiddleware, async (req, res) => {
   try {
     const [cotizaciones] = await pool.query(
       `SELECT id, folio, fecha_emision, fecha_valido_hasta, condicion, glosa,
-        cliente_id, cliente_tipo, cliente_rut, cliente_razon_social,
-        cliente_direccion, cliente_ciudad, cliente_comuna, cliente_telefono, cliente_email,
-        contacto_nombre, contacto_fono, contacto_email, contacto_cargo, contactos_extra,
+        cliente_id, cliente_tipo, cliente, rut, fono_principal, email,
+        contacto_id, contacto, fono_contacto, email_contacto, cargo_contacto,
+        direccion_id, direccion, ciudad, comuna,
         ejecutivo, ejecutivo_fono, ejecutivo_email,
-        items, orden_id, orden_numero, fecha_creacion, fecha_actualizacion
+        neto, iva_porcentaje, iva, total,
+        orden_id, orden_numero, fecha_creacion, fecha_actualizacion
        FROM cotizaciones ${where} ORDER BY id DESC LIMIT ? OFFSET ?`,
       [...whereParams, limit, offset]
     );
@@ -60,7 +89,11 @@ router.get("/:id", authMiddleware, async (req, res) => {
   try {
     const [rows] = await pool.query("SELECT * FROM cotizaciones WHERE id = ?", [req.params.id]);
     if (rows.length === 0) return res.status(404).json({ msg: "Cotización no encontrada" });
-    res.json(rows[0]);
+    const [items] = await pool.query(
+      "SELECT sku, detalle, cantidad, neto, descuento, total FROM cotizacion_items WHERE cotizacion_id = ? ORDER BY orden, id",
+      [req.params.id]
+    );
+    res.json({ ...rows[0], items });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
@@ -68,48 +101,20 @@ router.get("/:id", authMiddleware, async (req, res) => {
 });
 
 router.post("/", authMiddleware, async (req, res) => {
-  const {
-    fechaEmision, fechaValidoHasta, condicion, glosa,
-    clienteId, clienteTipo, clienteRut, clienteRazonSocial,
-    clienteDireccion, clienteCiudad, clienteComuna, clienteDireccionId, clienteTelefono, clienteEmail,
-    contactoNombre, contactoFono, contactoEmail, contactoCargo, contactoId, contactoDireccion, contactoCiudad, contactoComuna, direccionId, contactosExtra,
-    ejecutivoFono, ejecutivoEmail,
-    items, ordenId, ordenNumero
-  } = req.body;
-
-  // Cliente es opcional: una cotización "suelta" (creada sin venir de una
-  // OT ni de un Cliente) puede guardarse sin razón social todavía.
-
+  // Cliente es opcional: una cotización "suelta" (creada sin venir de una OT ni de un Cliente)
+  // puede guardarse sin razón social todavía.
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
 
-    const folio = await calcularSiguienteFolio();
-    // El ejecutivo se toma del usuario autenticado, no de lo que mande el
-    // cliente HTTP: es quien está usando la app en ese momento, no un dato
-    // editable a mano (evita que alguien se atribuya la cotización de otro).
-    // Se prioriza el Nombre cargado en Usuarios; si todavía no lo tiene,
-    // se usa el usuario de login como respaldo (nunca queda vacío).
-    const ejecutivo = req.user.nombre || req.user.usuario;
-
-    const [resultado] = await connection.query(
-      `INSERT INTO cotizaciones (folio, fecha_emision, fecha_valido_hasta, condicion, glosa,
-        cliente_id, cliente_tipo, cliente_rut, cliente_razon_social,
-        cliente_direccion, cliente_ciudad, cliente_comuna, cliente_direccion_id, cliente_telefono, cliente_email,
-        contacto_nombre, contacto_fono, contacto_email, contacto_cargo, contacto_id, contacto_direccion, contacto_ciudad, contacto_comuna, direccion_id, contactos_extra,
-        ejecutivo, ejecutivo_fono, ejecutivo_email,
-        items, orden_id, orden_numero)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        folio, fechaEmision, fechaValidoHasta || null, condicion || null, glosa || null,
-        await clienteIdExistente(connection, clienteId), tipoCliente(clienteTipo), clienteRut || null, clienteRazonSocial || '',
-        clienteDireccion || null, clienteCiudad || null, clienteComuna || null, clienteDireccionId || null, clienteTelefono || null, clienteEmail || null,
-        contactoNombre || null, contactoFono || null, contactoEmail || null, contactoCargo || null, contactoId || null, contactoDireccion || null, contactoCiudad || null, contactoComuna || null, direccionId || null,
-        contactosExtra ? JSON.stringify(contactosExtra) : null,
-        ejecutivo, ejecutivoFono || null, ejecutivoEmail || null,
-        items ? JSON.stringify(items) : null, ordenId || null, ordenNumero || null
-      ]
-    );
+    const folio = await calcularSiguienteFolio(connection);
+    // El ejecutivo se toma del usuario autenticado, no de lo que mande el cliente HTTP: es quien está
+    // usando la app en ese momento (evita que alguien se atribuya la cotización de otro). Se prioriza el
+    // Nombre cargado en Usuarios; si todavía no lo tiene, el usuario de login (nunca queda vacío).
+    const { montos, datos } = await datosAGuardar(connection, { ...req.body, ejecutivo: req.user.nombre || req.user.usuario });
+    const { sql, params } = armarInsertCotizacion(datos, folio);
+    const [resultado] = await connection.query(sql, params);
+    await guardarItems(connection, resultado.insertId, montos.items);
 
     await connection.commit();
     res.status(201).json({ msg: "Cotización creada", id: resultado.insertId, folio });
@@ -124,47 +129,29 @@ router.post("/", authMiddleware, async (req, res) => {
 
 router.put("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
-  const {
-    fechaEmision, fechaValidoHasta, condicion, glosa,
-    clienteId, clienteTipo, clienteRut, clienteRazonSocial,
-    clienteDireccion, clienteCiudad, clienteComuna, clienteDireccionId, clienteTelefono, clienteEmail,
-    contactoNombre, contactoFono, contactoEmail, contactoCargo, contactoId, contactoDireccion, contactoCiudad, contactoComuna, direccionId, contactosExtra,
-    ejecutivo, ejecutivoFono, ejecutivoEmail,
-    items, ordenId, ordenNumero
-  } = req.body;
-
-  // Cliente es opcional: una cotización "suelta" puede guardarse sin
-  // razón social todavía.
-
+  const connection = await pool.getConnection();
   try {
-    await pool.query(
-      `UPDATE cotizaciones SET fecha_emision = ?, fecha_valido_hasta = ?, condicion = ?, glosa = ?,
-        cliente_id = ?, cliente_tipo = ?, cliente_rut = ?, cliente_razon_social = ?,
-        cliente_direccion = ?, cliente_ciudad = ?, cliente_comuna = ?, cliente_direccion_id = ?, cliente_telefono = ?, cliente_email = ?,
-        contacto_nombre = ?, contacto_fono = ?, contacto_email = ?, contacto_cargo = ?, contacto_id = ?, contacto_direccion = ?, contacto_ciudad = ?, contacto_comuna = ?, direccion_id = ?, contactos_extra = ?,
-        ejecutivo = ?, ejecutivo_fono = ?, ejecutivo_email = ?,
-        items = ?, orden_id = ?, orden_numero = ?
-       WHERE id = ?`,
-      [
-        fechaEmision, fechaValidoHasta || null, condicion || null, glosa || null,
-        await clienteIdExistente(pool, clienteId), tipoCliente(clienteTipo), clienteRut || null, clienteRazonSocial || '',
-        clienteDireccion || null, clienteCiudad || null, clienteComuna || null, clienteDireccionId || null, clienteTelefono || null, clienteEmail || null,
-        contactoNombre || null, contactoFono || null, contactoEmail || null, contactoCargo || null, contactoId || null, contactoDireccion || null, contactoCiudad || null, contactoComuna || null, direccionId || null,
-        contactosExtra ? JSON.stringify(contactosExtra) : null,
-        ejecutivo || null, ejecutivoFono || null, ejecutivoEmail || null,
-        items ? JSON.stringify(items) : null, ordenId || null, ordenNumero || null,
-        id
-      ]
-    );
+    await connection.beginTransaction();
+
+    const { montos, datos } = await datosAGuardar(connection, req.body);
+    const { sql, params } = armarUpdateCotizacion(datos, id);
+    await connection.query(sql, params);
+    await guardarItems(connection, id, montos.items);
+
+    await connection.commit();
     res.json({ msg: "Cotización actualizada" });
   } catch (err) {
+    await connection.rollback();
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });
+  } finally {
+    connection.release();
   }
 });
 
 router.delete("/:id", authMiddleware, async (req, res) => {
   try {
+    // Los ítems se borran solos (ON DELETE CASCADE)
     await pool.query("DELETE FROM cotizaciones WHERE id = ?", [req.params.id]);
     res.json({ msg: "Cotización eliminada" });
   } catch (err) {

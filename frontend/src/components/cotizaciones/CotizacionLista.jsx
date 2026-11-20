@@ -1,7 +1,6 @@
 import { FileSpreadsheet, Plus, RotateCcw } from "lucide-react";
 import Pagination from "../Pagination";
 import CotizacionAcciones from "./CotizacionAcciones";
-import { calcularTotales } from "../../utils/cotizacionDoc";
 
 const clp = (n) => Math.round(Number(n) || 0).toLocaleString("es-CL");
 
@@ -70,12 +69,12 @@ function CotizacionLista({ cotizaciones, loading, filtroFolio, onFiltroFolioChan
                 {cotizaciones.map((cot) => (
                   <tr key={cot.id}>
                     <td data-label="Folio"><span className="codigo-badge">{cot.folio}</span></td>
-                    <td data-label="Cliente">{cot.cliente_razon_social}</td>
+                    <td data-label="Cliente">{cot.cliente}</td>
                     <td data-label="Emisión">
                       {cot.fecha_emision ? new Date(cot.fecha_emision).toLocaleDateString() : "-"}
                     </td>
                     <td data-label="Ejecutivo">{cot.ejecutivo}</td>
-                    <td data-label="Total">{clp(calcularTotales(cot.items).total)} CLP</td>
+                    <td data-label="Total">{clp(cot.total)} CLP</td>
                     <td className="col-ot-dot" data-label="OT">
                       {cot.orden_id && (
                         <span
@@ -109,7 +108,7 @@ function CotizacionLista({ cotizaciones, loading, filtroFolio, onFiltroFolioChan
                 </div>
                 <div className="data-card-row">
                   <span className="label">Cliente</span>
-                  <span className="value">{cot.cliente_razon_social}</span>
+                  <span className="value">{cot.cliente}</span>
                 </div>
                 <div className="data-card-row">
                   <span className="label">Emisión</span>
@@ -123,7 +122,7 @@ function CotizacionLista({ cotizaciones, loading, filtroFolio, onFiltroFolioChan
                 </div>
                 <div className="data-card-row">
                   <span className="label">Total</span>
-                  <span className="value">{clp(calcularTotales(cot.items).total)} CLP</span>
+                  <span className="value">{clp(cot.total)} CLP</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px' }}>
                   <CotizacionAcciones cotizacion={cot} onVer={onVer} onEditar={onEditar} onEliminar={onEliminar} onPDF={onPDF} />

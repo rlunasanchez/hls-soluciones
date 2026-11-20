@@ -3,7 +3,7 @@ import { parseToken, toUpper } from "./helpers";
 
 // El formulario de la cotización usa los mismos nombres que la OT para el cliente, el contacto y la
 // dirección (cliente, rut, email, fonoPrincipal, contacto, direccion…), así se reutilizan los
-// componentes de la OT. Aquí se convierte entre ese formulario y lo que guarda el servidor.
+// componentes de la OT; el servidor guarda las mismas columnas. Aquí se convierte lo que llega y lo que se manda.
 
 export const itemVacio = () => ({ sku: "", detalle: "", cantidad: 1, neto: "", descuento: "" });
 
@@ -29,7 +29,6 @@ export const cotizacionVacia = () => ({
   ciudad: "",
   comuna: "",
   direccionId: null,
-  contactosExtra: [],
   ejecutivo: parseToken().nombre || parseToken().usuario || "",
   ejecutivoFono: EMPRESA.fono,
   ejecutivoEmail: parseToken().email || "",
@@ -38,21 +37,18 @@ export const cotizacionVacia = () => ({
   ordenNumero: ""
 });
 
-const leerJson = (val) => {
-  try {
-    const arr = JSON.parse(val || "[]");
-    return Array.isArray(arr) ? arr : [];
-  } catch {
-    return [];
-  }
+// Ítems que llegan del servidor (filas de cotizacion_items) -> los de los campos del formulario. Siempre hay
+// al menos uno. Las cantidades y los descuentos llegan como DECIMAL (texto): se pasan a número.
+export const itemsDelServidor = (items) => {
+  const lista = (Array.isArray(items) ? items : []).map((i) => ({
+    sku: i.sku || "",
+    detalle: i.detalle || "",
+    cantidad: Number(i.cantidad) || 0,
+    neto: i.neto ?? "",
+    descuento: Number(i.descuento) ? String(Number(i.descuento)) : ""
+  }));
+  return lista.length ? lista : [itemVacio()];
 };
-
-// Los ítems siempre tienen al menos uno; "Otros Contactos" (contactos_extra) puede ser vacío.
-export const parseItems = (val) => {
-  const arr = leerJson(val);
-  return arr.length ? arr : [itemVacio()];
-};
-export const parseExtra = (val) => leerJson(val);
 
 // Cotización guardada (columnas del servidor) -> formulario. El tipo (Empresa/Persona) viene del cliente
 // vinculado, si todavía existe. La dirección es la elegida en el mantenedor de Direcciones (columnas
@@ -66,64 +62,36 @@ export function cotizacionAFormulario(c, tipoCliente) {
     clienteId: c.cliente_id || null,
     // El tipo guardado en la cotización manda; si es de antes de guardarlo, el del cliente vinculado.
     clienteTipo: (c.cliente_tipo === "PERSONA" || (!c.cliente_tipo && tipoCliente === "PERSONA")) ? "PERSONA" : "EMPRESA",
-    cliente: c.cliente_razon_social || "",
-    rut: c.cliente_rut || "",
-    email: c.cliente_email || "",
-    fonoPrincipal: c.cliente_telefono || "",
-    contacto: c.contacto_nombre || "",
-    emailContacto: c.contacto_email || "",
-    fonoContacto: c.contacto_fono || "",
-    cargoContacto: c.contacto_cargo || "",
+    cliente: c.cliente || "",
+    rut: c.rut || "",
+    email: c.email || "",
+    fonoPrincipal: c.fono_principal || "",
+    contacto: c.contacto || "",
+    emailContacto: c.email_contacto || "",
+    fonoContacto: c.fono_contacto || "",
+    cargoContacto: c.cargo_contacto || "",
     contactoId: c.contacto_id || null,
-    direccion: c.contacto_direccion || "",
-    ciudad: c.contacto_ciudad || "",
-    comuna: c.contacto_comuna || "",
+    direccion: c.direccion || "",
+    ciudad: c.ciudad || "",
+    comuna: c.comuna || "",
     direccionId: c.direccion_id || null,
-    contactosExtra: parseExtra(c.contactos_extra),
     ejecutivo: c.ejecutivo || "",
     ejecutivoFono: c.ejecutivo_fono || "",
     ejecutivoEmail: c.ejecutivo_email || "",
-    items: parseItems(c.items),
+    items: itemsDelServidor(c.items),
     ordenId: c.orden_id || null,
     ordenNumero: c.orden_numero || ""
   };
 }
 
-// Formulario -> lo que espera el servidor (POST/PUT /api/cotizaciones). La dirección del formulario va en
-// contacto_direccion* y direccion_id; las columnas cliente_direccion* quedan vacías.
+// Formulario -> lo que espera el servidor (POST/PUT /api/cotizaciones). El formulario ya usa los nombres de la
+// OT, así que viaja tal cual; el servidor enlaza el contacto y la dirección con el mantenedor y calcula los
+// montos. Solo se mandan los ítems con algo escrito.
 export function formularioAPayload(f) {
   return {
-    fechaEmision: f.fechaEmision,
-    fechaValidoHasta: f.fechaValidoHasta,
-    condicion: f.condicion,
-    glosa: f.glosa,
-    clienteId: f.clienteId,
+    ...f,
     clienteTipo: f.clienteTipo === "PERSONA" ? "PERSONA" : "EMPRESA",
-    clienteRut: f.rut,
-    clienteRazonSocial: f.cliente,
-    clienteDireccion: "",
-    clienteCiudad: "",
-    clienteComuna: "",
-    clienteDireccionId: null,
-    clienteTelefono: f.fonoPrincipal,
-    clienteEmail: f.email,
-    contactoNombre: f.contacto,
-    contactoFono: f.fonoContacto,
-    contactoEmail: f.emailContacto,
-    contactoCargo: f.cargoContacto,
-    contactoId: f.contactoId,
-    contactoDireccion: f.direccion,
-    contactoCiudad: f.ciudad,
-    contactoComuna: f.comuna,
-    direccionId: f.direccionId,
-    contactosExtra: f.contactosExtra,
-    ejecutivo: f.ejecutivo,
-    ejecutivoFono: f.ejecutivoFono,
-    ejecutivoEmail: f.ejecutivoEmail,
-    // Solo se guardan los ítems con algo escrito
-    items: f.items.filter((i) => String(i.sku || "").trim() || String(i.detalle || "").trim() || Number(i.neto) > 0),
-    ordenId: f.ordenId,
-    ordenNumero: f.ordenNumero
+    items: f.items.filter((i) => String(i.sku || "").trim() || String(i.detalle || "").trim() || Number(i.neto) > 0)
   };
 }
 

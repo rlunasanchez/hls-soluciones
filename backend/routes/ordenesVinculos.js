@@ -1,4 +1,4 @@
-// Vínculo de la OT con el mantenedor de Equipos, Contactos y Direcciones (como ya lo tiene con el cliente):
+// Vínculo de la OT (y de la cotización, para contacto y dirección) con el mantenedor de Equipos, Contactos y Direcciones (como ya lo tiene con el cliente):
 // la OT guarda el id (`equipo_id`, `contacto_id`, `direccion_id`) además de la copia de los textos.
 //  - Al guardar la OT, `resolverVinculos` enlaza cada dato con el registro del mantenedor que lo identifica:
 //    equipo = Equipo + Marca + Modelo, contacto = su nombre, dirección = su texto (sin distinguir mayúsculas
@@ -28,12 +28,18 @@ export async function resolverVinculos(db, orden) {
 export const sincronizarOrdenesDeEquipo = (db, id, e) => db.query(
   "UPDATE ordenes_trabajo SET equipo = ?, marca = ?, modelo = ? WHERE equipo_id = ?", [e.equipo, e.marca || "", e.modelo || "", id]);
 
-export const sincronizarOrdenesDeContacto = (db, id, c) => db.query(
-  "UPDATE ordenes_trabajo SET contacto = ?, fono_contacto = ?, email_contacto = ?, cargo_contacto = ? WHERE contacto_id = ?",
+// Las cotizaciones guardan el contacto y la dirección con las mismas columnas que la OT y se vinculan igual,
+// así que lo que sigue a contactos y direcciones vale para las dos tablas.
+const CON_CONTACTO_Y_DIRECCION = ["ordenes_trabajo", "cotizaciones"];
+const enAmbas = async (sql, params) => { for (const tabla of CON_CONTACTO_Y_DIRECCION) await sql(tabla, params); };
+
+export const sincronizarOrdenesDeContacto = (db, id, c) => enAmbas(
+  (tabla, p) => db.query(`UPDATE ${tabla} SET contacto = ?, fono_contacto = ?, email_contacto = ?, cargo_contacto = ? WHERE contacto_id = ?`, p),
   [c.nombre, c.fono || null, c.email || null, c.cargo || null, id]);
 
-export const sincronizarOrdenesDeDireccion = (db, id, d) => db.query(
-  "UPDATE ordenes_trabajo SET direccion = ?, ciudad = ?, comuna = ? WHERE direccion_id = ?", [d.direccion, d.ciudad || null, d.comuna || null, id]);
+export const sincronizarOrdenesDeDireccion = (db, id, d) => enAmbas(
+  (tabla, p) => db.query(`UPDATE ${tabla} SET direccion = ?, ciudad = ?, comuna = ? WHERE direccion_id = ?`, p),
+  [d.direccion, d.ciudad || null, d.comuna || null, id]);
 
 // Tras crear un registro del mantenedor: las OT sin vínculo cuyo texto lo identifica quedan enlazadas a él
 // (p. ej. se eliminó un equipo y se volvió a registrar: todas sus OT lo recuperan sin abrirlas una a una).
@@ -42,15 +48,19 @@ export const reenlazarOrdenesDeEquipo = (db, id, e) => db.query(
    AND LOWER(TRIM(IFNULL(marca,''))) = LOWER(?) AND LOWER(TRIM(IFNULL(modelo,''))) = LOWER(?)`,
   [id, norm(e.equipo), norm(e.marca), norm(e.modelo)]);
 
-export const reenlazarOrdenesDeContacto = (db, id, nombre) => db.query(
-  "UPDATE ordenes_trabajo SET contacto_id = ? WHERE contacto_id IS NULL AND LOWER(TRIM(contacto)) = LOWER(?)", [id, norm(nombre)]);
+export const reenlazarOrdenesDeContacto = (db, id, nombre) => enAmbas(
+  (tabla, p) => db.query(`UPDATE ${tabla} SET contacto_id = ? WHERE contacto_id IS NULL AND LOWER(TRIM(contacto)) = LOWER(?)`, p),
+  [id, norm(nombre)]);
 
-export const reenlazarOrdenesDeDireccion = (db, id, direccion) => db.query(
-  "UPDATE ordenes_trabajo SET direccion_id = ? WHERE direccion_id IS NULL AND LOWER(TRIM(direccion)) = LOWER(?)", [id, norm(direccion)]);
+export const reenlazarOrdenesDeDireccion = (db, id, direccion) => enAmbas(
+  (tabla, p) => db.query(`UPDATE ${tabla} SET direccion_id = ? WHERE direccion_id IS NULL AND LOWER(TRIM(direccion)) = LOWER(?)`, p),
+  [id, norm(direccion)]);
 
 // Tras eliminar un registro del mantenedor: las OT conservan su copia y pierden el vínculo.
 const COLUMNA = { equipo: "equipo_id", contacto: "contacto_id", direccion: "direccion_id" };
-export const desvincularOrdenes = (db, tipo, id) => {
+export const desvincularOrdenes = async (db, tipo, id) => {
   if (!COLUMNA[tipo]) throw new Error(`Tipo de vínculo desconocido: ${tipo}`);
-  return db.query(`UPDATE ordenes_trabajo SET ${COLUMNA[tipo]} = NULL WHERE ${COLUMNA[tipo]} = ?`, [id]);
+  // El equipo es solo de la OT; el contacto y la dirección también están en las cotizaciones.
+  const tablas = tipo === "equipo" ? ["ordenes_trabajo"] : CON_CONTACTO_Y_DIRECCION;
+  for (const tabla of tablas) await db.query(`UPDATE ${tabla} SET ${COLUMNA[tipo]} = NULL WHERE ${COLUMNA[tipo]} = ?`, [id]);
 };

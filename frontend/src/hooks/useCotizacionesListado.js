@@ -32,7 +32,7 @@ export default function useCotizacionesListado() {
 
   const filtradas = cotizaciones.filter((cot) => {
     if (filtroFolio && !String(cot.folio).includes(filtroFolio.trim())) return false;
-    if (filtroCliente && !cot.cliente_razon_social?.toLowerCase().includes(filtroCliente.toLowerCase())) return false;
+    if (filtroCliente && !cot.cliente?.toLowerCase().includes(filtroCliente.toLowerCase())) return false;
     return true;
   });
   const totalPaginas = Math.ceil(filtradas.length / ITEMS_POR_PAG);

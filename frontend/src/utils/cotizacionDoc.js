@@ -7,64 +7,41 @@ import { esc, fecha, campo, h2, slotLogo, unir } from "./pdfHelpers";
 
 const clp = (n) => Math.round(Number(n) || 0).toLocaleString("es-CL");
 
-const parseJsonArray = (val) => {
-  if (Array.isArray(val)) return val;
-  try {
-    const arr = JSON.parse(val || "[]");
-    return Array.isArray(arr) ? arr : [];
-  } catch {
-    return [];
-  }
-};
-
-function contactoExtraHtml(c) {
-  const direccion = unir([c.direccion, c.ciudad, c.comuna], ", ");
-  const detalle = [c.cargo, c.fono, c.email, direccion].filter((v) => String(v || "").trim()).map(esc).join(" · ");
-  return `<div class="extra-item"><span class="nom">${esc(c.nombre)}</span>${detalle ? ` <span class="det">${detalle}</span>` : ""}</div>`;
-}
-
-// Exportado para que el formulario calcule los mismos totales que el PDF
-// (una sola fuente de verdad para Neto/IVA/Total). Sin filtrar por "detalle":
-// una fila con Neto cargado debe sumar aunque todavía no se haya escrito el
-// detalle (se está completando el formulario de arriba hacia abajo).
-export function calcularTotales(items) {
-  const lista = parseJsonArray(items);
-  const neto = lista.reduce((acc, i) => {
-    const bruto = (Number(i.cantidad) || 0) * (Number(i.neto) || 0);
+// Vista previa de los montos en el formulario, con la MISMA regla que el servidor (backend/utils/cotizacionTotales.js),
+// que es quien los calcula y guarda al grabar la cotización: total de cada ítem redondeado, neto = suma de los
+// ítems, IVA 19 % redondeado. El PDF no calcula: lee los montos guardados.
+export function calcularTotales(items, ivaPorcentaje = 19) {
+  const neto = (Array.isArray(items) ? items : []).reduce((suma, i) => {
+    const cantidad = Math.max(0, Number(i.cantidad) || 0);
+    const unitario = Math.max(0, Math.round(Number(i.neto) || 0));
     const descuentoPct = Math.min(100, Math.max(0, Number(i.descuento) || 0));
-    return acc + Math.max(0, bruto * (1 - descuentoPct / 100));
+    return suma + Math.round(cantidad * unitario * (1 - descuentoPct / 100));
   }, 0);
-  const iva = Math.round(neto * 0.19);
-  const total = neto + iva;
-  return { neto, iva, total };
+  const iva = Math.round((neto * ivaPorcentaje) / 100);
+  return { neto, iva, total: neto + iva };
 }
 
+// Una fila de la tabla de ítems: lee el total guardado de cada ítem.
 function filaItem(item) {
   const cantidad = Number(item.cantidad) || 0;
-  const neto = Number(item.neto) || 0;
-  const descuentoPct = Math.min(100, Math.max(0, Number(item.descuento) || 0));
-  const total = Math.max(0, cantidad * neto * (1 - descuentoPct / 100));
+  const descuentoPct = Number(item.descuento) || 0;
   return `
     <tr>
       <td class="sku">${item.sku ? esc(item.sku) : "-"}</td>
       <td class="detalle">${esc(item.detalle)}</td>
       <td class="num">${cantidad || ""}</td>
-      <td class="num">${clp(neto)}</td>
+      <td class="num">${clp(item.neto)}</td>
       <td class="num">${descuentoPct ? descuentoPct + "%" : ""}</td>
-      <td class="num">${clp(total)}</td>
+      <td class="num">${clp(item.total)}</td>
     </tr>`;
 }
 
 // Lo propio de la cotización, encima de los estilos comunes: cuadro de la empresa en el encabezado,
-// contactos adicionales, tabla de ítems, condiciones, totales y datos bancarios.
+// tabla de ítems, condiciones, totales y datos bancarios.
 const ESTILOS = `${ESTILOS_COMUNES}
 .emp-rut { text-align: center; align-self: flex-end; }
 .emp-rut .rs { font-size: 8pt; font-weight: 700; color: #374151; }
 .emp-rut .rut { margin-top: .5mm; font-size: 6.5pt; font-weight: 700; color: #374151; }
-
-.extra-item { margin-top: 1.2mm; overflow-wrap: anywhere; }
-.extra-item .nom { font-size: 9pt; font-weight: 600; }
-.extra-item .det { font-size: 9pt; font-weight: 600; color: #111827; }
 
 table.items { width: 100%; table-layout: fixed; border-collapse: collapse; margin-top: 1mm; }
 table.items thead th { text-align: left; font-size: 7pt; text-transform: uppercase; letter-spacing: .06em; color: #6B7280; border-bottom: 1pt solid #0C4A8C; padding: 2mm 2mm 1.5mm; }
@@ -92,58 +69,46 @@ table.items td.detalle { font-weight: 600; color: #111827; white-space: pre-wrap
 .bancarios b { color: #111827; }
 `;
 
-// Exportado para que el modal de opciones de PDF liste los mismos contactos
-// extra que terminará mostrando el documento (una sola fuente de verdad).
-export function contactosExtraDe(cot) {
-  return parseJsonArray(cot.contactos_extra).filter((c) => String(c?.nombre || "").trim());
-}
-
 // Secciones de cliente y contacto como en la OT: una empresa lleva su contacto y la dirección en la sección
 // Contacto; una persona no tiene contacto y su dirección va en Datos de Cliente.
-function seccionesCliente(cot, contactosExtra) {
+function seccionesCliente(cot) {
   const esPersona = cot.cliente_tipo === "PERSONA";
-  // La dirección es la elegida en el mantenedor de Direcciones (como en la OT). La dirección propia de la
-  // ficha del cliente (cliente_direccion*) no se toma: en una empresa no viaja al documento.
-  const { contacto_direccion: direccion, contacto_ciudad: ciudad, contacto_comuna: comuna } = cot;
+  // La dirección es la elegida en el mantenedor de Direcciones (como en la OT); la dirección propia de la
+  // ficha del cliente no se guarda ni se toma.
+  const { direccion, ciudad, comuna } = cot;
   const camposDireccion = `
       ${campo("Dirección", direccion)}
       ${campo("Ciudad - Comuna", unir([ciudad, comuna], " - "))}`;
 
-  const hayContacto = [cot.contacto_nombre, cot.contacto_cargo, cot.contacto_email, cot.contacto_fono, direccion].some((v) => String(v || "").trim());
-  const seccionContacto = (esPersona || (!hayContacto && !contactosExtra.length)) ? "" : `
+  const hayContacto = [cot.contacto, cot.cargo_contacto, cot.email_contacto, cot.fono_contacto, direccion].some((v) => String(v || "").trim());
+  const seccionContacto = (esPersona || !hayContacto) ? "" : `
   <section class="sec">
     ${h2("Contacto")}
     <div class="grid grid-3">
-      ${campo("Contacto", cot.contacto_nombre)}
-      ${campo("Cargo Contacto", cot.contacto_cargo)}
-      ${campo("Email Contacto", cot.contacto_email)}
-      ${campo("Fono Contacto", cot.contacto_fono, true)}${camposDireccion}
+      ${campo("Contacto", cot.contacto)}
+      ${campo("Cargo Contacto", cot.cargo_contacto)}
+      ${campo("Email Contacto", cot.email_contacto)}
+      ${campo("Fono Contacto", cot.fono_contacto, true)}${camposDireccion}
     </div>
-    ${contactosExtra.length ? `<div class="sub">› Contactos adicionales</div>${contactosExtra.map(contactoExtraHtml).join("")}` : ""}
   </section>`;
 
   return `
   <section class="sec">
     ${h2("Datos de Cliente")}
     <div class="grid grid-3">
-      ${campo("Cliente", cot.cliente_razon_social)}
-      ${campo("RUT", cot.cliente_rut, true)}${esPersona ? camposDireccion : ""}
-      ${campo("Teléfono", cot.cliente_telefono, true)}
-      ${campo("Email Cliente", cot.cliente_email)}
+      ${campo("Cliente", cot.cliente)}
+      ${campo("RUT", cot.rut, true)}${esPersona ? camposDireccion : ""}
+      ${campo("Teléfono", cot.fono_principal, true)}
+      ${campo("Email Cliente", cot.email)}
     </div>
   </section>${seccionContacto}`;
 }
 
-export function generarHtmlCotizacion(cot, opciones) {
-  // Mismo criterio que el guardado: un ítem con SKU o Neto cargado se imprime aunque no tenga Detalle.
-  const items = parseJsonArray(cot.items).filter((i) =>
-    String(i?.sku || "").trim() || String(i?.detalle || "").trim() || Number(i?.neto) > 0
-  );
-  const contactosExtraTodos = contactosExtraDe(cot);
-  const contactosExtra = opciones?.contactosExtra
-    ? contactosExtraTodos.filter((_, i) => opciones.contactosExtra[i])
-    : contactosExtraTodos;
-  const { neto, iva, total } = calcularTotales(cot.items);
+// cot: la cotización completa del servidor (GET /api/cotizaciones/:id): sus columnas, los montos guardados
+// (neto, iva, total) y `items`, la lista de filas de cotizacion_items.
+export function generarHtmlCotizacion(cot) {
+  const items = Array.isArray(cot.items) ? cot.items : [];
+  const { neto, iva, total } = cot;
 
   return `<!DOCTYPE html>
 <html lang="es">
@@ -180,7 +145,7 @@ export function generarHtmlCotizacion(cot, opciones) {
       <span class="v">${esc(fecha(cot.fecha_emision))}</span>
     </div>
   </div>
-  ${seccionesCliente(cot, contactosExtra)}
+  ${seccionesCliente(cot)}
 
   <section class="sec">
     ${h2("Ejecutivo")}
@@ -219,7 +184,7 @@ export function generarHtmlCotizacion(cot, opciones) {
       </div>
       <div class="totales">
         <div class="fila"><span>Neto:</span><span>${clp(neto)} CLP</span></div>
-        <div class="fila"><span>IVA (19%):</span><span>${clp(iva)} CLP</span></div>
+        <div class="fila"><span>IVA (${esc(Number(cot.iva_porcentaje) || 19)}%):</span><span>${clp(iva)} CLP</span></div>
         <div class="fila total"><span>Total:</span><span>${clp(total)} CLP</span></div>
       </div>
     </div>
@@ -236,6 +201,6 @@ export function generarHtmlCotizacion(cot, opciones) {
 }
 
 export function tituloDocumentoCotizacion(cot) {
-  const cliente = String(cot.cliente_razon_social || "").trim();
+  const cliente = String(cot.cliente || "").trim();
   return `COTIZACIÓN ${cot.folio ?? "SIN-FOLIO"}${cliente ? " - " + cliente : ""}`;
 }
