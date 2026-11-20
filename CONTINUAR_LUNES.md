@@ -8,10 +8,9 @@ Este archivo resume dónde quedó el trabajo al terminar el viernes 20-nov-2026 
 
 | | Versión | Commit |
 |---|---|---|
-| **Web publicada** (Render + Vercel + Neon) | **v2.208** (19-nov-2026) | `main` `b8eb3f0`, `deploy/cloud` `bb32f4c` |
-| **Listo para subir** | v2.209 Cotizaciones en tablas (necesita el SQL de Neon) | ver 2c |
+| **Web publicada** (Render + Vercel + Neon) | **v2.209** (20-nov-2026) | `main` `7b142c9`, `deploy/cloud` `71fb4dd` (el despliegue de Render no se pudo comprobar) |
 
-- Árbol de trabajo limpio (solo `.claude/` sin versionar). No hay worktrees abiertos. **Neon:** v2.195 a v2.208 no tocan la base de datos; el único cambio es la columna `cotizaciones.cliente_tipo` (ver 2c), que el dueño **ya corrió en Neon** el 19-nov.
+- Árbol de trabajo limpio (solo `.claude/` sin versionar). No hay worktrees abiertos. **Neon:** v2.195 a v2.208 no tocaron la base de datos. v2.209 sí: el dueño corrió en Neon el 20-nov el `ALTER … cliente_tipo` (19-nov) y el bloque de migración de `CAMBIOS.md` v2.209 (tabla `cotizacion_items`, columnas con los nombres de la OT, montos en columnas, JSON eliminado); se verificó listando las columnas de `cotizaciones`. **Neon ya está al día, no hay SQL pendiente.**
 - Las dos ramas se publican con una carpeta temporal (`git worktree add "$env:TEMP\hls-cloud" deploy/cloud`, `git merge main`, push de `deploy/cloud` y luego de `main`, y quitar la carpeta), para no cambiar la rama de la carpeta del dueño. Los `git push` se hacen desde **PowerShell**.
 - El 17-nov-2026 Claude pudo hacer `git push` desde PowerShell sin bloqueo (v2.200 a v2.204, cada vez con orden expresa del dueño: «documenta y sube»). Si el clasificador lo bloquea, el dueño lo escribe con `! git push …`. **Solo se publica con la orden expresa del dueño.**
 - Los datos de la base de **producción (Neon) y la local se borraron**: eran de prueba. Los usuarios (`admin`, `rluna`, `rzuniga`) se conservan. La numeración de OT parte de `OT-2026-02800` y los códigos de `CL-0001`.
@@ -21,7 +20,7 @@ Este archivo resume dónde quedó el trabajo al terminar el viernes 20-nov-2026 
 
 Detalle completo en `CAMBIOS.md` (v2.209, con el SQL de Neon) y `AGENTS.md`. Resumen: formulario con los componentes de la OT (`Cotizaciones.jsx` 73 líneas), todo en tablas (`cotizacion_items` y montos `neto`/`iva`/`total` en columnas, calculados por el servidor), columnas con los nombres de la OT, vínculos y sincronización con los mantenedores como la OT, PDF al estilo de la OT (estilos en `utils/pdfEstilos.js`). Probado con MySQL y PostgreSQL reales; **el formulario y el PDF no se han visto en pantalla**.
 
-**Estado de la publicación:** si al retomar `git log origin/main` no incluye v2.209, falta subirla. Orden: **el dueño corre el SQL de Neon (`CAMBIOS.md` v2.209) → push `deploy/cloud` → push `main`** (verificar con `gh api repos/rlunasanchez/hls-soluciones/deployments`). Entre el SQL y el despliegue de Render, Cotizaciones de la web falla unos minutos.
+**Estado de la publicación (20-nov-2026):** SQL corrido en Neon → `deploy/cloud` `71fb4dd` subida → `main` `7b142c9` subida. **Sin comprobar:** que Render terminó de desplegar (`gh` solo muestra Vercel; revisar el panel de Render → Logs) y que Cotizaciones funciona en la web. **Primera tarea al retomar:** abrir la web (Ctrl+F5), entrar a Cotizaciones, crear una cotización de prueba con un cliente (y borrarla), y si falla copiar el error de los Logs de Render.
 
 **Lo que sigue en Cotizaciones:** que el dueño pruebe en pantalla (empresa y persona, crear desde una OT, editar un contacto y ver que se actualiza, PDF); listado de Cotizaciones en el servidor como la OT (hoy carga hasta 10.000 y filtra en el navegador); la OT mantiene `contactos_extra`/`direcciones_extra` como JSON (cambio aparte, no pedido aún). Duda abierta: el dueño dijo que «a veces se va el contacto» al crear desde una OT (por código llega completo; las OT de una persona no tienen contacto por diseño).
 
