@@ -2,6 +2,14 @@
 
 ## Fecha: 2026-11-23
 
+### v2.213: «Válido hasta» visible en el PDF de la cotización
+
+**Alcance:** solo frontend (`cotizacionDoc.js`), sin cambios de backend ni de base de datos (no hay SQL de Neon). Verificado por código (guardar la fecha, leerla del servidor y armar el HTML del PDF); no se vio el PDF renderizado.
+
+- **Qué pasaba:** el dueño llenaba «Válido hasta» en el formulario y «no aparecía» en el PDF. La fecha sí se guardaba y se imprimía, pero iba abajo, en la zona de condiciones (fuente de 6 pt junto a los textos legales), donde pasaba desapercibida.
+- **Qué cambió:** «Válido hasta» pasa a la barra del título, a la derecha, en un cuadro junto a «Emisión» (nuevo contenedor `.folios` con dos `.folio`). Abajo queda solo «Condición». Si la cotización no tiene fecha de validez no se imprime un cuadro vacío (solo «Emisión»).
+- **Si vuelve a pasar:** pedir el folio y revisar qué fecha tiene guardada (`cotizaciones.fecha_valido_hasta`).
+
 ### v2.212: «Ejecutivo y Condiciones» de la cotización en dos líneas de tres campos
 
 **Alcance:** solo frontend (`CotizacionFormEjecutivo.jsx`), sin cambios de backend ni de base de datos (no hay SQL de Neon). Build OK; sin probar en pantalla.
