@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { getCached } from "../services/cache";
 import { usePaginaPersistente, useClampPagina } from "./usePaginacion";
-
-const ITEMS_POR_PAG = 4;
+import useFilasPorPantalla from "./useFilasPorPantalla";
 
 // Listado de Cotizaciones: carga, filtros por folio y cliente, y paginación (en el navegador por ahora).
+// Las filas por página dependen del alto de la pantalla, como en el resto de los listados.
 export default function useCotizacionesListado() {
+  const itemsPorPagina = useFilasPorPantalla();
   const [cotizaciones, setCotizaciones] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filtroFolio, setFiltroFolio] = useState("");
@@ -35,8 +36,8 @@ export default function useCotizacionesListado() {
     if (filtroCliente && !cot.cliente?.toLowerCase().includes(filtroCliente.toLowerCase())) return false;
     return true;
   });
-  const totalPaginas = Math.ceil(filtradas.length / ITEMS_POR_PAG);
-  const pagina = filtradas.slice((paginaActual - 1) * ITEMS_POR_PAG, paginaActual * ITEMS_POR_PAG);
+  const totalPaginas = Math.ceil(filtradas.length / itemsPorPagina);
+  const pagina = filtradas.slice((paginaActual - 1) * itemsPorPagina, paginaActual * itemsPorPagina);
   useClampPagina(paginaActual, setPaginaActual, totalPaginas);
 
   return {

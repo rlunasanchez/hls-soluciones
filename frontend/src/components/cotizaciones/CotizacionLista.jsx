@@ -1,5 +1,5 @@
-import { FileSpreadsheet, Plus, RotateCcw } from "lucide-react";
-import Pagination from "../Pagination";
+import { FileSpreadsheet } from "lucide-react";
+import FiltrosCotizacion from "./FiltrosCotizacion";
 import CotizacionAcciones from "./CotizacionAcciones";
 
 const clp = (n) => Math.round(Number(n) || 0).toLocaleString("es-CL");
@@ -7,38 +7,12 @@ const clp = (n) => Math.round(Number(n) || 0).toLocaleString("es-CL");
 function CotizacionLista({ cotizaciones, loading, filtroFolio, onFiltroFolioChange, filtroCliente, onFiltroClienteChange, onLimpiar, onNueva, paginaActual, totalPaginas, onPageChange, onVer, onEditar, onEliminar, onPDF }) {
   return (
     <>
-      <div className="table-header">
-        <div className="table-header-actions">
-          <button className="main-btn" onClick={onNueva} style={{ marginRight: '8px' }}>
-            <Plus size={16} /> Nueva Cotización
-          </button>
-          <div className="filtro-fila-selects">
-            <div className="filtro-grupo-select">
-              <label>Folio</label>
-              <input
-                type="text"
-                placeholder="Buscar..."
-                value={filtroFolio}
-                onChange={(e) => onFiltroFolioChange(e.target.value)}
-                className="filtro-garantia-select"
-              />
-            </div>
-            <div className="filtro-grupo-select filtro-full-width">
-              <label>Cliente</label>
-              <input
-                type="text"
-                placeholder="Buscar..."
-                value={filtroCliente}
-                onChange={(e) => onFiltroClienteChange(e.target.value)}
-                className="filtro-garantia-select"
-              />
-            </div>
-            <button onClick={onLimpiar} className="btn-limpiar-equipos" title="Limpiar filtros">
-              <RotateCcw size={14} /> Limpiar
-            </button>
-          </div>
-        </div>
-      </div>
+      <FiltrosCotizacion
+        filtroFolio={filtroFolio} onFiltroFolioChange={onFiltroFolioChange}
+        filtroCliente={filtroCliente} onFiltroClienteChange={onFiltroClienteChange}
+        onLimpiar={onLimpiar} onNueva={onNueva}
+        paginaActual={paginaActual} totalPaginas={totalPaginas} onPageChange={onPageChange}
+      />
 
       {loading ? (
         <div className="empty-state">
@@ -130,8 +104,6 @@ function CotizacionLista({ cotizaciones, loading, filtroFolio, onFiltroFolioChan
               </div>
             ))}
           </div>
-
-          <Pagination currentPage={paginaActual} totalPages={totalPaginas} onPageChange={onPageChange} />
         </>
       )}
     </>
