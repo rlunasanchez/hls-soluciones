@@ -9,7 +9,8 @@ function CotizacionFormEjecutivo({ cotizacion, setCotizacion, soloLectura }) {
   return (
     <div className="of-sec success" style={{ marginTop: 8 }}>
       <div className="of-st primary">Ejecutivo y Condiciones</div>
-      <div className="of-form-grid" style={{ marginBottom: 0 }}>
+      {/* Dos líneas de tres campos: ejecutivo, fono y email; emisión, válido hasta y condición */}
+      <div className="of-r3">
         <div className="of-f">
           <label>Ejecutivo</label>
           <input type="text" value={cotizacion.ejecutivo} disabled />
@@ -23,7 +24,7 @@ function CotizacionFormEjecutivo({ cotizacion, setCotizacion, soloLectura }) {
           <input type="email" value={cotizacion.ejecutivoEmail} onChange={(e) => cambiar("ejecutivoEmail", e.target.value)} disabled={soloLectura} />
         </div>
       </div>
-      <div className="of-form-grid" style={{ marginTop: 10 }}>
+      <div className="of-r3">
         <div className="of-f">
           <label>Emisión</label>
           <input type="date" value={cotizacion.fechaEmision} onChange={(e) => cambiar("fechaEmision", e.target.value)} disabled={soloLectura} required />
