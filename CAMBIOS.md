@@ -1,5 +1,15 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-11-23
+
+### v2.210: La lista de Cotizaciones sigue el estándar del proyecto (barra de filtros, paginación arriba y filas según la pantalla)
+
+**Alcance:** solo frontend, sin cambios de backend ni de base de datos (no hay SQL de Neon). Build OK; sin probar en pantalla (se vio con datos de prueba en local, ya borrados).
+
+- **Barra de filtros** (`components/cotizaciones/FiltrosCotizacion.jsx`, nuevo, modelado sobre `FiltrosContacto`): **Nueva Cotización**, Folio, Cliente, **Limpiar** y la paginación en línea, todo en una fila dentro del recuadro blanco; los nombres van dentro de los campos (`placeholder` + `aria-label`) y los campos miden lo mismo que en los mantenedores (200 × 30 px). Reutiliza las clases `filters-section`, `filters-content`, `filtro-grupo-contactos` y `btn-limpiar-contactos`; no hay clases nuevas. Se quitó la barra anterior (estilo de la lista de OT) y la paginación de abajo.
+- **Filas por página según el alto de la pantalla** (`useCotizacionesListado.js` usa `useFilasPorPantalla`, antes 4 fijas), como Clientes, Contactos, Direcciones, Equipos y OT.
+- **Regla nueva del dueño (23-nov-2026): todo el proyecto debe ser estándar.** Una pantalla nueva o adaptada debe verse y comportarse como sus hermanas; está en `AGENTS.md` (sección 8) y en la memoria de Claude. **Desviación conocida:** la pantalla de **Usuarios** (4 filas fijas, paginación abajo y su propia barra de filtros) aún no es estándar; pendiente de estandarizar si el dueño lo pide.
+
 ## Fecha: 2026-11-20
 
 ### v2.209: Cotizaciones adaptada como la OT, todo en tablas (sin JSON) y PDF al estilo de la OT

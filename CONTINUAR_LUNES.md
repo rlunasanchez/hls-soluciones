@@ -8,7 +8,7 @@ Este archivo resume dónde quedó el trabajo al terminar el viernes 20-nov-2026 
 
 | | Versión | Commit |
 |---|---|---|
-| **Web publicada** (Render + Vercel + Neon) | **v2.209** (20-nov-2026) | `main` `7b142c9`, `deploy/cloud` `71fb4dd` (el despliegue de Render no se pudo comprobar) |
+| **Web publicada** (Render + Vercel + Neon) | **v2.210** (23-nov-2026; v2.209 el 20-nov con el SQL de Neon) | ver `git log` de `main` y `deploy/cloud` (el despliegue de Render no se pudo comprobar) |
 
 - Árbol de trabajo limpio (solo `.claude/` sin versionar). No hay worktrees abiertos. **Neon:** v2.195 a v2.208 no tocaron la base de datos. v2.209 sí: el dueño corrió en Neon el 20-nov el `ALTER … cliente_tipo` (19-nov) y el bloque de migración de `CAMBIOS.md` v2.209 (tabla `cotizacion_items`, columnas con los nombres de la OT, montos en columnas, JSON eliminado); se verificó listando las columnas de `cotizaciones`. **Neon ya está al día, no hay SQL pendiente.**
 - Las dos ramas se publican con una carpeta temporal (`git worktree add "$env:TEMP\hls-cloud" deploy/cloud`, `git merge main`, push de `deploy/cloud` y luego de `main`, y quitar la carpeta), para no cambiar la rama de la carpeta del dueño. Los `git push` se hacen desde **PowerShell**.
@@ -21,6 +21,8 @@ Este archivo resume dónde quedó el trabajo al terminar el viernes 20-nov-2026 
 Detalle completo en `CAMBIOS.md` (v2.209, con el SQL de Neon) y `AGENTS.md`. Resumen: formulario con los componentes de la OT (`Cotizaciones.jsx` 73 líneas), todo en tablas (`cotizacion_items` y montos `neto`/`iva`/`total` en columnas, calculados por el servidor), columnas con los nombres de la OT, vínculos y sincronización con los mantenedores como la OT, PDF al estilo de la OT (estilos en `utils/pdfEstilos.js`). Probado con MySQL y PostgreSQL reales; **el formulario y el PDF no se han visto en pantalla**.
 
 **Estado de la publicación (20-nov-2026):** SQL corrido en Neon → `deploy/cloud` `71fb4dd` subida → `main` `7b142c9` subida. **Sin comprobar:** que Render terminó de desplegar (`gh` solo muestra Vercel; revisar el panel de Render → Logs) y que Cotizaciones funciona en la web. **Primera tarea al retomar:** abrir la web (Ctrl+F5), entrar a Cotizaciones, crear una cotización de prueba con un cliente (y borrarla), y si falla copiar el error de los Logs de Render.
+
+**23-nov-2026 (v2.210):** la lista de Cotizaciones quedó estándar (barra de filtros en una fila con los nombres dentro de los campos, paginación arriba, filas según la pantalla). El dueño fijó la regla «todo el proyecto estándar» (`AGENTS.md` sección 8). **Pendiente conocido:** la pantalla de **Usuarios** no es estándar (4 filas fijas, paginación abajo, barra de filtros propia). Datos de prueba: la base local quedó vacía otra vez (usuarios intactos).
 
 **Lo que sigue en Cotizaciones:** que el dueño pruebe en pantalla (empresa y persona, crear desde una OT, editar un contacto y ver que se actualiza, PDF); listado de Cotizaciones en el servidor como la OT (hoy carga hasta 10.000 y filtra en el navegador); la OT mantiene `contactos_extra`/`direcciones_extra` como JSON (cambio aparte, no pedido aún). Duda abierta: el dueño dijo que «a veces se va el contacto» al crear desde una OT (por código llega completo; las OT de una persona no tienen contacto por diseño).
 
