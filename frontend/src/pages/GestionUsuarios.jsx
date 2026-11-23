@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Plus, Key, ToggleLeft, ToggleRight, RotateCcw
-} from "lucide-react";
+import { ToggleLeft, ToggleRight } from "lucide-react";
 import api from "../services/api";
 import { getCached } from "../services/cache";
 import { parseToken, cerrarSesion } from "../utils/helpers";
@@ -10,8 +8,9 @@ import HeaderUsuario from "../components/usuarios/HeaderUsuario";
 import UsuarioFormulario from "../components/usuarios/UsuarioFormulario";
 import CambioPasswordForm from "../components/usuarios/CambioPasswordForm";
 import UsuarioAcciones from "../components/usuarios/UsuarioAcciones";
-import Pagination from "../components/Pagination";
+import FiltrosUsuario from "../components/usuarios/FiltrosUsuario";
 import { usePaginaPersistente, useClampPagina } from "../hooks/usePaginacion";
+import useFilasPorPantalla from "../hooks/useFilasPorPantalla";
 
 function GestionUsuarios() {
   const navigate = useNavigate();
@@ -21,7 +20,7 @@ function GestionUsuarios() {
   const [usuarioEditando, setUsuarioEditando] = useState(null);
   const [filtroBusqueda, setFiltroBusqueda] = useState("");
   const [paginaActual, setPaginaActual] = usePaginaPersistente("pagUsuarios", [filtroBusqueda]);
-  const usuariosPorPagina = 4;
+  const usuariosPorPagina = useFilasPorPantalla();
 
   const usuariosFiltrados = usuarios.filter(u => {
     if (!filtroBusqueda) return true;
@@ -146,33 +145,16 @@ function GestionUsuarios() {
       <HeaderUsuario navigate={navigate} onLogout={cerrarSesion} rol={rol} />
 
       {rol === 'admin' && (
-        <div className="actions-bar" style={{ marginBottom: '16px', display: 'flex', gap: '10px' }}>
-          <button onClick={() => setMostrarFormulario(true)} className="main-btn">
-            <Plus size={16} /> Nuevo Usuario
-          </button>
-          <button onClick={() => setMostrarCambioPassword(true)} className="main-btn">
-            <Key size={16} /> Cambiar Password
-          </button>
-        </div>
-      )}
-
-      {rol === 'admin' && (
-        <div className="filters-section">
-          <div className="filters-content">
-            <div className="filtro-grupo-equipos">
-              <label>Buscar Usuario</label>
-              <input
-                type="text"
-                placeholder="Nombre o correo..."
-                value={filtroBusqueda}
-                onChange={(e) => setFiltroBusqueda(e.target.value)}
-              />
-            </div>
-            <button onClick={() => setFiltroBusqueda("")} className="btn-limpiar-equipos">
-              <RotateCcw size={14} /> Limpiar
-            </button>
-          </div>
-        </div>
+        <FiltrosUsuario
+          filtroBusqueda={filtroBusqueda}
+          onFiltroBusquedaChange={setFiltroBusqueda}
+          onLimpiar={() => setFiltroBusqueda("")}
+          onNuevo={() => setMostrarFormulario(true)}
+          onCambiarPassword={() => setMostrarCambioPassword(true)}
+          paginaActual={paginaActual}
+          totalPaginas={totalPaginas}
+          onPageChange={setPaginaActual}
+        />
       )}
 
       {rol === 'admin' ? (
@@ -272,8 +254,6 @@ function GestionUsuarios() {
               </div>
             ))}
           </div>
-
-          <Pagination currentPage={paginaActual} totalPages={totalPaginas} onPageChange={setPaginaActual} />
         </>
       ) : (
         <div className="table-container" style={{ padding: '40px', textAlign: 'center' }}>

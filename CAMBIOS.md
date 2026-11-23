@@ -2,6 +2,15 @@
 
 ## Fecha: 2026-11-23
 
+### v2.211: La pantalla de Usuarios sigue el estándar del proyecto
+
+**Alcance:** solo frontend, sin cambios de backend ni de base de datos (no hay SQL de Neon). Build OK y ESLint sin errores; sin probar en pantalla.
+
+- **Barra de filtros** (`components/usuarios/FiltrosUsuario.jsx`, nuevo, modelado sobre `FiltrosEquipo`): **Nuevo Usuario**, **Cambiar Password**, el filtro, **Limpiar** y la paginación en línea, todo en una fila dentro del recuadro blanco. Antes los dos botones estaban en una barra aparte arriba y la paginación abajo. El filtro lleva su nombre dentro del campo («Nombre o correo», con `aria-label`) y mide lo mismo que en los mantenedores (200 × 30 px). Reutiliza `filters-section`, `filters-content`, `filtro-grupo-equipos` y `btn-limpiar-equipos`; no hay clases nuevas.
+- **Filas por página según el alto de la pantalla** (`useFilasPorPantalla`, antes 4 fijas) y paginación arriba (`Pagination enLinea`); se quitó la de abajo.
+- **Sin cambios** para un usuario que no es admin (sigue viendo solo la información de su cuenta) ni en la tabla ni en el formulario.
+- **Con esto todas las listas del proyecto usan el mismo estándar** (Clientes, Contactos, Direcciones, Equipos, OT, Cotizaciones y Usuarios). Informes y Orden de Compra siguen siendo páginas vacías.
+
 ### v2.210: La lista de Cotizaciones sigue el estándar del proyecto (barra de filtros, paginación arriba y filas según la pantalla)
 
 **Alcance:** solo frontend, sin cambios de backend ni de base de datos (no hay SQL de Neon). Build OK; sin probar en pantalla (se vio con datos de prueba en local, ya borrados).
