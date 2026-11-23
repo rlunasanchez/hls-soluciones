@@ -36,9 +36,10 @@ function filaItem(item) {
     </tr>`;
 }
 
-// Lo propio de la cotización, encima de los estilos comunes: cuadro de la empresa en el encabezado,
+// Lo propio de la cotización, encima de los estilos comunes: cuadro de la empresa en el encabezado, las fechas de emisión y validez,
 // tabla de ítems, condiciones, totales y datos bancarios.
 const ESTILOS = `${ESTILOS_COMUNES}
+.folios { display: flex; gap: 4mm; }
 .emp-rut { text-align: center; align-self: flex-end; }
 .emp-rut .rs { font-size: 8pt; font-weight: 700; color: #374151; }
 .emp-rut .rut { margin-top: .5mm; font-size: 6.5pt; font-weight: 700; color: #374151; }
@@ -140,9 +141,15 @@ export function generarHtmlCotizacion(cot) {
     <div>
       <h1>Cotización <span class="folio-numero"><span class="l">N°</span><span class="v">${esc(cot.folio)}</span></span></h1>
     </div>
-    <div class="folio">
-      <span class="l">Emisión</span>
-      <span class="v">${esc(fecha(cot.fecha_emision))}</span>
+    <div class="folios">
+      <div class="folio">
+        <span class="l">Emisión</span>
+        <span class="v">${esc(fecha(cot.fecha_emision))}</span>
+      </div>
+      ${fecha(cot.fecha_valido_hasta) ? `<div class="folio">
+        <span class="l">Válido hasta</span>
+        <span class="v">${esc(fecha(cot.fecha_valido_hasta))}</span>
+      </div>` : ""}
     </div>
   </div>
   ${seccionesCliente(cot)}
@@ -179,7 +186,6 @@ export function generarHtmlCotizacion(cot) {
         ${CONDICIONES_COTIZACION.map((t) => `<p>${esc(t)}</p>`).join("")}
         <div class="grid cond-pie">
           ${campo("Condición", cot.condicion)}
-          ${campo("Válido hasta", fecha(cot.fecha_valido_hasta))}
         </div>
       </div>
       <div class="totales">
