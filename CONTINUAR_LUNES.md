@@ -1,6 +1,6 @@
-# Para continuar el lunes 23-nov-2026
+# Para continuar el martes 24-nov-2026
 
-Este archivo resume dónde quedó el trabajo al terminar el viernes 20-nov-2026 (el nombre del archivo es histórico). Se puede borrar cuando ya no haga falta.
+Este archivo resume dónde quedó el trabajo al terminar el lunes 23-nov-2026 (el nombre del archivo es histórico). Se puede borrar cuando ya no haga falta.
 
 **Frase para retomar:** "Lee AGENTS.md, CAMBIOS.md y CONTINUAR_LUNES.md; seguimos con …"
 
@@ -15,6 +15,22 @@ Este archivo resume dónde quedó el trabajo al terminar el viernes 20-nov-2026 
 - El 17-nov-2026 Claude pudo hacer `git push` desde PowerShell sin bloqueo (v2.200 a v2.204, cada vez con orden expresa del dueño: «documenta y sube»). Si el clasificador lo bloquea, el dueño lo escribe con `! git push …`. **Solo se publica con la orden expresa del dueño.**
 - Los datos de la base de **producción (Neon) y la local se borraron**: eran de prueba. Los usuarios (`admin`, `rluna`, `rzuniga`) se conservan. La numeración de OT parte de `OT-2026-02800` y los códigos de `CL-0001`.
 - La contraseña de `admin` en Neon se restableció a `admin123` el 10-nov-2026 (el dueño debe cambiarla desde Gestión de Usuarios). La de la base local es la de `ADMIN_PASSWORD` del `.env`.
+
+## 1b. Lo hecho el lunes 23-nov-2026 (v2.210 a v2.213, todo solo frontend, ya subido) y por dónde seguir
+
+Detalle de cada versión en `CAMBIOS.md`. Todo en `main` `5fe670d` y `deploy/cloud` `f2e1e8c`; no hubo SQL de Neon ni cambios de backend. **Ninguno se ha visto en pantalla todavía** (el dueño probó con datos de prueba en local, ya borrados).
+
+- **v2.210:** lista de Cotizaciones estándar: barra de filtros en una fila (`FiltrosCotizacion.jsx`, nombres dentro de los campos, 200 × 30 px), paginación arriba y filas según el alto de la pantalla.
+- **v2.211:** pantalla de **Usuarios** estándar (`FiltrosUsuario.jsx`: Nuevo Usuario, Cambiar Password, filtro, Limpiar y paginación en una fila; filas según la pantalla). Con esto **ya no quedan desvíos del estándar** entre las listas (Clientes, Contactos, Direcciones, Equipos, OT, Cotizaciones y Usuarios).
+- **v2.212:** «Ejecutivo y Condiciones» del formulario de cotización en dos líneas de tres campos (`of-r3`).
+- **v2.213:** «Válido hasta» del PDF de la cotización pasó a la barra del título, junto a «Emisión» (antes iba abajo y no se notaba). La fecha siempre se guardó bien; si el dueño dice que sigue sin verse, pedir el folio y mirar `cotizaciones.fecha_valido_hasta`.
+- **Regla permanente del dueño: «todo el proyecto debe ser estándar»** (`AGENTS.md` sección 8): antes de entregar una pantalla, compararla con sus hermanas; si algo se desvía, avisar y ofrecer estandarizarlo. También está en la memoria de Claude.
+
+**Primero mañana (en este orden):**
+1. Comprobar los despliegues: Vercel (`gh api repos/rlunasanchez/hls-soluciones/deployments`, debe aparecer `5fe670d` en Production) y Render (panel → Logs; `gh` no lo muestra).
+2. Que el dueño abra la web con Ctrl+F5 y mire, sin datos de prueba (la web y la base local están vacías salvo los usuarios): lista y formulario de Cotizaciones, PDF de la cotización (empresa y persona, «Válido hasta»), y la pantalla de Usuarios. Si hace falta volver a cargar datos de prueba, usar una marca reconocible («PRUEBA PAG», códigos 99xx), no crear registros reales mientras estén y borrarlos al terminar.
+3. Seguir con lo que pida el dueño sobre Cotizaciones (venía ajustando el formulario y el PDF paso a paso). Pendientes ya conocidos: listado de Cotizaciones en el servidor (hoy carga hasta 10.000 y filtra en el navegador; en el backend el listado ya devuelve `limit`/`page`) y la duda abierta del contacto «que a veces se va» al crear una cotización desde una OT (por código llega completo; las OT de una persona no tienen contacto por diseño).
+4. Después, sin fecha: historial de la OT (decisiones en la sección 3), Informes y Orden de Compra (páginas vacías), y pasar a tablas los JSON `contactos_extra`/`direcciones_extra` de la OT (el dueño quiere «todo con tablas»; aún no lo pidió para la OT).
 
 ## 2c. Cotizaciones adaptada como la OT (v2.209, 20-nov-2026)
 
@@ -63,7 +79,7 @@ Detalle de cada uno en `CAMBIOS.md`. Todo subido a la web; **lo marcado "sin pro
 
 ## 3. Lo que sigue (orden acordado con el dueño)
 
-0. **Primero Cotizaciones (sección 2c):** probar en local lo que hay y seguir con los pasos de esa sección.
+0. **Primero lo de la sección 1b** (comprobar despliegues, ver en pantalla lo del 23-nov y seguir con Cotizaciones según pida el dueño).
 1. **Probar en la web** (Ctrl+F5) lo marcado "sin probar" de las secciones 2b, 2a y 2 y avisar si algo falla; en especial las filas por página (v2.205) y los títulos «Cotizado» / «Con OT». Verificar también que Render terminó de desplegar `e736952` (`gh` solo muestra Vercel; Render se ve en su panel → Logs) y que **editar un cliente ya no vacía el fono de las OT** (v2.200, el arreglo original del día).
    - **Pendiente de probar a fondo:** el cambio de `routes/clientes.js` en PostgreSQL con `embedded-postgres` (`embedded-postgres` no está instalado en el PC del dueño; instalarlo en una carpeta temporal según la sección 7).
    - **Pendiente de decidir:** las cuatro decisiones del historial de la OT (punto 2).
