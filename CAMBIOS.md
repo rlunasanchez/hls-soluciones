@@ -2,6 +2,12 @@
 
 ## Fecha: 2026-11-23
 
+### v2.212: «Ejecutivo y Condiciones» de la cotización en dos líneas de tres campos
+
+**Alcance:** solo frontend (`CotizacionFormEjecutivo.jsx`), sin cambios de backend ni de base de datos (no hay SQL de Neon). Build OK; sin probar en pantalla.
+
+- **Qué cambió:** la sección usa dos filas de la grilla de 3 columnas ya existente (`of-r3`, la de la OT) en vez de `of-form-grid`, que repartía los campos según el ancho y los partía en más líneas. Línea 1: Ejecutivo, Fono Ejecutivo y Email Ejecutivo. Línea 2: Emisión, Válido hasta y Condición. Glosa sigue debajo a todo el ancho. En móvil (≤768 px) pasan a una columna. Sin clases CSS nuevas.
+
 ### v2.211: La pantalla de Usuarios sigue el estándar del proyecto
 
 **Alcance:** solo frontend, sin cambios de backend ni de base de datos (no hay SQL de Neon). Build OK y ESLint sin errores; sin probar en pantalla.
