@@ -7,13 +7,14 @@ const CONDICIONES = [
 // quedan iguales a los de Cliente, Contacto y Dirección; el largo no cambia.
 const ALTO_IGUAL = { height: "23.06px" };
 
-// Sección "Ejecutivo y Condiciones" de la cotización: ejecutivo, fechas, condición de pago y glosa.
-// Misma caja y mismo título que "Datos del cliente / contacto / dirección" (of-caja + of-caja-titulo).
+// "Ejecutivo y Condiciones" de la cotización (ejecutivo, fechas y condición de pago) y, aparte, su "Glosa".
+// "Ejecutivo y Condiciones" conserva el fondo celeste que tenía (of-sec success) con el título de las otras cajas
+// (of-caja-titulo); la Glosa va en su propia caja.
 function CotizacionFormEjecutivo({ cotizacion, setCotizacion, soloLectura }) {
   const cambiar = (campo, valor) => setCotizacion((prev) => ({ ...prev, [campo]: valor }));
   return (
-    <div className="of-sec primary" style={{ marginTop: 8 }}>
-      <div className="of-caja" style={{ marginBottom: 0 }}>
+    <>
+      <div className="of-sec success" style={{ marginTop: 8 }}>
         <div className="of-caja-titulo">Ejecutivo y Condiciones</div>
         {/* Dos líneas de tres campos: ejecutivo, fono y email; emisión, válido hasta y condición */}
         <div className="of-r3">
@@ -46,9 +47,13 @@ function CotizacionFormEjecutivo({ cotizacion, setCotizacion, soloLectura }) {
             </select>
           </div>
         </div>
-        <div className="of-f" style={{ marginTop: 10 }}>
-          <label>Glosa</label>
+      </div>
+
+      <div className="of-sec primary" style={{ marginTop: 8 }}>
+        <div className="of-caja-titulo">Glosa</div>
+        <div className="of-f">
           <textarea
+            aria-label="Glosa"
             value={cotizacion.glosa}
             onChange={(e) => cambiar("glosa", e.target.value)}
             rows={3}
@@ -57,7 +62,7 @@ function CotizacionFormEjecutivo({ cotizacion, setCotizacion, soloLectura }) {
           />
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

@@ -2,6 +2,15 @@
 
 ## Fecha: 2026-11-24
 
+### v2.218: Glosa de la cotización en su propia caja y «Ejecutivo y Condiciones» con su fondo celeste
+
+**Alcance:** solo frontend (`CotizacionFormEjecutivo.jsx`), sin cambios de backend ni de base de datos (no hay SQL de Neon). Build OK; sin probar en pantalla. Alturas medidas en Chrome (escritorio).
+
+- **Glosa aparte:** deja de ir dentro de «Ejecutivo y Condiciones» y pasa a su propia caja (`of-sec primary`, fondo `--primary-light` `#e6f0fa`) con su título «Glosa» (`of-caja-titulo`) y el cuadro de texto debajo (`aria-label="Glosa"`).
+- **«Ejecutivo y Condiciones» vuelve al fondo celeste** que tenía antes de v2.217: `of-sec success` (`--success-light` `#e0f7fc`), sin la caja blanca interior. **Se mantiene el título de v2.217** (`of-caja-titulo`: `.72rem`, peso 700, color `--primary`), el mismo que «Datos del cliente / contacto / dirección».
+- **Alto de los campos (sin cambios respecto a v2.217):** texto 23,06 px (igual que Cliente, Contacto y Dirección); fecha y lista «Condición» fijadas a 23,06 px (por defecto salían 25 px). Medido: Dirección y Ciudad 23,06 px; Ejecutivo 23,06 px; fechas y lista 23,05 px. El buscador («Buscar Cliente/Contacto/Dirección», `.bc-fila .bc-input`) mide 24 px por su propia regla en `campo-catalogo.css`; no se tocó (compartido con la OT y la ficha de cliente).
+- **Para volver al diseño de v2.217** (caja blanca azulada, Glosa dentro): `git checkout 1bc616f -- frontend/src/components/cotizaciones/CotizacionFormEjecutivo.jsx`. Los colores de v2.216 y anteriores y cómo volver a ellos están en v2.217.
+
 ### v2.217: «Ejecutivo y Condiciones» de la cotización con la misma caja, título y alto que Cliente, Contacto y Dirección
 
 **Alcance:** solo frontend (`CotizacionFormEjecutivo.jsx`), sin cambios de backend ni de base de datos (no hay SQL de Neon). Build OK; sin probar en pantalla. Se midió en Chrome (escritorio) antes de cambiar.
