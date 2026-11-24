@@ -2,6 +2,14 @@
 
 ## Fecha: 2026-11-24
 
+### v2.220: «Ejecutivo y Condiciones» con la misma sangría que Datos del contacto y de la dirección
+
+**Alcance:** solo frontend (`CotizacionFormEjecutivo.jsx`), sin backend ni SQL de Neon. Build OK; **sin ver en pantalla** (el dueño lo veía más a la izquierda que Contacto y Dirección).
+
+- El título y los campos de «Ejecutivo y Condiciones» iban pegados al borde de la sección celeste; los otros bloques van dentro de una caja `of-caja` (borde 1,5 px + relleno 10 px). Ahora van dentro de una `of-caja` con `background` y `borderColor` transparentes (`marginBottom: 0`): misma sangría y se conserva el fondo celeste.
+- **Pendiente:** la «Glosa» tiene el mismo desfase (no se tocó, no se pidió). Si tras recargar sigue desalineado, medir en Chrome headless contra «Datos de la dirección» (ver v2.217).
+- **Para volver:** quitar el `<div className="of-caja" …>` interior y su cierre en `CotizacionFormEjecutivo.jsx`.
+
 ### v2.219: Registrar un cliente (o contacto, dirección, equipo) desde un formulario ya no guarda ese formulario
 
 **Alcance:** solo frontend, sin cambios de backend ni de base de datos (no hay SQL de Neon). Build OK; sin probar en pantalla.
