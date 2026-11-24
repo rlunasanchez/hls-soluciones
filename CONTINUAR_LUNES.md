@@ -1,6 +1,6 @@
-# Para continuar el martes 24-nov-2026
+# Para continuar el miércoles 25-nov-2026
 
-Este archivo resume dónde quedó el trabajo al terminar el lunes 23-nov-2026 (el nombre del archivo es histórico). Se puede borrar cuando ya no haga falta.
+Este archivo resume dónde quedó el trabajo al terminar el martes 24-nov-2026 (el nombre del archivo es histórico). Se puede borrar cuando ya no haga falta.
 
 **Frase para retomar:** "Lee AGENTS.md, CAMBIOS.md y CONTINUAR_LUNES.md; seguimos con …"
 
@@ -8,7 +8,7 @@ Este archivo resume dónde quedó el trabajo al terminar el lunes 23-nov-2026 (e
 
 | | Versión | Commit |
 |---|---|---|
-| **Web publicada** (Render + Vercel + Neon) | **v2.218** (24-nov-2026; v2.209 el 20-nov con el SQL de Neon) | ver `git log` de `main` y `deploy/cloud` (el despliegue de Render no se pudo comprobar) |
+| **Web publicada** (Render + Vercel + Neon) | **v2.220** (24-nov-2026; v2.209 el 20-nov con el SQL de Neon) | ver `git log` de `main` y `deploy/cloud` (el despliegue de Render no se pudo comprobar) |
 
 - Árbol de trabajo limpio (solo `.claude/` sin versionar). No hay worktrees abiertos. **Neon:** v2.195 a v2.208 no tocaron la base de datos. v2.209 sí: el dueño corrió en Neon el 20-nov el `ALTER … cliente_tipo` (19-nov) y el bloque de migración de `CAMBIOS.md` v2.209 (tabla `cotizacion_items`, columnas con los nombres de la OT, montos en columnas, JSON eliminado); se verificó listando las columnas de `cotizaciones`. **Neon ya está al día, no hay SQL pendiente.**
 - Las dos ramas se publican con una carpeta temporal (`git worktree add "$env:TEMP\hls-cloud" deploy/cloud`, `git merge main`, push de `deploy/cloud` y luego de `main`, y quitar la carpeta), para no cambiar la rama de la carpeta del dueño. Los `git push` se hacen desde **PowerShell**.
@@ -34,7 +34,8 @@ Detalle de cada versión en `CAMBIOS.md`. Todo en `main` `5fe670d` y `deploy/clo
 - **Regla permanente del dueño: «todo el proyecto debe ser estándar»** (`AGENTS.md` sección 8): antes de entregar una pantalla, compararla con sus hermanas; si algo se desvía, avisar y ofrecer estandarizarlo. También está en la memoria de Claude.
 
 **Primero mañana (en este orden):**
-1. Comprobar los despliegues: Vercel (`gh api repos/rlunasanchez/hls-soluciones/deployments`, debe aparecer `5fe670d` en Production) y Render (panel → Logs; `gh` no lo muestra).
+0. Ver en pantalla lo del 24-nov: que registrar un cliente desde una cotización nueva ya no la guarda ni la cierra (v2.219), y si «Ejecutivo y Condiciones» quedó alineado con Contacto y Dirección (v2.220; si no, medir en Chrome headless). Luego alinear «Glosa» igual si el dueño lo pide.
+1. Comprobar los despliegues: Vercel (`gh api repos/rlunasanchez/hls-soluciones/deployments`, debe aparecer `01f93dc` (v2.220) en Production) y Render (panel → Logs; `gh` no lo muestra).
 2. Que el dueño abra la web con Ctrl+F5 y mire, sin datos de prueba (la web y la base local están vacías salvo los usuarios): lista y formulario de Cotizaciones, PDF de la cotización (empresa y persona, «Válido hasta»), y la pantalla de Usuarios. Si hace falta volver a cargar datos de prueba, usar una marca reconocible («PRUEBA PAG», códigos 99xx), no crear registros reales mientras estén y borrarlos al terminar.
 3. Seguir con lo que pida el dueño sobre Cotizaciones (venía ajustando el formulario y el PDF paso a paso). Pendientes ya conocidos: listado de Cotizaciones en el servidor (hoy carga hasta 10.000 y filtra en el navegador; en el backend el listado ya devuelve `limit`/`page`) y la duda abierta del contacto «que a veces se va» al crear una cotización desde una OT (por código llega completo; las OT de una persona no tienen contacto por diseño).
 4. Después, sin fecha: historial de la OT (decisiones en la sección 3), Informes y Orden de Compra (páginas vacías), y pasar a tablas los JSON `contactos_extra`/`direcciones_extra` de la OT (el dueño quiere «todo con tablas»; aún no lo pidió para la OT).
