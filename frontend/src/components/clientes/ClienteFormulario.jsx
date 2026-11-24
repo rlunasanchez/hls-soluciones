@@ -166,20 +166,23 @@ function ClienteFormulario({ clienteEditando, onSave, onCancel, titulo, readOnly
   }, [esPersona, modoRegistro, clienteEditando]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const unaColumna = soloCliente || esPersona;
-  // Persona: sus datos y su dirección van lado a lado. Dos columnas del mismo ancho que las de la ficha de
-  // empresa (unos 475 px cada una, 1000 px en total); más angostas deforman el RUT.
+  // Persona: sus datos y su dirección van lado a lado, en una ficha del mismo ancho que la de empresa (dos
+  // columnas iguales). Sus campos conservan su tamaño (cf-sec-fija); lo que gana espacio es la tabla de direcciones.
   const personaConDireccion = esPersona && !soloCliente;
 
   return (
-    <div className={unaColumna && !personaConDireccion ? "cf-wrap" : "cf-wrap cf-wrap-ancho"} style={personaConDireccion ? { maxWidth: "1000px" } : undefined}>
+    <div className={unaColumna && !personaConDireccion ? "cf-wrap" : "cf-wrap cf-wrap-ancho"} >
       <div className="cf-card">
         <div className="cf-head">
           <h2>{titulo || (readOnly ? "Ver Cliente" : clienteEditando ? "Editar Cliente" : "Nuevo Cliente")}</h2>
           <button type="button" onClick={() => { resetFormulario(); onCancel(); }}><X size={20} /></button>
         </div>
         <form onSubmit={handleSubmit} className="cf" noValidate>
-          <div className={unaColumna && !personaConDireccion ? "cf-grid" : "cf-grid cf-grid-3"}>
-            <div className="cf-sec cf-sec-empresa">
+          {/* Ficha de empresa: el recuadro de la empresa arriba, a todo el ancho (Contactos + Direcciones), pero con sus
+              campos del tamaño de siempre (cf-sec-ancha); Contactos y Direcciones debajo, en dos columnas más anchas. */}
+          <div className={unaColumna && !personaConDireccion ? "cf-grid" : "cf-grid cf-grid-3"}
+            style={!unaColumna ? { gridTemplateColumns: "1fr 1fr" } : undefined}>
+            <div className={!unaColumna ? "cf-sec cf-sec-empresa cf-sec-ancha" : personaConDireccion ? "cf-sec cf-sec-empresa cf-sec-fija" : "cf-sec cf-sec-empresa"} style={!unaColumna ? { gridColumn: "1 / -1" } : undefined}>
               <h3 style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
                 Empresa o Persona
                 {clienteEditando?.fecha_creacion && (

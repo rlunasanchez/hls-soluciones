@@ -2,6 +2,28 @@
 
 ## Fecha: 2026-11-24
 
+### v2.215: Ficha de cliente (Empresa y Persona) con Contactos y Direcciones más anchos
+
+**Alcance:** solo frontend (`ClienteFormulario.jsx` y `Clientes.css`), sin cambios de backend ni de base de datos (no hay SQL de Neon). Build OK; sin probar en pantalla. Pedido del dueño para ver toda la información de Contactos y Direcciones.
+
+- **Ficha de Empresa** (nuevo cliente o editar, tipo Empresa): antes eran 3 columnas iguales (Empresa | Contactos | Direcciones). Ahora la **Empresa va arriba a todo el ancho** (`cf-sec-ancha`, con `gridColumn: 1 / -1`) y **Contactos y Direcciones debajo, lado a lado, con la mitad del ancho cada uno** (`gridTemplateColumns: 1fr 1fr` en el grid). Los **campos y botones no cambian de tamaño**: los bloques del recuadro de la empresa quedan fijos en 460 px (Razón social y Dirección; Fono, Email, Ciudad y Comuna a unos 227 px; Tipo y RUT en 200 px), a la izquierda. En la mitad del recuadro hay una **marca** (línea que se desvanece con un punto azul al centro) que cae donde se dividen Contactos y Direcciones.
+- **Ficha de Persona** (Persona + Direcciones): antes limitada a 1000 px (`maxWidth: 1000px`). Ahora mide lo mismo que la de Empresa (hasta 1500 px, `cf-wrap-ancho`), con dos columnas iguales; los campos de Persona conservan su tamaño (`cf-sec-fija`) y la tabla de Direcciones gana espacio.
+- **No cambia:** la edición «solo cliente» desde la OT y el móvil (≤ 767 px, una columna).
+
+**Cómo volver a como estaba (v2.214):** los dos archivos tal como estaban están en el commit `e9a94fd`. Para restaurarlos:
+
+```
+git checkout e9a94fd -- frontend/src/components/clientes/ClienteFormulario.jsx frontend/src/styles/Clientes.css
+```
+
+Si se prefiere deshacerlo a mano, son 4 cambios:
+1. `ClienteFormulario.jsx`, `<div className="cf-grid cf-grid-3" ...>`: quitar el `style={!unaColumna ? { gridTemplateColumns: "1fr 1fr" } : undefined}` (vuelven las 3 columnas `auto-fit minmax(340px, 1fr)`).
+2. `ClienteFormulario.jsx`, la sección `cf-sec cf-sec-empresa`: quitar las clases `cf-sec-ancha` / `cf-sec-fija` y el `style={{ gridColumn: "1 / -1" }}`.
+3. `ClienteFormulario.jsx`, el contenedor `cf-wrap`: volver a poner `style={personaConDireccion ? { maxWidth: "1000px" } : undefined}` (la ficha de Persona vuelve a 1000 px) y su comentario.
+4. `Clientes.css`: borrar las reglas `.cf-sec-ancha>.cf-r1,…{width:460px…}` y `.cf-sec-ancha{background-image:…}` (con sus comentarios, justo después de `.cf-sec-empresa{background:#f0f7ff}`).
+
+Ajustes posibles sin deshacer: el ancho de los campos del recuadro (460 px en `Clientes.css`), la marca del medio (`.cf-sec-ancha{background-image…}`: se puede quitar entera) y el ancho máximo de la ficha (`.cf-wrap-ancho{max-width:1500px}`).
+
 ### v2.214: Ítems de la cotización: Detalle entre SKU y Cantidad y solo el número del ítem
 
 **Alcance:** solo frontend (`CotizacionFormItems.jsx`), sin cambios de backend ni de base de datos (no hay SQL de Neon). Build OK y ESLint sin errores; sin probar en pantalla.
