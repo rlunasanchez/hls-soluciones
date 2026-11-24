@@ -42,7 +42,7 @@ function CotizacionFormulario({ form, onPDF }) {
                 clienteSeleccionado={clienteSeleccionado} setClienteSeleccionado={setClienteSeleccionado}
                 clientesFiltrados={clientesFiltrados} clienteDropdownRef={clienteDropdownRef}
                 seleccionarCliente={seleccionarCliente} clienteInactivo={clienteInactivo}
-                nuevaOrden={cotizacion} setNuevaOrden={setCotizacion} readOnly={soloLectura}
+                nuevaOrden={cotizacion} setNuevaOrden={setCotizacion} readOnly={soloLectura} sinTitulo
               />
               <CotizacionFormEjecutivo cotizacion={cotizacion} setCotizacion={setCotizacion} soloLectura={soloLectura} />
             </div>

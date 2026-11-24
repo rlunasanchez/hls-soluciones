@@ -2,6 +2,12 @@
 
 ## Fecha: 2026-11-24
 
+### v2.216: Sin el título «Datos del Cliente» en el formulario de la cotización
+
+**Alcance:** solo frontend (`OrdenFormCliente.jsx` y `CotizacionFormulario.jsx`), sin cambios de backend ni de base de datos (no hay SQL de Neon). Build OK; sin probar en pantalla.
+
+- **Qué cambió:** en el formulario de Nueva/Editar/Ver Cotización se quita el título «Datos del Cliente» que iba arriba del buscador «Buscar y Seleccionar Cliente». `OrdenFormCliente` (compartido con la OT) recibe una opción nueva `sinTitulo` (por defecto `false`) y solo la cotización la activa; **la OT conserva su título**.
+
 ### v2.215: Ficha de cliente (Empresa y Persona) con Contactos y Direcciones más anchos
 
 **Alcance:** solo frontend (`ClienteFormulario.jsx` y `Clientes.css`), sin cambios de backend ni de base de datos (no hay SQL de Neon). Build OK; sin probar en pantalla. Pedido del dueño para ver toda la información de Contactos y Direcciones.
