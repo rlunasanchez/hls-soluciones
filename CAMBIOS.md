@@ -2,6 +2,26 @@
 
 ## Fecha: 2026-11-24
 
+### v2.217: «Ejecutivo y Condiciones» de la cotización con la misma caja, título y alto que Cliente, Contacto y Dirección
+
+**Alcance:** solo frontend (`CotizacionFormEjecutivo.jsx`), sin cambios de backend ni de base de datos (no hay SQL de Neon). Build OK; sin probar en pantalla. Se midió en Chrome (escritorio) antes de cambiar.
+
+- **Por qué:** esa sección usaba otro estilo que «Datos del cliente / contacto / dirección» (título más chico y otro color de fondo) y sus campos de fecha y lista salían más altos que los de texto. Medido: campos de texto 23,06 px (iguales en Cliente y Ejecutivo); fecha 25,06 px y lista 25,00 px.
+- **Qué cambió:** la sección pasa a la misma caja y título que las otras (`of-caja` + `of-caja-titulo`, dentro de un `of-sec primary`), y las fechas y la lista «Condición» quedan en `height: 23.06px` (sin cortar el texto, comprobado). Los campos de texto no se tocan y el largo no cambia (tres por línea). Se quitó una regla global de 24 px que se había probado para todo el formulario y se descartó.
+
+**Colores y estilos que tenía antes (por si se quiere volver):**
+
+| | Antes (v2.216 y anteriores) | Ahora (v2.217) |
+|---|---|---|
+| **Fondo de la sección** | `of-sec success`: `var(--success-light)` = **`#e0f7fc`** (celeste claro) | `of-sec primary`: `var(--primary-light)` = **`#e6f0fa`** (azul muy claro), con una caja interior blanca |
+| **Caja interior** | no tenía (los campos iban directo sobre el celeste) | `of-caja`: fondo blanco, borde `1.5px solid var(--border)`, radio 8 px, padding `6px 10px 8px` |
+| **Título «Ejecutivo y Condiciones»** | `of-st primary`: 10 px, peso 600, mayúsculas, espaciado `.5px`, color `var(--primary)` = **`#0C4A8C`** | `of-caja-titulo`: `.72rem` (11,5 px), peso 700, mayúsculas, espaciado `.4px`, color `var(--primary)` = **`#0C4A8C`** |
+| **Alto de fecha y lista** | natural (≈ 25 px) | 23,06 px |
+
+(Variables en `index.css`: `--primary #0C4A8C`, `--primary-light #e6f0fa`, `--success #00B5E2`, `--success-light #e0f7fc`. Clases en `OrdenTrabajo.css`: `.of-sec`, `.of-sec.success`, `.of-st`, `.of-caja`, `.of-caja-titulo`.)
+
+**Para volver al estilo anterior** (celeste y título chico): `git checkout 3d4f9cf -- frontend/src/components/cotizaciones/CotizacionFormEjecutivo.jsx`. O a mano: en `CotizacionFormEjecutivo.jsx` cambiar el contenedor a `<div className="of-sec success" style={{ marginTop: 8 }}>`, quitar el `<div className="of-caja">` interior, el título a `<div className="of-st primary">` y quitar `ALTO_IGUAL` de las fechas y la lista.
+
 ### v2.216: Sin el título «Datos del Cliente» en el formulario de la cotización
 
 **Alcance:** solo frontend (`OrdenFormCliente.jsx` y `CotizacionFormulario.jsx`), sin cambios de backend ni de base de datos (no hay SQL de Neon). Build OK; sin probar en pantalla.
