@@ -2,6 +2,14 @@
 
 ## Fecha: 2026-11-24
 
+### v2.219: Registrar un cliente (o contacto, dirección, equipo) desde un formulario ya no guarda ese formulario
+
+**Alcance:** solo frontend, sin cambios de backend ni de base de datos (no hay SQL de Neon). Build OK; sin probar en pantalla.
+
+- **Qué pasaba:** en una cotización nueva, al registrar el cliente desde el modal «Registrar Cliente», la cotización se guardaba sola, aparecía la alerta y el formulario se cerraba hacia el listado (parecía culpa de «Agregar ítem»; ese botón es `type="button"` y no guarda). **Causa:** los modales son portales (`createPortal`) dibujados dentro del `<form>` de la cotización; en React el evento `submit` de un portal sube por el árbol de React hasta el formulario padre, aunque en el DOM esté fuera. El mismo fallo existía en la OT (`guardarOrden`).
+- **Arreglo:** el contenedor de cada modal detiene el evento con `onSubmit={(e) => e.stopPropagation()}`: `useClienteOT.jsx` (3 modales de cliente), `ModalEditarCatalogo.jsx` (contacto y dirección) y `OrdenFormEquipo.jsx` (2 modales de equipo).
+- **Regla:** todo modal nuevo con `<form>` que se dibuje con `createPortal` dentro de otro formulario debe llevar ese `onSubmit` en su contenedor.
+
 ### v2.218: Glosa de la cotización en su propia caja y «Ejecutivo y Condiciones» con su fondo celeste
 
 **Alcance:** solo frontend (`CotizacionFormEjecutivo.jsx`), sin cambios de backend ni de base de datos (no hay SQL de Neon). Build OK; sin probar en pantalla. Alturas medidas en Chrome (escritorio).

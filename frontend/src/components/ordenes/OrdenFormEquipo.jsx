@@ -282,7 +282,7 @@ function OrdenFormEquipo({
 
       {/* Modal Detalle Equipo (solo lectura) — portal fuera del form de la OT */}
       {mostrarDetalleEquipo && (equipoExistente || hayDatosEquipo) && createPortal(
-        <div style={{
+        <div onSubmit={(e) => e.stopPropagation()} style={{
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999,
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
         }}
@@ -301,7 +301,7 @@ function OrdenFormEquipo({
 
       {/* Modal Editar Equipo (mantenedor desde la OT) — portal fuera del form de la OT */}
       {mostrarEditarEquipo && equipoEnEdicion && createPortal(
-        <div style={{
+        <div onSubmit={(e) => e.stopPropagation()} style={{
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999,
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
         }}
