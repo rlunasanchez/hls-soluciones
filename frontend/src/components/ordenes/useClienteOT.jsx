@@ -187,7 +187,7 @@ export default function useClienteOT({
     <>
       {/* Modal Detalle Cliente (solo lectura) */}
       {mostrarDetalleCliente && clienteSeleccionado && (
-        <div className="bc-modal">
+        <div className="bc-modal" onSubmit={(e) => e.stopPropagation()}>
           <div className="bc-modal-caja bc-modal-caja--ancha">
             <ClienteFormulario
               clienteEditando={clienteSeleccionado}
@@ -201,7 +201,7 @@ export default function useClienteOT({
 
       {/* Modal Editar Cliente completo desde la OT (portal fuera del form) */}
       {mostrarEditarClienteModal && clienteAEditar && createPortal(
-        <div className="bc-modal">
+        <div className="bc-modal" onSubmit={(e) => e.stopPropagation()}>
           <div className={`bc-modal-caja ${editarSoloCliente ? "bc-modal-caja--chica" : "bc-modal-caja--ancha"}`}>
             <ClienteFormulario
               clienteEditando={clienteAEditar}
@@ -217,7 +217,7 @@ export default function useClienteOT({
 
       {/* Modal Registrar Cliente desde la OT (portal fuera del form) */}
       {mostrarRegistrarCliente && createPortal(
-        <div className="bc-modal">
+        <div className="bc-modal" onSubmit={(e) => e.stopPropagation()}>
           <div className="bc-modal-caja bc-modal-caja--ancha">
             <ClienteFormulario
               clienteEditando={prefillCliente}

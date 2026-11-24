@@ -30,7 +30,7 @@ function ModalEditarCatalogo({ tipo, registro, onGuardado, onCerrar }) {
   };
 
   return createPortal(
-    <div className="bc-modal">
+    <div className="bc-modal" onSubmit={(e) => e.stopPropagation()}>
       <div className="bc-modal-caja">
         <Formulario {...{ [cfg.propFicha]: actual, [cfg.propLista]: [], onSave: guardar, onCancel: onCerrar }} />
       </div>
