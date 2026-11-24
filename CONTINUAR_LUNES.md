@@ -8,7 +8,7 @@ Este archivo resume dónde quedó el trabajo al terminar el lunes 23-nov-2026 (e
 
 | | Versión | Commit |
 |---|---|---|
-| **Web publicada** (Render + Vercel + Neon) | **v2.214** (24-nov-2026; v2.209 el 20-nov con el SQL de Neon) | ver `git log` de `main` y `deploy/cloud` (el despliegue de Render no se pudo comprobar) |
+| **Web publicada** (Render + Vercel + Neon) | **v2.215** (24-nov-2026; v2.209 el 20-nov con el SQL de Neon) | ver `git log` de `main` y `deploy/cloud` (el despliegue de Render no se pudo comprobar) |
 
 - Árbol de trabajo limpio (solo `.claude/` sin versionar). No hay worktrees abiertos. **Neon:** v2.195 a v2.208 no tocaron la base de datos. v2.209 sí: el dueño corrió en Neon el 20-nov el `ALTER … cliente_tipo` (19-nov) y el bloque de migración de `CAMBIOS.md` v2.209 (tabla `cotizacion_items`, columnas con los nombres de la OT, montos en columnas, JSON eliminado); se verificó listando las columnas de `cotizaciones`. **Neon ya está al día, no hay SQL pendiente.**
 - Las dos ramas se publican con una carpeta temporal (`git worktree add "$env:TEMP\hls-cloud" deploy/cloud`, `git merge main`, push de `deploy/cloud` y luego de `main`, y quitar la carpeta), para no cambiar la rama de la carpeta del dueño. Los `git push` se hacen desde **PowerShell**.
@@ -25,6 +25,7 @@ Detalle de cada versión en `CAMBIOS.md`. Todo en `main` `5fe670d` y `deploy/clo
 - **v2.212:** «Ejecutivo y Condiciones» del formulario de cotización en dos líneas de tres campos (`of-r3`).
 - **v2.213:** «Válido hasta» del PDF de la cotización pasó a la barra del título, junto a «Emisión» (antes iba abajo y no se notaba). La fecha siempre se guardó bien; si el dueño dice que sigue sin verse, pedir el folio y mirar `cotizaciones.fecha_valido_hasta`.
 - **v2.214 (24-nov-2026):** en los ítems del formulario de cotización, Detalle quedó entre SKU y Cantidad y el «Ítem N» pasó a ser solo el número al lado del SKU (la papelera para quitar el ítem va al final de la fila). Sin ver en pantalla.
+- **v2.215 (24-nov-2026):** ficha de cliente: en **Empresa** el recuadro de la empresa va arriba a todo el ancho (campos del mismo tamaño, con una marca en la mitad) y Contactos | Direcciones debajo, cada uno con la mitad del ancho; la ficha de **Persona** ahora mide lo mismo que la de Empresa (antes 1000 px). Costó varias idas y vueltas: el dueño quiere Contactos y Direcciones siempre **abajo y lado a lado**, el recuadro de la empresa **sin estirar sus campos**. **Cómo volver al diseño anterior:** `git checkout e9a94fd -- frontend/src/components/clientes/ClienteFormulario.jsx frontend/src/styles/Clientes.css` (detalle en `CAMBIOS.md` v2.215). Sin ver en pantalla.
 - **Regla permanente del dueño: «todo el proyecto debe ser estándar»** (`AGENTS.md` sección 8): antes de entregar una pantalla, compararla con sus hermanas; si algo se desvía, avisar y ofrecer estandarizarlo. También está en la memoria de Claude.
 
 **Primero mañana (en este orden):**

@@ -8,6 +8,11 @@
 .cf-grid{display:grid;grid-template-columns:1fr;gap:10px;align-items:start}
 .cf-sec{padding:10px;border-radius:10px}
 .cf-sec-empresa{background:#f0f7ff}
+/* Recuadro de la empresa a todo el ancho de la ficha (cf-sec-ancha) o de la persona en su columna (cf-sec-fija), sin estirar sus campos: conservan el ancho que tenían en la columna de 480 px */
+.cf-sec-ancha>.cf-r1,.cf-sec-ancha>.cf-r2,.cf-sec-fija>.cf-r1,.cf-sec-fija>.cf-r2{width:460px;max-width:100%}
+/* Marca en la mitad del recuadro (donde se dividen Contactos y Direcciones, que van debajo): una línea que se
+   desvanece en los extremos con un punto azul en el centro, rodeado de un pequeño espacio. */
+.cf-sec-ancha{background-image:radial-gradient(circle at center,var(--primary) 0 2.5px,#f0f7ff 3px 6px,transparent 6.5px),linear-gradient(to bottom,transparent,rgba(12,74,140,.35) 22%,rgba(12,74,140,.35) 78%,transparent);background-size:14px 14px,2px 82%;background-position:50% 50%,50% 50%;background-repeat:no-repeat}
 .cf-sec h3{margin-bottom:8px;font-size:13px;font-weight:700}
 .cf-sec-empresa h3{color:#0C4A8C}
 /* Ficha ancha: Cliente | Contactos | Direcciones lado a lado (baja a 1 columna si no cabe) */
