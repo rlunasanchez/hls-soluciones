@@ -1,5 +1,14 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-11-24
+
+### v2.214: Ítems de la cotización: Detalle entre SKU y Cantidad y solo el número del ítem
+
+**Alcance:** solo frontend (`CotizacionFormItems.jsx`), sin cambios de backend ni de base de datos (no hay SQL de Neon). Build OK y ESLint sin errores; sin probar en pantalla.
+
+- **Orden de los campos de cada ítem:** SKU, **Detalle**, Cant., Neto, Descuento y Total (antes Detalle iba al final). El PDF de la cotización ya tenía ese orden y no cambia.
+- **Número del ítem:** se quita la línea «Ítem N» de arriba; ahora se muestra **solo el número** (en azul) a la izquierda del SKU, en la misma fila. El botón de quitar ítem (papelera) pasa al final de la fila, después de Total.
+
 ## Fecha: 2026-11-23
 
 ### v2.213: «Válido hasta» visible en el PDF de la cotización

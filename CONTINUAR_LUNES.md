@@ -8,7 +8,7 @@ Este archivo resume dónde quedó el trabajo al terminar el lunes 23-nov-2026 (e
 
 | | Versión | Commit |
 |---|---|---|
-| **Web publicada** (Render + Vercel + Neon) | **v2.213** (23-nov-2026; v2.209 el 20-nov con el SQL de Neon) | ver `git log` de `main` y `deploy/cloud` (el despliegue de Render no se pudo comprobar) |
+| **Web publicada** (Render + Vercel + Neon) | **v2.214** (24-nov-2026; v2.209 el 20-nov con el SQL de Neon) | ver `git log` de `main` y `deploy/cloud` (el despliegue de Render no se pudo comprobar) |
 
 - Árbol de trabajo limpio (solo `.claude/` sin versionar). No hay worktrees abiertos. **Neon:** v2.195 a v2.208 no tocaron la base de datos. v2.209 sí: el dueño corrió en Neon el 20-nov el `ALTER … cliente_tipo` (19-nov) y el bloque de migración de `CAMBIOS.md` v2.209 (tabla `cotizacion_items`, columnas con los nombres de la OT, montos en columnas, JSON eliminado); se verificó listando las columnas de `cotizaciones`. **Neon ya está al día, no hay SQL pendiente.**
 - Las dos ramas se publican con una carpeta temporal (`git worktree add "$env:TEMP\hls-cloud" deploy/cloud`, `git merge main`, push de `deploy/cloud` y luego de `main`, y quitar la carpeta), para no cambiar la rama de la carpeta del dueño. Los `git push` se hacen desde **PowerShell**.
@@ -24,6 +24,7 @@ Detalle de cada versión en `CAMBIOS.md`. Todo en `main` `5fe670d` y `deploy/clo
 - **v2.211:** pantalla de **Usuarios** estándar (`FiltrosUsuario.jsx`: Nuevo Usuario, Cambiar Password, filtro, Limpiar y paginación en una fila; filas según la pantalla). Con esto **ya no quedan desvíos del estándar** entre las listas (Clientes, Contactos, Direcciones, Equipos, OT, Cotizaciones y Usuarios).
 - **v2.212:** «Ejecutivo y Condiciones» del formulario de cotización en dos líneas de tres campos (`of-r3`).
 - **v2.213:** «Válido hasta» del PDF de la cotización pasó a la barra del título, junto a «Emisión» (antes iba abajo y no se notaba). La fecha siempre se guardó bien; si el dueño dice que sigue sin verse, pedir el folio y mirar `cotizaciones.fecha_valido_hasta`.
+- **v2.214 (24-nov-2026):** en los ítems del formulario de cotización, Detalle quedó entre SKU y Cantidad y el «Ítem N» pasó a ser solo el número al lado del SKU (la papelera para quitar el ítem va al final de la fila). Sin ver en pantalla.
 - **Regla permanente del dueño: «todo el proyecto debe ser estándar»** (`AGENTS.md` sección 8): antes de entregar una pantalla, compararla con sus hermanas; si algo se desvía, avisar y ofrecer estandarizarlo. También está en la memoria de Claude.
 
 **Primero mañana (en este orden):**
