@@ -27,21 +27,19 @@ function ItemCard({ item, idx, soloLectura, actualizar, quitar }) {
   const totalFila = Math.max(0, bruto * (1 - descuentoPct / 100));
   return (
     <div style={{ border: "1px solid var(--border)", borderRadius: 6, padding: "6px 8px 8px", marginBottom: 8, background: "#fff" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-        <span style={{ fontSize: ".72rem", fontWeight: 700, color: "var(--primary)", textTransform: "uppercase", letterSpacing: ".05em" }}>
-          Ítem {idx + 1}
-        </span>
-        {!soloLectura && (
-          <button type="button" onClick={() => quitar(idx)} title="Quitar ítem"
-            style={{ background: "#FEF2F2", color: "#DC2626", border: "1px solid #FECACA", borderRadius: 6, padding: "4px 7px", cursor: "pointer", display: "flex" }}>
-            <Trash2 size={13} />
-          </button>
-        )}
-      </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8, alignItems: "flex-end" }}>
+        {/* Solo el número del ítem, al lado del SKU */}
+        <span style={{ flex: "0 0 18px", alignSelf: "flex-end", paddingBottom: 4, textAlign: "center", fontSize: ".8rem", fontWeight: 700, color: "var(--primary)" }}>
+          {idx + 1}
+        </span>
         <div className="of-f" style={{ flex: "0 0 70px" }}>
           <label>SKU</label>
           <input type="text" value={item.sku} onChange={(e) => actualizar(idx, "sku", e.target.value)} disabled={soloLectura} />
+        </div>
+        <div className="of-f" style={{ flex: "1 1 200px" }}>
+          <label>Detalle</label>
+          <textarea rows={1} value={item.detalle} onChange={(e) => actualizar(idx, "detalle", upperInput(e))} disabled={soloLectura}
+            style={{ resize: "vertical", fontFamily: "inherit", minHeight: 0, height: 40 }} />
         </div>
         <div className="of-f" style={{ flex: "0 0 55px" }}>
           <label>Cant.</label>
@@ -73,11 +71,12 @@ function ItemCard({ item, idx, soloLectura, actualizar, quitar }) {
           <label>Total</label>
           <input type="text" value={clp(totalFila)} disabled />
         </div>
-        <div className="of-f" style={{ flex: "1 1 200px" }}>
-          <label>Detalle</label>
-          <textarea rows={1} value={item.detalle} onChange={(e) => actualizar(idx, "detalle", upperInput(e))} disabled={soloLectura}
-            style={{ resize: "vertical", fontFamily: "inherit", minHeight: 0, height: 40 }} />
-        </div>
+        {!soloLectura && (
+          <button type="button" onClick={() => quitar(idx)} title="Quitar ítem"
+            style={{ background: "#FEF2F2", color: "#DC2626", border: "1px solid #FECACA", borderRadius: 6, padding: "4px 7px", cursor: "pointer", display: "flex", alignSelf: "flex-end", marginBottom: 2 }}>
+            <Trash2 size={13} />
+          </button>
+        )}
       </div>
     </div>
   );
