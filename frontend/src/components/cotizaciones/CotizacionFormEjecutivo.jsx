@@ -15,6 +15,8 @@ function CotizacionFormEjecutivo({ cotizacion, setCotizacion, soloLectura }) {
   return (
     <>
       <div className="of-sec success" style={{ marginTop: 8 }}>
+        {/* of-caja sin fondo ni borde: da la misma sangría (borde + padding) que las cajas de Cliente, Contacto y Dirección */}
+        <div className="of-caja" style={{ background: "transparent", borderColor: "transparent", marginBottom: 0 }}>
         <div className="of-caja-titulo">Ejecutivo y Condiciones</div>
         {/* Dos líneas de tres campos: ejecutivo, fono y email; emisión, válido hasta y condición */}
         <div className="of-r3">
@@ -46,6 +48,7 @@ function CotizacionFormEjecutivo({ cotizacion, setCotizacion, soloLectura }) {
               {CONDICIONES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
+        </div>
         </div>
       </div>
 
