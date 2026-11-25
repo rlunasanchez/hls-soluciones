@@ -2,6 +2,15 @@
 
 ## Fecha: 2026-11-25
 
+### v2.226: PDF de la cotización sin la razón social ni el RUT de HLS en el encabezado
+
+**Alcance:** solo frontend (`utils/cotizacionDoc.js`), sin backend ni SQL. Verificado renderizando el PDF con datos de ejemplo en Chrome (sin tocar la base).
+
+- **Qué se quitó (pedido del dueño, «de momento, luego veremos qué hacer ahí»):** el bloque de la derecha del encabezado con «HLS Soluciones E.I.R.L.» y el RUT de la empresa (`.emp-rut`, su CSS y el import `EMPRESA_RAZON_SOCIAL`). El encabezado queda con el logo y los datos de HLS (nombre, dirección, fono, email y web) y la barra «Cotización N° …» con Emisión y Válido hasta.
+- **Lo que se conserva:** el RUT del **cliente** (Datos de Cliente) y el RUT de HLS en **Datos Bancarios** (pie del documento; son datos de pago).
+- **Antecedentes para decidir qué va ahí (ver v2.217 y las notas del 25-nov):** hasta v2.208 el encabezado tenía un recuadro con borde azul (`#0C4A8C`, radio 7 pt, relleno `1,4 mm 5 mm`) con «COTIZACIÓN» (10 pt), «N° folio» (12 pt), el RUT de HLS (6,5 pt) y la razón social (8 pt). Desde v2.209 ese recuadro se reemplazó por la razón social y el RUT sueltos, y «Cotización N°» pasó a la barra azul. Para recuperar el recuadro anterior: `git show 5d894a9:frontend/src/utils/cotizacionDoc.js` (clases `.folio-box`, `.rut-emp`, `.razon-emp`).
+- **Constantes que siguen en `utils/empresa.js`:** `EMPRESA_RUT` y `EMPRESA_RAZON_SOCIAL` (esta última ya no se usa en el PDF de la cotización).
+
 ### v2.225: Un solo `HeaderModulo` y una sola `BarraFiltros`; CSS compartido y `index.css` partido (escalabilidad, pasos 4 y 5)
 
 **Alcance:** solo frontend. **Sin SQL de Neon.** Build y ESLint OK (sin `no-undef`). Se tomaron **44 capturas** (22 pantallas × escritorio y móvil, con 20.000 registros por tabla) antes de empezar y se compararon píxel a píxel después de cada paso (`pixelmatch`; script en una carpeta temporal, no versionado). Las que cambiaron son estandarizaciones (abajo); lo demás quedó idéntico.

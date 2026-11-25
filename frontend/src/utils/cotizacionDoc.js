@@ -1,7 +1,7 @@
 // Generador del documento "Cotización" (HTML listo para imprimir/guardar como PDF).
 // Función pura: no toca el DOM ni React. La impresión la dispara utils/imprimir.js.
 // Mismo estilo que la Orden de Servicio (ordenServicioDoc.js): comparten pdfEstilos.js y pdfHelpers.js.
-import { EMPRESA, EMPRESA_RUT, EMPRESA_RAZON_SOCIAL, LOGO_HLS, DATOS_BANCARIOS, CONDICIONES_COTIZACION } from "./empresa";
+import { EMPRESA, EMPRESA_RUT, LOGO_HLS, DATOS_BANCARIOS, CONDICIONES_COTIZACION } from "./empresa";
 import { ESTILOS_COMUNES } from "./pdfEstilos";
 import { esc, fecha, campo, h2, slotLogo, unir } from "./pdfHelpers";
 
@@ -36,13 +36,10 @@ function filaItem(item) {
     </tr>`;
 }
 
-// Lo propio de la cotización, encima de los estilos comunes: cuadro de la empresa en el encabezado, las fechas de emisión y validez,
+// Lo propio de la cotización, encima de los estilos comunes: las fechas de emisión y validez,
 // tabla de ítems, condiciones, totales y datos bancarios.
 const ESTILOS = `${ESTILOS_COMUNES}
 .folios { display: flex; gap: 4mm; }
-.emp-rut { text-align: center; align-self: flex-end; }
-.emp-rut .rs { font-size: 8pt; font-weight: 700; color: #374151; }
-.emp-rut .rut { margin-top: .5mm; font-size: 6.5pt; font-weight: 700; color: #374151; }
 
 table.items { width: 100%; table-layout: fixed; border-collapse: collapse; margin-top: 1mm; }
 table.items thead th { text-align: left; font-size: 7pt; text-transform: uppercase; letter-spacing: .06em; color: #6B7280; border-bottom: 1pt solid #0C4A8C; padding: 2mm 2mm 1.5mm; }
@@ -127,10 +124,6 @@ export function generarHtmlCotizacion(cot) {
         <h1>${esc(EMPRESA.nombre)}</h1>
         <p>${esc(EMPRESA.direccion)}</p>
         <p>Fono: ${esc(EMPRESA.fono)} · ${esc(EMPRESA.email)} · ${esc(EMPRESA.web)}</p>
-      </div>
-      <div class="emp-rut">
-        <div class="rs">${esc(EMPRESA_RAZON_SOCIAL)}</div>
-        <div class="rut">${esc(EMPRESA_RUT)}</div>
       </div>
     </div>
     <div class="filete-1"></div>
