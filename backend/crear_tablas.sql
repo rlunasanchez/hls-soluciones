@@ -162,7 +162,8 @@ CREATE TABLE IF NOT EXISTS ordenes_trabajo (
   INDEX idx_tecnico (tecnico_asignado),
   INDEX idx_ot_equipo (equipo_id),
   INDEX idx_ot_contacto (contacto_id),
-  INDEX idx_ot_direccion (direccion_id)
+  INDEX idx_ot_direccion (direccion_id),
+  INDEX idx_ot_cliente_id (cliente_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS usuarios (

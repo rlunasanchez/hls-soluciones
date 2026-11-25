@@ -3,6 +3,8 @@ import pool from "../config/db.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { armarInsertCotizacion, armarUpdateCotizacion } from "../utils/camposCotizacion.js";
 import { calcularMontos } from "../utils/cotizacionTotales.js";
+import { filtrosCotizaciones } from "../utils/filtrosCotizaciones.js";
+import { leerPaginacion, paginacion } from "../utils/filtrosOrdenes.js";
 import { resolverVinculos } from "./ordenesVinculos.js";
 
 const router = express.Router();
@@ -38,24 +40,20 @@ async function datosAGuardar(db, body) {
   };
 }
 
-// Reemplaza los ítems de la cotización por los que llegan (una fila por ítem).
+// Reemplaza los ítems de la cotización por los que llegan (una fila por ítem, en una sola consulta).
 async function guardarItems(db, cotizacionId, items) {
   await db.query("DELETE FROM cotizacion_items WHERE cotizacion_id = ?", [cotizacionId]);
-  for (const [i, it] of items.entries()) {
-    await db.query(
-      "INSERT INTO cotizacion_items (cotizacion_id, orden, sku, detalle, cantidad, neto, descuento, total) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-      [cotizacionId, i, it.sku || null, it.detalle || null, it.cantidad, it.neto, it.descuento, it.total]
-    );
-  }
+  if (!items.length) return;
+  await db.query(
+    "INSERT INTO cotizacion_items (cotizacion_id, orden, sku, detalle, cantidad, neto, descuento, total) VALUES ?",
+    [items.map((it, i) => [cotizacionId, i, it.sku || null, it.detalle || null, it.cantidad, it.neto, it.descuento, it.total])]
+  );
 }
 
+// Listado paginado y filtrado en el servidor: ?pagina=&limite=&folio=&cliente=&orden_id= (límite máximo 100).
 router.get("/", authMiddleware, async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const offset = (page - 1) * limit;
-  const ordenId = req.query.orden_id ? parseInt(req.query.orden_id) : null;
-  const where = ordenId ? "WHERE orden_id = ?" : "";
-  const whereParams = ordenId ? [ordenId] : [];
+  const { pagina, limite, offset } = leerPaginacion(req.query);
+  const { where, params } = filtrosCotizaciones(req.query);
 
   try {
     const [cotizaciones] = await pool.query(
@@ -67,18 +65,10 @@ router.get("/", authMiddleware, async (req, res) => {
         neto, iva_porcentaje, iva, total,
         orden_id, orden_numero, fecha_creacion, fecha_actualizacion
        FROM cotizaciones ${where} ORDER BY id DESC LIMIT ? OFFSET ?`,
-      [...whereParams, limit, offset]
+      [...params, limite, offset]
     );
-    const [totalResult] = await pool.query(`SELECT COUNT(*) as total FROM cotizaciones ${where}`, whereParams);
-    res.json({
-      cotizaciones,
-      pagination: {
-        currentPage: page,
-        totalPages: Math.ceil(totalResult[0].total / limit),
-        totalItems: totalResult[0].total,
-        itemsPerPage: limit
-      }
-    });
+    const [totalResult] = await pool.query(`SELECT COUNT(*) as total FROM cotizaciones ${where}`, params);
+    res.json({ cotizaciones, pagination: paginacion(pagina, limite, parseInt(totalResult[0].total)) });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });

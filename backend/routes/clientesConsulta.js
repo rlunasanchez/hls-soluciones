@@ -2,21 +2,21 @@ import express from "express";
 import pool from "../config/db.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { normalizarRut } from "../utils/validaciones.js";
-import { buscarClientesSql, filtrosListadoClientes, leerLimiteBusqueda, MIN_BUSQUEDA } from "../utils/busquedaClientes.js";
-import { leerPaginacion } from "../utils/filtrosOrdenes.js";
+import { buscarClientesSql, filtrosListadoClientes, leerLimiteBusqueda, MIN_BUSQUEDA, RUT_NORMALIZADO } from "../utils/busquedaClientes.js";
+import { leerPaginacion, paginacion } from "../utils/filtrosOrdenes.js";
 
 // Consultas de Clientes: listado (con paginación en el servidor), buscador de la OT, verificación de
 // RUT o razón social repetidos y armado de cada cliente con su contacto y dirección de la OT.
 // Las altas, ediciones y vínculos están en clientes.js, que monta este router antes de sus rutas /:id.
 const router = express.Router();
 
-// Busca otro cliente con el mismo RUT normalizado (compara en JS para que
-// cualquier formato guardado en la BD matchee: sin guion, k minúscula, etc.)
+// Busca otro cliente con el mismo RUT normalizado (sin puntos, guion ni espacios, en mayúscula). La
+// comparación la hace la base y devuelve a lo más una fila: ya no se leen todos los clientes en cada alta.
 export async function buscarDuplicadoRut(rut, excluirId = null) {
   const objetivo = normalizarRut(rut);
   if (!objetivo) return null;
-  const [rows] = await pool.query("SELECT id, codigo, rut FROM clientes");
-  return rows.find((c) => c.id !== excluirId && normalizarRut(c.rut) === objetivo) || null;
+  const [rows] = await pool.query(`SELECT id, codigo, rut FROM clientes WHERE ${RUT_NORMALIZADO} = ? AND id <> ? LIMIT 1`, [objetivo, excluirId ?? 0]);
+  return rows[0] || null;
 }
 
 router.get("/", authMiddleware, async (req, res) => {
@@ -33,13 +33,9 @@ router.get("/", authMiddleware, async (req, res) => {
       const { where, params } = filtrosListadoClientes(req.query);
       const [rows] = await pool.query(`SELECT * FROM clientes ${where} ORDER BY id DESC LIMIT ? OFFSET ?`, [...params, limite, offset]);
       const [total] = await pool.query(`SELECT COUNT(*) AS total FROM clientes ${where}`, params);
-      const totalItems = parseInt(total[0].total);
-      return res.json({
-        clientes: await enriquecerClientes(rows),
-        pagination: { currentPage: pagina, totalPages: Math.ceil(totalItems / limite), totalItems, itemsPerPage: limite }
-      });
+      return res.json({ clientes: await enriquecerClientes(rows), pagination: paginacion(pagina, limite, parseInt(total[0].total)) });
     }
-    const [rows] = await pool.query(`SELECT * FROM clientes ORDER BY id DESC`);
+    const [rows] = await pool.query(`SELECT * FROM clientes ORDER BY id DESC LIMIT 100`);
     res.json(await enriquecerClientes(rows));
   } catch (err) {
     console.error(err);
