@@ -125,6 +125,8 @@ Avance:
 3. **HECHO en local, sin publicar (v2.179):** `ordenes.js` arma el `INSERT`/`UPDATE` desde la lista `CAMPOS` (`utils/camposOrden.js`); probado igual al código anterior y en MySQL y PostgreSQL; merge a `deploy/cloud` hecho y sin push.
 4. **HECHO en local (v2.181 a v2.184):** `OrdenTrabajo.jsx` quedó en 377 líneas y el PDF (292) ya estaba bajo la meta. **Con esto queda cerrado el alcance acordado hasta la OT.** Todo lo de v2.179 a v2.184 y el arreglo de Cotizaciones (v2.180) están solo en local.
 
+**Contactos y Direcciones HECHO (v2.223, 25-nov-2026):** listado y buscador paginados en el servidor con una consulta compartida (`backend/utils/catalogoConsulta.js` y `routes/catalogoConsulta.js`) y un hook genérico `useListadoPaginado` (Clientes y Equipos aún tienen su propio hook, por unificar). Plan de escalabilidad que sigue: Cotizaciones en el servidor, índices, un solo `Header`/`Filtros`, limpiar `index.css` (detalle en `CAMBIOS.md` v2.223).
+
 Qué no escala todavía (después de la OT):
 1. Listados de Clientes (`Clientes.jsx`) y de Equipos (`Equipos.jsx`): cargan todo y filtran en el navegador.
 2. `GET /api/clientes` sin `q` arma contactos y direcciones de **todos** los clientes (`enriquecerClientes`), y `buscarDuplicadoRut` lee todos los clientes en cada alta/edición.

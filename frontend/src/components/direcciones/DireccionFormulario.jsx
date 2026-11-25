@@ -4,7 +4,7 @@ import { toUpper, upperInput } from "../../utils/helpers";
 import useGuardar from "../../hooks/useGuardar";
 import AccionesFicha from "../comunes/AccionesFicha";
 
-function DireccionFormulario({ direccionEditando, onCancel, onSave, direcciones, readOnly = false }) {
+function DireccionFormulario({ direccionEditando, onCancel, onSave, readOnly = false }) {
   const [nuevaDireccion, setNuevaDireccion] = useState({
     codigo: "", direccion: "", ciudad: "", comuna: ""
   });

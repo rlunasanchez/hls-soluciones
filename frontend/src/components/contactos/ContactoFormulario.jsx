@@ -4,7 +4,7 @@ import { toUpper, upperInput, validarEmail } from "../../utils/helpers";
 import useGuardar from "../../hooks/useGuardar";
 import AccionesFicha from "../comunes/AccionesFicha";
 
-function ContactoFormulario({ contactoEditando, onCancel, onSave, contactos, readOnly = false }) {
+function ContactoFormulario({ contactoEditando, onCancel, onSave, readOnly = false }) {
   const [nuevoContacto, setNuevoContacto] = useState({
     codigo: "", nombre: "", email: "", fono: "", cargo: ""
   });

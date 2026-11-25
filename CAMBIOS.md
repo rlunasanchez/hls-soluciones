@@ -1,5 +1,18 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-11-25
+
+### v2.223: Contactos y Direcciones: listado y buscador paginados en el servidor (escalabilidad, paso 1)
+
+**Alcance:** backend (MySQL en `main`; el port a PostgreSQL de `deploy/cloud` va aparte) y frontend. **Sin SQL de Neon.** Build y ESLint OK. Probado con 22 casos contra una base MySQL temporal con **20.000 contactos y 20.000 direcciones** (300 clientes vinculados) y en pantalla con Chrome; la base temporal se borró.
+
+- **Qué pasaba:** las listas de Contactos y Direcciones traían **todas** las filas (cada una con una subconsulta `GROUP_CONCAT` de sus clientes) y filtraban y paginaban en el navegador. Con los 5.698 contactos del sistema antiguo (y más) no escala. Las listas de OT, Clientes y Equipos ya estaban en el servidor; estas dos se habían pasado por alto (el md solo decía que sus *buscadores* consultaban al servidor).
+- **Backend:** una sola consulta para los dos catálogos, sin repetir código: `utils/catalogoConsulta.js` (configuración de cada catálogo, filtros, orden, límites y `paginacion`; idéntico en las dos ramas) y `routes/catalogoConsulta.js` (el `GET /`, que montan `contactos.js` y `direcciones.js` antes de `/:id`; contiene el SQL propio de cada motor). `GET /api/contactos|direcciones`: `?pagina=&limite=&nombre=|direccion=` devuelve `{ contactos|direcciones, pagination }` (límite máximo 100); `?q=` devuelve hasta 20 sugerencias (máximo 50 con `?limite=`), las que empiezan con el texto primero; sin parámetros, los 100 más recientes (antes todas). El texto se busca escapando `%` y `_` (como Equipos). `duenos` se calcula solo para las filas devueltas.
+- **Frontend:** hook genérico `hooks/useListadoPaginado.js` (página persistente, filas según la pantalla, filtros con 300 ms de espera, respuestas viejas descartadas) y dos hooks finos, `useContactosListado.js` y `useDireccionesListado.js` (15 líneas cada uno). `Contactos.jsx` y `Direcciones.jsx` bajaron de ~190 a 147 líneas; los formularios ya no reciben la lista completa (no la usaban).
+- **Medido (20.000 registros):** página de 6 filas 6 a 55 ms (la primera, en frío, 245 a 416 ms); filtro 26 a 55 ms; buscador 34 a 119 ms con ≤ 11 KB. Antes cada visita a la pantalla descargaba las 20.000 filas (~4 MB estimados a partir de las 100 filas = 21 KB).
+- **Ojo al probar en local:** hay que **reiniciar el backend** (`node server.js`); con el frontend nuevo y el backend viejo la lista da error.
+- **Siguiente (plan de escalabilidad):** 2) Cotizaciones en el servidor (filtros por folio y cliente, insert de ítems en una sola consulta); 3) índices (SQL de Neon); 4) un solo `Header` y un solo `Filtros` reutilizables, y que Clientes y Equipos usen `useListadoPaginado`; 5) limpiar `index.css` y compartir CSS entre mantenedores.
+
 ## Fecha: 2026-11-24
 
 ### v2.221: Vistas móviles: ficha de cliente completa y Usuarios sin tabla duplicada
