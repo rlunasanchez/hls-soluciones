@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, Eye, PackagePlus, Pencil } from "lucide-react";
+import { Eye, PackagePlus, Pencil } from "lucide-react";
 import EquipoFormulario from "../equipos/EquipoFormulario";
 import { createPortal } from "react-dom";
 import api from "../../services/api";
@@ -77,8 +77,6 @@ function OrdenFormEquipo({
 
   return (
     <div className="of-sec primary">
-      <div className="of-st primary">Datos del Equipo</div>
-
       {equipoFijo && equipoExistente && (
         <div style={{
           flex: 1,
@@ -103,14 +101,12 @@ function OrdenFormEquipo({
       <div className="of-r3" style={{ gap: '20px', marginBottom: '8px' }}>
         <div>
           <div ref={equipoModeloDropdownRef} style={{ position: 'relative' }}>
-            <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)' }}>
-              <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
-              Buscar por Modelo
-            </label>
             <div>
               <input
                 type="text"
                 className="ot-search"
+                placeholder="Buscar por Modelo"
+                aria-label="Buscar por Modelo"
                 value={busquedaModelo}
                 onChange={(e) => {
                   setBusquedaModelo(upperInput(e));

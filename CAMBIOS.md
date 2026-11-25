@@ -2,6 +2,15 @@
 
 ## Fecha: 2026-11-25
 
+### v2.227: Textos de ayuda dentro de los buscadores de la OT y la cotización; «Glosa» alineada
+
+**Alcance:** solo frontend, sin backend ni SQL. Build OK y ESLint sin `no-undef`. Alineación medida con Chrome (posición x del borde izquierdo de cada título y campo): a 1366 px todos en 59 y a 375 px todos en 47.
+
+- **Orden de Trabajo y Cotización (mismo componente `OrdenBuscadorCliente`):** el texto «Buscar y Seleccionar Cliente» pasó de etiqueta (con lupa) sobre el campo a **placeholder dentro del input** (con `aria-label`). Con el cliente fijo (`clienteFijo`) se conserva el título «Cliente Asignado».
+- **Se quitó el título «Datos del Cliente»** que iba sobre el buscador, ahora también en la OT. La opción `sinTitulo` de `OrdenFormCliente` se eliminó (ya no hace falta: ninguna pantalla lo muestra). El recuadro interior «Datos del cliente» (con el selector Empresa/Persona) se mantiene.
+- **Orden de Trabajo, equipo:** se quitó el título «Datos del Equipo» y «Buscar por Modelo» pasó a ser el placeholder del input (`OrdenFormEquipo`).
+- **Cotización, «Glosa»:** su título y su cuadro de texto estaban pegados al borde de la sección; ahora van dentro de un `of-caja` transparente (misma técnica que «Ejecutivo y Condiciones», v2.220), con la misma sangría que Cliente, Contacto y Dirección.
+
 ### v2.226: PDF de la cotización sin la razón social ni el RUT de HLS en el encabezado
 
 **Alcance:** solo frontend (`utils/cotizacionDoc.js`), sin backend ni SQL. Verificado renderizando el PDF con datos de ejemplo en Chrome (sin tocar la base).

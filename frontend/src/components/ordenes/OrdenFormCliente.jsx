@@ -27,8 +27,7 @@ function OrdenFormCliente({
   clienteFijo = false,
   readOnly = false,
   setClienteSeleccionado,
-  adjuntos,
-  sinTitulo = false
+  adjuntos
 }) {
   const contactosDisponibles = (() => {
     if (!clienteSeleccionado) return [];
@@ -209,8 +208,6 @@ function OrdenFormCliente({
   return (
     <>
     <div className="of-sec primary">
-      {!sinTitulo && <div className="of-st primary">Datos del Cliente</div>}
-
       <OrdenBuscadorCliente
         busquedaCliente={busquedaCliente} setBusquedaCliente={setBusquedaCliente}
         mostrarDropdownClientes={mostrarDropdownClientes} setMostrarDropdownClientes={setMostrarDropdownClientes}
