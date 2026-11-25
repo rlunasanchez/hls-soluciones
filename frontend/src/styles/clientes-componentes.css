@@ -2,62 +2,6 @@
    COMPONENTES - CLIENTES
    ========================= */
 
-/* FiltrosCliente */
-.filtros-cliente {
-  background: var(--panel);
-  padding: 10px 12px;
-  border-radius: var(--radius);
-  margin-bottom: 16px;
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  box-shadow: var(--shadow);
-}
-
-.filtro-grupo {
-  flex: 0 0 auto;
-  width: 200px;
-}
-
-@media (max-width: 768px) {
-  .filtro-grupo {
-    width: 100%;
-  }
-
-  .filtro-grupo input {
-    padding: 10px 12px;
-    font-size: 0.9rem;
-    min-height: 44px;
-    box-sizing: border-box;
-  }
-}
-
-.filtro-grupo label {
-  display: block;
-  margin-bottom: 4px;
-  font-weight: 600;
-  color: var(--text-muted);
-  font-size: 0.8rem;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.filtro-grupo input {
-  width: 100%;
-  padding: 2px 8px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-size: 0.82rem;
-  transition: border-color 0.2s;
-}
-
-.filtro-grupo input:focus {
-  border-color: var(--primary);
-  outline: none;
-}
-
 /* ClienteLista - Tabla */
 .table-wrapper {
   background: var(--panel);
@@ -201,13 +145,5 @@
   .cards-table {
     display: flex;
     flex-direction: column;
-  }
-
-  .filtros-cliente {
-    flex-direction: column;
-  }
-
-  .filtro-grupo {
-    min-width: 100%;
   }
 }

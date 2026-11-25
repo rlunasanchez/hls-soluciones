@@ -1,0 +1,50 @@
+/* Variables, reinicio y estilos base. (parte de lo que era index.css; se carga en este orden desde index.css) */
+:root {
+  --container-max: 1400px;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --gap: 12px;
+  --bg: #f0f2f5;
+  --panel: #ffffff;
+  --text: #1a1a2e;
+  --text-muted: #64748b;
+  --primary: #0C4A8C;
+  --primary-hover: #0a3d75;
+  --primary-light: #e6f0fa;
+  --danger: #E53935;
+  --danger-light: #ffebee;
+  --success: #00B5E2;
+  --success-light: #e0f7fc;
+  --warning: #FF9800;
+  --warning-light: #fff3e0;
+  --info: #7C3AED;
+  --info-light: #EDE9FE;
+  --secondary: #059669;
+  --secondary-light: #D1FAE5;
+  --border: #e2e8f0;
+  --gradient: linear-gradient(135deg, #0C4A8C 0%, #009EE3 100%);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+html, body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}

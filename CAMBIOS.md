@@ -2,6 +2,62 @@
 
 ## Fecha: 2026-11-25
 
+### v2.225: Un solo `HeaderModulo` y una sola `BarraFiltros`; CSS compartido y `index.css` partido (escalabilidad, pasos 4 y 5)
+
+**Alcance:** solo frontend. **Sin SQL de Neon.** Build y ESLint OK (sin `no-undef`). Se tomaron **44 capturas** (22 pantallas × escritorio y móvil, con 20.000 registros por tabla) antes de empezar y se compararon píxel a píxel después de cada paso (`pixelmatch`; script en una carpeta temporal, no versionado). Las que cambiaron son estandarizaciones (abajo); lo demás quedó idéntico.
+
+- **`HeaderModulo` + `utils/menuModulos.js`:** reemplazan a los 7 `Header*` (Cliente, Contacto, Dirección, Equipo, Cotización, OT y Usuario, ~45 líneas cada uno, casi iguales) y al menú pegado dentro de `Informes` y `OrdenCompra`. El orden, icono y color del menú están en un solo lugar y cada pantalla oculta su propio botón. Se borraron los 7 archivos.
+- **`BarraFiltros` + `styles/filtros.css`:** reemplazan a los 6 `Filtros*` y a sus clases triplicadas (`filtro-grupo-contactos|direcciones|equipos`, `btn-limpiar-*`, `.filtros-cliente`, `.filtro-grupo`). Clases nuevas únicas: `filtro-campo` y `btn-limpiar`. API: `acciones=[{texto, onClick, Icono}]`, `campos=[{valor, onChange, placeholder, transformar}]`. Se quitaron los bloques de filtros de `Equipos.css`, `Contactos.css`, `Direcciones.css`, `clientes-componentes.css`, `Clientes.css` e `index.css`.
+- **Formularios de Contactos y Direcciones con las clases `ef-` de Equipos:** sus hojas `Contactos.css` y `Direcciones.css` eran copia de las de Equipos con otro prefijo (`cof-`, `dif-`) y se borraron; `Equipos.css` pasó a llamarse `mantenedor.css` (la comparten los tres). `ef-r2` ahora mide un tercio del ancho (estándar de los mantenedores). Los botones `ef-btn-p|s|c` pasaron a `botones.css` con los de las otras fichas.
+- **`index.css` (1.107 líneas) partido por tema, en el mismo orden:** `base.css` (51), `login.css` (51), `cabecera.css` (159), `tablas.css` (350), `responsive-escritorio.css` (163) y `responsive-movil.css` (340); `index.css` quedó como lista de `@import` (**el orden importa**: es el de la cascada). Resultado verificado: las 44 capturas idénticas antes y después de partirlo.
+- **Lo que cambió a la vista (estandarización, regla «todo el proyecto estándar»):** (1) los títulos de Cotizaciones, Informes y Orden de Compra tenían una separación icono-título distinta de las otras seis pantallas; ahora iguales. (2) La barra de filtros de **Clientes** medía 4 px menos que las de los demás módulos y en móvil se apilaba en columna; ahora es igual a las otras (en móvil, grilla de 2 columnas con Limpiar a todo el ancho). (3) **Direcciones** tenía el filtro a 220 px; ahora 200 como todos. (4) El botón Limpiar y los botones de los formularios de Contactos y Direcciones en móvil miden 40 px, como pide la regla del proyecto y como ya hacían Equipos, Clientes y la OT.
+- **Aprendido (verificación visual):** ocultar las barras de desplazamiento (`::-webkit-scrollbar{display:none}`) y esperar 1,2 s antes de capturar hace las capturas repetibles; aun así `d_clientes` y `d_ot` fluctúan 1 px en la fila del menú entre corridas idénticas (ruido de renderizado, no cambios). Método: levantar el backend contra una base temporal en otro puerto (preload que cambia el 5001 por el 5099 sin tocar el código) y el frontend con `VITE_API_URL`.
+
+### v2.224: Cotizaciones paginadas en el servidor, residuos de Clientes y Equipos, hooks unificados e índices (escalabilidad, pasos 2 y 3)
+
+**Alcance:** backend (MySQL en `main`, portado a PostgreSQL en `deploy/cloud`) y frontend. **SQL de Neon abajo** (índices; no cambia datos). Probado en **MySQL y PostgreSQL reales** con 20.000 clientes, 20.000 equipos y 15.000 cotizaciones (más 20.000 contactos y direcciones).
+
+- **Cotizaciones:** `GET /api/cotizaciones?pagina=&limite=&folio=&cliente=&orden_id=` filtra y pagina en el servidor (`utils/filtrosCotizaciones.js`, idéntico en las dos ramas; folio con `CONCAT('', folio)`, que funciona en los dos motores). Antes la lista pedía `limit=10000` y filtraba en el navegador. Los ítems se guardan con **una sola consulta** (antes un `INSERT` por ítem). `useCotizacionesListado` quedó sobre el hook genérico.
+- **Clientes:** `buscarDuplicadoRut` compara en la base con la expresión `RUT_NORMALIZADO` (sin puntos, guion ni espacios; devuelve una fila) en vez de leer todos los clientes en cada alta y edición. El filtro de RUT del listado usa la misma expresión (así comparte el índice). `GET /api/clientes` y `GET /api/equipos` sin parámetros devuelven los 100 más recientes (antes todos; ninguna pantalla los usaba).
+- **Utilidad común:** `paginacion()` (en `utils/filtrosOrdenes.js`) arma los datos de paginación para Contactos, Direcciones, Cotizaciones, Clientes y Equipos.
+- **Frontend:** `useClientesListado` y `useEquiposListado` ahora se apoyan en `useListadoPaginado` (de ~50 líneas a ~12 cada uno), con la misma forma de respuesta que antes (las pantallas no cambiaron).
+- **Hallazgo:** `ordenes_trabajo` no tenía índice por `cliente_id`, y cada edición de un cliente sincroniza sus OT con `UPDATE … WHERE cliente_id = ?` (recorrido completo con 14.581 OT). Se agregó `idx_ot_cliente_id` a `crear_tablas.sql`. **Para tu base MySQL local:** `ALTER TABLE ordenes_trabajo ADD INDEX idx_ot_cliente_id (cliente_id);`
+- **Medido en PostgreSQL con 20.000 filas (antes → después de los índices):** razón social contiene 5,2 → 1,1 ms; RUT repetido 1,0 → 0,2 ms; RUT por prefijo 10,4 → 0,3 ms; buscador de contactos (5 columnas con OR) 13,6 → 0,4 ms; nombre de contacto 4,8 → 0,9 ms; dirección 5,0 → 1,0 ms; modelo de equipo 4,2 → 1,0 ms; cliente de cotización 3,9 → 1,2 ms. Todas pasan a usar índice; la ventaja crece con el volumen. En MySQL no se agregan índices de texto (los B-tree no ayudan a `LIKE '%…%'`).
+- **SQL para Neon (lo corre el dueño en el SQL Editor; empezar con una línea en blanco y revisar la primera palabra; es seguro repetirlo, usa `IF NOT EXISTS`):**
+
+```sql
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+CREATE INDEX IF NOT EXISTS idx_clientes_razon_trgm ON clientes USING gin (lower(razon_social) gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_clientes_codigo_trgm ON clientes USING gin (lower(codigo) gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_clientes_rut_norm ON clientes ((replace(replace(replace(upper(rut), '.', ''), '-', ''), ' ', '')) text_pattern_ops);
+CREATE INDEX IF NOT EXISTS idx_clientes_rut_norm_trgm ON clientes USING gin ((replace(replace(replace(upper(rut), '.', ''), '-', ''), ' ', '')) gin_trgm_ops);
+
+CREATE INDEX IF NOT EXISTS idx_contactos_nombre_trgm ON contactos USING gin (lower(nombre) gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_contactos_codigo_trgm ON contactos USING gin (lower(codigo) gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_contactos_email_trgm ON contactos USING gin (lower(email) gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_contactos_fono_trgm ON contactos USING gin (lower(fono) gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_contactos_cargo_trgm ON contactos USING gin (lower(cargo) gin_trgm_ops);
+
+CREATE INDEX IF NOT EXISTS idx_direcciones_direccion_trgm ON direcciones USING gin (lower(direccion) gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_direcciones_codigo_trgm ON direcciones USING gin (lower(codigo) gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_direcciones_ciudad_trgm ON direcciones USING gin (lower(ciudad) gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_direcciones_comuna_trgm ON direcciones USING gin (lower(comuna) gin_trgm_ops);
+
+CREATE INDEX IF NOT EXISTS idx_equipos_modelo_trgm ON equipos USING gin (lower(modelo) gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_equipos_codigo_trgm ON equipos USING gin (lower(codigo) gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_equipos_serie_trgm ON equipos USING gin (lower(serie) gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_equipos_equipo_trgm ON equipos USING gin (lower(equipo) gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_equipos_marca_trgm ON equipos USING gin (lower(marca) gin_trgm_ops);
+
+CREATE INDEX IF NOT EXISTS idx_ot_cliente_id ON ordenes_trabajo (cliente_id);
+CREATE INDEX IF NOT EXISTS idx_ot_numero_trgm ON ordenes_trabajo USING gin (lower(numero_orden) gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_ot_cliente_trgm ON ordenes_trabajo USING gin (lower(cliente) gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_ot_serie_trgm ON ordenes_trabajo USING gin (lower(serie) gin_trgm_ops);
+
+CREATE INDEX IF NOT EXISTS idx_cotizaciones_cliente_trgm ON cotizaciones USING gin (lower(cliente) gin_trgm_ops);
+```
+
 ### v2.223: Contactos y Direcciones: listado y buscador paginados en el servidor (escalabilidad, paso 1)
 
 **Alcance:** backend (MySQL en `main`; portado a PostgreSQL en `deploy/cloud`, con `STRING_AGG` y `numerarMarcadores`) y frontend. **Sin SQL de Neon.** Build y ESLint OK. Probado con 22 casos, **en MySQL y en PostgreSQL real (`embedded-postgres`)**, contra una base temporal con **20.000 contactos y 20.000 direcciones** (300 clientes vinculados) y en pantalla con Chrome; la base temporal se borró. En PostgreSQL la primera página y la última tardaron 0,5 a 0,8 s en frío (el OFFSET de la última recorre 20.000 filas) y el resto 3 a 25 ms.

@@ -3,8 +3,7 @@ import { createPortal } from "react-dom";
 import api from "../../services/api";
 import ContactoFormulario from "../contactos/ContactoFormulario";
 import DireccionFormulario from "../direcciones/DireccionFormulario";
-import "../../styles/Contactos.css";
-import "../../styles/Direcciones.css";
+import "../../styles/mantenedor.css";
 import "../../styles/campo-catalogo.css";
 
 const FICHAS = {

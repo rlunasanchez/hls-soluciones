@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import "../styles/mantenedor.css";
 import { Contact } from "lucide-react";
 import api from "../services/api";
-import '../styles/Contactos.css';
-import { cerrarSesion } from "../utils/helpers";
-import HeaderContacto from "../components/contactos/HeaderContacto";
-import FiltrosContacto from "../components/contactos/FiltrosContacto";
+import HeaderModulo from "../components/comunes/HeaderModulo";
+import BarraFiltros from "../components/comunes/BarraFiltros";
+import { upperInput } from "../utils/helpers";
 import ContactoFormulario from "../components/contactos/ContactoFormulario";
 import ContactoTabla from "../components/contactos/ContactoTabla";
 import ContactoCard from "../components/contactos/ContactoCard";
@@ -100,13 +100,12 @@ function Contactos() {
 
   return (
     <div className="container">
-      <HeaderContacto navigate={navigate} onLogout={cerrarSesion} />
+      <HeaderModulo titulo="Mantenedor de Contactos" Icono={Contact} />
 
-      <FiltrosContacto
-        filtroNombre={filtroNombre}
-        onFiltroNombreChange={setFiltroNombre}
+      <BarraFiltros
+        acciones={[{ texto: "Nuevo Contacto", onClick: nuevoContacto }]}
+        campos={[{ valor: filtroNombre, onChange: setFiltroNombre, placeholder: "Nombre", transformar: upperInput }]}
         onLimpiar={() => { setFiltroNombre(""); }}
-        onNuevo={nuevoContacto}
         paginaActual={paginaActual}
         totalPaginas={totalPaginas}
         onPageChange={setPaginaActual}

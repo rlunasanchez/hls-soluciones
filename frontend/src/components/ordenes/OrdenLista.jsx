@@ -1,3 +1,4 @@
+import "../../styles/filtros.css";
 import { ClipboardList, Plus, RotateCcw } from "lucide-react";
 import Pagination from "../Pagination";
 import OrdenAcciones from "./OrdenAcciones";
@@ -84,7 +85,7 @@ function OrdenLista({ ordenes, loading, filtroNumeroOrden, onFiltroChange, filtr
                 />
               </div>
             </div>
-            <button onClick={onLimpiar} className="btn-limpiar-equipos" title="Limpiar filtros">
+            <button onClick={onLimpiar} className="btn-limpiar" title="Limpiar filtros">
               <RotateCcw size={14} /> Limpiar
             </button>
             <Pagination enLinea currentPage={paginaActual} totalPages={totalPaginas} onPageChange={onPageChange} />

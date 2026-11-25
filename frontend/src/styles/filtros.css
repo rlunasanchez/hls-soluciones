@@ -1,0 +1,21 @@
+/* Barra de filtros compartida (components/comunes/BarraFiltros.jsx): Clientes, Contactos, Direcciones, Equipos,
+   Cotizaciones y Usuarios. Antes cada módulo tenía su copia (filtro-grupo-contactos, -direcciones, -equipos,
+   .filtros-cliente…). Los filtros de la lista de OT usan estas mismas clases para Limpiar. */
+.filters-section { background: var(--panel); border-radius: var(--radius); margin-bottom: 16px; box-shadow: var(--shadow); overflow: hidden; }
+.filters-content { display: flex; gap: 10px; align-items: flex-end; padding: 10px 12px; flex-wrap: wrap; }
+.filtro-campo { flex: 0 0 auto; width: 200px; }
+.filtro-campo input { width: 100%; padding: 2px 8px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.82rem; font-family: inherit; transition: border-color 0.2s; }
+.filtro-campo input:focus { border-color: var(--primary); outline: none; }
+.btn-limpiar { display: flex; align-items: center; gap: 4px; padding: 6px 12px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500; white-space: nowrap; }
+.btn-limpiar:hover { filter: brightness(0.92); }
+
+@media (min-width: 769px) {
+  .filtro-campo input { height: 30px; box-sizing: border-box; }
+}
+
+@media (max-width: 768px) {
+  .filters-content { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .filtro-campo { width: 100%; }
+  .filtro-campo input { padding: 10px 12px; font-size: .9rem; min-height: 44px; box-sizing: border-box; }
+  .filters-content .btn-limpiar { grid-column: 1 / -1; justify-content: center; padding: 10px 16px; }
+}

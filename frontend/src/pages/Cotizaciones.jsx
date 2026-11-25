@@ -1,9 +1,10 @@
 import { useNavigate, useLocation } from "react-router-dom";
+import { FileSpreadsheet } from "lucide-react";
 import api from "../services/api";
 import { invalidar } from "../services/cache";
 import "../styles/OrdenTrabajo.css";
 import "../styles/ordenes-componentes.css";
-import HeaderCotizacion from "../components/cotizaciones/HeaderCotizacion";
+import HeaderModulo from "../components/comunes/HeaderModulo";
 import CotizacionLista from "../components/cotizaciones/CotizacionLista";
 import CotizacionFormulario from "../components/cotizaciones/CotizacionFormulario";
 import { generarHtmlCotizacion, tituloDocumentoCotizacion } from "../utils/cotizacionDoc";
@@ -53,7 +54,7 @@ function Cotizaciones() {
 
   return (
     <div className="container" style={{ background: "var(--bg)", minHeight: "100vh" }}>
-      <HeaderCotizacion navigate={navigate} />
+      <HeaderModulo titulo="Cotizaciones" Icono={FileSpreadsheet} />
 
       {!form.mostrarFormulario ? (
         <div className="ot-list-wrap">

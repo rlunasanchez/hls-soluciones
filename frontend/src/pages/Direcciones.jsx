@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import "../styles/mantenedor.css";
 import { MapPin } from "lucide-react";
 import api from "../services/api";
-import '../styles/Direcciones.css';
-import { cerrarSesion } from "../utils/helpers";
-import HeaderDireccion from "../components/direcciones/HeaderDireccion";
-import FiltrosDireccion from "../components/direcciones/FiltrosDireccion";
+import HeaderModulo from "../components/comunes/HeaderModulo";
+import BarraFiltros from "../components/comunes/BarraFiltros";
+import { upperInput } from "../utils/helpers";
 import DireccionFormulario from "../components/direcciones/DireccionFormulario";
 import DireccionTabla from "../components/direcciones/DireccionTabla";
 import DireccionCard from "../components/direcciones/DireccionCard";
@@ -100,13 +100,12 @@ function Direcciones() {
 
   return (
     <div className="container">
-      <HeaderDireccion navigate={navigate} onLogout={cerrarSesion} />
+      <HeaderModulo titulo="Mantenedor de Direcciones" Icono={MapPin} />
 
-      <FiltrosDireccion
-        filtroDireccion={filtroDireccion}
-        onFiltroDireccionChange={setFiltroDireccion}
+      <BarraFiltros
+        acciones={[{ texto: "Nueva Dirección", onClick: nuevaDireccion }]}
+        campos={[{ valor: filtroDireccion, onChange: setFiltroDireccion, placeholder: "Dirección", transformar: upperInput }]}
         onLimpiar={() => { setFiltroDireccion(""); }}
-        onNuevo={nuevaDireccion}
         paginaActual={paginaActual}
         totalPaginas={totalPaginas}
         onPageChange={setPaginaActual}

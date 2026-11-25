@@ -2,10 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Package } from "lucide-react";
 import api from "../services/api";
-import '../styles/Equipos.css';
-import { cerrarSesion } from "../utils/helpers";
-import HeaderEquipo from "../components/equipos/HeaderEquipo";
-import FiltrosEquipo from "../components/equipos/FiltrosEquipo";
+import '../styles/mantenedor.css';
+import HeaderModulo from "../components/comunes/HeaderModulo";
+import BarraFiltros from "../components/comunes/BarraFiltros";
+import { upperInput } from "../utils/helpers";
 import EquipoFormulario from "../components/equipos/EquipoFormulario";
 import EquipoTabla from "../components/equipos/EquipoTabla";
 import EquipoCard from "../components/equipos/EquipoCard";
@@ -100,17 +100,16 @@ function Equipos() {
 
   return (
     <div className="container">
-      <HeaderEquipo navigate={navigate} onLogout={cerrarSesion} />
+      <HeaderModulo titulo="Mantenedor de Equipos" Icono={Package} />
 
-        <FiltrosEquipo
-          filtroModelo={filtroModelo}
-          onFiltroModeloChange={setFiltroModelo}
-          onLimpiar={() => { setFiltroModelo(""); }}
-          onNuevo={nuevaEquipo}
-          paginaActual={paginaActual}
-          totalPaginas={totalPaginas}
-          onPageChange={setPaginaActual}
-        />
+      <BarraFiltros
+        acciones={[{ texto: "Nuevo Equipo", onClick: nuevaEquipo }]}
+        campos={[{ valor: filtroModelo, onChange: setFiltroModelo, placeholder: "Modelo", transformar: upperInput }]}
+        onLimpiar={() => { setFiltroModelo(""); }}
+        paginaActual={paginaActual}
+        totalPaginas={totalPaginas}
+        onPageChange={setPaginaActual}
+      />
 
       {loading ? (
         <div className="empty-state">

@@ -1,13 +1,13 @@
-/* Botones de ficha: una sola definición para Cliente (cf), Contacto (cof), Dirección (dif) y OT (of).
+/* Botones de ficha: una sola definición para Cliente (cf), Contacto, Dirección y Equipo (ef) y OT (of).
    p = principal (guardar), s = secundario (guardar y seguir), c = cancelar. */
-.cf-btn-p,.cof-btn-p,.dif-btn-p,.of-btn-p{padding:4px 12px;font-size:.78rem;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px;transition:all .2s}
-.cf-btn-p:hover,.cof-btn-p:hover,.dif-btn-p:hover,.of-btn-p:hover{background:#0a3d75}
-.cf-btn-s,.cof-btn-s,.dif-btn-s,.of-btn-s{padding:4px 12px;font-size:.78rem;background:var(--success);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px;transition:all .2s}
-.cf-btn-s:hover,.cof-btn-s:hover,.dif-btn-s:hover,.of-btn-s:hover{filter:brightness(.92)}
-.cf-btn-c,.cof-btn-c,.dif-btn-c,.of-btn-c{padding:4px 12px;font-size:.78rem;background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px;transition:all .2s}
-.cf-btn-c:hover,.cof-btn-c:hover,.dif-btn-c:hover,.of-btn-c:hover{background:#e2e8f0}
-.cf-btn-p:disabled,.cof-btn-p:disabled,.dif-btn-p:disabled,.of-btn-p:disabled,
-.cf-btn-s:disabled,.cof-btn-s:disabled,.dif-btn-s:disabled,.of-btn-s:disabled{opacity:.6;cursor:not-allowed}
+.cf-btn-p,.ef-btn-p,.of-btn-p{padding:4px 12px;font-size:.78rem;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px;transition:all .2s}
+.cf-btn-p:hover,.ef-btn-p:hover,.of-btn-p:hover{background:#0a3d75}
+.cf-btn-s,.ef-btn-s,.of-btn-s{padding:4px 12px;font-size:.78rem;background:var(--success);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px;transition:all .2s}
+.cf-btn-s:hover,.ef-btn-s:hover,.of-btn-s:hover{filter:brightness(.92)}
+.cf-btn-c,.ef-btn-c,.of-btn-c{padding:4px 12px;font-size:.78rem;background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px;transition:all .2s}
+.cf-btn-c:hover,.ef-btn-c:hover,.of-btn-c:hover{background:#e2e8f0}
+.cf-btn-p:disabled,.ef-btn-p:disabled,.of-btn-p:disabled,
+.cf-btn-s:disabled,.ef-btn-s:disabled,.of-btn-s:disabled{opacity:.6;cursor:not-allowed}
 
 /* Botón mini (Editar / Registrar / Editar completo): el mismo tamaño en el cliente, el contacto y la dirección */
 .btn-mini{display:flex;align-items:center;gap:4px;flex-shrink:0;height:24px;padding:2px 10px;border:none;border-radius:var(--radius-sm);color:#fff;cursor:pointer;font-weight:600;font-size:.75rem;white-space:nowrap}
