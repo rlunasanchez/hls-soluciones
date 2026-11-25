@@ -34,28 +34,28 @@ function DireccionFormulario({ direccionEditando, onCancel, onSave, readOnly = f
 
   return (
     <div style={{ maxWidth: '740px', margin: '0 auto', padding: '20px' }}>
-      <div className="dif-wrap">
-        <div className="dif-head">
+      <div className="ef-wrap">
+        <div className="ef-head">
           <h2><MapPin size={22} />{readOnly ? "Ver Dirección" : direccionEditando ? "Editar Dirección" : "Nueva Dirección"}</h2>
-          <button type="button" className="dif-head-close" onClick={onCancel}><X size={20} /></button>
+          <button type="button" className="ef-head-close" onClick={onCancel}><X size={20} /></button>
         </div>
-        <form onSubmit={handleSubmit} className="dif-form">
-          <div className="dif-s primary">
-            <div className="dif-st primary">Datos de la Dirección</div>
-            <div className="dif-r2" style={{ marginTop: '8px' }}>
-              <div className="dif-f of-col-full">
+        <form onSubmit={handleSubmit} className="ef-form">
+          <div className="ef-s primary">
+            <div className="ef-st primary">Datos de la Dirección</div>
+            <div className="ef-r2" style={{ marginTop: '8px' }}>
+              <div className="ef-f of-col-full">
                 <label>Dirección *</label>
                 <input value={nuevaDireccion.direccion}
                   disabled={readOnly}
                   onChange={e => setNuevaDireccion({ ...nuevaDireccion, direccion: upperInput(e) })} required />
               </div>
-              <div className="dif-f">
+              <div className="ef-f">
                 <label>Ciudad</label>
                 <input value={nuevaDireccion.ciudad}
                   disabled={readOnly}
                   onChange={e => setNuevaDireccion({ ...nuevaDireccion, ciudad: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '') })} />
               </div>
-              <div className="dif-f">
+              <div className="ef-f">
                 <label>Comuna</label>
                 <input value={nuevaDireccion.comuna}
                   disabled={readOnly}
@@ -63,7 +63,7 @@ function DireccionFormulario({ direccionEditando, onCancel, onSave, readOnly = f
               </div>
             </div>
           </div>
-          <AccionesFicha clase="dif" readOnly={readOnly} guardando={guardando} onCancelar={onCancel}
+          <AccionesFicha clase="ef" readOnly={readOnly} guardando={guardando} onCancelar={onCancel}
             textoSeguir={direccionEditando ? "Guardar" : null} onSeguir={(e) => handleSubmit(e, true)}
             textoGuardar="Guardar y salir" />
         </form>

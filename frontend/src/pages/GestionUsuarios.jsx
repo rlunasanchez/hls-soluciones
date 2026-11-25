@@ -1,19 +1,17 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { ToggleLeft, ToggleRight } from "lucide-react";
+import { ToggleLeft, ToggleRight, Users, Key } from "lucide-react";
 import api from "../services/api";
 import { getCached } from "../services/cache";
-import { parseToken, cerrarSesion } from "../utils/helpers";
-import HeaderUsuario from "../components/usuarios/HeaderUsuario";
+import { parseToken } from "../utils/helpers";
+import HeaderModulo from "../components/comunes/HeaderModulo";
 import UsuarioFormulario from "../components/usuarios/UsuarioFormulario";
 import CambioPasswordForm from "../components/usuarios/CambioPasswordForm";
 import UsuarioAcciones from "../components/usuarios/UsuarioAcciones";
-import FiltrosUsuario from "../components/usuarios/FiltrosUsuario";
+import BarraFiltros from "../components/comunes/BarraFiltros";
 import { usePaginaPersistente, useClampPagina } from "../hooks/usePaginacion";
 import useFilasPorPantalla from "../hooks/useFilasPorPantalla";
 
 function GestionUsuarios() {
-  const navigate = useNavigate();
   const [usuarios, setUsuarios] = useState([]);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [mostrarCambioPassword, setMostrarCambioPassword] = useState(false);
@@ -142,15 +140,16 @@ function GestionUsuarios() {
 
   return (
     <div className="container">
-      <HeaderUsuario navigate={navigate} onLogout={cerrarSesion} rol={rol} />
+      <HeaderModulo titulo={rol === 'admin' ? 'Gestión de Usuarios' : 'Mi Cuenta'} Icono={Users} />
 
       {rol === 'admin' && (
-        <FiltrosUsuario
-          filtroBusqueda={filtroBusqueda}
-          onFiltroBusquedaChange={setFiltroBusqueda}
+        <BarraFiltros
+          acciones={[
+            { texto: "Nuevo Usuario", onClick: () => setMostrarFormulario(true) },
+            { texto: "Cambiar Password", onClick: () => setMostrarCambioPassword(true), Icono: Key }
+          ]}
+          campos={[{ valor: filtroBusqueda, onChange: setFiltroBusqueda, placeholder: "Nombre o correo" }]}
           onLimpiar={() => setFiltroBusqueda("")}
-          onNuevo={() => setMostrarFormulario(true)}
-          onCambiarPassword={() => setMostrarCambioPassword(true)}
           paginaActual={paginaActual}
           totalPaginas={totalPaginas}
           onPageChange={setPaginaActual}

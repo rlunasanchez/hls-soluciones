@@ -64,7 +64,5 @@
 }
 /* Vista de Clientes: encabezados con solo la primera letra en mayúscula */
 .cf-vinc .table-wrapper th{text-transform:none;letter-spacing:normal}
-/* Lupa centrada con su texto en los filtros del listado de Clientes */
-.filtros-cliente .filtro-grupo label{display:flex;align-items:center;gap:4px}
 /* Mensaje de tabla vacía con solo la primera letra en mayúscula */
 .cf-vinc .table-wrapper td.cf-vacio{text-transform:none;white-space:normal;max-width:none}

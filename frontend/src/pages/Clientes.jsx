@@ -2,11 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Users } from "lucide-react";
 import api from "../services/api";
-import { parseToken } from "../utils/helpers";
 import "../styles/Clientes.css";
 import "../styles/clientes-componentes.css";
-import HeaderCliente from "../components/clientes/HeaderCliente";
-import FiltrosCliente from "../components/clientes/FiltrosCliente";
+import HeaderModulo from "../components/comunes/HeaderModulo";
+import BarraFiltros from "../components/comunes/BarraFiltros";
+import { formatearRutInput } from "../utils/helpers";
 import ClienteLista from "../components/clientes/ClienteLista";
 import ClienteFormulario from "../components/clientes/ClienteFormulario";
 import useClientesListado from "../hooks/useClientesListado";
@@ -22,8 +22,6 @@ function Clientes() {
     clientes: clientesPagina, loading, fetchClientes, totalPaginas, totalClientes, paginaActual, setPaginaActual,
     busqueda, setBusqueda, filtroRut, setFiltroRut
   } = useClientesListado();
-
-  const { usuarioActual } = parseToken();
 
   const guardarCliente = async (clienteData, resetFormulario, mantener = false) => {
     try {
@@ -99,15 +97,15 @@ function Clientes() {
 
   return (
     <div className="container">
-      <HeaderCliente usuarioActual={usuarioActual} onLogout={() => { localStorage.removeItem("token"); navigate("/login"); }} />
+      <HeaderModulo titulo="Mantenedor de Clientes" Icono={Users} />
 
-      <FiltrosCliente
-        busqueda={busqueda}
-        onBusquedaChange={setBusqueda}
-        filtroRut={filtroRut}
-        onFiltroRutChange={setFiltroRut}
+      <BarraFiltros
+        acciones={[{ texto: "Nuevo Cliente", onClick: () => { setClienteEditando(null); setSoloLectura(false); setMostrarFormulario(true); } }]}
+        campos={[
+          { valor: busqueda, onChange: setBusqueda, placeholder: "Razón Social / Nombre" },
+          { valor: filtroRut, onChange: setFiltroRut, placeholder: "RUT", transformar: (e) => formatearRutInput(e.target.value) }
+        ]}
         onLimpiar={() => { setBusqueda(""); setFiltroRut(""); }}
-        onNuevo={() => { setClienteEditando(null); setSoloLectura(false); setMostrarFormulario(true); }}
         paginaActual={paginaActual}
         totalPaginas={totalPaginas}
         onPageChange={setPaginaActual}

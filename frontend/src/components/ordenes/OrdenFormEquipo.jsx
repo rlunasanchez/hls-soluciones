@@ -3,7 +3,7 @@ import { Search, Eye, PackagePlus, Pencil } from "lucide-react";
 import EquipoFormulario from "../equipos/EquipoFormulario";
 import { createPortal } from "react-dom";
 import api from "../../services/api";
-import "../../styles/Equipos.css";
+import "../../styles/mantenedor.css";
 import { upperInput, toUpper } from "../../utils/helpers";
 
 function OrdenFormEquipo({

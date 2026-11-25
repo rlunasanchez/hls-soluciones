@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { ClipboardList } from "lucide-react";
 import api from "../services/api";
 import useBusquedaApi from "../hooks/useBusquedaApi";
 import { clienteDeOrden } from "../utils/clientesApi";
 import { verificarEquipo } from "../utils/equiposApi";
-import { cerrarSesion } from "../utils/helpers";
 import { ordenAFormulario, insumosDeOrden, ordenVacia, insumosVacios, ordenParaCliente, tecnicoDeSesion, datosAlElegirCliente } from "../utils/ordenFormato";
 import '../styles/OrdenTrabajo.css';
 import "../styles/ordenes-componentes.css";
-import HeaderOrdenTrabajo from "../components/ordenes/HeaderOrdenTrabajo";
+import HeaderModulo from "../components/comunes/HeaderModulo";
 import OrdenLista from "../components/ordenes/OrdenLista";
 import OrdenFormDatos from "../components/ordenes/OrdenFormDatos";
 import OrdenFormCliente from "../components/ordenes/OrdenFormCliente";
@@ -246,7 +246,7 @@ function OrdenTrabajo() {
   };
   return (
     <div className="container" style={{ background: 'var(--bg)', minHeight: '100vh' }}>
-      <HeaderOrdenTrabajo onLogout={cerrarSesion} />
+      <HeaderModulo titulo="Orden de Trabajo" Icono={ClipboardList} />
 
       {!mostrarFormulario ? (
           <div className="ot-list-wrap">

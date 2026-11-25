@@ -27,7 +27,7 @@ export function buscarClientesSql(q) {
 
 // Filtros del listado de Clientes (con paginación en el servidor): ?nombre=&rut=
 //  - nombre: la razón social empieza con el texto o alguna de sus palabras empieza con él.
-//  - rut: solo los dígitos, desde el comienzo ("14900" encuentra "14.900.665-6"; se ignoran puntos, guion y DV).
+//  - rut: solo los dígitos, desde el comienzo ("14900" encuentra "14.900.665-6"; se ignoran puntos y guion). Usa la misma expresión que la verificación de RUT repetido (RUT_NORMALIZADO), que tiene su índice.
 export function filtrosListadoClientes(query) {
   const condiciones = [];
   const params = [];
@@ -38,7 +38,7 @@ export function filtrosListadoClientes(query) {
   }
   const digitos = String(query.rut || "").replace(/[^0-9]/g, "");
   if (digitos) {
-    condiciones.push("REPLACE(REPLACE(REPLACE(REPLACE(UPPER(rut), '.', ''), '-', ''), ' ', ''), 'K', '') LIKE ?");
+    condiciones.push(`${RUT_NORMALIZADO} LIKE ?`);
     params.push(`${digitos}%`);
   }
   return { where: condiciones.length ? `WHERE ${condiciones.join(" AND ")}` : "", params };

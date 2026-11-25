@@ -39,36 +39,36 @@ function ContactoFormulario({ contactoEditando, onCancel, onSave, readOnly = fal
 
   return (
     <div style={{ maxWidth: '740px', margin: '0 auto', padding: '20px' }}>
-      <div className="cof-wrap">
-        <div className="cof-head">
+      <div className="ef-wrap">
+        <div className="ef-head">
           <h2><Contact size={22} />{readOnly ? "Ver Contacto" : contactoEditando ? "Editar Contacto" : "Nuevo Contacto"}</h2>
-          <button type="button" className="cof-head-close" onClick={onCancel}><X size={20} /></button>
+          <button type="button" className="ef-head-close" onClick={onCancel}><X size={20} /></button>
         </div>
-        <form onSubmit={handleSubmit} className="cof-form">
-          <div className="cof-s primary">
-            <div className="cof-st primary">Datos del Contacto</div>
-            <div className="cof-r2" style={{ marginTop: '8px' }}>
-              <div className="cof-f">
+        <form onSubmit={handleSubmit} className="ef-form">
+          <div className="ef-s primary">
+            <div className="ef-st primary">Datos del Contacto</div>
+            <div className="ef-r2" style={{ marginTop: '8px' }}>
+              <div className="ef-f">
                 <label>Nombre *</label>
                 <input value={nuevoContacto.nombre}
                   disabled={readOnly}
                   onChange={e => setNuevoContacto({ ...nuevoContacto, nombre: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '') })} required />
               </div>
-              <div className="cof-f">
+              <div className="ef-f">
                 <label>Cargo</label>
                 <input value={nuevoContacto.cargo}
                   disabled={readOnly}
                   onChange={e => setNuevoContacto({ ...nuevoContacto, cargo: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '') })} />
               </div>
             </div>
-            <div className="cof-r2" style={{ marginTop: '8px' }}>
-              <div className="cof-f">
+            <div className="ef-r2" style={{ marginTop: '8px' }}>
+              <div className="ef-f">
                 <label>Email</label>
                 <input type="email" value={nuevoContacto.email}
                   disabled={readOnly}
                   onChange={e => setNuevoContacto({ ...nuevoContacto, email: e.target.value })} />
               </div>
-              <div className="cof-f">
+              <div className="ef-f">
                 <label>Fono</label>
                 <input value={nuevoContacto.fono}
                   disabled={readOnly}
@@ -76,7 +76,7 @@ function ContactoFormulario({ contactoEditando, onCancel, onSave, readOnly = fal
               </div>
             </div>
           </div>
-          <AccionesFicha clase="cof" readOnly={readOnly} guardando={guardando} onCancelar={onCancel}
+          <AccionesFicha clase="ef" readOnly={readOnly} guardando={guardando} onCancelar={onCancel}
             textoSeguir={contactoEditando ? "Guardar" : null} onSeguir={(e) => handleSubmit(e, true)}
             textoGuardar="Guardar y salir" />
         </form>

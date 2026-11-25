@@ -1,5 +1,5 @@
 import { FileSpreadsheet } from "lucide-react";
-import FiltrosCotizacion from "./FiltrosCotizacion";
+import BarraFiltros from "../comunes/BarraFiltros";
 import CotizacionAcciones from "./CotizacionAcciones";
 
 const clp = (n) => Math.round(Number(n) || 0).toLocaleString("es-CL");
@@ -7,11 +7,13 @@ const clp = (n) => Math.round(Number(n) || 0).toLocaleString("es-CL");
 function CotizacionLista({ cotizaciones, loading, filtroFolio, onFiltroFolioChange, filtroCliente, onFiltroClienteChange, onLimpiar, onNueva, paginaActual, totalPaginas, onPageChange, onVer, onEditar, onEliminar, onPDF }) {
   return (
     <>
-      <FiltrosCotizacion
-        filtroFolio={filtroFolio} onFiltroFolioChange={onFiltroFolioChange}
-        filtroCliente={filtroCliente} onFiltroClienteChange={onFiltroClienteChange}
-        onLimpiar={onLimpiar} onNueva={onNueva}
-        paginaActual={paginaActual} totalPaginas={totalPaginas} onPageChange={onPageChange}
+      <BarraFiltros
+        acciones={[{ texto: "Nueva Cotización", onClick: onNueva }]}
+        campos={[
+          { valor: filtroFolio, onChange: onFiltroFolioChange, placeholder: "Folio" },
+          { valor: filtroCliente, onChange: onFiltroClienteChange, placeholder: "Cliente" }
+        ]}
+        onLimpiar={onLimpiar} paginaActual={paginaActual} totalPaginas={totalPaginas} onPageChange={onPageChange}
       />
 
       {loading ? (
