@@ -9,7 +9,7 @@ const ALTO_IGUAL = { height: "23.06px" };
 
 // "Ejecutivo y Condiciones" de la cotización (ejecutivo, fechas y condición de pago) y, aparte, su "Glosa".
 // "Ejecutivo y Condiciones" conserva el fondo celeste que tenía (of-sec success) con el título de las otras cajas
-// (of-caja-titulo); la Glosa va en su propia caja.
+// (of-caja-titulo); la Glosa va en su propia sección. Las dos llevan un of-caja transparente para tener la misma sangría.
 function CotizacionFormEjecutivo({ cotizacion, setCotizacion, soloLectura }) {
   const cambiar = (campo, valor) => setCotizacion((prev) => ({ ...prev, [campo]: valor }));
   return (
@@ -53,16 +53,19 @@ function CotizacionFormEjecutivo({ cotizacion, setCotizacion, soloLectura }) {
       </div>
 
       <div className="of-sec primary" style={{ marginTop: 8 }}>
-        <div className="of-caja-titulo">Glosa</div>
-        <div className="of-f">
-          <textarea
-            aria-label="Glosa"
-            value={cotizacion.glosa}
-            onChange={(e) => cambiar("glosa", e.target.value)}
-            rows={3}
-            disabled={soloLectura}
-            style={{ resize: "vertical", fontFamily: "inherit" }}
-          />
+        {/* of-caja sin fondo ni borde: misma sangría (borde + relleno) que las cajas de Cliente, Contacto y Dirección */}
+        <div className="of-caja" style={{ background: "transparent", borderColor: "transparent", marginBottom: 0 }}>
+          <div className="of-caja-titulo">Glosa</div>
+          <div className="of-f">
+            <textarea
+              aria-label="Glosa"
+              value={cotizacion.glosa}
+              onChange={(e) => cambiar("glosa", e.target.value)}
+              rows={3}
+              disabled={soloLectura}
+              style={{ resize: "vertical", fontFamily: "inherit" }}
+            />
+          </div>
         </div>
       </div>
     </>

@@ -1,4 +1,4 @@
-import { Search, Users, ChevronDown, Eye, UserPlus } from "lucide-react";
+import { Users, ChevronDown, Eye, UserPlus } from "lucide-react";
 import { upperInput, formatearRutInput } from "../../utils/helpers";
 
 // Buscador de cliente de la OT: caja de búsqueda con lista de resultados (por nombre, RUT o código),
@@ -12,19 +12,13 @@ function OrdenBuscadorCliente({
 }) {
   return (
     <div style={{ marginBottom: '8px' }}>
-      <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)' }}>
-        {clienteFijo && clienteSeleccionado ? (
-          <>
-            <Users size={16} style={{ display: 'inline', marginRight: '6px' }} />
-            Cliente Asignado
-          </>
-        ) : (
-          <>
-            <Search size={16} style={{ display: 'inline', marginRight: '6px' }} />
-            Buscar y Seleccionar Cliente
-          </>
-        )}
-      </label>
+      {/* Con el cliente fijo se muestra su título; si no, "Buscar y Seleccionar Cliente" va dentro del campo (placeholder) */}
+      {clienteFijo && clienteSeleccionado && (
+        <label style={{ display: 'block', marginBottom: '4px', fontWeight: '600', color: 'var(--text)' }}>
+          <Users size={16} style={{ display: 'inline', marginRight: '6px' }} />
+          Cliente Asignado
+        </label>
+      )}
 
       {clienteFijo && clienteSeleccionado ? (
         <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
@@ -84,6 +78,8 @@ function OrdenBuscadorCliente({
           <input
             type="text"
             className="ot-search bc-input"
+            placeholder="Buscar y Seleccionar Cliente"
+            aria-label="Buscar y Seleccionar Cliente"
             value={busquedaCliente}
             onChange={(e) => {
               // Si lo escrito parece RUT (puro número/K/guion/puntos) agrega los puntos;
