@@ -658,6 +658,7 @@ table tr:last-child td {
 .data-card-row {
   display: flex;
   justify-content: space-between;
+  gap: 12px;
   padding: 6px 0;
   font-size: 0.875rem;
 }

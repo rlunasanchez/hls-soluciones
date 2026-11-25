@@ -10,7 +10,14 @@
 - **La ficha no mostraba los contactos ni las direcciones vinculados en móvil:** la regla global `.table-wrapper{display:none}` (≤768 px, el listado usa tarjetas) también los ocultaba. Ahora `.cf-vinc .table-wrapper{display:block}`: se ven con scroll horizontal dentro de la tabla (las columnas «En la OT» y quitar quedan a la derecha).
 - **Usuarios (≤768 px) mostraba la tabla de escritorio y las tarjetas a la vez:** `.table-container:has(table)` se oculta en móvil junto con `.table-wrapper`.
 - Sin cambios (ya cabían): listados y formularios de Contactos, Direcciones, Equipos, OT y Cotizaciones, Inicio, Informes y Orden de Compra.
-- **Pendiente posible:** los vínculos de la ficha en móvil podrían pasar a tarjetas (hoy scroll horizontal).
+### v2.222: Móvil: separación en las tarjetas de los listados y revisión con datos reales
+
+**Alcance:** solo frontend (`index.css`, `GestionUsuarios.jsx`), sin backend ni SQL de Neon. Build OK; sin ver en el celular real.
+
+- **Tarjetas de los listados en móvil (todos los módulos):** `.data-card-row` con `gap: 12px` (la etiqueta iba pegada al valor largo, por ejemplo «ClientePRUEBA…» en la OT). En Usuarios, el pie de cada tarjeta (botón Activo y «⋯») con `gap: 8px` (iban pegados).
+- **Revisión con datos reales (25-nov):** se cargaron un cliente, contacto, dirección, equipo, OT y cotización «PRUEBA MOVIL» con textos largos y se abrieron en Editar/Ver a 375 px, más un barrido de 600, 820 y 1024 px (script puppeteer-core en la carpeta temporal, no versionado). Sin campos cortados ni desborde en Contactos, Direcciones, Equipos, OT, Cotizaciones ni Usuarios. Los datos de prueba ya se borraron. Quedan solo: textos largos de las tablas con puntos suspensivos (intencional) y la lista de OT a ~820 px, que se desplaza horizontalmente dentro de su caja.
+- **Aprendido:** al capturar una OT en Editar hay que esperar más de 1 s: los insumos se cargan tras una consulta del cliente y salían vacíos en la captura (no es un fallo).
+- **Pendiente posible:** los vínculos de la ficha en móvil podrían pasar a tarjetas (hoy scroll horizontal); los filtros de Cotizaciones, Usuarios y OT en móvil se ven distintos a los de Clientes (botones con otro margen, Limpiar a la izquierda).
 
 ### v2.220: «Ejecutivo y Condiciones» con la misma sangría que Datos del contacto y de la dirección
 

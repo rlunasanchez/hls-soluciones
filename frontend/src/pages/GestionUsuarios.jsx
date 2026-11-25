@@ -234,7 +234,7 @@ function GestionUsuarios() {
                   <span className="data-card-label">Creado</span>
                   <span className="data-card-value">{u.fecha_creacion ? new Date(u.fecha_creacion).toLocaleDateString("es-CL") : '-'}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginTop: '12px' }}>
                   {u.usuario === 'admin' ? (
                     <span className="badge badge-success">Activo</span>
                   ) : (
