@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MapPin } from "lucide-react";
 import api from "../services/api";
-import { getCached } from "../services/cache";
 import '../styles/Direcciones.css';
 import { cerrarSesion } from "../utils/helpers";
 import HeaderDireccion from "../components/direcciones/HeaderDireccion";
@@ -10,50 +9,16 @@ import FiltrosDireccion from "../components/direcciones/FiltrosDireccion";
 import DireccionFormulario from "../components/direcciones/DireccionFormulario";
 import DireccionTabla from "../components/direcciones/DireccionTabla";
 import DireccionCard from "../components/direcciones/DireccionCard";
-import { usePaginaPersistente, useClampPagina } from "../hooks/usePaginacion";
-import useFilasPorPantalla from "../hooks/useFilasPorPantalla";
+import useDireccionesListado from "../hooks/useDireccionesListado";
 
 function Direcciones() {
   const navigate = useNavigate();
-  const [direcciones, setDirecciones] = useState([]);
+  const {
+    direcciones, loading, recargar, totalPaginas, paginaActual, setPaginaActual, filtroDireccion, setFiltroDireccion
+  } = useDireccionesListado();
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [direccionEditando, setDireccionEditando] = useState(null);
-  const [filtroDireccion, setFiltroDireccion] = useState("");
-  const [paginaActual, setPaginaActual] = usePaginaPersistente("pagDirecciones", [filtroDireccion]);
-  const direccionesPorPagina = useFilasPorPantalla();
   const [soloLectura, setSoloLectura] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const fetchDirecciones = async (signal) => {
-    setLoading(true);
-    try {
-      const res = await getCached("/api/direcciones", { signal });
-      setDirecciones(res.data);
-    } catch (err) {
-      if (err.name !== "CanceledError") console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const controller = new AbortController();
-    fetchDirecciones(controller.signal);
-    return () => controller.abort();
-  }, []);
-
-  const direccionesFiltradas = direcciones.filter(d => {
-    if (filtroDireccion) {
-      const m = filtroDireccion.toLowerCase();
-      if (!d.direccion?.toLowerCase().includes(m)) return false;
-    }
-    return true;
-  });
-
-  const totalPaginas = Math.ceil(direccionesFiltradas.length / direccionesPorPagina);
-  useClampPagina(paginaActual, setPaginaActual, totalPaginas);
-  const indiceInicio = (paginaActual - 1) * direccionesPorPagina;
-  const direccionesPagina = direccionesFiltradas.slice(indiceInicio, indiceInicio + direccionesPorPagina);
 
   const editarDireccion = (d) => {
     setDireccionEditando(d);
@@ -85,7 +50,7 @@ function Direcciones() {
         if (!window.confirm(`Esta dirección está vinculada a ${err.response.data.clientes.length} cliente(s):\n\n${lista}\n\nSi la eliminas, desaparece de todos ellos. ¿Eliminar de todos modos?`)) return;
         await api.delete(`/api/direcciones/${id}?forzar=1`);
       }
-      fetchDirecciones();
+      recargar();
     } catch (err) {
       alert("Error al eliminar");
     }
@@ -101,15 +66,13 @@ function Direcciones() {
       if (mantener && id) {
         const res = await api.get(`/api/direcciones/${id}`);
         setDireccionEditando(res.data);
-        const lista = await getCached("/api/direcciones");
-        setDirecciones(lista.data);
+        recargar();
       } else {
         setMostrarFormulario(false);
         setDireccionEditando(null);
         setSoloLectura(false);
         navigate('/direcciones', { replace: true });
-        const res = await getCached("/api/direcciones");
-        setDirecciones(res.data);
+        recargar();
       }
     } catch (err) {
       const msg = err.response?.data?.msg;
@@ -122,7 +85,6 @@ function Direcciones() {
       <div className="container">
         <DireccionFormulario
           direccionEditando={direccionEditando}
-          direcciones={direcciones}
           onCancel={() => {
             setMostrarFormulario(false);
             setDireccionEditando(null);
@@ -158,19 +120,19 @@ function Direcciones() {
       ) : (
         <>
           <DireccionTabla
-            direcciones={direccionesPagina}
+            direcciones={direcciones}
             onVer={verDireccion}
             onEditar={editarDireccion}
             onEliminar={eliminarDireccion}
           />
 
           <div className="cards-table">
-            {direccionesPagina.map((d) => (
+            {direcciones.map((d) => (
               <DireccionCard key={d.id} direccion={d} onVer={verDireccion} onEditar={editarDireccion} onEliminar={eliminarDireccion} />
             ))}
           </div>
 
-          {direccionesFiltradas.length === 0 && (
+          {!loading && direcciones.length === 0 && (
             <div className="empty-state">
               <MapPin size={48} />
               <p>No hay direcciones que coincidan con la búsqueda</p>

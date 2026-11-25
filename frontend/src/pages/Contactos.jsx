@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Contact } from "lucide-react";
 import api from "../services/api";
-import { getCached } from "../services/cache";
 import '../styles/Contactos.css';
 import { cerrarSesion } from "../utils/helpers";
 import HeaderContacto from "../components/contactos/HeaderContacto";
@@ -10,50 +9,16 @@ import FiltrosContacto from "../components/contactos/FiltrosContacto";
 import ContactoFormulario from "../components/contactos/ContactoFormulario";
 import ContactoTabla from "../components/contactos/ContactoTabla";
 import ContactoCard from "../components/contactos/ContactoCard";
-import { usePaginaPersistente, useClampPagina } from "../hooks/usePaginacion";
-import useFilasPorPantalla from "../hooks/useFilasPorPantalla";
+import useContactosListado from "../hooks/useContactosListado";
 
 function Contactos() {
   const navigate = useNavigate();
-  const [contactos, setContactos] = useState([]);
+  const {
+    contactos, loading, recargar, totalPaginas, paginaActual, setPaginaActual, filtroNombre, setFiltroNombre
+  } = useContactosListado();
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [contactoEditando, setContactoEditando] = useState(null);
-  const [filtroNombre, setFiltroNombre] = useState("");
-  const [paginaActual, setPaginaActual] = usePaginaPersistente("pagContactos", [filtroNombre]);
-  const contactosPorPagina = useFilasPorPantalla();
   const [soloLectura, setSoloLectura] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const fetchContactos = async (signal) => {
-    setLoading(true);
-    try {
-      const res = await getCached("/api/contactos", { signal });
-      setContactos(res.data);
-    } catch (err) {
-      if (err.name !== "CanceledError") console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const controller = new AbortController();
-    fetchContactos(controller.signal);
-    return () => controller.abort();
-  }, []);
-
-  const contactosFiltrados = contactos.filter(c => {
-    if (filtroNombre) {
-      const m = filtroNombre.toLowerCase();
-      if (!c.nombre?.toLowerCase().includes(m)) return false;
-    }
-    return true;
-  });
-
-  const totalPaginas = Math.ceil(contactosFiltrados.length / contactosPorPagina);
-  useClampPagina(paginaActual, setPaginaActual, totalPaginas);
-  const indiceInicio = (paginaActual - 1) * contactosPorPagina;
-  const contactosPagina = contactosFiltrados.slice(indiceInicio, indiceInicio + contactosPorPagina);
 
   const editarContacto = (c) => {
     setContactoEditando(c);
@@ -85,7 +50,7 @@ function Contactos() {
         if (!window.confirm(`Este contacto está vinculado a ${err.response.data.clientes.length} cliente(s):\n\n${lista}\n\nSi lo eliminas, desaparece de todos ellos. ¿Eliminar de todos modos?`)) return;
         await api.delete(`/api/contactos/${id}?forzar=1`);
       }
-      fetchContactos();
+      recargar();
     } catch (err) {
       alert("Error al eliminar");
     }
@@ -101,15 +66,13 @@ function Contactos() {
       if (mantener && id) {
         const res = await api.get(`/api/contactos/${id}`);
         setContactoEditando(res.data);
-        const lista = await getCached("/api/contactos");
-        setContactos(lista.data);
+        recargar();
       } else {
         setMostrarFormulario(false);
         setContactoEditando(null);
         setSoloLectura(false);
         navigate('/contactos', { replace: true });
-        const res = await getCached("/api/contactos");
-        setContactos(res.data);
+        recargar();
       }
     } catch (err) {
       const msg = err.response?.data?.msg;
@@ -122,7 +85,6 @@ function Contactos() {
       <div className="container">
         <ContactoFormulario
           contactoEditando={contactoEditando}
-          contactos={contactos}
           onCancel={() => {
             setMostrarFormulario(false);
             setContactoEditando(null);
@@ -158,19 +120,19 @@ function Contactos() {
       ) : (
         <>
           <ContactoTabla
-            contactos={contactosPagina}
+            contactos={contactos}
             onVer={verContacto}
             onEditar={editarContacto}
             onEliminar={eliminarContacto}
           />
 
           <div className="cards-table">
-            {contactosPagina.map((c) => (
+            {contactos.map((c) => (
               <ContactoCard key={c.id} contacto={c} onVer={verContacto} onEditar={editarContacto} onEliminar={eliminarContacto} />
             ))}
           </div>
 
-          {contactosFiltrados.length === 0 && (
+          {!loading && contactos.length === 0 && (
             <div className="empty-state">
               <Contact size={48} />
               <p>No hay contactos que coincidan con la búsqueda</p>

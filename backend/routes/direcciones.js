@@ -2,6 +2,8 @@ import express from "express";
 import dotenv from "dotenv";
 import pool from "../config/db.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
+import consultaCatalogo from "./catalogoConsulta.js";
+import { CATALOGOS } from "../utils/catalogoConsulta.js";
 import { sincronizarOrdenesDeDireccion, reenlazarOrdenesDeDireccion, desvincularOrdenes } from "./ordenesVinculos.js";
 
 dotenv.config();
@@ -18,33 +20,8 @@ async function generarCodigo() {
   return `DI-${String(num + 1).padStart(4, "0")}`;
 }
 
-router.get("/", authMiddleware, async (req, res) => {
-  try {
-    const { q } = req.query;
-    // duenos: clientes a los que está vinculada ("id:codigo,id:codigo"); una dirección
-    // pertenece a un solo cliente, así que el buscador de la ficha oculta las ajenas.
-    let sql = `SELECT direcciones.*,
-      (SELECT GROUP_CONCAT(CONCAT(cl.id, ':', cl.codigo)) FROM cliente_direcciones v
-        JOIN clientes cl ON cl.id = v.cliente_id WHERE v.direccion_id = direcciones.id) AS duenos
-      FROM direcciones`;
-    let conditions = [];
-    let params = [];
-    if (q && q.trim()) {
-      const term = `%${q.trim()}%`;
-      conditions.push(`(LOWER(codigo) LIKE LOWER(?) OR LOWER(direccion) LIKE LOWER(?) OR LOWER(ciudad) LIKE LOWER(?) OR LOWER(comuna) LIKE LOWER(?))`);
-      params.push(term, term, term, term);
-    }
-    if (conditions.length > 0) {
-      sql += ` WHERE ${conditions.join(' AND ')}`;
-    }
-    sql += ` ORDER BY id DESC`;
-    const [rows] = await pool.query(sql, params);
-    res.json(rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Error del servidor" });
-  }
-});
+// Listado paginado y buscador: consulta compartida de los catálogos (catalogoConsulta.js). Va antes de las rutas /:id.
+router.use(consultaCatalogo(CATALOGOS.direcciones));
 
 router.get("/:id", authMiddleware, async (req, res) => {
   try {
