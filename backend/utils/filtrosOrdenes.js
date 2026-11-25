@@ -16,6 +16,10 @@ export function leerPaginacion(query) {
   return { pagina, limite, offset: (pagina - 1) * limite };
 }
 
+// Datos de paginación que se devuelven con cada página de un listado.
+export const paginacion = (pagina, limite, totalItems) =>
+  ({ currentPage: pagina, totalPages: Math.ceil(totalItems / limite), totalItems, itemsPerPage: limite });
+
 // Arma el WHERE a partir de los filtros del listado. Devuelve { where, params }.
 export function filtrosOrdenes(query) {
   const condiciones = [];

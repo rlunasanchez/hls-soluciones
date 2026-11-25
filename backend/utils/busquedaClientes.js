@@ -5,6 +5,9 @@ import { comoLike, escaparLike } from "./filtrosOrdenes.js";
 
 export const MIN_BUSQUEDA = 2;
 
+// RUT sin puntos, guion ni espacios y en mayúscula (la comparación de unicidad se hace en la base, no en JS).
+export const RUT_NORMALIZADO = "REPLACE(REPLACE(REPLACE(UPPER(rut), '.', ''), '-', ''), ' ', '')";
+
 // Cantidad de resultados: por defecto 10, máximo 50.
 export const leerLimiteBusqueda = (query) => Math.min(Math.max(parseInt(query.limite, 10) || 10, 1), 50);
 
@@ -16,7 +19,7 @@ export function buscarClientesSql(q) {
   const params = [comoLike(texto), comoLike(texto)];
   const digitos = texto.replace(/[^0-9]/g, "");
   if (/^[0-9]/.test(texto) && digitos) {
-    condiciones.push("REPLACE(REPLACE(REPLACE(UPPER(rut), '.', ''), '-', ''), ' ', '') LIKE ?");
+    condiciones.push(`${RUT_NORMALIZADO} LIKE ?`);
     params.push(`%${digitos}%`);
   }
   return { where: `WHERE (${condiciones.join(" OR ")})`, params };

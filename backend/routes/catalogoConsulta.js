@@ -1,8 +1,8 @@
 import express from "express";
 import pool from "../config/db.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
-import { filtroListado, filtroBusqueda, ordenBusqueda, limiteSugerencias, paginacion } from "../utils/catalogoConsulta.js";
-import { leerPaginacion, numerarMarcadores } from "../utils/filtrosOrdenes.js";
+import { filtroListado, filtroBusqueda, ordenBusqueda, limiteSugerencias } from "../utils/catalogoConsulta.js";
+import { leerPaginacion, paginacion, numerarMarcadores } from "../utils/filtrosOrdenes.js";
 
 // GET / de un catálogo (Contactos o Direcciones). Los routers de contactos.js y direcciones.js lo montan
 // antes de sus rutas /:id.

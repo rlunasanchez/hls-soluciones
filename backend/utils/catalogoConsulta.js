@@ -43,6 +43,3 @@ export function ordenBusqueda(cfg, q) {
 }
 
 export const limiteSugerencias = (query) => Math.min(Math.max(parseInt(query.limite, 10) || 20, 1), LIMITE_SUGERENCIAS);
-
-export const paginacion = (pagina, limite, totalItems) =>
-  ({ currentPage: pagina, totalPages: Math.ceil(totalItems / limite), totalItems, itemsPerPage: limite });

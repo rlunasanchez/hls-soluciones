@@ -1,9 +1,10 @@
 import express from "express";
 import pool from "../config/db.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
-import { numerarMarcadores } from "../utils/filtrosOrdenes.js";
 import { armarInsertCotizacion, armarUpdateCotizacion } from "../utils/camposCotizacion.js";
 import { calcularMontos } from "../utils/cotizacionTotales.js";
+import { filtrosCotizaciones } from "../utils/filtrosCotizaciones.js";
+import { leerPaginacion, paginacion, numerarMarcadores } from "../utils/filtrosOrdenes.js";
 import { resolverVinculos } from "./ordenesVinculos.js";
 
 const router = express.Router();
@@ -39,49 +40,37 @@ async function datosAGuardar(db, body) {
   };
 }
 
-// Reemplaza los ítems de la cotización por los que llegan (una fila por ítem).
+// Reemplaza los ítems de la cotización por los que llegan (una fila por ítem, en una sola consulta).
 async function guardarItems(db, cotizacionId, items) {
   await db.query("DELETE FROM cotizacion_items WHERE cotizacion_id = $1", [cotizacionId]);
-  for (const [i, it] of items.entries()) {
-    await db.query(
-      "INSERT INTO cotizacion_items (cotizacion_id, orden, sku, detalle, cantidad, neto, descuento, total) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
-      [cotizacionId, i, it.sku || null, it.detalle || null, it.cantidad, it.neto, it.descuento, it.total]
-    );
-  }
+  if (!items.length) return;
+  const columnas = 8;
+  const marcadores = items.map((_, i) => `(${Array.from({ length: columnas }, (_, c) => `$${i * columnas + c + 1}`).join(", ")})`).join(", ");
+  await db.query(
+    `INSERT INTO cotizacion_items (cotizacion_id, orden, sku, detalle, cantidad, neto, descuento, total) VALUES ${marcadores}`,
+    items.flatMap((it, i) => [cotizacionId, i, it.sku || null, it.detalle || null, it.cantidad, it.neto, it.descuento, it.total])
+  );
 }
 
+// Listado paginado y filtrado en el servidor: ?pagina=&limite=&folio=&cliente=&orden_id= (límite máximo 100).
 router.get("/", authMiddleware, async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const offset = (page - 1) * limit;
-  const ordenId = req.query.orden_id ? parseInt(req.query.orden_id) : null;
-  const where = ordenId ? "WHERE orden_id = $1" : "";
-  const whereParams = ordenId ? [ordenId] : [];
-  const limitParamNum = whereParams.length + 1;
-  const offsetParamNum = whereParams.length + 2;
+  const { pagina, limite, offset } = leerPaginacion(req.query);
+  const { where, params } = filtrosCotizaciones(req.query);
 
   try {
-    const cotizacionesResult = await pool.query(
-      `SELECT id, folio, fecha_emision, fecha_valido_hasta, condicion, glosa,
+    const cotizaciones = await pool.query(
+      numerarMarcadores(`SELECT id, folio, fecha_emision, fecha_valido_hasta, condicion, glosa,
         cliente_id, cliente_tipo, cliente, rut, fono_principal, email,
         contacto_id, contacto, fono_contacto, email_contacto, cargo_contacto,
         direccion_id, direccion, ciudad, comuna,
         ejecutivo, ejecutivo_fono, ejecutivo_email,
         neto, iva_porcentaje, iva, total,
         orden_id, orden_numero, fecha_creacion, fecha_actualizacion
-       FROM cotizaciones ${where} ORDER BY id DESC LIMIT $${limitParamNum} OFFSET $${offsetParamNum}`,
-      [...whereParams, limit, offset]
+       FROM cotizaciones ${where} ORDER BY id DESC LIMIT ? OFFSET ?`),
+      [...params, limite, offset]
     );
-    const totalResult = await pool.query(`SELECT COUNT(*) as total FROM cotizaciones ${where}`, whereParams);
-    res.json({
-      cotizaciones: cotizacionesResult.rows,
-      pagination: {
-        currentPage: page,
-        totalPages: Math.ceil(parseInt(totalResult.rows[0].total) / limit),
-        totalItems: parseInt(totalResult.rows[0].total),
-        itemsPerPage: limit
-      }
-    });
+    const total = await pool.query(numerarMarcadores(`SELECT COUNT(*) as total FROM cotizaciones ${where}`), params);
+    res.json({ cotizaciones: cotizaciones.rows, pagination: paginacion(pagina, limite, parseInt(total.rows[0].total)) });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error del servidor" });

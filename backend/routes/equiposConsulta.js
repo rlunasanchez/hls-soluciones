@@ -2,7 +2,7 @@ import express from "express";
 import pool from "../config/db.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { filtrosListadoEquipos, filtrosBusquedaEquipos, ordenSugerenciasEquipos, leerLimiteSugerencias } from "../utils/filtrosEquipos.js";
-import { leerPaginacion, numerarMarcadores } from "../utils/filtrosOrdenes.js";
+import { leerPaginacion, paginacion, numerarMarcadores } from "../utils/filtrosOrdenes.js";
 
 // Consultas de Equipos: listado (con paginación en el servidor), buscador por texto y verificación de
 // un equipo repetido. Las altas, ediciones y bajas están en equipos.js, que monta este router antes
@@ -11,7 +11,7 @@ const router = express.Router();
 
 // Con ?pagina=&limite=&modelo=: una página del listado de Equipos ({ equipos, pagination }).
 // Con ?q=texto: hasta ?limite= (por defecto 20) equipos que coinciden (sugerencias de la OT).
-// Sin parámetros: todos los equipos.
+// Sin parámetros: los 100 más recientes.
 router.get("/", authMiddleware, async (req, res) => {
   try {
     if (req.query.pagina !== undefined) {
@@ -19,11 +19,7 @@ router.get("/", authMiddleware, async (req, res) => {
       const { where, params } = filtrosListadoEquipos(req.query);
       const result = await pool.query(numerarMarcadores(`SELECT * FROM equipos ${where} ORDER BY id DESC LIMIT ? OFFSET ?`), [...params, limite, offset]);
       const total = await pool.query(numerarMarcadores(`SELECT COUNT(*) AS total FROM equipos ${where}`), params);
-      const totalItems = parseInt(total.rows[0].total);
-      return res.json({
-        equipos: result.rows,
-        pagination: { currentPage: pagina, totalPages: Math.ceil(totalItems / limite), totalItems, itemsPerPage: limite }
-      });
+      return res.json({ equipos: result.rows, pagination: paginacion(pagina, limite, parseInt(total.rows[0].total)) });
     }
     const q = String(req.query.q || "").trim();
     if (q) {
@@ -32,7 +28,7 @@ router.get("/", authMiddleware, async (req, res) => {
       const result = await pool.query(numerarMarcadores(`SELECT * FROM equipos ${where} ${orderBy} LIMIT ?`), [...params, ...paramsOrden, leerLimiteSugerencias(req.query)]);
       return res.json(result.rows);
     }
-    const result = await pool.query("SELECT * FROM equipos ORDER BY id DESC");
+    const result = await pool.query("SELECT * FROM equipos ORDER BY id DESC LIMIT 100");
     res.json(result.rows);
   } catch (err) {
     console.error(err);
