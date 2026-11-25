@@ -191,7 +191,7 @@ function ClienteFormulario({ clienteEditando, onSave, onCancel, titulo, readOnly
                   </span>
                 )}
               </h3>
-              <div style={{ display: "grid", gridTemplateColumns: "200px 200px", gap: 6 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 200px) minmax(0, 200px)", gap: 6 }}>
                 <div className="cf-field">
                   <label>Tipo</label>
                   <select value={nuevoCliente.tipo} disabled={readOnly}
