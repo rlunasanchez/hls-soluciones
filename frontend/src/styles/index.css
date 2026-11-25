@@ -895,7 +895,8 @@ table tr:last-child td {
     display: none;
   }
   
-  .table-wrapper {
+  .table-wrapper,
+  .table-container:has(table) {
     display: none;
   }
   

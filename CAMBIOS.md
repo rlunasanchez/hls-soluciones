@@ -2,6 +2,16 @@
 
 ## Fecha: 2026-11-24
 
+### v2.221: Vistas móviles: ficha de cliente completa y Usuarios sin tabla duplicada
+
+**Alcance:** solo frontend (`Clientes.css`, `index.css`, `ClienteFormulario.jsx`), sin backend ni SQL de Neon. Build OK. Se revisó con Chrome headless (puppeteer-core en una carpeta temporal, token firmado con el `JWT_SECRET` local) a 320, 375, 414 y 768 px, abriendo los formularios de Clientes (Empresa y Persona, nuevo y editar), Contactos, Direcciones, Equipos, OT, Cotizaciones y Usuarios, y midiendo si algún elemento pasa del ancho de la ventana.
+
+- **Cliente nuevo/editar cortaba los campos a la derecha** (la sección medía 508 px en una ventana de 375): la grilla `1fr` no se encogía por el ancho fijo de 460 px de v2.215 y por el `200px 200px` de Tipo/RUT. Arreglo: `.cf-grid` móvil con `minmax(0,1fr)`, `.cf-grid>*{min-width:0}`, sin la marca del medio en móvil y Tipo/RUT con `minmax(0, 200px)`.
+- **La ficha no mostraba los contactos ni las direcciones vinculados en móvil:** la regla global `.table-wrapper{display:none}` (≤768 px, el listado usa tarjetas) también los ocultaba. Ahora `.cf-vinc .table-wrapper{display:block}`: se ven con scroll horizontal dentro de la tabla (las columnas «En la OT» y quitar quedan a la derecha).
+- **Usuarios (≤768 px) mostraba la tabla de escritorio y las tarjetas a la vez:** `.table-container:has(table)` se oculta en móvil junto con `.table-wrapper`.
+- Sin cambios (ya cabían): listados y formularios de Contactos, Direcciones, Equipos, OT y Cotizaciones, Inicio, Informes y Orden de Compra.
+- **Pendiente posible:** los vínculos de la ficha en móvil podrían pasar a tarjetas (hoy scroll horizontal).
+
 ### v2.220: «Ejecutivo y Condiciones» con la misma sangría que Datos del contacto y de la dirección
 
 **Alcance:** solo frontend (`CotizacionFormEjecutivo.jsx`), sin backend ni SQL de Neon. Build OK; **sin ver en pantalla** (el dueño lo veía más a la izquierda que Contacto y Dirección).
