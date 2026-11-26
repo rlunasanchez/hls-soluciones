@@ -5,7 +5,8 @@ import { parseToken, toUpper } from "./helpers";
 // dirección (cliente, rut, email, fonoPrincipal, contacto, direccion…), así se reutilizan los
 // componentes de la OT; el servidor guarda las mismas columnas. Aquí se convierte lo que llega y lo que se manda.
 
-export const itemVacio = () => ({ sku: "", detalle: "", cantidad: 1, neto: "", descuento: "" });
+// conDescripcion: el check "Descripción" del ítem (muestra el cuadro de texto de la descripción larga; no se guarda, se deduce de si hay texto).
+export const itemVacio = () => ({ sku: "", detalle: "", descripcion: "", conDescripcion: false, cantidad: 1, neto: "", descuento: "" });
 
 export const cotizacionVacia = () => ({
   fechaEmision: new Date().toISOString().split("T")[0],
@@ -43,6 +44,8 @@ export const itemsDelServidor = (items) => {
   const lista = (Array.isArray(items) ? items : []).map((i) => ({
     sku: i.sku || "",
     detalle: i.detalle || "",
+    descripcion: i.descripcion || "",
+    conDescripcion: !!String(i.descripcion || "").trim(),
     cantidad: Number(i.cantidad) || 0,
     neto: i.neto ?? "",
     descuento: Number(i.descuento) ? String(Number(i.descuento)) : ""

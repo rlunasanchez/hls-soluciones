@@ -34,13 +34,9 @@
 .of-f-inline.of-f-num input{max-width:110px}
 .of-f label{font-size:9px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px}
 .of-f input,.of-f select,.of-f textarea{padding:2px 8px;font-size:.82rem;line-height:1.3;border:1.5px solid var(--border);border-radius:6px;background:white;transition:border-color .15s;width:100%;box-sizing:border-box;font-family:inherit}.of-f textarea{resize:vertical;min-height:60px}
-/* Detalle de un ítem de la cotización: se ve de la altura de los demás campos (23,06 px; 44 px en móvil) y, mientras se escribe en él, se abre como un panel flotante sobre lo que hay debajo, sin mover el formulario. En solo lectura crece para mostrar todo el texto. */
-.of-detalle{position:relative;height:23.06px}
-.of-detalle textarea{position:absolute;top:0;left:0;height:100%;min-height:0;resize:none;overflow:hidden}
-.of-detalle textarea:focus{z-index:30;height:130px;width:max(100%,340px);max-width:90vw;overflow:auto;box-shadow:0 8px 24px rgba(15,23,42,.28)}
-.of-detalle:has(textarea:disabled){height:auto}
-.of-detalle textarea:disabled{position:static;height:auto;min-height:23.06px;field-sizing:content;overflow:visible}
-@media(max-width:768px){.of-detalle{height:44px}.of-detalle textarea:focus{width:100%;max-width:none}}
+/* Detalle de un ítem de la cotización: una sola línea de la altura de los demás campos (23,06 px; 44 px en móvil), no se agranda; el texto largo va en la Descripción (check de la fila). */
+.of-f textarea.of-detalle{height:23.06px;min-height:0;resize:none;overflow:hidden}
+@media(max-width:768px){.of-f textarea.of-detalle{height:44px;min-height:44px}}
 .of-f input:focus,.of-f select:focus,.of-f textarea:focus,.of-caja-titulo select:focus{outline:none;border-color:#0C4A8C!important;box-shadow:0 0 0 2px rgba(12,74,140,.15)}
 .of-head-row .of-dates{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:0}
 .of-date{display:flex;align-items:center;gap:3px}

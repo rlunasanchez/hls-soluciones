@@ -45,8 +45,8 @@ async function guardarItems(db, cotizacionId, items) {
   await db.query("DELETE FROM cotizacion_items WHERE cotizacion_id = ?", [cotizacionId]);
   if (!items.length) return;
   await db.query(
-    "INSERT INTO cotizacion_items (cotizacion_id, orden, sku, detalle, cantidad, neto, descuento, total) VALUES ?",
-    [items.map((it, i) => [cotizacionId, i, it.sku || null, it.detalle || null, it.cantidad, it.neto, it.descuento, it.total])]
+    "INSERT INTO cotizacion_items (cotizacion_id, orden, sku, detalle, descripcion, cantidad, neto, descuento, total) VALUES ?",
+    [items.map((it, i) => [cotizacionId, i, it.sku || null, it.detalle || null, it.descripcion || null, it.cantidad, it.neto, it.descuento, it.total])]
   );
 }
 
@@ -80,7 +80,7 @@ router.get("/:id", authMiddleware, async (req, res) => {
     const [rows] = await pool.query("SELECT * FROM cotizaciones WHERE id = ?", [req.params.id]);
     if (rows.length === 0) return res.status(404).json({ msg: "Cotización no encontrada" });
     const [items] = await pool.query(
-      "SELECT sku, detalle, cantidad, neto, descuento, total FROM cotizacion_items WHERE cotizacion_id = ? ORDER BY orden, id",
+      "SELECT sku, detalle, descripcion, cantidad, neto, descuento, total FROM cotizacion_items WHERE cotizacion_id = ? ORDER BY orden, id",
       [req.params.id]
     );
     res.json({ ...rows[0], items });

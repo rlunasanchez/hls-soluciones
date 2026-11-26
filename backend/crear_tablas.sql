@@ -241,6 +241,7 @@ CREATE TABLE IF NOT EXISTS cotizacion_items (
   orden INT NOT NULL DEFAULT 0,
   sku VARCHAR(100),
   detalle TEXT,
+  descripcion TEXT,
   cantidad DECIMAL(12,2) NOT NULL DEFAULT 1,
   neto INT NOT NULL DEFAULT 0,
   descuento DECIMAL(5,2) NOT NULL DEFAULT 0,
