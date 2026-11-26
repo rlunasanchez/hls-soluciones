@@ -2,6 +2,16 @@
 
 ## Fecha: 2026-11-26
 
+### v2.231: Editar un cliente desde la OT o la cotización: si se vacía el fono o el email, también se vacían en el formulario
+
+**Alcance:** solo frontend (`components/ordenes/useClienteOT.jsx`), sin backend ni SQL. Build OK. **Reproducido y verificado** con Chrome, un backend contra una base MySQL temporal y un cliente de prueba con fono y email (la base se borró).
+
+- **Qué pasaba (aviso del dueño, 26-nov-2026):** «eliminé el teléfono y el correo de la empresa y el cambio no se reflejó en la OT». Al editar el cliente **desde la OT** (botón «Editar» o «Editar completo») y dejar el fono o el email en blanco, el formulario de la OT seguía mostrando los datos viejos. El servidor **sí** los vaciaba en las OT guardadas del cliente (v2.200, en MySQL y en PostgreSQL); lo que fallaba era el formulario abierto, que tenía `email: fresh.email || prev.email` y `fonoPrincipal: fresh.telefono || prev.fonoPrincipal` («si el cliente no tiene ese dato, se conserva el de la OT»). Pasaba igual al editar un cliente desde la **cotización** (usa el mismo hook).
+- **Arreglo:** el formulario sigue ahora la **misma regla que el servidor**: el dato de la OT se pisa solo si el del cliente **cambió** (comparando con el cliente antes de editar), y si el cliente quedó en blanco, la OT también. Si el dato del cliente no cambió, se conserva lo que ya estaba escrito en la OT (una OT con un fono distinto al del cliente no lo pierde al cambiar, por ejemplo, la razón social). Aplica a RUT, email y fono.
+- **Qué se comprobó (4 casos):** al elegir el cliente en una OT nueva trae su fono y su email; al vaciarlos desde «Editar» en la OT, el formulario los muestra vacíos (antes del arreglo seguían con el valor viejo); la OT guardada del cliente queda sin ellos en el servidor; y editando el cliente desde **Clientes** y abriendo después la OT, también aparece vacía (esa vía ya funcionaba).
+- **Cómo era ANTES y cómo volver:** las tres líneas eran `rut: fresh.rut || prev.rut,` `email: fresh.email || prev.email,` `fonoPrincipal: fresh.telefono || prev.fonoPrincipal,` con el comentario «Si el cliente no tiene ese dato, se conserva el que ya estaba escrito en la OT». Para volver: `git checkout 8ea4544 -- frontend/src/components/ordenes/useClienteOT.jsx` (`8ea4544` = último commit publicado antes de v2.231).
+- **Para tener en cuenta:** una OT **no vinculada** a un cliente del mantenedor (escrita a mano) no se sincroniza; y una OT ya guardada solo se actualiza con el cliente cuando se edita este (servidor) o cuando se abre y se vuelve a guardar. Las OT guardadas antes de v2.200 pudieron quedar con datos que el cliente ya no tiene.
+
 ### v2.230: Ficha de cliente: Empresa en dos mitades armónicas, Persona con el mismo RUT
 
 **Alcance:** solo frontend (`ClienteFormulario.jsx` y `Clientes.css`), sin backend ni SQL. Build OK. Se capturó la ficha en Chrome con y sin el cambio y se midió la posición y el ancho de cada campo; se revisó en 320, 375, 768, 900, 1024 y 1366 px (nuevo Empresa, nuevo Persona, editar con contacto y dirección vinculados y «Editar completo» desde la OT).
