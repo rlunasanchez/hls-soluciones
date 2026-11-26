@@ -1,5 +1,17 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-11-26
+
+### v2.228: Cotización: el campo Detalle de cada ítem se abre como panel flotante
+
+**Alcance:** solo frontend (`CotizacionFormItems.jsx` y la clase `of-detalle` en `OrdenTrabajo.css`), sin backend ni SQL. Build OK. Medido en Chrome.
+
+- **Qué pasaba:** el Detalle era un cuadro de texto de 40 px, más alto que Cant., SKU y los demás campos del ítem.
+- **Ahora:** en reposo mide **lo mismo que Cant.** (23,05 px contra 23,06 px en escritorio; 44 px en móvil). Al hacer clic y escribir se abre como un **panel flotante** de 130 px de alto y al menos 340 px de ancho (`z-index` alto y sombra) que se despliega sobre lo que hay debajo **sin empujar el formulario**, y se cierra al salir del campo (queda la primera línea visible). El texto completo siempre se guarda; solo cambia cómo se ve.
+- **Cómo:** una envoltura `.of-detalle` de la altura de los campos con el `textarea` posicionado encima; `:focus` lo agranda. Sin estilos en línea (antes `height: 40`, `resize: vertical`).
+- **Solo lectura (Ver):** el campo está deshabilitado y no puede recibir foco, así que ahí crece para mostrar todo el texto (`field-sizing: content`, Chrome 123 o superior). **Sin comprobar en pantalla.**
+- **Ajustes posibles:** alto del panel (`height:130px`) y ancho mínimo (`340px`) en `.of-detalle textarea:focus`; si se prefiere un panel centrado tipo ventana en vez de desplegarse bajo el campo, habría que cambiarlo a un modal.
+
 ## Fecha: 2026-11-25
 
 ### v2.227: Textos de ayuda dentro de los buscadores de la OT y la cotización; «Glosa» alineada

@@ -38,8 +38,10 @@ function ItemCard({ item, idx, soloLectura, actualizar, quitar }) {
         </div>
         <div className="of-f" style={{ flex: "1 1 200px" }}>
           <label>Detalle</label>
-          <textarea rows={1} value={item.detalle} onChange={(e) => actualizar(idx, "detalle", upperInput(e))} disabled={soloLectura}
-            style={{ resize: "vertical", fontFamily: "inherit", minHeight: 0, height: 40 }} />
+          {/* Se ve de la altura de Cant.; al escribir se abre como panel flotante (clase of-detalle) */}
+          <div className="of-detalle">
+            <textarea rows={1} value={item.detalle} onChange={(e) => actualizar(idx, "detalle", upperInput(e))} disabled={soloLectura} />
+          </div>
         </div>
         <div className="of-f" style={{ flex: "0 0 55px" }}>
           <label>Cant.</label>
