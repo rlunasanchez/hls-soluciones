@@ -10,7 +10,14 @@ Este archivo resume dónde quedó el trabajo al terminar el jueves 26-nov-2026 (
 
 **Agregado después del cierre (publicado): v2.231** arregla que al vaciar el fono o el email de un cliente desde la OT (o la cotización) el formulario conservaba los datos viejos; el servidor ya los vaciaba. Detalle y cómo revertir en `CAMBIOS.md` v2.231. Pendiente: que el dueño lo vea en su navegador (Ctrl+F5): editar un cliente desde la OT dejando el fono y el email en blanco debe dejarlos en blanco en la OT.
 
-**Pendiente al retomar (27-nov-2026): confirmar y subir v2.232 y v2.233.** Están en commits locales, sin subir: v2.232 quita el encabezado y pie que el navegador dibujaba al imprimir el PDF de la OT y de la cotización (error mío de v2.229) y v2.233 es la auditoría de los cambios que no se reflejaban. Detalle y cómo revertir en `CAMBIOS.md`.
+**Publicados el 27-nov-2026: v2.232 y v2.233 (falta que el dueño los pruebe en la web, plan abajo).** v2.232 quita el encabezado y pie que el navegador dibujaba al imprimir el PDF de la OT y de la cotización (error mío de v2.229) y v2.233 es la auditoría de los cambios que no se reflejaban. Detalle y cómo revertir en `CAMBIOS.md`.
+
+**Plan de pruebas (QA) en la web, con registros NUEVOS (las OT viejas pueden traer datos viejos grabados y confunden):**
+1. Clientes → crear «PRUEBA QA» (empresa, con fono y email). OT → Nueva Orden → elegirlo: deben aparecer su fono y su email. «Editar» (botón del cliente en la OT) → borrar fono y email → guardar: el formulario de la OT debe quedar vacío en esos campos; guardar la OT y reabrirla: sigue vacío. En Clientes ponerle un fono nuevo y reabrir la OT: muestra el nuevo.
+2. **PDF (v2.232):** generar el PDF de una OT y de una cotización; en el diálogo de impresión, con «Encabezados y pies de página» activado, **no debe salir** fecha, hora, número de orden ni dirección arriba o abajo; en una OT larga, la hoja 2 tiene espacio arriba.
+3. **Registrar cliente desde la OT (v2.233):** OT con el cliente escrito a mano (con fono y email) → «Registrar en Clientes» → dejar fono y email en blanco → guardar: la OT queda sin ellos.
+4. **Lista de Cotizaciones (v2.233):** cambiar la razón social de un cliente con cotización y entrar enseguida a Cotizaciones: muestra el nombre nuevo sin esperar 60 s.
+5. Al terminar, borrar «PRUEBA QA» y sus OT.
 
 **OT que siguen mostrando un fono o email que el cliente ya no tiene (SQL para Neon; el dueño lo corre; primero la consulta, no cambia nada):**
 - Las OT guardan una copia del dato. Las que ya guardaron el valor viejo antes del arreglo de v2.231 lo conservan. **Detectarlas** (OT vinculadas a un cliente que ya no tiene fono o email pero ellas sí):
