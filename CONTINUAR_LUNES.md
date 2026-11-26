@@ -10,6 +10,22 @@ Este archivo resume dónde quedó el trabajo al terminar el jueves 26-nov-2026 (
 
 **Agregado después del cierre (publicado): v2.231** arregla que al vaciar el fono o el email de un cliente desde la OT (o la cotización) el formulario conservaba los datos viejos; el servidor ya los vaciaba. Detalle y cómo revertir en `CAMBIOS.md` v2.231. Pendiente: que el dueño lo vea en su navegador (Ctrl+F5): editar un cliente desde la OT dejando el fono y el email en blanco debe dejarlos en blanco en la OT.
 
+**Pendiente al retomar (27-nov-2026): confirmar y subir v2.232 y v2.233.** Están en commits locales, sin subir: v2.232 quita el encabezado y pie que el navegador dibujaba al imprimir el PDF de la OT y de la cotización (error mío de v2.229) y v2.233 es la auditoría de los cambios que no se reflejaban. Detalle y cómo revertir en `CAMBIOS.md`.
+
+**OT que siguen mostrando un fono o email que el cliente ya no tiene (SQL para Neon; el dueño lo corre; primero la consulta, no cambia nada):**
+- Las OT guardan una copia del dato. Las que ya guardaron el valor viejo antes del arreglo de v2.231 lo conservan. **Detectarlas** (OT vinculadas a un cliente que ya no tiene fono o email pero ellas sí):
+```sql
+
+SELECT o.id, o.numero_orden, o.cliente, c.codigo, o.fono_principal, o.email
+FROM ordenes_trabajo o JOIN clientes c ON c.id = o.cliente_id
+WHERE (COALESCE(c.telefono,'') = '' AND COALESCE(o.fono_principal,'') <> '')
+   OR (COALESCE(c.email,'') = '' AND COALESCE(o.email,'') <> '')
+ORDER BY o.id DESC LIMIT 100;
+```
+- Para ver las OT de un cliente concreto, vinculadas o no (la columna `cliente_id` vacía = no se sincroniza con el cliente): `SELECT o.numero_orden, o.cliente_id, o.fono_principal, o.email FROM ordenes_trabajo o WHERE o.cliente ILIKE '%PARTE DEL NOMBRE%' ORDER BY o.id DESC;`
+- **Limpiarlas** (solo las de ese cliente; cambiar `CL-0001` por su código y revisar antes con la consulta anterior): `UPDATE ordenes_trabajo SET fono_principal = NULL, email = NULL WHERE cliente_id = (SELECT id FROM clientes WHERE codigo = 'CL-0001');`. No hacerlo para todos los clientes a la vez: a un cliente sin fono se le puede haber escrito uno a mano en la OT a propósito.
+- Una OT sin `cliente_id` no se actualiza sola nunca; se corrige abriéndola y borrando el dato.
+
 **Lo hecho hoy (todo publicado):**
 - **v2.227:** «Buscar y Seleccionar Cliente» (OT y cotización) y «Buscar por Modelo» (OT) dentro del input; sin los títulos «Datos del Cliente» y «Datos del Equipo» sobre esos buscadores; «Glosa» alineada.
 - **v2.228:** cotización: el Detalle del ítem queda pequeño (misma altura que Cant., no se agranda) y un check «Desc.» antes del Detalle muestra debajo un cuadro «Descripción» que sale en el PDF si se escribió. **Columna nueva `cotizacion_items.descripcion`** (ya en la MySQL local y en Neon).
