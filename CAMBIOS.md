@@ -2,6 +2,40 @@
 
 ## Fecha: 2026-11-26
 
+### v2.233: Auditoría de «los cambios no se reflejan»: registrar un cliente desde la OT y la memoria de las listas
+
+**Alcance:** solo frontend (`useClienteOT.jsx` y `services/api.js`), sin backend ni SQL. Build OK. Pedido del dueño: «audita que no pase lo mismo en otro lado». Cada hallazgo se **reprodujo antes y se verificó después** con Chrome, un backend contra una base MySQL temporal y un cliente de prueba (la base se borró).
+
+**Qué se revisó y qué se encontró**
+
+| Camino | Resultado |
+|---|---|
+| Editar un cliente desde la OT o la cotización (vaciar fono o email) | **Fallaba** (v2.231, ya publicada) |
+| **Registrar un cliente nuevo desde la OT** y dejar su fono o email en blanco en la ficha | **Fallaba**: la OT conservaba los datos escritos a mano. Corregido |
+| **Memoria de las listas** (60 s) al editar un cliente: la lista de **Cotizaciones** seguía con el nombre viejo | **Fallaba**. Corregido |
+| Editar un cliente desde Clientes y abrir después la OT | Bien (el formulario de la OT lo lee del servidor) |
+| Elegir un cliente en la OT o la cotización (`datosAlElegirCliente`) | Bien: reemplaza todos sus datos, vacíos incluidos |
+| Elegir o editar un contacto o una dirección en la OT (`contactoEnOT`, `direccionEnOT`) | Bien: copia lo del registro, `|| ""` |
+| Elegir o editar un equipo en la OT | Bien (la serie es de la OT y no se toca, a propósito) |
+| Servidor: editar un contacto, una dirección o un equipo | Bien: las OT y cotizaciones vinculadas toman exactamente lo nuevo y, si quedó vacío, vacío (`|| null`) |
+| Servidor: editar un cliente | Bien: pisa en las OT y cotizaciones vinculadas solo lo que cambió, **vaciados incluidos** (regla de v2.200; comprobado) |
+| Cotización | Usa los mismos componentes y hooks que la OT: ya cubierta |
+
+- **Registrar cliente desde la OT (`guardarNuevoClienteDesdeOT`):** tenía `rut: fresh.rut || prev.rut` (y lo mismo con el email y el fono). Ahora el dato de la OT sigue al del cliente nuevo si este lo cambió respecto de lo que la OT llevó a la ficha (`prefillCliente`), también si lo dejaron en blanco. El contacto y la dirección no cambian: sin check «En la OT» no viaja nada (decisión de diseño). La función `cambio` quedó una sola vez en el hook, compartida con la edición.
+- **Memoria de listas (`services/api.js`):** al escribir en `/api/clientes` se invalidan también `/api/ordenes` y `/api/cotizaciones`, porque el servidor reescribe esos datos en sus OT y cotizaciones. Antes la lista de cotizaciones mostraba el nombre viejo hasta 60 s.
+- **Qué NO se corrige solo (por diseño):** una OT es una copia de lo que tenía al guardarse. **Las OT que ya guardaron un fono o email viejo (por el fallo de v2.231, que reescribía el dato al guardar la OT) los conservan**; el arreglo evita que vuelva a pasar, pero no limpia lo ya guardado. Tampoco se sincroniza una OT sin vínculo (`cliente_id` vacío: se escribió a mano o es antigua). Para limpiar OT concretas hay SQL en las notas de `CONTINUAR_LUNES.md`.
+- **Cómo era ANTES y cómo volver:** registrar: `rut: fresh.rut || prev.rut, email: fresh.email || prev.email, fonoPrincipal: fresh.telefono || prev.fonoPrincipal`; `api.js` no invalidaba `/api/ordenes` ni `/api/cotizaciones` al escribir en clientes. Para volver: `git checkout 66a315d -- frontend/src/components/ordenes/useClienteOT.jsx frontend/src/services/api.js` (`66a315d` = último commit publicado antes de v2.233; ojo: eso también deshace v2.231 si se vuelve más atrás, por eso se usa este commit).
+
+### v2.232: PDF: se quita el margen de página de v2.229 (el navegador dibujaba su propio encabezado y pie)
+
+**Alcance:** solo frontend (`utils/pdfEstilos.js`), sin backend ni SQL. **Corrige un error introducido en v2.229.**
+
+- **Qué pasó (aviso del dueño, 27-nov-2026):** «al generar un PDF desde la OT aparece un encabezado extra con fecha y hora, número de orden y datos». En v2.229 se cambió `@page { margin: 0 }` a `margin: 9mm 0 8mm` para que la segunda hoja no quedara pegada al borde. Con un margen de página mayor que 0, **el navegador dibuja sus propios encabezado y pie al imprimir** (fecha y hora, título del documento —que lleva el número de orden—, dirección y número de página) dentro de ese margen. Afectaba al PDF de la **Orden de Servicio** y al de la **cotización** (comparten `pdfEstilos.js`).
+- **Por qué no se vio al probar:** las pruebas generaban el PDF directamente con `page.pdf()`, que no dibuja encabezado ni pie del navegador. Lo que ve el dueño es la impresión real (`window.print()` con «Encabezados y pies de página» activado por defecto). **Para probar PDF de este sistema hay que imprimir con ese diálogo, o dejar siempre `@page { margin: 0 }`.**
+- **Arreglo:** `@page { margin: 0 }` otra vez (el navegador no tiene margen donde dibujar su encabezado) y el espacio de arriba y de abajo de **cada** hoja se logra repitiendo el relleno de `.page` con `box-decoration-break: clone` (con `padding: 9mm 12mm 8mm` y `min-height: 297mm` como antes de v2.229). Comparado con el PDF de antes de v2.229: las primeras hojas de la cotización, de una Orden de Servicio corta y de una larga son **idénticas** a las de antes; solo cambian las hojas 2 y siguientes, que ahora tienen su espacio arriba. Comprobado en Chrome 155.
+- **Cómo era ANTES de v2.232 (v2.229 a v2.231) y cómo volver:** `@page { size: A4 portrait; margin: 9mm 0 8mm; }` y `.page { … min-height: 279.6mm; padding: 0 12mm; … }` (con eso el navegador sí dibujaba su encabezado y pie al imprimir). **No se recomienda volver.** Si se quisiera: `git checkout 66a315d -- frontend/src/utils/pdfEstilos.js`. Para el comportamiento anterior a v2.229 (hoja 2 pegada al borde y sin encabezado del navegador): `git checkout bdb5a50 -- frontend/src/utils/pdfEstilos.js`.
+- **Riesgo conocido:** `box-decoration-break: clone` en contenedores `display:flex` se ve bien en Chrome 155; en un Chrome muy antiguo la hoja 2 volvería a quedar pegada al borde (sin otro daño).
+
 ### v2.231: Editar un cliente desde la OT o la cotización: si se vacía el fono o el email, también se vacían en el formulario
 
 **Alcance:** solo frontend (`components/ordenes/useClienteOT.jsx`), sin backend ni SQL. Build OK. **Reproducido y verificado** con Chrome, un backend contra una base MySQL temporal y un cliente de prueba con fono y email (la base se borró).
