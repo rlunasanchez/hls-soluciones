@@ -10,7 +10,7 @@ Este archivo resume dónde quedó el trabajo al terminar el jueves 26-nov-2026 (
 
 **Agregado después del cierre (publicado): v2.231** arregla que al vaciar el fono o el email de un cliente desde la OT (o la cotización) el formulario conservaba los datos viejos; el servidor ya los vaciaba. Detalle y cómo revertir en `CAMBIOS.md` v2.231. Pendiente: que el dueño lo vea en su navegador (Ctrl+F5): editar un cliente desde la OT dejando el fono y el email en blanco debe dejarlos en blanco en la OT.
 
-**v2.234 (27-nov-2026, en local, SIN SUBIR):** el encabezado del PDF de la cotización vuelve a quedar centrado (se había corrido 14 mm a la derecha al quitar el cuadro de HLS en v2.226). Detalle y cómo revertir en `CAMBIOS.md` v2.234.
+**v2.234 (27-nov-2026, publicado):** el encabezado del PDF de la cotización vuelve a quedar centrado (se había corrido 14 mm a la derecha al quitar el cuadro de HLS en v2.226). Detalle y cómo revertir en `CAMBIOS.md` v2.234.
 
 **Publicados el 27-nov-2026: v2.232 y v2.233 (falta que el dueño los pruebe en la web, plan abajo).** v2.232 quita el encabezado y pie que el navegador dibujaba al imprimir el PDF de la OT y de la cotización (error mío de v2.229) y v2.233 es la auditoría de los cambios que no se reflejaban. Detalle y cómo revertir en `CAMBIOS.md`.
 
