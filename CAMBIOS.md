@@ -2,6 +2,17 @@
 
 ## Fecha: 2026-11-26
 
+### v2.229: PDF: las hojas 2 y siguientes ya no quedan pegadas al borde; la descripción del ítem crece con su texto
+
+**Alcance:** solo frontend (`utils/pdfEstilos.js`, `OrdenTrabajo.css`, `CotizacionFormItems.jsx`), sin backend ni SQL. Build OK. Probado generando los PDF reales con Chrome (A4) y comparando antes y después.
+
+- **Pedido del dueño:** al pasar «Datos Bancarios» a la segunda hoja, quedaba muy pegado al borde de arriba.
+- **Causa:** la hoja usaba `@page { margin: 0 }` y el margen de arriba estaba como relleno de `.page`, que solo vale en la primera hoja. **Arreglo:** `@page { margin: 9mm 0 8mm }` (se repite en todas las hojas) y `.page` sin relleno vertical, con `min-height: 279.6mm` (alto útil de la hoja; así el pie de la Orden de Servicio sigue pegado al fondo). Quitar ese `min-height` hacía subir el pie de la Orden de Servicio; se comprobó y se mantuvo.
+- **Alcance real:** `pdfEstilos.js` lo comparten el PDF de la cotización y el de la Orden de Servicio, así que también mejora las hojas 2 y 3 de una Orden de Servicio larga. Comparado antes y después con 3 documentos (cotización completa de 2 hojas, Orden de Servicio corta de 1 y larga de 3): mismo número de hojas en los tres; el cuerpo de la hoja 1 es idéntico; difieren el trazo finísimo del borde de la tarjeta de arriba y el pie, unos 0,4 mm más arriba (invisible a simple vista).
+- **Formulario de la cotización, descripción de cada ítem:** el cuadro (`of-descripcion`) crece con el texto (mínimo 3 líneas, máximo unas 12; `field-sizing: content`), así se ve completa también en modo Ver. Antes quedaba cortada con scroll. Comprobado en Ver y en Editar con una cotización de 5 ítems (3 con descripción, la más larga de 108 px de alto).
+- **Cotización de prueba en la MySQL local (26-nov-2026):** folio 2801, «COMERCIALIZADORA E INVERSIONES HORIZONTE SPA», 5 ítems (3 con descripción, una de 4 líneas), glosa, contacto y dirección completos, condición «Crédito 30 días», neto 1.102.391 y total 1.311.845. Sirve para probar el formulario y el PDF; se puede borrar desde la lista.
+- **Aprendido:** `box-shadow` de 0,4 pt y `@page margin` conviven bien; el PDF real se puede revisar página por página generándolo con Chrome (`page.pdf`) y convirtiéndolo a imágenes (`pdf-to-img`), sin imprimir.
+
 ### v2.228: Cotización: el Detalle del ítem queda pequeño y la descripción larga va aparte, con un check
 
 **Alcance:** frontend y backend (MySQL en `main` y portado a PostgreSQL en `deploy/cloud`) y **una columna nueva**. Build OK. Probado con una base MySQL temporal (API, formulario en Chrome y PDF) y con **PostgreSQL real** (`embedded-postgres`: los 5 casos de la API de la descripción y la regresión de Cotizaciones); las bases temporales se borraron.

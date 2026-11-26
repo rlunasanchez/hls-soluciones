@@ -3,7 +3,9 @@
 // campos "etiqueta arriba, valor abajo". Cada documento agrega sus propios estilos encima.
 // Un solo acento (#0C4A8C, el --primary de la app).
 export const ESTILOS_COMUNES = `
-@page { size: A4 portrait; margin: 0; }
+/* El margen de arriba y de abajo es de la PÁGINA (se repite en todas las hojas); antes estaba en .page y solo valía para la primera,
+   así que la segunda hoja de un documento largo empezaba pegada al borde. */
+@page { size: A4 portrait; margin: 9mm 0 8mm; }
 * { box-sizing: border-box; }
 body {
   margin: 0;
@@ -17,7 +19,8 @@ body {
 
 /* Fondo de página como caja propia (no background-clip) para que se vea
    igual en cualquier visor de PDF, incluidos los de celular. */
-.page { width: 210mm; min-height: 297mm; padding: 9mm 12mm 8mm; background: #FFFFFF; display: flex; flex-direction: column; }
+/* min-height = alto útil de la hoja (297 − 9 − 8 mm, un poco menos para no generar una hoja en blanco): mantiene el pie de la Orden de Servicio pegado al fondo. */
+.page { width: 210mm; min-height: 279.6mm; padding: 0 12mm; background: #FFFFFF; display: flex; flex-direction: column; }
 
 .header-card { background: #FFFFFF; border: 0; box-shadow: 0 0 0 .4pt #64748B; border-radius: 7pt; padding: 3mm 4mm 2.2mm; break-inside: avoid; }
 .enc { display: grid; grid-template-columns: 28mm 1fr auto; align-items: center; gap: 5mm; break-inside: avoid; }
