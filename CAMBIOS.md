@@ -2,6 +2,20 @@
 
 ## Fecha: 2026-11-26
 
+### v2.229: PDF: las hojas 2 y siguientes ya no quedan pegadas al borde; la descripción del ítem crece con su texto
+
+**Alcance:** solo frontend (`utils/pdfEstilos.js`, `OrdenTrabajo.css`, `CotizacionFormItems.jsx`), sin backend ni SQL. Build OK. Probado generando los PDF reales con Chrome (A4) y comparando antes y después.
+
+- **Pedido del dueño:** al pasar «Datos Bancarios» a la segunda hoja, quedaba muy pegado al borde de arriba.
+- **Causa:** la hoja usaba `@page { margin: 0 }` y el margen de arriba estaba como relleno de `.page`, que solo vale en la primera hoja. **Arreglo:** `@page { margin: 9mm 0 8mm }` (se repite en todas las hojas) y `.page` sin relleno vertical, con `min-height: 279.6mm` (alto útil de la hoja; así el pie de la Orden de Servicio sigue pegado al fondo). Quitar ese `min-height` hacía subir el pie de la Orden de Servicio; se comprobó y se mantuvo.
+- **Alcance real:** `pdfEstilos.js` lo comparten el PDF de la cotización y el de la Orden de Servicio, así que también mejora las hojas 2 y 3 de una Orden de Servicio larga. Comparado antes y después con 3 documentos (cotización completa de 2 hojas, Orden de Servicio corta de 1 y larga de 3): mismo número de hojas en los tres; el cuerpo de la hoja 1 es idéntico; difieren el trazo finísimo del borde de la tarjeta de arriba y el pie, unos 0,4 mm más arriba (invisible a simple vista).
+- **Formulario de la cotización, descripción de cada ítem:** el cuadro (`of-descripcion`) crece con el texto (mínimo 3 líneas, máximo unas 12; `field-sizing: content`), así se ve completa también en modo Ver. Antes quedaba cortada con scroll. Comprobado en Ver y en Editar con una cotización de 5 ítems (3 con descripción, la más larga de 108 px de alto).
+- **Cotización de prueba en la MySQL local (26-nov-2026):** folio 2801, «COMERCIALIZADORA E INVERSIONES HORIZONTE SPA», 5 ítems (3 con descripción, una de 4 líneas), glosa, contacto y dirección completos, condición «Crédito 30 días», neto 1.102.391 y total 1.311.845. Sirve para probar el formulario y el PDF; se puede borrar desde la lista.
+- **Cómo era ANTES de v2.229 y cómo volver (por si se quiere revertir):**
+  - **Hojas del PDF.** Antes (`utils/pdfEstilos.js`): `@page { size: A4 portrait; margin: 0; }` y `.page { width: 210mm; min-height: 297mm; padding: 9mm 12mm 8mm; … }`, es decir, el margen de arriba y de abajo era relleno de `.page` y solo valía en la primera hoja (la segunda quedaba pegada al borde). Ahora: `@page { … margin: 9mm 0 8mm; }` y `.page { … min-height: 279.6mm; padding: 0 12mm; … }`. Para volver: `git checkout bdb5a50 -- frontend/src/utils/pdfEstilos.js` (`bdb5a50` = último commit publicado antes de v2.229). Ojo: afecta también a la Orden de Servicio.
+  - **Descripción del ítem.** Antes: cuadro de 3 líneas fijas (`rows={3}`, sin la clase `of-descripcion`), con scroll si el texto era más largo. Ahora crece con el texto (`field-sizing: content`, mínimo 60 px y máximo 260 px). Para volver: `git checkout bdb5a50 -- frontend/src/components/cotizaciones/CotizacionFormItems.jsx frontend/src/styles/OrdenTrabajo.css` (o quitar a mano la clase `of-descripcion` del `textarea` y su regla en `OrdenTrabajo.css`).
+- **Aprendido:** `box-shadow` de 0,4 pt y `@page margin` conviven bien; el PDF real se puede revisar página por página generándolo con Chrome (`page.pdf`) y convirtiéndolo a imágenes (`pdf-to-img`), sin imprimir.
+
 ### v2.228: Cotización: el Detalle del ítem queda pequeño y la descripción larga va aparte, con un check
 
 **Alcance:** frontend y backend (MySQL en `main` y portado a PostgreSQL en `deploy/cloud`) y **una columna nueva**. Build OK. Probado con una base MySQL temporal (API, formulario en Chrome y PDF) y con **PostgreSQL real** (`embedded-postgres`: los 5 casos de la API de la descripción y la regresión de Cotizaciones); las bases temporales se borraron.
@@ -24,7 +38,13 @@ ALTER TABLE cotizacion_items ADD COLUMN IF NOT EXISTS descripcion TEXT;
 - **Publicación (26-nov-2026):** el port a PostgreSQL ya está hecho (`guardarItems` con la columna `descripcion` en el `INSERT` multifila de 9 columnas y el `SELECT` de ítems de `GET /:id`). **Si el SQL de Neon no se corrió antes de que Render termine de desplegar, ver o guardar cotizaciones da error 500 hasta que se corra** (se arregla solo al correrlo; no se pierde nada).
 - **Datos de prueba en la MySQL local (26-nov-2026):** una cotización «EMPRESA DE PRUEBA DESCRIPCION» con un ítem con descripción y otro sin ella, para ver el formulario y el PDF; se puede borrar desde la lista de Cotizaciones.
 - **Se probó (22 comprobaciones, todas bien):** crear con una descripción larga con saltos de línea (se guarda completa), ítem sin descripción (queda vacío), montos intactos, editar reemplaza la descripción, Detalle de la misma altura que Cant. y sin agrandarse con mucho texto, Enter sin efecto, check antes del Detalle, fila de una sola línea, el cuadro aparece al marcar y desaparece al desmarcar.
-- **Sin comprobar:** el modo Ver (solo lectura): ahí el check está marcado y deshabilitado y el cuadro de la descripción se muestra con el texto, pero no se vio en pantalla.
+- **Comprobado después (26-nov-2026):** el modo Ver con una cotización de 5 ítems (3 con descripción): los checks quedan marcados y deshabilitados y las descripciones se ven con su texto.
+- **Cómo era el Detalle ANTES de v2.228 y cómo volver (por si se quiere revertir):**
+  - **Antes (v2.227 y anteriores, commit `5b54eed`):** el Detalle era un `<textarea rows={1} … style={{ resize: "vertical", fontFamily: "inherit", minHeight: 0, height: 40 }} />` de **40 px de alto** (más alto que Cant., que mide 23 px), sin check, sin descripción aparte y sin la columna `descripcion`; ocupaba `flex: "1 1 200px"` (unos 200 px de ancho). Se podía agrandar arrastrando la esquina y aceptaba saltos de línea.
+  - **Versión intermedia que se descartó:** Detalle de la altura de Cant. que se abría como panel flotante de 130 px al escribir (commit `4c136fb`); el dueño prefirió el check con la descripción aparte.
+  - **Para volver al Detalle de 40 px, sin check ni descripción (frontend):** `git checkout 5b54eed -- frontend/src/components/cotizaciones/CotizacionFormItems.jsx frontend/src/styles/OrdenTrabajo.css frontend/src/utils/cotizacionDoc.js frontend/src/utils/cotizacionFormato.js`. El PDF volvería a mostrar solo el detalle.
+  - **Backend:** no hace falta tocarlo. La columna `descripcion` y el código que la guarda pueden quedarse (es un campo extra opcional y no molesta). Si se quiere quitar también: en `main` `git checkout 5b54eed -- backend/routes/cotizaciones.js backend/utils/cotizacionTotales.js backend/crear_tablas.sql`, y en `deploy/cloud` `git checkout 8ba5c01 -- backend/routes/cotizaciones.js backend/utils/cotizacionTotales.js` (`8ba5c01` = último commit publicado de esa rama antes de v2.228); la columna en la base se deja o se borra con `ALTER TABLE cotizacion_items DROP COLUMN descripcion;` (se pierden las descripciones ya escritas).
+
 
 ## Fecha: 2026-11-25
 

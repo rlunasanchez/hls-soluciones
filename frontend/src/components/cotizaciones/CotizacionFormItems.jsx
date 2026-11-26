@@ -101,7 +101,7 @@ function ItemCard({ item, idx, soloLectura, actualizar, quitar }) {
       {item.conDescripcion && (
         <div className="of-f">
           <label>Descripción</label>
-          <textarea rows={3} value={item.descripcion} onChange={(e) => actualizar(idx, "descripcion", e.target.value)} disabled={soloLectura} />
+          <textarea className="of-descripcion" rows={3} value={item.descripcion} onChange={(e) => actualizar(idx, "descripcion", e.target.value)} disabled={soloLectura} />
         </div>
       )}
     </div>
