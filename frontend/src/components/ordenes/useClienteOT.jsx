@@ -41,6 +41,7 @@ export default function useClienteOT({
       // Se refrescan los datos propios del cliente. El check "En la OT" solo indica qué
       // contacto/dirección llevar: si al guardar cambió el marcado, la OT toma el nuevo;
       // si no cambió (o no hay ninguno marcado), el contacto y la dirección de la OT no se tocan.
+      const cambio = (nuevo, viejo) => String(nuevo || "").trim() !== String(viejo || "").trim();
       const esPersonaFresh = fresh.tipo === "PERSONA";
       const cambioContacto = !esPersonaFresh && !!fresh.contacto_nombre && normTxt(fresh.contacto_nombre) !== normTxt(clienteAEditar.contacto_nombre);
       const cambioDireccion = !!fresh.ot_direccion && normTxt(fresh.ot_direccion) !== normTxt(clienteAEditar.ot_direccion);
@@ -48,10 +49,11 @@ export default function useClienteOT({
         ...prev,
         cliente: toUpper(fresh.razon_social || ""),
         clienteTipo: esPersonaFresh ? "PERSONA" : "EMPRESA",
-        // Si el cliente no tiene ese dato, se conserva el que ya estaba escrito en la OT
-        rut: fresh.rut || prev.rut,
-        email: fresh.email || prev.email,
-        fonoPrincipal: fresh.telefono || prev.fonoPrincipal,
+        // Igual que el servidor al sincronizar las OT del cliente: el dato de la OT se pisa solo si el del cliente CAMBIÓ
+        // (también cuando se vació: la OT queda vacía). Si no cambió, se conserva lo que ya estaba escrito en la OT.
+        rut: cambio(fresh.rut, clienteAEditar.rut) ? (fresh.rut || "") : prev.rut,
+        email: cambio(fresh.email, clienteAEditar.email) ? (fresh.email || "") : prev.email,
+        fonoPrincipal: cambio(fresh.telefono, clienteAEditar.telefono) ? (fresh.telefono || "") : prev.fonoPrincipal,
         ...(cambioContacto ? {
           contacto: toUpper(fresh.contacto_nombre),
           emailContacto: fresh.contacto_email || "",

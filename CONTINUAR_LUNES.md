@@ -8,6 +8,8 @@ Este archivo resume dónde quedó el trabajo al terminar el jueves 26-nov-2026 (
 
 **Estado:** `main` y `deploy/cloud` sincronizados con GitHub tras la subida de cierre (v2.227 a v2.230). Neon ya tiene los 23 índices de v2.224 y la columna `cotizacion_items.descripcion` de v2.228 (las corrió el dueño). Detalle de cada versión, con **cómo era antes y cómo revertir**, en `CAMBIOS.md`.
 
+**Agregado después del cierre (27-nov-2026, EN LOCAL, SIN SUBIR):** v2.231 arregla que al vaciar el fono o el email de un cliente desde la OT (o la cotización) el formulario conservaba los datos viejos; el servidor ya los vaciaba. Detalle y cómo revertir en `CAMBIOS.md` v2.231. Pendiente: que el dueño lo vea en su navegador y subirlo a las dos ramas.
+
 **Lo hecho hoy (todo publicado):**
 - **v2.227:** «Buscar y Seleccionar Cliente» (OT y cotización) y «Buscar por Modelo» (OT) dentro del input; sin los títulos «Datos del Cliente» y «Datos del Equipo» sobre esos buscadores; «Glosa» alineada.
 - **v2.228:** cotización: el Detalle del ítem queda pequeño (misma altura que Cant., no se agranda) y un check «Desc.» antes del Detalle muestra debajo un cuadro «Descripción» que sale en el PDF si se escribió. **Columna nueva `cotizacion_items.descripcion`** (ya en la MySQL local y en Neon).
