@@ -39,6 +39,8 @@ function filaItem(item) {
 // Lo propio de la cotización, encima de los estilos comunes: las fechas de emisión y validez,
 // tabla de ítems, condiciones, totales y datos bancarios.
 const ESTILOS = `${ESTILOS_COMUNES}
+/* Encabezado simétrico: sin el cuadro de la derecha (v2.226), la columna derecha queda vacía y se reserva del mismo ancho que la del logo para que el nombre de HLS quede centrado en la tarjeta (la Orden de Servicio tiene el logo Brother a la derecha). */
+.enc { grid-template-columns: 28mm 1fr 28mm; }
 .folios { display: flex; gap: 4mm; }
 
 table.items { width: 100%; table-layout: fixed; border-collapse: collapse; margin-top: 1mm; }
