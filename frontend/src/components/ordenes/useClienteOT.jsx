@@ -31,6 +31,9 @@ export default function useClienteOT({
     setMostrarEditarClienteModal(true);
   };
 
+  // ¿El dato cambió? (comparando sin espacios sobrantes); sirve para decidir qué de la ficha del cliente se copia a la OT.
+  const cambio = (nuevo, viejo) => String(nuevo || "").trim() !== String(viejo || "").trim();
+
   const guardarEdicionCliente = async (payload, _resetFn, mantener = false) => {
     if (!clienteAEditar?.id) return;
     try {
@@ -41,7 +44,6 @@ export default function useClienteOT({
       // Se refrescan los datos propios del cliente. El check "En la OT" solo indica qué
       // contacto/dirección llevar: si al guardar cambió el marcado, la OT toma el nuevo;
       // si no cambió (o no hay ninguno marcado), el contacto y la dirección de la OT no se tocan.
-      const cambio = (nuevo, viejo) => String(nuevo || "").trim() !== String(viejo || "").trim();
       const esPersonaFresh = fresh.tipo === "PERSONA";
       const cambioContacto = !esPersonaFresh && !!fresh.contacto_nombre && normTxt(fresh.contacto_nombre) !== normTxt(clienteAEditar.contacto_nombre);
       const cambioDireccion = !!fresh.ot_direccion && normTxt(fresh.ot_direccion) !== normTxt(clienteAEditar.ot_direccion);
@@ -155,9 +157,11 @@ export default function useClienteOT({
           ...prev,
           cliente: toUpper(fresh.razon_social || "") || prev.cliente,
           clienteTipo: fresh.tipo === "PERSONA" ? "PERSONA" : "EMPRESA",
-          rut: fresh.rut || prev.rut,
-          email: fresh.email || prev.email,
-          fonoPrincipal: fresh.telefono || prev.fonoPrincipal,
+          // Mismo criterio que al editar: el dato de la OT sigue al del cliente nuevo si este lo cambió respecto de lo que la OT
+          // llevó a la ficha (también si lo dejaron en blanco); si no lo cambió, queda el de la OT.
+          rut: cambio(fresh.rut, prefillCliente?.rut) ? (fresh.rut || "") : prev.rut,
+          email: cambio(fresh.email, prefillCliente?.email) ? (fresh.email || "") : prev.email,
+          fonoPrincipal: cambio(fresh.telefono, prefillCliente?.telefono) ? (fresh.telefono || "") : prev.fonoPrincipal,
           contacto: toUpper(fresh.contacto_nombre || "") || prev.contacto,
           emailContacto: fresh.contacto_email || prev.emailContacto,
           fonoContacto: fresh.contacto_fono || prev.fonoContacto,
