@@ -19,6 +19,7 @@ export function calcularItem(item) {
   return {
     sku: String(item.sku ?? "").trim(),
     detalle: String(item.detalle ?? "").trim(),
+    descripcion: String(item.descripcion ?? "").trim(),
     cantidad,
     neto,
     descuento,

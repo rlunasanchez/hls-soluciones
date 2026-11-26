@@ -28,7 +28,7 @@ function filaItem(item) {
   return `
     <tr>
       <td class="sku">${item.sku ? esc(item.sku) : "-"}</td>
-      <td class="detalle">${esc(item.detalle)}</td>
+      <td class="detalle">${esc(item.detalle)}${item.descripcion ? `<div class="descripcion">${esc(item.descripcion)}</div>` : ""}</td>
       <td class="num">${cantidad || ""}</td>
       <td class="num">${clp(item.neto)}</td>
       <td class="num">${descuentoPct ? descuentoPct + "%" : ""}</td>
@@ -53,6 +53,7 @@ table.items td { padding: 2mm; border-bottom: .5pt solid #E2E8F0; vertical-align
 table.items td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 table.items td.sku { color: #6B7280; font-size: 7.5pt; word-break: break-all; }
 table.items td.detalle { font-weight: 600; color: #111827; white-space: pre-wrap; }
+table.items td.detalle .descripcion { margin-top: .8mm; font-weight: 400; font-size: 7.5pt; color: #4B5563; }
 
 .pie-tabla { display: flex; gap: 6mm; margin-top: 3mm; }
 .legales { flex: 1 1 auto; font-size: 6.5pt; color: #6B7280; }

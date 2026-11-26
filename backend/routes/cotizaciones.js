@@ -44,11 +44,11 @@ async function datosAGuardar(db, body) {
 async function guardarItems(db, cotizacionId, items) {
   await db.query("DELETE FROM cotizacion_items WHERE cotizacion_id = $1", [cotizacionId]);
   if (!items.length) return;
-  const columnas = 8;
+  const columnas = 9;
   const marcadores = items.map((_, i) => `(${Array.from({ length: columnas }, (_, c) => `$${i * columnas + c + 1}`).join(", ")})`).join(", ");
   await db.query(
-    `INSERT INTO cotizacion_items (cotizacion_id, orden, sku, detalle, cantidad, neto, descuento, total) VALUES ${marcadores}`,
-    items.flatMap((it, i) => [cotizacionId, i, it.sku || null, it.detalle || null, it.cantidad, it.neto, it.descuento, it.total])
+    `INSERT INTO cotizacion_items (cotizacion_id, orden, sku, detalle, descripcion, cantidad, neto, descuento, total) VALUES ${marcadores}`,
+    items.flatMap((it, i) => [cotizacionId, i, it.sku || null, it.detalle || null, it.descripcion || null, it.cantidad, it.neto, it.descuento, it.total])
   );
 }
 
@@ -82,7 +82,7 @@ router.get("/:id", authMiddleware, async (req, res) => {
     const result = await pool.query("SELECT * FROM cotizaciones WHERE id = $1", [req.params.id]);
     if (result.rows.length === 0) return res.status(404).json({ msg: "Cotización no encontrada" });
     const items = await pool.query(
-      "SELECT sku, detalle, cantidad, neto, descuento, total FROM cotizacion_items WHERE cotizacion_id = $1 ORDER BY orden, id",
+      "SELECT sku, detalle, descripcion, cantidad, neto, descuento, total FROM cotizacion_items WHERE cotizacion_id = $1 ORDER BY orden, id",
       [req.params.id]
     );
     res.json({ ...result.rows[0], items: items.rows });

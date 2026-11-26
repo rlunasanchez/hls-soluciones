@@ -1,5 +1,30 @@
 # Registro de Cambios - HLS Soluciones
 
+## Fecha: 2026-11-26
+
+### v2.228: Cotización: el Detalle del ítem queda pequeño y la descripción larga va aparte, con un check
+
+**Alcance:** frontend y backend (MySQL en `main`; **falta portar a PostgreSQL en `deploy/cloud` al publicar**) y **una columna nueva**. Build OK. Probado con una base MySQL temporal (API, formulario en Chrome y PDF); la base se borró.
+
+- **Pedido del dueño:** el campo Detalle debe medir lo mismo que Cant. y no agrandarse nunca; para detallar mejor, un check «Desc.» muestra debajo un cuadro de texto nuevo, que sale en el PDF solo si está marcado y se escribió.
+- **Detalle:** una línea fija de la altura de Cant. (23,05 px contra 23,06 px; 44 px en móvil; clase `of-detalle`), sin agrandarse con el texto. Enter no hace nada en él (antes cerraba el formulario) y no acepta saltos de línea.
+- **Check «Desc.»:** va **antes del Detalle** (entre SKU y Detalle), como un campo más: la etiqueta «Desc.» arriba con el mismo estilo que SKU, Detalle o Cant., y a la altura de los inputs solo el check. Abreviado a propósito para no quitarle ancho al Detalle; tiene `title` y `aria-label` «Descripción». La fila del ítem sigue en **una sola línea** (comprobado).
+- **Descripción:** al marcarlo aparece **debajo de los campos** un cuadro de texto «Descripción» de 3 líneas. Desmarcar un ítem con texto pregunta «¿Quitar la descripción de este ítem?» y la borra. El check no se guarda: se deduce de si hay texto (`conDescripcion` en el formulario).
+- **Datos:** nueva columna `cotizacion_items.descripcion TEXT` (después de `detalle`). El servidor la guarda (en una sola consulta con los demás campos) y la devuelve con cada ítem; los montos no cambian por ella.
+- **PDF:** la descripción sale en la celda del Detalle, debajo del texto del detalle (7,5 pt, gris `#4B5563`, respeta los saltos de línea), solo en los ítems que la tienen. Comprobado renderizando un PDF de muestra.
+- **SQL (hay que correrlo ANTES de publicar el backend; si no, guardar una cotización da error 500):**
+  - MySQL local: **ya aplicado el 26-nov-2026** en `soporte_tecnico_db` (`ALTER TABLE cotizacion_items ADD COLUMN descripcion TEXT AFTER detalle;`; los 2 ítems existentes siguen intactos). El esquema `crear_tablas.sql` ya la incluye.
+  - **Neon (lo corre el dueño en el SQL Editor; línea en blanco al inicio; se puede repetir):**
+
+```sql
+
+ALTER TABLE cotizacion_items ADD COLUMN IF NOT EXISTS descripcion TEXT;
+```
+
+- **Para publicar:** 1) SQL de Neon; 2) portar a `deploy/cloud` `routes/cotizaciones.js` (`guardarItems` con la columna `descripcion` en el `INSERT` multifila y el `SELECT` de ítems de `GET /:id`; probar con `embedded-postgres`); 3) push de `deploy/cloud` y luego de `main`.
+- **Se probó (22 comprobaciones, todas bien):** crear con una descripción larga con saltos de línea (se guarda completa), ítem sin descripción (queda vacío), montos intactos, editar reemplaza la descripción, Detalle de la misma altura que Cant. y sin agrandarse con mucho texto, Enter sin efecto, check antes del Detalle, fila de una sola línea, el cuadro aparece al marcar y desaparece al desmarcar.
+- **Sin comprobar:** el modo Ver (solo lectura): ahí el check está marcado y deshabilitado y el cuadro de la descripción se muestra con el texto, pero no se vio en pantalla.
+
 ## Fecha: 2026-11-25
 
 ### v2.227: Textos de ayuda dentro de los buscadores de la OT y la cotización; «Glosa» alineada

@@ -36,10 +36,30 @@ function ItemCard({ item, idx, soloLectura, actualizar, quitar }) {
           <label>SKU</label>
           <input type="text" value={item.sku} onChange={(e) => actualizar(idx, "sku", e.target.value)} disabled={soloLectura} />
         </div>
-        <div className="of-f" style={{ flex: "1 1 200px" }}>
+        {/* Como los demás campos: etiqueta corta arriba (mismo estilo; «Desc.» para no quitarle ancho al Detalle) y, a la altura de los inputs, solo el check */}
+        <div className="of-f" style={{ flex: "0 0 auto" }} title="Descripción">
+          <label>Desc.</label>
+          <div style={{ height: 23.06, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <input
+              type="checkbox" checked={!!item.conDescripcion} disabled={soloLectura} aria-label="Descripción"
+              style={{ width: "auto", margin: 0, cursor: soloLectura ? "default" : "pointer" }}
+              onChange={(e) => {
+                if (e.target.checked) return actualizar(idx, "conDescripcion", true);
+                if (String(item.descripcion || "").trim() && !window.confirm("¿Quitar la descripción de este ítem?")) return;
+                actualizar(idx, "conDescripcion", false);
+                actualizar(idx, "descripcion", "");
+              }}
+            />
+          </div>
+        </div>
+        <div className="of-f" style={{ flex: "1 1 120px", minWidth: 0 }}>
           <label>Detalle</label>
-          <textarea rows={1} value={item.detalle} onChange={(e) => actualizar(idx, "detalle", upperInput(e))} disabled={soloLectura}
-            style={{ resize: "vertical", fontFamily: "inherit", minHeight: 0, height: 40 }} />
+          {/* Una línea de la altura de Cant. (clase of-detalle): el texto largo va en la Descripción (check de la fila) */}
+          <textarea
+            className="of-detalle" rows={1} wrap="off" value={item.detalle} disabled={soloLectura}
+            onChange={(e) => actualizar(idx, "detalle", upperInput(e).replace(/\s*[\r\n]+\s*/g, " "))}
+            onKeyDown={(e) => { if (e.key === "Enter") e.preventDefault(); }}
+          />
         </div>
         <div className="of-f" style={{ flex: "0 0 55px" }}>
           <label>Cant.</label>
@@ -78,6 +98,12 @@ function ItemCard({ item, idx, soloLectura, actualizar, quitar }) {
           </button>
         )}
       </div>
+      {item.conDescripcion && (
+        <div className="of-f">
+          <label>Descripción</label>
+          <textarea rows={3} value={item.descripcion} onChange={(e) => actualizar(idx, "descripcion", e.target.value)} disabled={soloLectura} />
+        </div>
+      )}
     </div>
   );
 }
