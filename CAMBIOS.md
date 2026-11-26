@@ -4,7 +4,7 @@
 
 ### v2.228: Cotización: el Detalle del ítem queda pequeño y la descripción larga va aparte, con un check
 
-**Alcance:** frontend y backend (MySQL en `main`; **falta portar a PostgreSQL en `deploy/cloud` al publicar**) y **una columna nueva**. Build OK. Probado con una base MySQL temporal (API, formulario en Chrome y PDF); la base se borró.
+**Alcance:** frontend y backend (MySQL en `main` y portado a PostgreSQL en `deploy/cloud`) y **una columna nueva**. Build OK. Probado con una base MySQL temporal (API, formulario en Chrome y PDF) y con **PostgreSQL real** (`embedded-postgres`: los 5 casos de la API de la descripción y la regresión de Cotizaciones); las bases temporales se borraron.
 
 - **Pedido del dueño:** el campo Detalle debe medir lo mismo que Cant. y no agrandarse nunca; para detallar mejor, un check «Desc.» muestra debajo un cuadro de texto nuevo, que sale en el PDF solo si está marcado y se escribió.
 - **Detalle:** una línea fija de la altura de Cant. (23,05 px contra 23,06 px; 44 px en móvil; clase `of-detalle`), sin agrandarse con el texto. Enter no hace nada en él (antes cerraba el formulario) y no acepta saltos de línea.
@@ -21,7 +21,8 @@
 ALTER TABLE cotizacion_items ADD COLUMN IF NOT EXISTS descripcion TEXT;
 ```
 
-- **Para publicar:** 1) SQL de Neon; 2) portar a `deploy/cloud` `routes/cotizaciones.js` (`guardarItems` con la columna `descripcion` en el `INSERT` multifila y el `SELECT` de ítems de `GET /:id`; probar con `embedded-postgres`); 3) push de `deploy/cloud` y luego de `main`.
+- **Publicación (26-nov-2026):** el port a PostgreSQL ya está hecho (`guardarItems` con la columna `descripcion` en el `INSERT` multifila de 9 columnas y el `SELECT` de ítems de `GET /:id`). **Si el SQL de Neon no se corrió antes de que Render termine de desplegar, ver o guardar cotizaciones da error 500 hasta que se corra** (se arregla solo al correrlo; no se pierde nada).
+- **Datos de prueba en la MySQL local (26-nov-2026):** una cotización «EMPRESA DE PRUEBA DESCRIPCION» con un ítem con descripción y otro sin ella, para ver el formulario y el PDF; se puede borrar desde la lista de Cotizaciones.
 - **Se probó (22 comprobaciones, todas bien):** crear con una descripción larga con saltos de línea (se guarda completa), ítem sin descripción (queda vacío), montos intactos, editar reemplaza la descripción, Detalle de la misma altura que Cant. y sin agrandarse con mucho texto, Enter sin efecto, check antes del Detalle, fila de una sola línea, el cuadro aparece al marcar y desaparece al desmarcar.
 - **Sin comprobar:** el modo Ver (solo lectura): ahí el check está marcado y deshabilitado y el cuadro de la descripción se muestra con el texto, pero no se vio en pantalla.
 
