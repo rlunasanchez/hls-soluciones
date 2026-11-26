@@ -2,6 +2,15 @@
 
 ## Fecha: 2026-11-26
 
+### v2.234: PDF de la cotización: el encabezado vuelve a quedar centrado
+
+**Alcance:** solo frontend (`utils/cotizacionDoc.js`), sin backend ni SQL. Medido en Chrome (posición del nombre de HLS respecto del centro de la tarjeta del encabezado).
+
+- **Qué pasaba (aviso del dueño, 27-nov-2026):** «el encabezado del PDF de la cotización no está centrado, se movió». Al quitar el cuadro de la derecha en v2.226, la tercera columna de la grilla del encabezado (`.enc`, `28mm 1fr auto`) quedó vacía y con ancho 0, mientras el logo de la izquierda sigue ocupando 28 mm: el centro de la columna del medio ya no era el centro de la tarjeta. **Medido: el nombre de HLS quedaba 14 mm a la derecha del centro** (la Orden de Servicio, 4 mm, porque su logo Brother a la derecha lo equilibra casi del todo; no se tocó).
+- **Arreglo:** en los estilos propios de la cotización, `.enc { grid-template-columns: 28mm 1fr 28mm; }` (la columna derecha reserva el mismo ancho que la del logo). **Desvío medido después: 0 mm.** La Orden de Servicio sigue igual (4 mm).
+- **Cómo era ANTES y cómo volver:** antes (v2.226 a v2.233) no había esa regla y la grilla usaba la de `pdfEstilos.js` (`28mm 1fr auto`). Para volver: `git checkout 7ed3043 -- frontend/src/utils/cotizacionDoc.js` (`7ed3043` = último commit publicado antes de v2.234). Para el encabezado de la cotización de antes de v2.226 (con el recuadro «COTIZACIÓN N° / RUT» a la derecha) ver v2.226.
+- **Ajustes posibles:** si más adelante se decide qué va en el lado derecho del encabezado (ver el pendiente de v2.226), esa columna de 28 mm se puede usar para eso.
+
 ### v2.233: Auditoría de «los cambios no se reflejan»: registrar un cliente desde la OT y la memoria de las listas
 
 **Alcance:** solo frontend (`useClienteOT.jsx` y `services/api.js`), sin backend ni SQL. Build OK. Pedido del dueño: «audita que no pase lo mismo en otro lado». Cada hallazgo se **reprodujo antes y se verificó después** con Chrome, un backend contra una base MySQL temporal y un cliente de prueba (la base se borró).
