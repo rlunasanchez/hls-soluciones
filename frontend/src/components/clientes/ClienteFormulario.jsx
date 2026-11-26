@@ -191,7 +191,12 @@ function ClienteFormulario({ clienteEditando, onSave, onCancel, titulo, readOnly
                   </span>
                 )}
               </h3>
-              <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 200px) minmax(0, 200px)", gap: 6 }}>
+              {/* Empresa a todo el ancho (cf-grid-empresa): mitad y mitad, con las filas alineadas: a la izquierda empresa, RUT, razón social,
+                  fono y email; a la derecha dirección, ciudad y comuna. Los campos conservan su tamaño de siempre (cf-sec-ancha).
+                  En Persona y en la edición "solo cliente" todo queda en una columna, como siempre. */}
+              <div className={!unaColumna ? "cf-grid-empresa" : undefined}>
+              {/* Tipo | RUT sobre las mismas dos columnas que Fono | Email (Empresa, Persona y edición "solo cliente") */}
+              <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)", gap: 6, width: 460, maxWidth: "100%" }}>
                 <div className="cf-field">
                   <label>Tipo</label>
                   <select value={nuevoCliente.tipo} disabled={readOnly}
@@ -208,7 +213,7 @@ function ClienteFormulario({ clienteEditando, onSave, onCancel, titulo, readOnly
                     onChange={handleRutChange} onBlur={handleRutBlur} />
                 </div>
               </div>
-              <div className="cf-r1 cf-mt">
+              <div className={unaColumna ? "cf-r1 cf-mt" : "cf-r1"}>
                 <div className="cf-field">
                   <label>{esPersona ? "Nombre *" : "Razón Social *"}</label>
                   <input value={nuevoCliente.razon_social}
@@ -224,7 +229,7 @@ function ClienteFormulario({ clienteEditando, onSave, onCancel, titulo, readOnly
                     onChange={(e) => setNuevoCliente({ ...nuevoCliente, giro: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
                 </div>
               </div>
-              <div className="cf-r2 cf-mt">
+              <div className={unaColumna ? "cf-r2 cf-mt" : "cf-r2"}>
                 <div className="cf-field">
                   <label>Fono</label>
                   <input value={nuevoCliente.telefono}
@@ -241,7 +246,7 @@ function ClienteFormulario({ clienteEditando, onSave, onCancel, titulo, readOnly
               {/* Dirección, ciudad y comuna propias de la empresa. No se usan en la OT: allí el contacto
                   y la dirección se eligen de los mantenedores. La persona usa el mantenedor de Direcciones. */}
               {!esPersona && <>
-              <div className="cf-r1 cf-mt">
+              <div className={!unaColumna ? "cf-r1" : "cf-r1 cf-mt"}>
                 <div className="cf-field">
                   <label>Dirección</label>
                   <input value={nuevoCliente.direccion}
@@ -264,6 +269,7 @@ function ClienteFormulario({ clienteEditando, onSave, onCancel, titulo, readOnly
                 </div>
               </div>
               </>}
+              </div>
             </div>
             {!unaColumna && <VinculosCliente tipo="contactos" vinculados={contactos} onChange={setContactos} clienteId={clienteEditando?.id} readOnly={readOnly} />}
             {(!unaColumna || (esPersona && !soloCliente)) && <VinculosCliente tipo="direcciones" vinculados={direcciones} onChange={setDirecciones} clienteId={clienteEditando?.id} readOnly={readOnly} maximo={esPersona ? 1 : null} />}

@@ -1,8 +1,33 @@
-# Para continuar el miércoles 25-nov-2026
+# Para continuar el viernes 27-nov-2026
 
-Este archivo resume dónde quedó el trabajo al terminar el martes 24-nov-2026 (el nombre del archivo es histórico). Se puede borrar cuando ya no haga falta.
+Este archivo resume dónde quedó el trabajo al terminar el jueves 26-nov-2026 (el nombre del archivo es histórico). Se puede borrar cuando ya no haga falta.
 
 **Frase para retomar:** "Lee AGENTS.md, CAMBIOS.md y CONTINUAR_LUNES.md; seguimos con …"
+
+## 0. Resumen del jueves 26-nov-2026 y qué sigue (leer primero)
+
+**Estado:** `main` y `deploy/cloud` sincronizados con GitHub tras la subida de cierre (v2.227 a v2.230). Neon ya tiene los 23 índices de v2.224 y la columna `cotizacion_items.descripcion` de v2.228 (las corrió el dueño). Detalle de cada versión, con **cómo era antes y cómo revertir**, en `CAMBIOS.md`.
+
+**Lo hecho hoy (todo publicado):**
+- **v2.227:** «Buscar y Seleccionar Cliente» (OT y cotización) y «Buscar por Modelo» (OT) dentro del input; sin los títulos «Datos del Cliente» y «Datos del Equipo» sobre esos buscadores; «Glosa» alineada.
+- **v2.228:** cotización: el Detalle del ítem queda pequeño (misma altura que Cant., no se agranda) y un check «Desc.» antes del Detalle muestra debajo un cuadro «Descripción» que sale en el PDF si se escribió. **Columna nueva `cotizacion_items.descripcion`** (ya en la MySQL local y en Neon).
+- **v2.229:** el PDF tiene margen real en todas las hojas (la 2 ya no queda pegada al borde; también mejora las Órdenes de Servicio largas) y la descripción del ítem crece con su texto.
+- **v2.230:** ficha de cliente **Empresa** en dos mitades armónicas (izquierda: empresa, RUT, razón social, fono y email; derecha: dirección, ciudad y comuna, alineada con el cuadro «Direcciones» de abajo), sin línea divisoria, campos de su tamaño, Tipo y RUT de 227 px también en Persona. Respaldo con nombre: etiqueta `respaldo-ficha-cliente-antes-v2.230`.
+- Antes, el 25-nov: escalabilidad hasta Cotizaciones (v2.223 a v2.225), PDF de la cotización sin la razón social ni el RUT de HLS en el encabezado (v2.226).
+
+**Primero mañana (en este orden):**
+1. Comprobar los despliegues: Vercel (`gh api repos/rlunasanchez/hls-soluciones/deployments`, debe aparecer en Production el último commit de `main`) y Render (panel → Events → Live con el último commit de `deploy/cloud`; Logs sin errores). Reiniciar el backend local (`node server.js` en `backend/`) para usar el código nuevo.
+2. Que el dueño vea en su navegador (Ctrl+F5) lo de hoy: los buscadores con el texto dentro del input, el check «Desc.» y su descripción en una cotización (formulario y PDF), y la ficha de cliente Empresa y Persona en escritorio y celular.
+3. Hay una cotización de prueba en la MySQL local (folio 2800, «EMPRESA DE EJEMPLO SPA», creada por Claude): el dueño pidió borrar «la de prueba» y se borró la del folio 2801; **preguntar si borra también la 2800**.
+
+**Pendientes de decisión (no urgentes):**
+- Qué va en el encabezado del PDF de la cotización (hoy sin razón social ni RUT de HLS). Cómo era antes: `CAMBIOS.md` v2.226.
+- Avisos en los Logs de Render: `url.parse()` de Node (DEP0169; no es de nuestro código, para saber qué paquete es se puede poner `NODE_OPTIONS=--trace-deprecation` en Render) y el cambio de `sslmode` de `pg` (solución: `?sslmode=verify-full` en la `DATABASE_URL`).
+- Ficha de cliente Empresa: la tercera fila de la derecha queda libre; si se quiere, usarla o centrar cada bloque.
+- Vínculos de la ficha en móvil (contactos y direcciones): hoy con scroll horizontal; podrían pasar a tarjetas.
+- Después, sin fecha: historial de la OT, Informes y Orden de Compra (páginas vacías), pasar a tablas los JSON `contactos_extra`/`direcciones_extra` de la OT.
+
+**Cómo se prueba sin tocar nada del dueño (método usado hoy, ver `CAMBIOS.md` v2.225 y v2.229):** backend contra una base MySQL temporal en el puerto 5099 (preload que cambia el 5001 por el 5099), frontend con `VITE_API_URL`, Chrome headless con `puppeteer-core`, capturas comparadas con `pixelmatch`, PDF real con `page.pdf` y `pdf-to-img`, PostgreSQL real con `embedded-postgres`. Los scripts están en la carpeta temporal de la sesión y no viajan; hay que rehacerlos.
 
 ## 1. Estado exacto
 
@@ -25,6 +50,7 @@ Detalle de cada versión en `CAMBIOS.md`. Todo en `main` `5fe670d` y `deploy/clo
 - **v2.212:** «Ejecutivo y Condiciones» del formulario de cotización en dos líneas de tres campos (`of-r3`).
 - **v2.213:** «Válido hasta» del PDF de la cotización pasó a la barra del título, junto a «Emisión» (antes iba abajo y no se notaba). La fecha siempre se guardó bien; si el dueño dice que sigue sin verse, pedir el folio y mirar `cotizaciones.fecha_valido_hasta`.
 - **v2.214 (24-nov-2026):** en los ítems del formulario de cotización, Detalle quedó entre SKU y Cantidad y el «Ítem N» pasó a ser solo el número al lado del SKU (la papelera para quitar el ítem va al final de la fila). Sin ver en pantalla.
+- **v2.230 (26-nov-2026, en local, sin subir):** ficha de cliente **Empresa**: el recuadro de la empresa mitad y mitad con las filas alineadas, sin línea divisoria y con los campos de su tamaño de siempre (izquierda: empresa, RUT, razón social, fono y email; derecha: dirección, ciudad y comuna). Persona sin cambios. Cómo era antes y cómo volver en `CAMBIOS.md` v2.230. Respaldo con nombre: etiqueta `respaldo-ficha-cliente-antes-v2.230`.
 - **v2.229 (26-nov-2026, publicado):** PDF con margen real en todas las hojas (la 2 ya no queda pegada al borde; también mejora las Órdenes de Servicio largas) y la descripción de cada ítem crece con su texto. Hay una cotización completa de prueba en la MySQL local (folio 2801; borrarla desde la lista cuando ya no sirva). Detalle en `CAMBIOS.md` v2.229, **con cómo era antes y los comandos para revertir** (también para v2.228: el Detalle de 40 px sin check).
 - **v2.228 (26-nov-2026, publicado):** cotización: el Detalle del ítem queda pequeño (misma altura que Cant., no se agranda) y un check «Desc.» antes del Detalle muestra debajo un cuadro «Descripción» que sale en el PDF si se escribió. **Columna nueva `cotizacion_items.descripcion`:** aplicada en la MySQL local; en Neon hay que correr `ALTER TABLE cotizacion_items ADD COLUMN IF NOT EXISTS descripcion TEXT;` (confirmar que el dueño lo corrió). Hay una cotización de prueba en la MySQL local (borrarla desde la lista). Detalle en `CAMBIOS.md` v2.228.
 - **v2.227 (25-nov-2026, publicado):** «Buscar y Seleccionar Cliente» (OT y cotización) y «Buscar por Modelo» (OT) dentro del input; sin los títulos «Datos del Cliente» ni «Datos del Equipo» sobre esos buscadores; «Glosa» alineada con las demás cajas. Detalle en `CAMBIOS.md` v2.227. Sin ver en el navegador del dueño.

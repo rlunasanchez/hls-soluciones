@@ -8,11 +8,10 @@
 .cf-grid{display:grid;grid-template-columns:1fr;gap:10px;align-items:start}
 .cf-sec{padding:10px;border-radius:10px}
 .cf-sec-empresa{background:#f0f7ff}
-/* Recuadro de la empresa a todo el ancho de la ficha (cf-sec-ancha) o de la persona en su columna (cf-sec-fija), sin estirar sus campos: conservan el ancho que tenían en la columna de 480 px */
-.cf-sec-ancha>.cf-r1,.cf-sec-ancha>.cf-r2,.cf-sec-fija>.cf-r1,.cf-sec-fija>.cf-r2{width:460px;max-width:100%}
-/* Marca en la mitad del recuadro (donde se dividen Contactos y Direcciones, que van debajo): una línea que se
-   desvanece en los extremos con un punto azul en el centro, rodeado de un pequeño espacio. */
-.cf-sec-ancha{background-image:radial-gradient(circle at center,var(--primary) 0 2.5px,#f0f7ff 3px 6px,transparent 6.5px),linear-gradient(to bottom,transparent,rgba(12,74,140,.35) 22%,rgba(12,74,140,.35) 78%,transparent);background-size:14px 14px,2px 82%;background-position:50% 50%,50% 50%;background-repeat:no-repeat}
+/* Recuadro de la empresa a todo el ancho de la ficha (cf-sec-ancha, en dos mitades) o de la persona en su columna (cf-sec-fija), sin estirar sus campos: conservan el ancho que tenían en la columna de 480 px */
+.cf-sec-ancha .cf-r1,.cf-sec-ancha .cf-r2,.cf-sec-fija .cf-r1,.cf-sec-fija .cf-r2{width:460px;max-width:100%}
+/* Recuadro de la empresa: mitad y mitad, con las filas de los dos lados a la misma altura (3 filas; la 3.ª solo a la izquierda) y todos los campos sobre las mismas columnas de 227 px (minmax(0,1fr): sin eso, en tablet las filas de 460 px ensanchaban la columna y se salían de la ficha). Los 30 px entre mitades hacen que el lado derecho quede a la misma línea que el contenido del cuadro Direcciones de abajo. En móvil, una columna. */
+.cf-grid-empresa{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:repeat(3,auto);grid-auto-flow:column;gap:6px 30px}
 .cf-sec h3{margin-bottom:8px;font-size:13px;font-weight:700}
 .cf-sec-empresa h3{color:#0C4A8C}
 /* Ficha ancha: Cliente | Contactos | Direcciones lado a lado (baja a 1 columna si no cabe) */
@@ -38,7 +37,7 @@
 .cf-field input:focus,.cf-field select:focus{border-color:#0C4A8C;outline:none;box-shadow:0 0 0 2px rgba(12,74,140,.15)}
 .cf-field input::placeholder{color:#94a3b8}
 .cf-codigo input{background:#eef2ff;color:#0C4A8C;font-weight:700;font-size:.9rem;border-color:#c7d2fe;width:100%;box-sizing:border-box}
-@media(max-width:767px){.cf-wrap{padding:8px}.cf-card{border-radius:10px}.cf-head{padding:10px 14px}.cf-head h2{font-size:14px}.cf-head h2 svg{width:20px!important;height:20px!important}.cf-head button{padding:6px}.cf{padding:10px}.cf-grid{grid-template-columns:minmax(0,1fr)!important}.cf-grid>*{min-width:0}.cf-sec-ancha{background-image:none}/* La regla global oculta .table-wrapper en móvil (el listado usa tarjetas); los vínculos de la ficha no tienen tarjetas: se muestran con scroll horizontal */.cf-vinc .table-wrapper{display:block}.cf-sec{padding:10px}.cf-sec h3{font-size:12px}.cf-r3,.cf-r2{grid-template-columns:1fr!important}.cf-field label{font-size:10px}.cf-field input,.cf-field select{padding:8px 10px;font-size:.85rem}.cf-sub{gap:8px}.cf-btn-p,.cf-btn-c{padding:10px 16px;font-size:.9rem;flex:1}}
+@media(max-width:767px){.cf-grid-empresa{grid-template-columns:minmax(0,1fr);grid-template-rows:none;grid-auto-flow:row}.cf-wrap{padding:8px}.cf-card{border-radius:10px}.cf-head{padding:10px 14px}.cf-head h2{font-size:14px}.cf-head h2 svg{width:20px!important;height:20px!important}.cf-head button{padding:6px}.cf{padding:10px}.cf-grid{grid-template-columns:minmax(0,1fr)!important}.cf-grid>*{min-width:0}/* La regla global oculta .table-wrapper en móvil (el listado usa tarjetas); los vínculos de la ficha no tienen tarjetas: se muestran con scroll horizontal */.cf-vinc .table-wrapper{display:block}.cf-sec{padding:10px}.cf-sec h3{font-size:12px}.cf-r3,.cf-r2{grid-template-columns:1fr!important}.cf-field label{font-size:10px}.cf-field input,.cf-field select{padding:8px 10px;font-size:.85rem}.cf-sub{gap:8px}.cf-btn-p,.cf-btn-c{padding:10px 16px;font-size:.9rem;flex:1}}
 .cf-sub{display:flex;gap:12px;justify-content:flex-end;margin-top:6px;flex-wrap:wrap}
 .cf-mt{margin-top:6px}
 
