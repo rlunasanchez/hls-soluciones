@@ -10,8 +10,8 @@
 .cf-sec-empresa{background:#f0f7ff}
 /* Recuadro de la empresa a todo el ancho de la ficha (cf-sec-ancha, en dos mitades) o de la persona en su columna (cf-sec-fija), sin estirar sus campos: conservan el ancho que tenían en la columna de 480 px */
 .cf-sec-ancha .cf-r1,.cf-sec-ancha .cf-r2,.cf-sec-fija .cf-r1,.cf-sec-fija .cf-r2{width:460px;max-width:100%}
-/* Recuadro de la empresa: mitad y mitad, las filas de los dos lados a la misma altura (3 filas; la 3.ª solo a la izquierda). En móvil, una columna. */
-.cf-grid-empresa{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,auto);grid-auto-flow:column;gap:6px 0}
+/* Recuadro de la empresa: mitad y mitad, con las filas de los dos lados a la misma altura (3 filas; la 3.ª solo a la izquierda) y todos los campos sobre las mismas columnas de 227 px (minmax(0,1fr): sin eso, en tablet las filas de 460 px ensanchaban la columna y se salían de la ficha). Los 30 px entre mitades hacen que el lado derecho quede a la misma línea que el contenido del cuadro Direcciones de abajo. En móvil, una columna. */
+.cf-grid-empresa{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:repeat(3,auto);grid-auto-flow:column;gap:6px 30px}
 .cf-sec h3{margin-bottom:8px;font-size:13px;font-weight:700}
 .cf-sec-empresa h3{color:#0C4A8C}
 /* Ficha ancha: Cliente | Contactos | Direcciones lado a lado (baja a 1 columna si no cabe) */

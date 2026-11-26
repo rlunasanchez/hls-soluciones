@@ -195,7 +195,8 @@ function ClienteFormulario({ clienteEditando, onSave, onCancel, titulo, readOnly
                   fono y email; a la derecha dirección, ciudad y comuna. Los campos conservan su tamaño de siempre (cf-sec-ancha).
                   En Persona y en la edición "solo cliente" todo queda en una columna, como siempre. */}
               <div className={!unaColumna ? "cf-grid-empresa" : undefined}>
-              <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 200px) minmax(0, 200px)", gap: 6 }}>
+              {/* Tipo | RUT sobre las mismas dos columnas que Fono | Email (Empresa, Persona y edición "solo cliente") */}
+              <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)", gap: 6, width: 460, maxWidth: "100%" }}>
                 <div className="cf-field">
                   <label>Tipo</label>
                   <select value={nuevoCliente.tipo} disabled={readOnly}
