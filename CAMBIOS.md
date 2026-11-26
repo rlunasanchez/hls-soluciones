@@ -2,6 +2,17 @@
 
 ## Fecha: 2026-11-26
 
+### v2.230: Ficha de cliente (solo Empresa): los campos en dos mitades, empresa a la izquierda y dirección a la derecha
+
+**Alcance:** solo frontend (`ClienteFormulario.jsx` y `Clientes.css`), sin backend ni SQL. Build OK. Se capturó la ficha en Chrome (escritorio y móvil) con y sin el cambio y se compararon píxel a píxel.
+
+- **Pedido del dueño:** en Empresa, repartir los campos del recuadro de la empresa por todo el ancho: a un lado empresa, RUT, razón social, fono y email; al otro dirección, ciudad y comuna. **Persona queda como estaba.**
+- **Ahora (Empresa, ficha a todo el ancho):** el recuadro «Empresa o Persona» se divide en dos mitades iguales (`cf-grid` con `1fr 1fr` y 28 px entre ellas, para dejar aire a la marca del centro). **Izquierda:** Tipo | RUT, Razón social, Fono | Email. **Derecha:** Dirección, Ciudad | Comuna. Los campos llenan su mitad (antes eran de 460 px fijos a la izquierda). Medido a 1366 px: columna izquierda en x = 58 y derecha en x = 697. La marca vertical del medio sigue separando las mitades. Debajo siguen Contactos | Direcciones.
+- **Móvil (≤ 767 px):** las dos mitades se apilan (las reglas de `cf-grid` ya lo hacían) y Tipo | RUT siguen lado a lado, como antes.
+- **Sin cambios:** la ficha de **Persona** (idéntica píxel a píxel en escritorio y móvil, comprobado) y la edición «solo cliente» desde la OT (Empresa en una columna: los dos bloques quedan uno bajo el otro, como siempre).
+- **Cómo era ANTES y cómo volver:** antes (v2.215 a v2.229, commit `45ab56d`), el recuadro de la empresa a todo el ancho tenía **todos** sus campos en una sola columna de 460 px a la izquierda (Tipo | RUT, Razón social, Fono | Email, Dirección, Ciudad | Comuna), regla `.cf-sec-ancha>.cf-r1,.cf-sec-ancha>.cf-r2,.cf-sec-fija>.cf-r1,.cf-sec-fija>.cf-r2{width:460px;max-width:100%}` en `Clientes.css`, y quedaba espacio vacío a la derecha. Para volver: `git checkout 45ab56d -- frontend/src/components/clientes/ClienteFormulario.jsx frontend/src/styles/Clientes.css`.
+- **Ajustes posibles:** el aire entre las mitades (`columnGap: 28` en `ClienteFormulario.jsx`); alinear las filas de la derecha con las de la izquierda (hoy cada mitad va arriba, con 3 filas a la izquierda y 2 a la derecha).
+
 ### v2.229: PDF: las hojas 2 y siguientes ya no quedan pegadas al borde; la descripción del ítem crece con su texto
 
 **Alcance:** solo frontend (`utils/pdfEstilos.js`, `OrdenTrabajo.css`, `CotizacionFormItems.jsx`), sin backend ni SQL. Build OK. Probado generando los PDF reales con Chrome (A4) y comparando antes y después.

@@ -191,7 +191,11 @@ function ClienteFormulario({ clienteEditando, onSave, onCancel, titulo, readOnly
                   </span>
                 )}
               </h3>
-              <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 200px) minmax(0, 200px)", gap: 6 }}>
+              {/* Empresa a todo el ancho: dos mitades (datos de la empresa | dirección, ciudad y comuna). En Persona y en la edición
+                  "solo cliente" los dos bloques quedan uno bajo el otro, como siempre. */}
+              <div className={!unaColumna ? "cf-grid" : undefined} style={!unaColumna ? { gridTemplateColumns: "1fr 1fr", columnGap: 28 } : undefined}>
+              <div>
+              <div style={{ display: "grid", gridTemplateColumns: unaColumna ? "minmax(0, 200px) minmax(0, 200px)" : "minmax(0, 1fr) minmax(0, 1fr)", gap: 6 }}>
                 <div className="cf-field">
                   <label>Tipo</label>
                   <select value={nuevoCliente.tipo} disabled={readOnly}
@@ -240,8 +244,9 @@ function ClienteFormulario({ clienteEditando, onSave, onCancel, titulo, readOnly
               </div>
               {/* Dirección, ciudad y comuna propias de la empresa. No se usan en la OT: allí el contacto
                   y la dirección se eligen de los mantenedores. La persona usa el mantenedor de Direcciones. */}
-              {!esPersona && <>
-              <div className="cf-r1 cf-mt">
+              </div>
+              {!esPersona && <div>
+              <div className={!unaColumna ? "cf-r1" : "cf-r1 cf-mt"}>
                 <div className="cf-field">
                   <label>Dirección</label>
                   <input value={nuevoCliente.direccion}
@@ -263,7 +268,8 @@ function ClienteFormulario({ clienteEditando, onSave, onCancel, titulo, readOnly
                     onChange={(e) => setNuevoCliente({ ...nuevoCliente, comuna: upperInput(e).replace(/[^A-ZÁÉÍÓÚÑ\s]/g, "") })} />
                 </div>
               </div>
-              </>}
+              </div>}
+              </div>
             </div>
             {!unaColumna && <VinculosCliente tipo="contactos" vinculados={contactos} onChange={setContactos} clienteId={clienteEditando?.id} readOnly={readOnly} />}
             {(!unaColumna || (esPersona && !soloCliente)) && <VinculosCliente tipo="direcciones" vinculados={direcciones} onChange={setDirecciones} clienteId={clienteEditando?.id} readOnly={readOnly} maximo={esPersona ? 1 : null} />}
